@@ -1,0 +1,273 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>POJ 1753 Flip Game | Xuanwo&#39;s Blog</title>
+  <meta name="author" content="Xuanwo">
+  
+  <meta name="description" content="A simple bolg">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="POJ 1753 Flip Game"/>
+  <meta property="og:site_name" content="Xuanwo&#39;s Blog"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Xuanwo&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link href="/favicon.ico" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-51515330-1']);
+_gaq.push(['_trackPageview']);
+(function() {
+var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+
+ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';
+
+var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+</script>
+
+</head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Xuanwo&#39;s Blog</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">		
+			<h1> POJ 1753 Flip Game</h1>
+		</div>		
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div class="col-md-9">
+	
+
+			
+
+	<!-- content -->
+	<div class="mypage">		
+	    <h1 id="题目">题目</h1>
+<p>源地址：<a href="http://poj.org/problem?id=1753" target="_blank" rel="external">http://poj.org/problem?id=1753</a></p>
+<h1 id="理解">理解</h1>
+<p>我一开始的思路是错误的，企图通过正面的方法来找出从当前情况达到全白和全黑的方法，多次尝试之后，发现很难找到一条通用的方法，只能找出几个比较简单的特例。后来才明白过来，应当从全黑或者全白的情况出发，再来判断给定的图是不是其中的一个子集。因为是一个4X4的格子，不难看出，总共的情况只有2^16种。只要一一枚举即可。最后的步数就是这颗树的深度，使用DFS即可实现。</p>
+<a id="more"></a>
+
+<h1 id="新技能get">新技能get</h1>
+<p>深度优先搜索<code>DFS</code><br>对每一个可能的分支路径深入到不能再深入为止，而且每个节点只能访问一次。</p>
+<h1 id="代码">代码</h1>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#include&lt;iostream&gt;  </span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;  </div><div class="line">  </div><div class="line"><span class="keyword">bool</span> chess[<span class="number">6</span>][<span class="number">6</span>]={<span class="keyword">false</span>}; </div><div class="line"><span class="keyword">bool</span> flag;  </div><div class="line"><span class="keyword">int</span> step;  </div><div class="line"><span class="keyword">int</span> r[]={-<span class="number">1</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>};</div><div class="line"><span class="keyword">int</span> c[]={<span class="number">0</span>,<span class="number">0</span>,-<span class="number">1</span>,<span class="number">1</span>,<span class="number">0</span>};  </div><div class="line">  </div><div class="line"><span class="keyword">bool</span> judge_all(<span class="keyword">void</span>)</div><div class="line">{  </div><div class="line">    <span class="keyword">int</span> i,j;  </div><div class="line">    <span class="keyword">for</span>(i=<span class="number">1</span>;i&lt;<span class="number">5</span>;i++)  </div><div class="line">        <span class="keyword">for</span>(j=<span class="number">1</span>;j&lt;<span class="number">5</span>;j++)  </div><div class="line">            <span class="keyword">if</span>(chess[i][j]!=chess[<span class="number">1</span>][<span class="number">1</span>])  </div><div class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;  </div><div class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;  </div><div class="line">}  </div><div class="line">  </div><div class="line"><span class="keyword">void</span> flip(<span class="keyword">int</span> row,<span class="keyword">int</span> col)</div><div class="line">{  </div><div class="line">    <span class="keyword">int</span> i;  </div><div class="line">    <span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;<span class="number">5</span>;i++)  </div><div class="line">        chess[row+r[i]][col+c[i]]=!chess[row+r[i]][col+c[i]];  </div><div class="line">    <span class="keyword">return</span>;  </div><div class="line">}  </div><div class="line">  </div><div class="line"><span class="keyword">void</span> dfs(<span class="keyword">int</span> row,<span class="keyword">int</span> col,<span class="keyword">int</span> deep)  </div><div class="line">{  </div><div class="line">    <span class="keyword">if</span>(deep==step)  </div><div class="line">    {  </div><div class="line">        flag=judge_all();  </div><div class="line">        <span class="keyword">return</span>;  </div><div class="line">    }  </div><div class="line">  </div><div class="line">    <span class="keyword">if</span>(flag||row==<span class="number">5</span>)<span class="keyword">return</span>;  </div><div class="line">  </div><div class="line">    flip(row,col);      </div><div class="line">    <span class="keyword">if</span>(col&lt;<span class="number">4</span>)  </div><div class="line">        dfs(row,col+<span class="number">1</span>,deep+<span class="number">1</span>);  </div><div class="line">    <span class="keyword">else</span>  </div><div class="line">        dfs(row+<span class="number">1</span>,<span class="number">1</span>,deep+<span class="number">1</span>);  </div><div class="line">  </div><div class="line">    flip(row,col);       </div><div class="line">    <span class="keyword">if</span>(col&lt;<span class="number">4</span>)  </div><div class="line">        dfs(row,col+<span class="number">1</span>,deep);  </div><div class="line">    <span class="keyword">else</span>  </div><div class="line">        dfs(row+<span class="number">1</span>,<span class="number">1</span>,deep);  </div><div class="line">  </div><div class="line">    <span class="keyword">return</span>;  </div><div class="line">}  </div><div class="line">  </div><div class="line"><span class="keyword">int</span> main(<span class="keyword">void</span>)  </div><div class="line">{  </div><div class="line">    <span class="keyword">char</span> temp;  </div><div class="line">    <span class="keyword">int</span> i,j;  </div><div class="line">    <span class="keyword">for</span>(i=<span class="number">1</span>;i&lt;<span class="number">5</span>;i++)  </div><div class="line">        <span class="keyword">for</span>(j=<span class="number">1</span>;j&lt;<span class="number">5</span>;j++)  </div><div class="line">        {  </div><div class="line">            <span class="built_in">cin</span>&gt;&gt;temp;  </div><div class="line">            <span class="keyword">if</span>(temp==<span class="string">'b'</span>)   </div><div class="line">                chess[i][j]=<span class="keyword">true</span>;  </div><div class="line">        }  </div><div class="line">  </div><div class="line">    <span class="keyword">for</span>(step=<span class="number">0</span>;step&lt;=<span class="number">16</span>;step++)   </div><div class="line">    {                            </div><div class="line">        dfs(<span class="number">1</span>,<span class="number">1</span>,<span class="number">0</span>);  </div><div class="line">        <span class="keyword">if</span>(flag)<span class="keyword">break</span>;  </div><div class="line">    }  </div><div class="line">  </div><div class="line">    <span class="keyword">if</span>(flag)  </div><div class="line">        <span class="built_in">cout</span>&lt;&lt;step&lt;&lt;endl;  </div><div class="line">    <span class="keyword">else</span>  </div><div class="line">        <span class="built_in">cout</span>&lt;&lt;<span class="string">"Impossible"</span>&lt;&lt;endl;  </div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;  </div><div class="line">}</div></pre></td></tr></table></figure>
+
+<h1 id="更新日志">更新日志</h1>
+<ul>
+<li>2014年07月12日 已AC。</li>
+</ul>
+	  
+	</div>
+
+	<div>
+  	<center>
+	<div class="pagination">
+<ul class="pagination">
+	 
+				
+    	<li class="prev"><a href="/2014/07/13/POJ-2488-A-Knight's-Journey/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
+  		
+
+        <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
+
+		
+		   <li class="next"><a href="/2014/07/12/POJ-1018-Communication-System/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>         
+        
+	
+</ul>
+</div>
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	
+<section id="comment">
+  <h2 class="title">Comments</h2>
+
+  
+</section>
+
+	
+	</div> <!-- col-md-9/col-md-12 -->
+	
+	
+		<div class="col-md-3"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	Jul 12 2014 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/Exercise/">Exercise<span>30</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/ACM/">ACM<span>32</span></a></li> <li><a href="/tags/POJ/">POJ<span>31</span></a></li> <li><a href="/tags/CC++/">C/C++<span>30</span></a></li> <li><a href="/tags/枚举/">枚举<span>3</span></a></li> <li><a href="/tags/DFS/">DFS<span>9</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	   <a data-toggle="collapse" data-target="#toc"><i class="fa fa-bars"></i></a>
+	   <div id="toc" class="toc collapse in">
+			<ol class="toc-article"><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#题目"><span class="toc-article-text">题目</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#理解"><span class="toc-article-text">理解</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#新技能get"><span class="toc-article-text">新技能get</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#代码"><span class="toc-article-text">代码</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#更新日志"><span class="toc-article-text">更新日志</span></a></li></ol>
+		</div>
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+	
+
+</div><!-- row -->
+
+
+        <div class="ds-thread" data-thread-key="2014/07/12/POJ-1753-Flip-Game/"></div>
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  &copy; 2014 Xuanwo
+  
+      with help from <a href="http://zespia.tw/hexo/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a>进行许可。
+</p> </footer>
+</div> <!-- container-narrow -->
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuanwo"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+</body>
+   </html>
