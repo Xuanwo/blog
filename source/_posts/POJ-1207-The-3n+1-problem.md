@@ -1,0 +1,56 @@
+title: POJ 1207 The 3n + 1 problem
+date: 2014-07-10 16:55:39
+tags: [ACM, POJ, C/C++, 模拟, 数论]
+categories: Exercise
+toc: true
+---
+# 题目
+源地址：http://poj.org/problem?id=1207
+
+# 理解
+额，题意很清楚。就是一道关于3n+1的规律题，要求找出给定的i和j之间最长的循环数列。但是我坑了很久，因为错误的使用了A?B:C这样的三元运算符，被学姐学长痛批一顿之后，果断修改了。AC之余，提醒自己一下，良好的代码规范的重要性。
+
+<!-- more -->
+
+# 新技能get
+[Google C++开源项目风格指南](http://zh-google-styleguide.readthedocs.org/en/latest/google-cpp-styleguide/)
+
+# 代码
+```
+#include <stdio.h>
+
+int main()
+{
+    int a, b, n, longest, tmp;
+    while (scanf("%d%d", &a, &b) != EOF)
+    {
+        printf("%d %d ", a, b);
+        if (a > b)
+        {
+            tmp = a;
+            a = b;
+            b = tmp;
+        }
+        longest = n = 1;
+        for (int i = a; i <= b; i++)
+        {
+            tmp = 1;
+            n = i;
+            while (n-1)
+            {
+                n % 2 == 0 ? (n = n / 2) : (n = 3 * n + 1);
+                tmp++;
+            }
+            if (tmp > longest)
+            {
+                longest = tmp;
+            }
+        }
+        printf("%d\n", longest);
+    }
+    return 0;
+}
+```
+
+# 更新日志
+2014年07月10日 已AC，添加谷歌代码风格指南。
