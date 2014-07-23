@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   
-  <title>POJ 1045 Bode Plot | Xuanwo&#39;s Blog</title>
+  <title>POJ 1423 Big Number | Xuanwo&#39;s Blog</title>
   <meta name="author" content="Xuanwo">
   
   <meta name="description" content="A simple bolg">
@@ -11,7 +11,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="POJ 1045 Bode Plot"/>
+  <meta property="og:title" content="POJ 1423 Big Number"/>
   <meta property="og:site_name" content="Xuanwo&#39;s Blog"/>
 
   
@@ -100,7 +100,7 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 
 	
 		<div class="page-header">		
-			<h1> POJ 1045 Bode Plot</h1>
+			<h1> POJ 1423 Big Number</h1>
 		</div>		
 	
 
@@ -117,19 +117,17 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 	<!-- content -->
 	<div class="mypage">		
 	    <h1 id="题目">题目</h1>
-<p>源地址：<a href="http://poj.org/problem?id=1045" target="_blank" rel="external">http://poj.org/problem?id=1045</a></p>
+<p>源地址：<a href="http://poj.org/problem?id=1423" target="_blank" rel="external">http://poj.org/problem?id=1423</a></p>
 <h1 id="理解">理解</h1>
-<p>额- -，居然考到了物理公式。推倒的过程中，卡在了题目中的相位不是已知量。知道看了discuss才明白，可以通过令t=0特殊值带入的方法求解。果真是物理题做得少了- -，不机智了。类似于这样的精度问题，G++都是WA，只有C++才能A。至今不知原因。</p>
+<p>又是大数据的题目，果断用Java来做，不过还是用到了取对数得操作。</p>
 <a id="more"></a>
 
-<h1 id="新技能get">新技能get</h1>
-<p>特殊值带入求未知量</p>
 <h1 id="代码">代码</h1>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;cstdio&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;iostream&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;cmath&gt;</span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="keyword">int</span> n;</div><div class="line"><span class="keyword">double</span> vs,r,c,w;</div><div class="line"></div><div class="line"><span class="keyword">int</span> main(<span class="keyword">int</span> argc, <span class="keyword">char</span> <span class="keyword">const</span> *argv[])</div><div class="line">{</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;vs&gt;&gt;r&gt;&gt;c&gt;&gt;n;</div><div class="line">    <span class="keyword">while</span>(n--)</div><div class="line">    {</div><div class="line">        <span class="built_in">cin</span>&gt;&gt;w;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%.3lf\n"</span>,(c*r*w*vs)/<span class="built_in">sqrt</span>(<span class="number">1</span>+(c*r*w)*(c*r*w)));</div><div class="line">    }</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.*;</div><div class="line"></div><div class="line">public class <span class="type">Main</span> {</div><div class="line"></div><div class="line">    public <span class="keyword">static</span> <span class="type">void</span> main(<span class="type">String</span>[] args) {</div><div class="line">        <span class="type">Scanner</span> cin = new <span class="type">Scanner</span>(<span class="type">System</span>.<span class="keyword">in</span>);</div><div class="line">        <span class="type">int</span> n = cin.nextInt();</div><div class="line">        <span class="keyword">while</span> (n &gt; <span class="number">0</span>) {</div><div class="line">            <span class="type">int</span> test = cin.nextInt();</div><div class="line">            <span class="keyword">if</span> (test &lt;= <span class="number">3</span>)</div><div class="line">                <span class="type">System</span>.<span class="keyword">out</span>.println(<span class="number">1</span>);</div><div class="line">            <span class="keyword">else</span> {</div><div class="line">                double <span class="literal">result</span> = <span class="number">0</span>.<span class="number">5</span> * <span class="type">Math</span>.log10(<span class="number">2</span> * test * <span class="type">Math</span>.<span class="type">PI</span>) +</div><div class="line">                                test * <span class="type">Math</span>.log10(test / <span class="type">Math</span>.E) + <span class="number">1</span>;;</div><div class="line">                <span class="type">System</span>.<span class="keyword">out</span>.println((<span class="type">int</span>)(<span class="literal">result</span>));</div><div class="line">            }</div><div class="line">            n--;</div><div class="line">        }</div><div class="line">    }</div><div class="line">}</div></pre></td></tr></table></figure>
 
 <h1 id="更新日志">更新日志</h1>
 <ul>
-<li>2014年07月日 已AC，C++。</li>
+<li>2014年07月23日 已AC。</li>
 </ul>
 	  
 	</div>
@@ -140,13 +138,13 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 <ul class="pagination">
 	 
 				
-    	<li class="prev"><a href="/2014/07/20/POJ-1028-Web-Navigation/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
+    	<li class="prev"><a href="/2014/07/23/POJ-2965-The-Pilots-Brothers'-refrigerator/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
   		
 
         <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
 
 		
-		   <li class="next"><a href="/2014/07/20/POJ-2199-Rate-of-Return/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>         
+		   <li class="next"><a href="/2014/07/23/POJ-1401-Factorial/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>         
         
 	
 </ul>
@@ -173,7 +171,7 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 	
 	<div class="meta-widget">
 	<i class="fa fa-clock-o"></i>
-	Jul 20 2014 
+	Jul 23 2014 
 	</div>
 	
 
@@ -197,7 +195,7 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
     <ul id="tags" class="tag_box list-unstyled collapse in">	  
 	    
-  <li><a href="/tags/ACM/">ACM<span>64</span></a></li> <li><a href="/tags/POJ/">POJ<span>63</span></a></li> <li><a href="/tags/CC++/">C/C++<span>56</span></a></li> <li><a href="/tags/简单计算/">简单计算<span>12</span></a></li> <li><a href="/tags/物理/">物理<span>1</span></a></li>
+  <li><a href="/tags/ACM/">ACM<span>64</span></a></li> <li><a href="/tags/POJ/">POJ<span>63</span></a></li> <li><a href="/tags/Java/">Java<span>7</span></a></li> <li><a href="/tags/高精度计算/">高精度计算<span>8</span></a></li>
     </ul>
 	</div>
 		
@@ -207,7 +205,7 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 	
 	   <a data-toggle="collapse" data-target="#toc"><i class="fa fa-bars"></i></a>
 	   <div id="toc" class="toc collapse in">
-			<ol class="toc-article"><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#题目"><span class="toc-article-text">题目</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#理解"><span class="toc-article-text">理解</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#新技能get"><span class="toc-article-text">新技能get</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#代码"><span class="toc-article-text">代码</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#更新日志"><span class="toc-article-text">更新日志</span></a></li></ol>
+			<ol class="toc-article"><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#题目"><span class="toc-article-text">题目</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#理解"><span class="toc-article-text">理解</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#代码"><span class="toc-article-text">代码</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#更新日志"><span class="toc-article-text">更新日志</span></a></li></ol>
 		</div>
 	
 	</div>
@@ -221,7 +219,7 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 </div><!-- row -->
 
 
-        <div class="ds-thread" data-thread-key="2014/07/20/POJ-1045-Bode-Plot/"></div>
+        <div class="ds-thread" data-thread-key="2014/07/23/POJ-1423-Big-Number/"></div>
 
 	</div>
   </div>
