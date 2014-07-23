@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   
-  <title>POJ 2305 Basic remains | Xuanwo&#39;s Blog</title>
+  <title>POJ 2891 Strange Way to Express Integers | Xuanwo&#39;s Blog</title>
   <meta name="author" content="Xuanwo">
   
   <meta name="description" content="A simple bolg">
@@ -11,7 +11,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="POJ 2305 Basic remains"/>
+  <meta property="og:title" content="POJ 2891 Strange Way to Express Integers"/>
   <meta property="og:site_name" content="Xuanwo&#39;s Blog"/>
 
   
@@ -100,7 +100,7 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 
 	
 		<div class="page-header">		
-			<h1> POJ 2305 Basic remains</h1>
+			<h1> POJ 2891 Strange Way to Express Integers</h1>
 		</div>		
 	
 
@@ -117,17 +117,17 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 	<!-- content -->
 	<div class="mypage">		
 	    <h1 id="题目">题目</h1>
-<p>源地址：<a href="http://poj.org/problem?id=2305" target="_blank" rel="external">http://poj.org/problem?id=2305</a></p>
+<p>源地址：<a href="http://poj.org/problem?id=2891" target="_blank" rel="external">http://poj.org/problem?id=2891</a></p>
 <h1 id="理解">理解</h1>
-<p>高精度计算题啊，用Java的高精度类水过。</p>
+<p>做的第一道关于扩展欧几里德方程的题目，还不够。</p>
 <a id="more"></a>
 
 <h1 id="代码">代码</h1>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">import java.math.BigInteger;</div><div class="line">import java.util.Scanner;</div><div class="line"><span class="keyword">public</span> <span class="keyword">class</span> Main {</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span>(String[] args) {</div><div class="line">        Scanner scanner = <span class="keyword">new</span> Scanner(System.<span class="keyword">in</span>);</div><div class="line">        <span class="keyword">while</span> (scanner.hasNext()) {</div><div class="line">            <span class="keyword">int</span> n = scanner.nextInt();</div><div class="line">            <span class="keyword">if</span> (n == <span class="number">0</span>)</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            BigInteger aBigInteger = scanner.nextBigInteger();</div><div class="line">            BigInteger bBigInteger = scanner.nextBigInteger();</div><div class="line">            BigInteger a = <span class="keyword">new</span> BigInteger(aBigInteger.toString(), n);</div><div class="line">            BigInteger b = <span class="keyword">new</span> BigInteger(bBigInteger.toString(), n);</div><div class="line">            BigInteger cBigInteger = a.divide(b);</div><div class="line">            BigInteger mBigInteger = a.subtract(cBigInteger.multiply(b));</div><div class="line">            System.<span class="keyword">out</span>.println(mBigInteger.toString(n));</div><div class="line">        }</div><div class="line">    }</div><div class="line">}</div></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span>  &lt;cstdio&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span>  &lt;iostream&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span>  &lt;cstring&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">long</span> <span class="keyword">long</span> <span class="keyword">int</span> big;</div><div class="line"></div><div class="line">big egcd(big a, big b, big &x, big &y )</div><div class="line">{</div><div class="line">    big t, ret;</div><div class="line">    <span class="keyword">if</span> (!b)</div><div class="line">    {</div><div class="line">        x = <span class="number">1</span>;</div><div class="line">        y = <span class="number">0</span>;</div><div class="line">        <span class="keyword">return</span> a;</div><div class="line">    }</div><div class="line">    ret = egcd(b, a % b, x, y);</div><div class="line">    t = x, x = y, y = t - a / b * y;</div><div class="line">    <span class="keyword">return</span> ret;</div><div class="line">}</div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line">    <span class="keyword">int</span> k;</div><div class="line">    big a1, r1, a2, r2;</div><div class="line">    big d, x, y;</div><div class="line">    <span class="keyword">while</span> (<span class="built_in">scanf</span>(<span class="string">"%d"</span>, &k) != EOF)</div><div class="line">    {</div><div class="line">        <span class="keyword">bool</span> flag = <span class="keyword">false</span>;</div><div class="line">        <span class="built_in">scanf</span>(<span class="string">"%I64d%I64d"</span>, &a1, &r1);</div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= k; ++i)</div><div class="line">        {</div><div class="line">            <span class="built_in">scanf</span>(<span class="string">"%I64d%I64d"</span>, &a2, &r2);</div><div class="line">            <span class="keyword">if</span> (flag)    <span class="keyword">continue</span>;</div><div class="line">            d = egcd(a1, a2, x, y);</div><div class="line">            <span class="keyword">if</span> ((r2 - r1) % d)   flag = <span class="keyword">true</span>;</div><div class="line">            a2 = a2 / d;</div><div class="line">            r1 = ((x * ((r2 - r1) / d) % a2 + a2) % a2) * a1 + r1;</div><div class="line">            a1 = a2 * a1;</div><div class="line">        }</div><div class="line">        <span class="keyword">if</span> (flag)    <span class="built_in">printf</span>(<span class="string">"-1\n"</span>);</div><div class="line">        <span class="keyword">else</span>    <span class="built_in">printf</span>(<span class="string">"%I64d\n"</span>, r1 % a1);</div><div class="line"></div><div class="line">    }</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
 
 <h1 id="更新日志">更新日志</h1>
 <ul>
-<li>2014年07月18日 已AC。</li>
+<li>2014年07月24日 已AC。</li>
 </ul>
 	  
 	</div>
@@ -137,14 +137,14 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 	<div class="pagination">
 <ul class="pagination">
 	 
-				
-    	<li class="prev"><a href="/2014/07/18/POJ-1503-Integer-Inquiry/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
-  		
+		
+          <li class="prev disabled"><a><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
+        
 
         <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
 
 		
-		   <li class="next"><a href="/2014/07/18/POJ-3307-Smart-Sister/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>         
+		   <li class="next"><a href="/2014/07/23/POJ-3518-Prime-Gap/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>         
         
 	
 </ul>
@@ -171,7 +171,7 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 	
 	<div class="meta-widget">
 	<i class="fa fa-clock-o"></i>
-	Jul 18 2014 
+	Jul 24 2014 
 	</div>
 	
 
@@ -195,7 +195,7 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
     <ul id="tags" class="tag_box list-unstyled collapse in">	  
 	    
-  <li><a href="/tags/ACM/">ACM<span>69</span></a></li> <li><a href="/tags/POJ/">POJ<span>68</span></a></li> <li><a href="/tags/Java/">Java<span>7</span></a></li> <li><a href="/tags/高精度计算/">高精度计算<span>8</span></a></li>
+  <li><a href="/tags/ACM/">ACM<span>69</span></a></li> <li><a href="/tags/POJ/">POJ<span>68</span></a></li> <li><a href="/tags/CC++/">C/C++<span>61</span></a></li> <li><a href="/tags/数论/">数论<span>7</span></a></li>
     </ul>
 	</div>
 		
@@ -219,7 +219,7 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 </div><!-- row -->
 
 
-        <div class="ds-thread" data-thread-key="2014/07/18/POJ-2305-Basic-remains/"></div>
+        <div class="ds-thread" data-thread-key="2014/07/24/POJ-2891-Strange-Way-to-Express-Integers/"></div>
 
 	</div>
   </div>
