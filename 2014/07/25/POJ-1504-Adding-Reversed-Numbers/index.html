@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   
-  <title>POJ 1298 史上最难的问题 | Xuanwo&#39;s Blog</title>
+  <title>POJ 1504 Adding Reversed Numbers | Xuanwo&#39;s Blog</title>
   <meta name="author" content="Xuanwo">
   
   <meta name="description" content="Xuanwo&#39;s Blog is a blog for ACM， author is Xuanwo">
@@ -11,7 +11,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="POJ 1298 史上最难的问题"/>
+  <meta property="og:title" content="POJ 1504 Adding Reversed Numbers"/>
   <meta property="og:site_name" content="Xuanwo&#39;s Blog"/>
 
   
@@ -100,7 +100,7 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 
 	
 		<div class="page-header">		
-			<h1> POJ 1298 史上最难的问题</h1>
+			<h1> POJ 1504 Adding Reversed Numbers</h1>
 		</div>		
 	
 
@@ -117,17 +117,17 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 	<!-- content -->
 	<div class="mypage">		
 	    <h1 id="题目">题目</h1>
-<p>源地址：<a href="http://poj.org/problem?id=1298" target="_blank" rel="external">http://poj.org/problem?id=1298</a></p>
+<p>源地址：<a href="http://poj.org/problem?id=1504" target="_blank" rel="external">http://poj.org/problem?id=1504</a></p>
 <h1 id="理解">理解</h1>
-<p>问题的纠结之处在于编译器根本就不给<code>gets</code>和<code>puts</code>改过自新的机会，调试花了很久= =。恩，我也应该培养避免使用这些函数的习惯。回到题目上来，题意还是比较清楚的，向后移动五位即可。</p>
+<p>同样是长长的题目，其实是要求把数字从左到右相加，本质是要用字符数组模拟加法。当然，用java会更快一点，不过这次选择了用C++来写。姿势不是很优美，代码太丑陋了，应该有更优美的写法。</p>
 <a id="more"></a>
 
 <h1 id="代码">代码</h1>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;stdio.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;stdlib.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;string.h&gt;</span></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line">    <span class="keyword">char</span> *p, cipher[<span class="number">128</span>];</div><div class="line">    gets(cipher);</div><div class="line">    <span class="keyword">while</span> (<span class="built_in">strcmp</span>(cipher, <span class="string">"ENDOFINPUT"</span>))</div><div class="line">    {</div><div class="line">        <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(cipher, <span class="string">"START"</span>))</div><div class="line">        {</div><div class="line">            gets(cipher);</div><div class="line">            <span class="keyword">while</span> (<span class="built_in">strcmp</span>(cipher, <span class="string">"END"</span>))</div><div class="line">            {</div><div class="line">                <span class="keyword">for</span> (p = cipher; *p; ++p)</div><div class="line">                {</div><div class="line">                    <span class="keyword">if</span> (<span class="string">'A'</span> &lt;= *p && *p &lt;= <span class="string">'Z'</span>)</div><div class="line">                    {</div><div class="line">                        *p = *p &lt; <span class="string">'F'</span> ? <span class="number">21</span> + *p : *p - <span class="number">5</span>;</div><div class="line">                    }</div><div class="line">                    <span class="built_in">putchar</span>(*p);</div><div class="line">                }</div><div class="line">                gets(cipher);</div><div class="line">            }</div><div class="line">            <span class="built_in">putchar</span>(<span class="string">'\n'</span>);</div><div class="line">        }</div><div class="line">        gets(cipher);</div><div class="line">    }</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;iostream&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;string&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;cstdio&gt;</span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="keyword">int</span> n;</div><div class="line"><span class="built_in">string</span> a, b;</div><div class="line"><span class="keyword">char</span> c[<span class="number">100</span>];</div><div class="line"><span class="keyword">int</span> i;</div><div class="line"><span class="keyword">int</span> ans;</div><div class="line"></div><div class="line"><span class="keyword">int</span> main(<span class="keyword">int</span> argc, <span class="keyword">char</span> <span class="keyword">const</span> *argv[])</div><div class="line">{</div><div class="line">    <span class="built_in">cin</span> &gt;&gt; n;</div><div class="line">    <span class="keyword">while</span> (n--)</div><div class="line">    {</div><div class="line">        <span class="built_in">cin</span> &gt;&gt; a &gt;&gt; b;</div><div class="line">        <span class="keyword">if</span> (a.length() &lt; b.length())   a.swap(b);</div><div class="line">        <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; a.length() + <span class="number">1</span>; i++) c[i] = <span class="string">'0'</span>;</div><div class="line">        ans = <span class="number">0</span>;</div><div class="line">        <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; b.length(); i++)</div><div class="line">        {</div><div class="line">            c[i] += a[i] + b[i] - <span class="number">3</span> * <span class="string">'0'</span>;</div><div class="line">            <span class="keyword">if</span> (c[i] &gt;= <span class="number">10</span>)</div><div class="line">            {</div><div class="line">                c[i + <span class="number">1</span>]++;</div><div class="line">                c[i] = c[i] - <span class="number">10</span> + <span class="string">'0'</span>;</div><div class="line">            }</div><div class="line">            <span class="keyword">else</span></div><div class="line">                c[i] = c[i] + <span class="string">'0'</span>;</div><div class="line">        }</div><div class="line">        <span class="keyword">for</span> (i = b.length(); i &lt; a.length(); i++)</div><div class="line">        {</div><div class="line">            c[i] += a[i] - <span class="number">2</span> * <span class="string">'0'</span>;</div><div class="line">            <span class="keyword">if</span> (c[i] &gt;= <span class="number">10</span>)</div><div class="line">            {</div><div class="line">                c[i + <span class="number">1</span>]++;</div><div class="line">                c[i] = c[i] - <span class="number">10</span> + <span class="string">'0'</span>;</div><div class="line">            }</div><div class="line">            <span class="keyword">else</span></div><div class="line">                c[i] = c[i] + <span class="string">'0'</span>;</div><div class="line">        }</div><div class="line">        <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt;= a.length(); i++)</div><div class="line">        {</div><div class="line">            ans = ans * <span class="number">10</span> + c[i] - <span class="string">'0'</span>;</div><div class="line">        }</div><div class="line">        <span class="keyword">if</span> (ans % <span class="number">10</span> == <span class="number">0</span>)   ans /= <span class="number">10</span>;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>, ans);</div><div class="line">    }</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
 
 <h1 id="更新日志">更新日志</h1>
 <ul>
-<li>2014年07月23日 已AC。</li>
+<li>2014年07月25日 已AC。</li>
 </ul>
 	  
 	</div>
@@ -138,13 +138,13 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 <ul class="pagination">
 	 
 				
-    	<li class="prev"><a href="/2014/07/23/POJ-1316-Self-Numbers/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
+    	<li class="prev"><a href="/2014/07/25/POJ-1517-u-Calculate-e/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
   		
 
         <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
 
 		
-		   <li class="next"><a href="/2014/07/23/POJ-1256-Anagram/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>         
+		   <li class="next"><a href="/2014/07/25/POJ-1493-Machined-Surfaces/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>         
         
 	
 </ul>
@@ -171,7 +171,7 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 	
 	<div class="meta-widget">
 	<i class="fa fa-clock-o"></i>
-	Jul 23 2014 
+	Jul 25 2014 
 	</div>
 	
 
@@ -219,7 +219,7 @@ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga
 </div><!-- row -->
 
 
-        <div class="ds-thread" data-thread-key="2014/07/23/POJ-1298-The-Hardest-Problem-Ever/"></div>
+        <div class="ds-thread" data-thread-key="2014/07/25/POJ-1504-Adding-Reversed-Numbers/"></div>
 
 	</div>
   </div>
