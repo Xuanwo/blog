@@ -4,7 +4,7 @@
   <subtitle><![CDATA[A Long Way to Go]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://xuanwo.tk//"/>
-  <updated>2014-07-24T20:05:55.562Z</updated>
+  <updated>2014-07-24T20:38:24.079Z</updated>
   <id>http://xuanwo.tk//</id>
   
   <author>
@@ -13,6 +13,92 @@
   </author>
   
   <generator uri="http://zespia.tw/hexo/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[POJ 1528 Perfection]]></title>
+    <link href="http://xuanwo.tk/2014/07/25/POJ-1528-Perfection/"/>
+    <id>http://xuanwo.tk/2014/07/25/POJ-1528-Perfection/</id>
+    <published>2014-07-24T20:34:58.000Z</published>
+    <updated>2014-07-24T20:37:17.282Z</updated>
+    <content type="html"><![CDATA[<h1 id="题目">题目</h1>
+<p>源地址：<a href="http://poj.org/problem?id=1528" target="_blank" rel="external">http://poj.org/problem?id=1528</a></p>
+<h1 id="理解">理解</h1>
+<ol>
+<li>一个数n的正因数之和等于n则输出<code>PERFECT</code></li>
+<li>大于n，输出<code>ABUNDANT</code></li>
+<li>小于n，输出<code>DEFICIENT</code></li>
+</ol>
+<p><em>注意：因数不包括它本身</em></p>
+<a id="more"></a>
+
+<h1 id="代码">代码</h1>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;iostream&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;cstdio&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;cstring&gt;</span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"><span class="preprocessor">#<span class="keyword">define</span> MAX 60001</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> num[MAX];</div><div class="line"><span class="keyword">int</span> n,k=<span class="number">0</span>;</div><div class="line"></div><div class="line"><span class="keyword">void</span> fun()</div><div class="line">{</div><div class="line">    <span class="keyword">int</span> i, j;</div><div class="line">    <span class="built_in">memset</span>(num, <span class="number">0</span>, <span class="keyword">sizeof</span>(num));</div><div class="line">    <span class="keyword">for</span> (i = <span class="number">1</span>; i &lt; MAX; i++)</div><div class="line">    {</div><div class="line">        <span class="keyword">for</span> (j = i + i; j &lt; MAX; j += i)</div><div class="line">        {</div><div class="line">            num[j] += i;</div><div class="line">        }</div><div class="line">    }</div><div class="line">}</div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line">    fun();</div><div class="line">    <span class="keyword">while</span> (<span class="built_in">scanf</span>(<span class="string">"%d"</span>, &n) != EOF)</div><div class="line">    {</div><div class="line">        k++;</div><div class="line">        <span class="keyword">if</span> (k == <span class="number">1</span>)</div><div class="line">            <span class="built_in">printf</span>(<span class="string">"PERFECTION OUTPUT\n"</span>);</div><div class="line">        <span class="keyword">if</span> (n == <span class="number">0</span>)</div><div class="line">        {</div><div class="line">            <span class="built_in">printf</span>(<span class="string">"END OF OUTPUT\n"</span>);</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        }</div><div class="line">        <span class="keyword">if</span> (n / <span class="number">10</span> == <span class="number">0</span>)</div><div class="line">            <span class="built_in">printf</span>(<span class="string">"    %d"</span>, n);</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (n / <span class="number">100</span> == <span class="number">0</span>)</div><div class="line">            <span class="built_in">printf</span>(<span class="string">"   %d"</span>, n);</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (n / <span class="number">1000</span> == <span class="number">0</span>)</div><div class="line">            <span class="built_in">printf</span>(<span class="string">"  %d"</span>, n);</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (n / <span class="number">10000</span> == <span class="number">0</span>)</div><div class="line">            <span class="built_in">printf</span>(<span class="string">" %d"</span>, n);</div><div class="line">        <span class="keyword">else</span></div><div class="line">            <span class="built_in">printf</span>(<span class="string">"%d"</span>, n);</div><div class="line">        <span class="keyword">if</span> (num[n] == n)</div><div class="line">        {</div><div class="line">            <span class="built_in">printf</span>(<span class="string">"  PERFECT\n"</span>);</div><div class="line">        }</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (num[n] &lt; n)</div><div class="line">        {</div><div class="line">            <span class="built_in">printf</span>(<span class="string">"  DEFICIENT\n"</span>);</div><div class="line">        }</div><div class="line">        <span class="keyword">else</span></div><div class="line">            <span class="built_in">printf</span>(<span class="string">"  ABUNDANT\n"</span>);</div><div class="line">    }</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<h1 id="更新日志">更新日志</h1>
+<ul>
+<li>2014年07月25日 已AC。</li>
+</ul>
+]]></content>
+    <summary type="html"><![CDATA[<h1 id="题目">题目</h1>
+<p>源地址：<a href="http://poj.org/problem?id=1528" target="_blank" rel="external">http://poj.org/problem?id=1528</a></p>
+<h1 id="理解">理解</h1>
+<ol>
+<li>一个数n的正因数之和等于n则输出<code>PERFECT</code></li>
+<li>大于n，输出<code>ABUNDANT</code></li>
+<li>小于n，输出<code>DEFICIENT</code></li>
+</ol>
+<p><em>注意：因数不包括它本身</em></p>
+]]></summary>
+    
+      <category term="ACM" scheme="http://xuanwo.tk/tags/ACM/"/>
+    
+      <category term="POJ" scheme="http://xuanwo.tk/tags/POJ/"/>
+    
+      <category term="C/C++" scheme="http://xuanwo.tk/tags/CC++/"/>
+    
+      <category term="简单计算" scheme="http://xuanwo.tk/tags/%E7%AE%80%E5%8D%95%E8%AE%A1%E7%AE%97/"/>
+    
+      <category term="Exercise" scheme="http://xuanwo.tk/categories/Exercise/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[POJ 1519 Digital Roots]]></title>
+    <link href="http://xuanwo.tk/2014/07/25/POJ-1519-Digital-Roots/"/>
+    <id>http://xuanwo.tk/2014/07/25/POJ-1519-Digital-Roots/</id>
+    <published>2014-07-24T20:29:15.000Z</published>
+    <updated>2014-07-24T20:31:07.218Z</updated>
+    <content type="html"><![CDATA[<h1 id="题目">题目</h1>
+<p>源地址：<a href="http://poj.org/problem?id=1519" target="_blank" rel="external">http://poj.org/problem?id=1519</a></p>
+<h1 id="理解">理解</h1>
+<p>这不就是弃九法么。把每个位置上数字相加迭代即可，但是多次WA，看了discuss才知道原来数据到了2000位的，只能用数组模拟。</p>
+<a id="more"></a>
+
+<h1 id="代码">代码</h1>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;iostream&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;string.h&gt;</span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="keyword">int</span> root;</div><div class="line"><span class="built_in">string</span> n;</div><div class="line"></div><div class="line"><span class="keyword">int</span> main(<span class="keyword">int</span> argc, <span class="keyword">char</span> <span class="keyword">const</span> *argv[])</div><div class="line">{</div><div class="line"></div><div class="line">    <span class="keyword">while</span> (<span class="built_in">cin</span>&gt;&gt;n&&n!=<span class="string">"0"</span>)</div><div class="line">    {</div><div class="line">        root = <span class="number">0</span>;</div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n.length(); i++)</div><div class="line">        {</div><div class="line">            root += n[i] - <span class="string">'0'</span>;</div><div class="line">        }</div><div class="line">        root %= <span class="number">9</span>;</div><div class="line">        <span class="built_in">cout</span> &lt;&lt; (root == <span class="number">0</span> ? <span class="number">9</span> : root) &lt;&lt; endl;</div><div class="line">    }</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<h1 id="更新日志">更新日志</h1>
+<ul>
+<li>2014年07月25日 已AC。</li>
+</ul>
+]]></content>
+    <summary type="html"><![CDATA[<h1 id="题目">题目</h1>
+<p>源地址：<a href="http://poj.org/problem?id=1519" target="_blank" rel="external">http://poj.org/problem?id=1519</a></p>
+<h1 id="理解">理解</h1>
+<p>这不就是弃九法么。把每个位置上数字相加迭代即可，但是多次WA，看了discuss才知道原来数据到了2000位的，只能用数组模拟。</p>
+]]></summary>
+    
+      <category term="ACM" scheme="http://xuanwo.tk/tags/ACM/"/>
+    
+      <category term="POJ" scheme="http://xuanwo.tk/tags/POJ/"/>
+    
+      <category term="C/C++" scheme="http://xuanwo.tk/tags/CC++/"/>
+    
+      <category term="简单计算" scheme="http://xuanwo.tk/tags/%E7%AE%80%E5%8D%95%E8%AE%A1%E7%AE%97/"/>
+    
+      <category term="Exercise" scheme="http://xuanwo.tk/categories/Exercise/"/>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[POJ 1517 u Calculate e]]></title>
@@ -721,82 +807,6 @@
       <category term="C/C++" scheme="http://xuanwo.tk/tags/CC++/"/>
     
       <category term="简单计算" scheme="http://xuanwo.tk/tags/%E7%AE%80%E5%8D%95%E8%AE%A1%E7%AE%97/"/>
-    
-      <category term="Exercise" scheme="http://xuanwo.tk/categories/Exercise/"/>
-    
-  </entry>
-  
-  <entry>
-    <title><![CDATA[POJ 1218 THE DRUNK JAILER]]></title>
-    <link href="http://xuanwo.tk/2014/07/22/POJ-1218-THE-DRUNK-JAILER/"/>
-    <id>http://xuanwo.tk/2014/07/22/POJ-1218-THE-DRUNK-JAILER/</id>
-    <published>2014-07-22T13:37:10.000Z</published>
-    <updated>2014-07-22T13:37:36.832Z</updated>
-    <content type="html"><![CDATA[<h1 id="题目">题目</h1>
-<p>源地址：<a href="http://poj.org/problem?id=1218" target="_blank" rel="external">http://poj.org/problem?id=1218</a></p>
-<h1 id="理解">理解</h1>
-<p>汗= =，偷鸡水过了，正好是牢房数的平方根向下取整，不过没有严格的证明</p>
-<a id="more"></a>
-
-<h1 id="代码">代码</h1>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;iostream&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;cmath&gt;</span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line">    <span class="keyword">int</span> n, a, k;</div><div class="line">    <span class="built_in">cin</span> &gt;&gt; n;</div><div class="line">    <span class="keyword">while</span> (n--)</div><div class="line">    {</div><div class="line">        <span class="built_in">cin</span> &gt;&gt; k;</div><div class="line">        a = <span class="built_in">sqrt</span>(k);</div><div class="line">        <span class="built_in">cout</span> &lt;&lt; a &lt;&lt; endl;</div><div class="line">    }</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
-
-<h1 id="更新日志">更新日志</h1>
-<ul>
-<li>2014年07月22日 已AC，有待证明。</li>
-</ul>
-]]></content>
-    <summary type="html"><![CDATA[<h1 id="题目">题目</h1>
-<p>源地址：<a href="http://poj.org/problem?id=1218" target="_blank" rel="external">http://poj.org/problem?id=1218</a></p>
-<h1 id="理解">理解</h1>
-<p>汗= =，偷鸡水过了，正好是牢房数的平方根向下取整，不过没有严格的证明</p>
-]]></summary>
-    
-      <category term="ACM" scheme="http://xuanwo.tk/tags/ACM/"/>
-    
-      <category term="POJ" scheme="http://xuanwo.tk/tags/POJ/"/>
-    
-      <category term="C/C++" scheme="http://xuanwo.tk/tags/CC++/"/>
-    
-      <category term="简单计算" scheme="http://xuanwo.tk/tags/%E7%AE%80%E5%8D%95%E8%AE%A1%E7%AE%97/"/>
-    
-      <category term="Exercise" scheme="http://xuanwo.tk/categories/Exercise/"/>
-    
-  </entry>
-  
-  <entry>
-    <title><![CDATA[POJ 1163 The Triangle]]></title>
-    <link href="http://xuanwo.tk/2014/07/22/POJ-1163-The-Triangle/"/>
-    <id>http://xuanwo.tk/2014/07/22/POJ-1163-The-Triangle/</id>
-    <published>2014-07-22T13:12:47.000Z</published>
-    <updated>2014-07-22T13:18:22.473Z</updated>
-    <content type="html"><![CDATA[<h1 id="题目">题目</h1>
-<p>源地址：<a href="http://poj.org/problem?id=1163" target="_blank" rel="external">http://poj.org/problem?id=1163</a></p>
-<h1 id="理解">理解</h1>
-<p>这是第一道关于DP的题目，据说是用暴力的方法会直接超时，因为有大量的重复计算。使用DP可以避免这一点，最关键的公式是<br><code>triangle[i][j] += max(triangle[i + 1][j] : triangle[i + 1][j + 1])</code></p>
-<a id="more"></a>
-
-<h1 id="代码">代码</h1>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span>&lt;stdio.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">define</span> MAX 100</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> triangle[MAX][MAX];</div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line">    <span class="keyword">int</span> n, i, j;</div><div class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>, &n);</div><div class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; n; i++)</div><div class="line">        <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt;= i; j++)</div><div class="line">            <span class="built_in">scanf</span>(<span class="string">"%d"</span>, triangle[i] + j);</div><div class="line">    <span class="keyword">for</span> (i = n - <span class="number">2</span>; i &gt;= <span class="number">0</span>; i--)</div><div class="line">        <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt;= i; j++)</div><div class="line">            triangle[i][j] += triangle[i + <span class="number">1</span>][j] &gt; triangle[i + <span class="number">1</span>][j + <span class="number">1</span>] ? triangle[i + <span class="number">1</span>][j] : triangle[i + <span class="number">1</span>][j + <span class="number">1</span>];</div><div class="line">    <span class="built_in">printf</span>(<span class="string">"%d\n"</span>, triangle[<span class="number">0</span>][<span class="number">0</span>]);</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
-
-<h1 id="更新日志">更新日志</h1>
-<ul>
-<li>2014年07月22日 已AC。</li>
-</ul>
-]]></content>
-    <summary type="html"><![CDATA[<h1 id="题目">题目</h1>
-<p>源地址：<a href="http://poj.org/problem?id=1163" target="_blank" rel="external">http://poj.org/problem?id=1163</a></p>
-<h1 id="理解">理解</h1>
-<p>这是第一道关于DP的题目，据说是用暴力的方法会直接超时，因为有大量的重复计算。使用DP可以避免这一点，最关键的公式是<br><code>triangle[i][j] += max(triangle[i + 1][j] : triangle[i + 1][j + 1])</code></p>
-]]></summary>
-    
-      <category term="ACM" scheme="http://xuanwo.tk/tags/ACM/"/>
-    
-      <category term="POJ" scheme="http://xuanwo.tk/tags/POJ/"/>
-    
-      <category term="C/C++" scheme="http://xuanwo.tk/tags/CC++/"/>
-    
-      <category term="DP" scheme="http://xuanwo.tk/tags/DP/"/>
     
       <category term="Exercise" scheme="http://xuanwo.tk/categories/Exercise/"/>
     
