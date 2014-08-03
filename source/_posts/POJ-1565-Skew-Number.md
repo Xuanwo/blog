@@ -1,5 +1,5 @@
 title: POJ 1565 Skew数
-date: 2014-08-03 2014年8月3日 11:43:36
+date: 2014-08-03 11:43:36
 tags: [ACM, POJ, C/C++, 简单计算]
 categories: Exercise
 toc: true
