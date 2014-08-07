@@ -40,7 +40,7 @@ toc: true
 运行CMD(开始-> 运行-> Cmd)，输入：mingw-get后则会运行MinGW界面，这里说明变量设置成功。然后输入：g++ -v，用于检测安装g++有没有成功。
 ## 建立新的编译系统
 Tools –> Build System –> New Build System
-
+### Windows下
 在打开的页面中粘贴以下代码
 
     {
@@ -58,9 +58,32 @@ Tools –> Build System –> New Build System
           }
      ]
     }
+
 保存，并且取一个自己喜欢的名字，在`Tools->Build System`中选择即可。
 
 如果复制出现问题，请访问[https://gist.github.com/Xuanwo/0cb4bce76929ed764daf](https://gist.github.com/Xuanwo/0cb4bce76929ed764daf)
+
+### Linux下
+在打开的页面中粘贴以下代码
+```
+{
+    "cmd": ["g++", "${file}", "-o", "${file_path}/${file_base_name}"],
+    "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+    "working_dir": "${file_path}",
+    "selector": "source.c, source.c++",
+    "variants":
+    [
+        {
+            "name": "Run",
+            "cmd":["gnome-terminal", "-x", "bash", "-c", "g++ '${file}' -o '${file_path}/${file_base_name}' && '${file_path}/${file_base_name}' ;read -n1 -p 'press any key to continue.'"]
+        }
+    ]
+}
+```
+保存，并且取一个自己喜欢的名字，在`Tools->Build System`中选择即可。
+
+如果复制出现问题，请访问[https://gist.github.com/Xuanwo/31ac95e82d446db37c2e](https://gist.github.com/Xuanwo/31ac95e82d446db37c2e)
+
 ## 收工
 一个简单的IDE已经构建完毕了，下面可以进行一些简单的测试。
 
@@ -118,5 +141,6 @@ Tools –> Build System –> New Build System
 
 # 更新日志
 
- - 2014年06月05日  写完全文，观察效果，并发布
- - 2014年07月03日  博客迁移至Hexo，做细节调整
+ - 2014年06月05日 写完全文，观察效果，并发布
+ - 2014年07月03日 博客迁移至Hexo，做细节调整
+ - 2014年08月08日 添加了Sublime在Linux下的`.buildsystem`代码
