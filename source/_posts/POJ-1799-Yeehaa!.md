@@ -9,7 +9,7 @@ toc: true
 
 # 理解
 借用某大神图：
-![POJ1799示意图](https://raw.githubusercontent.com/Xuanwo/xuanwo.github.io/master/imgs/exercise/POJ1799.png)
+![POJ1799示意图](http://xuanwo.qiniudn.com/exercise/POJ1799.png)
 
 <!-- more -->
 
