@@ -1,6 +1,6 @@
 title: POJ 1844 Sum
 date: 2014-08-05 17:09:00
-tags: [ACM, POJ, C/C++, 简单数学]
+tags: [ACM, POJ, C/C++, 简单计算]
 categories: Exercise
 toc: true
 ---
