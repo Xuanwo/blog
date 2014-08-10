@@ -4,13 +4,13 @@ categories: Daily
 ---
 # 代码
 <i class="fa fa-square-o"></i>  怒刷POJ
-<i class="fa fa-square-o"></i>  完成数据结构学习
+<i class="fa fa-square-o"></i>  完成数据结构学习 `已看至：基础课1.2`
 <i class="fa fa-square-o"></i>  跟上集训进度
 
 # 美剧
 <i class="fa fa-square-o"></i>  暴君
-<i class="fa fa-square-o"></i>  冰与火之歌——第一季 权力的游戏
-<i class="fa fa-square-o"></i>  末日孤舰
+<i class="fa fa-square-o"></i>  冰与火之歌——第一季 权力的游戏 `已看至：第一集`
+<i class="fa fa-square-o"></i>  末日孤舰 `已看至：第一集`
 
 # 动漫
 <i class="fa fa-square-o"></i>  一周的朋友
