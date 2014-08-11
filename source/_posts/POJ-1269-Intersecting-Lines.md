@@ -15,100 +15,92 @@ toc: true
 # 代码
 ```
 {% raw %}
-#include <queue>
-#include <stack>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <limits.h>
-#include <string.h>
-#include <algorithm>
+#include<cstdio>
+#include<cstring>
+#include<cmath>
+#include<cstdlib>
+#include<iostream>
+#include<algorithm>
+#include<functional>
 using namespace std;
-const double eps = 1e-6;
-
-struct point
+#define eps 1e-8
+double sqr(double x)
+{
+    return x * x;
+}
+struct P
 {
     double x, y;
-};
-
-struct line
-{
-    point a, b;
-};
-
-bool dy(double x, double y)
-{
-    return x > y + eps;
-}
-
-bool xy(double x, double y)
-{
-    return x < y - eps; 
-}
-
-bool dyd(double x, double y)
-{
-    return x > y - eps;
-}
-
-bool xyd(double x, double y)
-{
-    return x < y + eps;
-}
-
-bool dd(double x, double y)
-{
-    return fabs( x - y ) < eps;
-}
-
-double crossProduct(point a, point b, point c)
-{
-    return (c.x - a.x) * (b.y - a.y) - (b.x - a.x) * (c.y - a.y);
-}
-
-bool parallel(line u, line v)
-{
-    return dd( (u.a.x - u.b.x) * (v.a.y - v.b.y) - (v.a.x - v.b.x) * (u.a.y - u.b.y), 0.0 );
-}
-
-point intersection(line u, line v)
-{
-    point ans = u.a;
-    double t = ((u.a.x - v.a.x) * (v.a.y - v.b.y) - (u.a.y - v.a.y) * (v.a.x - v.b.x)) /
-               ((u.a.x - u.b.x) * (v.a.y - v.b.y) - (u.a.y - u.b.y) * (v.a.x - v.b.x));
-    ans.x += (u.b.x - u.a.x) * t;
-    ans.y += (u.b.y - u.a.y) * t;
-    return ans;
-}
-
-int main(int argc, char const *argv[])
-{
-    int n;
-    line u, v;
-    int flag = 0;
-    while ( ~scanf("%d", &n) )
+    P(double _x, double _y): x(_x), y(_y) {}
+    P() {}
+    double dis()
     {
-        printf("INTERSECTING LINES OUTPUT/n");
-        while ( n-- )
-        {
-            scanf("%lf %lf %lf %lf", &u.a.x, &u.a.y, &u.b.x, &u.b.y);
-            scanf("%lf %lf %lf %lf", &v.a.x, &v.a.y, &v.b.x, &v.b.y);
-            if ( parallel(u, v) )
-                if ( dd(crossProduct(u.a, u.b, v.a), 0.0) )
-                    printf("LINE/n");
-                else
-                    printf("NONE/n");
-            else
-            {
-                point ans = intersection(u, v);
-                printf("POINT %.2lf %.2lf/n", ans.x, ans.y);
-            }
-        }
-        printf("END OF OUTPUT/n");
+        return sqrt(sqr(x) + sqr(y));
     }
+};
+struct V
+{
+    double x, y;
+    V(double _x, double _y): x(_x), y(_y) {}
+    V(P a, P b): x(b.x - a.x), y(b.y - a.y) {}
+    V() {}
+    const double dis()
+    {
+        return sqrt(sqr(x) + sqr(y));
+    }
+};
+P operator+(const P a, const V b)
+{
+    return P(a.x + b.x, a.y + b.y);
+}
+V operator*(const double a, const V b)
+{
+    return V(a * b.x, a * b.y);
+}
+double operator*(const V a, const V b)
+{
+    return a.x * b.y - b.x * a.y;
+}
+P jiao_dian(const V a, V b, const V c, const V CD, const P C)
+{
+    double d;
+    d = b.dis();
+    double s1 = a * b, s2 = b * c;
+    double k = s1 / (s1 + s2);
+    return C + k * CD;
+}
+bool equal(const double a, const double b)
+{
+    if (abs(a - b) < eps) return 1; return 0;
+}
+int n;
+int main()
+{
+    cout << "INTERSECTING LINES OUTPUT" << endl;
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++)
+    {
+        double x1, y1, x2, y2, x3, y3, x4, y4;
+        scanf("%lf%lf%lf%lf%lf%lf%lf%lf", &x1, &y1, &x2, &y2, &x3, &y3, &x4, &y4);
+        P A = P(x1, y1), B = P(x2, y2), C = P(x3, y3), D = P(x4, y4);
+        V AB = V(A, B), AC = V(A, C), AD = V(A, D), CD = V(C, D);
+        if (equal((AB * CD), 0))
+        {
+            if (equal((AC * AD), 0)) cout << "LINE\n";
+            else cout << "NONE\n";
+        }
+        else
+        {
+            P p = jiao_dian(AC, AB, AD, CD, C);
+            cout.setf(ios::fixed);
+            cout.precision(2);
+            cout << "POINT " << p.x << ' ' << p.y << endl;
+        }
+    }
+    cout << "END OF OUTPUT" << endl;
     return 0;
 }
+
 {% endraw %}
 ```
 	
