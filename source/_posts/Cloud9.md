@@ -1,6 +1,6 @@
 title: 强大且配置项丰富的在线IDE应用——Cloud9
 date: 2014-08-07 13:31:00
-tags: [IDE, Cloud, Github]
+tags: [software]
 categories: Opinion
 toc: true
 ---

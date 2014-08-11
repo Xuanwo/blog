@@ -1,6 +1,6 @@
 title: 30天，用为知笔记共创京城最好玩的运动场馆地图
 date: 2014-08-06 13:13:00
-tags: [为知, 北京, 体育]
+tags: [software, sports]
 categories: Daily
 toc: true
 ---
