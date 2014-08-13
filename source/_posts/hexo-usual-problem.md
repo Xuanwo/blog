@@ -70,13 +70,42 @@ or you can check the docs: http://zespia.tw/hexo/docs/
 **解决方案：**
 检查`_config.yml`内容，特别注意`:`后面需要有一个空格。
 
+## 更新至2.8.X版本后，构建失败
+**问题描述：**
+输入`hexo g`后，报错如下：
+```
+[error] { name: 'HexoError',
+  reason: 'incomplete explicit mapping pair; a key node is missed',
+  mark:
+   { name: null,
+     buffer: 'categories: Categories\nsearch: Search\ntags: Tags\ntagcloud: Tag Cloud\ntweets: Tweets\nprev: Prev\nnext:
+ Next\ncomment: Comments\narchive_a: Archives\narchive_b: Archives: %s\npage: Page %d\nrecent_posts: Recent Posts\ndescr
+iption: Description\nread_more: Read More\n\u0000',
+     position: 163,
+     line: 9,
+     column: 19 },
+  message: 'Process failed: languages/default.yml',
+  domain:
+   { domain: null,
+     _events: { error: [Function] },
+     _maxListeners: 10,
+     members: [ [Object] ] },
+  domainThrown: true,
+  stack: undefined }
+```
+**解决方案：**
+主题的languages文件夹下所有yml文件中所有有空格的字段都用双引号括起来。
+![就像这样](http://xuanwo.qiniudn.com/opinion/hexo-languages-error.png)
+*感谢[@dukewan](https://github.com/dukewan)提供的截图*
+
+
 # 常见问题
 ## 如何在不同电脑（系统）上使用Hexo
 ## 如何为站点添加社会化评论
 ## 如何避免在Deploy时输入密码
 
 # 贡献者
-@Xuanwo
+[@Xuanwo](http://xuanwo.tk/)
 
 # 更新日志
 - 2014年08月14日  完成大体框架，内容慢慢填充。
