@@ -1,4 +1,4 @@
-title: POJ 1028 Web Navigation
+﻿title: POJ 1028 Web Navigation
 date: 2014-07-20 15:40:31
 tags: [ACM, POJ, C/C++, stack, STL]
 categories: Exercise

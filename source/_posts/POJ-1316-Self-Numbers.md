@@ -1,4 +1,4 @@
-title: POJ 1316 Self Numbers
+﻿title: POJ 1316 Self Numbers
 date: 2014-07-23 02:43:24
 tags: [ACM, POJ, C/C++, 模拟]
 categories: Exercise

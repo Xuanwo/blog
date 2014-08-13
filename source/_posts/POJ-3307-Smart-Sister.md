@@ -1,4 +1,4 @@
-title: POJ 3048 Max Factor
+﻿title: POJ 3048 Max Factor
 date: 2014-07-18 0:23:10
 tags: [ACM, POJ, C/C++, 数论]
 categories: Exercise

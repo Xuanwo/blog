@@ -1,4 +1,4 @@
-title: POJ 1047 Round and Round We Go
+﻿title: POJ 1047 Round and Round We Go
 date: 2014-07-18 17:38:41
 tags: [ACM, POJ, Java, 高精度计算, 数论]
 categories: Exercise

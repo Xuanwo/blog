@@ -1,4 +1,4 @@
-title: POJ 2524 Ubiquitous Religions
+﻿title: POJ 2524 Ubiquitous Religions
 date: 2014-07-22 03:45:40
 tags: [ACM, POJ, C/C++, 并查集]
 categories: Exercise

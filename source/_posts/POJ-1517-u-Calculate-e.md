@@ -1,4 +1,4 @@
-title: POJ 1517 u Calculate e
+﻿title: POJ 1517 u Calculate e
 date: 2014-07-25 04:00:19
 tags: [ACM, POJ, C/C++, 简单计算]
 categories: Exercise

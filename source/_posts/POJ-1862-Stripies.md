@@ -1,4 +1,4 @@
-title: POJ 1862 Stripies
+﻿title: POJ 1862 Stripies
 date: 2014-08-05 20:31:00
 tags: [ACM, POJ, C/C++, 简单计算]
 categories: Exercise

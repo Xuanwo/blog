@@ -1,4 +1,4 @@
-title: POJ 1256 Anagram
+﻿title: POJ 1256 Anagram
 date: 2014-07-23 02:07:50
 tags: [ACM, POJ, C/C++, STL]
 categories: Exercise

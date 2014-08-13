@@ -1,4 +1,4 @@
-title: POJ 2159 Ancient Cipher
+﻿title: POJ 2159 Ancient Cipher
 date: 2014-07-11 13:30:04
 tags: [ACM, POJ, C/C++, 模拟, 排序]
 categories: Exercise

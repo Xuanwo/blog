@@ -1,4 +1,4 @@
-title: POJ 1939 Diplomatic License
+﻿title: POJ 1939 Diplomatic License
 date: 2014-08-05 20:51:00
 tags: [ACM, POJ, C/C++, ]
 categories: Exercise

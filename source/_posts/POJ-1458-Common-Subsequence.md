@@ -1,4 +1,4 @@
-title: POJ 1458 Common Subsequence
+﻿title: POJ 1458 Common Subsequence
 date: 2014-08-12 04:23:00
 tags: [ACM, POJ, C/C++, DP]
 categories: Exercise

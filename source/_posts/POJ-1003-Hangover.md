@@ -1,4 +1,4 @@
-title: POJ 1003 Hangover
+﻿title: POJ 1003 Hangover
 date: 2014-07-04 7:33:55
 tags: [ACM, POJ, 模拟, C/C++]
 categories: Exercise

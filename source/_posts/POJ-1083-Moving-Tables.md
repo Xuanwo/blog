@@ -1,4 +1,4 @@
-title: POJ 1083 Moving Tables
+﻿title: POJ 1083 Moving Tables
 date: 2014-07-22 21:03:10
 tags: [ACM, POJ, C/C++, 简单计算]
 categories: Exercise

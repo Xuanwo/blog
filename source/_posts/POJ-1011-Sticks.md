@@ -1,4 +1,4 @@
-title: POJ 1011 木棒
+﻿title: POJ 1011 木棒
 date: 2014-07-16 12:20:44
 tags: [ACM, POJ, C/C++, DFS, 剪枝]
 categories: Exercise

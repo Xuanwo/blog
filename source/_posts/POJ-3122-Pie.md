@@ -1,4 +1,4 @@
-title: POJ 3122 Pie
+﻿title: POJ 3122 Pie
 date: 2014-07-23 23:47:09
 tags: [ACM, POJ, C/C++, 二分]
 categories: Exercise

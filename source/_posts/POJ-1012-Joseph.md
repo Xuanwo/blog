@@ -1,4 +1,4 @@
-title: POJ 1012 Joseph
+﻿title: POJ 1012 Joseph
 date: 2014-07-16 14:22:30
 tags: [ACM, POJ, C/C++, 简单计算, 打表]
 categories: Exercise

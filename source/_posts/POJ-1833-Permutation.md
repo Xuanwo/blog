@@ -1,4 +1,4 @@
-title: POJ 1833 排列
+﻿title: POJ 1833 排列
 date: 2014-08-12 05:12:00
 tags: [ACM, POJ, C/C++, STL]
 categories: Exercise

@@ -1,4 +1,4 @@
-title: POJ 1131 Octal Fractions
+﻿title: POJ 1131 Octal Fractions
 date: 2014-07-18 15:29:12
 tags: [ACM, POJ, Java, 高精度计算]
 categories: Exercise

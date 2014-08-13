@@ -1,4 +1,4 @@
-title: POJ 2492 A Bug's Life
+﻿title: POJ 2492 A Bug's Life
 date: 2014-07-22 17:12:30
 tags: [ACM, POJ, C/C++, 并查集]
 categories: Exercise

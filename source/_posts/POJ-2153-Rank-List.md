@@ -1,4 +1,4 @@
-title: POJ 2153 Rank List
+﻿title: POJ 2153 Rank List
 date: 2014-07-16 22:55:02
 tags: [ACM, POJ, C/C++, Map, STL]
 categories: Exercise

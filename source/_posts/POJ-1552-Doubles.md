@@ -1,4 +1,4 @@
-title: POJ 1552 Doubles
+﻿title: POJ 1552 Doubles
 date: 2014-08-03 11:40:11
 tags: [ACM, POJ, C/C++, 简单计算]
 categories: Exercise

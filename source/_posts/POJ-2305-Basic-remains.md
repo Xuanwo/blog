@@ -1,4 +1,4 @@
-title: POJ 2305 Basic remains
+﻿title: POJ 2305 Basic remains
 date: 2014-07-18 14:46:10
 tags: [ACM, POJ, Java, 高精度计算]
 categories: Exercise

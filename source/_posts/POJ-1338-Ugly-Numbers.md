@@ -1,4 +1,4 @@
-title: POJ 1338 Ugly Numbers
+﻿title: POJ 1338 Ugly Numbers
 date: 2014-08-12 04:11:00
 tags: [ACM, POJ, C/C++, 打表]
 categories: Exercise

@@ -1,4 +1,4 @@
-title: POJ 1799 Yeehaa!
+﻿title: POJ 1799 Yeehaa!
 date: 2014-08-05 16:13:00
 tags: [ACM, POJ, C/C++, 模拟]
 categories: Exercise

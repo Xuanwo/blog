@@ -1,4 +1,4 @@
-title: POJ 1269 Intersecting Lines
+﻿title: POJ 1269 Intersecting Lines
 date: 2014-08-12 01:12:00
 tags: [ACM, POJ, C/C++, 几何]
 categories: Exercise

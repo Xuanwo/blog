@@ -1,4 +1,4 @@
-title: POJ 2386 Lake Counting
+﻿title: POJ 2386 Lake Counting
 date: 2014-07-12 21:34:56
 tags: [ACM, POJ, C/C++, DFS]
 categories: Exercise

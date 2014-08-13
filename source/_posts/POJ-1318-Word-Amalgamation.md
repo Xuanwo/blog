@@ -1,4 +1,4 @@
-title: POJ 1318 Word Amalgamation
+﻿title: POJ 1318 Word Amalgamation
 date: 2014-07-23 13:38:41
 tags: [ACM, POJ, C/C++, 字符串]
 categories: Exercise
