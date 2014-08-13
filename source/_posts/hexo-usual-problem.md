@@ -13,7 +13,9 @@ Hexo是一个非常好用的静态博客生成器，但是由于很多方面的�
 
 # 常见问题
 ## 本地浏览没问题，Deploy报错
-### 常见报错信息如下：
+### Git环境配置错误
+**问题描述：**
+*Windows系统*出现报错信息如下
 ```
 [info] Start deploying: git
 [info] Setting up Git deployment...
@@ -29,3 +31,9 @@ Error: spawn ENOENT
     at errnoException (child_process.js:1000:11)
     at Process.ChildProcess._handle.onexit (child_process.js:791:34)
 ```
+**解决方案：**
+1. 检查Git的相关配置，将git所在目录添加到系统path中去。
+2. 使用`Github For Windows`的朋友，将git添加至path之后，使用`git shell.lnk`启动Hexo。在lnk文件的属性界面中`目标`项中添加`C:\Users\xuanw_000\AppData\Local\GitHub\GitHub.appref-ms --open-shell /k "C:\Program Files\nodejs\nodevars.bat"`。其中`C:\Users\xuanw_000\AppData\Local\GitHub\GitHub.appref-ms --open-shell /k`是原来的文本，`"C:\Program Files\nodejs\nodevars.bat"`是新增的，用于在shell中添加nodejs运行环境。不会配置可以点击[这里](https://github.com/Xuanwo/xuanwo.github.io/raw/blog/Git%20Shell.lnk)下载。
+
+### Deploy设置错误
+**问题描述：**
