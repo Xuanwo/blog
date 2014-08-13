@@ -11,7 +11,7 @@ Hexo是一个非常好用的静态博客生成器，但是由于很多方面的�
 
 <!--more-->
 
-# 常见问题
+# 常见错误
 ## 本地浏览没问题，Deploy报错
 ### Git环境配置错误
 **问题描述：**
@@ -37,3 +37,46 @@ Error: spawn ENOENT
 
 ### Deploy设置错误
 **问题描述：**
+输入`hexo deploy`后，出现错误信息：
+```
+'github' does not appear to be a git repository
+```
+**解决方案：**
+1. 检查`_config.yml`中deploy设置。参见<http://hexo.io/docs/deployment.html>。
+2. 删除`.deploy`文件夹并且执行`hexo clean`后，重新`hexo deploy`。
+
+## Deploy之后，页面长时间404
+
+## Hexo命令失效
+**问题描述：**
+输入命令后出现如下信息：
+```
+localhost:~ apple$ hexo new "title"
+Usage: hexo
+
+Commands:
+help Get help on a command
+init Create a new Hexo folder
+migrate Migrate your site from other system to Hexo
+version Display version information
+
+Global Options:
+--debug Display all verbose messages in the terminal
+--safe Disable all plugins and scripts
+
+For more help, you can use hexo help [command] for the detailed information
+or you can check the docs: http://zespia.tw/hexo/docs/
+```
+**解决方案：**
+检查`_config.yml`内容，特别注意`:`后面需要有一个空格。
+
+# 常见问题
+## 如何在不同电脑（系统）上使用Hexo
+## 如何为站点添加社会化评论
+## 如何避免在Deploy时输入密码
+
+# 贡献者
+@Xuanwo
+
+# 更新日志
+- 2014年08月14日  完成大体框架，内容慢慢填充。
