@@ -1,6 +1,6 @@
 ﻿title: Sublime Text 3 化身为高大上的C/C++ IDE
 date: 2014-06-05 23:00:00
-tags: [software, C/C++]
+tags: [Software, C/C++]
 categories: Opinion
 toc: true
 ---
