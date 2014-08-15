@@ -42,23 +42,23 @@ toc: true
 Tools –> Build System –> New Build System
 ### Windows下
 在打开的页面中粘贴以下代码
-
-    {
-     "cmd": ["g++", "${file}", "-o", "${file_path}/${file_base_name}"],
-     "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
-     "working_dir": "${file_path}",
-     "selector": "source.c, source.c++",
-     "shell": true,
-     "encoding":"cp936",
-     "variants":
-     [
-          {
-               "name": "Run",
-                  "cmd": ["start", "cmd", "/c", "${file_base_name} & echo. & pause"]
-          }
-     ]
-    }
-
+```
+{
+    "cmd": ["g++", "${file}", "-o", "${file_path}/${file_base_name}"],
+    "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+    "working_dir": "${file_path}",
+    "selector": "source.c, source.c++",
+    "shell": true,
+    "encoding":"cp936",
+    "variants":
+    [
+         {
+              "name": "Run",
+                 "cmd": ["start", "cmd", "/c", "${file_base_name} & echo. & pause"]
+         }
+    ]
+}
+```
 保存，并且取一个自己喜欢的名字，在`Tools->Build System`中选择即可。
 
 如果复制出现问题，请访问[https://gist.github.com/Xuanwo/0cb4bce76929ed764daf](https://gist.github.com/Xuanwo/0cb4bce76929ed764daf)
@@ -102,27 +102,102 @@ Tools –> Build System –> New Build System
 默认情况下Sublime Text 3是没有打开侧边栏文件浏览器的，可以通过`View`来打开和关闭侧边栏，默认情况下Sublime Text 3右边是有文件的缩略图的，可以通过`View`来打开和关闭缩略图。
 ### 快捷键寻找文件和已定义的函数
 在Sublime Text 3中可以非常快速地切换到想找的文件，只需要通过`Ctrl+P`打开切换面板即可。然后输入想找的文件名称就可以快速找切换到该文件了。如果想要找函数，可以通过输入`@+函数名`可以快速切换到定义该函数的文件。
+
 ## 插件
+
 ### Package Control
-*必装的插件，没有它，有了它可以很方便的安装和管理其他的插件。*
+*必装的插件，有了它可以很方便的安装和管理其他的插件。*
 
 使用快捷键`ctrl+反斜杠`或者 `View -> Show Console`打开命令行，粘贴以下代码：
-
-    import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404' + 'e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)
-
+```
+import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404' + 'e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)
+```
 如果复制出现问题，请访问[https://gist.github.com/Xuanwo/fd4e4388099536bcdd65](https://gist.github.com/Xuanwo/fd4e4388099536bcdd65)
-###ConvertToUTF8
+
+### ConvertToUTF8
 *此插件可以有效的解决中文乱码问题*
 
 `Ctrl+P`打开切换面板，输入`PackageControl`回车，打开包管理。输入或者点击`install`进入安装页面，等待片刻后，在新弹出的窗口中输入`ConvertToUTF8`，点击它便开始自动下载安装。
 
 如果出现乱码，只要在`File`里面找到`Encoding`并选择合适的编码模式即可，快捷键`Ctrl+Shift+C`。
-###AStyleFormatter
+
+### AStyleFormatter
 *Sublime Text 3下的C/C++代码整理工具，好像还支持java*
 
 `Ctrl+P`打开切换面板，输入`PackageControl`回车，打开包管理。输入或者点击`install`进入安装页面，等待片刻后，在新弹出的窗口中输入`AStyleFormatter`，点击它便开始自动下载安装。
 
-使用时只要在代码编辑页面右击，选择`AStyleFormatter->Format`即可,快捷键为`Ctrl+Shift+F`。
+使用时只要在代码编辑页面右击，选择`AStyleFormatter->Format`即可,快捷键为`Ctrl+Alt+F`。
+
+### InsertDate
+*顾名思义，此插件用于在文中快速插入时间*
+`Ctrl+P`打开切换面板，输入`PackageControl`回车，打开包管理。输入或者点击`install`进入安装页面，等待片刻后，在新弹出的窗口中输入`InsertDate`，点击它便开始自动下载安装。
+
+默认的键位需要用到`F5`键，但是ThinkPad默认状态下需要同时按`Fn`才能使用`F5`，所以修改一下键位吧。
+
+点击`Preferences->Key Bindings - Users`，打开自定义键位设置，输入如下代码：
+```
+[
+    { "keys": ["ctrl+m"], //ctrl+m可以换成任意一组没有冲突的组合键
+    "command": "insert_date",
+    "args": {"format": "%H:%M:%S"} },
+]
+```
+这样，不管在什么状态下，我都能用`Ctrl+m`输入当前时间了～
+
+## 代码片段(`snippet`)功能
+点击`Tools->New Snippet`之后，会新建一个文件，内容如下：
+```
+<snippet>
+    <content><![CDATA[
+Hello, ${1:this} is a ${2:snippet}. //这里输入你想要键入的代码～
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <!-- <tabTrigger>hello</tabTrigger> --> //这里把hello换成你想要使用的快捷键。
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <!-- <scope>source.python</scope> --> //这里选择起作用的文件类型
+</snippet>
+```
+设置完毕之后，`Ctrl+S`保存，默认会保存在User文件夹下，为了方便管理，不妨新建一个Snippet文件夹，后缀名为`.sublime-snippet`。保存好之后，就可以使用啦～
+用我自己的一个Snippet文件举例：
+```
+<snippet>
+    <content>
+<![CDATA[
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <ctime>
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <deque>
+#include <list>
+#include <set>
+#include <map>
+#include <stack>
+#include <queue>
+#include <numeric>
+#include <iomanip>
+#include <bitset>
+#include <sstream>
+#include <fstream>
+#define debug puts("-----")
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1<<30)
+using namespace std;
+]]>
+    </content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>#init</tabTrigger>
+    <description>C/C++ header file</description> //描述信息，可选
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.c, source.c++</scope>
+</snippet>
+```
+该文件起到的作用就是，当我输入`#init`并敲击`Tab`是，会自动将`#init`转换成我预先设定的代码。
 
 
 ----------
@@ -144,3 +219,4 @@ Tools –> Build System –> New Build System
  - 2014年06月05日 写完全文，观察效果，并发布
  - 2014年07月03日 博客迁移至Hexo，做细节调整
  - 2014年08月08日 添加了Sublime在Linux下的`.buildsystem`代码
+ - 2014年08月16日 添加了关于Snippet功能和快速插入时间插件的介绍。
