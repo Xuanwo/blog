@@ -1,6 +1,6 @@
 title: Hexo常见问题解决方案
 date: 2014-08-14 05:20:00
-tags: [software]
+tags: [Software]
 categories: Opinion
 toc: true
 ---
@@ -105,7 +105,7 @@ iption: Description\nread_more: Read More\n\u0000',
 ## 如何避免在Deploy时输入密码
 
 # 贡献者
-[@Xuanwo](http://xuanwo.tk/)
+[@Xuanwo](http://xuanwo.org/)
 
 # 更新日志
 - 2014年08月14日  完成大体框架，内容慢慢填充。
