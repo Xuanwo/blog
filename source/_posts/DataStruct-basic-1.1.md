@@ -1,6 +1,6 @@
 ﻿title: 1.1线性表的逻辑结构
 date: 2014-08-11 22:06:00
-tags: [ACM, 数据结构, C/C++, list, 基础]
+tags: [ACM, 数据结构, C/C++, List, 基础]
 categories: Learn
 toc: true
 ---
