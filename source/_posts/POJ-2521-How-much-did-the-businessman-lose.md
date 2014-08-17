@@ -1,5 +1,5 @@
 title: POJ 2521 How much did the businessman lose
-date: 2014-08-16 16:14:20
+date: 2014-08-17 16:14:20
 tags: [ACM, POJ, C/C++, 简单计算]
 categories: Exercise
 toc: true
@@ -52,4 +52,4 @@ int main(int argc, char const *argv[])
 ```
 
 # 更新日志
-- 2014年08月16日 已AC。
+- 2014年08月17日 已AC。

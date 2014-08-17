@@ -1,5 +1,5 @@
 title: POJ 2623 Sequence Median
-date: 2014-08-16 16:44:10
+date: 2014-08-17 16:44:10
 tags: [ACM, POJ, C/C++, 排序]
 categories: Exercise
 toc: true
@@ -62,4 +62,4 @@ int main()
 ```
 
 # 更新日志
-- 2014年08月16日 已AC。
+- 2014年08月17日 已AC。

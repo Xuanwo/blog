@@ -1,5 +1,5 @@
 title: POJ 1118 Lining Up
-date: 2014-08-16 16:47:52
+date: 2014-08-17 16:47:52
 tags: [ACM, POJ, C/C++, 几何]
 categories: Exercise
 toc: true
@@ -95,4 +95,4 @@ int main(int argc, char const *argv[])
 ```
 
 # 更新日志
-- 2014年08月16日 已AC。
+- 2014年08月17日 已AC。

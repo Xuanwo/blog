@@ -1,5 +1,5 @@
 title: POJ 2509 Peter's smokes
-date: 2014-08-16 16:08:27
+date: 2014-08-17 16:08:27
 tags: [ACM, POJ, C/C++, 模拟]
 categories: Exercise
 toc: true
@@ -61,4 +61,4 @@ int main(int argc, char const *argv[])
 ```
 
 # 更新日志
-- 2014年08月16日 已AC。
+- 2014年08月17日 已AC。

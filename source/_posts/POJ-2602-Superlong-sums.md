@@ -1,5 +1,5 @@
 title: POJ 2602 Superlong sums
-date: 2014-08-16 16:33:30
+date: 2014-08-17 16:33:30
 tags: [ACM, POJ, C/C++, 高精度]
 categories: Exercise
 toc: true
@@ -65,4 +65,4 @@ int main()
 ```
 
 # 更新日志
-- 2014年08月16日 已AC。
+- 2014年08月17日 已AC。

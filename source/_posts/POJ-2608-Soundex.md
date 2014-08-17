@@ -1,5 +1,5 @@
 title: POJ 2608 Soundex
-date: 2014-08-16 16:36:16
+date: 2014-08-17 16:36:16
 tags: [ACM, POJ, C/C++, 字符串]
 categories: Exercise
 toc: true
@@ -101,4 +101,4 @@ int main(int argc, char const *argv[])
 ```
 
 # 更新日志
-- 2014年08月16日 已AC。
+- 2014年08月17日 已AC。
