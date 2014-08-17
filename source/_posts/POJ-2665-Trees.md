@@ -1,0 +1,66 @@
+title: POJ 2665 Trees
+date: 2014-08-17 23:42:32
+tags: [ACM, POJ, C/C++, 简单计算]
+categories: Exercise
+toc: true
+---
+# 题目
+源地址：http://poj.org/problem?id=2665
+
+# 理解
+用一个unsigned int储存总数，然后每次对于区间减去需要移除的数量，最后求值。
+*记得POJ上也有这道题，当年好象是用标记01的方法来做的。*
+
+<!-- more -->
+
+# 代码
+```
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <ctime>
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <deque>
+#include <list>
+#include <set>
+#include <map>
+#include <stack>
+#include <queue>
+#include <numeric>
+#include <iomanip>
+#include <bitset>
+#include <sstream>
+#include <fstream>
+#define debug puts("-----")
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1<<30)
+using namespace std;
+
+int main(int argc, char const *argv[])
+{
+    unsigned int trees;
+    int i, j;
+    int M;
+    unsigned int start, end;
+
+    while (scanf("%u%d", &trees, &M), trees != 0 || M != 0)
+    {
+        trees += 1;
+        for (i = 0; i < M ; i++)
+        {
+            scanf("%u%u", &start, &end);
+            trees -= end - start + 1;
+        }
+        printf("%u\n", trees);
+    }
+    return 0;
+}
+```
+
+# 更新日志
+- 2014年08月17日 已AC。
