@@ -14,7 +14,6 @@ toc: true
 
 # 代码
 ```
-{% raw %}
 #include <stdio.h>
 #include <string.h>
 #define MAX 501
@@ -75,7 +74,6 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-{% endraw %}
 ```
 	
 # 更新日志

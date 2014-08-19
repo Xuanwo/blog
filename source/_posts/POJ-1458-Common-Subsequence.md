@@ -23,7 +23,6 @@ else
 
 # 代码
 ```
-{% raw %}
 #include <iostream>
 #include <string>
 
@@ -63,7 +62,6 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-{% endraw %}
 ```
 	
 # 更新日志

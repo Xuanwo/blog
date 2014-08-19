@@ -14,7 +14,6 @@ toc: true
 
 # 代码
 ```
-{% raw %}
 #include<cstdio>
 #include<cstring>
 #include<cmath>
@@ -100,8 +99,6 @@ int main()
     cout << "END OF OUTPUT" << endl;
     return 0;
 }
-
-{% endraw %}
 ```
 	
 # 更新日志

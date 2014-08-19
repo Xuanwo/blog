@@ -17,7 +17,6 @@ toc: true
 # 代码
 ## Kruskal算法
 ```
-{% raw %}
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -106,12 +105,10 @@ int main()
     }
     return 0;
 }
-{% endraw %}
 ```
 
 ## Prim算法
 ```
-{% raw %}
 #include <iostream>
 #include <cstdio>
 #include <string.h>
@@ -168,7 +165,6 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-{% endraw %}
 ```
 	
 # 更新日志

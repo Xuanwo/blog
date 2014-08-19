@@ -14,7 +14,6 @@ toc: true
 
 # 代码
 ```
-{% raw %}
 #include <stdio.h>
 
 int main(int argc, char const *argv[])
@@ -34,7 +33,6 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
-{% endraw %}
 ```
 	
 # 更新日志

@@ -14,7 +14,6 @@ toc: true
 
 # 代码
 ```
-{% raw %}
 #include<algorithm>
 #include<iostream>
 #include<cstdio>
@@ -25,7 +24,7 @@ using namespace std;
 char map[100][100];
 int vis[100][100];
 int m, n;
-int op[8][2] = {{ -1, -1}, { -1, 0}, {1, 0}, {0, 1}, {1, 1}, { -1, 1}, {1, -1}, {0, -1}};
+int op[8][2] = { { -1, -1}, { -1, 0}, {1, 0}, {0, 1}, {1, 1}, { -1, 1}, {1, -1}, {0, -1} };
 
 void search(int x, int y)
 {
@@ -57,7 +56,6 @@ int main(int argc, char const *argv[])
     system("pause");
     return 0;
 }
-{% endraw %}
 ```
 	
 # 更新日志

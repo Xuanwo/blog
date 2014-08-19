@@ -11,10 +11,9 @@ toc: true
 只有比平均数还要大的柱子需要移动，而移动的具体方式不需要考虑，明白了这一点就是水题了。
 
 <!-- more -->
-
 # 代码
 ```
-{% raw %}
+
 #include <cstdio>
 #include <iostream>
 #include <cstdlib>
@@ -45,7 +44,6 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-{% endraw %}
 ```
 	
 # 更新日志

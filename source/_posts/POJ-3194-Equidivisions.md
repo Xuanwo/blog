@@ -28,9 +28,9 @@ using namespace std;
 int N, ans;
 int map[101][101];  
 int visit[101][101];  
-{% raw %}
-int step[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};  
-{% endraw %}
+
+int step[4][2] = { {-1, 0}, {0, 1}, {1, 0}, {0, -1} };  
+
 int color[101];  
 bool Check(int x, int y)  
 {  

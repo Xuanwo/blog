@@ -14,7 +14,6 @@ toc: true
 
 # 代码
 ```
-{% raw %}
 #include<cstdio>
 #include<cstdlib>
 #include<cstring>
@@ -49,7 +48,6 @@ int main(int argc, char const *argv[])
         }
     printf("%d\n", dp[n][m]);
 }
-{% endraw %}
 ```
 	
 # 更新日志

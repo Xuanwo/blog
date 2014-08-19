@@ -14,7 +14,6 @@ toc: true
 
 # 代码
 ```
-{% raw %}
 #include <iostream>
 using namespace std;
 
@@ -54,7 +53,6 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
-{% endraw %}
 ```
 	
 # 更新日志
