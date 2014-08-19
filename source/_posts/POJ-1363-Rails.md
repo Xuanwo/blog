@@ -1,6 +1,6 @@
 ﻿title: POJ 1363 Rails
 date: 2014-08-12 04:07:00
-tags: [ACM, POJ, C/C++, STL, stack]
+tags: [ACM, POJ, C/C++, STL, Stack]
 categories: Exercise
 toc: true
 ---
@@ -14,7 +14,6 @@ toc: true
 
 # 代码
 ```
-{% raw %}
 #include <cstdio>
 #include <stack>
 using namespace std;
@@ -48,8 +47,6 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-
-{% endraw %}
 ```
 	
 # 更新日志
