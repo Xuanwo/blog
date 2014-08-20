@@ -4,13 +4,13 @@ categories: Daily
 ---
 # 八月
 ## 代码
-<i class="fa fa-square-o"></i>  怒刷POJ
+<i class="fa fa-square-o"></i>  怒刷POJ `已完成：185`
 <i class="fa fa-square-o"></i>  完成数据结构学习 `已看至：基础课4.2`
 <i class="fa fa-square-o"></i>  跟上集训进度 `已完成：最小生成树`
 
 ## 美剧
 <i class="fa fa-square-o"></i>  暴君
-<i class="fa fa-square-o"></i>  冰与火之歌——第一季 权力的游戏 `已看至：第一集`
+<i class="fa fa-square-o"></i>  冰与火之歌——第一季 权力的游戏 `已看至：第一集` *我估计要弃*
 <i class="fa fa-square-o"></i>  末日孤舰 `已看至：第八集`
 
 ## 动漫
@@ -30,3 +30,4 @@ categories: Daily
 - 2014年08月10日 想到的就是这些，再补充。
 - 2014年08月11日 更新进度。
 - 2014年08月13日 更新进度，增加任务项目。
+- 2014年08月20日 更新进度。
