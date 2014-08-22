@@ -199,6 +199,14 @@ using namespace std;
 ```
 该文件起到的作用就是，当我输入`#init`并敲击`Tab`是，会自动将`#init`转换成我预先设定的代码。
 
+## 备份
+配置到现在，Sublime也算用的顺手了，要是换一台电脑都得这么捣鼓一下，肯定得疯。所以下面介绍一下如何同步自己的Sublime配置——只要备份`Packages\User`文件夹即可，里面的`sublime-settings`文件都保存了你的所有设置，更换电脑之后，只要恢复过去，打开Sublime的时候会自动检测，下载并安装你需要的包。
+### Windows下
+备份文件夹：`C:\Users\yourusername\AppData\Roaming\Sublime Text 3\Packages\User`
+### Linux下
+备份文件夹：`~/Library/Application/Support/Sublime\ Text\ 3/Packages/User`
+注意空格的转义= =。`rm -rf /usr /balabala`之类的梗我才没有听说过呢。
+
 
 ----------
 
@@ -220,3 +228,4 @@ using namespace std;
  - 2014年07月03日 博客迁移至Hexo，做细节调整
  - 2014年08月08日 添加了Sublime在Linux下的`.buildsystem`代码
  - 2014年08月16日 添加了关于Snippet功能和快速插入时间插件的介绍。
+ - 2014年08月22日 添加了关于备份Sublime设定的介绍
