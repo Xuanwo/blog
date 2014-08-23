@@ -48,6 +48,10 @@ Error: spawn ENOENT
 2. 删除`.deploy`文件夹并且执行`hexo clean`后，重新`hexo deploy`。
 
 ## Deploy之后，页面长时间404
+**问题描述：**
+直接上图了，不要哭= =
+![Github 404 孩子不哭](http://xuanwo.qiniudn.com/opinion/Github-404.png)
+**解决方案：**
 ### 检查Github Pages类型
 **个人主页**
 也就是库的名称为`yourname.github.io`的主页，页面文件应当在master分支下，文件结构可以参考[我的主页](https://github.com/Xuanwo/xuanwo.github.io/tree/master)，也就是应当以HTML文件为主，是没有Markdown文件的。
