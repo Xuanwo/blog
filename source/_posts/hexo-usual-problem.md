@@ -11,6 +11,8 @@ Hexo是一个非常好用的静态博客生成器，但是由于很多方面的�
 
 <!--more-->
 
+---
+
 # 常见错误
 ## 本地浏览没问题，Deploy报错
 ### Git环境配置错误
@@ -46,6 +48,16 @@ Error: spawn ENOENT
 2. 删除`.deploy`文件夹并且执行`hexo clean`后，重新`hexo deploy`。
 
 ## Deploy之后，页面长时间404
+### 检查Github Pages类型
+**个人主页**
+也就是库的名称为`yourname.github.io`的主页，页面文件应当在master分支下，文件结构可以参考[我的主页](https://github.com/Xuanwo/xuanwo.github.io/tree/master)，也就是应当以HTML文件为主，是没有Markdown文件的。
+**项目主页**
+也就是库名不是`yourname.github.io`的主页，页面文件应当在`gh-pages`分支下，文件结构与个人主页基本一致，同样没有Markdown文件。
+### 检查Github验证邮件
+曾经出现过所有操作都没有问题但就是404的状况，新创建的用户最好都去看看是不是验证邮件没有通过。
+### 注意库的名字
+现在大多改成`.io`结尾域名了，但是不确定是不是真的跟这个有关，最好改成`.io`。
+
 
 ## Hexo命令失效
 **问题描述：**
@@ -98,9 +110,22 @@ iption: Description\nread_more: Read More\n\u0000',
 ![就像这样](http://xuanwo.qiniudn.com/opinion/hexo-languages-error.png)
 *感谢[@dukewan](https://github.com/dukewan)提供的截图*
 
+## 修改主题文件之后，网页不更新
+**解决方案：**
+`hexo clean`并且删除`.deploy`文件夹之后，`hexo d -g`。
+
+---
 
 # 常见问题
 ## 如何在不同电脑（系统）上使用Hexo
+将自己的`Blog`文件夹使用`Git`来管理，需要注意一下几点。
+
+1. 如果主题是通过git管理的，需要将主题文件夹下的`.git`文件夹删除，才能同步Blog文件夹（.git文件夹是隐藏的，需要显示隐藏文件才能删除，Linux下需要`rm -rf`命令才能删除，Mac没用过，不清楚）。
+2. 按照Blog目录下自带的`.gitignore`文件，`node_modules`文件夹是不会同步的，所以同步之后需要自己再次进行`npm install`，但是注意，不要进行`hexo init`了，否则`_config.yml`全都白弄了。
+
+然后看一下同步之后的目录结构：
+<https://github.com/Xuanwo/xuanwo.github.io/tree/blog>
+
 ## 如何为站点添加社会化评论
 ## 如何避免在Deploy时输入密码
 
@@ -108,4 +133,5 @@ iption: Description\nread_more: Read More\n\u0000',
 [@Xuanwo](http://xuanwo.org/)
 
 # 更新日志
-- 2014年08月14日  完成大体框架，内容慢慢填充。
+- 2014年08月14日 完成大体框架，内容慢慢填充。
+- 2014年08月23日 补充404问题，以及如何在不同电脑（系统）上使用Hexo。
