@@ -1,6 +1,6 @@
 title: POJ 3077 Rounders
 date: 2014-08-22 17:52:36
-tags: [ACM, POJ, Java, 高精度]
+tags: [ACM, POJ, Java, 高精度计算]
 categories: Exercise
 toc: true
 ---
