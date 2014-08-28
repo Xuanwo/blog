@@ -11,7 +11,7 @@ categories: Daily
 ## 美剧
 <i class="fa fa-square-o"></i>  暴君
 <i class="fa fa-square-o"></i>  冰与火之歌——第一季 权力的游戏 `已看至：第一集` *我估计要弃*
-<i class="fa fa-square-o"></i>  末日孤舰 `已看至：第九集`
+<i class="fa fa-check-square-o"></i>  末日孤舰——第一季 `已看至：第十集`
 
 ## 动漫
 <i class="fa fa-square-o"></i>  一周的朋友 `已看至：第一集` *我估计要弃*
