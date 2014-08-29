@@ -25,7 +25,7 @@ categories: Daily
 <i class="fa fa-check-square-o"></i>  介绍gitbooks
 
 ## 开源项目
-<i class="fa fa-square-o"></i>  TiddlyWiki中文教程
+<i class="fa fa-square-o"></i>  [TiddlyWiki中文教程](https://github.com/Xuanwo/TiddlyWiki-Doc-cn)
 <i class="fa fa-square-o"></i>  完善在线OJ系统wiki那边的工作 `已完成至：第八周`
 
 # 更新日志

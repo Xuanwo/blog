@@ -20,8 +20,8 @@ categories: Daily
 - 为知笔记开源用户文档编辑(地址暂时不能透漏，现在还处在规则完善期)
 - 为知笔记开源插件[SublimeForWiz](https://github.com/Xuanwo/SublimeForWiz)作者
 - 开源文档[ACM模板](https://github.com/Xuanwo/ACMTemplate)作者
-- 开源文档TiddlyWiki中文教程作者
-- 中国地质大学（北京）在线开源OJ系统Wiki维护者
+- 开源文档[TiddlyWiki中文教程](https://github.com/Xuanwo/TiddlyWiki-Doc-cn)作者
+- [中国地质大学（北京）在线开源OJ系统Wiki](http://cugbacm.github.io/oj/)维护者
 
 # 更新日志
 - 2014年06月12日 完成`现状`和`兴趣`介绍。
