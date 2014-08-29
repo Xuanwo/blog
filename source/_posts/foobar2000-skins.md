@@ -25,5 +25,5 @@ toc: true
 ![设置选项](http://xuanwo.qiniudn.com/opinion/foobar-choose.png)
 ## 享受自己的音乐生活吧～
 
-# 更新日子
+# 更新日志
 - 2014年08月28日 完成基本的配置步骤并提供了下载地址。
