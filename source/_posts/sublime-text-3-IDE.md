@@ -13,17 +13,115 @@ toc: true
 
 
 # 安装
-以下均为Sublime Text 3 3059版 更新于17 December 2013
+以下均为Sublime Text 3 3065版 更新于29 August 2014
 ### OS X
-[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203059.dmg](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203059.dmg)
+[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203065.dmg](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203065.dmg)
 ### Windows 32 bit
-[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203059%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203059%20Setup.exe)
+[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203065%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203065%20Setup.exe)
 ### Windows 64 bit
-[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203059%20x64%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203059%20x64%20Setup.exe)
+[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203065%20x64%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203065%20x64%20Setup.exe)
 ### Ubuntu 32 bit
-[http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3059_i386.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3059_i386.deb)
+[http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3065_i386.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3065_i386.deb)
 ### Ubuntu 64 bit
-[http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3059_amd64.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3059_amd64.deb)
+[http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3065_amd64.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3065_amd64.deb)
+
+# ChangeLog
+## Build 3065
+Release Date: 27 August 2014
+
+    * Added sidebar icons
+    * Added sidebar loading indicators
+    * Sidebar remembers which folders are expanded
+    * Tweaked window closing behavior when pressing ctrl+w / cmd+w
+    * Improved quote auto pairing logic 
+    * Selected group is now stored in the session
+    * Added remember_full_screen setting
+    * Fixed a lockup when transitioning from a blinking to a solid caret
+    * Fixed a crash in plugin_host
+    * Fixed a crash triggered by Goto Anything cloning views
+    * Windows: Added command line helper, subl.exe
+    * OSX: Added 'New Window' entry to dock menu
+    * Posix: Using correct permissions for newly created files and folders
+    * API: Updated to Python 3.3.3
+
+## Build 3059
+Release Date: 17 December 2013
+
+    * Added tab scrolling, controlled by the enable_tab_scrolling setting
+    * Added image preview when opening images
+    * Encoding and line endings can be displayed in the status bar with the show_encoding and show_line_endings settings
+    * Added settings caret_extra_top, caret_extra_bottom and caret_extra_width to control the caret size
+    * Added index_exclude_patterns setting to control which files get indexed
+    * Automatically closing windows when the last tab is dragged out
+    * Changed tab close behavior: the neighboring tab is now always selected
+    * When the last file is closed, a new transient file is created automatically
+    * Ctrl+Tab ordering is stored in the session
+    * Added minimap_scroll_to_clicked_text setting
+    * Improved error messages when unable to save files
+    * Auto complete now works as expected in macros
+    * Minor improvements to Python syntax highlighting
+    * Vintage: A block caret is now used
+    * Vintage: Improved behavior of visual line mode with word wrapped lines
+    * Find in Files will no longer block when FIFOs are encountered
+    * Linux: Added menu hiding
+    * Linux: Fixed incorrect handling of double clicks in the Find panel
+    * Linux: Fixed incorrect underscore display in some menus
+    * Posix: Fixed new files being created with unexpected permissions
+    * Windows: SSE support is no longer required for 32 bit builds
+    * API: Window.open_file now accepts an optional group parameter
+    * API: Plugins may now call Settings.clear_on_change() within a callback from Settings.add_on_change()
+    * API: Calling Settings.add_on_change() from within a settings change callback won't cause the added callback to be run
+
+## Build 3047
+Release Date: 27 June 2013
+
+    * Beta is now open to non-registered users
+    * Windows and Linux: Added High DPI support
+    * Improved file change detection
+    * Improved rendering performance
+    * HTML tag auto completion is better behaved in script tags
+    * Fixed a crash on exit that could occur when hot_exit is disabled
+    * Linux and OSX: atomic_save is adaptively disabled when it's not possible to preserve file permissions
+    * OSX: Fixed context menus not working when the application is in the background
+    * Windows: Auto updater supports updating from unicode paths
+    * API: Plugins in zip files are able to be overridden via files on disk
+    * API: Added support for the termios module on Linux and OS X
+    * API: Fixed Selection.contains
+    * API: Fixed settings objects getting invalidated too early with cloned views
+
+## Build 3033
+Release Date: 7 May 2013
+
+    * New auto update system for Windows and OS X
+    * Previewing a file from the side bar will no longer add an entry to the OPEN FILES section of the side bar
+    * Added Paste from History
+    * Added setting 'auto_find_in_selection', for S2 style Find in Selection logic
+    * Find panel has a drop down arrow to select previous items
+    * Pressing right in the Goto Anything overlay will open the selected file without closing the overlay
+    * Fixed several crash bugs
+    * Further startup time improvements
+    * Improved HTML completions when typing outside of tags
+    * Fixed Close Tag not respecting self closing tags
+    * PHP: Improved auto indenting for the alternative control syntax
+    * Added setting always_prompt_for_file_reload
+    * Improved handling of deleted files when restoring sessions
+    * Deleting a file via the side bar will first close the corresponding view, if any
+    * "Remove all Folders from Project" now prompts to confirm
+    * Added telemetry. Telemetry is disabled by default, but can be turned on with the enable_telemetry setting
+    * Using Google Breakpad to automatically report crashes
+    * Updated syntax highlighting for PHP, Haskell and Pascal
+    * Symlinks are followed by default in folders added to the side bar
+    * Windows: Fixed erroneous entries in system menu
+    * Windows: New style Open Folder dialogs are used on Vista and later
+    * API: Significantly improved communication speed with plugin_host
+    * API: Added view.close()
+    * API: Added view.show_popup_menu()
+    * API: Added is_valid() method to view and window, to determine if the handle has been invalidated
+    * API: Added on_post_text_command and on_post_window_command
+    * API: on_text_command and on_window command are now called when the menu is used
+    * API: Added sublime.get_macro()
+    * API: view.substr(point) now has the same semantics as S2 for out of bounds addresses
+    * API: view.command_history(0, True) now returns the last modifying command, as expected
 
 
 ----------
@@ -229,3 +327,4 @@ using namespace std;
  - 2014年08月08日 添加了Sublime在Linux下的`.buildsystem`代码
  - 2014年08月16日 添加了关于Snippet功能和快速插入时间插件的介绍。
  - 2014年08月22日 添加了关于备份Sublime设定的介绍
+ - 2014年09月01日 更新Sublime Text 3至3065版本，增加Changelog，修改下载地址。
