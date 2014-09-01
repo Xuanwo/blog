@@ -7,6 +7,7 @@ categories: Daily
 
 # 工具
 - [快递查询](http://xuanwo.org/tools/kuaidi100.html)
+- [电话叫快递](http://xuanwo.org/tools/call-for-kuaidi.html)
 
 # 开源电子书
 - [ACM模板集](http://xuanwo.gitbooks.io/acm/)
