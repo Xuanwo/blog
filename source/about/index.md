@@ -19,6 +19,7 @@ categories: Daily
 - 简单的C/C++程序阅读及编写
 - 能阅读简单的html，js，java代码
 - 熟练操作git，有开源项目合作经验
+- Linux基本配置及shell操作，以及Linux下编程经验
 
 # 开源项目
 - [Hexo](https://github.com/hexojs/hexo)社区积极参与者
