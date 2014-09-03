@@ -15,13 +15,19 @@ categories: Daily
 - 软件（喜欢试用各种稀奇古怪的软件和应用，同学都说我可以去做推广。。。）
 - 待续（说不定没过几天就迷上新的东西了）
 
+# 技能
+- 简单的C/C++程序阅读及编写
+- 能阅读简单的html，js，java代码
+- 熟练操作git，有开源项目合作经验
+
 # 开源项目
-- [Hexo](https://github.com/hexojs/hexo)社区积极参与者，提出并解决过大量issues
+- [Hexo](https://github.com/hexojs/hexo)社区积极参与者
 - 为知笔记开源用户文档编辑(地址暂时不能透漏，现在还处在规则完善期)
 - 为知笔记开源插件[SublimeForWiz](https://github.com/Xuanwo/SublimeForWiz)作者
 - 开源文档[ACM模板](https://github.com/Xuanwo/ACMTemplate)作者
-- 开源文档[TiddlyWiki中文教程](https://github.com/Xuanwo/TiddlyWiki-Doc-cn)作者
 - [中国地质大学（北京）在线开源OJ系统Wiki](http://cugbacm.github.io/oj/)维护者
+- 开源文档[程序员编程艺术 — 面试和算法心得](https://github.com/julycoding/The-Art-Of-Programming-By-July)参与者
+- 开源文档[免费的编程中文书籍索引](https://github.com/justjavac/free-programming-books-zh_CN)参与者
 
 # 更新日志
 - 2014年06月12日 完成`现状`和`兴趣`介绍。
@@ -34,3 +40,4 @@ categories: Daily
 - 2014年08月10日 将个人介绍和To-do分开，方面阅读和使用，删除最近动向板块。
 - 2014年08月16日 花钱买下了`xuanwo.org`这个域名，好好干吧～
 - 2014年08月29日 新增关于开源项目的介绍。
+- 2014年09月03日 新增关于个人技能的介绍。
