@@ -27,9 +27,8 @@ toc: true
 
 # ChangeLog
 ## Build 3065
-```
 Release Date: 27 August 2014
-
+```
     * Added sidebar icons
     * Added sidebar loading indicators
     * Sidebar remembers which folders are expanded
