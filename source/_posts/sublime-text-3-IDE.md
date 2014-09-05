@@ -27,6 +27,7 @@ toc: true
 
 # ChangeLog
 ## Build 3065
+```
 Release Date: 27 August 2014
 
     * Added sidebar icons
@@ -43,10 +44,10 @@ Release Date: 27 August 2014
     * OSX: Added 'New Window' entry to dock menu
     * Posix: Using correct permissions for newly created files and folders
     * API: Updated to Python 3.3.3
-
+```
 ## Build 3059
 Release Date: 17 December 2013
-
+```
     * Added tab scrolling, controlled by the enable_tab_scrolling setting
     * Added image preview when opening images
     * Encoding and line endings can be displayed in the status bar with the show_encoding and show_line_endings settings
@@ -71,10 +72,10 @@ Release Date: 17 December 2013
     * API: Window.open_file now accepts an optional group parameter
     * API: Plugins may now call Settings.clear_on_change() within a callback from Settings.add_on_change()
     * API: Calling Settings.add_on_change() from within a settings change callback won't cause the added callback to be run
-
+```
 ## Build 3047
 Release Date: 27 June 2013
-
+```
     * Beta is now open to non-registered users
     * Windows and Linux: Added High DPI support
     * Improved file change detection
@@ -88,10 +89,10 @@ Release Date: 27 June 2013
     * API: Added support for the termios module on Linux and OS X
     * API: Fixed Selection.contains
     * API: Fixed settings objects getting invalidated too early with cloned views
-
+```
 ## Build 3033
 Release Date: 7 May 2013
-
+```
     * New auto update system for Windows and OS X
     * Previewing a file from the side bar will no longer add an entry to the OPEN FILES section of the side bar
     * Added Paste from History
@@ -122,7 +123,7 @@ Release Date: 7 May 2013
     * API: Added sublime.get_macro()
     * API: view.substr(point) now has the same semantics as S2 for out of bounds addresses
     * API: view.command_history(0, True) now returns the last modifying command, as expected
-
+```
 
 ----------
 
