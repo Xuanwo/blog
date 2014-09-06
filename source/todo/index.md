@@ -8,10 +8,14 @@ categories: Daily
 
 ## 美剧
 <i class="fa fa-square-o"></i>  暴君 `已看至：第四集`
-<i class="fa fa-square-o"></i>  冰与火之歌——第一季 权力的游戏 `已看至：第七集`
+<i class="fa fa-check-square-o"></i>  冰与火之歌——第一季 权力的游戏
+<i class="fa fa-check-o"></i>  冰与火之歌——第二季 列王的纷争
 
 ## 开源项目
 <i class="fa fa-square-o"></i>  完善在线OJ系统wiki那边的工作 `已完成至：第八周`
+
+## 考试
+<i class="fa fa-square-o"></i>  全国计算机等级考试——Access数据库程序设计
 
 # 2014年8月
 ## 代码
@@ -48,3 +52,4 @@ categories: Daily
 - 2014年08月29日 新增开源项目分类，进度尚未更新。
 - 2014年09月01日 新的一月，从头开始~
 - 2014年09月04日 只有同时看暴君和冰与火之歌的人才能明白我此时复杂的心情。。。
+- 2014年09月06日 更新进度，增加考试项目。
