@@ -67,7 +67,7 @@ Error: spawn ENOENT
 
 **问题分析**
 问题出在CNAME跳转，下面附上我的分析，如果不感兴趣可以直接翻到解决方案。
->
+> 
 如果没有CNAME跳转，访问`yourname.github.io/repo`会自动地去访问gh-pages分支下的静态文件。
 但是一旦进行了CNAME跳转，访问`yourname.github.io/repo`就会自动跳转为`yoursite.com/repo`，显然在你的博客目录下是没有这个文件夹的，所以自然而然的会出现访问404错误。
 
