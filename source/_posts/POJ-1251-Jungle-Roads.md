@@ -1,6 +1,6 @@
 ﻿title: POJ 1251 Jungle Roads
 date: 2014-08-06 22:52:00
-tags: [ACM, POJ, C/C++, 图论, Kruskal, 最小生成树, Prim]
+tags: [ACM, POJ, C/C++, Graph, Kruskal, 最小生成树, Prim]
 categories: Exercise
 toc: true
 ---
