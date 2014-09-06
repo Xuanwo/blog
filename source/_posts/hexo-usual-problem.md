@@ -125,7 +125,7 @@ iption: Description\nread_more: Read More\n\u0000',
   stack: undefined }
 ```
 **解决方案：**
-主题目录下所有yml文件中所有有空格的字段都用双引号括起来。
+主题目录下所有yml文件中所有有空格的字段都用双引号括起来，尤其注意languages下面的yml文件。
 ![就像这样](http://xuanwo.qiniudn.com/opinion/hexo-languages-error.png)
 *感谢[@dukewan](https://github.com/dukewan)提供的截图*
 
