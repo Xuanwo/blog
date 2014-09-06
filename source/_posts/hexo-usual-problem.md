@@ -158,9 +158,8 @@ iption: Description\nread_more: Read More\n\u0000',
 ## 如何避免在Deploy时输入密码
 
 # 贡献者
-|-|
-|[@Xuanwo](http://xuanwo.org/)|
-|[@TimNew](http://timnew.me/)|
+- [@Xuanwo](http://xuanwo.org/)
+- [@TimNew](http://timnew.me/)
 
 # 更新日志
 - 2014年08月14日 完成大体框架，内容慢慢填充。
