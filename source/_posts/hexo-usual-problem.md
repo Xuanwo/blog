@@ -101,6 +101,30 @@ or you can check the docs: http://zespia.tw/hexo/docs/
 **解决方案：**
 检查`_config.yml`内容，特别注意`:`后面需要有一个空格。
 
+## Hexo所有命令报错
+**问题描述：**
+[参见Issues](https://github.com/hexojs/hexo/issues/832)
+报错信息如下：
+```
+[error] { name: 'HexoError',
+  reason: 'end of the stream or a document separator is expected',
+  mark: 
+   { name: null,
+     buffer: '# Hexo Configuration\n## Docs: http://hexo.io/docs/configuration.html\n## Source: https://github.com/tommy351/hexo/\n\n# Site\ntitle: 2hu\nsubtitle:\ndescription: 2hu\nauthor: @2hu10n92hen9\nemail:\nlanguage:\n\n# URL\n## If your site is put in a subdirectory, set url as \'http://yoursite.com/child\' and root as \'/child/\'\nurl: http://2hu.me\nroot: /\npermalink: :year/:month/:day/:title/\ntag_dir: tags\narchive_dir: archives\ncategory_dir: categories\ncode_dir: downloads/code\n\n# Directory\nsource_dir: source\npublic_dir: public\n\n# Writing\nnew_post_name: :year-:month-:day-:title.md # File name of new posts\ndefault_layout: post\nauto_spacing: false # Add spaces between asian characters and western characters\ntitlecase: false # Transform title into titlecase\nexternal_link: true # Open external links in new tab\nmax_open_file: 100\nmulti_thread: true\nfilename_case: 0\nrender_drafts: false\npost_asset_folder: false\nhighlight:\n  enable: true\n  line_number: true\n  tab_replace:\n\n# Category & Tag\ndefault_category: uncategorized\ncategory_map:\ntag_map:\n\n# Archives\n## 2: Enable pagination\n## 1: Disable pagination\n## 0: Fully Disable\narchive: 2\ncategory: 2\ntag: 2\n\n# Server\n## Hexo uses Connect as a server\n## You can customize the logger format as defined in\n## http://www.senchalabs.org/connect/logger.html\nport: 4000\nserver_ip: 0.0.0.0\nlogger: false\nlogger_format:\n\n# Date / Time format\n## Hexo uses Moment.js to parse and display date\n## You can customize the date format as defined in\n## http://momentjs.com/docs/#/displaying/format/\ndate_format: MMM D YYYY\ntime_format: H:mm:ss\n\n# Pagination\n## Set per_page to 0 to disable pagination\nper_page: 10\npagination_dir: page\n\n# Disqus\ndisqus_shortname: 2hu\n\n# Extensions\n## Plugins: https://github.com/tommy351/hexo/wiki/Plugins\n## Themes: https://github.com/tommy351/hexo/wiki/Themes\ntheme: strict\nexclude_generator:\n\n# Deployment\n## Docs: http://hexo.io/docs/deployment.html\ndeploy:\n  type: github\n  repository: https://github.com/zhulongzheng/zhulongzheng.github.io.git\n  branch: master\n\u0000',
+     position: 168,
+     line: 8,
+     column: 8 },
+  message: 'Config file load failed',
+  domain: 
+   { domain: null,
+     _events: { error: [Function] },
+     _maxListeners: 10,
+     members: [ [Object] ] },
+  domainThrown: true,
+  stack: undefined }
+```
+**解决方案：**
+仔细检查`_config.yml`文件中所有冒号后面的空格，格式很严格，必须是**只有一个**，**半角**。不管是多了还是少了都会报错，这是yml解释器所定义的语法。如果不确定的话，将输入法调整到英文模式，删除所有冒号后面的空格重新输入，不要使用Tab。
 ## 更新至2.8.X版本后，构建失败
 **问题描述：**
 输入`hexo g`后，报错如下：
@@ -173,4 +197,4 @@ iption: Description\nread_more: Read More\n\u0000',
 - 2014年08月14日 完成大体框架，内容慢慢填充。
 - 2014年08月23日 补充404问题，以及如何在不同电脑（系统）上使用Hexo。
 - 2014年09月06日 新增自有域名二级目录无法访问，在主目录下添加md文件。
-- 2014年09月09日 新增Hexo版本回退。
+- 2014年09月09日 新增Hexo版本回退，Hexo所有命令报错。
