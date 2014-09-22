@@ -15,7 +15,7 @@ categories: Daily
 <i class="fa fa-square-o"></i>  完善在线OJ系统wiki那边的工作 `已完成至：第八周`
 
 ## 考试
-<i class="fa fa-square-o"></i>  全国计算机等级考试——Access数据库程序设计
+<i class="fa fa-check-square-o"></i>  全国计算机等级考试——Access数据库程序设计
 
 # 2014年8月
 ## 代码
@@ -53,3 +53,4 @@ categories: Daily
 - 2014年09月01日 新的一月，从头开始~
 - 2014年09月04日 只有同时看暴君和冰与火之歌的人才能明白我此时复杂的心情。。。
 - 2014年09月06日 更新进度，增加考试项目。
+- 2014年09月22日 更新进度= =，Access貌似要挂了，唉，人生艰难。
