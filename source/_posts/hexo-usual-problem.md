@@ -125,6 +125,7 @@ or you can check the docs: http://zespia.tw/hexo/docs/
 ```
 **解决方案：**
 仔细检查`_config.yml`文件中所有冒号后面的空格，格式很严格，必须是**只有一个**，**半角**。不管是多了还是少了都会报错，这是yml解释器所定义的语法。如果不确定的话，将输入法调整到英文模式，删除所有冒号后面的空格重新输入，不要使用Tab。
+
 ## 更新至2.8.X版本后，构建失败
 **问题描述：**
 输入`hexo g`后，报错如下：
@@ -154,8 +155,26 @@ iption: Description\nread_more: Read More\n\u0000',
 *感谢[@dukewan](https://github.com/dukewan)提供的截图*
 
 ## 修改主题文件之后，网页不更新
+**问题描述：**
+在修改主题文件之后，页面的文件依然没有更新。
 **解决方案：**
-`hexo clean`并且删除`.deploy`文件夹之后，`hexo d -g`。
+`hexo clean`并且删除`.deploy`文件夹之后，`hexo d -g`。为了强制浏览器更新资源文件，可以采用'Ctrl+F5'来刷新。
+
+## 页面没有渲染（partial转义失败）
+**问题描述：**
+[参见Issues](https://github.com/hexojs/hexo/issues/838)
+看不到渲染后的页面，只能看到类似如下信息：
+```
+<%- partial('_partial/head') %>
+<%- partial('_partial/header', null, {cache: !config.relative_link}) %>
+<%- body %>
+<% if (theme.sidebar && theme.sidebar !== 'bottom'){ %> <%- partial('_partial/sidebar', null,     {cache: !config.relative_link}) %> <% } %>
+<%- partial('_partial/footer', null, {cache: !config.relative_link}) %>
+<%- partial('_partial/mobile-nav', null, {cache: !config.relative_link}) %> <%- partial('_partial/after-footer') %>
+```
+**解决方案：**
+在博客所在目录下执行'npm install'用以安装插件。
+**感谢[@tommy351](http://zespia.tw/)提供的解决方案**
 
 ---
 
@@ -192,9 +211,11 @@ iption: Description\nread_more: Read More\n\u0000',
 # 贡献者
 - [@Xuanwo](http://xuanwo.org/)
 - [@TimNew](http://timnew.me/)
+- [@tommy351](http://zespia.tw/)
 
 # 更新日志
 - 2014年08月14日 完成大体框架，内容慢慢填充。
 - 2014年08月23日 补充404问题，以及如何在不同电脑（系统）上使用Hexo。
 - 2014年09月06日 新增自有域名二级目录无法访问，在主目录下添加md文件。
 - 2014年09月09日 新增Hexo版本回退，Hexo所有命令报错。
+- 2014年09月23日 新增Partial没有转义
