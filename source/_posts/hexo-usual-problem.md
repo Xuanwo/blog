@@ -206,6 +206,35 @@ iption: Description\nread_more: Read More\n\u0000',
 *推荐使用nvm来管理Node.js版本*
 
 ## 如何为站点添加社会化评论
+### 使用Disque
+Hexo默认支持Disque，打开`_config.yml`，在`disqus_shortname:`后面输入自己的Disque账号。保存，重新渲染，清除缓存之后就能看到自己的评论窗口。
+### 使用Duoshuo
+部分主题添加了对多说的支持，只要输入Duoshuo账号，就可以看到效果了。如果主题不支持的话，就需要自己添加。需要对自己的主题结构有一定的了解，不是每一个主题都会有一样的文件，找不到同样的文件也正常，但是都会存在相同功能的区块，自己去定位即可。如果没把握的话，最后做好备份。
+
+在`after_footer.ejs`模块中输入如下代码：
+```
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuanwo"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+```
+
+在`article.ejs`模块中输入如下代码：
+```
+<% if (page.comments){ %>
+        <div class="ds-thread" data-thread-key="<%- item.path %>"></div>
+<% } %>
+```
+
 ## 如何避免在Deploy时输入密码
 
 # 贡献者
@@ -219,3 +248,4 @@ iption: Description\nread_more: Read More\n\u0000',
 - 2014年09月06日 新增自有域名二级目录无法访问，在主目录下添加md文件。
 - 2014年09月09日 新增Hexo版本回退，Hexo所有命令报错。
 - 2014年09月23日 新增Partial没有转义
+- 2014年09月24日 新增添加社会化评论
