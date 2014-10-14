@@ -1,4 +1,4 @@
-title: Codeforces Beta Round #1 A Theatre Square
+title: Codeforces Beta Round 1 A Theatre Square
 date: 2014-10-14 17:00:08
 tags: [ACM, Codeforces, C/C++, 简单]
 categories: Exercise
