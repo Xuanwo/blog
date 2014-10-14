@@ -51,10 +51,10 @@ void init()
 int main(int argc, char const *argv[])
 {
 	init();
-    ll x = n % a == 0 ? n / a : n / a + 1;
-    ll y = m % a == 0 ? m / a : m / a + 1;
-    printf("%I64d", x * y);
-    return 0;
+	ll x = n % a == 0 ? n / a : n / a + 1;
+	ll y = m % a == 0 ? m / a : m / a + 1;
+	printf("%I64d", x * y);
+	return 0;
 }
 ```
 
