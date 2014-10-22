@@ -24,7 +24,7 @@ If score is negative, this means that the player has lost in the round.`
 初始化: `vector<int> myVector;`
 赋值: `myVector.push_back();`
 ## 迭代器
-初始化： map<string,int>::iterator myIterator;
+初始化： `map<string,int>::iterator myIterator;`
 
 # 代码
 ```
