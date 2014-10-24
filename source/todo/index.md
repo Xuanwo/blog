@@ -4,7 +4,7 @@ categories: Daily
 ---
 # 2014年10月
 ## 代码
-<i class="fa fa-square-o"></i>  Codeforces以前的contest
+<i class="fa fa-square-o"></i>  Codeforces以前的contest `已完成至：1`
 <i class="fa fa-square-o"></i>  CodeVS上黄金，2333
 <i class="fa fa-check-square-o"></i>  鞍山区域赛
 
