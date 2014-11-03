@@ -1,4 +1,4 @@
-title: Codeforces Beta Round 3 C
+title: Codeforces Beta Round 3 A Shortest path of the king
 date: 2014-11-3 11:03:26
 tags: [ACM, Codeforces, C/C++, 模拟]
 categories: Exercise
