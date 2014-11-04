@@ -1,5 +1,5 @@
 title: CF拉练第一场
-date: 2014-10-27 16:13:36
+date: 2014-11-4 10:28:10
 tags: [ACM, Contest, C/C++]
 categories: Exercise
 toc: true
@@ -14,7 +14,7 @@ http://acm.hust.edu.cn/vjudge/contest/view.action?cid=61581#overview
 # 分题讲解
 ## A题（纯水题）
 通过简单的分析就能搞定，一道比较简单的贪心。
-http://xuanwo.org/2014/11/03/CF-3B/
+http://xuanwo.org/2014/11/03/CF-4B/
 
 
 ## B题（DP）
