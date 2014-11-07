@@ -66,7 +66,9 @@ http://xuanwo.org/2014/11/05/UVa-10954-Add-All/
 貌似是第一次接触分治，这种把大问题分解为多个小问题的思想需要掌握。
 http://xuanwo.org/2014/11/05/UVa-12627-Erratic-Expansion/
 
-## M题
+## M题（模拟，剪枝）
+很多人过的题，但是我没想出来怎么敲。
+http://xuanwo.org/2014/11/06/UVa-11093-Just-Finish-it-up/
 
 ## N题
 
