@@ -1,4 +1,4 @@
-title: Codeforces Beta Round 9 A Die Roll
+title: Codeforces Beta Round 9 A Die Roll (Div.2 Only)
 date: 2014-11-13 15:29:45
 tags: [ACM, Codeforces, C/C++, 模拟]
 categories: Exercise
