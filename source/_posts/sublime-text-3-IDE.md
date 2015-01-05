@@ -128,17 +128,19 @@ Release Date: 7 May 2013
 
 
 # 运行环境
-以MinGW为例，其他编译系统类似
-## 下载安装MinGW
+## Windows下
+`以MinGW为例，其他编译系统类似`
+### 下载安装MinGW
 有被墙的风险，如果不能访问，请在某管，某三的软件管家中搜索MinGW
 [http://sourceforge.net/projects/mingw/files/](http://sourceforge.net/projects/mingw/files/)
-## 添加系统环境变量
+### 添加系统环境变量
 默认条件下是`C:/MinGW/bin`，如果不是请自行修改，将其添加到PATH之后，记得不要忘记分号。如果不知道如何修改系统环境变量，请参考[http://www.java.com/zh_CN/download/help/path.xml](http://www.java.com/zh_CN/download/help/path.xml "如何设置或更改 PATH 系统变量？")
 
 运行CMD(开始-> 运行-> Cmd)，输入：mingw-get后则会运行MinGW界面，这里说明变量设置成功。然后输入：g++ -v，用于检测安装g++有没有成功。
-## 建立新的编译系统
-Tools –> Build System –> New Build System
-### Windows下
+### 建立新的编译系统
+
+`Tools –> Build System –> New Build System`
+
 在打开的页面中粘贴以下代码
 ```
 {
@@ -161,7 +163,12 @@ Tools –> Build System –> New Build System
 
 如果复制出现问题，请访问[https://gist.github.com/Xuanwo/0cb4bce76929ed764daf](https://gist.github.com/Xuanwo/0cb4bce76929ed764daf)
 
-### Linux下
+## Linux下
+``以Ubuntu为例，系统不同请自行修改终端参数。``
+建立新的编译系统
+
+`Tools –> Build System –> New Build System`
+
 在打开的页面中粘贴以下代码
 ```
 {
@@ -328,3 +335,4 @@ using namespace std;
  - 2014年08月16日 添加了关于Snippet功能和快速插入时间插件的介绍。
  - 2014年08月22日 添加了关于备份Sublime设定的介绍
  - 2014年09月01日 更新Sublime Text 3至3065版本，增加Changelog，修改下载地址。
+ - 2015年01月06日 采纳读者建议，修改了编译系统部分的文字，现在更加容易懂了~
