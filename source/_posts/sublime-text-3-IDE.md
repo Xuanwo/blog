@@ -8,7 +8,7 @@ toc: true
 # 前言
 我是一只有着小小的强迫症的苦逼菜鸟，敲代码追求一个爽快。原来一直在用Code::Blocks，虽然说是用C++开发的，效率很高，但是每次启动的时候总是要盯着它不怎么样的启动页看很久，不开心= =。这两天开始接触Sublime Text，顿时被迷住了，不管不顾的决定把它改造成一个狂霸酷拽屌的IDE，所以，走你～～
 
-<!--  more -->
+<!-- more -->
 ----------
 
 
@@ -138,9 +138,7 @@ Release Date: 7 May 2013
 
 运行CMD(开始-> 运行-> Cmd)，输入：mingw-get后则会运行MinGW界面，这里说明变量设置成功。然后输入：g++ -v，用于检测安装g++有没有成功。
 ### 建立新的编译系统
-
 `Tools –> Build System –> New Build System`
-
 在打开的页面中粘贴以下代码
 ```
 {
@@ -166,9 +164,7 @@ Release Date: 7 May 2013
 ## Linux下
 ``以Ubuntu为例，系统不同请自行修改终端参数。``
 建立新的编译系统
-
 `Tools –> Build System –> New Build System`
-
 在打开的页面中粘贴以下代码
 ```
 {
