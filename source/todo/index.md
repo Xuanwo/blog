@@ -1,6 +1,5 @@
 ﻿title: 计划要做的事
 layout: page
-categories: Daily
 ---
 # 2015年01月
 

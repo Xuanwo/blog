@@ -1,6 +1,5 @@
 title: 我的作品
 layout: page
-categories: Daily
 ---
 # 插件
 - [SublimeForWiz](http://github.com/Xuanwo/SublimeForWiz)

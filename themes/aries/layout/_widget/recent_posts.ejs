@@ -1,0 +1,18 @@
+<% if (site.posts.length){ %>
+<% 
+	post_length = 10; 
+	if (site.categories.length > post_length) {
+		post_length = site.categories.length;
+	}
+%>
+<div class="widget tag0">
+  <h3 class="title"><%= __('recent_posts') %></h3>
+  <ul class="entry">
+    <% site.posts.sort('date', -1).limit(post_length).each(function(post){ %>
+      <li>
+        <a href="<%= config.root %><%= post.path %>"><%= post.title %></a>
+      </li>
+    <% }); %>
+  </ul>
+</div>
+<% } %>

@@ -1,6 +1,5 @@
 ﻿title: 关于我
 layout: page
-categories: Daily
 ---
 
 # 现状
