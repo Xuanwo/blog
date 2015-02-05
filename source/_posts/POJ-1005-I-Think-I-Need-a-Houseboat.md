@@ -1,6 +1,6 @@
 ﻿title: POJ 1005 I Think I Need a Houseboat
 date: 2014-07-06 19:04:08
-tags: [ACM, POJ, 模拟, C/C++]
+tags: [ACM, POJ, 模拟, C]
 categories: Exercise
 toc: true
 ---

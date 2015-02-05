@@ -1,6 +1,6 @@
 title: POJ 2249 Binomial Showdown
 date: 2014-08-16 14:59:02
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

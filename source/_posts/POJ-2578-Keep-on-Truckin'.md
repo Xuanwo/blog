@@ -1,6 +1,6 @@
 title: POJ 2578 Keep on Truckin'
 date: 2014-08-17 16:24:37
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

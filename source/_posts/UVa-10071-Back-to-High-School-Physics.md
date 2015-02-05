@@ -1,6 +1,6 @@
 title: UVa 10071 Back to High School Physics
 date: 2014-10-29 20:09:12
-tags: [ACM, UVa, C/C++, 简单]
+tags: [ACM, UVa, C, 简单]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 ﻿title: POJ 1323 Game Prediction
 date: 2014-08-12 04:19:00
-tags: [ACM, POJ, C/C++, 贪心]
+tags: [ACM, POJ, C, 贪心]
 categories: Exercise
 toc: true
 ---

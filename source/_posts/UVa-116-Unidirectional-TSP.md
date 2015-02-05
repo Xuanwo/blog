@@ -1,6 +1,6 @@
 title: UVa 116 Unidirectional TSP
 date: 2014-11-16 15:39:47
-tags: [ACM, UVa, C/C++, DP]
+tags: [ACM, UVa, C, DP]
 categories: Exercise
 toc: true
 ---

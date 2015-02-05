@@ -1,6 +1,6 @@
 title: POJ 3094 Quicksum
 date: 2014-08-21 09:54:26
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

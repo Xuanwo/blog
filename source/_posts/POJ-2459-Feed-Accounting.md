@@ -1,6 +1,6 @@
 title: POJ 2459 Feed Accounting
 date: 2014-08-22 22:12:13
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

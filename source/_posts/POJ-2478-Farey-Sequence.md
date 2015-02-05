@@ -1,6 +1,6 @@
 title: POJ 2478 Farey Sequence
 date: 2014-08-16 23:33:37
-tags: [ACM, POJ, C/C++, 数论]
+tags: [ACM, POJ, C, 数论]
 categories: Exercise
 toc: true
 ---

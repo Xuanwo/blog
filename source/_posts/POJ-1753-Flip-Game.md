@@ -1,6 +1,6 @@
 ﻿title: POJ 1753 Flip Game
 date: 2014-07-12 13:48:16
-tags: [ACM, POJ, C/C++, 枚举, DFS]
+tags: [ACM, POJ, C, 枚举, DFS]
 categories: Exercise
 toc: true
 ---

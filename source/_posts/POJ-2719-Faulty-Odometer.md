@@ -1,6 +1,6 @@
 title: POJ 2719 Faulty Odometer
 date: 2014-08-18 22:01:00
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

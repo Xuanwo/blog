@@ -1,6 +1,6 @@
 title: POJ 3720 Occurrence of Digits
 date: 2014-08-18 22:23:53
-tags: [ACM, POJ, C/C++, 模拟]
+tags: [ACM, POJ, C, 模拟]
 categories: Exercise
 toc: true
 ---

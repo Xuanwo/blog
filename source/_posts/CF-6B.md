@@ -1,6 +1,6 @@
 title: Codeforces Beta Round 6 B President's Office (Div.2 Only)
 date: 2014-11-22 17:59:29
-tags: [ACM, Codeforces, C/C++, 暴力]
+tags: [ACM, Codeforces, C, 暴力]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 title: POJ 2840 Big Clock
 date: 2014-08-18 22:08:11
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

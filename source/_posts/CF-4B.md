@@ -1,6 +1,6 @@
 title: Codeforces Beta Round 4 B Before an Exam
 date: 2014-11-3 19:13:39
-tags: [ACM, Codeforces, C/C++, 简单]
+tags: [ACM, Codeforces, C, 简单]
 categories: Exercise
 toc: true
 ---

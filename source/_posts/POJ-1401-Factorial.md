@@ -1,6 +1,6 @@
 ﻿title: POJ 1401 Factorial
 date: 2014-07-23 14:48:05
-tags: [ACM, POJ, C/C++, 数论]
+tags: [ACM, POJ, C, 数论]
 categories: Exercise
 toc: true
 ---

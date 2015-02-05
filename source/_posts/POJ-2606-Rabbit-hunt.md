@@ -1,6 +1,6 @@
 title: POJ 2606 Rabbit hunt
 date: 2014-08-17 16:50:58
-tags: [ACM, POJ, C/C++, 几何]
+tags: [ACM, POJ, C, 几何]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 title: CodeVS 1012 最大公约数和最小公倍数问题
 date: 2014-11-1 10:17:25
-tags: [ACM, CodeVS, C/C++, 数论]
+tags: [ACM, CodeVS, C, 数论]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 title: UVa 12174 Shuffle
 date: 2014-11-4 22:19:47
-tags: [ACM, UVa, C/C++, 模拟]
+tags: [ACM, UVa, C, 模拟]
 categories: Exercise
 toc: true
 ---

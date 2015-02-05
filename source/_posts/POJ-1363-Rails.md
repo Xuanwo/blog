@@ -1,6 +1,6 @@
 ﻿title: POJ 1363 Rails
 date: 2014-08-12 04:07:00
-tags: [ACM, POJ, C/C++, STL, Stack]
+tags: [ACM, POJ, C, STL, Stack]
 categories: Exercise
 toc: true
 ---

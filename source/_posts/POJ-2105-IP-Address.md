@@ -1,6 +1,6 @@
 title: POJ 2105 IP Address
 date: 2014-08-16 00:24:31
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

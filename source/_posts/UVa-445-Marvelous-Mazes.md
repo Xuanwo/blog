@@ -1,6 +1,6 @@
 title: UVa 445 Marvelous Mazes
 date: 2014-11-1 09:47:48
-tags: [ACM, UVa, C/C++, 字符串, 简单]
+tags: [ACM, UVa, C, 字符串, 简单]
 categories: Exercise
 toc: true
 ---

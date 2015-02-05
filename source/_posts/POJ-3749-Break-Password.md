@@ -1,6 +1,6 @@
 title: POJ 3749 破译密码
 date: 2014-08-21 22:08:38
-tags: [ACM, POJ, C/C++, 字符串]
+tags: [ACM, POJ, C, 字符串]
 categories: Exercise
 toc: true
 ---

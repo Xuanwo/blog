@@ -1,6 +1,6 @@
 title: UVa 414 Machined Surfaces
 date: 2014-10-31 17:13:19
-tags: [ACM, UVa, C/C++, 简单, 模拟]
+tags: [ACM, UVa, C, 简单, 模拟]
 categories: Exercise
 toc: true
 ---

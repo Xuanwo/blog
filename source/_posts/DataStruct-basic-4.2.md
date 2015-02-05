@@ -1,6 +1,6 @@
 title: 4.2图的存储结构
 date: 2014-08-13 20:19:00
-tags: [ACM, 数据结构, C/C++, Graph, 基础]
+tags: [ACM, 数据结构, C, Graph, 基础]
 categories: Learn
 toc: true
 ---

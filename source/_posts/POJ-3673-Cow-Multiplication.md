@@ -1,6 +1,6 @@
 title: POJ 3673 Cow Multiplication
 date: 2014-08-21 21:59:04
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 ﻿title: POJ 1543 Perfect Cubes
 date: 2014-08-03 11:36:27
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

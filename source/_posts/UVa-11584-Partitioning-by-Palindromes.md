@@ -1,6 +1,6 @@
 title: UVa 11584 Partitioning by Palindromes
 date: 2014-11-15 11:33:53
-tags: [ACM, UVa, C/C++, DP]
+tags: [ACM, UVa, C, DP]
 categories: Exercise
 toc: true
 ---

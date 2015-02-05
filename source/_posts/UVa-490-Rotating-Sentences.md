@@ -1,6 +1,6 @@
 title: UVa 490 Rotating Sentences
 date: 2014-11-1 09:21:56
-tags: [ACM, UVa, C/C++, 字符串, 简单]
+tags: [ACM, UVa, C, 字符串, 简单]
 categories: Exercise
 toc: true
 ---

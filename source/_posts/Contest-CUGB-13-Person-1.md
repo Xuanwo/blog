@@ -1,6 +1,6 @@
 title: 13级个人赛第一场
 date: 2014-11-4 10:28:10
-tags: [ACM, Contest, C/C++]
+tags: [ACM, Contest, C]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 title: POJ 2316 SPIN
 date: 2014-08-16 00:40:30
-tags: [ACM, POJ, C/C++, ]
+tags: [ACM, POJ, C, ]
 categories: Exercise
 toc: true
 ---

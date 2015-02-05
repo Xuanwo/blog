@@ -1,6 +1,6 @@
 title: POJ 2328 Guessing Game
 date: 2014-08-22 22:28:14
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

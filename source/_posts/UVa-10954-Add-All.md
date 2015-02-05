@@ -1,6 +1,6 @@
 title: UVa 10954 Add All
 date: 2014-11-5 20:06:21
-tags: [ACM, UVa, C/C++, 简单]
+tags: [ACM, UVa, C, 简单]
 categories: Exercise
 toc: true
 ---

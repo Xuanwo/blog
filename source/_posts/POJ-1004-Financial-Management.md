@@ -1,6 +1,6 @@
 ﻿title: POJ 1004 Financial Management
 date: 2014-07-04 18:41:50
-tags: [ACM, POJ, 模拟, C/C++]
+tags: [ACM, POJ, 模拟, C]
 categories: Exercise
 toc: true
 ---

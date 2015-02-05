@@ -1,6 +1,6 @@
 title: POJ 1969 Count on Canton
 date: 2014-08-15 19:28:52
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

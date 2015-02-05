@@ -1,6 +1,6 @@
 title: POJ 3979 分数加减法
 date: 2014-08-21 23:37:02
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

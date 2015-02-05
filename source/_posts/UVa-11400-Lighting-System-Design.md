@@ -1,6 +1,6 @@
 title: UVa 11400 Lighting System Design
 date: 2014-11-16 16:33:57
-tags: [ACM, UVa, C/C++, DP]
+tags: [ACM, UVa, C, DP]
 categories: Exercise
 toc: true
 ---

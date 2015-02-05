@@ -1,6 +1,6 @@
 title: POJ 2141 Message Decowding
 date: 2014-08-16 00:50:06
-tags: [ACM, POJ, C/C++, 字符串]
+tags: [ACM, POJ, C, 字符串]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 title: POJ 2371 Questions and answers
 date: 2014-08-16 15:35:31
-tags: [ACM, POJ, C/C++, STL, 排序]
+tags: [ACM, POJ, C, STL, 排序]
 categories: Exercise
 toc: true
 ---

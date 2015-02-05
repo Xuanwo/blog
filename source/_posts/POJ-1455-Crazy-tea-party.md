@@ -1,6 +1,6 @@
 ﻿title: POJ 1455 Crazy tea party
 date: 2014-08-12 04:37:00
-tags: [ACM, POJ, C/C++, 数论]
+tags: [ACM, POJ, C, 数论]
 categories: Exercise
 toc: true
 ---

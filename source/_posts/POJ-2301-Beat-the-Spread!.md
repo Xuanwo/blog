@@ -1,6 +1,6 @@
 title: POJ 2301 Beat the Spread!
 date: 2014-08-16 15:19:47
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 title: POJ 3302 Subsequence
 date: 2014-08-22 17:21:34
-tags: [ACM, POJ, C/C++, 字符串]
+tags: [ACM, POJ, C, 字符串]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 ﻿title: POJ 2714 Random Walk
 date: 2014-07-15 15:55:21
-tags: [ACM, POJ, C/C++, 枚举]
+tags: [ACM, POJ, C, 枚举]
 categories: Exercise
 toc: true
 ---

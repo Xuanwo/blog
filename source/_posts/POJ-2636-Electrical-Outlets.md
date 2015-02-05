@@ -1,6 +1,6 @@
 title: POJ 2636 Electrical Outlets
 date: 2014-08-22 21:32:53
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

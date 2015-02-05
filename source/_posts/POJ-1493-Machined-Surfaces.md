@@ -1,6 +1,6 @@
 ﻿title: POJ 1493 Machined Surfaces
 date: 2014-07-25 02:59:11
-tags: [ACM, POJ, C/C++, 字符串]
+tags: [ACM, POJ, C, 字符串]
 categories: Exercise
 toc: true
 ---

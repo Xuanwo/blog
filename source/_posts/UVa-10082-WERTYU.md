@@ -1,6 +1,6 @@
 title: UVa 10082 WERTYU
 date: 2014-11-25 10:34:01
-tags: [ACM, UVa, C/C++, 字符串]
+tags: [ACM, UVa, C, 字符串]
 categories: Exercise
 toc: true
 ---

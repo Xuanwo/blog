@@ -1,6 +1,6 @@
 ﻿title: POJ 1014 Dividing
 date: 2014-07-16 15:25:02
-tags: [ACM, POJ, C/C++, DFS]
+tags: [ACM, POJ, C, DFS]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 title: POJ 2575 Jolly Jumpers
 date: 2014-08-22 21:37:59
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

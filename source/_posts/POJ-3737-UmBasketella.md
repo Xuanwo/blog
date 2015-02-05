@@ -1,6 +1,6 @@
 title: POJ 3737 UmBasketella
 date: 2014-08-18 22:12:24
-tags: [ACM, POJ, C/C++, 几何]
+tags: [ACM, POJ, C, 几何]
 categories: Exercise
 toc: true
 ---

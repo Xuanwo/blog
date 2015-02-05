@@ -1,6 +1,6 @@
 title: Codeforces Beta Round 5 A Chat Server's Outgoing Traffic
 date: 2014-11-5 14:41:32
-tags: [ACM, Codeforces, C/C++, 字符串]
+tags: [ACM, Codeforces, C, 字符串]
 categories: Exercise
 toc: true
 ---

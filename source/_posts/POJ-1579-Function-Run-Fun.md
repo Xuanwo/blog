@@ -1,6 +1,6 @@
 ﻿title: POJ 1579 Function Run Fun
 date: 2014-08-03 12:00:24
-tags: [ACM, POJ, C/C++, 递归]
+tags: [ACM, POJ, C, 递归]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 ﻿title: POJ 1051 P,MTHBGWB
 date: 2014-08-12 00:31:00
-tags: [ACM, POJ, C/C++, 字符串]
+tags: [ACM, POJ, C, 字符串]
 categories: Exercise
 toc: true
 ---

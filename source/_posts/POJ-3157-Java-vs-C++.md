@@ -1,6 +1,6 @@
 title: POJ 3157 Java vs C++
 date: 2014-08-21 19:16:49
-tags: [ACM, POJ, C/C++, 字符串]
+tags: [ACM, POJ, C, 字符串]
 categories: Exercise
 toc: true
 ---

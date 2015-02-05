@@ -1,6 +1,6 @@
 title: POJ 2509 Peter's smokes
 date: 2014-08-17 16:08:27
-tags: [ACM, POJ, C/C++, 模拟]
+tags: [ACM, POJ, C, 模拟]
 categories: Exercise
 toc: true
 ---

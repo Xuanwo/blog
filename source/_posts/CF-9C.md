@@ -1,6 +1,6 @@
 title: Codeforces Beta Round 9 C Hexadecimal's Numbers (Div.2 Only)
 date: 2014-11-16 11:05:48
-tags: [ACM, Codeforces, C/C++, 数论]
+tags: [ACM, Codeforces, C, 数论]
 categories: Exercise
 toc: true
 ---

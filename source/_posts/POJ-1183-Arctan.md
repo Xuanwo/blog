@@ -1,6 +1,6 @@
 ﻿title: POJ 1183 反正切函数的应用
 date: 2014-08-12 01:01:00
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 ﻿title: POJ 1247 Magnificent Meatballs
 date: 2014-07-23 02:03:12
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

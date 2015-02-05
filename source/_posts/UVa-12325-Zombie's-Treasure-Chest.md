@@ -1,6 +1,6 @@
 title: UVa 12325 Zombie's Treasure Chest
 date: 2014-10-27 16:49:40
-tags: [ACM, UVa, C/C++, ]
+tags: [ACM, UVa, C, ]
 categories: Exercise
 toc: true
 ---

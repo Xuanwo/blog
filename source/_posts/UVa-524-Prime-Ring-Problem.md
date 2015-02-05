@@ -1,6 +1,6 @@
 title: UVa 524 Prime Ring Problem
 date: 2014-11-2 13:47:34
-tags: [ACM, UVa, C/C++, DFS]
+tags: [ACM, UVa, C, DFS]
 categories: Exercise
 toc: true
 ---

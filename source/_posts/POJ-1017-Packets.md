@@ -1,6 +1,6 @@
 ﻿title: POJ 1017 Packets
 date: 2014-07-13 16:42:02
-tags: [ACM, POJ, C/C++, 简单计算]
+tags: [ACM, POJ, C, 简单计算]
 categories: Exercise
 toc: true
 ---

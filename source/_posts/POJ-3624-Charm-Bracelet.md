@@ -1,6 +1,6 @@
 title: POJ 3624 Charm Bracelet
 date: 2014-10-5 10:52:48
-tags: [ACM, POJ, C/C++, DP, 01背包]
+tags: [ACM, POJ, C, DP, 01背包]
 categories: Exercise
 toc: true
 ---

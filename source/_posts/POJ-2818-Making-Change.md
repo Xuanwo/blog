@@ -1,6 +1,6 @@
 ﻿title: POJ 2818 Making Change
 date: 2014-07-15 16:50:50
-tags: [ACM, POJ, C/C++, DFS]
+tags: [ACM, POJ, C, DFS]
 categories: Exercise
 toc: true
 ---

@@ -1,6 +1,6 @@
 title: UVa 12563 Jin Ge Jin Qu hao
 date: 2014-11-16 16:16:48
-tags: [ACM, UVa, C/C++, DP]
+tags: [ACM, UVa, C, DP]
 categories: Exercise
 toc: true
 ---
