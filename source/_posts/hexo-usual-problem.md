@@ -193,7 +193,7 @@ iption: Description\nread_more: Read More\n\u0000',
 *额，不知道是不是有人跟我一样有一个库没有`README.md`文件就浑身不舒服的强迫症= =*
 正如大家所知道的，在source文件夹下的所有md文件都会被hexo渲染成html文件，导致`README.md`文件不能好好的放在里面了，即使是添加了`layout: false`依然没有用。
 
-不过现在有一个另外的好办法，那就是利用主题的source目录，也就是`themes/themes-name/source`。因为这个文件夹里面的所有文件都会被复制到网站的根目录中去，也就是说，如果在里面放上`README.md`，就可以正常的存在于网站的主目录了。
+不过现在有一个另外的好办法，那就是利用主题的source目录，也就是`themes/themes-name/source`。因为这个文件夹里面的所有文件都会被复制到网站的根目录中去，也就是说，如果在里面放上`README`，就可以正常的存在于网站的主目录了。
 
 同样的，对于一些需要在网站下添加html文件的需求也可以这样来达成。比如百度或者谷歌在验证站长权限的时候，通常都会要求在主目录下添加一个html文件。同样的，只要把这个文件放在`themes/themes-name/source`就可以搞定了。
 
