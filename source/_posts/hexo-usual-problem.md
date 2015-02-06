@@ -215,7 +215,7 @@ Hexo默认支持Disque，打开`_config.yml`，在`disqus_shortname:`后面输�
 ```
 <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 <script type="text/javascript">
-var duoshuoQuery = {short_name:"xuanwo"};
+var duoshuoQuery = {short_name:"yourshortname"};
 	(function() {
 		var ds = document.createElement('script');
 		ds.type = 'text/javascript';ds.async = true;
@@ -231,11 +231,62 @@ var duoshuoQuery = {short_name:"xuanwo"};
 在`article.ejs`模块中输入如下代码：
 ```
 <% if (page.comments){ %>
-        <div class="ds-thread" data-thread-key="<%- item.path %>"></div>
+        <div class="ds-thread" data-thread-key="<%- page.path %>" data-title=<%- page.title %> data-url=<%- page.permalink %>>
 <% } %>
 ```
 
 ## 如何避免在Deploy时输入密码
+### 使用Github客户端
+安装好Github客户端之后，使用Github客户端内置的Git Shell进行hexo的部署操作。
+### 自行生成SSH key
+使用Github客户端可以免去输入密码操作的原因就是客户端在本地生成了一个SSH key并且添加到了Github网站中。不喜欢使用Github客户端的童鞋可以参考下面的流程自行生成SSH key。
+
+打开Git Bash，并且输入：
+`ls -al ~/.ssh`
+这个命令会列出你`.ssh`账户中已经存在的SSH key，如果之前没有设置过，一般都是没有。
+然后输入：
+`ssh-keygen -t rsa -C "your_email@example.com"`
+这个命令将会生成一个以`your_email@example.com`为标签的ssh key，然后bash中会显示：
+```
+Generating public/private rsa key pair.
+Enter file in which to save the key (/c/Users/you/.ssh/id_rsa): [Press enter]
+```
+直接回车，然后出现：
+```
+Enter passphrase (empty for no passphrase): [Type a passphrase]
+Enter same passphrase again: [Type passphrase again]
+```
+因为追求操作方便，我们不打算在deploy的时候输入这个`passphrase`，所以直接回车两次设为空。然后你会看到：
+```
+Your identification has been saved in ~/.ssh/id_rsa.
+Your public key has been saved in ~/.ssh/id_rsa.pub.
+The key fingerprint is:
+01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db your_email@example.com
+```
+下一步输入：
+`ssh-agent -s`
+如果出现类似`Agent pid XXXX`这样的字样，则跳过下一步，否则输入：
+`eval `ssh-agent -s``
+直到出现`Agent pid XXXX`这样的提示之后，输入：
+`ssh-add ~/.ssh/id_rsa`
+这样，你成功的在本地生成了一个SSH key，下面将这个key添加到github网站。
+打开[https://github.com/settings/ssh](https://github.com/settings/ssh)，点击`Add SSH Key`，复制`id_rsa.pub`中的所有内容到`Key`框中，在`Title`框中输入方便自己记忆的名字（建议输入能让自己明白是哪台电脑的名字，方便以后管理）。
+当网页显示添加成功后，就已经完成了全部的操作。
+下面进行一些测试，同样是打开Git Bash，输入：
+`ssh -T git@github.com`
+bash中会显示如下字样：
+```
+The authenticity of host 'github.com (207.97.227.239)' can't be established.
+RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
+Are you sure you want to continue connecting (yes/no)?
+```
+输入yes之后，计算机会自动将`github.com`列入已知的host，然后会出现如下提示：
+```
+Hi username! You've successfully authenticated, but GitHub does not
+provide shell access.
+```
+如果成功看见，说明你已经配置好了，快去享受爽快的hexo一键部署吧；
+如果出现任何错误提示，请仔细检查自己的操作，或者将错误信息发给我。
 
 # 贡献者
 - [@Xuanwo](http://xuanwo.org/)
@@ -249,3 +300,4 @@ var duoshuoQuery = {short_name:"xuanwo"};
 - 2014年09月09日 新增Hexo版本回退，Hexo所有命令报错。
 - 2014年09月23日 新增Partial没有转义
 - 2014年09月24日 新增添加社会化评论
+- 2015年02月06日 新增本地添加SSH key，修复部分笔误
