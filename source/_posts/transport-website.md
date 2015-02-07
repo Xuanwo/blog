@@ -1,7 +1,7 @@
 title: 跨城公交网站的想法
 date: 2014-09-10 09:49:15
 tags: [Web]
-categories: Work
+categories: Opinion
 toc: true
 ---
 # 功能痛点

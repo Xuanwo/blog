@@ -1,7 +1,7 @@
 title: 世界——我的游戏狂想曲
 date: 2014-09-07 05:20:01
 tags: [Games]
-categories: Work
+categories: Opinion
 toc: true
 ---
 # 前言
