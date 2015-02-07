@@ -11,23 +11,32 @@
     </nav>
   <% } %>
 <% } else { %>
-  <% var last; %>
-  <% page.posts.each(function(post, i){ %>
-    <% var year = post.date.year(); %>
-    <% if (last != year){ %>
-      <% if (last != null){ %>
-        </div></section>
-      <% } %>
-      <% last = year; %>
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="<%- url_for('archives/' + year) %>" class="archive-year"><%= year %></a>
+  <div class="archive">
+    <% page.posts.each(function(item){ %>
+      <article class="<%= item.layout %> post">
+        <footer class="entry-meta-header">
+          <span class="meta-elements date">
+            <time datetime="<%= item.date.toDate().toISOString() %>"><a href="<%- config.root %><%- item.path %>"><%= item.date.format(config.date_format) %></a></time>
+          </span>
+        </footer>
+        <div class="entry-content">
+          <header>
+            <% if (item.title){ %>
+              <% if (item.link){ %>
+                <% if (item.title){ %>
+                  <h1 class="title link"><a href="<%- item.link %>" target="_blank"><%= item.title %></a></h1>
+                <% } else { %>
+                  <h1 class="title link"><a href="<%- item.link %>" target="_blank"><%= item.link %></a></h1>
+                <% } %>
+              <% } else { %>
+                <h1><a href="<%- config.root %><%- item.path %>"><%= item.title %></a></h1>
+              <% } %>
+            <% } else { %>
+                <h1>(No title)</h1>
+            <% } %>
+          </header>
         </div>
-        <div class="archives">
-    <% } %>
-    <%- partial('archive-post', {post: post, even: i % 2 == 0}) %>
-  <% }) %>
-  <% if (page.posts.length){ %>
-    </div></section>
-  <% } %>
+      </article>
+    <% }); %>
+  </div>
 <% } %>
