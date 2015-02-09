@@ -17,7 +17,7 @@ toc: true
 <!-- more -->
 
 # 解决方案
-[超星学术视频下载处理一条龙](https://app.yinxiang.com/shard/s10/nl/6685310/b24ae78d-adf2-4d23-ae35-279c1962e79d)
+[超星学术视频下载处理一条龙](http://disk.xuanwo.org/public.php?service=files&t=e0a53590668ea7605f87a056ea3db288)
 
 ---
 
