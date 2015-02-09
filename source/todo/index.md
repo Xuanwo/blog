@@ -1,28 +1,6 @@
 ﻿title: 计划要做的事
-layout: false
+layout: page
 ---
-
-<div id="timeline-embed"></div>
-<script type="text/javascript">
-var timeline_config = {
-    width:  '100%',
-    height: '600',
-    source: '/todo/todo.json',
-    embed_id:'timeline-embed',   
-    start_at_end:false,  
-    start_at_slide:'4',    
-    start_zoom_adjust:'3',    
-    hash_bookmark:true,   
-    font:'Bevan-PotanoSans', 
-    debug:true,   
-    lang:'zh-cn',
-    maptype:'watercolor', 
-    css:'/timeline/css/timeline.css',
-    js:'/timeline/js/timeline-min.js'
-}
-</script>
-<script type="text/javascript" src="/timeline/js/storyjs-embed.js"></script>
-
 # 2015年01月
 
 
