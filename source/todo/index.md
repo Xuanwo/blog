@@ -2,7 +2,7 @@
 layout: page
 ---
 
-<div id="timeline-embed"></div><script type="text/javascript">var timeline_config = {width:  '100%',height: '600',source: '/todo/todo.json',embed_id:           'timeline-embed',   start_at_end:       false,  start_at_slide:     '4',    start_zoom_adjust:  '3',    hash_bookmark:      true,   font:   'Bevan-PotanoSans', debug:  true,   lang:   'zh-cn',maptype:'watercolor',       css:    '/timeline/timeline.css',js:     '/timeline/timeline-min.js'           }</script><script type="text/javascript" src="/timeline/storyjs-embed.js"></script>
+<div id="timeline-embed"><script type="text/javascript">var timeline_config = {width:  '100%',height: '600',source: '/todo/todo.json',embed_id:           'timeline-embed',   start_at_end:       false,  start_at_slide:     '4',    start_zoom_adjust:  '3',    hash_bookmark:      true,   font:   'Bevan-PotanoSans', debug:  true,   lang:   'zh-cn',maptype:'watercolor',       css:    '/timeline/timeline.css',js:     '/timeline/timeline-min.js'           }</script><script type="text/javascript" src="/timeline/storyjs-embed.js"></script></div>
 
 # 2015年01月
 
