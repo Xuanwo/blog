@@ -17,11 +17,11 @@ var timeline_config = {
     debug:true,   
     lang:'zh-cn',
     maptype:'watercolor', 
-    css:'/timeline/timeline.css',
-    js:'/timeline/timeline-min.js'
+    css:'/timeline/css/timeline.css',
+    js:'/timeline/js/timeline-min.js'
 }
 </script>
-<script type="text/javascript" src="/timeline/storyjs-embed.js"></script>
+<script type="text/javascript" src="/timeline/js/storyjs-embed.js"></script>
 
 # 2015年01月
 
