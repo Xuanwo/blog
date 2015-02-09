@@ -17,11 +17,11 @@ layout: page
             debug:              true,                           //OPTIONAL DEBUG TO CONSOLE
             lang:               'zh-cn',                        //OPTIONAL LANGUAGE
             maptype:            'watercolor',                   //OPTIONAL MAP STYLE
-            css:                '/css/timeline.css',            //OPTIONAL PATH TO CSS
-            js:                 '/js/timeline-min.js'           //OPTIONAL PATH TO JS
+            css:                '/timeline/timeline.css',            //OPTIONAL PATH TO CSS
+            js:                 '/timeline/timeline-min.js'           //OPTIONAL PATH TO JS
         }
     </script>
-    <script type="text/javascript" src="/js/storyjs-embed.js"></script>
+    <script type="text/javascript" src="/timeline/storyjs-embed.js"></script>
 
 # 2015年01月
 
