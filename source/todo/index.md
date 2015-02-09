@@ -1,5 +1,5 @@
 ﻿title: 计划要做的事
-layout: false
+layout: page
 ---
 
 <div id="timeline-embed"></div>
@@ -17,8 +17,8 @@ layout: false
             debug:              true,                           //OPTIONAL DEBUG TO CONSOLE
             lang:               'zh-cn',                        //OPTIONAL LANGUAGE
             maptype:            'watercolor',                   //OPTIONAL MAP STYLE
-            css:                '/css/timeline.css',     //OPTIONAL PATH TO CSS
-            js:                 '/js/timeline-min.js'    //OPTIONAL PATH TO JS
+            css:                '/css/timeline.css',            //OPTIONAL PATH TO CSS
+            js:                 '/js/timeline-min.js'           //OPTIONAL PATH TO JS
         }
     </script>
     <script type="text/javascript" src="/js/storyjs-embed.js"></script>
