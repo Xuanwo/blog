@@ -1,13 +1,14 @@
-﻿title: POJ 
-date: 2014-09-03 
-tags: [ACM, POJ, C/C++, ]
+title: CodeVS 
+date: 2014-10-14 17:00:08
+tags: [ACM, CodeVS, C, ]
 categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://poj.org/problem?id=
+源地址：
 
 # 理解
+
 
 <!-- more -->
 
@@ -18,4 +19,4 @@ toc: true
 ```
 
 # 更新日志
-- 2014年09月03日 已AC。
+-2014年11月7日 已AC。

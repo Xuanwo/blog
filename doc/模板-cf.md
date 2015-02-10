@@ -1,6 +1,6 @@
-title: UVa 
-date: 2014-10-27 16:13:36
-tags: [ACM, UVa, C/C++, ]
+title: Codeforces Beta Round #
+date: 2014-10-14 17:00:08
+tags: [ACM, Codeforces, C, ]
 categories: Exercise
 toc: true
 ---
@@ -12,10 +12,11 @@ toc: true
 
 <!-- more -->
 
+# 新技能get
+
 # 代码
 ```
 ```
 
 # 更新日志
 - 2014年11月7日 已AC。
-

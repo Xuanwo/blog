@@ -9,11 +9,11 @@ node_js:
 
 before_install:
 - openssl aes-256-cbc -K $encrypted_26b4962af0e7_key -iv $encrypted_26b4962af0e7_iv
-  -in travis.enc -out ~/.ssh/id_rsa -d
+  -in doc/travis.enc -out ~/.ssh/id_rsa -d
 - chmod 600 ~/.ssh/id_rsa
 - eval $(ssh-agent)
 - ssh-add ~/.ssh/id_rsa
-- cp ssh_config ~/.ssh/config
+- cp doc/ssh_config ~/.ssh/config
 - git config --global user.name "Xuanwo"
 - git config --global user.email vars.cn@gmail.com
 
@@ -23,4 +23,5 @@ install:
 
 script:
 - hexo clean
-- hexo d -g
+- hexo g
+- hexo d

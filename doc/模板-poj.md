@@ -1,14 +1,13 @@
-title: Codeforces Beta Round #
-date: 2014-10-14 17:00:08
-tags: [ACM, Codeforces, C/C++, ]
+﻿title: POJ 
+date: 2014-09-03 
+tags: [ACM, POJ, C, ]
 categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：
+源地址：http://poj.org/problem?id=
 
 # 理解
-
 
 <!-- more -->
 
@@ -19,4 +18,4 @@ toc: true
 ```
 
 # 更新日志
-- 2014年11月7日 已AC。
+- 2014年09月03日 已AC。
