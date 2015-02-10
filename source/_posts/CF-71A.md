@@ -1,5 +1,5 @@
 title: Codeforces Beta Round 65 A Way Too Long Words (Div. 2)
-date: 2014-10-14 17:00:08
+date: 2015-2-10 23:11:25
 tags: [ACM, Codeforces, C, 字符串] 
 categories: Exercise
 toc: true
