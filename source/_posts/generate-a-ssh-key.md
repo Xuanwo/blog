@@ -10,6 +10,10 @@ toc: true
 <!-- more -->
 
 # 操作
+
+## 修改_config.yml
+将_config.yml的git信息修改为SSH形式。
+
 ## 列出已存在的SSH Key
 打开Git Bash，并且输入：
 `ls -al ~/.ssh`
@@ -67,3 +71,4 @@ provide shell access.
 
 # 更新日志
 - 2015年02月07日 独立成篇。
+- 2015年02月16日 补充`_config.yml`的修改
