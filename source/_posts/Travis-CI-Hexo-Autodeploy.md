@@ -122,17 +122,20 @@ branches:
 首先在虚拟机中安装Hexo：
 ```
 install:
-- npm install hexo@beta -g
+- npm install hexo-cli -g
+- npm install hexo@beta --save
 - npm install
 ```
 然后执行Hexo的渲染操作
 ```
 script:
 - hexo clean
-- hexo d -g
+- hexo d 
+- hexo g
 ```
 
 到这里，你的Travis CI的持续集成已经配置完毕了，最后的`.travis.yml`文件内容可以参考[.travis.yml样例](https://github.com/Xuanwo/xuanwo.github.io/blob/blog/.travis.yml)。
 
 # 更新日志
 - 2015年02月07日 首次发布，感谢Tommy351
+- 2015年02月16日 跟随Hexo版本更新，修改了相关代码。
