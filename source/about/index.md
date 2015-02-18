@@ -23,10 +23,20 @@ layout: page
 - 熟练操作git，有开源项目合作经验
 - Linux基本配置及shell操作，以及Linux下编程经验
 
+# 正在捣鼓
+- 基于Node.js的各项应用
+- 围绕着VPS的各项功能实现
+- 自己的淘宝小店- -
+
+# 捣鼓成果
+- 基于NodeBB的信息管理专业论坛[信道](http://xg.xuanwo.org/)
+- 独立架设的私人网盘，为本博客提供所有外链文件服务[OwnCloud](disk.xuanwo.org)
+- CF网站的题面抓取工具[CodeforcesGrabber](https://github.com/Xuanwo/CodeforcesGrabber)
+- 为知笔记开源插件[SublimeForWiz](https://github.com/Xuanwo/SublimeForWiz)
+
 # 开源项目
 - [Hexo](https://github.com/hexojs/hexo)社区积极参与者
 - 为知笔记开源用户文档编辑(地址暂时不能透漏，现在还处在规则完善期)
-- 为知笔记开源插件[SublimeForWiz](https://github.com/Xuanwo/SublimeForWiz)作者
 - 开源文档[ACM模板](https://github.com/Xuanwo/ACMTemplate)作者
 - [中国地质大学（北京）在线开源OJ系统Wiki](http://cugbacm.github.io/oj/)维护者
 - 开源文档[程序员编程艺术 — 面试和算法心得](https://github.com/julycoding/The-Art-Of-Programming-By-July)参与者
@@ -45,3 +55,4 @@ layout: page
 - 2014年08月29日 新增关于开源项目的介绍。
 - 2014年09月03日 新增关于个人技能的介绍。
 - 2015年01月07日 更换主题，迁移评论
+- 2015年02月19日 更换主题= =，补充最近的成果
