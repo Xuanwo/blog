@@ -27,12 +27,12 @@ toc: true
 再从147中不断减去21直到小于21（可以减7次，即q2 = 7），没有余数：
 147 = 7 × 21 + 0.
 此时，余数是0，所以1071和462的最大公约数是21，用表格表示如下：
-```
-步骤数	算式	商和余数
-0	1071 = 462 q0 + r0	q0 = 2、r0 = 147
-1	462 = 147 q1 + r1	q1 = 3、r1 = 21
-2	147 = 21 q2 + r2	q2 = 7、r2 = 0
-```
+|步骤数|算式|商和余数|
+|-|-|-|
+|0|1071 = 462 |q0 + r0|	q0 = 2、r0 = 147|
+|1	|462 = 147 q1 + r1|	q1 = 3、r1 = 21|
+|2|	147 = 21 q2 + r2|	q2 = 7、r2 = 0|
+
 ## 算法
 ### 递归
 ```
@@ -75,4 +75,5 @@ int Gcd(int a, int b)
 <dd><span lang="en" style="font-family: serif;" xml:lang="en"><i>r</i><sub>1</sub> = <i>b</i> − <i>q</i><sub>1</sub> <i>r</i><sub>0</sub></span></dd>
 <dd><span lang="en" style="font-family: serif;" xml:lang="en"><i>r</i><sub>0</sub> = <i>a</i> − <i>q</i><sub>0</sub> <i>b</i></span></dd>
 </dl>
-最终，g可以表示成a和b的线性和：g = sa + tb。贝祖等式以及以上证明都可以扩展至欧几里得整环。
+最终，g可以表示成a和b的线性和：g = sa + tb。
+## 算法
