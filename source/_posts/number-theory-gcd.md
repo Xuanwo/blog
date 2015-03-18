@@ -58,7 +58,25 @@ int Gcd(int a, int b)
 
 # 扩展欧几里得算法
 ## 介绍
- 扩展欧几里德算法是用来在已知a, b求解一组p，q使得`p*a+q*b=Gcd(a,b)`(根据数论中的相关定理解一定存在，不展开叙述)。扩展欧几里德常用在求解模线性方程及方程组中。
+扩展欧几里德算法是用来在已知a, b求解一组p，q使得`p*a+q*b=Gcd(a,b)`(根据数论中的相关定理解一定存在，不展开叙述)。扩展欧几里德常用在求解模线性方程及方程组中。
+## 算法
+```
+int exGcd(int a, int b, int &x, int &y)
+{
+    if(b == 0)
+    {
+        x = 1;
+        y = 0;
+        return a;
+    }
+    int r = exGcd(b, a % b, x, y);
+    int t = x;
+    x = y;
+    y = t - a / b * y;
+
+    return r;
+}
+```
 ## 理解
 把这个实现和Gcd的递归实现相比，发现多了下面的x,y赋值过程，这就是扩展欧几里德算法的精髓。
 可以这样思考:
@@ -73,3 +91,36 @@ bx + (a - a / b * b)y = Gcd(a', b') = Gcd(a, b)
 ay +b(x - a / b*y) = Gcd(a, b)
 ```
 因此对于a和b而言，他们的相对应的p，q分别是 y和(x-a/b*y)
+
+# Stein算法
+## 介绍
+Stein算法由J. Stein 1961年提出，这个方法也是计算两个数的最大公约数。和欧几里德算法 算法不同的是，Stein算法只有整数的移位和加减法，因此对于大素数Stein将更有优势。
+## 描述
+注意到如下结论：
+1. 如果A=0，B是最大公约数，算法结束 
+2. 如果B=0，A是最大公约数，算法结束 
+3. 设置A1=A、B1=B和C1=1 
+4. 如果An和Bn都是偶数，则An+1=An>>1，Bn+1=Bn>>1，Cn+1=Cn<<1
+5. 如果An是偶数，Bn不是偶数，则An+1=An>>1，Bn+1=Bn，Cn+1=Cn(很显然，2不是奇数的约数) 
+6. 如果Bn是偶数，An不是偶数，则Bn+1=B>>1，An+1=An，Cn+1=Cn(很显然，2不是奇数的约数) 
+7. 如果An和Bn都不是偶数，则An+1=|An-Bn|>>1，Bn+1=min(An,Bn)，Cn+1=Cn 
+8. n加1，转1
+## 算法
+```
+int Gcd(int a, int b)
+{
+    if(a == 0) return b;
+    if(b == 0) return a;
+    if(a % 2 == 0 && b % 2 == 0) return 2 * gcd(a >> 1, b >> 1);
+    else if(a % 2 == 0)  return gcd(a >> 1, b);
+    else if(b % 2 == 0) return gcd(a, b >> 1);
+    else return gcd(abs(a - b), Min(a, b));
+}
+```
+
+# 引用
+- [最大公约数(Gcd)两种算法(Euclid && Stein) [整理]](http://www.cnblogs.com/drizzlecrj/archive/2007/09/14/892340.html)
+- [辗转相除法](http://zh.wikipedia.org/wiki/%E8%BC%BE%E8%BD%89%E7%9B%B8%E9%99%A4%E6%B3%95)
+
+# 更新日志
+- 2015年03月18日 拖了这么久，总算写完了= =。
