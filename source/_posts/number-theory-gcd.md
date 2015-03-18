@@ -84,11 +84,11 @@ int exGcd(int a, int b, int &x, int &y)
 由于`b' = a % b = a - a / b * b`
 那么可以得到:
 ```
-a'x + b'y = Gcd(a', b')  
+a' x + b' y = Gcd(a' , b')  
 ===>
-bx + (a - a / b * b)y = Gcd(a', b') = Gcd(a, b)  
+bx + (a - a/b *b)y = Gcd(a' , b') = Gcd(a, b)  //注意到这里的/是C语言中的出发
 ===>
-ay +b(x - a / b*y) = Gcd(a, b)
+ay + b(x- a/b *y) = Gcd(a, b)
 ```
 因此对于a和b而言，他们的相对应的p，q分别是 y和(x-a/b*y)
 
