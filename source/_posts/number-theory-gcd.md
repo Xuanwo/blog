@@ -65,7 +65,7 @@ int Gcd(int a, int b)
 ## 贝祖等式
 贝祖等式说明，两个数a和b的最大公约数g可以表示为a和b的线性和。也就是说，存在整数s和t使g = sa + tb。
 整数s和t可以从辗转相除法算出的商q0、q1……计算出。 从辗转相除法的最后一步开始，g可以表示成前一步的商qN−1和前两步的余数rN−2和rN−3：
-<span class="texhtml"><i>g</i> = <i>r</i><sub><i>N</i>−1</sub> = <i>r</i><sub><i>N</i>−3</sub> − <i>q</i><sub><i>N</i>−1</sub> <i>r</i><sub><i>N</i>−2</sub></span>
+<span><i>g</i> = <i>r</i><sub><i>N</i>−1</sub> = <i>r</i><sub><i>N</i>−3</sub> − <i>q</i><sub><i>N</i>−1</sub> <i>r</i><sub><i>N</i>−2</sub></span>
 而前两步的余数又分别可以表示成它们前两步的余数和商： 
 <span><i>r</i><sub><i>N</i>−2</sub> = <i>r</i><sub><i>N</i>−4</sub> − <i>q</i><sub><i>N</i>−2</sub> <i>r</i><sub><i>N</i>−3</sub></span>
 <span><i>r</i><sub><i>N</i>−3</sub> = <i>r</i><sub><i>N</i>−5</sub> − <i>q</i><sub><i>N</i>−3</sub> <i>r</i><sub><i>N</i>−4</sub></span>
@@ -75,3 +75,6 @@ int Gcd(int a, int b)
 <span><i>r</i><sub>0</sub> = <i>a</i> − <i>q</i><sub>0</sub> <i>b</i></span>
 最终，g可以表示成a和b的线性和：g = sa + tb。
 ## 算法
+贝祖等式的整数s和t可以通过扩展欧几里得算法算出。这个扩展算法在原有辗转相除法的基础上增加了两个递归等式：
+<span><i>s</i><sub><i>k</i></sub> = <i>s</i><sub><i>k</i>−2</sub> − <i>q</i><sub><i>k</i></sub><i>s</i><sub><i>k</i>−1</sub></span>
+<span><i>t</i><sub><i>k</i></sub> = <i>t</i><sub><i>k</i>−2</sub> − <i>q</i><sub><i>k</i></sub><i>t</i><sub><i>k</i>−1</sub></span>
