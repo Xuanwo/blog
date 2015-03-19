@@ -105,6 +105,7 @@ Stein算法由J. Stein 1961年提出，这个方法也是计算两个数的最�
 6. 如果Bn是偶数，An不是偶数，则Bn+1=B>>1，An+1=An，Cn+1=Cn(很显然，2不是奇数的约数) 
 7. 如果An和Bn都不是偶数，则An+1=|An-Bn|>>1，Bn+1=min(An,Bn)，Cn+1=Cn 
 8. n加1，转1
+
 ## 算法
 ```
 int Gcd(int a, int b)
@@ -118,9 +119,39 @@ int Gcd(int a, int b)
 }
 ```
 
+# 应用
+- **求解不定方程**
+对于不定整数方程pa+qb=c，若 c mod Gcd(p, q)=0,则该方程存在整数解，否则不存在整数解。
+上面已经列出找一个整数解的方法，在找到p * a+q * b = Gcd(p, q)的一组解p0,q0后，p * a+q * b = Gcd(p, q)的其他整数解满足：
+1. p = p0 + b/Gcd(p, q) * t 
+2. q = q0 - a/Gcd(p, q) * t(其中t为任意整数)
+
+至于pa+qb=c的整数解，只需将p * a+q * b = Gcd(p, q)的每个解乘上 c/Gcd(p, q) 即可。
+在找到p * a+q * b = Gcd(a, b)的一组解p0,q0后，应该是得到p * a+q * b = c的一组解p1 = p0*(c/Gcd(a,b)),q1 = q0*(c/Gcd(a,b))，p * a+q * b = c的其他整数解满足：
+1. p = p1 + b/Gcd(a, b) * t
+2. q = q1 - a/Gcd(a, b) * t(其中t为任意整数)
+
+此处的p 、q就是p * a+q * b = c的所有整数解。
+
+- **求解模线性方程（线性同余方程）**
+同余方程 ax≡b (mod n)对于未知数 x 有解，当且仅当 gcd(a,n) | b。且方程有解时，方程有 gcd(a,n) 个解。
+求解方程 ax≡b (mod n) 相当于求解方程 ax+ ny= b, (x, y为整数)。
+设 d= gcd(a,n)，假如整数 x 和 y，满足 d= ax+ ny(用扩展欧几里德得出)。如果 d| b，则方程a* x0+ n* y0= d， 方程两边乘以 b/ d，(因为 d|b，所以能够整除)，得到 a* x0* b/ d+ n* y0* b/ d= b。
+所以 x= x0* b/ d，y= y0* b/ d 为 ax+ ny= b 的一个解，所以 x= x0* b/ d 为 ax= b (mod n ) 的解。
+ax≡b (mod n)的一个解为 x0= x* (b/ d ) mod n，且方程的 d 个解分别为 xi= (x0+ i* (n/ d ))mod n {i= 0... d-1}。
+设ans=x*(b/d),s=n/d;
+方程ax≡b (mod n)的最小整数解为：(ans%s+s)%s;
+
+- **求解模的逆元**
+同余方程ax≡b (mod n)，如果 gcd(a,n)== 1，则方程只有唯一解。
+在这种情况下，如果 b== 1，同余方程就是 ax=1 (mod n ),gcd(a,n)= 1。这时称求出的 x 为 a 的对模 n 乘法的逆元。
+对于同余方程 ax= 1(mod n )， gcd(a,n)= 1 的求解就是求解方程ax+ ny= 1，x, y 为整数。这个可用扩展欧几里德算法求出，原同余方程的唯一解就是用扩展欧几里德算法得出的 x 。
+
 # 引用
 - [最大公约数(Gcd)两种算法(Euclid && Stein) [整理]](http://www.cnblogs.com/drizzlecrj/archive/2007/09/14/892340.html)
 - [辗转相除法](http://zh.wikipedia.org/wiki/%E8%BC%BE%E8%BD%89%E7%9B%B8%E9%99%A4%E6%B3%95)
+- [ACM 进阶学习第一课----同余相关之欧几里得算法及其扩展（2）](http://blog.csdn.net/suool/article/details/14094255)
 
 # 更新日志
 - 2015年03月18日 拖了这么久，总算写完了= =。
+- 2015年03月19日 补充了扩展欧几里得算法的一些应用。
