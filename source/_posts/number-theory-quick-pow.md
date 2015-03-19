@@ -8,13 +8,13 @@ toc: true
 ```
 int Pow(int A, int n)
 {
-	if (n == 0) return 1;
-	int rslt = 1;
-	for (int i = 0; i < n; ++i)
-	{
-		rslt *= A;
-	}
-	return rslt;
+    if (n == 0) return 1;
+    int rslt = 1;
+    for (int i = 0; i < n; ++i)
+    {
+        rslt *= A;
+    }
+    return rslt;
 }
 ```
 <!-- more -->
@@ -41,19 +41,19 @@ A^6 = [(A * A) * (A * A)] ^ 2 = [(A * A) ^ 2] ^ 2
 ```
 int qPow(int A, int n)
 {
-	if (n == 0) return 1;
-	int rslt = 1;
+    if (n == 0) return 1;
+    int rslt = 1;
 
-	while (n)
-	{
-		if (n & 1) //如果n为奇数
-		{
-			rslt *= A;
-		}
-		A *= A;
-		n >>= 1; 
-	}
-	return rslt;
+    while (n)
+    {
+        if (n & 1) //如果n为奇数
+        {
+            rslt *= A;
+        }
+        A *= A;
+        n >>= 1;
+    }
+    return rslt;
 }
 ```
 
