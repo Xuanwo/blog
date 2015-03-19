@@ -57,8 +57,102 @@ int qPow(int A, int n)
 }
 ```
 
+# 矩阵快速幂
+矩阵和整数的快速幂运算算法在代数上应该是等价的，矩阵也具备快速幂运算所必需的条件：结合律。因此，我们在前面得出的结论也能应用到矩阵当中。
+首先，我们需要实现一个矩阵类，重载一些运算符：
+```
+class Matrix
+{
+public:
+    int N; // 矩阵维数
+    int** m; // 存储矩阵的二维数组
+
+    Matrix(int n = 2)
+    {
+        m = new int*[n];
+        for (int i=0; i < n; ++i)
+        {
+            m[i] = new int[n];
+        }
+        N = n;
+        clear();
+    }
+
+// 将矩阵清空为零矩阵
+    void clear()
+    {
+        for (int i=0; i < N; ++i)
+        {
+            memset(m[i], 0, sizeof(int) * N);
+        }
+    }
+
+// 将矩阵设定为单位矩阵
+    void unit()
+    {
+        clear();
+        for (int i=0; i < N; ++i)
+        {
+            m[i][i] = 1;
+        }
+    }
+
+// 矩阵的赋值
+    Matrix operator= (Matrix &othr)
+    {
+        Matrix(othr.N);
+        for (int i=0; i < othr.N; ++i)
+        {
+            for (int j=0; j < othr.N; ++j)
+            {
+                m[i][j] = othr.m[i][j];
+            }
+        }
+        return *this;
+    }
+
+// 矩阵的乘法
+//!假设所有因子均为同阶方阵
+    Matrix operator* (Matrix &othr)
+    {
+        Matrix rslt(othr.N);
+        for (int i=0; i < othr.N; ++i)
+        {
+            for (int j=0; j < othr.N; ++j)
+            {
+                for (int k=0; k < othr.N; ++k)
+                {
+                    rslt.m[i][j] += m[i][k] * othr.m[k][j];
+                }
+            }
+        }
+        return rslt;
+    }
+};
+```
+有了矩阵类，我们下面再依样画瓢地实现一遍快速幂运算：
+```
+Matrix qMPow(Matrix &A, int n)
+{
+    Matrix rslt(A.N);
+    rslt.unit();
+    if (n == 0) return rslt;
+    while (n)
+    {
+        if (n & 1) // 若幂为奇数
+        {
+            rslt = rslt * A;
+        }
+        A = A * A;
+        n >>= 1; // 右位移等价于除以2
+    }
+    return rslt;
+}
+```
+
 # 引用
 - [快速幂运算](http://blueve.me/archives/660)
 
 # 更新日志
 - 2015年3月19日 首次发布。
+- 2015年3月19日 补充了矩阵快速幂的内容。
