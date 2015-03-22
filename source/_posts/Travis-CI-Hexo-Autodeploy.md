@@ -33,7 +33,7 @@ Travis CI会在你每一次提交之后生成一个虚拟机来执行你事先�
 
 ## 生成SSH Key
 参见[使用Github SSH Key以免去Hexo部署时输入密码](http://xuanwo.org/2015/02/07/generate-a-ssh-key/)
-需要注意的是，这个SSH key不应成为你账号的全局SSH key*（因为这样Travis CI就获得了你所有代码库的提交权限，这是不正确的）*，而应该添加至https://github.com/username/ropename/settings/keys，这样，你就控制了Travis CI的权限。
+需要注意的是，这个SSH key不应成为你账号的全局SSH key*（因为这样Travis CI就获得了你所有代码库的提交权限，这是不正确的）*，而应该添加至https://github.com/username/ropename/settings/keys ，这样，你就控制了Travis CI的权限。
 
 ## 加密私钥
 下面的操作需要事先配置好gem环境，如果没有可以尝试使用[强大且配置项丰富的在线IDE应用——Cloud9](http://xuanwo.org/2014/08/07/Cloud9/)。
@@ -123,7 +123,7 @@ branches:
 ```
 install:
 - npm install hexo-cli -g
-- npm install hexo@beta --save
+- npm install hexo --save
 - npm install
 ```
 然后执行Hexo的渲染操作
@@ -139,3 +139,4 @@ script:
 # 更新日志
 - 2015年02月07日 首次发布，感谢Tommy351
 - 2015年02月16日 跟随Hexo版本更新，修改了相关代码。
+- 2015年03月22日 Hexo3.0稳定版发布，修改相关代码，并修复部分显示问题。

@@ -44,7 +44,9 @@ The key fingerprint is:
 下一步输入：
 `ssh-agent -s`
 如果出现类似`Agent pid XXXX`这样的字样，则跳过下一步，否则输入：
-`eval `ssh-agent -s``
+```
+eval `ssh-agent -s`
+```
 直到出现`Agent pid XXXX`这样的提示之后，输入：
 `ssh-add ~/.ssh/id_rsa`
 这样，你成功的在本地生成了一个可用的SSH key。
@@ -71,4 +73,5 @@ provide shell access.
 
 # 更新日志
 - 2015年02月07日 独立成篇。
-- 2015年02月16日 补充`_config.yml`的修改
+- 2015年02月16日 补充`_config.yml`的修改。
+- 2015年03月22日 修复了一处代码显示BUG。
