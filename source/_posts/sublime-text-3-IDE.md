@@ -13,19 +13,80 @@ toc: true
 
 
 # 安装
-以下均为Sublime Text 3 3065版 更新于29 August 2014
+以下均为Sublime Text 3 3080版 更新于24 March 2015
 ### OS X
-[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203065.dmg](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203065.dmg)
+[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080.dmg](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080.dmg)
 ### Windows 32 bit
-[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203065%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203065%20Setup.exe)
+[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20Setup.exe)
 ### Windows 64 bit
-[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203065%20x64%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203065%20x64%20Setup.exe)
+[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20x64%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20x64%20Setup.exe)
 ### Ubuntu 32 bit
-[http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3065_i386.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3065_i386.deb)
+[http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_i386.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_i386.deb)
 ### Ubuntu 64 bit
-[http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3065_amd64.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3065_amd64.deb)
+[http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_amd64.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_amd64.deb)
 
 # ChangeLog
+## Build 3080
+Release Date: 24 March 2015
+```
+    * Fixed Redo sometimes restoring the selection to the incorrect location
+    * Reworked how Build Systems are selected (More Information)
+    * Build Systems may now declare "keyfiles" (e.g., 'Makefile' for the Make build system) to better auto detect which build system to use
+    * Improved handling of build systems that generate lots of output
+    * New windows always use the automatic build system, rather than the build system of the last used window
+    * Command Palette now remembers the last entered string
+    * Improved change detection for files that disappear and reappear, as happens with disconnected network drives
+    * atomic_save is disabled by default
+    * Right clicking on a URL will show an "Open URL" menu item
+    * Added Goto Definition to the context menu
+    * Improved behavior of Goto Definition when using multiple panes
+    * Misspelled words can now be added to the dictionary, in addition to being ignored
+    * Fixed Ignored Words not persisting after exiting
+    * Fixed a long standing issue with spell checking and non-ascii characters
+    * Added spelling_selector setting, to control what text is checked for misspellings
+    * Tweaked handling of syntax definitions and unused captures, resolving an issue with spell checking in Markdown links.
+    * Goto Anything supports :line:col syntax in addition to :line
+    * Added Edit Project to the Command palette
+    * Improved quote auto pairing logic
+    * Added <current file> option to Find in Files
+    * Improved Console Panel scrolling behavior
+    * .tmLanguage files may contain a hidden setting, to indicate they shouldn't be displayed to the user
+    * Improved some error messages when parsing .tmLanguage files
+    * remember_open_files setting is now defaults to false. Note that this change will have no effect if the hot_exit setting is left at its default value of true
+    * Added auto_complete_cycle setting
+    * Fixed Minimap refusing to draw on very large windows
+    * Fixed not being able to click on the selected row of the auto complete popup
+    * Fixed sidebar icons sometimes being invisible on startup
+    * Transient sheets (e.g., as created by Goto Anything when previewing files) are no longer added to the Recently Closed list
+    * Improved scrolling behavior when line_padding_top is > 0
+    * Fixed a bug with scrolling tabs, where a 1 pixel line would occasionally appear underneath them
+    * Fixed tabset background being set to the wrong color on startup if different colored tabs are used
+    * Updated to a never version of leveldb, fixing constant low level CPU usage if the index becomes corrupted
+    * Fixed a crash that could occur when directories are being rapidly deleted and recreated
+    * Fixed a crash that occurred when dragging rows scrolled out of view in the side bar
+    * Fixed a long standing plugin_host crash triggered via modal dialogs
+    * Fixed a typo in the "Save Workspace As" dialog
+    * Fixed incorrect menu mnemonics
+    * Linux: Added sudo save
+    * Windows: Popup windows are able to receive scroll wheel input
+    * Windows: subl.exe command line helper accepts wildcards
+    * Windows: Fixed access denied errors that could occur when saving with atomic_save disabled
+    * Windows: Added workaround for broken std::condition_variable in MSVC 2012, fixing a crash in plugin_host
+    * Windows: Added more descriptive errors when the Update Installer fails to rename a folder
+    * Windows: Fixed incorrect window sizing after making a maximised window full screen
+    * OSX: Added work around for performActionForItemAtIndex: taking an excessively long time in Yosemite. This affected any commands that had a corresponding menu item.
+    * OSX: Workaround for an OS issue with zero size windows and OpenGL views
+    * OSX: subl command line tool no longer uses Distributed Objects, resolving some intermittent failures
+    * Posix: Fixed new files not respecting the umask permission flags
+    * API: Added View.show_popup() and related functions
+    * API: Added sublime.yes_no_cancel_dialog()
+    * API: Added sublime.expand_variables()
+    * API: Added Window.extract_variables()
+    * API: Added Sheet.view()
+    * API: Window.show_quick_panel() now accepts the flag sublime.KEEP_OPEN_ON_FOCUS_LOST
+    * API: Window.show_quick_panel() will now scroll to the selected item when shown
+    * API: Fixed on_post_window_command() not getting called
+```
 ## Build 3065
 Release Date: 27 August 2014
 ```
@@ -142,19 +203,12 @@ Release Date: 7 May 2013
 在打开的页面中粘贴以下代码
 ```
 {
-    "cmd": ["g++", "${file}", "-o", "${file_path}/${file_base_name}"],
-    "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
-    "working_dir": "${file_path}",
-    "selector": "source.c, source.c++",
-    "shell": true,
-    "encoding":"cp936",
-    "variants":
-    [
-         {
-              "name": "Run",
-                 "cmd": ["start", "cmd", "/c", "${file_base_name} & echo. & pause"]
-         }
-    ]
+ "cmd": ["g++", "${file}", "-std=c++11", "-o", "${file_path}/${file_base_name}", "&", "start", "cmd", "/c", "${file_base_name} & echo. & pause"],
+ "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+ "working_dir": "${file_path}",
+ "selector": "source.c, source.c++",
+ "shell": true,
+ "encoding":"cp936",
 }
 ```
 保存，并且取一个自己喜欢的名字，在`Tools->Build System`中选择即可。
@@ -168,17 +222,10 @@ Release Date: 7 May 2013
 在打开的页面中粘贴以下代码
 ```
 {
-    "cmd": ["g++", "${file}", "-o", "${file_path}/${file_base_name}"],
+    "cmd": ["g++", "${file}", "-o", "${file_path}/${file_base_name}", "&", "gnome-terminal", "-x", "bash", "-c", "g++ '${file}' -o '${file_path}/${file_base_name}' && '${file_path}/${file_base_name}' ;read -n1 -p 'press any key to continue.'"],
     "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
     "working_dir": "${file_path}",
     "selector": "source.c, source.c++",
-    "variants":
-    [
-        {
-            "name": "Run",
-            "cmd":["gnome-terminal", "-x", "bash", "-c", "g++ '${file}' -o '${file_path}/${file_base_name}' && '${file_path}/${file_base_name}' ;read -n1 -p 'press any key to continue.'"]
-        }
-    ]
 }
 ```
 保存，并且取一个自己喜欢的名字，在`Tools->Build System`中选择即可。
@@ -188,8 +235,7 @@ Release Date: 7 May 2013
 ## 收工
 一个简单的IDE已经构建完毕了，下面可以进行一些简单的测试。
 
-编译并构建`Ctrl+B`
-运行`Ctrl+shift+B`
+编译并运行`Ctrl+B`
 
 
 ----------
@@ -332,3 +378,4 @@ using namespace std;
  - 2014年08月22日 添加了关于备份Sublime设定的介绍
  - 2014年09月01日 更新Sublime Text 3至3065版本，增加Changelog，修改下载地址。
  - 2015年01月06日 采纳读者建议，修改了编译系统部分的文字，现在更加容易懂了~
+ - 2015年03月25日 新版本的Build变得有点傻逼- -，重新修改了sublime-build，现在只需要一次按键就能编译并运行了~，Linux下没有进行测试，求反馈。
