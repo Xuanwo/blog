@@ -30,7 +30,7 @@ layout: page
 
 # 捣鼓成果
 - 基于NodeBB的信息管理专业论坛[信道](http://xg.xuanwo.org/)
-- 独立架设的私人网盘，为本博客提供所有外链文件服务[OwnCloud](disk.xuanwo.org)
+- 独立架设的私人网盘，为本博客提供所有外链文件服务[OwnCloud](http://disk.xuanwo.org/)
 - CF网站的题面抓取工具[CodeforcesGrabber](https://github.com/Xuanwo/CodeforcesGrabber)
 - 为知笔记开源插件[SublimeForWiz](https://github.com/Xuanwo/SublimeForWiz)
 
@@ -56,3 +56,4 @@ layout: page
 - 2014年09月03日 新增关于个人技能的介绍。
 - 2015年01月07日 更换主题，迁移评论
 - 2015年02月19日 更换主题= =，补充最近的成果
+- 2015年03月25日 修改了一些细节= =
