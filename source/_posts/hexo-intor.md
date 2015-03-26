@@ -44,6 +44,7 @@ npm -v
 ![Git PATH设置](http://xuanwo.qiniudn.com/opinion/Git-path-setting.png)
 > 这是对上图的解释，不需要了解请直接跳过
 > Git的默认设置下，出于安全考虑，只有在Git Bash中才能进行Git的相关操作。按照上图进行的选择，将会使得Git安装程序在系统PATH中加入Git的相关路径，使得你可以在CMD界面下调用Git，不用打开Git Bash了。
+
 一样的，我们来检查一下Git是不是安装正确了，打开命令行，输入：
 ```
 git --version
@@ -149,12 +150,53 @@ timezone:   //时区，一般不用设置
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
 url: http://yoursite.com   //请设置为http://yourname.github.io
 root: /   //保持默认，无需设置
-permalink: :year/:month/:day/:title/  //保持默认，无需设置
+permalink: :year/:month/:day/:title/  //你文章的链接将会表现为：http://yourname.github.io/年/月/日/标题/
 permalink_defaults:  //保持默认，无需设置
 ```
 
 ## 配置Deployment
-同样在`_config.yml`文件中，找到
+首先，你需要为自己配置身份信息，打开命令行，然后输入：
+```
+git --global user.name
+```
+同样在`_config.yml`文件中，找到`Deployment`，然后按照如下修改：
+```
+deploy:
+  type: git
+  repo: git@github.com:yourname/yourname.github.io.git
+  branch: master
+```
+然后在当前目录打开命令行，输入：
+```
+hexo d
+```
+随后按照提示，分别输入自己的Github账号用户名和密码，开始上传。
+然后通过http://yourname.github.io/来访问自己刚刚上传的网站。
+
+## 添加新文章
+打开Hexo目录下的`source`文件夹，所有的文章都会以md形式保存在`_post`文件夹中，只要在`_post`文件夹中新建md类型的文档，就能在执行`hexo g`的时候被渲染。
+新建的文章头需要添加一些yml信息，如下所示：
+```
+title: hello-world   //在此处添加你的标题。
+date: 2014-11-7 08:55:29   //在此处输入你编辑这篇文章的时间。
+tags: [ACM, UVa, C/C++]  //在此处添加这篇文章的标签，多个标签需要使用`[ ]`来包裹，用`,`来分隔。
+categories: Exercise   //在此处输入这篇文章的分类。
+toc: true  //在此处设定是否开启目录，需要主题支持。
+---
+```
+
+# 进阶
+如果成功完成了上述的全部步骤，恭喜你，你已经搭建了一个最为简单且基础的博客。但是这个博客还非常简单， 没有个人的定制，操作也比较复杂，下面的进阶技巧将会让你获得对Hexo更为深入的了解。
+## 更换主题
+*可以在[此处](https://github.com/hexojs/hexo/wiki/Themes)寻找自己喜欢的主题*
+下载所有的主题文件，保存到Hexo目录下的`themes`文件夹下。然后在`_config.yml`文件中修改：
+```
+# Extensions
+## Plugins: http://hexo.io/plugins/
+## Themes: http://hexo.io/themes/
+theme: landscape //themes文件夹中对应文件夹的名称
+```
+然后先执行`hexo clean`，然后重新`hexo g`，并且`hexo d`，很快就能看到新主题的效果了~
 
 # 更新日志
-- 2015年03月26日 完成了Hexo的配置，总算写完一半了= =。
+- 2015年03月26日 完成了基础架构，慢慢添加进阶技巧= =。
