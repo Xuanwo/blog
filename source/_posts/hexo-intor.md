@@ -8,6 +8,8 @@ toc: true
 从2014年的八月份开始接触Hexo，一直用到现在，已经有半年的时间了。这期间，Hexo从2.X一路升级到了3.0，很多地方都发生了改变。不仅如此，很多原来使用Hexo的博主们写下了的教程并没有及时更新，导致后来人一头雾水，挫折感十足。因此，本文致力于提供一份足够简单，长期维护的基于Github Pages的Hexo博客搭建图文教程，希望能有所帮助。
 当然，我个人的力量是有限的，因此也希望使用Hexo的大家也能一起行动起来，通过[提交PR](https://github.com/Xuanwo/xuanwo.github.io/pulls)，[发布issues](https://github.com/Xuanwo/xuanwo.github.io/issues)或者在下方评论区评论等形式参与到本文档的编辑中来。浏览时，使用`Ctrl+F`搜索关键词。*（是不是会有似曾相识的感觉，= =）*
 
+<!-- more -->
+
 # 准备
 你需要准备好以下软件：
 - Node.js环境
@@ -129,6 +131,30 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 
 # 使用Hexo
 ## 修改全局配置文件
+在你的目录下，将会存在一个名为`_config.yml`的文件，这个文件保存了Hexo全局的配置，下面先修改其中的一部分：
+```
+# Hexo Configuration
+## Docs: http://hexo.io/docs/configuration.html
+## Source: https://github.com/hexojs/hexo/
+
+# Site
+title: Hexo   //站点标题
+subtitle:	//站点副标题
+description:	//站点描述，会被搜索引擎识别
+author: John Doe   	//站点作者
+language:	//站点语言，一般不用设置
+timezone:   //时区，一般不用设置
+
+# URL
+## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
+url: http://yoursite.com   //请设置为http://yourname.github.io
+root: /   //保持默认，无需设置
+permalink: :year/:month/:day/:title/  //保持默认，无需设置
+permalink_defaults:  //保持默认，无需设置
+```
+
+## 配置Deployment
+同样在`_config.yml`文件中，找到
 
 # 更新日志
 - 2015年03月26日 完成了Hexo的配置，总算写完一半了= =。
