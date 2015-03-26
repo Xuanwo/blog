@@ -131,4 +131,4 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 ## 修改全局配置文件
 
 # 更新日志
-- 2015年03月26日 完成了Hexo的配置。
+- 2015年03月26日 完成了Hexo的配置，总算写完一半了= =。
