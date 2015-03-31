@@ -16,6 +16,8 @@ before_install:
 - cp doc/ssh_config ~/.ssh/config
 - git config --global user.name "xuanwo"
 - git config --global user.email xuanwo.cn@gmail.com
+- git remote add github git@github.com:Xuanwo/xuanwo.github.io.git
+- git remote add gitcafe git@gitcafe.com:xuanwo/xuanwo.git
 
 install:
 - npm install hexo-cli -g
@@ -38,12 +40,10 @@ script:
 - cd git
 - git init
 - git add -A
-- git commit -m "First commit"
-- git add -A
 - git commit -m "Update"
-- git remote add all git@github.com:Xuanwo/xuanwo.github.io.git
-- git remote set-url --add all git@gitcafe.com:xuanwo/xuanwo.git
-- git push -u  all  --all --force
+- git push github master:master --force
+- git push gitcafe master:gitcafe-pages --force
+
 
 addons:
   ssh_known_hosts:
