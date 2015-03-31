@@ -14,8 +14,8 @@ before_install:
 - eval $(ssh-agent)
 - ssh-add ~/.ssh/id_rsa
 - cp doc/ssh_config ~/.ssh/config
-- git config --global user.name "Xuanwo"
-- git config --global user.email vars.cn@gmail.com
+- git config --global user.name "xuanwo"
+- git config --global user.email xuanwo.cn@gmail.com
 
 install:
 - npm install hexo-cli -g
@@ -34,4 +34,14 @@ install:
 script:
 - hexo clean
 - hexo g
-- hexo d
+- mk git
+- cd git
+- git init
+- git remote
+- git add -A
+- git commit -m "First commit"
+- cd ..
+- cp public git
+- git remote add all git@github.com:Xuanwo/xuanwo.github.io.git
+- git remote set-url --add all git@gitcafe.com:xuanwo/xuanwo.git
+- git push all --all
