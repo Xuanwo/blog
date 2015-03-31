@@ -34,16 +34,18 @@ install:
 script:
 - hexo clean
 - hexo g
-- mkdir git
+- mv public git
 - cd git
 - git init
 - git add -A
 - git commit -m "First commit"
-- cd ..
-- cp -a public git
-- cd git
 - git add -A
 - git commit -m "Update"
 - git remote add all git@github.com:Xuanwo/xuanwo.github.io.git
 - git remote set-url --add all git@gitcafe.com:xuanwo/xuanwo.git
 - git push -u  all  --all --force
+
+addons:
+  ssh_known_hosts:
+  - github.com
+  - gitcafe.com
