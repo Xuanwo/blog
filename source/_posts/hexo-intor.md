@@ -198,5 +198,29 @@ theme: landscape //themes文件夹中对应文件夹的名称
 ```
 然后先执行`hexo clean`，然后重新`hexo g`，并且`hexo d`，很快就能看到新主题的效果了~
 
+## 更换域名
+首先，需要注册一个域名。在中国的话，`.cn`全都需要进行备案，如果不想备案的话，请注册别的顶级域名，可以使用[godaddy](https://www.godaddy.com/)或[新网](http://www.xinnet.com/)或[万网](http://www.xinnet.com/)中的任意一家，自己权衡价格即可。
+然后，我们需要配置一下域名解析。推荐使用DNSPod的服务，比较稳定，解析速度比较快。在域名注册商出修改NS服务器地址为：
+```
+f1g1ns1.dnspod.net
+f1g1ns2.dnspod.net
+```
+以新网为例，首先点击域名管理进入管理页面：
+![点击域名管理](http://xuanwo.qiniudn.com/opinion/domin-setting.png)
+然后点击域名后面的`管理`：
+![管理](http://xuanwo.qiniudn.com/opinion/mydomin.png)
+进入域名管理的操作界面，点击`域名管理`，来到域名管理界面：
+![终于来到了域名管理= =](http://xuanwo.qiniudn.com/opinion/domin-config.png)
+点击`修改域名DNS`，然后选择`填写具体信息`，在下面的空框中填入DNSPod的NS服务器：
+![使用DNSPod的服务器](http://xuanwo.qiniudn.com/opinion/domin-dnspod.png)
+然后我们进入DNSPod的界面，开始真正进入域名解析的配置= =。在DNSPod中，首先添加域名，然后分别添加如下条目：
+![配置DNS解析](http://xuanwo.qiniudn.com/opinion/dnspod-setting.png)
+最后，我们对Github进行一下配置。
+在自己本地的hexo目录下的`source`文件夹中，新建一个`CNAME`文件*（注意，没有后缀名。）*，内容为`yourdomin.xxx`。然后再执行一下`hexo d -g`，重新上传自己的博客。
+在github中打开你自己的库，进入库的setting界面，如果看到了如下提示，说明配置成功了。
+![Github-pages绑定自定义域名](http://xuanwo.qiniudn.com/opinion/Github-domin.png)
+在这一系列的操作中，包括修改NS服务器，设置A解析等等，都需要一定的时间。短则10分钟，长则24小时，最长不会超过72小时。如果超过72小时，请检查自己的配置过程，或者修改自己本地的DNS服务器。
+
 # 更新日志
 - 2015年03月26日 完成了基础架构，慢慢添加进阶技巧= =。
+- 2015年03月31日 添加了CNAME的相关内容。
