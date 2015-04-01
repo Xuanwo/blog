@@ -39,8 +39,9 @@ toc: true
 ### Linux环境下
 Ubuntu, Debian：`sudo apt-get install git-core`
 Fedora, Red Hat, CentOS：`sudo yum install git-core`
+
 ### 开启SSH，避免重复输入帐号密码
-（TODO：择日完成）
+可以参考[此处](http://xuanwo.org/2015/02/07/generate-a-ssh-key/)。
 
 # Wiki配置
 感谢[wzpan](http://www.hahack.com/)开源的主题，其实还是我主动索要的- -，幸好他非常热情地提供了帮助，在此表示衷心的感谢。
@@ -83,3 +84,4 @@ toc: true //默认开启，生成table of contents
 # 更新日志
 - 2014年07月07日 完成`前言`和`为什么`板块
 - 2014年07月24日 完成`前期准备`和`Wiki配置`以及`注意事项`版块，接下来完成免PATH配置的详细步骤以及SSH的配置。此外发现步骤有些混杂不清，下一个版本中将进行修正。
+- 2015年04月01日 添加了SSH配置。
