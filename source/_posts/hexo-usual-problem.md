@@ -212,6 +212,7 @@ something
 <https://github.com/Xuanwo/xuanwo.github.io/tree/blog>
 
 ## 在主目录下添加`README.md`文件或者html文件
+### Hexo3.0以下使用
 **感谢[@TimNew](http://timnew.me/)提供的思路**
 *额，不知道是不是有人跟我一样有一个库没有`README.md`文件就浑身不舒服的强迫症= =*
 正如大家所知道的，在source文件夹下的所有md文件都会被hexo渲染成html文件，导致`README.md`文件不能好好的放在里面了，即使是添加了`layout: false`依然没有用。
@@ -219,6 +220,49 @@ something
 不过现在有一个另外的好办法，那就是利用主题的source目录，也就是`themes/themes-name/source`。因为这个文件夹里面的所有文件都会被复制到网站的根目录中去，也就是说，如果在里面放上`README`，就可以正常的存在于网站的主目录了。
 
 同样的，对于一些需要在网站下添加html文件的需求也可以这样来达成。比如百度或者谷歌在验证站长权限的时候，通常都会要求在主目录下添加一个html文件。同样的，只要把这个文件放在`themes/themes-name/source`就可以搞定了。
+
+### Hexo3.0以上支持
+**使用`_config.yml`下的`skip_render`参数。**
+比如说现在`source`下有两个文件夹，一个是`_post`，一个是`haha`，里面各有一个名为`hello-world.md`的文档，然后我的`skip_render`参数为：
+`skip_render: haha/*.md`
+那么，hexo g之后的结果为：
+```
+INFO  Files loaded in 503 ms
+INFO  Generated: js/script.js
+INFO  Generated: fancybox/jquery.fancybox.pack.js
+INFO  Generated: fancybox/jquery.fancybox.js
+INFO  Generated: fancybox/jquery.fancybox.css
+INFO  Generated: fancybox/helpers/jquery.fancybox-thumbs.js
+INFO  Generated: fancybox/helpers/jquery.fancybox-thumbs.css
+INFO  Generated: fancybox/helpers/jquery.fancybox-media.js
+INFO  Generated: fancybox/helpers/jquery.fancybox-buttons.js
+INFO  Generated: fancybox/helpers/jquery.fancybox-buttons.css
+INFO  Generated: fancybox/helpers/fancybox_buttons.png
+INFO  Generated: fancybox/fancybox_sprite@2x.png
+INFO  Generated: fancybox/fancybox_sprite.png
+INFO  Generated: fancybox/fancybox_overlay.png
+INFO  Generated: fancybox/fancybox_loading@2x.gif
+INFO  Generated: fancybox/fancybox_loading.gif
+INFO  Generated: fancybox/blank.gif
+INFO  Generated: css/style.css
+INFO  Generated: css/images/banner.jpg
+INFO  Generated: css/fonts/fontawesome-webfont.woff
+INFO  Generated: css/fonts/fontawesome-webfont.ttf
+INFO  Generated: css/fonts/fontawesome-webfont.svg
+INFO  Generated: css/fonts/fontawesome-webfont.eot
+INFO  Generated: css/fonts/FontAwesome.otf
+INFO  Generated: haha/hello-world.md    //看这里！看这里！
+INFO  Generated: 2015/03/26/hello-world/index.html
+INFO  Generated: archives/index.html
+INFO  Generated: archives/2015/index.html
+INFO  Generated: archives/2015/03/index.html
+INFO  Generated: index.html
+INFO  29 files generatd in 1.28 s
+```
+
+也就是说，skip_render参数的使用需要注意两点：
+- 此处的位置是相对于你的`source_dir`的位置，一般来说，就是以source为根的位置
+- 这里的文件匹配是基于正则的，大致上可以参考[这个](http://en.wikipedia.org/wiki/Glob_(programming))，也就是说`*.html`可以忽略所有html文档，`hello-wordl.md`的话，就能忽略掉名字为`hello-wordl.md`的文件。
 
 ## Hexo版本回退
 有时候更新之后发现新版本的Hexo不能按照预期的方式工作，这时候就需要使用版本回退功能。
@@ -279,4 +323,4 @@ var duoshuoQuery = {short_name:"yourshortname"};
 - 2014年09月24日 新增添加社会化评论
 - 2015年02月06日 新增本地添加SSH key，修复部分笔误
 - 2015年02月07日 SSH key生成独立成篇
-- 2015年04月01日 添加了部分Hexo3.0带来的问题
+- 2015年04月01日 添加了部分Hexo3.0带来的问题，新增了`skip_render`参数设置。
