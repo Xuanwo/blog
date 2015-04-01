@@ -45,7 +45,7 @@ Error: spawn ENOENT
 ```
 **解决方案：**
 1. 检查`_config.yml`中deploy设置。参见<http://hexo.io/docs/deployment.html>。
-2. 删除`.deploy`文件夹并且执行`hexo clean`后，重新`hexo deploy`。
+2. 删除`.deploy_git`文件夹并且执行`hexo clean`后，重新`hexo deploy`。
 
 ## Deploy之后，页面长时间404
 **问题描述：**
@@ -99,7 +99,16 @@ For more help, you can use hexo help [command] for the detailed information
 or you can check the docs: http://zespia.tw/hexo/docs/
 ```
 **解决方案：**
-检查`_config.yml`内容，特别注意`:`后面需要有一个空格。
+1. 检查`_config.yml`中的内容，特别注意`:`后面需要有一个空格。
+2. 检查`package.json'中的内容，注意添加hexo信息用来标识这是一个hexo目录：
+```
+{
+  "hexo": {
+    "version": ""
+  }
+}
+```
+3. 如果还是有问题，可以更新hexo之后，在新的文件夹中重新进行`hexo init`。
 
 ## Hexo所有命令报错
 **问题描述：**
@@ -175,6 +184,20 @@ iption: Description\nread_more: Read More\n\u0000',
 **解决方案：**
 在博客所在目录下执行'npm install'用以安装插件。
 **感谢[@tommy351](http://zespia.tw/)提供的解决方案**
+
+## 更新至3.0.0版本后，文件渲染时卡死
+**问题描述：**
+[参见Issues](https://github.com/hexojs/hexo/issues/1137)
+表现为文件不多，但是渲染非常缓慢，超过半个小时。
+**问题分析：**
+问题出在'Highlight.js`在判断语言类型时，会因为`-`这个符号导致卡死。
+**解决方案：**
+在使用代码块时，明确使用类型，或者全部使用`plain`类型，如下：
+```
+``` plain
+something
+```
+```
 
 ---
 
@@ -256,3 +279,4 @@ var duoshuoQuery = {short_name:"yourshortname"};
 - 2014年09月24日 新增添加社会化评论
 - 2015年02月06日 新增本地添加SSH key，修复部分笔误
 - 2015年02月07日 SSH key生成独立成篇
+- 2015年04月01日 添加了部分Hexo3.0带来的问题
