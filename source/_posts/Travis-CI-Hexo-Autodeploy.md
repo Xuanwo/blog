@@ -70,7 +70,7 @@ Host github.com
 ```
 然后指定openssl解密后的生成位置，修改Travis自动插入的解密指令(不要照抄，注意修改密钥)
 ```
-- openssl aes-256-cbc -K $encrypted_26b4962af0e7_key -iv $encrypted_26b4962af0e7_iv
+- openssl aes-256-cbc -K $encrypted_xxxxxxxxxx_key -iv $encrypted_xxxxxxxxxx_iv
   -in travis.enc -out ~/.ssh/id_rsa -d
 ```
 
@@ -91,7 +91,7 @@ Host github.com
 ### 修改git信息
 将之前创建的ssh_config复制到Travis的虚拟机中去，输入：
 ```
-- cp .travis/ssh_config ~/.ssh/config
+- cp ssh_config ~/.ssh/config
 ```
 然后制定git使用者信息：
 ```
@@ -100,7 +100,6 @@ Host github.com
 ```
 
 ## Build配置
-https://github.com/Xuanwo/xuanwo.github.io/blob/blog/.travis.yml
 之前的所有操作都只是为了让Travis CI拥有push权限，下面我们开始进入到真正的Build配置当中。
 之前我们用到了一个名为`.travis.yml`的文件，跟build有关的所有设置都在这个文件里面，下面的操作都在这个文件当中进行。
 
@@ -110,7 +109,7 @@ https://github.com/Xuanwo/xuanwo.github.io/blob/blog/.travis.yml
 language: node_js
 
 node_js:
-- '0.10'
+- '0.10'   //指定使用node.js最新的稳定版0.10
 ```
 
 ### 指定分支
@@ -118,7 +117,7 @@ node_js:
 ```
 branches:
   only:
-  - blog
+  - blog    //这个分支应当使用自己的源文件分支
 ```
 差点忘了讲- -，本方案只适用于用github来托管自己自己的hexo目录的用户。这里的分支应该使用包含有.md文档的那个分支。
 
@@ -133,14 +132,46 @@ install:
 然后执行Hexo的渲染操作
 ```
 script:
-- hexo clean
+- hexo clean   //分开写，方便调试可能出现的错误
 - hexo d 
 - hexo g
 ```
 
-到这里，你的Travis CI的持续集成已经配置完毕了，最后的`.travis.yml`文件内容可以参考[.travis.yml样例](https://github.com/Xuanwo/xuanwo.github.io/blob/blog/.travis.yml)。
+到这里，你的Travis CI的持续集成已经配置完毕了，最后的`.travis.yml`文件内容可以参考如下：
+```
+branches:
+  only:
+  - blog
+
+language: node_js
+
+node_js:
+- '0.10'
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_xxxxxxxxxx_key -iv $encrypted_xxxxxxxxxx_iv
+  -in travis.enc -out ~/.ssh/id_rsa -d
+- chmod 600 ~/.ssh/id_rsa
+- eval $(ssh-agent)
+- ssh-add ~/.ssh/id_rsa
+- cp ssh_config ~/.ssh/config
+- git config --global user.name "username"
+- git config --global user.email username@xxxxx.com
+
+install:
+- npm install hexo-cli -g
+- npm install hexo --save
+- npm install
+
+script:
+- hexo clean
+- hexo g
+- hexo d
+```
+
 
 # 更新日志
 - 2015年02月07日 首次发布，感谢Tommy351
 - 2015年02月16日 跟随Hexo版本更新，修改了相关代码。
 - 2015年03月22日 Hexo3.0稳定版发布，修改相关代码，并修复部分显示问题。
+- 2015年04月01日 因为自己的.travis.yml有大幅度修改，所以重新添加了相关代码，避免产生困扰。
