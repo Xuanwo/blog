@@ -193,11 +193,11 @@ iption: Description\nread_more: Read More\n\u0000',
 问题出在'Highlight.js`在判断语言类型时，会因为`-`这个符号导致卡死。
 **解决方案：**
 在使用代码块时，明确使用类型，或者全部使用`plain`类型，如下：
-```
-``` plain
-something
-```
-```
+
+	```plain
+	something
+	```
+
 
 ---
 
