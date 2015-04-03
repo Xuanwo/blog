@@ -198,6 +198,36 @@ iption: Description\nread_more: Read More\n\u0000',
 	something
 	```
 
+## 升级至Hexo 3.0版本后，deploy报错
+**问题描述：**
+[参见Issues](https://github.com/hexojs/hexo/issues/1013)
+升级之后，本来可以deploy的设置出现报错，内容为：
+```
+ERROR Deployer not found: github
+```
+**问题分析：**
+Hexo3.0与以往版本最大的改变在于，更多的模块都从主程序中剥离了出来，其中就包括deploy的相关模块。
+**解决方案：**
+首先需要安装对应的deploy模块，目前Hexo支持以下服务器的一键部署：
+```
+git
+heroku
+rsync
+openshift
+```
+安装命令为：
+```
+npm install hexo-deployer-git //将git替换为别的名字就可以安装对应模块
+```
+然后对`_config.yml`做如下设置：
+```
+deploy:
+  type: git   //非git请参考官方文档中的设置
+  repo: <repository url>
+  branch: [branch]
+  message: [message]
+```
+*目前多Git部署存在BUG，等待修复中。*
 
 ---
 
@@ -324,3 +354,4 @@ var duoshuoQuery = {short_name:"yourshortname"};
 - 2015年02月06日 新增本地添加SSH key，修复部分笔误
 - 2015年02月07日 SSH key生成独立成篇
 - 2015年04月01日 添加了部分Hexo3.0带来的问题，新增了`skip_render`参数设置。
+- 2015年04月03日 添加了Hexo3.0中deploy设置。
