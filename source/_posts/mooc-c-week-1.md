@@ -4,8 +4,6 @@ tags: [C, MOOC]
 categories: Learn
 toc: true
 ---
-# 资源
-
 # 笔记
 简单的介绍了函数之间的相互调用，重点在于区分函数的实参和形参，把这样两个概念处理好就OK了。
 
