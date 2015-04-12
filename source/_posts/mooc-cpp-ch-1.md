@@ -1,4 +1,4 @@
-title: C++语言程序设计基础——第一周
+title: C++语言程序设计基础——第一章
 date: 2015-4-12 14:48:32
 tags: [C, MOOC]
 categories: Learn
