@@ -157,7 +157,8 @@ permalink_defaults:  //保持默认，无需设置
 ## 配置Deployment
 首先，你需要为自己配置身份信息，打开命令行，然后输入：
 ```
-git --global user.name
+git config --global user.name "yourname"
+git config --global user.email "youremail"
 ```
 同样在`_config.yml`文件中，找到`Deployment`，然后按照如下修改：
 ```
@@ -224,3 +225,4 @@ f1g1ns2.dnspod.net
 # 更新日志
 - 2015年03月26日 完成了基础架构，慢慢添加进阶技巧= =。
 - 2015年03月31日 添加了CNAME的相关内容。
+- 2015年04月30日 修复了错误的git命令。
