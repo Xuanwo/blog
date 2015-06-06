@@ -1,3 +1,3 @@
 title: Categories
-layout: category
+layout: categories
 ---

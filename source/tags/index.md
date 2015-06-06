@@ -1,3 +1,3 @@
 title: Tags
-layout: tag
+layout: tags
 ---
