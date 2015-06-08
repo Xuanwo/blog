@@ -22,19 +22,19 @@ int a,b;
 
 int gcd(int a, int b)
 {
-	return b==0?a:gcd(b,a%b);
+    return b==0?a:gcd(b,a%b);
 }
 
 void init()
 {
-	scanf("%d,%d", &a, &b);
+    scanf("%d,%d", &a, &b);
 }
 
 int main(int argc, char const *argv[])
 {
-	init();
-	printf("%d", gcd(a,b));
-	return 0;
+    init();
+    printf("%d", gcd(a,b));
+    return 0;
 }
 ```
 
@@ -50,14 +50,14 @@ int n;
 
 void init()
 {
-	scanf("%d", &n);
+    scanf("%d", &n);
 }
 
 int main(int argc, char const *argv[])
 {
-	init();
-	printf("%d", n*n);
-	return 0;
+    init();
+    printf("%d", n*n);
+    return 0;
 }
 ```
 
