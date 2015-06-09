@@ -1,5 +1,5 @@
 ﻿title: 关于我
-type: "post"
+layout: "post"
 ---
 
 # 现状
