@@ -64,7 +64,6 @@
   {% include '_scripts/mathjax.swig' %}
   {% block comment_system %}{% endblock %}
 
-  {% include '_scripts/baidushare.swig' %}
   {% include '_scripts/analytics/google-analytics.swig' %}
 </body>
 </html>
