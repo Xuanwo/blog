@@ -1,4 +1,5 @@
 ﻿title: 关于我
+type: "post"
 ---
 
 # 现状
