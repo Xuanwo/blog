@@ -11,6 +11,15 @@
 
 {% if theme.menu %}
   <ul id="menu" class="menu">
+  {% for name, path in theme.menu %}
+      {% set itemName = name.toLowerCase() %}
+      <li class="menu-item menu-item-{{ itemName }}">
+        <a href="{{ url_for(path) }}">
+          <i class="menu-item-icon icon-{{ itemName }}"></i> <br />
+          {{ __('menu.' + itemName) }}
+        </a>
+      </li>
+    {% endfor %}
      {% if config.swiftype_key %}
     <!--增加swiftype搜索功能-->
     <form class="menu-item menu-item-search">
@@ -48,14 +57,5 @@
     </script>
   <!--增加“tinysou”站内搜索功能end-->
   {% endif %}
-    {% for name, path in theme.menu %}
-      {% set itemName = name.toLowerCase() %}
-      <li class="menu-item menu-item-{{ itemName }}">
-        <a href="{{ url_for(path) }}">
-          <i class="menu-item-icon icon-{{ itemName }}"></i> <br />
-          {{ __('menu.' + itemName) }}
-        </a>
-      </li>
-    {% endfor %}
   </ul>
 {% endif %}
