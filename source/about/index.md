@@ -34,14 +34,6 @@ layout: "post"
 - CF网站的题面抓取工具[CodeforcesGrabber](https://github.com/Xuanwo/CodeforcesGrabber)
 - 为知笔记开源插件[SublimeForWiz](https://github.com/Xuanwo/SublimeForWiz)
 
-# 开源项目
-- [Hexo](https://github.com/hexojs/hexo)社区积极参与者
-- 为知笔记开源用户文档编辑(地址暂时不能透漏，现在还处在规则完善期)
-- 开源文档[ACM模板](https://github.com/Xuanwo/ACMTemplate)作者
-- [中国地质大学（北京）在线开源OJ系统Wiki](http://cugbacm.github.io/oj/)维护者
-- 开源文档[程序员编程艺术 — 面试和算法心得](https://github.com/julycoding/The-Art-Of-Programming-By-July)参与者
-- 开源文档[免费的编程中文书籍索引](https://github.com/justjavac/free-programming-books-zh_CN)参与者
-
 # 更新日志
 - 2014年06月12日 完成`现状`和`兴趣`介绍。
 - 2014年07月03日 迁移至Hexo引擎构建博客。
@@ -59,3 +51,4 @@ layout: "post"
 - 2015年03月25日 修改了一些细节= =
 - 2015年06月07日 修改主题，添加了Tags和Category的页面。目前比较丑- -，考完试优化一下。
 - 2015年06月09日 将评论系统迁移到了Disqus，更改主题为NexT。
+- 2015年06月10日 去除了羞耻的黑历史。
