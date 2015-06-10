@@ -156,9 +156,7 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 `permalink` | 文章的 [永久链接](permalinks.html) 格式 | :year/:month/:day/:title/
 `permalink_default` | 永久链接中各部分的默认值 |
 
-{% note info 网站存放在子目录 %}
-如果您的网站存放在子目录中，例如 `http://yoursite.com/blog`，则请将您的 `url` 设为 `http://yoursite.com/blog` 并把 `root` 设为 `/blog/`。
-{% endnote %}
+> 如果您的网站存放在子目录中，例如 `http://yoursite.com/blog`，则请将您的 `url` 设为 `http://yoursite.com/blog` 并把 `root` 设为 `/blog/`。
 
 ## 目录
 
