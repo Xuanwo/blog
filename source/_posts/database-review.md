@@ -4,7 +4,7 @@ tags: [Database]
 categories: Learn
 toc: true
 ---
-# 第一章 绪论
+# 绪论
 ## 数据库系统概述
 数据（Data）： 描述事物的符号记录称为数据。
 记录： 计算机中表示和存储数据的一种格式或一种方法。
@@ -200,3 +200,200 @@ F：属性间数据依赖关系集合
 
 # SQL数据语言
 ## SQL概述
+### 产生与发展
+- 1974年由Boyce和Chamberlin提出
+- 1975-1979年，IBM的System R上实现
+- 1986年，ANSI通过SQL标准
+- 后来相继提出SQL-89与SQL-92标准
+- 目前，大多数数据库均采用SQL作为共同的数据存取和标准接口
+
+### SQL的特点
+- 综合统一
+- 高度非过程化
+- 面向集合的操作方式
+- 一种语法结构两种方式
+- 语言简洁，易学易用
+
+### SQL基本概念
+SQL支持关系数据库三级模式结构，其中：
+- 外模式——视图和部分基本表（不能独立存在）
+- 模式——基本表（独立存在，关系-基本表-存储文件一一对应）
+- 内模式——存储文件（存储文件的逻辑结构组成了关系数据库的内模式）
+
+### SQL对象
+SQL对象包括数据库、表、视图、属性名等，这些对象名符合一定规则：
+>
+SQL SERVER 1-30字符
+ACCESS 64字符
+ORACLE 限制为8个字符
+
+>
+应以字母开头，其他字符可以使字母、数字、下划线
+
+### SQL语句
+1. 尖括号"<>"中的内容为实际意义
+1. 中括号"[]"中的内容为任选项
+1. [,...]意思是等等
+1. 大括号"{}"与竖线"|"标明此处为选择项，在所列举的各项中仅需选择一项。
+1. SQL中的数据项（包括列项、表和视图）分隔符为","；其字符串常数的定界符用单引号"'"表示。
+
+## 数据定义
+![SQL的数据定义语句](http://xuanwo.qiniudn.com/learn/SQL-data-define.png)
+
+### 数据库的创建与删除
+创建数据库
+```
+CREATE DATABASE <数据库名>;
+CREATE DATABASE Mydb;
+```
+删除数据库
+```
+DROP DATABASE <数据库名> [,<数据库名>] [,...];
+DROP DATABASE Mydb;
+```
+
+### 表的创建与删除
+创建基本表
+```
+CREATE TABLE <表名>
+    (<列名> <数据类型> [<列级完整性约束条件>] [<列名> <数据类型> [ <列级完整性约束条件> ] [,...] ] [,<表级完整性约束条件>] [,..]);
+```
+![主要数据类型](http://xuanwo.qiniudn.com/learn/main-type.png)
+
+约束条件：
+- 列级完整性约束条件——只能用于列
+- 表级完整性约束条件——只能够用于一张中的多列
+
+SQL完整性约束条件
+- NOT NULL或NULL，列级，是否允许为空
+- UNIQUE，列级，唯一性约束
+- DEFAULT，列级，默认值约束
+- CHECK，列级，检验约束，为插入列中的数据指定约束条件
+- PRIMARY KEY，表级，主键约束，使得主键的数值在每一行中各不相同，不能为空
+- FOREIGN KEY，表级，外键约束，是参照完整性约束
+
+举例
+创建`学生表：Student(sno, sname, sdate, ssex, sdept)`
+```
+Create Table Student(
+    sno char(5) not null unique,
+    sdate date,
+    ssex char(2) default '男',
+    sdept char(2)
+    Constraint C1 Check (ssex In ('男', '女')));
+```
+
+删除基本表
+```
+DROP TABLE <表名>;
+```
+举例
+```
+DROP TABLE Student;
+```
+
+### 表结构的修改
+```
+ALTER TABLE <表名>
+    [ADD ( <新列名> <数据类型> [<完整性约束条件>][,...])]
+    [DROP <完整性约束名>]
+    [MODIFY ( <列名> <数据类型> [,...])];
+```
+举例
+> 在Student表中增加‘籍贯native_place’列，数据类型为字符型
+
+```
+Alter Table Student
+    Add native_place Varchar(50);
+```
+
+> 删除Student表中学生姓名必须取唯一值的约束条件
+
+```
+Alter Table Student
+    Drop unique(sname);
+```
+
+> 修改Student表中sname列的数据类型为定长字符型
+
+```
+Alter Table Student
+    Modify sname char(8) unique;
+```
+
+### 建立和删除索引
+建立索引
+```
+CREATE [UNIQUE] [CLUSTER] INDEX  <索引名>
+    ON <表名> (<列名> [<次序>] [, <列名> [<次序>] ] [,…]);
+```
+举例
+```
+Create unique Index stusno_ind
+    On Student (sno ASC);
+```
+
+删除索引
+```
+DROP INDEX <索引名>;
+```
+举例
+```
+DROP INDEX Stusno_Ind;
+```
+
+## 数据查询
+```
+SELECT [ALL|DISTINCT] <目标列表达式> [,<目标列表达式>] [,…]
+[INTO <新表名>]
+FROM <表名/视图名> [,<表名/视图名>] [,…]
+[WHERE <条件表达式>]
+[GROUP BY <列名1>] [HAVING <条件表达式>]]
+[ORDER BY <列名2> [ASC|DESC]];
+```
+
+### 目标列表达式
+目标列表达式是一个逗号分隔的表达式列表
+```
+[<表名>.]<属性列名表达式> [, [<表名>.] <属性列名表达式>] [, …]
+```
+举例
+```
+//查询单表中全体学生的学号与姓名
+SELECT sno, sname FROM Student;
+//查询单表中的全体学生
+SELECT * FROM Student;
+```
+
+集函数
+```
+<集函数> ( [ DISTINCT | ALL ] * )
+//集函数：SUM、AVG、COUNT、MAX、MIN
+```
+举例
+```
+SELECT DISTINCT sname, Year(GetDate())-Year(sdate) AS age FROM Student;
+```
+
+### 条件表达式
+![条件表达式](http://xuanwo.qiniudn.com/learn/where.png)
+举例
+```
+//从Student表中，查询男同学
+SELECT * FROM Student WHERE ssex='男';
+//从Student表中，查询出生日期在1980年和1990年之间的学生
+SELECT * FROM Student WHERE sdate BETWEEN '1980-01-01' AND '1990-12-31';
+```
+
+通配符
+> %：百分号，代表任意长度的字符串
+a%b:ab,acb,addb
+> _：下划线，代表单个字符
+a_b: acb,adb, afb
+
+> [ ]：表示中括号里面的任意一个字符
+A[BCDE]表示第一个字符为A，第二个字符为B,C,D,E中的任意一个
+> [^ ]：表示不在中括号里面的任意一个字符
+A[^BCDE]表示第一个字符为A，第二个字符为不为B,C,D,E的任意一个字符
+
+## 数据操纵
