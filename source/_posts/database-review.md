@@ -397,3 +397,150 @@ A[BCDE]表示第一个字符为A，第二个字符为B,C,D,E中的任意一个
 A[^BCDE]表示第一个字符为A，第二个字符为不为B,C,D,E的任意一个字符
 
 ## 数据操纵
+```
+数据插入——INSERT——向数据库中插入新纪录
+数据修改——UPDATE——修改数据库中的某记录
+数据删除——DELETE——删除数据库中的某记录
+```
+### 数据插入
+插入元组
+```
+INSERT
+INTO <表名> [( <字段1>[, <字段2>] [,…])]
+VALUES (<常量1> [, <常量2>] [,…]);
+```
+举例
+```
+//将一条新学生记录（所有字段都有值）插入到表中
+Insert Into S
+Values (‘95020’,‘陈东’,‘男’,‘IS’,’18’);
+将一条学生记录（部分字段有值）插入表中
+Insert Into S(Sno,Sname)
+Values (‘95020’,‘陈东’);
+```
+
+插入子查询
+子查询不仅可以嵌套在SELECT语句中，也可以嵌套在INSERT语句中，用于生成要插入的批量数据。
+```
+INSERT
+INTO <表名> [( <字段1>[, <字段2>] [,…])]
+子查询;
+```
+举例
+```
+Insert Into Deptage(Sdept, Avgage)
+    Select Sdept, AVG(Sage)
+    From S  Group By Sdept;
+```
+
+### 数据修改
+一般格式
+```
+UPDATE <表名>
+SET  <字段名1>＝<表达式1>[, <字段2>= <表达式2>] [,…]]
+[WHERE <条件表达式>];
+```
+举例
+```
+//修改某一元组的值：如将学生95001的年龄改为22岁
+Update S
+Set Sage=22
+Where Sno='95001';
+//修改多个元组的值：如将所有学生的年龄加一岁
+Update S
+Set Sage= Sage+1;
+//带子查询的修改语句：将信息管理系的所有学生成绩置零
+Update SC
+Set Grade=0
+Where 'IS'=
+    (Select Sdept
+    From S
+    Where S.Sno=SC.Sno);
+```
+
+### 删除数据
+一般格式
+```
+DELETE
+FROM  <表名>
+[WHERE <条件表达式>];
+```
+举例
+```
+//删除某一元组：如删除学号为95001的学生记录
+Delete
+From S
+Where Sno='95001';
+//将S表清空
+Delete
+From S;
+//带查询的删除语句：如删除信息系所有学生的选课记录
+Delete
+From SC
+Where 'IS'=
+    (Select Sdept
+    From S
+    Where S.Sno=SC.Sno);
+```
+
+## 数据控制
+共享程度与安全性问题的冲突
+数据控制功能：
+- 事务管理功能
+- 数据保护功能
+
+授予权限
+一般格式
+```
+GRANT  <权限> [,<权限>][,…]
+    [ON  <对象类型> <对象名称>]
+    TO  <用户> [, <用户>] [,…]
+    [WITH  GRANT OPTION];
+```
+举例
+```
+//把查询S表的权限授权给用户U1
+GRANT  SELECT
+ON  TABLE  S
+TO U1;
+//把查询S表和C表的全部权限授权给用户U1和U2
+GRANT ALL PRIVILEGES
+ON TABLE S, C
+TO U1, U2;
+//
+```
+
+收回权限
+一般格式
+```
+REVOKE  <权限> [,<权限>][,…]
+    [ON  <对象类型> <对象名称>]
+    FROM  <用户> [, <用户>] [,…]
+```
+举例
+```
+//把用户U1修改学号的权限收回
+REVOKE UPDATE(Sno)
+ON TABLE S
+FROM U1;
+//收回所有用户对表SC的查询权限
+REVOKE SELECT
+ON TABLE SC
+FROM PUBLIC;
+```
+
+# 关系数据库设计
+## 关系数据库设计理论
+### 关系模式
+`R(U , F)`
+当且仅当U上的一个关系r满足F时，r称为关系模式R(U , F)的一个关系
+
+## 函数依赖
+
+
+
+# 版权信息
+大部分内容来自于中国地质大学（北京）安海忠老师的授课PPT以及王珊，萨师煊所著的《数据库系统概论》（第四版），可在非商用-署名前提下自由分发。
+
+# 更新日志
+- 2015年06月12日 完成初稿
