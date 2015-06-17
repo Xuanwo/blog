@@ -1,6 +1,6 @@
 title: 数据库系统概论复习
 date: 2015-6-12 14:33:29
-tags: [Database]
+tags: [Database, 复习]
 categories: Learn
 toc: true
 ---
