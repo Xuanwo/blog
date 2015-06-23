@@ -48,3 +48,5 @@
     sidebar: '{{ theme.sidebar }}'
   };
 </script>
+
+<meta name="google-site-verification" content="YAHxtBFjjhWkrycLOhOBuMHETNYVTtS3h4cPY4Wgo2A" />
