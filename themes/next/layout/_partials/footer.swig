@@ -19,4 +19,8 @@
   </a>
 </div>
 
+<div class="qiniu">
+  <a rel="qiniu" href="http://www.qiniu.com/"><img src="http://assets.qiniu.com/qiniu-white.png" /></a>
+</div>
+
 {% block footer %}{% endblock %}
