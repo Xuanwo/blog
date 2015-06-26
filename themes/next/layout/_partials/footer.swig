@@ -20,7 +20,7 @@
 </div>
 
 <div class="qiniu">
-  <a rel="qiniu" href="http://www.qiniu.com/"><img src="http://assets.qiniu.com/qiniu-white.png" /></a>
+  <a rel="qiniu" href="http://www.qiniu.com/"><img src="http://assets.qiniu.com/qiniu-white.png" height="1em" width="4em"></a>
 </div>
 
 {% block footer %}{% endblock %}
