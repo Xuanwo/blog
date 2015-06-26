@@ -1,3 +1,7 @@
+<a rel="qiniu" href="http://www.qiniu.com/">
+  <img src="http://assets.qiniu.com/qiniu-white.png" height="2em" style="float:right">
+</a>
+
 <div class="copyright">
   {% set current = date(Date.now(), "YYYY") %}
   &copy; &nbsp; {% if theme.since and theme.since != current %} {{ theme.since }} - {% endif %}
@@ -18,9 +22,5 @@
     NexT{% if theme.scheme %}.{{ theme.scheme }}{% endif %}
   </a>
 </div>
-
-<a rel="qiniu" href="http://www.qiniu.com/">
-  <img src="http://assets.qiniu.com/qiniu-white.png" height="4em" style="float:right">
-</a>
 
 {% block footer %}{% endblock %}
