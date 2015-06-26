@@ -1,5 +1,5 @@
 <a rel="qiniu" href="http://www.qiniu.com/">
-  <img src="http://assets.qiniu.com/qiniu-white.png" height="2em" style="float:right">
+  <img src="http://assets.qiniu.com/qiniu-white.png" style="float:right">
 </a>
 
 <div class="copyright">
