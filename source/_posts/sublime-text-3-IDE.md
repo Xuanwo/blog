@@ -13,19 +13,19 @@ toc: true
 # 安装
 以下均为Sublime Text 3 3083版 更新于26 March 2015
 
-### OS X
+## OS X
 [http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083.dmg](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083.dmg)
 
-### Windows 32 bit
+## Windows 32 bit
 [http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083%20Setup.exe)
 
-### Windows 64 bit
+## Windows 64 bit
 [http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20x64%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083%20x64%20Setup.exe)
 
-### Ubuntu 32 bit
+## Ubuntu 32 bit
 [http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_i386.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3083_i386.deb)
 
-### Ubuntu 64 bit
+## Ubuntu 64 bit
 [http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_amd64.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3083_amd64.deb)
 
 
