@@ -13,19 +13,27 @@ toc: true
 
 
 # 安装
-以下均为Sublime Text 3 3080版 更新于24 March 2015
+以下均为Sublime Text 3 3083版 更新于26 March 2015
 ### OS X
-[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080.dmg](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080.dmg)
+[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083.dmg](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083.dmg)
 ### Windows 32 bit
-[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20Setup.exe)
+[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083%20Setup.exe)
 ### Windows 64 bit
-[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20x64%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20x64%20Setup.exe)
+[http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20x64%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083%20x64%20Setup.exe)
 ### Ubuntu 32 bit
-[http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_i386.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_i386.deb)
+[http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_i386.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3083_i386.deb)
 ### Ubuntu 64 bit
-[http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_amd64.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_amd64.deb)
+[http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_amd64.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3083_amd64.deb)
 
 # ChangeLog
+## Build 3083
+Release Date: 26 March 2015
+```
+    * Fixed high CPU usage caused by a corrupt index. This was occuring for some users upgrading from 3065
+    * Added setting index_workers to control the number of threads used for file indexing. By default the number of threads is based on the number of CPU cores. By setting index_workers to 1 or 2, indexing will be slower, but less intrusive
+    * Fixed a crash when showing the Command Palette with an empty .sublime-build file
+    * Tab completion no longer completes numbers. Edit/Show Completions can still be used for this
+```
 ## Build 3080
 Release Date: 24 March 2015
 ```
@@ -376,6 +384,7 @@ using namespace std;
  - 2014年08月08日 添加了Sublime在Linux下的`.buildsystem`代码
  - 2014年08月16日 添加了关于Snippet功能和快速插入时间插件的介绍。
  - 2014年08月22日 添加了关于备份Sublime设定的介绍
- - 2014年09月01日 更新Sublime Text 3至3065版本，增加Changelog，修改下载地址。
+ - 2014年09月01日 更新Sublime Text 3下载链接至3065版本，增加Changelog，修改下载地址。
  - 2015年01月06日 采纳读者建议，修改了编译系统部分的文字，现在更加容易懂了~
  - 2015年03月25日 新版本的Build变得有点傻逼- -，重新修改了sublime-build，现在只需要一次按键就能编译并运行了~，Linux下没有进行测试，求反馈。
+ - 2015年06月30日 更新Sublime Text 3下载链接至3083版本。
