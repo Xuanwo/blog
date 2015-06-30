@@ -1,11 +1,11 @@
-title: Learn Together网站项目设计
+title: Together网站项目设计
 date: 2015-6-30 11:08:47
 tags: [实习, 项目]
 categories: Learn
 toc: true
 ---
 # 简介
-不满足当前网络教育老套的模式，运用强大的Socket.io框架，带来全新的交互体验，Learn Together项目正在路上！
+不满足当前网络教育老套的模式，运用强大的Socket.io框架，带来全新的交互体验，Together项目正在路上！
 
 # 团队介绍
 - 丁皓（组长），负责网站后端建设及维护（兼产品经理？）
@@ -18,7 +18,7 @@ toc: true
 ## 前端
 主要由两个页面构成：着陆页与内容页。
 ### 着陆页
-参考[QQ浏览器](http://browser.qq.com/)的着陆页，使用幻灯片类型的动效，介绍LT项目的特性及优点。
+参考[QQ浏览器](http://browser.qq.com/)的着陆页，使用幻灯片类型的动效，介绍Together项目的特性及优点。
 ### 内容页
 承载IE的主要功能：视频，PPT，电子白板，虚拟机，实时聊天，使用iframe的形式嵌入。
 ## 后端
