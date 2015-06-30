@@ -29,8 +29,8 @@ layout: "post"
 - 自己的淘宝小店- -
 
 # 捣鼓成果
-- 基于NodeBB的信息管理专业论坛[信道](http://xg.xuanwo.org/)
-- 独立架设的私人网盘，为本博客提供所有外链文件服务[OwnCloud](http://disk.xuanwo.org/)
+- ~~基于NodeBB的信息管理专业论坛[信道](http://xg.xuanwo.org/)~~ `链接目前失效，正在寻找新的VPS`
+- ~~独立架设的私人网盘，为本博客提供所有外链文件服务[OwnCloud](http://disk.xuanwo.org/)~~ `链接目前失效，正在寻找新的VPS`
 - CF网站的题面抓取工具[CodeforcesGrabber](https://github.com/Xuanwo/CodeforcesGrabber)
 - 为知笔记开源插件[SublimeForWiz](https://github.com/Xuanwo/SublimeForWiz)
 
@@ -52,3 +52,4 @@ layout: "post"
 - 2015年06月07日 修改主题，添加了Tags和Category的页面。目前比较丑- -，考完试优化一下。
 - 2015年06月09日 将评论系统迁移到了Disqus，更改主题为NexT。
 - 2015年06月10日 去除了羞耻的黑历史。
+- 2015年06月30日 补充了关于成果的最新动态，标注出了目前失效的链接。
