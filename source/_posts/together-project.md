@@ -4,8 +4,7 @@ tags: [实习, 项目]
 categories: Learn
 toc: true
 ---
-# 简介
-不满足当前网络教育老套的模式，运用强大的Socket.io框架，带来全新的交互体验，Together项目正在路上！
+**本项目仍然处在设计阶段，一切变动以最终成果为准**
 
 # 团队介绍
 - 丁皓（组长），负责网站后端建设及维护（兼产品经理？）
@@ -13,24 +12,38 @@ toc: true
 - 何壁伟，负责网站内容页设计
 - 马可，担任网站首席体验师
 
-# 项目构成
-*有待更新*
-## 前端
-主要由两个页面构成：着陆页与内容页。
-### 着陆页
-参考[QQ浏览器](http://browser.qq.com/)的着陆页，使用幻灯片类型的动效，介绍Together项目的特性及优点。
-### 内容页
-承载IE的主要功能：视频，PPT，电子白板，虚拟机，实时聊天，使用iframe的形式嵌入。
-## 后端
-主要使用socket.io实现大部分功能
+# 项目简介
+不满足当前网络教育老套的模式，运用强大的Socket.io框架，带来全新的交互体验，Together项目正在路上！
 
-# 版权申明
-本项目是中国地质大学（北京）人文经管学院2013级信息管理与信息系统专业的暑期实习作品，以[署名-非商业性使用-相同方式共享 4.0 国际](http://creativecommons.org/licenses/by-nc-sa/4.0/)协议发布，在此协议下，您可以自由地转载或共享。
+# 背景介绍
 
-# 开源信息
+# 市场前景
+
+# 存在问题
+
+# 产品比较
+
+# 模块演示
+## 即时聊天
+## 电子白板
+## 在线虚拟机
+
+
+# 引用资料
+## 参考文档
+## 开源信息
 - [chat](https://github.com/Automattic/socket.io/tree/master/examples/chat)
 - [socket.io-computer](https://github.com/kevin-roark/socket.io-computer)
 - [CommentCoreLibrary](https://github.com/jabbany/CommentCoreLibrary/)
 
+# 版权申明
+本项目是中国地质大学（北京）人文经管学院2013级信息管理与信息系统专业的暑期实习作品，以[署名-非商业性使用-相同方式共享 4.0 国际](http://creativecommons.org/licenses/by-nc-sa/4.0/)协议发布，在此协议下，您可以自由地转载或共享。
+
+# 小小赞助
+如果您对本项目感兴趣，欢迎使用支付宝扫一扫进行小额赞助以促成项目尽快上新，谢谢~
+![支付宝二维码](http://xuanwo.qiniudn.com/alipay.jpg)
+
+
 # 更新日志
 - 2015年6月30日 完成项目设计
+- 2015年6月30日 更新文档结构
