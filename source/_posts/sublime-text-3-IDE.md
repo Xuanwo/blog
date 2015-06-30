@@ -14,18 +14,24 @@ toc: true
 
 # 安装
 以下均为Sublime Text 3 3083版 更新于26 March 2015
+
 ### OS X
 [http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083.dmg](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083.dmg)
+
 ### Windows 32 bit
 [http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083%20Setup.exe)
+
 ### Windows 64 bit
 [http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203080%20x64%20Setup.exe](http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083%20x64%20Setup.exe)
+
 ### Ubuntu 32 bit
 [http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_i386.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3083_i386.deb)
+
 ### Ubuntu 64 bit
 [http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3080_amd64.deb](http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3083_amd64.deb)
 
 # ChangeLog
+
 ## Build 3083
 Release Date: 26 March 2015
 ```
@@ -34,6 +40,7 @@ Release Date: 26 March 2015
     * Fixed a crash when showing the Command Palette with an empty .sublime-build file
     * Tab completion no longer completes numbers. Edit/Show Completions can still be used for this
 ```
+
 ## Build 3080
 Release Date: 24 March 2015
 ```
@@ -95,6 +102,7 @@ Release Date: 24 March 2015
     * API: Window.show_quick_panel() will now scroll to the selected item when shown
     * API: Fixed on_post_window_command() not getting called
 ```
+
 ## Build 3065
 Release Date: 27 August 2014
 ```
@@ -113,6 +121,7 @@ Release Date: 27 August 2014
     * Posix: Using correct permissions for newly created files and folders
     * API: Updated to Python 3.3.3
 ```
+
 ## Build 3059
 Release Date: 17 December 2013
 ```
@@ -197,15 +206,19 @@ Release Date: 7 May 2013
 
 
 # 运行环境
+
 ## Windows下
 `以MinGW为例，其他编译系统类似`
+
 ### 下载安装MinGW
 有被墙的风险，如果不能访问，请在某管，某三的软件管家中搜索MinGW
 [http://sourceforge.net/projects/mingw/files/](http://sourceforge.net/projects/mingw/files/)
+
 ### 添加系统环境变量
 默认条件下是`C:/MinGW/bin`，如果不是请自行修改，将其添加到PATH之后，记得不要忘记分号。如果不知道如何修改系统环境变量，请参考[http://www.java.com/zh_CN/download/help/path.xml](http://www.java.com/zh_CN/download/help/path.xml "如何设置或更改 PATH 系统变量？")
 
 运行CMD(开始-> 运行-> Cmd)，输入：mingw-get后则会运行MinGW界面，这里说明变量设置成功。然后输入：g++ -v，用于检测安装g++有没有成功。
+
 ### 建立新的编译系统
 `Tools –> Build System –> New Build System`
 在打开的页面中粘贴以下代码
@@ -250,11 +263,15 @@ Release Date: 7 May 2013
 
 
 # 配置
+
 ## 界面
+
 ### 字体、主题风格等设置
 当需要更改主题时，直接可以通过`Preferences —> Color Scheme`来设置，主界面上只能改变字体的大小。若需要改变字体和字体大小，可以先`Preferences —> Browse Packages`，找到`Default`文件夹，然后找到`Preferences.sublime-settings`这个文件，用Sublime Text 3打开这个文件，这个文件保存了一些常用的设置，比如字体、主题风格、是否显示行号、智能提示延迟时间等，可以根据自己的需要自行设置。
+
 ### 打开（关闭）侧边栏、右边缩略图等常用面板
 默认情况下Sublime Text 3是没有打开侧边栏文件浏览器的，可以通过`View`来打开和关闭侧边栏，默认情况下Sublime Text 3右边是有文件的缩略图的，可以通过`View`来打开和关闭缩略图。
+
 ### 快捷键寻找文件和已定义的函数
 在Sublime Text 3中可以非常快速地切换到想找的文件，只需要通过`Ctrl+P`打开切换面板即可。然后输入想找的文件名称就可以快速找切换到该文件了。如果想要找函数，可以通过输入`@+函数名`可以快速切换到定义该函数的文件。
 
@@ -265,7 +282,7 @@ Release Date: 7 May 2013
 
 使用快捷键`ctrl+反斜杠`或者 `View -> Show Console`打开命令行，粘贴以下代码：
 ```
-import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404' + 'e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)
+import urllib.request,os,hashlib; h = 'eb2297e1a458f27d836c04bb0cbaf282' + 'd0e7a3098092775ccb37ca9d6b2e4b7d'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)
 ```
 如果复制出现问题，请访问[https://gist.github.com/Xuanwo/fd4e4388099536bcdd65](https://gist.github.com/Xuanwo/fd4e4388099536bcdd65)
 
@@ -356,8 +373,10 @@ using namespace std;
 
 ## 备份
 配置到现在，Sublime也算用的顺手了，要是换一台电脑都得这么捣鼓一下，肯定得疯。所以下面介绍一下如何同步自己的Sublime配置——只要备份`Packages\User`文件夹即可，里面的`sublime-settings`文件都保存了你的所有设置，更换电脑之后，只要恢复过去，打开Sublime的时候会自动检测，下载并安装你需要的包。
+
 ### Windows下
 备份文件夹：`C:\Users\yourusername\AppData\Roaming\Sublime Text 3\Packages\User`
+
 ### Linux下
 备份文件夹：`~/Library/Application/Support/Sublime\ Text\ 3/Packages/User`
 注意空格的转义= =。`rm -rf /usr /balabala`之类的梗我才没有听说过呢。
@@ -387,4 +406,4 @@ using namespace std;
  - 2014年09月01日 更新Sublime Text 3下载链接至3065版本，增加Changelog，修改下载地址。
  - 2015年01月06日 采纳读者建议，修改了编译系统部分的文字，现在更加容易懂了~
  - 2015年03月25日 新版本的Build变得有点傻逼- -，重新修改了sublime-build，现在只需要一次按键就能编译并运行了~，Linux下没有进行测试，求反馈。
- - 2015年06月30日 更新Sublime Text 3下载链接至3083版本。
+ - 2015年06月30日 更新Sublime Text 3下载链接至3083版本，更新了Toc上的BUG，修复了Package Control的安装脚本。
