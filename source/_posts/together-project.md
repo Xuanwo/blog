@@ -37,6 +37,10 @@ toc: true
 
 
 # 引用资料
+## 产生文档
+- [使用Screen管理会话](http://xuanwo.org/2015/07/01/screen-ssh/)
+- [Teambition团队协作实践](http://xuanwo.org/2015/07/02/teambition-work/)
+
 ## 参考文档
 - [Node.js文档](https://nodejs.org/documentation/)
 - [Socket.io文档](http://socket.io/docs/)
@@ -57,4 +61,5 @@ toc: true
 
 
 # 更新日志
-- 2015年6月30日 完成项目设计,更新文档结构
+- 2015年06月30日 完成项目设计,更新文档结构
+- 2015年07月02日 添加了项目执行中产生的文档
