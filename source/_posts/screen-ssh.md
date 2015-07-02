@@ -1,4 +1,4 @@
-title: 使用screen管理会话
+title: 使用Screen管理会话
 date: 2015-7-1 09:49:31
 tags: [Linux, SSH, VPS]
 categories: Opinion
@@ -74,10 +74,12 @@ screen -r 会话ID
 `Ctrl+A k`  | 杀掉当前窗口
 `Ctrl+A [`  | 进入拷贝/回滚模式
 
+
 # 参考资料
 - [linux 技巧：使用 screen 管理你的远程会话](http://www.ibm.com/developerworks/cn/linux/l-cn-screen/index.html)
 - [GNU Screen](http://www.gnu.org/software/screen/)
 - [Screen的man page提供了最详细的信息](http://www.slac.stanford.edu/comp/unix/package/epics/extensions/iocConsole/screen.1.html)
+
 
 # 更新日志
 - 2015年07月01日 完成关于Screen的介绍
