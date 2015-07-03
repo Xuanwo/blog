@@ -14,9 +14,9 @@ toc: true
 - 马可，担任网站首席体验师
 
 ## 协同工具
-- 分工：Teambition
-- 交流：QQ，简聊
-- 分享：印象笔记
+- 分工：[Teambition](https://www.teambition.com/)
+- 交流：[QQ](http://www.qq.com/)，[简聊](https://jianliao.com/)
+- 分享：[印象笔记](https://www.yinxiang.com/)
 
 <!-- more -->
 
