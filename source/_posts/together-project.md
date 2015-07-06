@@ -72,9 +72,12 @@ Next，我们在路上。
 
 ## 在线聊天室
 运用Node.js以及Socket.io，我们公司搭建了响应迅速的在线交流平台，其特点是可以支持大量用户同时在线交流。
+[源代码](https://github.com/together-education/together-core-whiteboard)
 
 ## 电子白板
 同样基于Node.js以及Socket.io，我们公司搭建了自研发的电子白板平台，基于教师-学生结构的主控端与受控端模型，支持在线演示。
+[源代码](https://github.com/together-education/together-core-whiteboard)
+
 ## 虚拟计算机
 运用Node.js以及Socket.io，并结合Linux平台上的Qemu虚拟化技术，我们公司首次实现了在线教育领域中的共享操作功能。
 
@@ -126,3 +129,4 @@ Next，我们在路上。
 - 2015年07月02日 添加了项目执行中产生的文档
 - 2015年07月03日 完善并充实项目内容，重新调整了结构
 - 2015年07月04日 添加了阶段报告，并提供创意汇报PPT下载
+- 2015年07月06日 添加了在线聊天室以及电子白板的源代码
