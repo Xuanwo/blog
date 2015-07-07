@@ -40,11 +40,14 @@ dpkg -i libjpeg9-dev_9a-2_amd64.deb
 
 # 处理WinXp镜像
 ## 下载XP镜像
+### 下载后使用网盘中转
 在[I Tell You](http://msdn.itellyou.cn/)上下载纯净的XP镜像。（如果使用盗版的镜像，VPS可能会因为违反其Tos而封号）
 比如，WinXP的中文简体专业版：
 ```
 ed2k://|file|CN_WINXP_PRO_ISO.img|530186240|7855069CE4216615D761654E2B75A4F7|/
 ```
+### 使用sftp上传
+可以使用类似于FileZilla这样的FTP工具直接上传，大部分国内的网盘到国外的速度都不理想= =，百度云还会出现断流，而好用的国外网盘都被墙，本身就需要翻墙上传。所以还不如直接使用sftp传到服务器上。
 ## 格式转换
 [I Tell You](http://msdn.itellyou.cn/)上下载下来的是img镜像文件，然而我们需要的是ISO，所以还需要进行转换。将img转换为iso，我们需要`ccd2iso`。
 ```
@@ -63,7 +66,7 @@ sudo apt-get -y install qemu redis-server
 ## 虚拟机配置
 生成一个光盘镜像文件用来加载ISO
 ```
-qemu-img create -f qcow2 winxp.img 3G
+qemu-img create -f qcow2 winxp.img 10G
 ```
 ## 运行
 ### 启动Web服务器
@@ -85,6 +88,18 @@ COMPUTER_IMG=winxp.img node emu-runner.js
 
 # 运行
 访问`http://localhost:5000`
+
+# 注意
+## 若搭建在服务器上，使用IP访问
+需要修改
+```
+var url = process.env.COMPUTER_IO_URL || 'http://localhost:6001';
+```
+为
+```
+var url = process.env.COMPUTER_IO_URL || 'http://your IP address:6001';
+```
+否则无法正常连接
 
 # 更新日志
 - 2015年07月06日 完成主体框架
