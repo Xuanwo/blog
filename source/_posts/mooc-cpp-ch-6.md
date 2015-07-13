@@ -1,4 +1,4 @@
-title: C++语言程序设计基础——第六章
+title: C++语言程序设计进阶——第六章
 date: 2015-6-13 00:52:39
 tags: [C, MOOC]
 categories: Learn

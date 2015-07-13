@@ -1,4 +1,4 @@
-title: C++语言程序设计基础——第八章
+title: C++语言程序设计进阶——第八章
 date: 2015-7-8 15:46:09
 tags: [C, MOOC]
 categories: Learn

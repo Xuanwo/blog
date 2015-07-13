@@ -1,4 +1,4 @@
-title: C++语言程序设计基础——第七章
+title: C++语言程序设计进阶——第七章
 date: 2015-7-4 16:50:24
 tags: [C, MOOC]
 categories: Learn

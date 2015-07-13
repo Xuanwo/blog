@@ -1,4 +1,4 @@
-title: C++语言程序设计基础——第十二章
+title: C++语言程序设计进阶——第十二章
 date: 2015-7-13 17:15:44
 tags: [C, MOOC]
 categories: Learn
