@@ -14,7 +14,7 @@ $(document).ready(function () {
 
   var sidebarToggleLine1stStatusInit = sidebarToggleLineStatusInit;
   var sidebarToggleLine1stStatusArrow = {width: '50%', rotateZ: '-45deg', top: '2px'};
-  var sidebarToggleLine1stStatusClose = {width: '100%', rotateZ: '-45deg', top: '14.5px'};
+  var sidebarToggleLine1stStatusClose = {width: '100%', rotateZ: '-45deg', top: '5px'};
 
   var sidebarToggleLine2ndStatusInit = sidebarToggleLineStatusInit;
   var sidebarToggleLine2ndStatusArrow = {width: '90%'};
@@ -22,7 +22,7 @@ $(document).ready(function () {
 
   var sidebarToggleLine3rdStatusInit = sidebarToggleLineStatusInit;
   var sidebarToggleLine3rdStatusArrow = {width: '50%', rotateZ: '45deg', top: '-2px'};
-  var sidebarToggleLine3rdStatusClose = {width: '100%', rotateZ: '45deg', top: '-6px'};
+  var sidebarToggleLine3rdStatusClose = {width: '100%', rotateZ: '45deg', top: '-5px'};
 
   LogoAndMenuMotion();
   sidebarToggleMotion();
