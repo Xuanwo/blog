@@ -59,7 +59,7 @@ toc: true
 ```
 保存，并且取一个自己喜欢的名字，在`Tools->Build System`中选择即可。
 
-如果复制出现问题，请访问[https://gist.github.com/Xuanwo/0cb4bce76929ed764daf](https://gist.github.com/Xuanwo/0cb4bce76929ed764daf)
+如果复制出现问题，请访问 [https://gist.github.com/Xuanwo/0cb4bce76929ed764daf](https://gist.github.com/Xuanwo/0cb4bce76929ed764daf)
 
 ## Linux下
 ``以Ubuntu为例，系统不同请自行修改终端参数。``
@@ -76,7 +76,7 @@ toc: true
 ```
 保存，并且取一个自己喜欢的名字，在`Tools->Build System`中选择即可。
 
-如果复制出现问题，请访问[https://gist.github.com/Xuanwo/31ac95e82d446db37c2e](https://gist.github.com/Xuanwo/31ac95e82d446db37c2e)
+如果复制出现问题，请访问 [https://gist.github.com/Xuanwo/31ac95e82d446db37c2e](https://gist.github.com/Xuanwo/31ac95e82d446db37c2e)
 
 ## 收工
 一个简单的IDE已经构建完毕了，下面可以进行一些简单的测试。
