@@ -4,7 +4,7 @@
       <span class="logo">
         <i class="icon-logo"></i>
       </span>
-      <span class="site-title">{{ config.title }}</span>
+      <span class="site-title" style="opacity: 1; top: 0px;box-shadow: 5px 1px 10px #888;" >{{ config.title }}</span>
   </a>
   <span class="logo-line-after"><i></i></span>
 </h1>
