@@ -34,6 +34,10 @@ layout: "post"
 - CF网站的题面抓取工具[CodeforcesGrabber](https://github.com/Xuanwo/CodeforcesGrabber)
 - 为知笔记开源插件[SublimeForWiz](https://github.com/Xuanwo/SublimeForWiz)
 
+# 捐赠按钮
+如果我的文章对你有些作用，欢迎进行捐赠，非常感谢>.<
+![捐赠按钮](http://xuanwo.qiniudn.com/alipay.jpg)
+
 # 更新日志
 - 2014年06月12日 完成`现状`和`兴趣`介绍。
 - 2014年07月03日 迁移至Hexo引擎构建博客。
