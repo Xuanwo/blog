@@ -7,6 +7,8 @@ toc: true
 # 前言
 最近在电脑上配置了VMware，想要搭建一个Mac OS X的虚拟机以供体验。不过网上的资料过于老旧，版本更新不及时，导致我在配置的过程中遇到了无数的坑，折腾了一个晚上才配置成功。事后我总结了相关的经验和实践完成了这份教程，希望能够对大家有所益处~
 
+<!-- more -->
+
 # 需要准备的东西
 - [VMware 11.1.1](http://pan.baidu.com/s/1mgAazK8)
 - [Unlocker](http://pan.baidu.com/s/1i3nLNXr)
