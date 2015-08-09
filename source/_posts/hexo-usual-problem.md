@@ -9,7 +9,7 @@ Hexo是一个非常好用的静态博客生成器，但是由于很多方面的�
 
 **本文欢迎转载，但是恳请保留贡献者信息，谢谢。**
 
-<!--more-->
+<!-- more -->
 
 ---
 
@@ -34,8 +34,7 @@ Error: spawn ENOENT
     at Process.ChildProcess._handle.onexit (child_process.js:791:34)
 ```
 **解决方案：**
-1. 检查Git的相关配置，将git所在目录添加到系统path中去。
-2. 使用`Github For Windows`的朋友，将git添加至path之后，使用`git shell.lnk`启动Hexo。在lnk文件的属性界面中`目标`项中添加`C:\Users\xuanw_000\AppData\Local\GitHub\GitHub.appref-ms --open-shell /k "C:\Program Files\nodejs\nodevars.bat"`。其中`C:\Users\xuanw_000\AppData\Local\GitHub\GitHub.appref-ms --open-shell /k`是原来的文本，`"C:\Program Files\nodejs\nodevars.bat"`是新增的，用于在shell中添加nodejs运行环境。不会配置可以点击[这里](https://github.com/Xuanwo/xuanwo.github.io/raw/blog/Git%20Shell.lnk)下载。
+检查Git的相关配置，将git所在目录添加到系统path中去。
 
 ### Deploy设置错误
 **问题描述：**
@@ -167,7 +166,7 @@ iption: Description\nread_more: Read More\n\u0000',
 **问题描述：**
 在修改主题文件之后，页面的文件依然没有更新。
 **解决方案：**
-`hexo clean`并且删除`.deploy`文件夹之后，`hexo d -g`。为了强制浏览器更新资源文件，可以采用'Ctrl+F5'来刷新。
+`hexo clean`并且删除`.deploy_git`文件夹之后，`hexo d -g`。为了强制浏览器更新资源文件，可以采用'Ctrl+F5'来刷新。
 
 ## 页面没有渲染（partial转义失败）
 **问题描述：**
@@ -190,13 +189,14 @@ iption: Description\nread_more: Read More\n\u0000',
 [参见Issues](https://github.com/hexojs/hexo/issues/1137)
 表现为文件不多，但是渲染非常缓慢，超过半个小时。
 **问题分析：**
-问题出在'Highlight.js`在判断语言类型时，会因为`-`这个符号导致卡死。
+问题出在`Highlight.js`在判断语言类型时，会因为`-`这个符号导致卡死。
 **解决方案：**
 在使用代码块时，明确使用类型，或者全部使用`plain`类型，如下：
-
-	```plain
-	something
-	```
+{% raw %}
+```plain
+something
+```
+{% endraw %}
 
 ## 升级至Hexo 3.0版本后，deploy报错
 **问题描述：**
@@ -217,7 +217,7 @@ openshift
 ```
 安装命令为：
 ```
-npm install hexo-deployer-git //将git替换为别的名字就可以安装对应模块
+npm install hexo-deployer-git --save //将git替换为别的名字就可以安装对应模块
 ```
 然后对`_config.yml`做如下设置：
 ```
@@ -227,7 +227,18 @@ deploy:
   branch: [branch]
   message: [message]
 ```
-*目前多Git部署存在BUG，等待修复中。*
+
+## Mac OS安装Hexo出错
+**问题描述：**
+[参见Issues](https://github.com/hexojs/hexo/issues/1326)
+命令行返回ERROR：
+```
+{ [Error: Cannot find module './build/Release/DTraceProviderBindings'] code: 'MODULE_NOT_FOUND' }
+{ [Error: Cannot find module './build/default/DTraceProviderBindings'] code: 'MODULE_NOT_FOUND' }
+{ [Error: Cannot find module './build/Debug/DTraceProviderBindings'] code: 'MODULE_NOT_FOUND' }
+```
+**解决方案：**
+使用命令`npm install hexo --no-optional`
 
 ---
 
@@ -313,20 +324,34 @@ var duoshuoQuery = {short_name:"yourshortname"};
 使用Github客户端可以免去输入密码操作的原因就是客户端在本地生成了一个SSH key并且添加到了Github网站中。不喜欢使用Github客户端的童鞋可以参考下面的流程自行生成SSH key。
 [使用Github SSH Key以免去Hexo部署时输入密码](http://xuanwo.org/2015/02/07/generate-a-ssh-key/)
 
+## 多git部署
+参考[hexo-deployer-git](https://github.com/hexojs/hexo-deployer-git)插件README进行配置：
+
+```
+deploy:
+  type: git
+  message: [message]
+  repo: 
+    github: <repository url>,[branch]
+    gitcafe: <repository url>,[branch]
+```
+
+请注意每一个冒号后面的空格，如果丢失会导致yml文件读取错误。
+
 # 贡献者
 - [@Xuanwo](http://xuanwo.org/)
 - [@TimNew](http://timnew.me/)
 - [@tommy351](http://zespia.tw/)
 
 # 更新日志
-- 2014年08月14日 完成大体框架，内容慢慢填充。
-- 2014年08月23日 补充404问题，以及如何在不同电脑（系统）上使用Hexo。
-- 2014年09月06日 新增自有域名二级目录无法访问，在主目录下添加md文件。
+- 2014年08月14日 完成大体框架，内容慢慢填充
+- 2014年08月23日 补充404问题，以及如何在不同电脑（系统）上使用Hexo
+- 2014年09月06日 新增自有域名二级目录无法访问，在主目录下添加md文件
 - 2014年09月09日 新增Hexo版本回退，Hexo所有命令报错。
 - 2014年09月23日 新增Partial没有转义
 - 2014年09月24日 新增添加社会化评论
 - 2015年02月06日 新增本地添加SSH key，修复部分笔误
 - 2015年02月07日 SSH key生成独立成篇
-- 2015年04月01日 添加了部分Hexo3.0带来的问题，新增了`skip_render`参数设置。
-- 2015年04月03日 添加了Hexo3.0中deploy设置。
-- 2015年08月09日 更新了`skip_render`参数设置，补充了更为详细的说明。
+- 2015年04月01日 添加了部分Hexo3.0带来的问题，新增了`skip_render`参数设置
+- 2015年04月03日 添加了Hexo3.0中deploy设置
+- 2015年08月09日 添加了多git部署，Mac OS安装出错，更新了`skip_render`参数设置以及部分文本说明
