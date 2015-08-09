@@ -253,46 +253,20 @@ deploy:
 
 ### Hexo3.0以上支持
 **使用`_config.yml`下的`skip_render`参数。**
-比如说现在`source`下有两个文件夹，一个是`_post`，一个是`haha`，里面各有一个名为`hello-world.md`的文档，然后我的`skip_render`参数为：
-`skip_render: haha/*.md`
-那么，hexo g之后的结果为：
+`skip_render`使用了[`minimatch`](https://github.com/isaacs/minimatch)，开始匹配的位置是基于你的`source_dir`的，一般来说，是你的`source`文件夹下。下面我分别列举几种常见的情况进行说明：
+
+*请注意yml中的文件格式，输入单个数据请注意空格，输入数组请进行缩进*
+
+1. 单个文件夹下全部文件：`skip_render: test/*`
+1. 单个文件夹下指定类型文件：`skip_render: test/*.md`
+1. 单个文件夹下全部文件以及子目录:`skip_render: test/**`
+1. 多个文件夹以及各种复杂情况：
 ```
-INFO  Files loaded in 503 ms
-INFO  Generated: js/script.js
-INFO  Generated: fancybox/jquery.fancybox.pack.js
-INFO  Generated: fancybox/jquery.fancybox.js
-INFO  Generated: fancybox/jquery.fancybox.css
-INFO  Generated: fancybox/helpers/jquery.fancybox-thumbs.js
-INFO  Generated: fancybox/helpers/jquery.fancybox-thumbs.css
-INFO  Generated: fancybox/helpers/jquery.fancybox-media.js
-INFO  Generated: fancybox/helpers/jquery.fancybox-buttons.js
-INFO  Generated: fancybox/helpers/jquery.fancybox-buttons.css
-INFO  Generated: fancybox/helpers/fancybox_buttons.png
-INFO  Generated: fancybox/fancybox_sprite@2x.png
-INFO  Generated: fancybox/fancybox_sprite.png
-INFO  Generated: fancybox/fancybox_overlay.png
-INFO  Generated: fancybox/fancybox_loading@2x.gif
-INFO  Generated: fancybox/fancybox_loading.gif
-INFO  Generated: fancybox/blank.gif
-INFO  Generated: css/style.css
-INFO  Generated: css/images/banner.jpg
-INFO  Generated: css/fonts/fontawesome-webfont.woff
-INFO  Generated: css/fonts/fontawesome-webfont.ttf
-INFO  Generated: css/fonts/fontawesome-webfont.svg
-INFO  Generated: css/fonts/fontawesome-webfont.eot
-INFO  Generated: css/fonts/FontAwesome.otf
-INFO  Generated: haha/hello-world.md    //看这里！看这里！
-INFO  Generated: 2015/03/26/hello-world/index.html
-INFO  Generated: archives/index.html
-INFO  Generated: archives/2015/index.html
-INFO  Generated: archives/2015/03/index.html
-INFO  Generated: index.html
-INFO  29 files generatd in 1.28 s
+skip_render:
+    - `test1/*.html`
+    - `test2/**`
 ```
 
-也就是说，skip_render参数的使用需要注意两点：
-- 此处的位置是相对于你的`source_dir`的位置，一般来说，就是以source为根的位置
-- 这里的文件匹配是基于正则的，大致上可以参考[这个](http://en.wikipedia.org/wiki/Glob_(programming))，也就是说`*.html`可以忽略所有html文档，`hello-wordl.md`的话，就能忽略掉名字为`hello-wordl.md`的文件。
 
 ## Hexo版本回退
 有时候更新之后发现新版本的Hexo不能按照预期的方式工作，这时候就需要使用版本回退功能。
@@ -355,3 +329,4 @@ var duoshuoQuery = {short_name:"yourshortname"};
 - 2015年02月07日 SSH key生成独立成篇
 - 2015年04月01日 添加了部分Hexo3.0带来的问题，新增了`skip_render`参数设置。
 - 2015年04月03日 添加了Hexo3.0中deploy设置。
+- 2015年08月09日 更新了`skip_render`参数设置，补充了更为详细的说明。
