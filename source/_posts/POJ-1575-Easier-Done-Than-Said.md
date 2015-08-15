@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1575
+源地址：
+
+http://poj.org/problem?id=1575
 
 # 理解
 运用三种标记，分别标记三种情况。对每一次字符读入均进行判断，一旦遇到不符合条件的，就直接退出循环。

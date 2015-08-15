@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2231
+源地址：
+
+http://poj.org/problem?id=2231
 
 # 理解
 打表找规律，排序之后发现：

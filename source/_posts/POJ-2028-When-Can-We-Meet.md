@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2028
+源地址：
+
+http://poj.org/problem?id=2028
 
 # 理解
 一边输入一边记录开会最多且最近的那天。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=465
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=465
 
 # 理解
 一开始写了一个特别暴力的程序，吃饭之前让它一直跑，但是一直到我吃完饭回来还在跑14- -，默然泪。

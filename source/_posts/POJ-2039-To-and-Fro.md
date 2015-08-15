@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2039
+源地址：
+
+http://poj.org/problem?id=2039
 
 # 理解
 找规律的题目。

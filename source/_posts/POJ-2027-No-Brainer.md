@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2027
+源地址：
+
+http://poj.org/problem?id=2027
 
 # 理解
 超级大水题= =，比较一下X和Y的大小。

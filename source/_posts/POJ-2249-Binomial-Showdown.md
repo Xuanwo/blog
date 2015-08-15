@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2249
+源地址：
+
+http://poj.org/problem?id=2249
 
 # 理解
 求二项式，直接使用二项式定理～

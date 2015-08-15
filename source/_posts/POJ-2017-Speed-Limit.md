@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2017
+源地址：
+
+http://poj.org/problem?id=2017
 
 # 理解
 一道比较简单的模拟，跨项累加。

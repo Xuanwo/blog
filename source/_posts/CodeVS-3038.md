@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codevs.cn/problem/3038/
+源地址：
+
+http://codevs.cn/problem/3038/
 
 # 理解
 水题。

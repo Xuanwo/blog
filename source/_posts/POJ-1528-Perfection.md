@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1528
+源地址：
+
+http://poj.org/problem?id=1528
 
 # 理解
 1. 一个数n的正因数之和等于n则输出`PERFECT`

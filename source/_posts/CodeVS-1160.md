@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codevs.cn/problem/1160/
+源地址：
+
+http://codevs.cn/problem/1160/
 
 # 理解
 一道模拟的，一直在纠结这个规律怎么推。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1477
+源地址：
+
+http://poj.org/problem?id=1477
 
 # 理解
 只有比平均数还要大的柱子需要移动，而移动的具体方式不需要考虑，明白了这一点就是水题了。

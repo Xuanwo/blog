@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1338
+源地址：
+
+http://poj.org/problem?id=1338
 
 # 理解
 本来貌似是一道很难的题目，不过因为数据比较弱，打表水过。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1005
+源地址：
+
+http://poj.org/problem?id=1005
 
 # 理解
 一块地按照`50 square miles each year`的速度被腐蚀，给定一个坐标要求计算到第几年的时候被腐蚀。自然是一道大水题：计算出给定坐标到原点的距离，取这个距离为半径求出实际的半圆面积，然后跟已经被腐蚀的面积比较一下即可。

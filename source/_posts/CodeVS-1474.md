@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codevs.cn/problem/1474/
+源地址：
+
+http://codevs.cn/problem/1474/
 
 # 理解
 一开始就看到了下面的提示——可以使用反向取余法，然后就去百度了一下，结果没有发现什么有用的东西- -，然后坑爹的麦当劳的网络又一直连不上GoAgent，直接导致谷歌也上不去，然后就只能靠自己YY反向取余法到底是个什么玩意儿了。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/71/A
+源地址：
+
+http://codeforces.com/problemset/problem/71/A
 
 # 理解
 刷水题，保持手指灵活性= =

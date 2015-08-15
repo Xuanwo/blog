@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2485
+源地址：
+
+http://poj.org/problem?id=2485
 
 # 理解
 拖了很久的最小生成树练习题，对着模板想了很久。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1061
+源地址：
+
+http://poj.org/problem?id=1061
 
 # 理解
 扩展欧几里德方程的模板体。当初没有做出来，现在好像明白一点了。

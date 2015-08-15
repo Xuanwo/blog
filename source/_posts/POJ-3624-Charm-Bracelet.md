@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://poj.org/problem?id=3624
+源地址：
+
+http://poj.org/problem?id=3624
 
 # 理解
 这道题拖了很久很久，一直没有搞定，对DP以及背包问题的理解，一直处在一个瓶颈之中，特别烦躁。

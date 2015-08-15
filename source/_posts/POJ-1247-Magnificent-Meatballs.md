@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1247
+源地址：
+
+http://poj.org/problem?id=1247
 
 # 理解
 让给的肉丸子少的人继续给，直到最后判断是否相等。

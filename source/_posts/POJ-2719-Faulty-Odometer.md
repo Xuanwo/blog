@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2719
+源地址：
+
+http://poj.org/problem?id=2719
 
 # 理解
 一语惊醒梦中人啊- -，九进制就OK。

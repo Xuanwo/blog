@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2840
+源地址：
+
+http://poj.org/problem?id=2840
 
 # 理解
 很有意思的题目，求解大本钟敲几下的问题，按照规律来。

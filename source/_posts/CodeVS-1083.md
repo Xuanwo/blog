@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codevs.cn/problem/1083/
+源地址：
+
+http://codevs.cn/problem/1083/
 
 # 理解
 一道基础题，但是我在如何建立模型上面想了很久。

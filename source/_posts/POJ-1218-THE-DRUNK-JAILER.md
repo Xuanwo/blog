@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1218
+源地址：
+
+http://poj.org/problem?id=1218
 
 # 理解
 汗= =，偷鸡水过了，正好是牢房数的平方根向下取整，不过没有严格的证明

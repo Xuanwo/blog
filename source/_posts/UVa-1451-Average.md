@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=24&page=show_problem&problem=4197
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=24&page=show_problem&problem=4197
 
 # 理解
 这道题被康逗逗怒拿了FB，默默地去看题，结果完全看不出什么头绪。题意扯到了DNA神马的，其实完全不重要。实际上就是给你一个由0和1组成的串，叫你求出一段长度至少为L的连续子序列，使得这个子序列的平均数最小。如果出现多解，则要求取长度小而且起点小的那个序列。

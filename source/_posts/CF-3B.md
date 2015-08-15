@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/3/B
+源地址：
+
+http://codeforces.com/problemset/problem/3/B
 
 # 理解
 读懂题略微花了一点时间，主要是生词多，有点吓人= =。有一辆卡车，要装载一些船只，有1和2两种。然后给出n个船的类型和容积，要求给定卡车体积v的情况下，装载的船的最大容积。

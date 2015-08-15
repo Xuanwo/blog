@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1503
+源地址：
+
+http://poj.org/problem?id=1503
 
 # 理解
 还是高精度计算，大数相加～

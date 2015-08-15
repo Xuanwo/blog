@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1663
+源地址：
+
+http://poj.org/problem?id=1663
 
 # 理解
 发现奇偶之间的规律之后，这也就是一道水题。

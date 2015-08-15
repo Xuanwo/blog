@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3194
+源地址：
+
+http://poj.org/problem?id=3194
 
 # 理解
 本以为只要逐个判断每一个数是否有相邻即可，事实上，少考虑了一种情况。

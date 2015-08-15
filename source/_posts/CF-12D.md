@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/12/problem/D
+源地址：
+
+http://codeforces.com/contest/12/problem/D
 
 # 理解
 一个很神奇的题目= =。

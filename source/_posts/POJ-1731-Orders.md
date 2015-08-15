@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1731
+源地址：
+
+http://poj.org/problem?id=1731
 
 # 理解
 全排列的简单运用

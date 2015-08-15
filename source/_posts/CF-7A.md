@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/7/A
+源地址：
+
+http://codeforces.com/problemset/problem/7/A
 
 # 理解
 同样是理解题- -。

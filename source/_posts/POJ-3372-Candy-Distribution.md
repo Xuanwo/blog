@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3372
+源地址：
+
+http://poj.org/problem?id=3372
 
 # 理解
 找规律的题目，照例打表，发现只有2的次方才符合规律。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1862
+源地址：
+
+http://poj.org/problem?id=1862
 
 # 理解
 原先质量越大的，如果越先被计算，那么开根号的次数就会越多，相比之下，最终结果就会越小。最后再排一下序就好。

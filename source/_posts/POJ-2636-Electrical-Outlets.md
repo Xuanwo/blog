@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2636
+源地址：
+
+http://poj.org/problem?id=2636
 
 # 理解
 今天做的时候发现`2636.cpp`文件已经存在了，有点神奇= =，改了一下头文件，直接提交了。

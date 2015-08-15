@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3219
+源地址：
+
+http://poj.org/problem?id=3219
 
 # 理解
 跪拜大神的神思路，还有二进制的神奇用法。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1083
+源地址：
+
+http://poj.org/problem?id=1083
 
 # 理解
 题目不难，关键在于理解题意。开一个数组，求出每一张桌子移动的时间，遍历找出最大值即可。

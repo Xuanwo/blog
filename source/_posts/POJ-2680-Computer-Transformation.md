@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3048
+源地址：
+
+http://poj.org/problem?id=3048
 
 # 理解
 数学规律并不难，很容易推出f[n]=f[n-1]+f[n-2]*2。但是2^1000次方，必须使用一定的手段来处理这个超大的数据。这里使用了一种比较简单的技巧，数组模拟。

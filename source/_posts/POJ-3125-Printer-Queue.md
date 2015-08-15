@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3125
+源地址：
+
+http://poj.org/problem?id=3125
 
 # 理解
 打印队列，看名字都感觉是队列的经典应用，不过没有使用STL，而是模拟了一个。

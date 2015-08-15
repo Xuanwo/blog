@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=
+源地址：
+
+http://poj.org/problem?id=
 
 # 理解
 将已经选择的课程标记下来，然后对于每一个类别分别进行验证是否已经符合了要求。

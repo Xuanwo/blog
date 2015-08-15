@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2521
+源地址：
+
+http://poj.org/problem?id=2521
 
 # 理解
 小学的时候经常做的题目啊，只要保持头脑清醒，计算出交易过程中因为假币损失的钱。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2524
+源地址：
+
+http://poj.org/problem?id=2524
 
 # 理解
 POJ上最简单的一道关于并查集的题目，没有使用路径压缩，没有进行优化，直接水过。

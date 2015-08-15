@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1519
+源地址：
+
+http://poj.org/problem?id=1519
 
 # 理解
 这不就是弃九法么。把每个位置上数字相加迭代即可，但是多次WA，看了discuss才知道原来数据到了2000位的，只能用数组模拟。

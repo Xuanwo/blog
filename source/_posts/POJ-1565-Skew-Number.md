@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1565
+源地址：
+
+http://poj.org/problem?id=1565
 
 # 理解
 不难，按照规则计算即可，注意大数的处理。

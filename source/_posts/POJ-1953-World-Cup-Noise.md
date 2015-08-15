@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1953
+源地址：
+
+http://poj.org/problem?id=1953
 
 # 理解
 稍微推了几个，发现是斐波那契数列，水之。

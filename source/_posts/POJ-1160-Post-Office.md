@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1160
+源地址：
+
+http://poj.org/problem?id=1160
 
 # 理解
 很经典的邮局送信的DP问题。

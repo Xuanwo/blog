@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1007
+源地址：
+
+http://poj.org/problem?id=1007
 
 # 理解
 我再一次把问题想的太复杂了，其实就是一个计算逆序数并且排序的一个过程。

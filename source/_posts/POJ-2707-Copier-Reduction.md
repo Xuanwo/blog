@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2707
+源地址：
+
+http://poj.org/problem?id=2707
 
 # 理解
 纯英文题，题目读懂就会做，注意int和float的区别。

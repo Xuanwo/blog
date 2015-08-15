@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2371
+源地址：
+
+http://poj.org/problem?id=2371
 
 # 理解
 排序题，输出制定的i-th的数。

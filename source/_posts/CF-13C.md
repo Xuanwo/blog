@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/13/C
+源地址：
+
+http://codeforces.com/problemset/problem/13/C
 
 # 理解
 给定一个序列，然后对于每一个数，你都可以进行自增或者自减操作。要求求出使得这个序列变为非减序列的最少操作次数。

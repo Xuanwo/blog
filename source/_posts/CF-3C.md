@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/3/C
+源地址：
+
+http://codeforces.com/problemset/problem/3/C
 
 # 理解
 一开始看到3*3，第一反应是想要枚举出所有可能的情况，也就是总共有9^3次种，但是发现自己很难处理这些情况，后来还是决定用暴力模拟的方法来做。

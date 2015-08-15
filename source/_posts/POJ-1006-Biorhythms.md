@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1006
+源地址：
+
+http://poj.org/problem?id=1006
 
 # 理解
 基本上就是孙子兵法，求那个最小的公倍数。记得华罗庚先生也写过同余式的相关著作。恩，找出规律之后，轻松水掉。

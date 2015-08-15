@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://poj.org/problem?id=2479
+源地址：
+
+http://poj.org/problem?id=2479
 
 # 理解
 因为超时卡了很久，不得不换了一种更加优越的方法。不过有点丑，有机会重写一次吧= =

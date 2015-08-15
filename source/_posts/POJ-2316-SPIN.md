@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2316
+源地址：
+
+http://poj.org/problem?id=2316
 
 # 理解
 所有数据相加，再对10取模，因为每个字符串的长度都是相同的～

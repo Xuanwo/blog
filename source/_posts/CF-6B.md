@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/6/B
+源地址：
+
+http://codeforces.com/problemset/problem/6/B
 
 # 理解
 总统的办公室里面坐着他的副手，然后每个人都会有一张办公桌（长短不一，但每个人都有自己的颜色）。然后告诉你每个人的办公桌都是长方形，给定一个描述办公室布局的图，要你求出这个办公室里面总统的副手有几个。

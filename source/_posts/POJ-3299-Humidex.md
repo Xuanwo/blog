@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3299
+源地址：
+
+http://poj.org/problem?id=3299
 
 # 理解
 我的理解有误。主要是看input里面都是给定T，D求H的情况，便以为这道题就是用一下公式。没想到这道题还有其他的两种情况。说明不管在怎样的条件下，看题都是至关重要的一步。还有就是在输入输出上，`%s`和`%c`的区别，值得注意。

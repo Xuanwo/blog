@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3278
+源地址：
+
+http://poj.org/problem?id=3278
 
 # 理解
 BFS最基础的应用，只有三个方向，一个是乘二，一个是加一，一个是减一。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/5/problem/A
+源地址：
+
+http://codeforces.com/contest/5/problem/A
 
 # 理解
 很简单的一道水题，实际上就是输出字符串个数和乘上当前聊天室里面的人数的和。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1321
+源地址：
+
+http://poj.org/problem?id=1321
 
 # 理解
 感觉还是蛮简单的一道题目，主要是因为数据特别水，最大只有8*8的棋盘，用DFS按照行来搜索。主要的问题在于如何确保同列不存在重复的棋子。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1183
+源地址：
+
+http://poj.org/problem?id=1183
 
 # 理解
 题目不难，但是被数据类型坑了= =。

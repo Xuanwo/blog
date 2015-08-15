@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/14/B
+源地址：
+
+http://codeforces.com/problemset/problem/14/B
 
 # 理解
 一个摄影师要拍摄运动员比赛的照片，然后给定摄影师的坐标，以及每一位运动员的活动范围。要求计算出摄影是需要活动的最小步数。

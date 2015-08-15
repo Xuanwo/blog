@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=4217
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=4217
 
 # 理解
 不理会逗比的国王们= =，题意很清楚，给定一个序列，要求删除一段连续的序列之后，剩下的连续递增序列最长，要求输出满足题意的序列的长度。

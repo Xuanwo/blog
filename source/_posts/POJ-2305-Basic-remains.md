@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2305
+源地址：
+
+http://poj.org/problem?id=2305
 
 # 理解
 高精度计算题啊，用Java的高精度类水过。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3062
+源地址：
+
+http://poj.org/problem?id=3062
 
 # 理解
 我对这个充满恶意的世界感到了深深的绝望TnT。原样输出之。。。

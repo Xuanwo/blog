@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/9/problem/A
+源地址：
+
+http://codeforces.com/contest/9/problem/A
 
 # 理解
 阅读题= =，实际上，只要Dot的点数比其他两个人中大的那个人大就行。

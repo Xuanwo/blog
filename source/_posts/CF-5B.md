@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/5/problem/B
+源地址：
+
+http://codeforces.com/contest/5/problem/B
 
 # 理解
 题目不难，不过输出上有点问题，因为题目要求左右均匀分布，上一次偏左则下一次需要偏右。

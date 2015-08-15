@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3751
+源地址：
+
+http://poj.org/problem?id=3751
 
 # 理解
 通过标记来判断正午和午夜，水题。

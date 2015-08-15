@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1207
+源地址：
+
+http://poj.org/problem?id=1207
 
 # 理解
 额，题意很清楚。就是一道关于3n+1的规律题，要求找出给定的i和j之间最长的循环数列。但是我坑了很久，因为错误的使用了A?B:C这样的三元运算符，被学姐学长痛批一顿之后，果断修改了。AC之余，提醒自己一下，良好的代码规范的重要性。

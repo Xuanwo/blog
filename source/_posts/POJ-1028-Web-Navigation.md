@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1028
+源地址：
+
+http://poj.org/problem?id=1028
 
 # 理解
 这是一道STL里面的栈的运用的一个模板题。构建两个栈，一个存放forward，一个存放backward，然后后再建立一个string类用于存放浏览器当前的页面。题目不难，但是要理解你现在的操作对栈影响是什么，先后顺序一点都不能错。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/4/problem/B
+源地址：
+
+http://codeforces.com/contest/4/problem/B
 
 # 理解
 水题一枚。

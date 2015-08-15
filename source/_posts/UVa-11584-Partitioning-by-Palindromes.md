@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=465&page=show_problem&problem=2631
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=465&page=show_problem&problem=2631
 
 # 理解
 原谅我是一个乐盲，看到乐谱就吓出翔，不敢看了= =。

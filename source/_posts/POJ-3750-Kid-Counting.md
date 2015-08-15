@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3750
+源地址：
+
+http://poj.org/problem?id=3750
 
 # 理解
 中文题- -，用队列来搞定～

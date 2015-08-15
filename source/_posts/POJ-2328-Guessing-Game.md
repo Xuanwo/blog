@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2328
+源地址：
+
+http://poj.org/problem?id=2328
 
 # 理解
 猜数字游戏，还是比较熟悉的模型。

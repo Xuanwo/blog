@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1658
+源地址：
+
+http://poj.org/problem?id=1658
 
 # 理解
 额，水题一枚，直接算就好

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/12/A
+源地址：
+
+http://codeforces.com/problemset/problem/12/A
 
 # 理解
 问题很简单，要求判断是不是一个中心对称的图形。

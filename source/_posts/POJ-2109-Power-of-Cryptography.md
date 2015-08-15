@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2109
+源地址：
+
+http://poj.org/problem?id=2109
 
 # 理解
 直接暴力求。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/2/problem/A
+源地址：
+
+http://codeforces.com/contest/2/problem/A
 
 # 理解
 真尼玛给俄式英语跪了= =，游戏规则中最关键的地方各种看不懂。

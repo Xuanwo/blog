@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/16/C
+源地址：
+
+http://codeforces.com/problemset/problem/16/C
 
 # 理解
 一道关于分辨率转化的问题。要求将一个大分辨率按照指定的宽高比进行转化，如果宽高比不符，则进行切割。首先，我们来求一个x和y的最大公约数d，然后分别令x=x/d，y=y/d，这样就得到了x和y之间最简的比例形式。然后a和b分别去除以x和y，得到的两个背书中去掉小数部分较小的那个，就是切割之后的倍数比。最后得到的结果就是符合要求的结果。

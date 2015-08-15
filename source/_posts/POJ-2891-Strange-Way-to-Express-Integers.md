@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2891
+源地址：
+
+http://poj.org/problem?id=2891
 
 # 理解
 做的第一道关于扩展欧几里德方程的题目，还不够。

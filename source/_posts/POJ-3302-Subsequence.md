@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3302
+源地址：
+
+http://poj.org/problem?id=3302
 
 # 理解
 直接用一个循环，遍历str1，与str2进行单字符匹配，如果匹配成功就count++。

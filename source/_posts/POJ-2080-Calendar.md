@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2080
+源地址：
+
+http://poj.org/problem?id=2080
 
 # 理解
 完全的模拟题。将给定的天数转化为年月日，注意闰年，大小月。

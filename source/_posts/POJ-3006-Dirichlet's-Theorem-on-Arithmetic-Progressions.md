@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3006
+源地址：
+
+http://poj.org/problem?id=3006
 
 # 理解
 筛法打素数表，然后暴力得到这些数字，判断是否为素数，若是则次数times+1,直到得到第n个素数。

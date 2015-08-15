@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3196
+源地址：
+
+http://poj.org/problem?id=3196
 
 # 理解
 好长的题目- -，是一个关于赌博的问题。给你三个数pot，bet，fpot，分别代表初始金额，赌注金额，封盘金额，每次加钱可能是赌注的-1，-2，-3，1，2，3倍，求最少多少次可以到达封盘金额。

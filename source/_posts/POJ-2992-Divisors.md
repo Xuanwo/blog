@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2992
+源地址：
+
+http://poj.org/problem?id=2992
 
 # 理解
 题目的意思还是比较简单的：输入C(n,k), 求该数的因数个数。

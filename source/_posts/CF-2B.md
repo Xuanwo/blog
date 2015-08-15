@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/2/problem/B
+源地址：
+
+http://codeforces.com/contest/2/problem/B
 
 # 理解
 比赛的时候没有做出来，一看就知道应该是一个DP，选取一个2或者5最少的路径。

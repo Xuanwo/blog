@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1488
+源地址：
+
+http://poj.org/problem?id=1488
 
 # 理解
 字符串处理- -，慢慢坑就是了。。注意输入方式，有空格的时候要用getline。

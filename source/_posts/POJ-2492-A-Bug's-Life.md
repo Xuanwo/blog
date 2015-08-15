@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2492
+源地址：
+
+http://poj.org/problem?id=2492
 
 # 理解
 当初学习并查集的时候做得题目，是一个比较经典的关于并查集的题目

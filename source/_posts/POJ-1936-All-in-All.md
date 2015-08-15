@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1936
+源地址：
+
+http://poj.org/problem?id=1936
 
 # 理解
 字符串的题目。因为数据水所以这是一道水题，要是数据再强一点估计就TLE了。

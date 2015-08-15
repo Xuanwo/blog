@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codevs.cn/problem/1012/
+源地址：
+
+http://codevs.cn/problem/1012/
 
 # 理解
 自然是水题= =。只要用一个循环就可以搞定，最大公约数用gcd，最小公倍数就是i*j/gcd(i,j)，没有什么问题。

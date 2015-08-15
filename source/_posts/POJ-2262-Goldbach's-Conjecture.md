@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2262
+源地址：
+
+http://poj.org/problem?id=2262
 
 # 理解
 给定大于6的偶数X，求满足X=a+b且|a-b|最大的那对，直接暴力做，事实上，找到的第一对就是满足条件的那对。

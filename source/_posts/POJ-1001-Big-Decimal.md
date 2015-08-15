@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1001
+源地址：
+
+http://poj.org/problem?id=1001
 
 # 理解
 搜索高精度计算的时候发现java自带了关于高精度处理的类，毫不客气的拿来用了～

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3518
+源地址：
+
+http://poj.org/problem?id=3518
 
 # 理解
 虽然看起来并没有二分计算的代码，但是应用了二分的思想。设两个端点，分别向两个方向扩展，最后的结果就是两个端点的差值。

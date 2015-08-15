@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1323
+源地址：
+
+http://poj.org/problem?id=1323
 
 # 理解
 最优的方法是出一张比你出的牌大的牌中最小的牌，不过没有严格证明= =。

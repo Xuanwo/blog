@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/3/problem/D
+源地址：
+
+http://codeforces.com/contest/3/problem/D
 
 # 理解
 比赛的时候没有做出来，赛后看了[琦神的解题报告](http://siofive.github.io/2014/11/02/%E6%8B%89%E7%BB%831/)才明白应该怎么敲。

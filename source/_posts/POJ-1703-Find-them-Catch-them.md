@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1703
+源地址：
+
+http://poj.org/problem?id=1703
 
 # 理解
 这个并查集有点不一样，之前做过的全都是判断是否连通，这一次确实要判断是否不连通。想了一想，其实还是可以转换过来的。假定r1，r2分别表示ab，bc之间的关系，0表示相同，1表示不同，则有下面的逻辑表。

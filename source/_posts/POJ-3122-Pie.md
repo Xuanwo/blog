@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3122
+源地址：
+
+http://poj.org/problem?id=3122
 
 # 理解
 这也是一道水题，二分切之。

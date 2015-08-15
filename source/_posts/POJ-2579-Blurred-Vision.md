@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2579
+源地址：
+
+http://poj.org/problem?id=2579
 
 # 理解
 对于一个R*C的矩阵，输出矩阵中每一个2*2的小方格四个值的平均值（向下取整）。

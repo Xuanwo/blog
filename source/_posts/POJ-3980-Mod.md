@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3980
+源地址：
+
+http://poj.org/problem?id=3980
 
 # 理解
 给定两个数，求他们的模。

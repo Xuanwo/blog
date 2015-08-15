@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1316
+源地址：
+
+http://poj.org/problem?id=1316
 
 # 理解
 水题，开一个数组模拟，水过～

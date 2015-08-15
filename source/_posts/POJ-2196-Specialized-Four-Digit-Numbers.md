@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2196
+源地址：
+
+http://poj.org/problem?id=2196
 
 # 理解
 直接暴力做，逐个判断是不是符合条件。

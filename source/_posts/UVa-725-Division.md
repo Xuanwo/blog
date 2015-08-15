@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=9&page=show_problem&problem=666
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=9&page=show_problem&problem=666
 
 # 理解
 提议比较简单，给你0~9这十个数字，要求将其组合为两个五位数X和Y，使得其满足`X/Y=N`这样的形式。然后就想到了用STL里面的next_permutation函数，很快把代码写了出来，中间还用到了queue来存储答案。不过WA了两发之后开始怀疑是不是STL效率太低导致T了，改用数组模拟，但是还是WA了。经过三个小时的漫长Debug之路，才发现原来问题出在**输入输出**，**我多输出了一个空行！！！**

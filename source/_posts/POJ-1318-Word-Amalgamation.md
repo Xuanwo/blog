@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1318
+源地址：
+
+http://poj.org/problem?id=1318
 
 # 理解
 一开始的思路有点偏，想要单纯的使用string类的compare函数来解决问题。但是稍微考虑一下之后发现，复杂度有点高。事实上，我根本就不需要知道它们是不是匹配，只要排序之后匹配即可。

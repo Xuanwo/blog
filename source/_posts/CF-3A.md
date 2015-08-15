@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/3/problem/A
+源地址：
+
+http://codeforces.com/contest/3/problem/A
 
 # 理解
 第一开始的想法是可以用DFS或者BFS搞定。后来仔细想了想，发现其实不需要这么复杂，通过建立一个坐标系，可以轻松搞定这个问题。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codevs.cn/problem/1501/
+源地址：
+
+http://codevs.cn/problem/1501/
 
 # 理解
 数据结构的基础题，不过我把它做成了一道模拟题= =。

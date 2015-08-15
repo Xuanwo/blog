@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3325
+源地址：
+
+http://poj.org/problem?id=3325
 
 # 理解
 去掉一个最高分，一个最低分，求平均值。

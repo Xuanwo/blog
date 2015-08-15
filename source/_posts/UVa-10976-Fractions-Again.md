@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=1917
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=1917
 
 # 理解
 直接暴力做，最多有n-1种可能，每种可能全都尝试一遍，看看能不能找到合适的解，定eps为1e-4，幸运1A。

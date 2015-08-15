@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1012
+源地址：
+
+http://poj.org/problem?id=1012
 
 # 理解
 用模拟的方法貌似会超时。直接打了一个表，求出0到14之间每一种k的值对应的m值，再根据输入输出就OK。

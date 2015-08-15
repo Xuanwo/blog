@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3086
+源地址：
+
+http://poj.org/problem?id=3086
 
 # 理解
 三角数求和，打表输出。

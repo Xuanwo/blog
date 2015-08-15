@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2190
+源地址：
+
+http://poj.org/problem?id=2190
 
 # 理解
 题目不难，只需求解给定一个数为ISBN数十，？上那个数字代表的是几。需要考虑的一些特殊情况：

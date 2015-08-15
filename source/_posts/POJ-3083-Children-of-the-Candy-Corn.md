@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3083
+源地址：
+
+http://poj.org/problem?id=3083
 
 # 理解
 最开始的代码程序直接报错，反复调试之后，发现我陷入了无限的循环之中。因为先写的左转优先的代码，面对这样的数据时：

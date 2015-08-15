@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1411
+源地址：
+
+http://poj.org/problem?id=1411
 
 # 理解
 打表暴力水过，估计是因为数据弱= =。

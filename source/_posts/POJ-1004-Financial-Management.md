@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1004
+源地址：
+
+http://poj.org/problem?id=1004
 
 # 理解
 额，就是求解12个数的平均数。不过据说POJ不能用lf，还要我没有遇到这样的问题，交了一个float水过。

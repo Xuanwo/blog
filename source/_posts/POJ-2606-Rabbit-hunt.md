@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2606
+源地址：
+
+http://poj.org/problem?id=2606
 
 # 理解
 与之前做过的题目几乎一模一样，只是结束条件不同。同样是计算每一个点的斜率，存在数组中，再排序。

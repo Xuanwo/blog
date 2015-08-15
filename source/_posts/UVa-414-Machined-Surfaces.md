@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=355
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=355
 
 # 理解
 题意还是比较好理解的，实际上就是求将两端合并，中间还会剩余多少个空格。只要找到X最多的那一行，问题就变得简单了。

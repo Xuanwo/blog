@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1969
+源地址：
+
+http://poj.org/problem?id=1969
 
 # 理解
 一道找规律的题目，只要把奇偶分开处理，结果很快出来了。

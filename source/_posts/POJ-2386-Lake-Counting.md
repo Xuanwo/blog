@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2386
+源地址：
+
+http://poj.org/problem?id=2386
 
 # 理解
 当年学习DFS的AC掉的一道水题。DFS的经典模板，通过找出全部的相连池塘块来确定有几块池塘。

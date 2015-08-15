@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2081
+源地址：
+
+http://poj.org/problem?id=2081
 
 # 理解
 简单的计算题。利用打表的方法，空间换时间。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1256
+源地址：
+
+http://poj.org/problem?id=1256
 
 # 理解
 再次遇到一道使用`next_permutation`的题目，不过这一次需要针对题目的给出的条件重新写一个`cmp`函数。

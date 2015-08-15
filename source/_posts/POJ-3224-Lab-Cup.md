@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3224
+源地址：
+
+http://poj.org/problem?id=3224
 
 # 理解
 直接每行取分，如果是3分就+1，比较出获得3分最多的人，输出号码。

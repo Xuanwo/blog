@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2623
+源地址：
+
+http://poj.org/problem?id=2623
 
 # 理解
 快速排序的简单应用，注意最后的输出格式。

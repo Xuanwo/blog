@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1604
+源地址：
+
+http://poj.org/problem?id=1604
 
 # 理解
 只需要截取后面五位，避免超过int的范围

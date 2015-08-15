@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2853
+源地址：
+
+http://poj.org/problem?id=2853
 
 # 理解
 因式分解，输出能用题目中的要求输出的组合的数目。

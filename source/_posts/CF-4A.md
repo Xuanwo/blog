@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/4/problem/A
+源地址：
+
+http://codeforces.com/contest/4/problem/A
 
 # 理解
 真不愧是过了1W+的题= =，水的真可怕。

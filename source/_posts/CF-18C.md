@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/18/C
+源地址：
+
+http://codeforces.com/problemset/problem/18/C
 
 # 理解
 题意很简单，把一个给定的数列分成两份，要求两份数字之和相等。直接暴力乱搞，预处理的时候用两个数组分别保存前后缀的数字之和，然后只要遍历一遍，就能得到最后的结果。

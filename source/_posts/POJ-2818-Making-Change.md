@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2818
+源地址：
+
+http://poj.org/problem?id=2818
 
 # 理解
 感觉很水的一道题，不知道为什么交题的人很少（吐槽一下坑爹的美元换算）。用DFS水掉了，分别从dispenser到pennies来算一遍就OK。我本以为用四个for也能过，但是discuss上面有人说过不了，TLE。有时间我试试看。

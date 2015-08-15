@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codevs.cn/problem/1475/
+源地址：
+
+http://codevs.cn/problem/1475/
 
 # 理解
 跟上一道题差不多- -，也是简单的写了一个循环，然后使用累积法计算十进制的值。不过有一个小小的坑，就是'A'字符的ANSI值不是'9'+1，而是'9'+7。为了省的麻烦，我还是采用了-'A'+10这样的方法。

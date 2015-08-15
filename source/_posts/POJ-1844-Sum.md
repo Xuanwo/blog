@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1844
+源地址：
+
+http://poj.org/problem?id=1844
 
 # 理解
 有这样两种情况：

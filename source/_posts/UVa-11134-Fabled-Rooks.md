@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=24&page=show_problem&problem=2075
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=24&page=show_problem&problem=2075
 
 # 理解
 比赛的时候没有写出来。其实很容易可以看出来，这个题目可以变成两个子题目，也就是X和Y方向并没有直接的关系，完全可以看成在X方向是不重叠摆放和在Y方向是不重叠摆放的问题。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3749
+源地址：
+
+http://poj.org/problem?id=3749
 
 # 理解
 将一个字符串按照一定的规则转化，中文题，不多说了。。

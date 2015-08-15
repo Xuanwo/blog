@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2153
+源地址：
+
+http://poj.org/problem?id=2153
 
 # 理解
 感觉不是很难，因为数据量不是很大，将人和成绩一一映射，然后遍历即可。

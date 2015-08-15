@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2551
+源地址：
+
+http://poj.org/problem?id=2551
 
 # 理解
 将一个数取下来，然后从1对n本身取模（%），之后将取模之后的数字乘以10加1，再取模，直到取模为0。

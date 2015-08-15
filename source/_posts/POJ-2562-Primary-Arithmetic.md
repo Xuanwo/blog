@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2562
+源地址：
+
+http://poj.org/problem?id=2562
 
 # 理解
 高精度的模拟加法进位，数组模拟之。

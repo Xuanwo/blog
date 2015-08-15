@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1363
+源地址：
+
+http://poj.org/problem?id=1363
 
 # 理解
 一列火车，每个车厢都有编号，都可以单独行使，然后有一个火车站，进去之后，头变成尾，尾变成头，问能不能以输入的顺序出站。使用了STL栈。

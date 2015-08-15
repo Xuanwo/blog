@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1003
+源地址：
+
+http://poj.org/problem?id=1003
 
 # 理解
 嗯哼，一道水题，用模拟水过。唯一自认为值得注意的地方是精度的问题，在比较的时候使用了两者之差小于0.001来判断他们是否相等。

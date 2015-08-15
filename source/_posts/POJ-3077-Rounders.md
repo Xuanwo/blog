@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3077
+源地址：
+
+http://poj.org/problem?id=3077
 
 # 理解
 咦，居然又碰到一道高精度的题目，Java水过。

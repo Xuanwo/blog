@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1405
+源地址：
+
+http://poj.org/problem?id=1405
 
 # 理解
 可以得出递推关系X(n+1) = Xn * X(n-1) + 1，考虑到数据较大，使用Java大数类A掉

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2656
+源地址：
+
+http://poj.org/problem?id=2656
 
 # 理解
 在我们学校自己的OJ好像做过一样的题目，恩，一道水题，求学习时间最长的一天。

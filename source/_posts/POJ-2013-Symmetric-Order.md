@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2013
+源地址：
+
+http://poj.org/problem?id=2013
 
 # 理解
 一组字符串，从短到长再到短排列，相同长短的字符串按照字母表顺序排列。

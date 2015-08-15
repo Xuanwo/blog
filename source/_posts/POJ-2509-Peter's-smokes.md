@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2509
+源地址：
+
+http://poj.org/problem?id=2509
 
 # 理解
 模拟每个人吸烟的过程即可。

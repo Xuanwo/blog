@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/11/A
+源地址：
+
+http://codeforces.com/problemset/problem/11/A
 
 # 理解
 给定一个序列，给定一个递增值。要求计算出最少需要多少步，能将这个序列变为递增数列。

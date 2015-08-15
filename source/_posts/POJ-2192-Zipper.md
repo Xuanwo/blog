@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2192
+源地址：
+
+http://poj.org/problem?id=2192
 
 # 理解
 动态规划的核心方程：b.dp[i][j-1]==1&&str2[j-1]==str3[i+j-1]

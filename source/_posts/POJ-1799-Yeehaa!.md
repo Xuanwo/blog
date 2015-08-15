@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1799
+源地址：
+
+http://poj.org/problem?id=1799
 
 # 理解
 借用某大神图：

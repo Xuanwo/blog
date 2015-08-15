@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1401
+源地址：
+
+http://poj.org/problem?id=1401
 
 # 理解
 一开始惊讶地发现，每个数除以4之后都跟答案比较接近，然后打算开始偷鸡，结果失败了= =。实际上，是每一个数不停地除以5，寻找10的因子的过程。

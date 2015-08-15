@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3466
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3466
 
 # 理解
 其实题目还是蛮吓人的= =，因为上来就是Line1~7的输入。其实题意不难，有从左到右编号为1~n的车站，有m1辆车从第1站往右开，有m2辆车从第2站往左开。主角在t=0的时候从第1站出发，要在t时刻遇见车站n的一个间谍。要求求出最短的等待时间，没有的话就输出impossible。

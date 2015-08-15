@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2538
+源地址：
+
+http://poj.org/problem?id=2538
 
 # 理解
 键盘错位，分别一一对应即可。

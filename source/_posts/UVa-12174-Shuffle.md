@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=513&page=show_problem&problem=3326
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=513&page=show_problem&problem=3326
 
 # 理解
 题意真心有点看不懂，原谅我这个没有用过音乐播放器的男人= =。

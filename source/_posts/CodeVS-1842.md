@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codevs.cn/problem/1842/
+源地址：
+
+http://codevs.cn/problem/1842/
 
 # 理解
 还是一道水题，不过卡了RE。研究之后发现，问题出在我的记忆化搜索上面，我的记忆化数组的下标出现了负值，所以出现了RE。后来想了想，通过加上一个最小负数的绝对值，使得出现的每一个x都是非负数，然后解决了这个问题。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2407
+源地址：
+
+http://poj.org/problem?id=2407
 
 # 理解
 套用欧拉公式，其实不懂= =。

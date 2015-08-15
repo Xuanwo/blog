@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/7/D
+源地址：
+
+http://codeforces.com/problemset/problem/7/D
 
 # 理解
 被引入的新概念吓到了= =，其实这道题就是一个求最大回文串的问题。

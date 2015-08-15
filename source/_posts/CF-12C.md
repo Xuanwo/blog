@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/12/problem/C
+源地址：
+
+http://codeforces.com/contest/12/problem/C
 
 # 理解
 题意并不复杂：给定一些标价牌，然后再给定一些水果的名字，每种水果对应一个标价牌。要求输出水果总价的最大值和最小值。

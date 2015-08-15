@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3300
+源地址：
+
+http://poj.org/problem?id=3300
 
 # 理解
 好多轮子= =。

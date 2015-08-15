@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2019
+源地址：
+
+http://poj.org/problem?id=2019
 
 # 理解
 暴力水过的= =，大牛说是RMQ的题目，要是POJ数据强的话，估计就超时了。

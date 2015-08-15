@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2388
+源地址：
+
+http://poj.org/problem?id=2388
 
 # 理解
 纯排序题，直接用sort水过。

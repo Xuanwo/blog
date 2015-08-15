@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2453
+源地址：
+
+http://poj.org/problem?id=2453
 
 # 理解
 位运算碉堡了，着实强大。

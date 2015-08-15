@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2488
+源地址：
+
+http://poj.org/problem?id=2488
 
 # 理解
 一开始没看懂，看了几遍之后才明白。是给定一个p*q的棋盘，要求计算出是否存在可能性使得骑士走遍整个棋盘，并要求按照字典序排列。这个字典序真的是要我的命，直接导致挂了很多次，还傻傻地去群里面问这道题是不是Special Judge= =。

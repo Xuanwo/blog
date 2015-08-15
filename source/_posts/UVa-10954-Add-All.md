@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=onlinejudge&page=show_problem&problem=1895
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=onlinejudge&page=show_problem&problem=1895
 
 # 理解
 很明显的一道水题，不过我WA了一发。

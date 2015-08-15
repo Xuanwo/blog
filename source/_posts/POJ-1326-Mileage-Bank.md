@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1326
+源地址：
+
+http://poj.org/problem?id=1326
 
 # 理解
 题目倒是不难，但是这个输入真的是。。。。

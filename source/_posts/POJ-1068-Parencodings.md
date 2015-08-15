@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1068
+源地址：
+
+http://poj.org/problem?id=1068
 
 # 理解
 模拟栈操作，主要是对题目意思的理解。

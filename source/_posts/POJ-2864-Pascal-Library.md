@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2864
+源地址：
+
+http://poj.org/problem?id=2864
 
 # 理解
 统计出现1的个数，如果个数等于列数，就输出yes，否则输出no。

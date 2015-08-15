@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3981
+源地址：
+
+http://poj.org/problem?id=3981
 
 # 理解
 大水题一道，字符串函数的简单运用

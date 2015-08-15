@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1051
+源地址：
+
+http://poj.org/problem?id=1051
 
 # 理解
 简单的字符串转换，要有耐心= =，debug出翔。

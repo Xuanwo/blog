@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2871
+源地址：
+
+http://poj.org/problem?id=2871
 
 # 理解
 给一列数，从第二个数开始，输出其与上一个数字之差，输出取两位小数，输入以“999”数字结束。

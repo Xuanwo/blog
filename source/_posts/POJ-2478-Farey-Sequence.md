@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2478
+源地址：
+
+http://poj.org/problem?id=2478
 
 # 理解
 欧拉函数的运用，套用了模板。

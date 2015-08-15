@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1455
+源地址：
+
+http://poj.org/problem?id=1455
 
 # 理解
 把n分成两部分，分别排序。唉= =，不机智了。。

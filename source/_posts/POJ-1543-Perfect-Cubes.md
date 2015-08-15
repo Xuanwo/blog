@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1543
+源地址：
+
+http://poj.org/problem?id=1543
 
 # 理解
 暴力提交过了= =，怪我喽？

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1939
+源地址：
+
+http://poj.org/problem?id=1939
 
 # 理解
 求多边形相邻两个点的中点= =，这是英语题吧。。。

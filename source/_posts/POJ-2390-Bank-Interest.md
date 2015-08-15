@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2390
+源地址：
+
+http://poj.org/problem?id=2390
 
 # 理解
 给定年利率，本金和存款年数，求解到期之后的本息和。找自信专用。

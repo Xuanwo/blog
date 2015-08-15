@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2591
+源地址：
+
+http://poj.org/problem?id=2591
 
 # 理解
 运用了递归的思想，不过没有另外使用函数来调用。

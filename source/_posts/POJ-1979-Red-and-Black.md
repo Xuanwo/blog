@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1979
+源地址：
+
+http://poj.org/problem?id=1979
 
 # 理解
 一个比较简单的DFS练习题

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1426
+源地址：
+
+http://poj.org/problem?id=1426
 
 # 理解
 使用了BFS来搜索满足条件的数，注意必须使用long long，否则数据不够。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3979
+源地址：
+
+http://poj.org/problem?id=3979
 
 # 理解
 简单的分数问题，注意上下约分。

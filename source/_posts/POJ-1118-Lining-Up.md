@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1118
+源地址：
+
+http://poj.org/problem?id=1118
 
 # 理解
 暴力过，求出所有点的斜率并存在一个数组中，再进行比较。

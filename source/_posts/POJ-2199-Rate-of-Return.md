@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2199
+源地址：
+
+http://poj.org/problem?id=2199
 
 # 理解
 感觉题目并不是很难。给出n个月，每个月都存进去一定的钱，然后第n+1个月给出到这个月为止的本息和。运用二分法，逐步逼近，直到达到了精度要求。

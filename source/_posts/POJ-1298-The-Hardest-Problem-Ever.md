@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1298
+源地址：
+
+http://poj.org/problem?id=1298
 
 # 理解
 问题的纠结之处在于编译器根本就不给`gets`和`puts`改过自新的机会，调试花了很久= =。恩，我也应该培养避免使用这些函数的习惯。回到题目上来，题意还是比较清楚的，向后移动五位即可。

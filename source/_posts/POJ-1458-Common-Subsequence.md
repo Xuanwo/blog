@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1458
+源地址：
+
+http://poj.org/problem?id=1458
 
 # 理解
 DP的基础题，求最长子序列（LCS）。

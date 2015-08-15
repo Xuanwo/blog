@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3183
+源地址：
+
+http://poj.org/problem?id=3183
 
 # 理解
 只要找到比两边大的小高峰即可，注意特殊情况的判断，比如在最开始和最后面。

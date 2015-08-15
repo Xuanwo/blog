@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=2619
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=2619
 
 # 理解
 题意是酱紫的：给定一组数，叫你求出不含有重复数字的最长子序列的长度。

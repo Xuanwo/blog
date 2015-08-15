@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3030
+源地址：
+
+http://poj.org/problem?id=3030
 
 # 理解
 输入三个数，分别代表不做广告的效果、做广告的效果、做广告的花销，输出决定。

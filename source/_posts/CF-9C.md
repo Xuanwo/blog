@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/9/C
+源地址：
+
+http://codeforces.com/problemset/problem/9/C
 
 # 理解
 题意不难理解。给定一个n，要你求出从0到n有多少个仅用0和1能表示出来的数。

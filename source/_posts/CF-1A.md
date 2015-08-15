@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/1/problem/A
+源地址：
+
+http://codeforces.com/contest/1/problem/A
 
 # 理解
 大水题一道。

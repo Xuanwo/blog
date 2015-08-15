@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3414
+源地址：
+
+http://poj.org/problem?id=3414
 
 # 理解
 因为卡一道题然后整整两天没有做题目什么的太不科学了- -。

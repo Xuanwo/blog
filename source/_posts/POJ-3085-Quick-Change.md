@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3085
+源地址：
+
+http://poj.org/problem?id=3085
 
 # 理解
 找零钱，使用贪心来做～

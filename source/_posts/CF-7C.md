@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/7/C
+源地址：
+
+http://codeforces.com/problemset/problem/7/C
 
 # 理解
 扩展欧几里得算法的模板题。

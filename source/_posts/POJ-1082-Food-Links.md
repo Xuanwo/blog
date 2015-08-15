@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1082
+源地址：
+
+http://poj.org/problem?id=1082
 
 # 理解
 理解时候的困难在于如何把题目中吃与被吃的关系用一个计算机能理解的方式表达出来。后来使用了0表示他们是同类，用1表示a吃b，用2表示b吃a。再使用并查集的相关知识得到最后得结果。

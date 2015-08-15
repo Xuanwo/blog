@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2739
+源地址：
+
+http://poj.org/problem?id=2739
 
 # 理解
 跑偏了= =。`An output line includes the number of representations for the input integer as the sum of one or more consecutive prime numbers.`居然理解成输出用于表示的质数的个数了，卡了很久。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2575
+源地址：
+
+http://poj.org/problem?id=2575
 
 # 理解
 又是一道已经A过的题目，咦，都是什么时候做的啊？

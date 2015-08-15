@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1157
+源地址：
+
+http://poj.org/problem?id=1157
 
 # 理解
 满足的递推方程：`dp[i][j]=max(dp[i][j-1],dp[i-1][j-1]+map[i][j])`

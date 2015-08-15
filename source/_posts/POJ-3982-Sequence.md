@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3982
+源地址：
+
+http://poj.org/problem?id=3982
 
 # 理解
 题意非常清晰，唯一的问题在于大数的实现。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1611
+源地址：
+
+http://poj.org/problem?id=1611
 
 # 理解
 比较简单的并查集，照着模板敲。

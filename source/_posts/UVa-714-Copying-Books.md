@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=113&page=show_problem&problem=655
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=113&page=show_problem&problem=655
 
 # 理解
 比赛的时候读懂了题意，但是没有拿出来敲，因为感觉自己应该是敲不出来的。实际上，这是一道小白书上提到过的题目，也就是最大值最小化问题。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1833
+源地址：
+
+http://poj.org/problem?id=1833
 
 # 理解
 再次使用`next_permutation`水题。不过G++会超时，C++400ms+。

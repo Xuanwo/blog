@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2876
+源地址：
+
+http://poj.org/problem?id=2876
 
 # 理解
 按照指定格式输出字符串，递归求解。

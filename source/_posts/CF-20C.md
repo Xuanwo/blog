@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/20/C
+源地址：
+
+http://codeforces.com/problemset/problem/20/C
 
 # 理解
 实际上题目不难，但是我们都捣鼓了很久。原因是我们根本就没有掌握这种算法，导致连一个输出路径都搞得这么蛋疼。使用邻接表来存储每一个节点，每一个节点都自带一个指针指向下一个节点（可以自己使用数组模拟），最后的结果倒过来输出即可。

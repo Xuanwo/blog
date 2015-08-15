@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1562
+源地址：
+
+http://poj.org/problem?id=1562
 
 # 理解
 使用DFS搜索石油所在的区块。

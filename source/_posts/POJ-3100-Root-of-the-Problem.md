@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3100
+源地址：
+
+http://poj.org/problem?id=3100
 
 # 理解
 给定B，N，求出，最接近B的N次方根的整数。

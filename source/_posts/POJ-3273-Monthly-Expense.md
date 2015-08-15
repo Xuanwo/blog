@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3273
+源地址：
+
+http://poj.org/problem?id=3273
 
 # 理解
 也是很久之前的一道题目，简单的二分。

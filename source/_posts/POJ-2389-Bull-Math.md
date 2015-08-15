@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2389
+源地址：
+
+http://poj.org/problem?id=2389
 
 # 理解
 没什么好说的，java大数模板水之。

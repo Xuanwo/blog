@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1781
+源地址：
+
+http://poj.org/problem?id=1781
 
 # 理解
 同样的，打表找规律，发现当n是2的次方幂时，结果都是1；当n不是2的次方幂时，结果是与比n大的最小的2的次方幂的差值的两倍。

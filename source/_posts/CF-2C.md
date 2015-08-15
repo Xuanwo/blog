@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/2/problem/C
+源地址：
+
+http://codeforces.com/contest/2/problem/C
 
 # 理解
 题意很清楚，就是给定三个点，要求出一个点到这三个点的视角相同。要是存在多个这样的点，则选择那个视角最大的点。

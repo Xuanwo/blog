@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1517
+源地址：
+
+http://poj.org/problem?id=1517
 
 # 理解
 计算e的值。太自信，没有用打表，结果WA了两发，蛋疼。

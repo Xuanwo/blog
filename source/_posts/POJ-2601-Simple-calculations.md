@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2601
+源地址：
+
+http://poj.org/problem?id=2601
 
 # 理解
 推公式。满眼都是泪，不多说了= =。

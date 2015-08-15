@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2070
+源地址：
+
+http://poj.org/problem?id=2070
 
 # 理解
 简单的计算题，理解题意之后，就是比较一下浮点数的值。

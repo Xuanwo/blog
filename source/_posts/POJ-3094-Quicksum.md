@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3094
+源地址：
+
+http://poj.org/problem?id=3094
 
 # 理解
 对字母按照顺序求和，大水题，记得数组开大一点。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/15/C
+源地址：
+
+http://codeforces.com/problemset/problem/15/C
 
 # 理解
 有n个矿场，第i个矿场有mi辆矿车，第一辆矿车有xi颗石头，第二辆xi+1颗，如此递推，直到第mi辆有mi+xi-1颗。然后有两个人轮流取石头（金矿？），他们可以选择任意一个矿场任意一辆矿车取走任意非0数量的石头，直到第一个不能再取的人认输。

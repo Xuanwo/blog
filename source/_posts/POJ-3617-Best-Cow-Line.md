@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3617
+源地址：
+
+http://poj.org/problem?id=3617
 
 # 理解
 根据题目中所描述的数据结构来构建一个字典序最小的字符串。

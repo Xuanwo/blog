@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2800
+源地址：
+
+http://poj.org/problem?id=2800
 
 # 理解
 抱着侥幸心理使用了一般的方法来求，果然TLE了。然后开始计算∑1<=i<=n(k mod i)。由分析之，总共有三种情况，k<n，k=n，k>n。分别寻找规律并转化为等差数列简化运算。

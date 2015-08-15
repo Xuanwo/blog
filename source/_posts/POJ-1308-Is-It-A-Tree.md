@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1308
+源地址：
+
+http://poj.org/problem?id=1308
 
 # 理解
 同样是并查集的应用，难点在于如何判断给定的点之间是否形成了森林。事实上，只要判断树与树之间有没有成环即可。

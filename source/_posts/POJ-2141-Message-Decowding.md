@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2141
+源地址：
+
+http://poj.org/problem?id=2141
 
 # 理解
 简单的密码转换，注意输出，要以大写字母输出。

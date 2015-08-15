@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/contest/1/problem/C
+源地址：
+
+http://codeforces.com/contest/1/problem/C
 
 # 理解
 题意很简单，就是给出一个正N边形的三个点，要求求出这个正N边形的最小面积。

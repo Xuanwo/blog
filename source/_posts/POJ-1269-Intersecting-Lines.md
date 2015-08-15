@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1269
+源地址：
+
+http://poj.org/problem?id=1269
 
 # 理解
 几何题= =，各种直线方程用起来，代码量有点大。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1493
+源地址：
+
+http://poj.org/problem?id=1493
 
 # 理解
 题目虽然这么长，但是意思很简单，就是求左右合并之后中间剩下的空格数量。分别求出每行的空格数，排序，跟最小真相减之后叠加即可。

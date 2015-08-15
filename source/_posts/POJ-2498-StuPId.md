@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2498
+源地址：
+
+http://poj.org/problem?id=2498
 
 # 理解
 英文题= =。按照{9,3,7}的顺序，从后往前乘，最后的乘积相加可以被十整除。但是有一个数字看不清了，要求计算出那个数字，并且输出整个数。

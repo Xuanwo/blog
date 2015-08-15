@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1046
+源地址：
+
+http://poj.org/problem?id=1046
 
 # 理解
 题目并不难，暴力水过即可。用到了结构体的知识，可惜我对结构体的理解还是太过于表层。其实我可以把结构体作为函数的参数输入，这样可以减少很大的代码量。

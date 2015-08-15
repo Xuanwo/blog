@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/9/D
+源地址：
+
+http://codeforces.com/problemset/problem/9/D
 
 # 理解
 神DP，给战斗民族的数学功底跪了。

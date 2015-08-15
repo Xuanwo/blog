@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1905
+源地址：
+
+http://poj.org/problem?id=1905
 
 # 理解
 很久以前做的题目，是二分法最基础的运用。

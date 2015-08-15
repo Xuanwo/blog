@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3176
+源地址：
+
+http://poj.org/problem?id=3176
 
 # 理解
 简单的DP，状态转移方程为：f[i][j]=w[i][j]+max(f[i+1][j],f[i+1][j+1]);

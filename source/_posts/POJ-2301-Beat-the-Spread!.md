@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2301
+源地址：
+
+http://poj.org/problem?id=2301
 
 # 理解
 给定两数之和以及两数之差，求解这两个数，并且要求大数先输出。

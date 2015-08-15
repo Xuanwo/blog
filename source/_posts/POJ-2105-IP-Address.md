@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2105
+源地址：
+
+http://poj.org/problem?id=2105
 
 # 理解
 将表示IP地址的二位数转换成十进制并且分段，使用字符数组即可。

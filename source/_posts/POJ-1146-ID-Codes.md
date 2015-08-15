@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1146
+源地址：
+
+http://poj.org/problem?id=1146
 
 # 理解
 使用`STL`里面的`next_permutation`轻松水掉。

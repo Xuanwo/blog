@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1423
+源地址：
+
+http://poj.org/problem?id=1423
 
 # 理解
 又是大数据的题目，果断用Java来做，不过还是用到了取对数得操作。

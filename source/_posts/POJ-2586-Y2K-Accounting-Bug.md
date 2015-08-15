@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2586
+源地址：
+
+http://poj.org/problem?id=2586
 
 # 理解
 总共有五种情况：

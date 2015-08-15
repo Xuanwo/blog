@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2665
+源地址：
+
+http://poj.org/problem?id=2665
 
 # 理解
 用一个unsigned int储存总数，然后每次对于区间减去需要移除的数量，最后求值。

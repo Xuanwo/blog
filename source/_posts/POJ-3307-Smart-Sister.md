@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3307
+源地址：
+
+http://poj.org/problem?id=3307
 
 # 理解
 如果一个数可以通过其他数的各数字位相乘得到，则说这个数具有`productivity property`。要求求出第i个具有这种性质的数。我们考虑1～9这些数字，显然，我们只要考虑1，2，3，5，7这四个质因数，因为别的数都能通过他们来得到，于是可以得到代码。

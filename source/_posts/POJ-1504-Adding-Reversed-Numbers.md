@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1504
+源地址：
+
+http://poj.org/problem?id=1504
 
 # 理解
 同样是长长的题目，其实是要求把数字从左到右相加，本质是要用字符数组模拟加法。当然，用java会更快一点，不过这次选择了用C++来写。姿势不是很优美，代码太丑陋了，应该有更优美的写法。

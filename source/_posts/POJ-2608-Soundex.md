@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2608
+源地址：
+
+http://poj.org/problem?id=2608
 
 # 理解
 输出字符串所对应的值，没有的话，就不输出。不过现在有点后悔，是不是用Map来做会更好一些。

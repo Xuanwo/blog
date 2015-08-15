@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3117
+源地址：
+
+http://poj.org/problem?id=3117
 
 # 理解
 如果所有的队伍作为一个整体，有胜负的比赛总分+3分，如果是平局总分+2分。所以平局数量是：所有比赛均有胜负的总分减去当前总分的分值，即：3 * N - SUM。

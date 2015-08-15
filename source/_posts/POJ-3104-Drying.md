@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3104
+源地址：
+
+http://poj.org/problem?id=3104
 
 # 理解
 感觉是一道模拟的题目，使用二分来优化时间。

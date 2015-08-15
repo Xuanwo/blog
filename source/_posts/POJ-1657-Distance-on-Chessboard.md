@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1657
+源地址：
+
+http://poj.org/problem?id=1657
 
 # 理解
 再一次脑洞大开了= =，居然还写了一个`normalize`函数用来区分是不是可行的走法，其实只要通过`abs(x-y)%2!=0`即可实现判断斜的方向上是否可以行走了。恩，这是程序设计实践导引上的例题，加上中文，没有什么好讲的。不过需要注意位置没有发生改变时的特殊情况。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1579
+源地址：
+
+http://poj.org/problem?id=1579
 
 # 理解
 题目很简单，就是递归。但是直接递归会导致超时，这里直接处理一下，超过20全都当作20来计算。

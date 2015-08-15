@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2602
+源地址：
+
+http://poj.org/problem?id=2602
 
 # 理解
 发现开辟一个字符数组，在输入的过程中处理数据。比较简单的大数加法，没有使用Java。

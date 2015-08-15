@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2503
+源地址：
+
+http://poj.org/problem?id=2503
 
 # 理解
 STL里面Map的运用，分别建立映射就好，不难。

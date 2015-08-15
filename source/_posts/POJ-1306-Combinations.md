@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1306
+源地址：
+
+http://poj.org/problem?id=1306
 
 # 理解
 高精度阶乘的题目，再次用java水掉= =。

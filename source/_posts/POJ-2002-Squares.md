@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2002
+源地址：
+
+http://poj.org/problem?id=2002
 
 # 理解
 排序之后使用二分搜索，用向量旋转的方法来确定是否可以构成正方形。

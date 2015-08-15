@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2350
+源地址：
+
+http://poj.org/problem?id=2350
 
 # 理解
 成绩高于平均成绩的百分比，数据不大，直接暴力做。

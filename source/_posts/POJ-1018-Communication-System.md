@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1018
+源地址：
+
+http://poj.org/problem?id=1018
 
 # 理解
 题意比较清晰，就是找出最大的B/sum(P)，要求网络设备的性价比最高。采用枚举的方法，把所有情况都列出来，然后有些明显不需要考虑的情况，可以直接舍去。

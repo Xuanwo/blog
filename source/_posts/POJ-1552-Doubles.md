@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1552
+源地址：
+
+http://poj.org/problem?id=1552
 
 # 理解
 直接开一个数组，两个循环判断后一个数是不是前一个数的两倍。暴力做的，没有超时。

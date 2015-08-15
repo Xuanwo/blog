@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3673
+源地址：
+
+http://poj.org/problem?id=3673
 
 # 理解
 按照题意初始化，并运算即可。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2363
+源地址：
+
+http://poj.org/problem?id=2363
 
 # 理解
 直接暴力计算，没有啥算法。

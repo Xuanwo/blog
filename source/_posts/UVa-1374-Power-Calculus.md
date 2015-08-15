@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=512&page=show_problem&problem=4120
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=512&page=show_problem&problem=4120
 
 # 理解
 这次的题意比较清楚，就是给定n，求出从1变换到n的最小步数。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1131
+源地址：
+
+http://poj.org/problem?id=1131
 
 # 理解
 题意挺简单，就是把八进制浮点数转化为十进制，同样是用高精度类，叠乘即可～

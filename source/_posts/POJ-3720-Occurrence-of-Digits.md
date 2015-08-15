@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3720
+源地址：
+
+http://poj.org/problem?id=3720
 
 # 理解
 给定n，k，求出1/2 , 1/n之间所有分数的循环小数表达式中数字k的出现次数，简单的模拟就行了。

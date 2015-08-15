@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3069
+源地址：
+
+http://poj.org/problem?id=3069
 
 # 理解
 每一个点有自己的范围，要求所有的点都被覆盖。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2000
+源地址：
+
+http://poj.org/problem?id=2000
 
 # 理解
 求N天得到多少个金币，第一天得到1个，第二、三天得到2个，第四、五、六天得到3个。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/8/B
+源地址：
+
+http://codeforces.com/problemset/problem/8/B
 
 # 理解
 ~~在那遥远的地方有位好姑娘 ，人们走过她的帐篷都要留恋的张望~~

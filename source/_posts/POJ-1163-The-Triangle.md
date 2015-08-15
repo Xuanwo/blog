@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=1163
+源地址：
+
+http://poj.org/problem?id=1163
 
 # 理解
 这是第一道关于DP的题目，据说是用暴力的方法会直接超时，因为有大量的重复计算。使用DP可以避免这一点，最关键的公式是

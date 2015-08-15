@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3157
+源地址：
+
+http://poj.org/problem?id=3157
 
 # 理解
 这是我们在周赛上面做过的题目，WA了无数发，深感自己智商不够——我把input和output里面的`sample input #1`也处理进去了，每个结果都跟一个`sample output #1`，能A就有鬼了。看了discuss之后，真恨不得抽自己嘴巴子。。

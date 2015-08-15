@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=
+源地址：
+
+http://poj.org/problem?id=
 
 # 理解
 对于一个有N个元素的队列，队列元素为[1,2,...,N-1,N]，进行一次队列变换，当前队列“数字i的位置”将成为变换后队列的第i个元素的值（下标从1开始）。

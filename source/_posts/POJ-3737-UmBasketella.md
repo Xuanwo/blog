@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3737
+源地址：
+
+http://poj.org/problem?id=3737
 
 # 理解
 几何的题目，立体几何的公式用起来。

@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2140
+源地址：
+
+http://poj.org/problem?id=2140
 
 # 理解
 很有意思的一道题，很显然，i不会超过n/2。

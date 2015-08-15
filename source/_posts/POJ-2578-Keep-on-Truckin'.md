@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2578
+源地址：
+
+http://poj.org/problem?id=2578
 
 # 理解
 给三个数字，从左到右，看哪个数字先大于168，直到得到一个大于168的数，之前的数全都输出"Crash"。

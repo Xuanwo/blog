@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目	
-源地址：http://codeforces.com/problemset/problem/8/C
+源地址：
+
+http://codeforces.com/problemset/problem/8/C
 
 # 理解
 群里面讨论时，萌神说是一个状态压缩DP，然后我就主动放弃了这道题= =。

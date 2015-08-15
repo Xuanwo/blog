@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=3173
+源地址：
+
+http://poj.org/problem?id=3173
 
 # 理解
 生成这样一个表并不难，但是需要注意格式的控制。

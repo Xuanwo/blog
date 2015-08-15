@@ -5,7 +5,9 @@ categories: Exercise
 toc: true
 ---
 # 题目
-源地址：http://poj.org/problem?id=2696
+源地址：
+
+http://poj.org/problem?id=2696
 
 # 理解
 套公式计算，水题，但是注意数组的大小。
