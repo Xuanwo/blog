@@ -15,8 +15,7 @@ http://poj.org/problem?id=2390
 <!-- more -->
 
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -60,6 +59,5 @@ int main(void)
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年08月16日 已AC。

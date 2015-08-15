@@ -15,8 +15,7 @@ http://poj.org/problem?id=1321
 <!-- more -->
 
 # 代码
-```
-#include <iostream>
+```#include <iostream>
 using namespace std;
 
 char pic[8][8];
@@ -61,6 +60,5 @@ int main(int argc, char const *argv[])
     }
 }
 ```
-
 # 更新日志
 - 2014年07月12日 已AC。

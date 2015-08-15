@@ -18,8 +18,7 @@ Hexo是一个非常好用的静态博客生成器，但是由于很多方面的�
 ### Git环境配置错误
 **问题描述：**
 *Windows系统*出现报错信息如下
-```
-[info] Start deploying: git
+```[info] Start deploying: git
 [info] Setting up Git deployment...
 [error] Error: spawn ENOENT
 Error: spawn ENOENT
@@ -32,17 +31,14 @@ events.js:72
 Error: spawn ENOENT
     at errnoException (child_process.js:1000:11)
     at Process.ChildProcess._handle.onexit (child_process.js:791:34)
-```
-**解决方案：**
+```**解决方案：**
 检查Git的相关配置，将git所在目录添加到系统path中去。
 
 ### Deploy设置错误
 **问题描述：**
 输入`hexo deploy`后，出现错误信息：
-```
-'github' does not appear to be a git repository
-```
-**解决方案：**
+```'github' does not appear to be a git repository
+```**解决方案：**
 1. 检查`_config.yml`中deploy设置。参见<http://hexo.io/docs/deployment.html>。
 2. 删除`.deploy_git`文件夹并且执行`hexo clean`后，重新`hexo deploy`。
 
@@ -80,8 +76,7 @@ Error: spawn ENOENT
 ## Hexo命令失效
 **问题描述：**
 输入命令后出现如下信息：
-```
-localhost:~ apple$ hexo new "title"
+```localhost:~ apple$ hexo new "title"
 Usage: hexo
 
 Commands:
@@ -96,25 +91,21 @@ Global Options:
 
 For more help, you can use hexo help [command] for the detailed information
 or you can check the docs: http://zespia.tw/hexo/docs/
-```
-**解决方案：**
+```**解决方案：**
 1. 检查`_config.yml`中的内容，特别注意`:`后面需要有一个空格。
 2. 检查`package.json'中的内容，注意添加hexo信息用来标识这是一个hexo目录：
-```
-{
+```{
   "hexo": {
     "version": ""
   }
 }
-```
-3. 如果还是有问题，可以更新hexo之后，在新的文件夹中重新进行`hexo init`。
+```3. 如果还是有问题，可以更新hexo之后，在新的文件夹中重新进行`hexo init`。
 
 ## Hexo所有命令报错
 **问题描述：**
 [参见Issues](https://github.com/hexojs/hexo/issues/832)
 报错信息如下：
-```
-[error] { name: 'HexoError',
+```[error] { name: 'HexoError',
   reason: 'end of the stream or a document separator is expected',
   mark: 
    { name: null,
@@ -130,15 +121,13 @@ or you can check the docs: http://zespia.tw/hexo/docs/
      members: [ [Object] ] },
   domainThrown: true,
   stack: undefined }
-```
-**解决方案：**
+```**解决方案：**
 仔细检查`_config.yml`文件中所有冒号后面的空格，格式很严格，必须是**只有一个**，**半角**。不管是多了还是少了都会报错，这是yml解释器所定义的语法。如果不确定的话，将输入法调整到英文模式，删除所有冒号后面的空格重新输入，不要使用Tab。
 
 ## 更新至2.8.X版本后，构建失败
 **问题描述：**
 输入`hexo g`后，报错如下：
-```
-[error] { name: 'HexoError',
+```[error] { name: 'HexoError',
   reason: 'incomplete explicit mapping pair; a key node is missed',
   mark:
    { name: null,
@@ -156,8 +145,7 @@ iption: Description\nread_more: Read More\n\u0000',
      members: [ [Object] ] },
   domainThrown: true,
   stack: undefined }
-```
-**解决方案：**
+```**解决方案：**
 主题目录下所有yml文件中所有有空格的字段都用双引号括起来，尤其注意languages下面的yml文件。
 ![就像这样](http://xuanwo.qiniudn.com/opinion/hexo-languages-error.png)
 *感谢[@dukewan](https://github.com/dukewan)提供的截图*
@@ -172,15 +160,13 @@ iption: Description\nread_more: Read More\n\u0000',
 **问题描述：**
 [参见Issues](https://github.com/hexojs/hexo/issues/838)
 看不到渲染后的页面，只能看到类似如下信息：
-```
-<%- partial('_partial/head') %>
+```<%- partial('_partial/head') %>
 <%- partial('_partial/header', null, {cache: !config.relative_link}) %>
 <%- body %>
 <% if (theme.sidebar && theme.sidebar !== 'bottom'){ %> <%- partial('_partial/sidebar', null,     {cache: !config.relative_link}) %> <% } %>
 <%- partial('_partial/footer', null, {cache: !config.relative_link}) %>
 <%- partial('_partial/mobile-nav', null, {cache: !config.relative_link}) %> <%- partial('_partial/after-footer') %>
-```
-**解决方案：**
+```**解决方案：**
 在博客所在目录下执行'npm install'用以安装插件。
 **感谢[@tommy351](http://zespia.tw/)提供的解决方案**
 
@@ -195,49 +181,38 @@ iption: Description\nread_more: Read More\n\u0000',
 {% raw %}
 ```plain
 something
-```
-{% endraw %}
+```{% endraw %}
 
 ## 升级至Hexo 3.0版本后，deploy报错
 **问题描述：**
 [参见Issues](https://github.com/hexojs/hexo/issues/1013)
 升级之后，本来可以deploy的设置出现报错，内容为：
-```
-ERROR Deployer not found: github
-```
-**问题分析：**
+```ERROR Deployer not found: github
+```**问题分析：**
 Hexo3.0与以往版本最大的改变在于，更多的模块都从主程序中剥离了出来，其中就包括deploy的相关模块。
 **解决方案：**
 首先需要安装对应的deploy模块，目前Hexo支持以下服务器的一键部署：
-```
-git
+```git
 heroku
 rsync
 openshift
-```
-安装命令为：
-```
-npm install hexo-deployer-git --save //将git替换为别的名字就可以安装对应模块
-```
-然后对`_config.yml`做如下设置：
-```
-deploy:
+```安装命令为：
+```npm install hexo-deployer-git --save //将git替换为别的名字就可以安装对应模块
+```然后对`_config.yml`做如下设置：
+```deploy:
   type: git   //非git请参考官方文档中的设置
   repo: <repository url>
   branch: [branch]
   message: [message]
 ```
-
 ## Mac OS安装Hexo出错
 **问题描述：**
 [参见Issues](https://github.com/hexojs/hexo/issues/1326)
 命令行返回ERROR：
-```
-{ [Error: Cannot find module './build/Release/DTraceProviderBindings'] code: 'MODULE_NOT_FOUND' }
+```{ [Error: Cannot find module './build/Release/DTraceProviderBindings'] code: 'MODULE_NOT_FOUND' }
 { [Error: Cannot find module './build/default/DTraceProviderBindings'] code: 'MODULE_NOT_FOUND' }
 { [Error: Cannot find module './build/Debug/DTraceProviderBindings'] code: 'MODULE_NOT_FOUND' }
-```
-**解决方案：**
+```**解决方案：**
 使用命令`npm install hexo --no-optional`
 
 ---
@@ -272,12 +247,10 @@ deploy:
 1. 单个文件夹下指定类型文件：`skip_render: test/*.md`
 1. 单个文件夹下全部文件以及子目录:`skip_render: test/**`
 1. 多个文件夹以及各种复杂情况：
-```
-skip_render:
+```skip_render:
     - `test1/*.html`
     - `test2/**`
 ```
-
 
 ## Hexo版本回退
 有时候更新之后发现新版本的Hexo不能按照预期的方式工作，这时候就需要使用版本回退功能。
@@ -294,8 +267,7 @@ Hexo默认支持Disque，打开`_config.yml`，在`disqus_shortname:`后面输�
 部分主题添加了对多说的支持，只要输入Duoshuo账号，就可以看到效果了。如果主题不支持的话，就需要自己添加。需要对自己的主题结构有一定的了解，不是每一个主题都会有一样的文件，找不到同样的文件也正常，但是都会存在相同功能的区块，自己去定位即可。如果没把握的话，最后做好备份。
 
 在`after_footer.ejs`模块中输入如下代码：
-```
-<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+```<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 <script type="text/javascript">
 var duoshuoQuery = {short_name:"yourshortname"};
 	(function() {
@@ -309,14 +281,11 @@ var duoshuoQuery = {short_name:"yourshortname"};
 	</script>
 <!-- 多说公共JS代码 end -->
 ```
-
 在`article.ejs`模块中输入如下代码：
-```
-<% if (page.comments){ %>
+```<% if (page.comments){ %>
         <div class="ds-thread" data-thread-key="<%- page.path %>" data-title=<%- page.title %> data-url=<%- page.permalink %>>
 <% } %>
 ```
-
 ## 如何避免在Deploy时输入密码
 ### 使用Github客户端
 安装好Github客户端之后，使用Github客户端内置的Git Shell进行hexo的部署操作。
@@ -327,15 +296,13 @@ var duoshuoQuery = {short_name:"yourshortname"};
 ## 多git部署
 参考[hexo-deployer-git](https://github.com/hexojs/hexo-deployer-git)插件README进行配置：
 
-```
-deploy:
+```deploy:
   type: git
   message: [message]
   repo: 
     github: <repository url>,[branch]
     gitcafe: <repository url>,[branch]
 ```
-
 请注意每一个冒号后面的空格，如果丢失会导致yml文件读取错误。
 
 # 贡献者

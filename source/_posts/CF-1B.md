@@ -20,8 +20,7 @@ http://codeforces.com/contest/1/problem/B
 <!-- more -->
 
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -149,6 +148,5 @@ R98C688
 **/
 
 ```
-
 # 更新日志
 - 2014年10月21日 已AC。

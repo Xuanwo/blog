@@ -11,22 +11,19 @@ http://poj.org/problem?id=2231
 
 # 理解
 打表找规律，排序之后发现：
-```
-1     2     3     4     5  
+```1     2     3     4     5  
 
 0     1     2     3     4  
 1     0     1     2     3  
 2     1     0     1     2  
 3     2     1     0     1  
 4     3     2     1     0  
-```
-把下面矩阵的所有数字相加就是所求的结果。
+```把下面矩阵的所有数字相加就是所求的结果。
 
 <!-- more -->
 
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -70,6 +67,5 @@ int main()
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年08月16日 已AC。

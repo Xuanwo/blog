@@ -15,8 +15,7 @@ http://poj.org/problem?id=1190
 <!-- more -->
 
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cmath>
 using namespace std;
 
@@ -96,6 +95,5 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年07月12日 已AC。

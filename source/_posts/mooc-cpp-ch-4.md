@@ -15,8 +15,7 @@ toc: true
 > 求两个正整数a 和 b的最大公约数。
 
 非常简单的gcd- -，然而发现并不能实现一个好的递归，于是改成了迭代。
-```
-#include <iostream>
+```#include <iostream>
 using namespace std;
 class Integer {
 private:
@@ -50,13 +49,11 @@ int main() {
      return 0;
 }
 ```
-
 ## C4-2 反转整数
 > 对于输入的一个正整数，输出其反转形式
 
 一开始的想法是用字符串来搞，后来发现原来还有更优雅的做法。
-```
-#include <iostream>
+```#include <iostream>
 using namespace std;
 
 class Integer{
@@ -99,7 +96,6 @@ int main() {
     cout << integer.inversed() << endl;
 }
 ```
-
 ## C4-3 一元二次方程求解
 > 对于一元二次方程ax^2 + bx + c = 0,解可以分为很多情况。
 > 若该方程有两个不相等实根，首先输出1，换行，然后从小到大输出两个实根，换行；
@@ -110,8 +106,7 @@ int main() {
 > 若该方程只有一个根，首先输出6，换行，然后输出这个跟，换行；
 
 这道题- -，样例错了，所以被坑了一段时间。
-```
-#include <iostream>
+```#include <iostream>
 #include <cmath>
 #include <cstdio>
 using namespace std;
@@ -165,6 +160,5 @@ int main() {
      tmp.solve();
 }
 ```
-
 # 更新日志
 - 2015年04月12日 首次发布

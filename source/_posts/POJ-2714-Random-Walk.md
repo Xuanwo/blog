@@ -21,8 +21,7 @@ http://poj.org/problem?id=2714
 注意区分位运算`~`与逻辑运算`!`的区别。
 
 # 代码
-```
-#include<iostream>
+```#include<iostream>
 #include<cstdio>
 #include<algorithm>
 #include<cmath>
@@ -78,6 +77,5 @@ int main(int argc, char const *argv[])
 }
 
 ```
-
 # 更新日志
 - 2014年07月15日 已AC。

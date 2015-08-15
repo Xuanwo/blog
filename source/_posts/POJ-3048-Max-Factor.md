@@ -19,8 +19,7 @@ http://poj.org/problem?id=3048
 - 不要执着于小数据特例而忘记大数据的测试，
 
 # 代码
-```
-#include <iostream>
+```#include <iostream>
 #include <cstdio>
 #include <cstring>
 #include <cmath>
@@ -78,6 +77,5 @@ int main()
     printf("%d\n", pos);
 }
 ```
-
 # 更新日志
 - 2014年07月14日 已AC。

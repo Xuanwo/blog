@@ -15,8 +15,7 @@ http://poj.org/problem?id=1488
 <!-- more -->
 
 # 代码
-```
-#include<iostream>
+```#include<iostream>
 #include<string>
 using namespace std;
 
@@ -46,7 +45,6 @@ int main(int argc, char const *argv[])
         cout << endl;
     }
 }
-```
-	
+```	
 # 更新日志
 - 2014年08月12日 已AC。

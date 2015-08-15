@@ -16,8 +16,6 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_p
 <!-- more -->
 
 # 代码
-```
-```
-
+``````
 # 更新日志
 - 2014年10月27日 已AC。

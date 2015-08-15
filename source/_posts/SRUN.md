@@ -14,8 +14,7 @@ toc: true
 
 # HTML源代码
 ## IPv4登陆
-```
-<!DOCTYPE HTML>
+```<!DOCTYPE HTML>
 <html>
 	<head>
     	<meta charset="utf-8" />
@@ -38,10 +37,8 @@ toc: true
         </form>
     </body>
 </html>
-```
-## IPv6登陆
-```
-<!DOCTYPE HTML>
+```## IPv6登陆
+```<!DOCTYPE HTML>
 <html>
 	<head>
     	<meta charset="utf-8" />
@@ -64,10 +61,8 @@ toc: true
         </form>
     </body>
 </html>
-```
-## login页面
-```
-<!DOCTYPE HTML>
+```## login页面
+```<!DOCTYPE HTML>
 <html>
 	<head>
     	<meta charset="utf-8" />
@@ -88,7 +83,6 @@ toc: true
     </body>
 </html>
 ```
-
 # 鸣谢
 - [@Austin Lee](http://imnerd.org/srun-login-by-html.html)
 - [@范神](http://www.freemeepo.com/)

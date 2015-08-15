@@ -15,8 +15,7 @@ http://poj.org/problem?id=3299
 <!-- more -->
 
 # 代码
-```
-#include<stdio.h>
+```#include<stdio.h>
 #include<math.h>
 
 float getHumidex(float temperature, float dewpoint)
@@ -100,6 +99,5 @@ int main()
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年07月10日 已AC。

@@ -15,8 +15,7 @@ http://poj.org/problem?id=1269
 <!-- more -->
 
 # 代码
-```
-#include<cstdio>
+```#include<cstdio>
 #include<cstring>
 #include<cmath>
 #include<cstdlib>
@@ -101,7 +100,6 @@ int main()
     cout << "END OF OUTPUT" << endl;
     return 0;
 }
-```
-	
+```	
 # 更新日志
 - 2014年08月12日 已AC。

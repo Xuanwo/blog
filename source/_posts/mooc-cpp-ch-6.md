@@ -15,8 +15,7 @@ toc: true
 
 就是一个简单的最大序列和- -，比较简单的DP就能搞定。
 
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -67,13 +66,11 @@ int main()
     return 0;
 }
 ```
-
 ## 字符串的回文子序列个数
 > 求一个长度不超过15的字符串的回文子序列个数（子序列长度>=1）。
 
 这道题还是比较蛋疼的- -，向来不会处理这种字符串问题的我，花了很久时间才搞定。
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -148,14 +145,12 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 ## 数组第K小数
 > 给定一个整数数组a[0,...,n-1]，求数组中第k小数
 
 我怀疑是不是我没有get到老师想要考察的东西- -，sort随手做啊，为何放在第三题？
 
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -198,7 +193,6 @@ int main()
     return 0;
 }
 ```
-
 ## 最大子数组和（加强版）
 > 给定一个数组a[0,...,n-1],求其最大子数组(长度>=1)和
 

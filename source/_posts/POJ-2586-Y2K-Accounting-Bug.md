@@ -20,8 +20,7 @@ http://poj.org/problem?id=2586
 <!-- more -->
 
 # 代码
-```
-#include <iostream>
+```#include <iostream>
 #include <cstdio>
 using namespace std;
 
@@ -42,7 +41,6 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-```
-	
+```	
 # 更新日志
 - 2014年08月06日 已AC。

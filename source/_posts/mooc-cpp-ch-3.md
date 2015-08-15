@@ -15,8 +15,7 @@ toc: true
 > 输入一个三角形的3边长度，判断该三角形是否为直角三角形，若是则输出True，若不是则输出False。
 
 直接sort一下之后用直角三角形的性质判断一下即可~，并无坑点。
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -56,15 +55,13 @@ int main(int argc, char const *argv[])
      return 0;
 }
 ```
-
 **C3-2 斐波那契数列 **
 > 斐波那契数列f(n)满足以下定义：
 > f(0) = 1, f(1) = 1, f(n) = f(n-1) + f(n-2) (n >= 2)。
 > 请用递归的方法编写函数，对于给定的n，求出斐波那契数列的第n项f(n)
 
 学递归嘛- -，肯定少不了斐波那契的出场了。直接一个记忆化搜索，感觉效率还是很不错的。
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -110,14 +107,12 @@ int main(int argc, char const *argv[])
      }
      return 0;
 }
-```
-**C3-3 丑数**
+```**C3-3 丑数**
 > 只包含因子2,3,5的正整数被称作丑数，比如4,10,12都是丑数，而7,23,111则不是丑数，另外1也不是丑数。请编写一个函数，输入一个整数n，能够判断该整数是否为丑数，如果是，则输出True，否则输出False。
 
 一开始小小的纠结了一下到底怎么写，后来想到了一种迭代的方法，每次循环都分别判断是否能被2，3，5整除，如果都不能被整除，则直接返回false，如果运行到值为1是，返回true。
 一开始做不出来，因为想当然的觉得最后的结果应当是0，所以错了好久= =。
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -169,15 +164,13 @@ int main(int argc, char const *argv[])
      return 0;
 }
 ```
-
 **C3-4 斐波那契数列选做题**
 > 斐波那契数列f(n)满足以下定义：
 > f(0) = 1, f(1) = 1, f(n) = f(n-1) + f(n-2) (n >= 2)。
 > 本题的数据规模比原先更大
 
 看样例就能明白- -，这次的数据已经超过了int的范围，于是换成了long long int类型，搞定。
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -224,6 +217,5 @@ int main(int argc, char const *argv[])
      return 0;
 }
 ```
-
 # 更新日志
 - 2015年04月12日 首次发布。

@@ -54,21 +54,17 @@ Fedora, Red Hat, CentOS：`sudo yum install git-core`
 > 
 补充一下关于`deploy`的设置
 同样是在_config.yml文件夹中，修改`deploy`的部分为
-```
-deploy:
+```deploy:
   type: github
   repo: repository url //使用之前创建的那个库，建议使用SSH
   branch: branch //Hexo会自动识别个人wiki还是项目wiki
-```
-<p>6. 进入source文件夹，打开_post文件夹，新建一个md文档，在文档的开头加入
-```
-title: your title //这将会是wiki文档的标题
+```<p>6. 进入source文件夹，打开_post文件夹，新建一个md文档，在文档的开头加入
+```title: your title //这将会是wiki文档的标题
 date: 2014-03-16 10:17:16  //构建时间，wiki中用不到
 categories: Docs //这将会是本文档所属的类别
 toc: true //默认开启，生成table of contents
 --- //不可省略，敲回车后，下面的内容就自由发挥了～
 ```
-
 <p>7. 保存文档后，返回wiki所在文件夹， 输入`hexo d -g`，此时wiki已经自动生成并上传完毕了。
 
 # 协作注意事项

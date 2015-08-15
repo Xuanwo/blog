@@ -21,8 +21,7 @@ http://poj.org/problem?id=1001
 `toPlainString()`转化为string类
 
 # 代码
-```
-import java.io.*;
+```import java.io.*;
 import java.util.*;
 import java.math.BigDecimal;
 
@@ -41,6 +40,5 @@ public class Main {
     }
 }
 ```
-
 # 更新日志
 - 2014年07月15日 已AC。

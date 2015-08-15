@@ -25,8 +25,7 @@ http://poj.org/problem?id=2407
 (注意：每种质因数只一个。比如12=2*2*3那么φ(12)=12*(1-1/2)*(1-1/3)=4）
 
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -79,6 +78,5 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年08月16日 已AC。

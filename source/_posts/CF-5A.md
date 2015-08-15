@@ -18,8 +18,7 @@ http://codeforces.com/contest/5/problem/A
 <!-- more -->
 
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -78,6 +77,5 @@ int main()
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年11月5日 已AC。

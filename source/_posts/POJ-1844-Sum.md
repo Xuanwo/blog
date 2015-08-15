@@ -17,8 +17,7 @@ http://poj.org/problem?id=1844
 <!-- more -->
 
 # 代码
-```
-#include<stdio.h>
+```#include<stdio.h>
 
 const int maxn = 100000;
 
@@ -49,7 +48,6 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-```
-	
+```	
 # 更新日志
 - 2014年08月05日 已AC。

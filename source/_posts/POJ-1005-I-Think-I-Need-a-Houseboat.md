@@ -15,8 +15,7 @@ http://poj.org/problem?id=1005
 <!-- more -->
 
 # 代码
-```
-#include <stdio.h>
+```#include <stdio.h>
 #include <iostream>
 #include <math.h>
 using namespace std;
@@ -46,6 +45,5 @@ int main()
 	cout<<"END OF OUTPUT.";
 	return 0;
 }
-```
-# 更新日志
+```# 更新日志
 - 2014年07月06日 已AC。

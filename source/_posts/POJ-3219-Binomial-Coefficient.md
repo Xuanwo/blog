@@ -17,8 +17,7 @@ C(n,k)(k<=n)的奇偶性取决于(n-k)与k的二进制表达式是否存在同�
 <!-- more -->
 
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -54,6 +53,5 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年08月18日 已AC。

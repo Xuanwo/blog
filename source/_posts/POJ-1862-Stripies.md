@@ -15,8 +15,7 @@ http://poj.org/problem?id=1862
 <!-- more -->
 
 # 代码
-```
-#include <stdio.h>
+```#include <stdio.h>
 #include <string.h>
 #include <iostream>
 #include <math.h>
@@ -45,7 +44,6 @@ int main(int argc, char const *argv[])
     printf("%.3f\n", ans);
     return 0;
 }
-```
-	
+```	
 # 更新日志
 - 2014年08月05日 已AC。

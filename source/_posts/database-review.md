@@ -240,23 +240,17 @@ ORACLE 限制为8个字符
 
 ### 数据库的创建与删除
 创建数据库
-```
-CREATE DATABASE <数据库名>;
+```CREATE DATABASE <数据库名>;
 CREATE DATABASE Mydb;
-```
-删除数据库
-```
-DROP DATABASE <数据库名> [,<数据库名>] [,...];
+```删除数据库
+```DROP DATABASE <数据库名> [,<数据库名>] [,...];
 DROP DATABASE Mydb;
 ```
-
 ### 表的创建与删除
 创建基本表
-```
-CREATE TABLE <表名>
+```CREATE TABLE <表名>
     (<列名> <数据类型> [<列级完整性约束条件>] [<列名> <数据类型> [ <列级完整性约束条件> ] [,...] ] [,<表级完整性约束条件>] [,..]);
-```
-![主要数据类型](http://xuanwo.qiniudn.com/learn/main-type.png)
+```![主要数据类型](http://xuanwo.qiniudn.com/learn/main-type.png)
 
 约束条件：
 - 列级完整性约束条件——只能用于列
@@ -272,117 +266,83 @@ SQL完整性约束条件
 
 举例
 创建`学生表：Student(sno, sname, sdate, ssex, sdept)`
-```
-Create Table Student(
+```Create Table Student(
     sno char(5) not null unique,
     sdate date,
     ssex char(2) default '男',
     sdept char(2)
     Constraint C1 Check (ssex In ('男', '女')));
 ```
-
 删除基本表
+```DROP TABLE <表名>;
+```举例
+```DROP TABLE Student;
 ```
-DROP TABLE <表名>;
-```
-举例
-```
-DROP TABLE Student;
-```
-
 ### 表结构的修改
-```
-ALTER TABLE <表名>
+```ALTER TABLE <表名>
     [ADD ( <新列名> <数据类型> [<完整性约束条件>][,...])]
     [DROP <完整性约束名>]
     [MODIFY ( <列名> <数据类型> [,...])];
-```
-举例
+```举例
 > 在Student表中增加‘籍贯native_place’列，数据类型为字符型
 
-```
-Alter Table Student
+```Alter Table Student
     Add native_place Varchar(50);
 ```
-
 > 删除Student表中学生姓名必须取唯一值的约束条件
 
-```
-Alter Table Student
+```Alter Table Student
     Drop unique(sname);
 ```
-
 > 修改Student表中sname列的数据类型为定长字符型
 
-```
-Alter Table Student
+```Alter Table Student
     Modify sname char(8) unique;
 ```
-
 ### 建立和删除索引
 建立索引
-```
-CREATE [UNIQUE] [CLUSTER] INDEX  <索引名>
+```CREATE [UNIQUE] [CLUSTER] INDEX  <索引名>
     ON <表名> (<列名> [<次序>] [, <列名> [<次序>] ] [,…]);
-```
-举例
-```
-Create unique Index stusno_ind
+```举例
+```Create unique Index stusno_ind
     On Student (sno ASC);
 ```
-
 删除索引
+```DROP INDEX <索引名>;
+```举例
+```DROP INDEX Stusno_Ind;
 ```
-DROP INDEX <索引名>;
-```
-举例
-```
-DROP INDEX Stusno_Ind;
-```
-
 ## 数据查询
-```
-SELECT [ALL|DISTINCT] <目标列表达式> [,<目标列表达式>] [,…]
+```SELECT [ALL|DISTINCT] <目标列表达式> [,<目标列表达式>] [,…]
 [INTO <新表名>]
 FROM <表名/视图名> [,<表名/视图名>] [,…]
 [WHERE <条件表达式>]
 [GROUP BY <列名1>] [HAVING <条件表达式>]]
 [ORDER BY <列名2> [ASC|DESC]];
 ```
-
 ### 目标列表达式
 目标列表达式是一个逗号分隔的表达式列表
-```
-[<表名>.]<属性列名表达式> [, [<表名>.] <属性列名表达式>] [, …]
-```
-举例
-```
-//查询单表中全体学生的学号与姓名
+```[<表名>.]<属性列名表达式> [, [<表名>.] <属性列名表达式>] [, …]
+```举例
+```//查询单表中全体学生的学号与姓名
 SELECT sno, sname FROM Student;
 //查询单表中的全体学生
 SELECT * FROM Student;
 ```
-
 集函数
-```
-<集函数> ( [ DISTINCT | ALL ] * )
+```<集函数> ( [ DISTINCT | ALL ] * )
 //集函数：SUM、AVG、COUNT、MAX、MIN
+```举例
+```SELECT DISTINCT sname, Year(GetDate())-Year(sdate) AS age FROM Student;
 ```
-举例
-```
-SELECT DISTINCT sname, Year(GetDate())-Year(sdate) AS age FROM Student;
-```
-
 ### 条件表达式
 ![条件表达式](http://xuanwo.qiniudn.com/learn/where.png)
 举例
-```
-//从Student表中，查询男同学
+```//从Student表中，查询男同学
 SELECT * FROM Student WHERE ssex='男';
 //从Student表中，查询出生日期在1980年和1990年之间的学生
 SELECT * FROM Student WHERE sdate BETWEEN '1980-01-01' AND '1990-12-31';
 ```
-
 通配符
 > %：百分号，代表任意长度的字符串
 a%b:ab,acb,addb
@@ -395,52 +355,39 @@ A[BCDE]表示第一个字符为A，第二个字符为B,C,D,E中的任意一个
 A[^BCDE]表示第一个字符为A，第二个字符为不为B,C,D,E的任意一个字符
 
 ## 数据操纵
-```
-数据插入——INSERT——向数据库中插入新纪录
+```数据插入——INSERT——向数据库中插入新纪录
 数据修改——UPDATE——修改数据库中的某记录
 数据删除——DELETE——删除数据库中的某记录
-```
-### 数据插入
+```### 数据插入
 插入元组
-```
-INSERT
+```INSERT
 INTO <表名> [( <字段1>[, <字段2>] [,…])]
 VALUES (<常量1> [, <常量2>] [,…]);
-```
-举例
-```
-//将一条新学生记录（所有字段都有值）插入到表中
+```举例
+```//将一条新学生记录（所有字段都有值）插入到表中
 Insert Into S
 Values (‘95020’,‘陈东’,‘男’,‘IS’,’18’);
 将一条学生记录（部分字段有值）插入表中
 Insert Into S(Sno,Sname)
 Values (‘95020’,‘陈东’);
 ```
-
 插入子查询
 子查询不仅可以嵌套在SELECT语句中，也可以嵌套在INSERT语句中，用于生成要插入的批量数据。
-```
-INSERT
+```INSERT
 INTO <表名> [( <字段1>[, <字段2>] [,…])]
 子查询;
-```
-举例
-```
-Insert Into Deptage(Sdept, Avgage)
+```举例
+```Insert Into Deptage(Sdept, Avgage)
     Select Sdept, AVG(Sage)
     From S  Group By Sdept;
 ```
-
 ### 数据修改
 一般格式
-```
-UPDATE <表名>
+```UPDATE <表名>
 SET  <字段名1>＝<表达式1>[, <字段2>= <表达式2>] [,…]]
 [WHERE <条件表达式>];
-```
-举例
-```
-//修改某一元组的值：如将学生95001的年龄改为22岁
+```举例
+```//修改某一元组的值：如将学生95001的年龄改为22岁
 Update S
 Set Sage=22
 Where Sno='95001';
@@ -455,17 +402,13 @@ Where 'IS'=
     From S
     Where S.Sno=SC.Sno);
 ```
-
 ### 删除数据
 一般格式
-```
-DELETE
+```DELETE
 FROM  <表名>
 [WHERE <条件表达式>];
-```
-举例
-```
-//删除某一元组：如删除学号为95001的学生记录
+```举例
+```//删除某一元组：如删除学号为95001的学生记录
 Delete
 From S
 Where Sno='95001';
@@ -480,7 +423,6 @@ Where 'IS'=
     From S
     Where S.Sno=SC.Sno);
 ```
-
 ## 数据控制
 共享程度与安全性问题的冲突
 数据控制功能：
@@ -489,15 +431,12 @@ Where 'IS'=
 
 授予权限
 一般格式
-```
-GRANT  <权限> [,<权限>][,…]
+```GRANT  <权限> [,<权限>][,…]
     [ON  <对象类型> <对象名称>]
     TO  <用户> [, <用户>] [,…]
     [WITH  GRANT OPTION];
-```
-举例
-```
-//把查询S表的权限授权给用户U1
+```举例
+```//把查询S表的权限授权给用户U1
 GRANT  SELECT
 ON  TABLE  S
 TO U1;
@@ -506,17 +445,13 @@ GRANT ALL PRIVILEGES
 ON TABLE S, C
 TO U1, U2;
 ```
-
 收回权限
 一般格式
-```
-REVOKE  <权限> [,<权限>][,…]
+```REVOKE  <权限> [,<权限>][,…]
     [ON  <对象类型> <对象名称>]
     FROM  <用户> [, <用户>] [,…]
-```
-举例
-```
-//把用户U1修改学号的权限收回
+```举例
+```//把用户U1修改学号的权限收回
 REVOKE UPDATE(Sno)
 ON TABLE S
 FROM U1;
@@ -525,7 +460,6 @@ REVOKE SELECT
 ON TABLE SC
 FROM PUBLIC;
 ```
-
 # 关系数据库设计
 ## 关系数据库设计理论
 ### 关系模式

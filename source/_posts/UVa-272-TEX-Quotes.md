@@ -16,33 +16,6 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=82
 
 # 代码
 ```
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <ctime>
-#include <iostream>
-#include <algorithm>
-#include <string>
-#include <vector>
-#include <deque>
-#include <list>
-#include <set>
-#include <map>
-#include <stack>
-#include <queue>
-#include <numeric>
-#include <iomanip>
-#include <bitset>
-#include <sstream>
-#include <fstream>
-#define debug "output for debug\n"
-#define pi (acos(-1.0))
-#define eps (1e-8)
-#define inf 0x3f3f3f3f
-#define ll long long int
-using namespace std;
-
 char a;
 int flag=0;
 
@@ -70,7 +43,6 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 ```
-
 # 更新日志
 - 2014年11月25日 已AC。
 

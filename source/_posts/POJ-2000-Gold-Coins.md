@@ -15,8 +15,7 @@ http://poj.org/problem?id=2000
 <!-- more -->
 
 # 代码
-```
-#include <iostream>
+```#include <iostream>
 using namespace std;
 
 int i;
@@ -41,7 +40,6 @@ int main(int argc, char const *argv[])
         cin >> day;
     }
 }
-```
-	
+```	
 # 更新日志
 - 2014年08月05日 已AC。

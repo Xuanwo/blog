@@ -15,8 +15,7 @@ http://poj.org/problem?id=2080
 <!-- more -->
 
 # 代码
-```
-#include <stdio.h>
+```#include <stdio.h>
 using namespace std;
 
 char week[7][10] = {"Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
@@ -42,7 +41,6 @@ int main(int argc, char const *argv[])
         printf("%d-%02d-%02d %s\n", i, j + 1, days + 1, week[dayofweek]);
     }
 }
-```
-	
+```	
 # 更新日志
 - 2014年08月06日 已AC。

@@ -18,8 +18,7 @@ http://poj.org/problem?id=1018
 `Sublime-Text`在C++模式下输入main+回车可以直接完成符合C++11的代码，点个赞
 
 # 代码
-```
-#include <iostream>  
+```#include <iostream>  
 #include <algorithm>  
 #include <iomanip>  
 #include <cstring>
@@ -135,6 +134,5 @@ int main(int argc, char const *argv[], int i, int j)
     return 0;  
 }  
 ```
-
 # 更新日志
 - 2014年07月12日 已AC。

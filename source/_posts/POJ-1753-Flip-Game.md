@@ -19,8 +19,7 @@ http://poj.org/problem?id=1753
 对每一个可能的分支路径深入到不能再深入为止，而且每个节点只能访问一次。
 
 # 代码
-```
-#include<iostream>  
+```#include<iostream>  
 using namespace std;  
   
 bool chess[6][6]={false}; 
@@ -97,6 +96,5 @@ int main(void)
     return 0;  
 }  
 ```
-
 # 更新日志
 - 2014年07月12日 已AC。

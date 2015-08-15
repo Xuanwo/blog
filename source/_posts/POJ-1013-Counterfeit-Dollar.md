@@ -15,8 +15,7 @@ http://poj.org/problem?id=1013
 <!-- more -->
 
 # 代码
-```
-#include <iostream>
+```#include <iostream>
 #include <stdlib.h>
 using namespace std;
 
@@ -91,6 +90,5 @@ int main()
 	return 0;
 }
 ```
-
 # 更新日志
 2014年07月10日 已AC(C++下通过，G++下WA)，准备择日修复。

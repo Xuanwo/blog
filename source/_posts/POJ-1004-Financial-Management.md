@@ -15,8 +15,7 @@ http://poj.org/problem?id=1004
 <!-- more -->
 
 # 代码
-```
-#include <stdio.h>
+```#include <stdio.h>
 #include <iostream>
 
 using namespace std;
@@ -34,6 +33,5 @@ int main()
 	return 0;
 }
 ```
-
 # 更新日志
 - 2014年07月04日  已AC。

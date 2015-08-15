@@ -15,8 +15,7 @@ http://poj.org/problem?id=1657
 <!-- more -->
 
 # 代码
-```
-#include <iostream>
+```#include <iostream>
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -55,6 +54,5 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年07月13日 已AC。

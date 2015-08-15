@@ -15,8 +15,7 @@ http://poj.org/problem?id=2019
 <!-- more -->
 
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 
 int field[300][300];
@@ -57,7 +56,6 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-```
-	
+```	
 # 更新日志
 - 2014年08月06日 已AC。

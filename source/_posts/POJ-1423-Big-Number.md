@@ -15,8 +15,7 @@ http://poj.org/problem?id=1423
 <!-- more -->
 
 # 代码
-```
-import java.util.*;
+```import java.util.*;
 
 public class Main {
 
@@ -37,6 +36,5 @@ public class Main {
     }
 }
 ```
-
 # 更新日志
 - 2014年07月23日 已AC。

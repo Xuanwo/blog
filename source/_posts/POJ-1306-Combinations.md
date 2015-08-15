@@ -15,8 +15,7 @@ http://poj.org/problem?id=1306
 <!-- more -->
 
 # 代码
-```
-import java.math.BigInteger;
+```import java.math.BigInteger;
 import java.util.Scanner;
 
 
@@ -47,6 +46,5 @@ public class Main {
 }
 
 ```
-
 # 更新日志
 - 2014年07月18日 已AC。

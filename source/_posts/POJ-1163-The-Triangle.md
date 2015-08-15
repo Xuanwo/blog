@@ -16,8 +16,7 @@ http://poj.org/problem?id=1163
 <!-- more -->
 
 # 代码
-```
-#include<stdio.h>
+```#include<stdio.h>
 #define MAX 100
 
 int triangle[MAX][MAX];
@@ -36,6 +35,5 @@ int main()
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年07月22日 已AC。

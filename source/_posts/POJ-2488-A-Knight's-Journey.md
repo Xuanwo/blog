@@ -18,8 +18,7 @@ http://poj.org/problem?id=2488
 字典序 `lexicographically`
 
 # 代码
-```
-#include <iostream>
+```#include <iostream>
 #include <cstring>
 using namespace std;  
   
@@ -126,6 +125,5 @@ int main(int argc, char const *argv[])
     return 0;  
 }  
 ```
-
 # 更新日志
 - 2014年07月12日 已AC。

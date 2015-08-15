@@ -22,8 +22,7 @@ http://poj.org/problem?id=1047
 3. 所有的循环数都是9的倍数。
 
 # 代码
-```
-import java.util.*;
+```import java.util.*;
 import java.math.*;
 
 public class Main {
@@ -52,6 +51,5 @@ public class Main {
     }
 }
 ```
-
 # 更新日志
 - 2014年07月18日 已AC。

@@ -53,7 +53,6 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 ## 数组排序
 > 输入n个数，对这n个数去重之后排序，并输出从小到大排序结果。
 
@@ -109,7 +108,6 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 ## 字符串出现个数
 > 给定一个串a和串b，求b在a中出现次数
 
@@ -156,6 +154,5 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 # 更新日志
 - 2015年07月13日 赶deadline ing

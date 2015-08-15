@@ -17,8 +17,7 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_p
 <!-- more -->
 
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -85,6 +84,5 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年11月5日 已AC。

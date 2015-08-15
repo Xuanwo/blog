@@ -11,10 +11,8 @@ http://codeforces.com/contest/2/problem/A
 
 # 理解
 真尼玛给俄式英语跪了= =，游戏规则中最关键的地方各种看不懂。
-```
-If score is negative, this means that the player has lost in the round.`
-```
-这句话一直看不懂，是不是只要为负就能直接出局？还是就算暂时是负的也是没有关系的，只要最后大于最后的M就可以？直到看到CF的多组样例之后才明白，应该是后面一种。
+```If score is negative, this means that the player has lost in the round.`
+```这句话一直看不懂，是不是只要为负就能直接出局？还是就算暂时是负的也是没有关系的，只要最后大于最后的M就可以？直到看到CF的多组样例之后才明白，应该是后面一种。
 除了这个之外，好好地学习了一下STL中的map，vector和迭代器，感觉好厉害！涨姿势了。
 
 <!-- more -->
@@ -29,8 +27,7 @@ If score is negative, this means that the player has lost in the round.`
 初始化： `map<string,int>::iterator myIterator;`
 
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -91,6 +88,5 @@ int main()
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年10月22日 已AC。

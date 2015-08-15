@@ -15,8 +15,7 @@ http://poj.org/problem?id=1082
 <!-- more -->
 
 # 代码
-```
-#include <iostream>
+```#include <iostream>
 #include <cstdio>
 using namespace std;
 const int Max = 50005;
@@ -79,6 +78,5 @@ int main()
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年07月22日 已AC。

@@ -18,8 +18,7 @@ http://poj.org/problem?id=1207
 [Google C++开源项目风格指南](http://zh-google-styleguide.readthedocs.org/en/latest/google-cpp-styleguide/)
 
 # 代码
-```
-#include <stdio.h>
+```#include <stdio.h>
 
 int main()
 {
@@ -53,6 +52,5 @@ int main()
     return 0;
 }
 ```
-
 # 更新日志
 2014年07月10日 已AC，添加谷歌代码风格指南。

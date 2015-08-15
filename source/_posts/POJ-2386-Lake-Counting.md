@@ -16,8 +16,7 @@ http://poj.org/problem?id=2386
 
 # 代码
 ## 原始版本
-```
-#include  <cstdio>
+```#include  <cstdio>
 #include  <cstring>
 using namespace std;
 
@@ -65,10 +64,8 @@ int main()
     return 0;
 }
 ```
-
 ## 优化版本
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -135,7 +132,6 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年07月12日 已AC。
 - 2014年08月18日 更新了优化后的代码，提升可读性，并且运用了新的处理方法。

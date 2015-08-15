@@ -15,8 +15,7 @@ toc: true
 > 任意给定n个整数，求这n个整数序列的和、最小值、最大值
 
 还是比较简单的- -，一边读取一边处理，没有什么坑点。
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -67,13 +66,11 @@ int main(int argc, char const *argv[])
      return 0;
 }
 ```
-
 **C2-2 进制转换**
 > 已知一个只包含0和1的二进制数，长度不大于10，将其转换为十进制并输出。
 
 一开始想偷懒- -，研究了一下sprintf和itoa之类的玩意儿，发现并不能满足我的需求。所以还是自己手写了一发，后来发现，其实手写也没有特别复杂。
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -122,13 +119,11 @@ int main(int argc, char const *argv[])
      return 0;
 }
 ```
-
 **C2-3  实心菱形**
 > 打印n阶实心菱形
 
 当然啦- -，比较常见的模拟题，只要注意下整个图形变化的规律就可以轻松搞定。
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -182,6 +177,5 @@ int main(int argc, char const *argv[])
      return 0;
 }
 ```
-
 # 更新日志
 - 2015年04月12日 不按照周次来了，直接整章整理~

@@ -15,8 +15,7 @@ http://poj.org/problem?id=1308
 <!-- more -->
 
 # 代码
-```
-#include <stdio.h>
+```#include <stdio.h>
 #define N 1000
 
 int father[N], rank[N];
@@ -75,6 +74,5 @@ int main(int argc, char const *argv[])
     return 0;
     }
 ```
-
 # 更新日志
 - 2014年07月22日 已AC。

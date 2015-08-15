@@ -15,8 +15,7 @@ AOAPC上的基础题，一个非常简单的求两个数之间的差，注意数
 <!-- more -->
 
 # 代码
-```
-#include  <stdio.h>
+```#include  <stdio.h>
 
 using namespace std;
 
@@ -30,6 +29,5 @@ int main()
 	return 0;
 }
 ```
-
 # 更新日志
 - 2014年10月29日 已AC。

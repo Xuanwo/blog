@@ -16,8 +16,7 @@ http://poj.org/problem?id=2199
 
 # 新技能get
 二分法循环形式
-```
-up = 2;
+```up = 2;
 down = 1;
 mid = (up + down) / 2;
 while ((mid - down) > eps)
@@ -34,10 +33,8 @@ while ((mid - down) > eps)
     mid = (up + down) / 2;
 }
 ```
-
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cmath>
 using namespace std;
 
@@ -90,6 +87,5 @@ int main()
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年07月19日 已AC。

@@ -17,8 +17,7 @@ http://poj.org/problem?id=3624
 
 # 代码
 **挂在空间占用上的代码**
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -131,10 +130,8 @@ int main(int argc, char const *argv[])
     printf("%d\n", dp[0][m]);
     return 0;
 }
-```
-**修改之后成功AC的代码**
-```
-#include <cstdio>
+```**修改之后成功AC的代码**
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -197,6 +194,5 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年10月05日 已AC。

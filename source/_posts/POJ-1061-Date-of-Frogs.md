@@ -23,8 +23,7 @@ http://poj.org/problem?id=1061
 3. 根据解系的 公式： x =x1 + b* t ; y =y1 - a *t; 我们首先假设他最小的解x=0 ，然后求出 此时的 t=-x1/b; 然后带入求最小的解x=x1+b*t=x1 - b*t ;因为此时的t为 负数， 减去他的 负数，就是等于加上他。
 
 # 代码
-```
-#include <iostream>
+```#include <iostream>
 #include <cmath>
 #include <cstdio>
 using namespace std;
@@ -95,6 +94,5 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年07月23日 已AC。

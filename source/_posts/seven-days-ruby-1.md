@@ -33,8 +33,7 @@ if conditional
 [else
       code...]
 end
-```
-跟C++的唯一区别大概就是`else if`变成了`elsif`，减少了两次击键，23333。
+```跟C++的唯一区别大概就是`else if`变成了`elsif`，减少了两次击键，23333。
 下面给出一个实例：
 ```ruby
 #!/usr/bin/ruby
@@ -47,29 +46,22 @@ elsif x <= 2 and x!=0
  else
     puts "I can't guess the number"
  end
-```
-输出的结果是
-```
-x is 1
-```
-### if修饰符
+```输出的结果是
+```x is 1
+```### if修饰符
 跟C++有一个明显区别在于，Ruby提供一个一种单行进行逻辑判断的方式，称之为修饰符。
 ```ruby
 code if condition
-```
-如果condition为真，则执行code。简单的脑补了一下，大概减少了四次击键的样子，学到这里，我觉得我大概有点懂Ruby的对程序员友好的理念了。
+```如果condition为真，则执行code。简单的脑补了一下，大概减少了四次击键的样子，学到这里，我觉得我大概有点懂Ruby的对程序员友好的理念了。
 下面同样给出一个实例：
 ```ruby
 #!/usr/bin/ruby
 
 debug=1
 print "debug\n" if debug
-```
-输出的结果为：
-```
-debug
-```
-### unless语句
+```输出的结果为：
+```debug
+```### unless语句
 这也是相比于C++而言新增的一个语法糖，基本等价于`if not`。
 ```ruby
 unless conditional
@@ -77,8 +69,7 @@ unless conditional
 [else
    code ]
 end
-```
-如果 conditional 为假，则执行 code。如果 conditional 为真，则执行 else 子句中指定的 code。
+```如果 conditional 为假，则执行 code。如果 conditional 为真，则执行 else 子句中指定的 code。
 我们来看一下这个样例：
 ```ruby
 #!/usr/bin/ruby
@@ -89,17 +80,14 @@ unless x>2
  else
   puts "x is greater than 2"
 end
-```
-将会产生这样的结果：
+```将会产生这样的结果：
 ```ruby
 x is less than 2
-```
-### unless修饰符
+```### unless修饰符
 跟if一样，unless也提供了修饰符的用法。
 ```ruby
 code unless conditional
-```
-如果 conditional 为假，则执行 code。
+```如果 conditional 为假，则执行 code。
 ### case语句
 首先来介绍一下相应的语法：
 ```ruby
@@ -109,8 +97,7 @@ case expression
 [else
    code ]
 end
-```
-比较 case 所指定的 expression，当使用 === 运算符指定时，执行匹配的 when 子句的 code。
+```比较 case 所指定的 expression，当使用 === 运算符指定时，执行匹配的 when 子句的 code。
 when 子句所指定的 expression 背当作左操作数。如果没有匹配的 when 子句，case 执行 else 子句的代码。
 when 语句的表达式通过保留字 then、一个换行符或一个分号，来与代码分离开。
 
@@ -132,7 +119,6 @@ else
     puts "adult"
 end
 ```
-
 这个执行的结果是`little child`。
 Ruby的case语句还是十分好用的，通过`x...y`的形式，就可以自动进行匹配。
 
@@ -150,13 +136,10 @@ while i < 2
     puts a[i].to_i
     i = i + 1
 end
-```
-我们可以得到这样的输出：
-```
-100
+```我们可以得到这样的输出：
+```100
 100
 ```
-
 我们可以看到数组a中有一个字符串和一个浮点数，但是在to_i函数的作用下他们都变成了整数100。从某种角度上来说，这就相当于C++中的模板类型。这是面对对象设计思想中的一个重要原则：对接口编码，不对实现编码。同样的，如果两个对象有相同的方法，他们就可以当成同一个对象来调用；反之，如果没有，则不能。
 
 # 更新日志

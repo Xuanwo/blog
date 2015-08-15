@@ -15,8 +15,7 @@ http://poj.org/problem?id=2492
 <!-- more -->
 
 # 代码
-```
-#include<cstdio>
+```#include<cstdio>
 
 const int maxn = 2000 + 10;
 
@@ -85,6 +84,5 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年07月22日 已AC。

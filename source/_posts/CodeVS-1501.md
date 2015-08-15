@@ -15,8 +15,7 @@ http://codevs.cn/problem/1501/
 <!-- more -->
 
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -70,6 +69,5 @@ int main(void)
 	return 0;
 }
 ```
-
 # 更新日志
 - 2014年10月31日 已AC。

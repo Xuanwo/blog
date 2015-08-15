@@ -15,8 +15,7 @@ http://poj.org/problem?id=1012
 <!-- more -->
 
 # 代码
-```
-#include <iostream>
+```#include <iostream>
 using namespace std;
 
 int r[14];
@@ -60,6 +59,5 @@ int main()
     return 0;
 }
 ```
-
 # 更新日志
 - 2014年07月16日 已AC。

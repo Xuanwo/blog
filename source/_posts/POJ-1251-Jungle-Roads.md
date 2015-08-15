@@ -18,8 +18,7 @@ http://poj.org/problem?id=1251
 
 # 代码
 ## Kruskal算法
-```
-#include <iostream>
+```#include <iostream>
 #include <algorithm>
 using namespace std;
 #define MAX 26
@@ -108,10 +107,8 @@ int main()
     return 0;
 }
 ```
-
 ## Prim算法
-```
-#include <iostream>
+```#include <iostream>
 #include <cstdio>
 #include <string.h>
 using namespace std;
@@ -167,7 +164,6 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-```
-	
+```	
 # 更新日志
 - 2014年08月06日 已AC。

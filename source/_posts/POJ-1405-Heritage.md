@@ -15,8 +15,7 @@ http://poj.org/problem?id=1405
 <!-- more -->
 
 # 代码
-```
-import java.io.*;
+```import java.io.*;
 import java.math.*;
 import java.util.*;
 import java.text.*;
@@ -37,6 +36,5 @@ public class Main {
     }
 }
 ```
-
 # 更新日志
 - 2014年08月02日 已AC。

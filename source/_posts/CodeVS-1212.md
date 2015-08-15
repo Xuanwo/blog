@@ -17,16 +17,13 @@ http://codevs.cn/problem/1212/
 
 # 新技能get
 **GCD模板代码**
-```
-int gcd(int a, int b)
+```int gcd(int a, int b)
 {
 	return b==0?a:gcd(b,a%b);
 }
 ```
-
 # 代码
-```
-#include <cstdio>
+```#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -67,6 +64,5 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 ```
-
 # 更新日志
 - 2014年10月15日 已AC。

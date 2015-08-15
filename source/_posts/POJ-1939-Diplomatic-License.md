@@ -15,8 +15,7 @@ http://poj.org/problem?id=1939
 <!-- more -->
 
 # 代码
-```
-#include <stdio.h>
+```#include <stdio.h>
 
 double cor[2][30000];
 
@@ -34,7 +33,6 @@ int main()
     }
     return 0;
 }
-```
-	
+```	
 # 更新日志
 - 2014年08月05日 已AC，C提交过了，G++直接超时两发。

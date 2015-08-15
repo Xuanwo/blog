@@ -15,8 +15,7 @@ http://poj.org/problem?id=2389
 <!-- more -->
 
 # 代码
-```
-import java.math.BigDecimal;
+```import java.math.BigDecimal;
 import java.util.Scanner;
 public class Main{
 	public static void main(String[] args){
@@ -28,7 +27,6 @@ public class Main{
 		}
 	}
 }
-```
-	
+```	
 # 更新日志
 - 2014年08月06日 已AC。
