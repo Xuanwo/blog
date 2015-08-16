@@ -1,6 +1,6 @@
 ﻿title: POJ 1844 Sum
 date: 2014-08-05 17:09:00
-tags: [ACM, POJ, C, 简单计算]
+tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

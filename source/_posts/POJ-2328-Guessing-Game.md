@@ -1,6 +1,6 @@
 title: POJ 2328 Guessing Game
 date: 2014-08-22 22:28:14
-tags: [ACM, POJ, C, 简单计算]
+tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---
@@ -16,7 +16,8 @@ http://poj.org/problem?id=2328
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

@@ -1,6 +1,6 @@
 ﻿title: POJ 1543 Perfect Cubes
 date: 2014-08-03 11:36:27
-tags: [ACM, POJ, C, 简单计算]
+tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---
@@ -15,7 +15,8 @@ http://poj.org/problem?id=1543
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 
 using namespace std;
 

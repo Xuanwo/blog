@@ -1,6 +1,6 @@
 title: CodeVS 1501 二叉树最大宽度和高度
 date: 2014-10-31 16:45:17
-tags: [ACM, CodeVS, C, 模拟, 简单]
+tags: [ACM, CodeVS, C, 模拟, 水题]
 categories: Exercise
 toc: true
 ---
@@ -15,7 +15,8 @@ http://codevs.cn/problem/1501/
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

@@ -1,6 +1,6 @@
 title: POJ 2535 Very Simple Problem
 date: 2014-08-22 22:04:55
-tags: [ACM, POJ, C, 简单计算]
+tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---
@@ -15,7 +15,8 @@ N个评委，P道题目，每个评委对每道题进行评分。对于单个评
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

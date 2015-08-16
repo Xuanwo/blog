@@ -1,6 +1,6 @@
 title: UVa 725 Division
 date: 2014-11-2 11:58:24
-tags: [ACM, UVa, C, 简单]
+tags: [ACM, UVa, C, 水题]
 categories: Exercise
 toc: true
 ---
@@ -16,7 +16,8 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=9&
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

@@ -1,6 +1,6 @@
 title: POJ 3979 分数加减法
 date: 2014-08-21 23:37:02
-tags: [ACM, POJ, C, 简单计算]
+tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---
@@ -15,7 +15,8 @@ http://poj.org/problem?id=3979
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

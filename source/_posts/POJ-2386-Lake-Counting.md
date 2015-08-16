@@ -65,7 +65,8 @@ int main()
 }
 ```
 ## 优化版本
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

@@ -1,6 +1,6 @@
 title: UVa 414 Machined Surfaces
 date: 2014-10-31 17:13:19
-tags: [ACM, UVa, C, 简单, 模拟]
+tags: [ACM, UVa, C, 水题, 模拟]
 categories: Exercise
 toc: true
 ---
@@ -16,7 +16,8 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_p
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

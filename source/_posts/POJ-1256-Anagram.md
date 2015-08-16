@@ -15,7 +15,8 @@ http://poj.org/problem?id=1256
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <iostream>
 #include <algorithm>
 #include <string>

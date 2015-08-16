@@ -1,6 +1,6 @@
 title: POJ 3173 Parkside's Triangle
 date: 2014-08-21 18:40:11
-tags: [ACM, POJ, C, 简单计算]
+tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---
@@ -15,7 +15,8 @@ http://poj.org/problem?id=3173
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

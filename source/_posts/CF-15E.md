@@ -24,7 +24,8 @@ http://codeforces.com/contest/15/problem/E
 # 新技能get
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

@@ -1,6 +1,6 @@
 title: POJ 2579 Blurred Vision
 date: 2014-08-22 21:35:15
-tags: [ACM, POJ, C, 简单计算]
+tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---
@@ -16,7 +16,8 @@ http://poj.org/problem?id=2579
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

@@ -1,6 +1,6 @@
 title: POJ 3085 Quick Change
 date: 2014-08-21 18:28:06
-tags: [ACM, POJ, C, 简单计算, 贪心]
+tags: [ACM, POJ, C, 水题, 贪心]
 categories: Exercise
 toc: true
 ---
@@ -15,7 +15,8 @@ http://poj.org/problem?id=3085
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

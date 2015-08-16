@@ -15,7 +15,8 @@ http://poj.org/problem?id=1363
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <stack>
 using namespace std;
 const int maxn=1000+5;

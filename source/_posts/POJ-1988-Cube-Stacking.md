@@ -15,7 +15,8 @@ http://poj.org/problem?id=1988
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <iostream>
 #include <cstring>
 using namespace std;

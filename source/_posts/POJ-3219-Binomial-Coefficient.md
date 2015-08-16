@@ -1,6 +1,6 @@
 title: POJ 3219 二项式系数
 date: 2014-08-18 22:18:58
-tags: [ACM, POJ, C, 简单计算]
+tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---
@@ -17,7 +17,8 @@ C(n,k)(k<=n)的奇偶性取决于(n-k)与k的二进制表达式是否存在同�
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

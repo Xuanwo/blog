@@ -15,7 +15,8 @@ http://poj.org/problem?id=1190
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cmath>
 using namespace std;
 

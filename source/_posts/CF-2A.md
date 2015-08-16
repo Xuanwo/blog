@@ -27,7 +27,8 @@ http://codeforces.com/contest/2/problem/A
 初始化： `map<string,int>::iterator myIterator;`
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

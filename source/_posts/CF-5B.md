@@ -17,7 +17,8 @@ http://codeforces.com/contest/5/problem/B
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

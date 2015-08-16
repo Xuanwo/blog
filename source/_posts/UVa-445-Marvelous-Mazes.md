@@ -1,6 +1,6 @@
 title: UVa 445 Marvelous Mazes
 date: 2014-11-1 09:47:48
-tags: [ACM, UVa, C, 字符串, 简单]
+tags: [ACM, UVa, C, 字符串, 水题]
 categories: Exercise
 toc: true
 ---
@@ -19,7 +19,8 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=94
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

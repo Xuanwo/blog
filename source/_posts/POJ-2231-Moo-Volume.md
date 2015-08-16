@@ -1,6 +1,6 @@
 title: POJ 2231 Moo Volume
 date: 2014-08-16 14:52:02
-tags: [ACM, POJ, C, 简单计算, 排序]
+tags: [ACM, POJ, C, 水题, 排序]
 categories: Exercise
 toc: true
 ---
@@ -23,7 +23,8 @@ http://poj.org/problem?id=2231
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

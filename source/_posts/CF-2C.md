@@ -22,7 +22,8 @@ http://codeforces.com/contest/2/problem/C
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

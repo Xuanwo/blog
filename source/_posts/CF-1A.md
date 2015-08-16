@@ -1,6 +1,6 @@
 title: Codeforces Beta Round 1 A Theatre Square
 date: 2014-10-14 17:00:08
-tags: [ACM, Codeforces, C, 简单]
+tags: [ACM, Codeforces, C, 水题]
 categories: Exercise
 toc: true
 ---
@@ -15,7 +15,8 @@ http://codeforces.com/contest/1/problem/A
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

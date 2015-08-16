@@ -34,7 +34,8 @@ while ((mid - down) > eps)
 }
 ```
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cmath>
 using namespace std;
 

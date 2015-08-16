@@ -1,6 +1,6 @@
 title: POJ 3086 Triangular Sums
 date: 2014-08-21 10:06:22
-tags: [ACM, POJ, C, 简单计算, 打表]
+tags: [ACM, POJ, C, 水题, 打表]
 categories: Exercise
 toc: true
 ---
@@ -15,7 +15,8 @@ http://poj.org/problem?id=3086
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

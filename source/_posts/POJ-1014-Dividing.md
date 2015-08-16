@@ -14,7 +14,8 @@ http://poj.org/problem?id=1014
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 using namespace std;
 
 int num[6] = {0};

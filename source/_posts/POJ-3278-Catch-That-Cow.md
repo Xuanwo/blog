@@ -15,7 +15,8 @@ BFS最基础的应用，只有三个方向，一个是乘二，一个是加一�
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

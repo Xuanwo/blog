@@ -15,7 +15,8 @@ STL里面Map的运用，分别建立映射就好，不难。
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

@@ -16,7 +16,8 @@ http://poj.org/problem?id=3414
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

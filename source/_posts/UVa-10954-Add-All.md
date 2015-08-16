@@ -1,6 +1,6 @@
 title: UVa 10954 Add All
 date: 2014-11-5 20:06:21
-tags: [ACM, UVa, C, 简单]
+tags: [ACM, UVa, C, 水题]
 categories: Exercise
 toc: true
 ---
@@ -18,7 +18,8 @@ http://uva.onlinejudge.org/index.php?option=onlinejudge&page=show_problem&proble
 # 代码
 
 ## WA代码（求测试数据）
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -70,7 +71,8 @@ int main(int argc, char const *argv[])
 }
 ```
 ## AC代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

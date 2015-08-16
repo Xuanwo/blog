@@ -16,7 +16,8 @@ http://uva.onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_probl
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

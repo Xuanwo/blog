@@ -17,7 +17,8 @@ http://codevs.cn/problem/1012/
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

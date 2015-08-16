@@ -1,6 +1,6 @@
 title: Codeforces Beta Round 4 B Before an Exam
 date: 2014-11-3 19:13:39
-tags: [ACM, Codeforces, C, 简单]
+tags: [ACM, Codeforces, C, 水题]
 categories: Exercise
 toc: true
 ---
@@ -16,7 +16,8 @@ http://codeforces.com/contest/4/problem/B
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

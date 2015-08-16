@@ -15,7 +15,8 @@ toc: true
 > 输入一个三角形的3边长度，判断该三角形是否为直角三角形，若是则输出True，若不是则输出False。
 
 直接sort一下之后用直角三角形的性质判断一下即可~，并无坑点。
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -61,7 +62,8 @@ int main(int argc, char const *argv[])
 > 请用递归的方法编写函数，对于给定的n，求出斐波那契数列的第n项f(n)
 
 学递归嘛- -，肯定少不了斐波那契的出场了。直接一个记忆化搜索，感觉效率还是很不错的。
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -112,7 +114,8 @@ int main(int argc, char const *argv[])
 
 一开始小小的纠结了一下到底怎么写，后来想到了一种迭代的方法，每次循环都分别判断是否能被2，3，5整除，如果都不能被整除，则直接返回false，如果运行到值为1是，返回true。
 一开始做不出来，因为想当然的觉得最后的结果应当是0，所以错了好久= =。
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -170,7 +173,8 @@ int main(int argc, char const *argv[])
 > 本题的数据规模比原先更大
 
 看样例就能明白- -，这次的数据已经超过了int的范围，于是换成了long long int类型，搞定。
-```#include <cstdio>
+```
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

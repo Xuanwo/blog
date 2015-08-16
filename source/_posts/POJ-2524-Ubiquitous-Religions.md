@@ -15,7 +15,8 @@ POJ上最简单的一道关于并查集的题目，没有使用路径压缩，�
 <!-- more -->
 
 # 代码
-```#include <cstdio>
+```
+#include <cstdio>
 
 int f[50005], sum;
 
