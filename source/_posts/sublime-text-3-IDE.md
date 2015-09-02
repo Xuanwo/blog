@@ -47,7 +47,8 @@ toc: true
 ### 建立新的编译系统
 `Tools –> Build System –> New Build System`
 在打开的页面中粘贴以下代码
-```{
+```
+{
  "cmd": ["g++", "${file}", "-std=c++11", "-o", "${file_path}/${file_base_name}", "&", "start", "cmd", "/c", "${file_base_name} & echo. & pause"],
  "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
  "working_dir": "${file_path}",
@@ -55,7 +56,8 @@ toc: true
  "shell": true,
  "encoding":"cp936",
 }
-```保存，并且取一个自己喜欢的名字，在`Tools->Build System`中选择即可。
+```
+保存，并且取一个自己喜欢的名字，在`Tools->Build System`中选择即可。
 
 如果复制出现问题，请访问 [https://gist.github.com/Xuanwo/0cb4bce76929ed764daf](https://gist.github.com/Xuanwo/0cb4bce76929ed764daf)
 
@@ -64,13 +66,15 @@ toc: true
 建立新的编译系统
 `Tools –> Build System –> New Build System`
 在打开的页面中粘贴以下代码
-```{
+```
+{
     "cmd": ["g++", "${file}", "-o", "${file_path}/${file_base_name}", "&", "gnome-terminal", "-x", "bash", "-c", "g++ '${file}' -o '${file_path}/${file_base_name}' && '${file_path}/${file_base_name}' ;read -n1 -p 'press any key to continue.'"],
     "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
     "working_dir": "${file_path}",
     "selector": "source.c, source.c++",
 }
-```保存，并且取一个自己喜欢的名字，在`Tools->Build System`中选择即可。
+```
+保存，并且取一个自己喜欢的名字，在`Tools->Build System`中选择即可。
 
 如果复制出现问题，请访问 [https://gist.github.com/Xuanwo/31ac95e82d446db37c2e](https://gist.github.com/Xuanwo/31ac95e82d446db37c2e)
 
@@ -100,8 +104,10 @@ toc: true
 *必装的插件，有了它可以很方便的安装和管理其他的插件。*
 
 使用快捷键`ctrl+反斜杠`或者 `View -> Show Console`打开命令行，粘贴以下代码：
-```import urllib.request,os,hashlib; h = 'eb2297e1a458f27d836c04bb0cbaf282' + 'd0e7a3098092775ccb37ca9d6b2e4b7d'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)
-```如果复制出现问题，请访问[https://gist.github.com/Xuanwo/fd4e4388099536bcdd65](https://gist.github.com/Xuanwo/fd4e4388099536bcdd65)
+```
+import urllib.request,os,hashlib; h = 'eb2297e1a458f27d836c04bb0cbaf282' + 'd0e7a3098092775ccb37ca9d6b2e4b7d'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)
+```
+如果复制出现问题，请访问[https://gist.github.com/Xuanwo/fd4e4388099536bcdd65](https://gist.github.com/Xuanwo/fd4e4388099536bcdd65)
 
 ### ConvertToUTF8
 *此插件可以有效的解决中文乱码问题*
@@ -124,16 +130,19 @@ toc: true
 默认的键位需要用到`F5`键，但是ThinkPad默认状态下需要同时按`Fn`才能使用`F5`，所以修改一下键位吧。
 
 点击`Preferences->Key Bindings - Users`，打开自定义键位设置，输入如下代码：
-```[
+```
+[
     { "keys": ["ctrl+m"], //ctrl+m可以换成任意一组没有冲突的组合键
     "command": "insert_date",
     "args": {"format": "%H:%M:%S"} },
 ]
-```这样，不管在什么状态下，我都能用`Ctrl+m`输入当前时间了～
+```
+这样，不管在什么状态下，我都能用`Ctrl+m`输入当前时间了～
 
 ## 代码片段(`snippet`)功能
 点击`Tools->New Snippet`之后，会新建一个文件，内容如下：
-```<snippet>
+```
+<snippet>
     <content><![CDATA[
 Hello, ${1:this} is a ${2:snippet}. //这里输入你想要键入的代码～
 ]]></content>
@@ -142,9 +151,11 @@ Hello, ${1:this} is a ${2:snippet}. //这里输入你想要键入的代码～
     <!-- Optional: Set a scope to limit where the snippet will trigger -->
     <!-- <scope>source.python</scope> --> //这里选择起作用的文件类型
 </snippet>
-```设置完毕之后，`Ctrl+S`保存，默认会保存在User文件夹下，为了方便管理，不妨新建一个Snippet文件夹，后缀名为`.sublime-snippet`。保存好之后，就可以使用啦～
+```
+设置完毕之后，`Ctrl+S`保存，默认会保存在User文件夹下，为了方便管理，不妨新建一个Snippet文件夹，后缀名为`.sublime-snippet`。保存好之后，就可以使用啦～
 用我自己的一个Snippet文件举例：
-```<snippet>
+```
+<snippet>
     <content>
 <![CDATA[
 #include <cstdio>
@@ -180,7 +191,8 @@ using namespace std;
     <!-- Optional: Set a scope to limit where the snippet will trigger -->
     <scope>source.c, source.c++</scope>
 </snippet>
-```该文件起到的作用就是，当我输入`#init`并敲击`Tab`是，会自动将`#init`转换成我预先设定的代码。
+```
+该文件起到的作用就是，当我输入`#init`并敲击`Tab`时，会自动将`#init`转换成我预先设定的代码。
 
 ## 备份
 配置到现在，Sublime也算用的顺手了，要是换一台电脑都得这么捣鼓一下，肯定得疯。所以下面介绍一下如何同步自己的Sublime配置——只要备份`Packages\User`文件夹即可，里面的`sublime-settings`文件都保存了你的所有设置，更换电脑之后，只要恢复过去，打开Sublime的时候会自动检测，下载并安装你需要的包。
@@ -213,3 +225,4 @@ using namespace std;
  - 2015年03月25日 新版本的Build变得有点傻逼- -，重新修改了sublime-build，现在只需要一次按键就能编译并运行了~，Linux下没有进行测试，求反馈。
  - 2015年06月30日 更新Sublime Text 3下载链接至3083版本，更新了Toc上的BUG，修复了Package Control的安装脚本。
  - 2015年07月01日 去除了有些累赘的更新信息
+ - 2015年09月02日 修复了一些排版上的BUG
