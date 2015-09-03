@@ -11,7 +11,7 @@ http://poj.org/problem?id=1799
 
 # 理解
 借用某大神图：
-![POJ1799示意图](http://xuanwo.qiniudn.com/exercise/POJ1799.png)
+![POJ1799示意图](//dn-xuanwo.qbox.me/exercise/POJ1799.png)
 
 <!-- more -->
 
@@ -38,6 +38,6 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-```	
+```
 # 更新日志
 - 2014年08月05日 已AC。

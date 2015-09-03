@@ -5,7 +5,7 @@ categories: Opinion
 toc: true
 ---
 废话先不说，首先来一张大图秀一下编辑状态下的页面：
-![C9的主界面](http://xuanwo.qiniudn.com/opinion/C9-main.png)
+![C9的主界面](//dn-xuanwo.qbox.me/opinion/C9-main.png)
 
 <!-- more -->
 
@@ -52,7 +52,7 @@ toc: true
 ```Size  Used Avail  Use%
 1.5G  165M  1.2G   13%
 ```C9真心厚道，每个人给了1.5G的空间，已经够用了。
-> 
+>
 偷偷的曝光一件我做的不地道的事情，我单开了一个叫做test的workplace，输入命令
 ```sudo apt-get update
 sudo apt-get install ubuntu-desktop

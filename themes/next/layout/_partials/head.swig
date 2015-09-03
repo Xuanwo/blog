@@ -1,3 +1,9 @@
+<script type="text/javascript">
+    var host = "xuanwo.org";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+        window.location.protocol = "https";
+</script>
+
 {% if theme.rss === '' and config.feed and config.feed.path %}
     {% set theme.rss = config.root + config.feed.path %}
 {% endif %}
@@ -5,7 +11,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
+<link rel="canonical" href=" { { site.url } }{ { page.url } }" />
 {% if theme.google_site_verification %}
   <meta name="google-site-verification" content="{{ theme.google_site_verification }}" />
 {% endif %}

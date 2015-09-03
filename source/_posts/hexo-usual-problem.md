@@ -45,7 +45,7 @@ Error: spawn ENOENT
 ## Deploy之后，页面长时间404
 **问题描述：**
 直接上图了，不要哭= =
-![Github 404 孩子不哭](http://xuanwo.qiniudn.com/opinion/Github-404.png)
+![Github 404 孩子不哭](//dn-xuanwo.qbox.me/opinion/Github-404.png)
 **解决方案：**
 ### 检查Github Pages类型
 **个人主页**
@@ -63,7 +63,7 @@ Error: spawn ENOENT
 
 **问题分析**
 问题出在CNAME跳转，下面附上我的分析，如果不感兴趣可以直接翻到解决方案。
-> 
+>
 如果没有CNAME跳转，访问`yourname.github.io/repo`会自动地去访问gh-pages分支下的静态文件。
 但是一旦进行了CNAME跳转，访问`yourname.github.io/repo`就会自动跳转为`yoursite.com/repo`，显然在你的博客目录下是没有这个文件夹的，所以自然而然的会出现访问404错误。
 
@@ -107,14 +107,14 @@ or you can check the docs: http://zespia.tw/hexo/docs/
 报错信息如下：
 ```[error] { name: 'HexoError',
   reason: 'end of the stream or a document separator is expected',
-  mark: 
+  mark:
    { name: null,
      buffer: '# Hexo Configuration\n## Docs: http://hexo.io/docs/configuration.html\n## Source: https://github.com/tommy351/hexo/\n\n# Site\ntitle: 2hu\nsubtitle:\ndescription: 2hu\nauthor: @2hu10n92hen9\nemail:\nlanguage:\n\n# URL\n## If your site is put in a subdirectory, set url as \'http://yoursite.com/child\' and root as \'/child/\'\nurl: http://2hu.me\nroot: /\npermalink: :year/:month/:day/:title/\ntag_dir: tags\narchive_dir: archives\ncategory_dir: categories\ncode_dir: downloads/code\n\n# Directory\nsource_dir: source\npublic_dir: public\n\n# Writing\nnew_post_name: :year-:month-:day-:title.md # File name of new posts\ndefault_layout: post\nauto_spacing: false # Add spaces between asian characters and western characters\ntitlecase: false # Transform title into titlecase\nexternal_link: true # Open external links in new tab\nmax_open_file: 100\nmulti_thread: true\nfilename_case: 0\nrender_drafts: false\npost_asset_folder: false\nhighlight:\n  enable: true\n  line_number: true\n  tab_replace:\n\n# Category & Tag\ndefault_category: uncategorized\ncategory_map:\ntag_map:\n\n# Archives\n## 2: Enable pagination\n## 1: Disable pagination\n## 0: Fully Disable\narchive: 2\ncategory: 2\ntag: 2\n\n# Server\n## Hexo uses Connect as a server\n## You can customize the logger format as defined in\n## http://www.senchalabs.org/connect/logger.html\nport: 4000\nserver_ip: 0.0.0.0\nlogger: false\nlogger_format:\n\n# Date / Time format\n## Hexo uses Moment.js to parse and display date\n## You can customize the date format as defined in\n## http://momentjs.com/docs/#/displaying/format/\ndate_format: MMM D YYYY\ntime_format: H:mm:ss\n\n# Pagination\n## Set per_page to 0 to disable pagination\nper_page: 10\npagination_dir: page\n\n# Disqus\ndisqus_shortname: 2hu\n\n# Extensions\n## Plugins: https://github.com/tommy351/hexo/wiki/Plugins\n## Themes: https://github.com/tommy351/hexo/wiki/Themes\ntheme: strict\nexclude_generator:\n\n# Deployment\n## Docs: http://hexo.io/docs/deployment.html\ndeploy:\n  type: github\n  repository: https://github.com/zhulongzheng/zhulongzheng.github.io.git\n  branch: master\n\u0000',
      position: 168,
      line: 8,
      column: 8 },
   message: 'Config file load failed',
-  domain: 
+  domain:
    { domain: null,
      _events: { error: [Function] },
      _maxListeners: 10,
@@ -147,7 +147,7 @@ iption: Description\nread_more: Read More\n\u0000',
   stack: undefined }
 ```**解决方案：**
 主题目录下所有yml文件中所有有空格的字段都用双引号括起来，尤其注意languages下面的yml文件。
-![就像这样](http://xuanwo.qiniudn.com/opinion/hexo-languages-error.png)
+![就像这样](//dn-xuanwo.qbox.me/opinion/hexo-languages-error.png)
 *感谢[@dukewan](https://github.com/dukewan)提供的截图*
 
 ## 修改主题文件之后，网页不更新
@@ -256,7 +256,7 @@ openshift
 有时候更新之后发现新版本的Hexo不能按照预期的方式工作，这时候就需要使用版本回退功能。
 打开命令行，输入`npm install -g hexo@版本号`就可以回退到没有出现问题的版本上来。
 *这个命令适用于所有Node.js模块*
-> 
+>
 少数情况下会出现Node.js版本问题，可以使用`nvm install 版本号`来安装报错信息中需要的版本。
 *推荐使用nvm来管理Node.js版本*
 
@@ -275,7 +275,7 @@ var duoshuoQuery = {short_name:"yourshortname"};
 		ds.type = 'text/javascript';ds.async = true;
 		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
 		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
+		(document.getElementsByTagName('head')[0]
 		 || document.getElementsByTagName('body')[0]).appendChild(ds);
 	})();
 	</script>
@@ -299,7 +299,7 @@ var duoshuoQuery = {short_name:"yourshortname"};
 ```deploy:
   type: git
   message: [message]
-  repo: 
+  repo:
     github: <repository url>,[branch]
     gitcafe: <repository url>,[branch]
 ```
