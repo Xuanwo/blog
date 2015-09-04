@@ -1,7 +1,3 @@
-<a rel="qiniu" href="http://www.qiniu.com/">
-  <img src="http://assets.qiniu.com/qiniu-white.png" style="height: 4em; float: right">
-</a>
-
 <div class="copyright">
   {% set current = date(Date.now(), "YYYY") %}
   &copy; &nbsp; {% if theme.since and theme.since != current %} {{ theme.since }} - {% endif %}
