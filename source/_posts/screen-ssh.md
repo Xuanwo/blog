@@ -39,9 +39,9 @@ toc: true
 
 ## 暂时中断
 screen还有更高级的功能。你可以不中断screen窗口中程序的运行而暂时断开（detach）screen会话，并在随后时间重新连接（attach）该会话，重新控制各窗口中运行的程序。例如，我们使用wget下载一个文件：
-![SSH超时样例](//dn-xuanwo.qbox.me/learn/ssh-time-out.png)
+![SSH超时样例](/imgs/learn/ssh-time-out.png)
 之后我们想暂时退出做点别的事情，比如出去散散步，那么在screen窗口键入`Ctrl+A`然后点击`D`，Screen会给出detached提示：
-![Screen Detached](//dn-xuanwo.qbox.me/learn/screen-detached.png)
+![Screen Detached](/imgs/learn/screen-detached.png)
 半个小时之后回来了，找到该screen会话：
 ```screen -ls
 ```重新连接会话：

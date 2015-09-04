@@ -14,11 +14,11 @@ toc: true
 
 # 初步使用
 ## 基础配置
-![Listary设置页面](//dn-xuanwo.qbox.me/opinion/listary-setting.png)
+![Listary设置页面](/imgs/opinion/listary-setting.png)
 如果是第一次安装，Listary会有一个引导教程，建议大家都跟着操作一下。在教程的最后会让你设置一个激活Listary的快捷键，这个快捷键的设置完全可以根据自己的喜好来设置，只要不跟系统或者别的软件热键相冲突即可。我使用的是`Alt+Q`，感觉十分顺手，推荐大家也这样设置~
 
 ## 基础用法
-![Listary主窗体](//dn-xuanwo.qbox.me/opinion/listary-main.png)
+![Listary主窗体](/imgs/opinion/listary-main.png)
 在任一窗体下使用快捷键`Alt+Q`即可激活Listary，同时光标会自动定位在Listary的输入窗口
 ，只要直接开始输入，Listary就自动进行匹配了。使用快捷键`Alt+Q`可以在启动程序模式与常规模式间进行切换。
 Listary的匹配总共有三种，分别为命令，路径，启动程序，下面分别介绍一下。
@@ -27,15 +27,15 @@ Listary的匹配总共有三种，分别为命令，路径，启动程序，下�
 - 启动程序：可以启动预先设置的路径中的程序（再次使用快捷键`Alt+Q`就可以在启动程序与常规模式间进行切换）
 
 ## 收藏功能
-![Listary收藏功能](//dn-xuanwo.qbox.me/opinion/listary-loves.png)
+![Listary收藏功能](/imgs/opinion/listary-loves.png)
 激活Listary之后点击有爱心标识的收藏按钮，就可以打开自己的收藏列表，能够更快捷的打开自己常用的软件或者文件。
 
 ## 历史记录
-![Listary历史记录](//dn-xuanwo.qbox.me/opinion/listary-history.png)
+![Listary历史记录](/imgs/opinion/listary-history.png)
 激活Listary之后点击历史记录，就可以打开自己最近打开的文件或者文件夹。
 
 ## 快捷功能
-![Listary快捷功能](//dn-xuanwo.qbox.me/opinion/listary-quick.png)
+![Listary快捷功能](/imgs/opinion/listary-quick.png)
 激活Listary之后点击快捷功能，就可以弹出一些常用的功能，个人最喜欢的是显示隐藏文件和显示文件扩展名，相当的好用~
 
 # 常用功能
@@ -48,7 +48,7 @@ Listary的匹配总共有三种，分别为命令，路径，启动程序，下�
 使用与[Everything](http://www.voidtools.com/)相似的原理，通过遍历USN journal更新索引，可以实现秒级的索引建立与搜索反馈（只支持NTFS文件系统，FAT32等不支持）。结合前面的智能匹配功能，你可以轻易地找到在你硬盘中的每一个文件。
 
 ## 快速选择
-![Listary快速选择](//dn-xuanwo.qbox.me/opinion/listary-quick-switch.png)
+![Listary快速选择](/imgs/opinion/listary-quick-switch.png)
 在任意一个打开的资源管理器界面（焦点需要锁定在资源管理器界面上），输入关键字，光标会自动跳转到当前文件夹中匹配的文件或者目录上。你只要直接回车就可以打开自己想要的文件，而不需要再去使用鼠标双击打开。真正的让文件在指尖舞蹈~
 
 # Pro版功能

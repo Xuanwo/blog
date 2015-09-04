@@ -74,7 +74,7 @@ toc: true
 对象：现实世界中实体的模型化
 类：对象类型和对这个对象模型进行的操作方法
 
-![四种数据模型的比较](//dn-xuanwo.qbox.me/learn/four-data-modal.png)
+![四种数据模型的比较](/imgs/learn/four-data-modal.png)
 
 ## 数据库系统结构
 数据库系统的三级模式结构
@@ -94,15 +94,15 @@ toc: true
 4. 用户
 
 # 关系型数据库理论
-![关系数据库理论概述](//dn-xuanwo.qbox.me/learn/relate-database-theory.png)
+![关系数据库理论概述](/imgs/learn/relate-database-theory.png)
 
 ## 关系模型概述
-![关系模型概述](//dn-xuanwo.qbox.me/learn/relate-database-modal.png)
+![关系模型概述](/imgs/learn/relate-database-modal.png)
 
 ## 关系数据结构
 域：是一组具有相同数据类型的值的集合
 域的笛卡儿积：给定一组域D1，D2，...，Dn，其笛卡尔积为：
-![笛卡儿积](//dn-xuanwo.qbox.me/learn/cartesian-product.png)
+![笛卡儿积](/imgs/learn/cartesian-product.png)
 
 ### 关系
 关系：D1×D2×…×Dn的子集叫做在域D1，D2，…，Dn上的关系，记做：R(D1，D2，…，Dn)。
@@ -171,7 +171,7 @@ F：属性间数据依赖关系集合
 
 ## 关系代数
 关系代数是一种抽象的查询语言，它用作对关系的运算来表达查询。
-![关系代数运算符](//dn-xuanwo.qbox.me/learn/relate-cal.png)
+![关系代数运算符](/imgs/learn/relate-cal.png)
 
 ### 传统的集合运算
 - 并
@@ -195,7 +195,7 @@ F：属性间数据依赖关系集合
 如果只保留右边关系中要舍弃的部分，叫做右外连接。
 
 **除**
-![关系运算-除](//dn-xuanwo.qbox.me/learn/divide.png)
+![关系运算-除](/imgs/learn/divide.png)
 
 # SQL数据语言
 ## SQL概述
@@ -236,7 +236,7 @@ ORACLE 限制为8个字符
 1. SQL中的数据项（包括列项、表和视图）分隔符为","；其字符串常数的定界符用单引号"'"表示。
 
 ## 数据定义
-![SQL的数据定义语句](//dn-xuanwo.qbox.me/learn/SQL-data-define.png)
+![SQL的数据定义语句](/imgs/learn/SQL-data-define.png)
 
 ### 数据库的创建与删除
 创建数据库
@@ -250,7 +250,7 @@ DROP DATABASE Mydb;
 创建基本表
 ```CREATE TABLE <表名>
     (<列名> <数据类型> [<列级完整性约束条件>] [<列名> <数据类型> [ <列级完整性约束条件> ] [,...] ] [,<表级完整性约束条件>] [,..]);
-```![主要数据类型](//dn-xuanwo.qbox.me/learn/main-type.png)
+```![主要数据类型](/imgs/learn/main-type.png)
 
 约束条件：
 - 列级完整性约束条件——只能用于列
@@ -336,7 +336,7 @@ SELECT * FROM Student;
 ```SELECT DISTINCT sname, Year(GetDate())-Year(sdate) AS age FROM Student;
 ```
 ### 条件表达式
-![条件表达式](//dn-xuanwo.qbox.me/learn/where.png)
+![条件表达式](/imgs/learn/where.png)
 举例
 ```//从Student表中，查询男同学
 SELECT * FROM Student WHERE ssex='男';
@@ -473,7 +473,7 @@ FROM PUBLIC;
 X函数依赖确定Y或Y函数依赖确定于X，记做`X->Y`。
 
 术语：
-![函数依赖术语](//dn-xuanwo.qbox.me/learn/func-define.png)
+![函数依赖术语](/imgs/learn/func-define.png)
 
 ### 第一范式（1NF）
 每一个分量必须是不可分的数据项。
@@ -494,13 +494,13 @@ X函数依赖确定Y或Y函数依赖确定于X，记做`X->Y`。
 - 没有任何属性完全依赖于非码的任何一组属性
 
 ### 多值依赖
-![多值依赖](//dn-xuanwo.qbox.me/learn/MVD.png)
+![多值依赖](/imgs/learn/MVD.png)
 
 ### 第四范式（4NF）
 关系模式R<U,F>符合第一范式，对于R的每一个非平凡多值依赖，X都含有码，则称关系模式R符合第四范式
 
 ### 总结
-![函数依赖总结](//dn-xuanwo.qbox.me/learn/func-depand-conclusion.png)
+![函数依赖总结](/imgs/learn/func-depand-conclusion.png)
 
 ## 关系数据库设计的步骤
 - 需求分析
@@ -573,7 +573,7 @@ m:n
 漏洞：系统内的弱点或错误，或者是使信息暴露给攻击或破坏的保护性机制
 ## 数据库安全性控制
 计算机系统的安全模型
-![计算机系统的安全模型](//dn-xuanwo.qbox.me/learn/safe-modal.png)
+![计算机系统的安全模型](/imgs/learn/safe-modal.png)
 
 ### 用户标识和鉴别
 用户标识和鉴别是系统提供的最外层安全保护措施

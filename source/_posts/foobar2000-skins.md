@@ -5,7 +5,7 @@ categories: Opinion
 toc: true
 ---
 大图镇楼，没错，这就是Foobar2000.
-![Foobar2000主界面](//dn-xuanwo.qbox.me/opinion/foobar-main.png)
+![Foobar2000主界面](/imgs/opinion/foobar-main.png)
 )
 
 # 前言
@@ -18,11 +18,11 @@ toc: true
 这里提供了十个全世界好评度最高的皮肤，没有一一核实是否为最新版，也不确定是否兼容，有问题的话请联系我。
 [点击这里进入城通网盘下载](http://www.400gb.com/shared/folder_7013074_9c338272/)
 ## 把主题包内的所有文件复制到Foobar2000安装目录下
-![复制到Foobar2000安装目录下](//dn-xuanwo.qbox.me/opinion/foobar-copy.png)
+![复制到Foobar2000安装目录下](/imgs/opinion/foobar-copy.png)
 ## 重新打开Foobar2000，此时会跳出提示，选择
-![选择新模块](//dn-xuanwo.qbox.me/opinion/foobar-newmoudle.jpg)
+![选择新模块](/imgs/opinion/foobar-newmoudle.jpg)
 ## 打开设置，选择自己喜欢的配色
-![设置选项](//dn-xuanwo.qbox.me/opinion/foobar-choose.png)
+![设置选项](/imgs/opinion/foobar-choose.png)
 ## 享受自己的音乐生活吧～
 
 # 更新日志

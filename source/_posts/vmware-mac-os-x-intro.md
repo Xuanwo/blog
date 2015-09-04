@@ -23,43 +23,43 @@ toc: true
 VMware Workstation并不支持Mac OS X的安装，只有VMware Fusion（也就是Mac平台上的VMware）才支持。于是有大神推出了这个解锁补丁，安装好这个补丁之后，VMware便可以支持OS X 的虚拟机安装。
 
 下载并解压Unlocker，右击使用管理员权限打开`win-install.cmd`，当任务执行完毕后，窗口会自动退出。
-![运行Unlocker](//dn-xuanwo.qbox.me/opinion/vmware-unlocker.png)
+![运行Unlocker](/imgs/opinion/vmware-unlocker.png)
 
 这时候再打开VMware，你将会看到`Apple Mac OX X`的字样，说明你已经成功解锁了Mac OS X的安装功能。
-![可以选择Apple Mac OS X了](//dn-xuanwo.qbox.me/opinion/vmware-apple-appear.png)
+![可以选择Apple Mac OS X了](/imgs/opinion/vmware-apple-appear.png)
 
 # 配置Mac OS X虚拟机
 
 ## 启动新建虚拟机向导
 没啥好说的，选择`典型`。
-![配置类型选择](//dn-xuanwo.qbox.me/opinion/vmware-apple-1.png)
+![配置类型选择](/imgs/opinion/vmware-apple-1.png)
 
 ## 安装客户机操作系统
 因为我们还需要一些特别的配置，所以这里我们选择`稍后安装操作系统`。
-![安装客户机操作系统](//dn-xuanwo.qbox.me/opinion/vmware-apple-2.png)
+![安装客户机操作系统](/imgs/opinion/vmware-apple-2.png)
 
 ## 选择客户机操作系统
 这里我们选择`Apple Mac OS X`，版本就选择最新的`OS X 10.10`，其实这个版本对我们的安装没啥大的影响，主要是涉及到一些硬件兼容性的问题，无须在意。
-![选择客户机操作系统](//dn-xuanwo.qbox.me/opinion/vmware-apple-3.png)
+![选择客户机操作系统](/imgs/opinion/vmware-apple-3.png)
 
 ## 命名虚拟机
 在这里我们需要设定虚拟机的名称以及位置，这里就按照自己的喜好设定吧。
-![命名虚拟机](//dn-xuanwo.qbox.me/opinion/vmware-apple-4.png)
+![命名虚拟机](/imgs/opinion/vmware-apple-4.png)
 
 ## 指定磁盘容量
 这里我们需要指定Mac虚拟机最大占用的空间大小，VMware推荐的是40G，如果空间够的话，可以设置的更大一些。然后下面的设置可以根据自己的喜好来，如果对性能比较注重，可以使用存储为单个文件的方式。
-![指定磁盘容量](//dn-xuanwo.qbox.me/opinion/vmware-apple-5.png)
+![指定磁盘容量](/imgs/opinion/vmware-apple-5.png)
 
 ## 开始创建虚拟机
 到这里，Mac虚拟机的一些简单设置就已经全部完成了，点击完成，我们进入到下一个阶段。
-![开始创建虚拟机](//dn-xuanwo.qbox.me/opinion/vmware-apple-6.png)
+![开始创建虚拟机](/imgs/opinion/vmware-apple-6.png)
 
 # 虚拟机故障排除
 ## 选择cdr镜像
 在新弹出的页面中选择`编辑虚拟机设置`，然后点击`CD/DVD(SATA)`
-![虚拟机设置](//dn-xuanwo.qbox.me/opinion/vmware-error-1.png)
+![虚拟机设置](/imgs/opinion/vmware-error-1.png)
 选择`浏览`，在弹出的`浏览ISO映像`中，点击右下角的`CD-ROM 映像(.iso)`，切换成`所有文件`，然后就可以正常打开我们的cdr镜像了。
-![切换所有文件](//dn-xuanwo.qbox.me/opinion/vmware-error-2.png)
+![切换所有文件](/imgs/opinion/vmware-error-2.png)
 
 ## 修复无法正常引导
 即使前面的操作全部正确，我们依然无法正常启动我们的虚拟机。为了可以正常引导，我们还需要修改我们虚拟机的vmx文件。
@@ -70,31 +70,31 @@ VMware Workstation并不支持Mac OS X的安装，只有VMware Fusion（也就�
 
 ## 加载界面
 首先附上酷炫的加载界面，我们什么都不用做，静静地等到它加载完成即可。
-![加载界面](//dn-xuanwo.qbox.me/opinion/apple-install-1.png)
+![加载界面](/imgs/opinion/apple-install-1.png)
 
 ## 语言选择
 然后是语言选择界面，选择自己喜欢的语言吧，不想折腾自己的话就老老实实简体中文吧~
-![语言选择](//dn-xuanwo.qbox.me/opinion/apple-install-2.png)
+![语言选择](/imgs/opinion/apple-install-2.png)
 
 ## 硬盘分区
 安装之前，我们必须要对磁盘进行分区。首先我们点击安装界面最上方的`实用工具`，然后选择`磁盘工具`，进入分区管理界面。
-![选择实用工具](//dn-xuanwo.qbox.me/opinion/apple-install-3.png)
+![选择实用工具](/imgs/opinion/apple-install-3.png)
 我们首先点击左侧列出的磁盘，然后在右侧选择`分区`，空间也不大，选择一个分区即可。可以自己设定这个磁盘的名字，格式化类型默认即可，无需改动。
-![选择分区](//dn-xuanwo.qbox.me/opinion/apple-install-4.png)
+![选择分区](/imgs/opinion/apple-install-4.png)
 配置完成后，我们点击左上角红色的叉叉退出磁盘工具，点击继续，开始我们的安装。
-![正式开始安装](//dn-xuanwo.qbox.me/opinion/apple-install-5.png)
+![正式开始安装](/imgs/opinion/apple-install-5.png)
 
 ## 许可协议
 作为一家有操守的大公司，该推的锅肯定是要推干净，于是有了这份许可协议。还有一个二次确认，如果拒绝，安装就结束了= =，不过反正是虚拟机，我们一路同意即可。
-![阅读许可协议](//dn-xuanwo.qbox.me/opinion/apple-install-6.png)
+![阅读许可协议](/imgs/opinion/apple-install-6.png)
 
 ## 选择安装磁盘
 这里我们需要选择前面已经设定好的磁盘，选中之后点击继续即可。
-![选择安装磁盘](//dn-xuanwo.qbox.me/opinion/apple-install-7.png)
+![选择安装磁盘](/imgs/opinion/apple-install-7.png)
 
 ## 默默等待
 然后就到了真正的安装过程了，这个过程中我们需要做的只有等待。出去溜达两圈，或者搓一把炉石？
-![等待安装完成](//dn-xuanwo.qbox.me/opinion/apple-install-8.png)
+![等待安装完成](/imgs/opinion/apple-install-8.png)
 
 # 坑点总结
 ## 使用DMG镜像提取

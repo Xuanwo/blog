@@ -4,7 +4,7 @@ tags: [C, MOOC]
 categories: Learn
 toc: true
 ---
-![证书](//dn-xuanwo.qbox.me/learn/cpp-credit.png)
+![证书](/imgs/learn/cpp-credit.png)
 
 <!-- more -->
 

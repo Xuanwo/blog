@@ -5,7 +5,7 @@ categories: Opinion
 toc: true
 ---
 废话先不说，首先来一张大图秀一下编辑状态下的页面：
-![C9的主界面](//dn-xuanwo.qbox.me/opinion/C9-main.png)
+![C9的主界面](/imgs/opinion/C9-main.png)
 
 <!-- more -->
 

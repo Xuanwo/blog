@@ -17,7 +17,7 @@ http://poj.org/problem?id=2714
 # 新技能get
 [位运算](http://www.cplusplus.com/doc/boolean/)
 下面列出一张简表
-![位运算简表](//dn-xuanwo.qbox.me/exercise/%E4%BD%8D%E8%BF%90%E7%AE%97.jpg)
+![位运算简表](/imgs/exercise/%E4%BD%8D%E8%BF%90%E7%AE%97.jpg)
 注意区分位运算`~`与逻辑运算`!`的区别。
 
 # 代码

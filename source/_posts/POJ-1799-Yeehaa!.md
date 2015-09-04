@@ -11,7 +11,7 @@ http://poj.org/problem?id=1799
 
 # 理解
 借用某大神图：
-![POJ1799示意图](//dn-xuanwo.qbox.me/exercise/POJ1799.png)
+![POJ1799示意图](/imgs/exercise/POJ1799.png)
 
 <!-- more -->
 

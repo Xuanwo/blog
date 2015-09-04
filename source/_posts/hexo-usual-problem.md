@@ -45,7 +45,7 @@ Error: spawn ENOENT
 ## Deploy之后，页面长时间404
 **问题描述：**
 直接上图了，不要哭= =
-![Github 404 孩子不哭](//dn-xuanwo.qbox.me/opinion/Github-404.png)
+![Github 404 孩子不哭](/imgs/opinion/Github-404.png)
 **解决方案：**
 ### 检查Github Pages类型
 **个人主页**
@@ -147,7 +147,7 @@ iption: Description\nread_more: Read More\n\u0000',
   stack: undefined }
 ```**解决方案：**
 主题目录下所有yml文件中所有有空格的字段都用双引号括起来，尤其注意languages下面的yml文件。
-![就像这样](//dn-xuanwo.qbox.me/opinion/hexo-languages-error.png)
+![就像这样](/imgs/opinion/hexo-languages-error.png)
 *感谢[@dukewan](https://github.com/dukewan)提供的截图*
 
 ## 修改主题文件之后，网页不更新

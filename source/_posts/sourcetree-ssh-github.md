@@ -10,9 +10,9 @@ toc: true
 # 解决方案
 修改`SourceTree`默认的SSH客户端，使用`OpenSSH`来链接（仅适用于Git）。
 工具->选项->一般，SSH客户端选择`OpenSSH`。
-![SourceTree设置](//dn-xuanwo.qbox.me/opinion/sourcetree-setting.png)
+![SourceTree设置](/imgs/opinion/sourcetree-setting.png)
 SSH密钥选择之前已经生成好的SSH密钥，纯文件形式，无后缀，一般位于`C:\Users\yourname\.ssh`目录下。
-![SourceTree密钥原则](//dn-xuanwo.qbox.me/opinion/sourcetree-ssh.png)
+![SourceTree密钥原则](/imgs/opinion/sourcetree-ssh.png)
 
 # 更新日志
 - 2014年08月28日 完成解决方案。
