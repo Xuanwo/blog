@@ -28,12 +28,17 @@ toc: true
 简单来说，Screen是一个可以在多个进程之间多路复用一个物理终端的窗口管理器。Screen中有会话的概念，用户可以在一个screen会话中创建多个screen窗口，在每一个screen窗口中就像操作一个真实的telnet/SSH连接窗口那样。
 ## 安装
 很多发行版会预装Screen，如果没有（比如Ubuntu），则需要自行安装，以Ubuntu为例：
-```sudo apt-get install screen
-```## 创建
+```
+sudo apt-get install screen
+```
+
+## 创建
 ### 直接创建
 直接在命令行下输入
-```screen
-```之后你会看到几页字，按回车跳过之后，你就来到了一个shell的全屏窗口。你可以执行任意shell程序，就像在ssh窗口中那样。在该窗口中键入exit退出该窗口，如果这是该screen会话的唯一窗口，该screen会话退出，否则screen自动切换到前一个窗口。
+```
+screen
+```
+之后你会看到几页字，按回车跳过之后，你就来到了一个shell的全屏窗口。你可以执行任意shell程序，就像在ssh窗口中那样。在该窗口中键入exit退出该窗口，如果这是该screen会话的唯一窗口，该screen会话退出，否则screen自动切换到前一个窗口。
 ### 快捷键创建新窗口
 在已经激活的Screen会话下，使用快捷键`Ctrl+A`然后点击`C`，screen 在该会话内生成一个新的窗口并切换到该窗口。
 
@@ -43,10 +48,14 @@ screen还有更高级的功能。你可以不中断screen窗口中程序的运�
 之后我们想暂时退出做点别的事情，比如出去散散步，那么在screen窗口键入`Ctrl+A`然后点击`D`，Screen会给出detached提示：
 ![Screen Detached](/imgs/learn/screen-detached.png)
 半个小时之后回来了，找到该screen会话：
-```screen -ls
-```重新连接会话：
-```screen -r 会话ID
-```一切工作都会完全回来，区别只在于，他可能已经做好了>_<。
+```
+screen -ls
+```
+重新连接会话：
+```
+screen -r 会话ID
+```
+一切工作都会完全回来，区别只在于，他可能已经做好了>_<。
 
 ## 键绑定
 > 你可能注意到给screen发送命令使用了特殊的键组合`Ctrl+A`。这是因为我们在键盘上键入的信息是直接发送给当前screen窗口，必须用其他方式向screen窗口管理器发出命令，默认情况下，screen接收以`Ctrl+A`开始的命令。这种命令形式在screen中叫做键绑定（key binding），`Ctrl+A`叫做命令字符（command character）。
