@@ -6,7 +6,7 @@ toc: true
 ---
 *本文是我加入LCTT后翻译的第一篇文章，感谢LCTT项目组伙伴们的支持，感谢组长wxy的仔细校对，也欢迎大家加入LCTT项目，共同翻译优质的Linux文章~*
 
-![Best Torrent clients for Ubuntu Linux](http://itsfoss.itsfoss.netdna-cdn.com/wp-content/uploads/2015/08/5_Best_Torrent_Ubuntu.png)
+![Best Torrent clients for Ubuntu Linux](/imgs/opinion/5_Best_Torrent_Ubuntu.png)
 
 在寻找 **Ubuntu 中最好的 BT 客户端**吗？事实上，Linux 桌面平台中有许多 BT 客户端，但是它们中的哪些才是**最好的 Ubuntu 客户端**呢？
 
@@ -20,7 +20,7 @@ toc: true
 
 ### Deluge ###
 
-![Logo of Deluge torrent client for Ubuntu](http://itsfoss.itsfoss.netdna-cdn.com/wp-content/uploads/2015/08/Deluge.png)
+![Logo of Deluge torrent client for Ubuntu](/imgs/opinion/Deluge.png)
 
 [Deluge][1] 被 Lifehacker 评选为 Linux 下最好的 BT 客户端，这说明了 Deluge 是多么的有用。而且，并不仅仅只有 Lifehacker 是 Deluge 的粉丝，纵观多个论坛，你都会发现不少 Deluge 的忠实拥趸。
 
@@ -32,7 +32,7 @@ Deluge 可在 Ubuntu 的仓库中获取，你能够在 Ubuntu 软件中心中安
 
 ### qBittorrent ###
 
-![qBittorrent client for Linux](http://itsfoss.itsfoss.netdna-cdn.com/wp-content/uploads/2015/08/qbittorrent_icon.png)
+![qBittorrent client for Linux](/imgs/opinion/qbittorrent_icon.png)
 
 正如它的名字所暗示的，[qBittorrent][2] 是著名的 [Bittorrent][3] 应用的 Qt 版本。如果曾经使用过它，你将会看到和 Windows 下的 Bittorrent 相似的界面。同样轻巧并且有着 BT 客户端的所有标准功能， qBittorrent 也可以在 Ubuntu 的默认仓库中找到。
 
@@ -43,7 +43,7 @@ Deluge 可在 Ubuntu 的仓库中获取，你能够在 Ubuntu 软件中心中安
 
 ### Tixati ###
 
-![Tixati torrent client logo](http://itsfoss.itsfoss.netdna-cdn.com/wp-content/uploads/2015/08/tixati_icon.png)
+![Tixati torrent client logo](/imgs/opinion/tixati_icon.png)
 
 [Tixati][4] 是另一个不错的 Ubuntu 下的 BT 客户端。它有着一个默认的黑暗主题，尽管很多人喜欢，但是我例外。它拥有着一切你能在 BT 客户端中找到的功能。
 
@@ -55,7 +55,7 @@ Deluge 可在 Ubuntu 的仓库中获取，你能够在 Ubuntu 软件中心中安
 
 ### Vuze ###
 
-![Vuze Torrent Logo](http://itsfoss.itsfoss.netdna-cdn.com/wp-content/uploads/2015/08/vuze_icon_for_mac_os_x_by_hamzasaleem-d6yx1fp.png)
+![Vuze Torrent Logo](/imgs/opinion/vuze_icon_for_mac_os_x_by_hamzasaleem-d6yx1fp.png)
 
 [Vuze][6] 是许多 Linux 以及 Windows 用户最喜欢的 BT 客户端。除了标准的功能，你可以直接在应用程序中搜索种子，也可以订阅系列片源，这样就无需再去寻找新的片源了，因为你可以在侧边栏中的订阅看到它们。
 
@@ -69,7 +69,7 @@ Vuze 可以通过 Ubuntu 软件中心安装或者使用下列命令：
 
 ### Frostwire ###
 
-![Logo of Frostwire torrent client](http://itsfoss.itsfoss.netdna-cdn.com/wp-content/uploads/2015/08/frostwire.png)
+![Logo of Frostwire torrent client](/imgs/opinion/frostwire.png)
 
 [Frostwire][7] 是一个你应该试一下的应用。它不仅仅是一个简单的 BT 客户端，它还可以应用于安卓，你可以用它通过 Wifi 来共享文件。
 
