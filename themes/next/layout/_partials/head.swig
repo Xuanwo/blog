@@ -4,6 +4,12 @@
         window.location.protocol = "https";
 </script>
 
+{% if theme.fancybox %}
+  <link rel="stylesheet" type="text/css" href="{{ url_for(theme.vendors) }}/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+{% endif %}
+
+<link rel="stylesheet" type="text/css" href="{{ url_for(theme.css) }}/main.css?v={{ theme.version }}"/>
+
 {% if theme.rss === '' and config.feed and config.feed.path %}
     {% set theme.rss = config.root + config.feed.path %}
 {% endif %}
@@ -19,12 +25,6 @@
 {% if config.qihu_site_verification %}
   <meta name="360-site-verification" content="{{ config.qihu_site_verification }}" />
 {% endif %}
-
-{% if theme.fancybox %}
-  <link rel="stylesheet" type="text/css" href="{{ url_for(theme.vendors) }}/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
-{% endif %}
-
-<link rel="stylesheet" type="text/css" href="{{ url_for(theme.css) }}/main.css?v={{ theme.version }}"/>
 
 {% if config.description %}
     <meta name="description" content="{{ config.description }}" />
