@@ -15,7 +15,9 @@ http://poj.org/problem?id=2591
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -63,6 +65,8 @@ int main(int argc, char const *argv[])
         printf("%ld\n", a[t]);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年08月18日 已AC。

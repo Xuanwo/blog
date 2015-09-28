@@ -4,7 +4,7 @@ tags: [ACM, UVa, C, 水题]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=996
@@ -15,7 +15,9 @@ AOAPC上的基础题，一个非常简单的求两个数之间的差，注意数
 <!-- more -->
 
 # 代码
-```#include  <stdio.h>
+
+```
+#include  <stdio.h>
 
 using namespace std;
 
@@ -28,6 +30,8 @@ int main()
 	}
 	return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年10月29日 已AC。

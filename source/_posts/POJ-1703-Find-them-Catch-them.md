@@ -16,13 +16,15 @@ http://poj.org/problem?id=1703
 | :-----: | :-----:  | :-----:  |:-----:|
 |0	    |0       |0       |0         |
 |0       |1       |1       |1         |
-|1       |0       |1       |1         |     
+|1       |0       |1       |1         |
 |1       |1       |0       |0         |
 
 <!-- more -->
 
 # 代码
-```#include<cstdio>
+
+```
+#include<cstdio>
 
 const int maxn = 100000 + 10;
 
@@ -87,6 +89,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年07月22日 已AC。

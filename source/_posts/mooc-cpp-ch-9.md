@@ -16,7 +16,9 @@ toc: true
 
 很简单的一个题，只要对模板有最基本的了解就可以完成。
 
-```cpp
+
+```
+cpp
 #include <iostream>
 using namespace std;
 
@@ -45,13 +47,17 @@ int main()
     cout << getSum(arr_double, m) << endl;
     return 0;
 }
+
 ```
+
 ## 折半查找
 > 编写一个折半查找的模板函数binSearch()，接收一个数组，数组长度和要查找的元素key，按查找顺序输出查找过程中访问的所有元素下标。
 
 用模板实现一下折半查找= =，坑点是要求输出查找序号。
 
-```cpp
+
+```
+cpp
 #include <iostream>
 using namespace std;
 
@@ -89,14 +95,18 @@ int main()
     binSearch(arr_double, m, key2);
     return 0;
 }
+
 ```
+
 ## 括号匹配
 > 栈的应用非常广泛。请先实现一个栈模板类（定义已在下面给出），然后利用这个栈类解决下面的问题：
 > 给定一个字符串，长度小于1000，其中只包含左右括号和大小写英文字母。请编写程序判断输入的字符串里的左右括号是否全部是匹配的，匹配规则即从内到外左括号都与其右边距离最近的右括号匹配。如匹配，输出“Yes”,否则，输出“No”。
 
 题意就这么简单= =。首先实现一个栈的模板类，然后解决一下括号匹配的问题。
 
-```cpp
+
+```
+cpp
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -178,6 +188,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2015年07月08日 要结课啦- -，狂赶Deadline。

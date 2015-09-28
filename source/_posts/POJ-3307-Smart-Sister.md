@@ -15,7 +15,9 @@ http://poj.org/problem?id=3307
 <!-- more -->
 
 # 代码
-```#include <iostream>
+
+```
+#include <iostream>
 #include <cstdio>
 #define MAX 80000
 using namespace std;
@@ -60,6 +62,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年07月18日 已AC。

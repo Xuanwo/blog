@@ -18,7 +18,9 @@ http://poj.org/problem?id=1146
 [`next_permutation`](http://www.cplusplus.com/reference/algorithm/next_permutation/)
 
 # 代码
-```#include<stdio.h>
+
+```
+#include<stdio.h>
 #include<string>
 #include<iostream>
 #include<algorithm>
@@ -38,6 +40,8 @@ int main()
         if(flag)printf("No Successor\n");
     }
 }
+
 ```
+
 # 更新日志
 - 2014年07月22日 已AC。

@@ -14,7 +14,9 @@ http://poj.org/problem?id=1014
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 using namespace std;
 
@@ -64,6 +66,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年07月16日 已AC。

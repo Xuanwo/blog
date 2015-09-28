@@ -4,7 +4,7 @@ tags: [ACM, CodeVS, C, 数论]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codevs.cn/problem/1083/
@@ -17,7 +17,9 @@ http://codevs.cn/problem/1083/
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -59,6 +61,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年10月29日 已AC。

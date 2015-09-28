@@ -4,7 +4,7 @@ tags: [ACM, UVa, C, 字符串]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=3&page=show_problem&problem=65
@@ -12,11 +12,11 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=3&
 # 理解
 题意不是很好懂= =，我搬运一下翻译。
 
-> 
+>
 Problem
 “超级氪因素大赛”(译注：英国的一档电视心智竞答节目）的主办方雇你来对付那些足智多谋的参赛选手。在比赛的一个环节中，节目主持人将念出一长串的字母来考验选手的记忆能力。因为许多选手都是分析字串模式的高手，为了增加一些比赛的难度，主办方决定不再使用那些含有特定重复子串的字串。但是他们又不能将所有重复的子串都删掉，如果那样的话字串中就不存在两个相同的单字了，这反倒会让问题变的非常简单。为了解决这一问题，他们决定仅删除那些包含相邻重复子串的字串。我们将存在上述相邻重复情况的字串称为“easy”（简单），否则称为“hard”（难）。
 
-> 
+>
 Input and Output
 为了能给节目主持人提供无限量的问题字串，要求你来写一个程序执行生成运算。程序从输入中读取多行数据，每行包括两个整数n和L（即按此顺序给出），其中n > 0，L的范围是1 ≤ L ≤ 26。根据这些输入，程序要按照字母表升序打印出第n个“hard”字串（由字母表中的前L个字母构成），并在接下来的一行打印这个串的长度。按照上述规则，第一个串应该是“A”。对于给定的n和L，你可以认为第n个“hard”串是一定存在的。
 比方说，当L = 3时，头7个“hard”字串为：
@@ -37,7 +37,9 @@ ABAC ABA
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -104,6 +106,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月2日 已AC。

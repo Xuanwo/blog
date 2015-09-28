@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 模拟]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/3/C
@@ -22,7 +22,9 @@ http://codeforces.com/problemset/problem/3/C
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -138,6 +140,8 @@ int main(int argc, char const *argv[])
     while (true);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月2日 已AC。

@@ -28,9 +28,13 @@ toc: true
 ![Windows的运行界面](/imgs/opinion/win-run.png)
 在新打开的窗口中输入`cmd`，敲击回车，打开命令行界面。*（下文将直接用`打开命令行`来表示以上操作，记住哦~）*
 在打开的命令行界面中，输入
-```node -v
+
+```
+node -v
 npm -v
-```如果结果如下图所示，则说明安装正确，可以进行下一步了，如果不正确，则需要回头检查自己的安装过程。
+
+```
+如果结果如下图所示，则说明安装正确，可以进行下一步了，如果不正确，则需要回头检查自己的安装过程。
 ![Node.js安装测试](/imgs/opinion/Nodejs-test.png)
 
 ### 配置Git环境
@@ -44,8 +48,12 @@ npm -v
 > Git的默认设置下，出于安全考虑，只有在Git Bash中才能进行Git的相关操作。按照上图进行的选择，将会使得Git安装程序在系统PATH中加入Git的相关路径，使得你可以在CMD界面下调用Git，不用打开Git Bash了。
 
 一样的，我们来检查一下Git是不是安装正确了，打开命令行，输入：
-```git --version
-```如果结果如下图所示，则说明安装正确，可以进行下一步了，如果不正确，则需要回头检查自己的安装过程。
+
+```
+git --version
+
+```
+如果结果如下图所示，则说明安装正确，可以进行下一步了，如果不正确，则需要回头检查自己的安装过程。
 ![Git安装测试](/imgs/opinion/Git-test.png)
 
 ## Linux
@@ -78,35 +86,67 @@ npm -v
 ## 安装Hexo
 在自己认为合适的地方创建一个文件夹，然后在文件夹空白处按住`Shift`+鼠标右键，然后点击在此处打开命令行窗口。*（同样要记住啦，下文中会使用`在当前目录打开命令行`来代指上述的操作）*
 在命令行中输入：
-```npm install hexo-cli -g
-```然后你将会看到:
+
+```
+npm install hexo-cli -g
+
+```
+然后你将会看到:
 ![安装hexo-cli](/imgs/opinion/npm-install-hexo-cli.png)
 可能你会看到一个`WARN`，但是不用担心，这不会影响你的正常使用。
 然后输入
-```npm install hexo --save
-```然后你会看到命令行窗口刷了一大堆白字，下面我们来看一看Hexo是不是已经安装好了。
+
+```
+npm install hexo --save
+
+```
+然后你会看到命令行窗口刷了一大堆白字，下面我们来看一看Hexo是不是已经安装好了。
 在命令行中输入：
-```hexo -v
-```如果你看到了如图文字，则说明已经安装成功了。
+
+```
+hexo -v
+
+```
+如果你看到了如图文字，则说明已经安装成功了。
 ![Hexo测试](/imgs/opinion/hexo-v.png)
 ## 初始化Hexo
 接着上面的操作，输入：
-```hexo init
-```如图：
+
+```
+hexo init
+
+```
+如图：
 ![hexo初始化](/imgs/opinion/hexo-init.png)
 然后输入：
-```npm install
-```之后npm将会自动安装你需要的组件，只需要等待npm操作即可。
+
+```
+npm install
+
+```
+之后npm将会自动安装你需要的组件，只需要等待npm操作即可。
 ## 首次体验Hexo
 继续操作，同样是在命令行中，输入：
-```hexo g
-```如图：
+
+```
+hexo g
+
+```
+如图：
 ![hexo渲染](/imgs/opinion/hexo-g.png)
 然后输入：
-```hexo s
-```然后会提示：
-```INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
-```在浏览器中打开`http://localhost:4000/`，你将会看到：
+
+```
+hexo s
+
+```
+然后会提示：
+
+```
+INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
+
+```
+在浏览器中打开`http://localhost:4000/`，你将会看到：
 ![hexo初体验](/imgs/opinion/hexo-first-time.png)
 到目前为止，Hexo在本地的配置已经全都结束了。
 
@@ -201,45 +241,69 @@ Hexo 使用 [Moment.js](http://momentjs.com/) 来解析和显示时间。
 
 ## 配置Deployment
 首先，你需要为自己配置身份信息，打开命令行，然后输入：
-```git config --global user.name "yourname"
+
+```
+git config --global user.name "yourname"
 git config --global user.email "youremail"
-```同样在`_config.yml`文件中，找到`Deployment`，然后按照如下修改：
-```deploy:
+
+```
+同样在`_config.yml`文件中，找到`Deployment`，然后按照如下修改：
+
+```
+deploy:
   type: git
   repo: git@github.com:yourname/yourname.github.io.git
   branch: master
-```然后在当前目录打开命令行，输入：
-```hexo d
-```随后按照提示，分别输入自己的Github账号用户名和密码，开始上传。
+
+```
+然后在当前目录打开命令行，输入：
+
+```
+hexo d
+
+```
+随后按照提示，分别输入自己的Github账号用户名和密码，开始上传。
 然后通过http://yourname.github.io/来访问自己刚刚上传的网站。
 
 ## 添加新文章
 打开Hexo目录下的`source`文件夹，所有的文章都会以md形式保存在`_post`文件夹中，只要在`_post`文件夹中新建md类型的文档，就能在执行`hexo g`的时候被渲染。
 新建的文章头需要添加一些yml信息，如下所示：
-```title: hello-world   //在此处添加你的标题。
+
+```
+title: hello-world   //在此处添加你的标题。
 date: 2014-11-7 08:55:29   //在此处输入你编辑这篇文章的时间。
 tags: [ACM, UVa, C/C++]  //在此处添加这篇文章的标签，多个标签需要使用`[ ]`来包裹，用`,`来分隔。
 categories: Exercise   //在此处输入这篇文章的分类。
 toc: true  //在此处设定是否开启目录，需要主题支持。
 ---
+
 ```
+
 # 进阶
 如果成功完成了上述的全部步骤，恭喜你，你已经搭建了一个最为简单且基础的博客。但是这个博客还非常简单， 没有个人的定制，操作也比较复杂，下面的进阶技巧将会让你获得对Hexo更为深入的了解。
 ## 更换主题
 *可以在[此处](https://github.com/hexojs/hexo/wiki/Themes)寻找自己喜欢的主题*
 下载所有的主题文件，保存到Hexo目录下的`themes`文件夹下。然后在`_config.yml`文件中修改：
-```# Extensions
+
+```
+# Extensions
 ## Plugins: http://hexo.io/plugins/
 ## Themes: http://hexo.io/themes/
 theme: landscape //themes文件夹中对应文件夹的名称
-```然后先执行`hexo clean`，然后重新`hexo g`，并且`hexo d`，很快就能看到新主题的效果了~
+
+```
+然后先执行`hexo clean`，然后重新`hexo g`，并且`hexo d`，很快就能看到新主题的效果了~
 
 ## 更换域名
 首先，需要注册一个域名。在中国的话，`.cn`全都需要进行备案，如果不想备案的话，请注册别的顶级域名，可以使用[godaddy](https://www.godaddy.com/)或[新网](http://www.xinnet.com/)或[万网](http://www.xinnet.com/)中的任意一家，自己权衡价格即可。
 然后，我们需要配置一下域名解析。推荐使用DNSPod的服务，比较稳定，解析速度比较快。在域名注册商出修改NS服务器地址为：
-```f1g1ns1.dnspod.net
+
+```
+f1g1ns1.dnspod.net
 f1g1ns2.dnspod.net
-```以新网为例，首先点击域名管理进入管理页面：
+
+```
+以新网为例，首先点击域名管理进入管理页面：
 ![点击域名管理](/imgs/opinion/domin-setting.png)
 然后点击域名后面的`管理`：
 ![管理](/imgs/opinion/mydomin.png)

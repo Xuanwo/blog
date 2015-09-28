@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, DP]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/contest/2/problem/B
@@ -14,14 +14,16 @@ http://codeforces.com/contest/2/problem/B
 首先处理一下，设TWO为0，FIVE为1。在输入的时候就进行判断，当前输入的数和'0'，'2'，'5'之间的关系。得到的结果存在一个数组中，这样就得到整个数组中最多的0的个数。然后对2和5的数量进行比较，只需要考虑比较少的那个。
 然后对第一个数为0的情况进行特判，此时只要随手输出就可以了。如果第一个数不为0，则开始取2比较少的路径开始行走。
 
-> 
+>
 大概是我写得不是很优美= =，在提交的时候遇到了各种问题，debug了半天，还是没有找出究竟错在哪里。直到我脑洞一开，把所有变量的定义放在了main函数的里面，居然过了！过了！！了！！！
 蛋疼，不知道问题到底在哪里= =，唉，存疑。
 
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -151,6 +153,8 @@ int main()
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月3日 已AC。

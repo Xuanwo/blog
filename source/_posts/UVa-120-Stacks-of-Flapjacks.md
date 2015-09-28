@@ -4,7 +4,7 @@ tags: [ACM, UVa, C, STL, Deque]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=56
@@ -24,7 +24,9 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_p
 <!-- more -->
 
 # 代码
+
 ```
+
 string str;
 
 int main(int argc, char const *argv[])
@@ -53,6 +55,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月4日 已AC。

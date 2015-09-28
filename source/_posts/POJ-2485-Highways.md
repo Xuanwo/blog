@@ -15,7 +15,9 @@ http://poj.org/problem?id=2485
 <!-- more -->
 
 # 代码
-```#include <stdio.h>
+
+```
+#include <stdio.h>
 #include <string.h>
 #define MAX 501
 #define INF 0x3f3f3f3f
@@ -75,6 +77,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-```	
+
+```
+
 # 更新日志
 - 2014年08月06日 已AC。

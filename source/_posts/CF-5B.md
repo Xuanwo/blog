@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 字符串]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/contest/5/problem/B
@@ -17,7 +17,9 @@ http://codeforces.com/contest/5/problem/B
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -98,6 +100,8 @@ int main()
     for(int i=0; i<Max+2; i++)  printf("*");
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月5日日 已AC。

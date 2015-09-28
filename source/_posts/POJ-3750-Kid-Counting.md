@@ -15,7 +15,9 @@ http://poj.org/problem?id=3750
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -70,6 +72,8 @@ int main(int argc, char const *argv[])
         cout << q.front() << endl, q.pop();
     }
 }
+
 ```
+
 # 更新日志
 - 2014年08月21日 已AC。

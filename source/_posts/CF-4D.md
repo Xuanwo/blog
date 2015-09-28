@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, DP]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/4/D
@@ -16,7 +16,9 @@ http://codeforces.com/problemset/problem/4/D
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 5000+10
 
 struct node
@@ -103,6 +105,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月7日 已AC。

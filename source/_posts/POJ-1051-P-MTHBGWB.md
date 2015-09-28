@@ -15,7 +15,9 @@ http://poj.org/problem?id=1051
 <!-- more -->
 
 # 代码
-```#include <stdio.h>
+
+```
+#include <stdio.h>
 #include <string.h>
 #define MAX 102
 
@@ -94,6 +96,8 @@ int main(int argc, char const *argv[])
 	}
 	return 0;
 }
-```	
+
+```
+
 # 更新日志
 - 2014年08月12日 已AC。

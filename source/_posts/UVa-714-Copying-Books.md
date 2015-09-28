@@ -15,7 +15,9 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=11
 使用一个pos数组来保存是否在此分段，然后使用二分最小值来确定pos的取值。
 实际上我还不是能够非常具体地描述中间二分的过程，不妨在二分的循环当中打印pos数组的值来找一找感觉。
 
-```Input:
+
+```
+Input:
 1
 9 3
 100 200 300 400 500 600 700 800 900
@@ -67,13 +69,17 @@ Output:
 0 0 0 0 1 0 1 0 0
 
 100 200 300 400 500 / 600 700 / 800 900
+
 ```
+
 除去最后一行是答案，不去考虑之外，我们可以看到这是一个在中央取值，然后不断向右靠拢的过程。
 
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 500+10
 
 int m,k;
@@ -166,6 +172,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月4日 已AC。

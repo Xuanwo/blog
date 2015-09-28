@@ -15,11 +15,13 @@ http://poj.org/problem?id=1405
 <!-- more -->
 
 # 代码
-```import java.io.*;
+
+```
+import java.io.*;
 import java.math.*;
 import java.util.*;
 import java.text.*;
- 
+
 public class Main {
     public static void main(String[] args) {
         Scanner cin = new Scanner(System.in);
@@ -35,6 +37,8 @@ public class Main {
         System.exit(0);
     }
 }
+
 ```
+
 # 更新日志
 - 2014年08月02日 已AC。

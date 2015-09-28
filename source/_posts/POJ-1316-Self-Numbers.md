@@ -15,7 +15,9 @@ http://poj.org/problem?id=1316
 <!-- more -->
 
 # 代码
-```#include <stdio.h>
+
+```
+#include <stdio.h>
 
 int data[10010] = {0};
 
@@ -45,6 +47,8 @@ int main(int argc, char const *argv[])
         }
     }
 }
+
 ```
+
 # 更新日志
 - 2014年07月23日 已AC。

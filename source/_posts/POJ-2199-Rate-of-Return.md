@@ -16,14 +16,16 @@ http://poj.org/problem?id=2199
 
 # 新技能get
 二分法循环形式
-```up = 2;
+
+```
+up = 2;
 down = 1;
 mid = (up + down) / 2;
 while ((mid - down) > eps)
 {
     temp = 0;
     for (i = 0; i < count; i++)
-    {        
+    {
     	temp += cof[i] * pow(mid, month[i]);//迭代条件，自行修改
     }
     if (temp < total)
@@ -32,9 +34,13 @@ while ((mid - down) > eps)
         up = mid;
     mid = (up + down) / 2;
 }
+
 ```
+
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cmath>
 using namespace std;
@@ -87,6 +93,8 @@ int main()
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年07月19日 已AC。

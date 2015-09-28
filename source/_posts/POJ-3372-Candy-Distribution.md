@@ -15,7 +15,9 @@ http://poj.org/problem?id=3372
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -50,6 +52,8 @@ int main(int argc, char const *argv[])
         cout << (n & n - 1 ? "NO" : "YES") <<endl;
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年08月15日 已AC。

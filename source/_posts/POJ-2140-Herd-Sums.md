@@ -16,7 +16,9 @@ http://poj.org/problem?id=2140
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -48,7 +50,7 @@ int main(int argc, char const *argv[])
     int i, n;
     int counts = 0;
     scanf("%d", &n);
-    for (i = 1; i <= n / 2; i += 2) 
+    for (i = 1; i <= n / 2; i += 2)
         if (n % i == 0)
             counts++;
     if (n % 2 != 0)
@@ -56,6 +58,8 @@ int main(int argc, char const *argv[])
     printf("%d\n", counts);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年08月16日 已AC。

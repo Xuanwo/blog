@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, DP]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/8/C
@@ -16,7 +16,9 @@ http://codeforces.com/problemset/problem/8/C
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 1<<24
 
 int dp[MAXN],pre[MAXN],gra[26][26],x[26],y[26],ans[60];
@@ -109,7 +111,9 @@ int main(int argc, char const *argv[])
     printf("\n");
 	return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月19日 看题解AC，但是还没有理解。
 - 2014年11月19日 在妹纸的督促下，完成了。

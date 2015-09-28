@@ -51,26 +51,34 @@ Fedora, Red Hat, CentOS：`sudo yum install git-core`
 3. 然后输入`npm install`，自动下载相关的依赖包，此时一个最基本的框架已经构建完毕了。
 4. 然后输入`git clone https://github.com/wzpan/hexo-theme-wixo.git themes/wixo`，下载wiki用的主题。
 5. 然后修改`_config.yml`中的`theme`条目为`wixo`，注意`theme`后有一个空格。
-> 
+>
 补充一下关于`deploy`的设置
 同样是在_config.yml文件夹中，修改`deploy`的部分为
-```deploy:
+
+```
+deploy:
   type: github
   repo: repository url //使用之前创建的那个库，建议使用SSH
   branch: branch //Hexo会自动识别个人wiki还是项目wiki
-```<p>6. 进入source文件夹，打开_post文件夹，新建一个md文档，在文档的开头加入
-```title: your title //这将会是wiki文档的标题
+
+```
+<p>6. 进入source文件夹，打开_post文件夹，新建一个md文档，在文档的开头加入
+
+```
+title: your title //这将会是wiki文档的标题
 date: 2014-03-16 10:17:16  //构建时间，wiki中用不到
 categories: Docs //这将会是本文档所属的类别
 toc: true //默认开启，生成table of contents
 --- //不可省略，敲回车后，下面的内容就自由发挥了～
+
 ```
+
 <p>7. 保存文档后，返回wiki所在文件夹， 输入`hexo d -g`，此时wiki已经自动生成并上传完毕了。
 
 # 协作注意事项
 ## 项目创建者
 按照上述设置，`wiki`默认保存在`yourname.github.io`的`master`分支下。建议另外开启一个`source`分支，用来将整个wiki文件夹上传，方便多地编辑以及同步协作。
-> 
+>
 一开始可能会发现wiki文件夹不能使用git管理，这是因为主题wixo是使用git管理的。所以在上传wiki文件夹之前，要删除位于wixo文件夹下的.git文件夹。
 
 ## 项目参与者

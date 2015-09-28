@@ -11,7 +11,7 @@ http://poj.org/problem?id=2965
 
 # 理解
 参考的某神牛的解法：
-> 
+>
 证明:
 1. 要使一个为'+'的符号变为'-',必须其相应的行和列的操作数为奇数;可以证明,如果'+'位置对应的行和列上每一个位置都进行一次操作,则整个图只有这一'+'位置的符号改变,其余都不会改变.
 2. 设置一个4*4的整型数组,初值为零,用于记录每个点的操作数,那么在每个'+'上的行和列的的位置都加1,得到结果模2(因为一个点进行偶数次操作的效果和没进行操作一样),然后计算整型数组中一的
@@ -22,7 +22,9 @@ http://poj.org/problem?id=2965
 <!-- more -->
 
 # 代码
-```#include <iostream>
+
+```
+#include <iostream>
 #include <cstdio>
 #include <cstring>
 using namespace std;
@@ -67,6 +69,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年07月23日 已AC。

@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 几何]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/7/C
@@ -17,7 +17,9 @@ http://codeforces.com/problemset/problem/7/C
 <!-- more -->
 
 # 代码
+
 ```
+
 ll a,b,c,d,x,y;
 
 void ex_gcd(ll a, ll b, ll& d,ll& x, ll& y)
@@ -45,6 +47,8 @@ int main(int argc, char const *argv[])
         cout << -x*(c/d) << " " << -y*(c/d) << endl;
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月19日 已AC。

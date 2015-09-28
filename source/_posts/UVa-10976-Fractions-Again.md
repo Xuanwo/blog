@@ -4,7 +4,7 @@ tags: [ACM, UVa, C, 暴力]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=1917
@@ -15,7 +15,9 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_p
 <!-- more -->
 
 # 代码
-```#include <stdio.h>
+
+```
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -69,6 +71,8 @@ int main()
         }
     }
 }
+
 ```
+
 # 更新日志
 - 2014年10月27日 已AC。

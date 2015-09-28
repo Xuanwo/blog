@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 水题]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/contest/4/problem/A
@@ -16,7 +16,9 @@ http://codeforces.com/contest/4/problem/A
 <!-- more -->
 
 # 代码
+
 ```
+
 int w;
 
 int main(int argc, char const *argv[])
@@ -33,6 +35,8 @@ int main(int argc, char const *argv[])
     }
 	return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月3日 已AC。

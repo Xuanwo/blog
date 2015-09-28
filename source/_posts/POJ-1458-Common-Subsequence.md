@@ -12,17 +12,23 @@ http://poj.org/problem?id=1458
 # 理解
 DP的基础题，求最长子序列（LCS）。
 状态转移方程伪代码如下：
-```if (i == 0 || j == 0) 
-	dp[i,j] = 0
-else if (X[i] == Y[j]) 
-	dp[i,j] = dp[i-1,j-1] + 1
-else 
-	dp[i,j] = max(dp[i-1,j], dp[i,j-1])
+
 ```
+if (i == 0 || j == 0)
+	dp[i,j] = 0
+else if (X[i] == Y[j])
+	dp[i,j] = dp[i-1,j-1] + 1
+else
+	dp[i,j] = max(dp[i-1,j], dp[i,j-1])
+
+```
+
 <!-- more -->
 
 # 代码
-```#include <iostream>
+
+```
+#include <iostream>
 #include <string>
 
 using namespace std;
@@ -61,6 +67,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-```	
+
+```
+
 # 更新日志
 - 2014年08月12日 已AC。

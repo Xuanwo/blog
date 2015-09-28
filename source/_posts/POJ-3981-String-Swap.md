@@ -15,7 +15,9 @@ http://poj.org/problem?id=3981
 <!-- more -->
 
 # 代码
-```#include <iostream>
+
+```
+#include <iostream>
 #include <string>
 
 using namespace std;
@@ -26,15 +28,17 @@ int main(int argc, char const *argv[])
 	while(getline(cin, str))
 	{
 		int start = str.find("you");
-		while(start != string::npos) 
+		while(start != string::npos)
 		{
 			str.replace(start, 3, "we");
-			start = str.find("you", start+2); 
+			start = str.find("you", start+2);
 		}
 		cout << str << endl;
 	}
 	return 0;
 }
-```	
+
+```
+
 # 更新日志
 - 2014年08月06日 已AC。

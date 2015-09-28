@@ -15,7 +15,9 @@ http://poj.org/problem?id=1306
 <!-- more -->
 
 # 代码
-```import java.math.BigInteger;
+
+```
+import java.math.BigInteger;
 import java.util.Scanner;
 
 
@@ -34,7 +36,7 @@ public class Main {
             System.out.println(a+" things taken "+b+" at a time is "+result.toString()+" exactly.");
         }
     }
-    
+
     public static BigInteger factor(int n){
         BigInteger goal=BigInteger.ONE;
         for(int i=n;i>=2;i--){
@@ -45,6 +47,8 @@ public class Main {
 
 }
 
+
 ```
+
 # 更新日志
 - 2014年07月18日 已AC。

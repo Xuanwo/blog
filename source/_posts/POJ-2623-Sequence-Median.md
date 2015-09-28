@@ -15,7 +15,9 @@ http://poj.org/problem?id=2623
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -61,6 +63,8 @@ int main()
         printf("%.1f\n", a[n / 2 - 1] / 2.0 + a[n / 2] / 2.0);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年08月17日 已AC。

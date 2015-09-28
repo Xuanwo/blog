@@ -15,7 +15,9 @@ http://poj.org/problem?id=2871
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -55,6 +57,8 @@ int main(int argc, char const *argv[])
     printf("End of Output\n");
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年08月18日 已AC。

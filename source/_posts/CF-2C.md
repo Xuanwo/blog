@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 几何]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/contest/2/problem/C
@@ -12,7 +12,7 @@ http://codeforces.com/contest/2/problem/C
 # 理解
 题意很清楚，就是给定三个点，要求出一个点到这三个点的视角相同。要是存在多个这样的点，则选择那个视角最大的点。
 
-> 
+>
 小科普——视角
 定圆O和不在O上的定点A，从A向O引两条切线，这两条切线所形成的角可以看做视角。
 又因为已知O的半径r和OA的长，显然，视角的大小为2*asin(r/OA)，也能够利用sin(r/OA)的值来衡量。
@@ -22,7 +22,9 @@ http://codeforces.com/contest/2/problem/C
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -119,6 +121,8 @@ int main(int argc, char const *argv[])
         printf("%.5lf %.5lf\n", x,y);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月6日 已AC。

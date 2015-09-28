@@ -18,7 +18,9 @@ http://poj.org/problem?id=2153
 [STL库中Map](http://www.cplusplus.com/reference/map/map/?kw=map)
 
 # 代码
-```#include <iostream>
+
+```
+#include <iostream>
 #include <string>
 #include <map>
 #include <cstdio>
@@ -83,6 +85,8 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+
 ```
+
 # 更新日志
 - 2014年07月16日 已AC。

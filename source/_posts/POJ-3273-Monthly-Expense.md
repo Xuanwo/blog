@@ -15,7 +15,9 @@ http://poj.org/problem?id=3273
 <!-- more -->
 
 # 代码
-```#include  <stdio.h>
+
+```
+#include  <stdio.h>
 #include  <string.h>
 #include  <iostream>
 #include  <stdlib.h>
@@ -67,6 +69,8 @@ int main()
     printf("%d\n", _min);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年07月23日 已AC。

@@ -4,7 +4,7 @@ tags: [ACM, POJ, C, DP]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://poj.org/problem?id=1050
@@ -15,7 +15,9 @@ http://poj.org/problem?id=1050
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -96,6 +98,8 @@ int main(int argc, char const *argv[])
     cout << maxALL << endl;
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年10月07日 已AC，因为freopen忘了改WA了一发。

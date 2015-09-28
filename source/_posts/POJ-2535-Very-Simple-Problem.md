@@ -15,7 +15,9 @@ N个评委，P道题目，每个评委对每道题进行评分。对于单个评
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -110,6 +112,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年08月22日 已AC。

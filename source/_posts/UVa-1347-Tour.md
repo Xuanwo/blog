@@ -4,7 +4,7 @@ tags: [ACM, UVa, C, DP]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=4093
@@ -12,14 +12,20 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_p
 # 理解
 给出n个定点，要求计算出连接这些点的最短闭合路径。
 使用dp[i][j]来保存从i到1再从1到j的最短距离。然后可以得到这样两条递推公式：
-```dp[i][i-1]=min(dp[i][i-1],dp[i-1][j]+dis(i,j));
+
+```
+dp[i][i-1]=min(dp[i][i-1],dp[i-1][j]+dis(i,j));
 dp[i][j]=dp[i-1][j]+dis(i,i-1);
-```最后的结果就是遍历一遍dp[n][i]+dis(n,i)，找到最小值。
+
+```
+最后的结果就是遍历一遍dp[n][i]+dis(n,i)，找到最小值。
 
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 100+10
 
 int n;
@@ -64,6 +70,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月16日 已AC。

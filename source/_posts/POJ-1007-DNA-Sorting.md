@@ -19,7 +19,9 @@ http://poj.org/problem?id=1007
 `void qsort (void* base, size_t num, size_t size, int (*compar)(const void*,const void*));`
 
 # 代码
-```#include <iostream>
+
+```
+#include <iostream>
 #include <string>
 #include <cstdlib>
 using namespace std;
@@ -63,6 +65,8 @@ int main()
 
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年07月07日 已AC。

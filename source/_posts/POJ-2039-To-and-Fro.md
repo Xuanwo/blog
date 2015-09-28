@@ -13,14 +13,18 @@ http://poj.org/problem?id=2039
 找规律的题目。
 首先看一下加密的方式：
 原文为`theresonoplacelikehomeonasnowynightx`，分成N列来写，没有写满的用x填充，写成如下队列：
-```t o i o y
+
+```
+t o i o y
 h p k n n
 e l e a i
 r a h s g
 e c o n h
 s e m o t
 n l e w x
-```对于奇数行，从左向后书写，对于偶数行，从右向左书写，得到密文：
+
+```
+对于奇数行，从左向后书写，对于偶数行，从右向左书写，得到密文：
 `toioynnkpheleaigshareconhtomesnlewx`
 显然，解密的方式就是原样还原回去。
 一共进行N次读入，对于第i次读取，用j定位行数。
@@ -30,7 +34,9 @@ n l e w x
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -66,6 +72,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-```	
+
+```
+
 # 更新日志
 - 2014年08月06日 已AC。

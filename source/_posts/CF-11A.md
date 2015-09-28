@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 贪心]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/11/A
@@ -16,7 +16,9 @@ http://codeforces.com/problemset/problem/11/A
 <!-- more -->
 
 # 代码
+
 ```
+
 int n,d;
 int t=0,one,two,temp;
 
@@ -43,6 +45,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月16日 已AC。

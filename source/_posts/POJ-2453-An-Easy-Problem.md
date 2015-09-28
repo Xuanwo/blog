@@ -15,7 +15,9 @@ http://poj.org/problem?id=2453
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -51,6 +53,8 @@ int main(int argc, char const *argv[])
         printf("%d\n", n + x + (n ^ n + x) / x / 4);
     }
 }
+
 ```
+
 # 更新日志
 - 2014年08月16日 已AC。

@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 暴力]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/12/A
@@ -16,7 +16,9 @@ http://codeforces.com/problemset/problem/12/A
 <!-- more -->
 
 # 代码
+
 ```
+
 char a[3][3];
 
 void init()
@@ -33,6 +35,8 @@ int main(int argc, char const *argv[])
 	else printf("NO\n");
 	return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月21日 已AC。

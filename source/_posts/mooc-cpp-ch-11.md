@@ -15,7 +15,9 @@ toc: true
 
 这道题做了很久，甚至还拿去问了队友，都没有满意的答案。一怒之下，还是用了各种string来完成。
 
-```cpp
+
+```
+cpp
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -49,13 +51,17 @@ int main(void)
     }
     return 0;
 }
+
 ```
+
 ## 重载流运算符
 > 实现一个学生类，包含学号（id），姓名（name），年级（grade）数据成员。为了输入输出的方便，需要对这个学生类重载“>>”和“<<”运算符，同时为了对多个学生按照学号从小到大排序，还需要重载“<”运算符，以使用STL里的sort函数。类的声明与主函数的测试代码已给出，请将类的实现与相关重载补充完整，使得程序正确运行并输出正确结果。
 
 这道题并不是很难，只需要重载输入输出和小于即可。
 
-```cpp
+
+```
+cpp
 #include <iostream>
 #include <vector>
 #include <string>
@@ -99,6 +105,8 @@ int main()
         cout << sv[i];
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2015年07月13日 赶deadline ing

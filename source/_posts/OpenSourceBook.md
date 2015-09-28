@@ -14,7 +14,7 @@ toc: true
 - 代码编辑容易，因为我们的模板白手起家，经常会需要修改。
 
 这些需求，单个实现都比较容易，但是如果想要找到一个全部符合并且简单易行的方案，就有些困难了。在[@larrycai](http://www.larrycaiyu.com/)推出的[中文开源电子书项目](https://github.com/larrycai/kaiyuanbook)的启发下，我想到了使用 `Markdown` + `Github` + `Travis CI` 的一套工具链来构建了我的开源电子书的方法。
-下面我来简单地介绍一下。 
+下面我来简单地介绍一下。
 
 <!-- more -->
 
@@ -51,18 +51,24 @@ toc: true
 
 首先我们需要一个ruby的环境，如果没有的话可以考虑使用[Cloud9](https://c9.io/)。
 安装travis的gem包
-```xuanwo@ruby:~/workspace $ gem install travis
+
+```
+xuanwo@ruby:~/workspace $ gem install travis
 Fetching: addressable-2.3.8.gem (100%)
 Successfully installed addressable-2.3.8
 （中间省略）
 Fetching: travis-1.8.0.gem (100%)
 Successfully installed travis-1.8.0
 18 gems installed
-```登陆Travis，需要使用Github的账号和密码。
-```xuanwo@ruby:~/workspace $ cd OpenSourceBook/
-xuanwo@ruby:~/workspace/OpenSourceBook (master) $ 
+
+```
+登陆Travis，需要使用Github的账号和密码。
+
+```
+xuanwo@ruby:~/workspace $ cd OpenSourceBook/
+xuanwo@ruby:~/workspace/OpenSourceBook (master) $
 xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis login --auto
-Shell completion not installed. Would you like to install it now? |y| 
+Shell completion not installed. Would you like to install it now? |y|
 We need your GitHub login to identify you.
 This information will not be sent to Travis CI, only to api.github.com.
 The password will not be displayed.
@@ -73,9 +79,13 @@ Username: Xuanwo
 Password for Xuanwo: **********
 Two-factor authentication code for Xuanwo: 147447
 Successfully logged in as Xuanwo!
-```使用Travis的Release-Guide生成相应的脚本代码
-```xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis setup releases
-Detected repository as Xuanwo/OpenSourceBook, is this correct? |yes| 
+
+```
+使用Travis的Release-Guide生成相应的脚本代码
+
+```
+xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis setup releases
+Detected repository as Xuanwo/OpenSourceBook, is this correct? |yes|
 //此处错误表明这个库是新建的，Travis CI还没有同步，手动同步即可。
 repository not known to https://api.travis-ci.org/: Xuanwo/OpenSourceBook
 xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis setup releases
@@ -85,20 +95,26 @@ Two-factor authentication code for Xuanwo: 603930
 //设定需要上传的文件名
 File to Upload: OpenSourceBook.pdf
 //设定只从当前库进行上传
-Deploy only from Xuanwo/OpenSourceBook? |yes| 
+Deploy only from Xuanwo/OpenSourceBook? |yes|
 //设定进行API key加密（强烈要求）
-Encrypt API key? |yes| 
-```到这里，我们已经实现了一本电子书由Markdown到PDF的自动构建，下面我来具体的讲解一下如何使用。
+Encrypt API key? |yes|
+
+```
+到这里，我们已经实现了一本电子书由Markdown到PDF的自动构建，下面我来具体的讲解一下如何使用。
 
 # 使用方法
 ## 触发Release发布
 由于Github的强制要求，所有发布都必须归属于某一个Tags，所以我们在push的时候，需要带上tags，生成的文件才能够上传到Github上去。具体的操作如下：
-```git add --all
+
+```
+git add --all
 git commit -m "update content"
 git tag -a v0.0.1 -m "tags content"
 git push --tags
 git push
-```## 文件结构介绍
+
+```
+## 文件结构介绍
 所有的源代码文件都保存在`content`文件夹下，所有文件都遵循[Markdown语法](http://www.jianshu.com/p/q81RER)。图片保存在`content/img`目录下，调用时使用`![图片描述](img/pic.png)`。
 每一本书分为前言，内容和目录。其中`0-prefaceX-xxx.md`表示前言的第X章，`1-chapterX-xxx.md`表示正文的第X章，`2-appendixX-xxx.md`表示附录的第X章，都是从1开始的。
 
@@ -106,7 +122,11 @@ git push
 
 ## 跳过自动构建
 只是单纯想更新内容，不想生成PDF时，只需要在commit信息中添加`[ci skip]`即可。比如
-```git commit -m "[ci skip] commit message"
+
 ```
+git commit -m "[ci skip] commit message"
+
+```
+
 # 更新日志
 - 2015年08月12日 初步完成教程

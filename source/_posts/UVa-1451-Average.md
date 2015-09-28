@@ -4,7 +4,7 @@ tags: [ACM, UVa, C, 几何]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=24&page=show_problem&problem=4197
@@ -17,7 +17,9 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=24
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 100000+10
 
 int t,n,L;
@@ -73,6 +75,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月4日 已AC。

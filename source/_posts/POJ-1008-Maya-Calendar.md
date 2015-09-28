@@ -24,7 +24,9 @@ C++就是比C高大上，再也不需要`char`数组了～
 - [`compare`](http://www.cplusplus.com/reference/string/string/compare/)
 
 # 代码
-```#include <stdio.h>
+
+```
+#include <stdio.h>
 #include <string.h>
 #include <iostream>
 using namespace std;
@@ -101,6 +103,8 @@ int main()
         cout << Tzolkinmonth << " " << Tzolkinday << " " << Tzolkinyear << endl;
     }
 }
+
 ```
+
 # 更新日志
 - 2014年07月07日  已AC，文章BUG修正。

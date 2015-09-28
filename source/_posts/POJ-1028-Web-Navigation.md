@@ -23,7 +23,9 @@ std::stack中几个常用的操作
 |example.empty();    |判断example栈是否为空，是的话返回1，不是的话返回0 |
 
 # 代码
-```#include <iostream>
+
+```
+#include <iostream>
 #include <stack>
 #include <string>
 using namespace std;
@@ -77,6 +79,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年07月20日 已AC。

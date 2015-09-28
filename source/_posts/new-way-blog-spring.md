@@ -24,8 +24,10 @@ Spring拥有响应式的页面设计，可以在手机、平板和桌面端完�
 
  1. Fork仓库[Spring](https://github.com/zhaoda/spring)
  2. 修改仓库名称为`yourname.github.io`
- 3. 修改`index.html`文件（可以在Github网页端修改好之后再同步到本地）             
-```$.extend(spring.config, {
+ 3. 修改`index.html`文件（可以在Github网页端修改好之后再同步到本地）
+
+```
+$.extend(spring.config, {
 // my blog title
 title: 'Your Blog title',
 // my blog description
@@ -40,7 +42,9 @@ repo: 'yourname.github.io',
 pages: [
 ]
 })
+
 ```
+
 在设置页面中打开`Issues`功能，开始写你的博客吧～
 
 # 添加百度统计代码

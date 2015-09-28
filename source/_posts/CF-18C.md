@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 暴力]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/18/C
@@ -15,7 +15,9 @@ http://codeforces.com/problemset/problem/18/C
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 100000+10
 
 int a[MAXN];
@@ -49,6 +51,8 @@ int main(int argc, char const *argv[])
     printf("%d\n",ans);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月26日 已AC。

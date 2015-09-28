@@ -34,7 +34,9 @@ http://poj.org/problem?id=1006
 >这就是现代数论中著名的剩余定理。如上所说，它的基本形式已经包含在《孙子算经》“物不知数”题的解法之中。不过《孙子算经》没有明确地表述这个一般的定理。
 
 # 代码
-```#include <stdio.h>
+
+```
+#include <stdio.h>
 
 using namespace std;
 
@@ -69,6 +71,8 @@ int main(void)
 
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年07月06日 已AC，完成中国剩余定理资料引用。

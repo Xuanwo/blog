@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, DP]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/9/D
@@ -20,7 +20,9 @@ http://codeforces.com/problemset/problem/9/D
 <!-- more -->
 
 # 代码
+
 ```
+
 int n,h;
 ll dp[36][36];
 
@@ -46,6 +48,8 @@ int main(int argc, char const *argv[])
     printf("%I64d\n",dp[n][35]-dp[n][h-1]);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月16日 已AC。

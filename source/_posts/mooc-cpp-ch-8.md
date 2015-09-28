@@ -15,7 +15,9 @@ toc: true
 
 多态的话，平时敲代码也经常有用到，所以并没有折腾很久。倒是虚数的四则运算还推了一会儿- -，计算基础真的已经弱成渣了。。
 
-```cpp
+
+```
+cpp
 #include <cstdio>
 #include <cstring>
 #include <iostream>
@@ -76,13 +78,17 @@ int main() {
     cout << c1 * c2;
     cout << c1 / c2;
 }
+
 ```
+
 ## 圆的周长和面积
 > 求圆的周长和面积，已知圆类从shape抽象类继承。
 
 这道题也没有什么难度，补全两个函数即可。虽说用到了虚函数这种自己并不是很懂的概念，但是撸代码重在胆大心细，跟着直觉走，直接上。
 
-```cpp
+
+```
+cpp
 #include <iostream>
 using namespace std;
 
@@ -124,19 +130,27 @@ int main() {
     Circle c(radius);
     cout << c.getArea() << " " << c.getPerim() << endl;
 }
+
 ```
+
 #  三角形还是长方形？
 > 在多态概念中，基类的指针既可以指向基类的对象，又可以指向派生类的对象。我们可以使用dynamic_cast类型转换操作符来判断当前指针（必须是多态类型）是否能够转换成为某个目的类型的指针。
 > 同学们先查找dynamic_cast的使用说明（如http://en.wikipedia.org/wiki/Run-time_type_information#dynamic_cast），然后使用该类型转换操作符完成下面程序（该题无输入）。
 > 函数int getVertexCount(Shape * b)计算b的顶点数目，若b指向Shape类型，返回值为0；若b指向Triangle类型，返回值为3；若b指向Rectangle类型，返回值为4。
 
 用到了一个黑科技：[dynamic_cast](http://en.cppreference.com/w/cpp/language/dynamic_cast)。
-```dynamic_cast < new_type > ( expression )
-```试着将`expression`转换为`new_type`，如果转换成功，则返回一个`new_type`的指针，如果转换失败，则返回`null`指针。
+
+```
+dynamic_cast < new_type > ( expression )
+
+```
+试着将`expression`转换为`new_type`，如果转换成功，则返回一个`new_type`的指针，如果转换失败，则返回`null`指针。
 也就是说，通过这种方法，我们可以确定一个对象是不是可以转换为某个类的对象，如下面的演示。
 *纯经验推断= =，如果理解有错，请千万指出*
 
-```cpp
+
+```
+cpp
 /*students please write your program here*/
 #include <cstdio>
 #include <cstring>
@@ -176,6 +190,8 @@ int main() {
     Rectangle r;
     cout << getVertexCount(&r) << endl;
 }
+
 ```
+
 # 更新日志
 - 2015年07月08日 要结课啦- -，狂赶Deadline。

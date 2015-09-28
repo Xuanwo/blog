@@ -11,16 +11,22 @@ http://poj.org/problem?id=1159
 
 # 理解
 最关键的公式是：
-```if (str[i] == str[j])
+
+```
+if (str[i] == str[j])
     DP[k][j] = DP[1 - k][j - 1];
 else
     DP[k][j] = min(DP[1 - k][j], DP[k][j - 1]) + 1;
-```注意到k空间的循环利用，节省了空间，感谢大牛提供的思路。
+
+```
+注意到k空间的循环利用，节省了空间，感谢大牛提供的思路。
 
 <!-- more -->
 
 # 代码
-```#include <iostream>
+
+```
+#include <iostream>
 #include <string.h>
 #include <cstdio>
 #include <string>
@@ -56,6 +62,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-```	
+
+```
+
 # 更新日志
 - 2014年08月12日 已AC。

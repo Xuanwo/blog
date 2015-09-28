@@ -15,7 +15,9 @@ http://poj.org/problem?id=1338
 <!-- more -->
 
 # 代码
-```#include <iostream>
+
+```
+#include <iostream>
 using namespace std;
 
 const int MAX_POS = 1500;
@@ -54,6 +56,8 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
-```	
+
+```
+
 # 更新日志
 - 2014年08月12日 已AC。

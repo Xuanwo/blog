@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 贪心]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/3/B
@@ -17,7 +17,9 @@ http://codeforces.com/problemset/problem/3/B
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 100000+10
 
 int sum1[MAXN], sum2[MAXN], oc, tc, ans[MAXN];
@@ -94,6 +96,8 @@ int main(int argc, char const *argv[])
 24
 3 1 5
 **/
+
 ```
+
 # 更新日志
 - 2014年11月7日 已AC。

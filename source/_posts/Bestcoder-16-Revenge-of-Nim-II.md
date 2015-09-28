@@ -25,7 +25,9 @@ http://acm.hdu.edu.cn/showproblem.php?pid=5088
 
 
 # 代码
-```cpp
+
+```
+cpp
 const int maxn = 1010;
 const int maxm = 65;
 int t, n;
@@ -101,7 +103,9 @@ int main()
     }
     return 0;
 }
+
 ```
+
 
 # 更新日志
 - 2015年8月17日 已AC

@@ -16,7 +16,9 @@ toc: true
 
 并不难，先预处理之后，再头尾进行比较即可。实际敲的时候，没有考虑到空格- -，WA了很久。
 
-```cpp
+
+```
+cpp
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -77,13 +79,17 @@ int main(int argc, char const *argv[])
     else cout << 1;
     return 0;
 }
+
 ```
+
 ## 计算面积
 > 现在要计算长方形、圆、三角形三种类型区域面积，首先输入一个类型指定信息type，若type=0，表示圆，接下来会输入其半径；若type=1，表示三角形，接下来输入其三条边；若type=2，表示长方形，接下来输入其长和宽。最后输出相应区域面积。
 
 这是一道陈题，用到了`dynamic_cast`。判断出图形的类别，计算面积就很容易了~
 
-```cpp
+
+```
+cpp
 #include <cstdio>
 #include <iostream>
 #include <cmath>
@@ -182,13 +188,17 @@ int main() {
         calArea(&rectangle);
     }
 }
+
 ```
+
 ## 中位数
 > 请实现一个模板函数，求出数组中的中位数，数组可能为整数数组，也可能为浮点数数组。数组的中位数定义为数组按非递减顺序排序后的第⌊n/2⌋ + 1个数，其中n为数组元素个数。每个测试用例都会测试一个整数数组和一个浮点数数组。
 
 额- -，这个我做的比较脏，并没有用模板函数的做法。（虽然后来发现是自己的scanf没有处理好，不过并不打算改了，就这样吧。。）
 
-```cpp
+
+```
+cpp
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -233,13 +243,17 @@ int main(int argc, char const *argv[])
     printf("%.2f", b[n / 2 + 1]);
     return 0;
 }
+
 ```
+
 ## 图形类
 > 下面给出了图形类Shape的定义，请以Shape为基类派生出矩形类Rectangle和三角形类Triangle，并实现他们各自的求面积函数area()，该函数返回double类型。
 
 做这道题的时候- -，距离截止还有2分钟，所以再一次脏了起来。。对不起老师= =
 
-```cpp
+
+```
+cpp
 #include <iostream>
 using namespace std;
 
@@ -252,7 +266,9 @@ int main()
        cout << w*h / 2.0 << endl;
        return 0;
 }
+
 ```
+
 
 # 更新日志
 - 2015年07月13日 结束了。

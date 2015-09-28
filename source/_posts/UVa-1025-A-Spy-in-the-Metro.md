@@ -4,7 +4,7 @@ tags: [ACM, UVa, C, DP]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3466
@@ -17,7 +17,9 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_p
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 250+10
 #define MAXM 70+10
 
@@ -97,6 +99,8 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
+
 ```
+
 # 更新日志
 - 2014年11月15日 已AC。

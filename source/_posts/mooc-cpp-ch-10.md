@@ -15,7 +15,9 @@ toc: true
 
 很简单的题，用map直接搞定。
 
-```cpp
+
+```
+cpp
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -52,13 +54,17 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 ## 数组排序
 > 输入n个数，对这n个数去重之后排序，并输出从小到大排序结果。
 
 这道题涨的姿势有点多，学到了很多原来没有用到过的函数，以后再也不用手写去重啦~
 
-```cpp
+
+```
+cpp
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -107,13 +113,17 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 ## 字符串出现个数
 > 给定一个串a和串b，求b在a中出现次数
 
 我觉得我的实现并不是老师的意图，这样写有点蠢= =，感觉运行效率并没有提高。
 
-```cpp
+
+```
+cpp
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -153,6 +163,8 @@ int main(int argc, char const *argv[])
     cout << t << endl;
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2015年07月13日 赶deadline ing

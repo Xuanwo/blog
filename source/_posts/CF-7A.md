@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 模拟]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/7/A
@@ -17,7 +17,9 @@ http://codeforces.com/problemset/problem/7/A
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 8
 
 char chess[MAXN][MAXN];
@@ -54,6 +56,8 @@ int main(int argc, char const *argv[])
     printf("%d\n", ans);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月13日 已AC。

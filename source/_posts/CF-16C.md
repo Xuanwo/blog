@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 数论]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/16/C
@@ -15,7 +15,9 @@ http://codeforces.com/problemset/problem/16/C
 <!-- more -->
 
 # 代码
+
 ```
+
 ll a,b,x,y;
 ll d,t1,t2;
 
@@ -40,6 +42,8 @@ int main(int argc, char const *argv[])
     cout<<x*t1<<" "<<y*t1<<endl;
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月26日 已AC。

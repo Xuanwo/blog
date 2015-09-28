@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 贪心]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/contest/3/problem/D
@@ -18,7 +18,9 @@ http://codeforces.com/contest/3/problem/D
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 50000+10
 
 char s[MAXN];
@@ -66,6 +68,8 @@ int main(int argc, char const *argv[])
         printf("%lld\n%s\n", ss,s+1);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月3日 已AC。

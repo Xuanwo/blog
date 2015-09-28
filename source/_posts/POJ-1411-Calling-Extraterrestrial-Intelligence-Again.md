@@ -15,7 +15,9 @@ http://poj.org/problem?id=1411
 <!-- more -->
 
 # 代码
-```#include<cstdio>
+
+```
+#include<cstdio>
 int m, a, b;
 bool ok[100010];
 int prime[100000], cnt, ansx, ansy, ans;
@@ -50,6 +52,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-```	
+
+```
+
 # 更新日志
 - 2014年08月12日 已AC。

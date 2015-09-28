@@ -4,7 +4,7 @@ tags: [ACM, POJ, C, DP, 01背包]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://poj.org/problem?id=3624
@@ -17,7 +17,9 @@ http://poj.org/problem?id=3624
 
 # 代码
 **挂在空间占用上的代码**
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -131,8 +133,12 @@ int main(int argc, char const *argv[])
     printf("%d\n", dp[0][m]);
     return 0;
 }
-```**修改之后成功AC的代码**
+
 ```
+**修改之后成功AC的代码**
+
+```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -195,6 +201,8 @@ int main(int argc, char const *argv[])
     printf("%d\n", dp[m]);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年10月05日 已AC。

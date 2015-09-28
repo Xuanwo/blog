@@ -1,10 +1,10 @@
 title: Codeforces Beta Round 65 A Way Too Long Words (Div. 2)
 date: 2015-2-10 23:11:25
-tags: [ACM, Codeforces, C, 字符串] 
+tags: [ACM, Codeforces, C, 字符串]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/71/A
@@ -15,7 +15,9 @@ http://codeforces.com/problemset/problem/71/A
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -61,6 +63,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2015年2月10日 已AC。

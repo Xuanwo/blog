@@ -16,7 +16,7 @@ http://poj.org/problem?id=2407
 
 # 新技能get
 欧拉函数：
-> 
+>
 在数论，对正整数n，欧拉函数是少于或等于n的数中与n互质的数的数目。此函数以其首名研究者欧拉命名，它又称为Euler's totient function、φ函数、欧拉商数等。 例如φ(8)=4，因为1,3,5,7均和8互质。 从欧拉函数引伸出来在环论方面的事实和拉格朗日定理构成了欧拉定理的证明。
 
 φ函数的值 　
@@ -25,7 +25,9 @@ http://poj.org/problem?id=2407
 (注意：每种质因数只一个。比如12=2*2*3那么φ(12)=12*(1-1/2)*(1-1/3)=4）
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -78,6 +80,8 @@ int main(int argc, char const *argv[])
         printf ("%d\n", Euler(n));
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年08月16日 已AC。

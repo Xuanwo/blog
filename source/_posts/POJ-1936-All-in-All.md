@@ -15,7 +15,9 @@ http://poj.org/problem?id=1936
 <!-- more -->
 
 # 代码
-```#include <stdio.h>
+
+```
+#include <stdio.h>
 #include <string.h>
 #define N 100001
 using namespace std;
@@ -37,6 +39,8 @@ int main()
     }
     return 0;
 }
-```	
+
+```
+
 # 更新日志
 - 2014年08月05日 已AC。

@@ -26,7 +26,9 @@ Hexo是一个非常好用的静态博客生成器，但是由于很多方面的�
 
 *Windows系统*出现报错信息如下
 
+
 ```
+
 [info] Start deploying: git
 [info] Setting up Git deployment...
 [error] Error: spawn ENOENT
@@ -40,7 +42,9 @@ events.js:72
 Error: spawn ENOENT
     at errnoException (child_process.js:1000:11)
     at Process.ChildProcess._handle.onexit (child_process.js:791:34)
+
 ```
+
 
 **解决方案：**
 
@@ -52,9 +56,13 @@ Error: spawn ENOENT
 
 输入`hexo deploy`后，出现错误信息：
 
+
 ```
+
 'github' does not appear to be a git repository
+
 ```
+
 
 **解决方案：**
 
@@ -114,7 +122,9 @@ Error: spawn ENOENT
 
 输入命令后出现如下信息：
 
+
 ```
+
 localhost:~ apple$ hexo new "title"
 Usage: hexo
 
@@ -130,20 +140,26 @@ Global Options:
 
 For more help, you can use hexo help [command] for the detailed information
 or you can check the docs: http://zespia.tw/hexo/docs/
+
 ```
+
 
 **解决方案：**
 
 1. 检查`_config.yml`中的内容，特别注意`:`后面需要有一个空格。
 2. 检查`package.json'中的内容，注意添加hexo信息用来标识这是一个hexo目录：
 
+
 ```
+
 {
   "hexo": {
     "version": ""
   }
 }
+
 ```
+
 
 3. 如果还是有问题，可以更新hexo之后，在新的文件夹中重新进行`hexo init`。
 
@@ -153,7 +169,9 @@ or you can check the docs: http://zespia.tw/hexo/docs/
 
 [参见Issues](https://github.com/hexojs/hexo/issues/832)
 报错信息如下：
+
 ```
+
 [error] { name: 'HexoError',
   reason: 'end of the stream or a document separator is expected',
   mark:
@@ -170,7 +188,9 @@ or you can check the docs: http://zespia.tw/hexo/docs/
      members: [ [Object] ] },
   domainThrown: true,
   stack: undefined }
+
 ```
+
 
 **解决方案：**
 仔细检查`_config.yml`文件中所有冒号后面的空格，格式很严格，必须是**只有一个**，**半角**。不管是多了还是少了都会报错，这是yml解释器所定义的语法。如果不确定的话，将输入法调整到英文模式，删除所有冒号后面的空格重新输入，不要使用Tab。
@@ -179,7 +199,9 @@ or you can check the docs: http://zespia.tw/hexo/docs/
 
 **问题描述：**
 输入`hexo g`后，报错如下：
+
 ```
+
 [error] { name: 'HexoError',
   reason: 'incomplete explicit mapping pair; a key node is missed',
   mark:
@@ -198,7 +220,9 @@ iption: Description\nread_more: Read More\n\u0000',
      members: [ [Object] ] },
   domainThrown: true,
   stack: undefined }
+
 ```
+
 
 **解决方案：**
 
@@ -223,14 +247,18 @@ iption: Description\nread_more: Read More\n\u0000',
 [参见Issues](https://github.com/hexojs/hexo/issues/838)
 看不到渲染后的页面，只能看到类似如下信息：
 
+
 ```
+
 <%- partial('_partial/head') %>
 <%- partial('_partial/header', null, {cache: !config.relative_link}) %>
 <%- body %>
 <% if (theme.sidebar && theme.sidebar !== 'bottom'){ %> <%- partial('_partial/sidebar', null,     {cache: !config.relative_link}) %> <% } %>
 <%- partial('_partial/footer', null, {cache: !config.relative_link}) %>
 <%- partial('_partial/mobile-nav', null, {cache: !config.relative_link}) %> <%- partial('_partial/after-footer') %>
+
 ```
+
 
 **解决方案：**
 
@@ -254,10 +282,14 @@ iption: Description\nread_more: Read More\n\u0000',
 在使用代码块时，明确使用类型，或者全部使用`plain`类型，如下：
 
 {% raw %}
+
 ```
+
 plain
 something
+
 ```
+
 {% endraw %}
 
 ## 升级至Hexo 3.0版本后，deploy报错
@@ -267,9 +299,13 @@ something
 [参见Issues](https://github.com/hexojs/hexo/issues/1013)
 升级之后，本来可以deploy的设置出现报错，内容为：
 
+
 ```
+
 ERROR Deployer not found: github
+
 ```
+
 
 **问题分析：**
 
@@ -279,28 +315,40 @@ Hexo3.0与以往版本最大的改变在于，更多的模块都从主程序中�
 
 首先需要安装对应的deploy模块，目前Hexo支持以下服务器的一键部署：
 
+
 ```
+
 git
 heroku
 rsync
 openshift
+
 ```
+
 
 安装命令为：
 
+
 ```
+
 npm install hexo-deployer-git --save //将git替换为别的名字就可以安装对应模块
+
 ```
+
 
 然后对`_config.yml`做如下设置：
 
+
 ```
+
 deploy:
   type: git   //非git请参考官方文档中的设置
   repo: <repository url>
   branch: [branch]
   message: [message]
+
 ```
+
 
 ## Mac OS安装Hexo出错
 
@@ -309,11 +357,15 @@ deploy:
 [参见Issues](https://github.com/hexojs/hexo/issues/1326)
 命令行返回ERROR：
 
+
 ```
+
 { [Error: Cannot find module './build/Release/DTraceProviderBindings'] code: 'MODULE_NOT_FOUND' }
 { [Error: Cannot find module './build/default/DTraceProviderBindings'] code: 'MODULE_NOT_FOUND' }
 { [Error: Cannot find module './build/Debug/DTraceProviderBindings'] code: 'MODULE_NOT_FOUND' }
+
 ```
+
 
 **解决方案：**
 
@@ -363,11 +415,15 @@ Todo
 1. 单个文件夹下全部文件以及子目录:`skip_render: test/**`
 1. 多个文件夹以及各种复杂情况：
 
+
 ```
+
 skip_render:
     - `test1/*.html`
     - `test2/**`
+
 ```
+
 
 ## Hexo版本回退
 
@@ -393,7 +449,9 @@ Hexo默认支持Disque，打开`_config.yml`，在`disqus_shortname:`后面输�
 
 在`after_footer.ejs`模块中输入如下代码：
 
+
 ```
+
 <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 <script type="text/javascript">
 var duoshuoQuery = {short_name:"yourshortname"};
@@ -407,15 +465,21 @@ var duoshuoQuery = {short_name:"yourshortname"};
 	})();
 	</script>
 <!-- 多说公共JS代码 end -->
+
 ```
+
 
 在`article.ejs`模块中输入如下代码：
 
+
 ```
+
 <% if (page.comments){ %>
         <div class="ds-thread" data-thread-key="<%- page.path %>" data-title=<%- page.title %> data-url=<%- page.permalink %>>
 <% } %>
+
 ```
+
 
 ## 如何避免在Deploy时输入密码
 
@@ -432,14 +496,18 @@ var duoshuoQuery = {short_name:"yourshortname"};
 
 参考[hexo-deployer-git](https://github.com/hexojs/hexo-deployer-git)插件README进行配置：
 
+
 ```
+
 deploy:
   type: git
   message: [message]
   repo:
     github: <repository url>,[branch]
     gitcafe: <repository url>,[branch]
+
 ```
+
 
 请注意每一个冒号后面的空格，如果丢失会导致yml文件读取错误。
 

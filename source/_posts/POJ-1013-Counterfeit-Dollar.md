@@ -15,7 +15,9 @@ http://poj.org/problem?id=1013
 <!-- more -->
 
 # 代码
-```#include <iostream>
+
+```
+#include <iostream>
 #include <stdlib.h>
 using namespace std;
 
@@ -27,51 +29,51 @@ int main()
 	{
 		char left[3][6],right[3][6],status[3][6];
 
-		int time['L'+1]={0};  
-		bool zero['L'+1]={false};  
+		int time['L'+1]={0};
+		bool zero['L'+1]={false};
 
 		for(int k=0;k<3;k++)
-			cin>>left[k]>>right[k]>>status[k];	
+			cin>>left[k]>>right[k]>>status[k];
 
 		for(int i=0;i<3;i++)
 		{
-			switch(status[i][0])  
+			switch(status[i][0])
 			{
-			    case 'u':    
+			    case 'u':
 					{
 						for(int j=0;left[i][j];j++)
 						{
-							time[ left[i][j] ]++;  
-							time[ right[i][j] ]--;  
+							time[ left[i][j] ]++;
+							time[ right[i][j] ]--;
 						}
 						break;
 					}
-				case 'd':    
+				case 'd':
 					{
 						for(int j=0;left[i][j];j++)
 						{
-							time[ left[i][j] ]--;  
-							time[ right[i][j] ]++;  
+							time[ left[i][j] ]--;
+							time[ right[i][j] ]++;
 						}
 						break;
 					}
-				case 'e':     
+				case 'e':
 					{
 						for(int j=0;left[i][j];j++)
 						{
-							zero[ left[i][j] ]=true;   
-							zero[ right[i][j] ]=true;  
+							zero[ left[i][j] ]=true;
+							zero[ right[i][j] ]=true;
 						}
 						break;
 					}
 			}
 		}
 
-		int max=-1;  
+		int max=-1;
 		char alpha;
 		for(int j='A';j<='L';j++)
 		{
-			if(zero[j])  
+			if(zero[j])
 				continue;
 
 			if(max<=abs(time[j]))
@@ -89,6 +91,8 @@ int main()
 	}
 	return 0;
 }
+
 ```
+
 # 更新日志
 2014年07月10日 已AC(C++下通过，G++下WA)，准备择日修复。

@@ -15,7 +15,9 @@ toc: true
 
 具体写这个异常的时候，还是遇到了一点问题= =，回头去看了下视频。
 
-```cpp
+
+```
+cpp
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
@@ -62,6 +64,8 @@ int main() {
         cout << e.what() << endl;
     }
 }
+
 ```
+
 # 更新日志
 - 2015年07月13日 总算完成了= =

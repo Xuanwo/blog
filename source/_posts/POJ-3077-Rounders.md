@@ -15,7 +15,9 @@ http://poj.org/problem?id=3077
 <!-- more -->
 
 # 代码
-```import java.math.BigInteger;
+
+```
+import java.math.BigInteger;
 import java.util.*;
 
 public class Main {
@@ -35,6 +37,8 @@ public class Main {
         return;
     }
 }
+
 ```
+
 # 更新日志
 - 2014年08月22日 已AC。

@@ -16,7 +16,9 @@ int不够，long long超时，使用unsigned int过了= =，感谢大神，坑�
 <!-- more -->
 
 # 代码
-```#include <iostream>
+
+```
+#include <iostream>
 #include <cstdio>
 using namespace std;
 
@@ -34,6 +36,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-```	
+
+```
+
 # 更新日志
 - 2014年08月12日 已AC。

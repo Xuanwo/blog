@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 模拟]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/contest/9/problem/A
@@ -16,7 +16,9 @@ http://codeforces.com/contest/9/problem/A
 <!-- more -->
 
 # 代码
+
 ```
+
 int m,n;
 
 int main(int argc, char const *argv[])
@@ -53,6 +55,8 @@ int main(int argc, char const *argv[])
     }
 }
 
+
 ```
+
 # 更新日志
 - 2014年11月13日 已AC。

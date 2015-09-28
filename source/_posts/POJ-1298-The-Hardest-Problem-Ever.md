@@ -15,7 +15,9 @@ http://poj.org/problem?id=1298
 <!-- more -->
 
 # 代码
-```#include <stdio.h>
+
+```
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 int main()
@@ -45,6 +47,8 @@ int main()
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年07月23日 已AC。

@@ -15,7 +15,9 @@ http://poj.org/problem?id=1218
 <!-- more -->
 
 # 代码
-```#include <iostream>
+
+```
+#include <iostream>
 #include <cmath>
 using namespace std;
 
@@ -31,6 +33,8 @@ int main()
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年07月22日 已AC，有待证明。

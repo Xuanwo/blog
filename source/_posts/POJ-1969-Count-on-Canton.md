@@ -15,7 +15,9 @@ http://poj.org/problem?id=1969
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -85,6 +87,8 @@ int main(int argc, char const *argv[])
         cout << "TERM " << num << " IS " << a << "/" << b << endl;
     }
 }
-```	
+
+```
+
 # 更新日志
 - 2014年08月15日 已AC。

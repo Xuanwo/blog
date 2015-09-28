@@ -18,7 +18,9 @@ http://poj.org/problem?id=1045
 特殊值带入求未知量
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <iostream>
 #include <cmath>
@@ -37,6 +39,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年07月日 已AC，C++。

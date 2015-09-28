@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, DP]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/13/C
@@ -20,7 +20,9 @@ http://codeforces.com/problemset/problem/13/C
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 5000+10
 
 ll n;
@@ -58,6 +60,8 @@ int main(int argc, char const *argv[])
     printf("%I64d\n", dp[n-1]);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月21日 已AC。

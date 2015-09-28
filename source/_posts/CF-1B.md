@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 模拟]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/contest/1/problem/B
@@ -20,7 +20,9 @@ http://codeforces.com/contest/1/problem/B
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -148,6 +150,8 @@ R98C688
 
 **/
 
+
 ```
+
 # 更新日志
 - 2014年10月21日 已AC。

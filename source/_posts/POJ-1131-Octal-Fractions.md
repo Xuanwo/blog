@@ -15,7 +15,9 @@ http://poj.org/problem?id=1131
 <!-- more -->
 
 # 代码
-```import java.math.BigDecimal;
+
+```
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Scanner;
 
@@ -41,6 +43,8 @@ public class Main {
         cin.close();
     }
 }
+
 ```
+
 # 更新日志
 - 2014年07月18日 已AC。

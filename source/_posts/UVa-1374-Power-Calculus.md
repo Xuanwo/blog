@@ -4,7 +4,7 @@ tags: [ACM, UVa, C, DFS]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=512&page=show_problem&problem=4120
@@ -19,7 +19,9 @@ http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=51
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -101,6 +103,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月2日 已AC。

@@ -49,20 +49,30 @@ toc: true
 
 ## 硬盘空间
 `Bash`中输入命令`df`查看磁盘空间，结果如下
-```Size  Used Avail  Use%
+
+```
+Size  Used Avail  Use%
 1.5G  165M  1.2G   13%
-```C9真心厚道，每个人给了1.5G的空间，已经够用了。
+
+```
+C9真心厚道，每个人给了1.5G的空间，已经够用了。
 >
 偷偷的曝光一件我做的不地道的事情，我单开了一个叫做test的workplace，输入命令
-```sudo apt-get update
+
+```
+sudo apt-get update
 sudo apt-get install ubuntu-desktop
-```经过漫长的等待之后- -，果然，空间不足了，哈哈哈。
+
+```
+经过漫长的等待之后- -，果然，空间不足了，哈哈哈。
 其实我蛮好奇要是安装成功了会是什么样的，难道真的会有一个桌面跳出来？
 我可以再试试别的轻量一点的桌面，恩。
 
 ## CPU配置
 `Bash`中输入命令`cat /proc/cpuinfo`查看CPU配置,结果如下
-```processor       : 0  //核心数从0到7，其他的全都一样
+
+```
+processor       : 0  //核心数从0到7，其他的全都一样
 vendor_id       : GenuineIntel
 cpu family      : 6
 model           : 45
@@ -87,17 +97,23 @@ clflush size    : 64
 cache_alignment : 64
 address sizes   : 46 bits physical, 48 bits virtual
 power management:
-```我了个擦，着实有点羡慕，八核的至强处理器。不过我猜应该是亚马逊或者Google的云服务器吧，而且我在用的时候没觉得有多快啊= =。
+
+```
+我了个擦，着实有点羡慕，八核的至强处理器。不过我猜应该是亚马逊或者Google的云服务器吧，而且我在用的时候没觉得有多快啊= =。
 
 
 ## 系统版本
 `Bash`中输入命令`sudo lsb_release -a`查看系统版本,结果如下
-```No LSB modules are available.
+
+```
+No LSB modules are available.
 Distributor ID: Ubuntu
 Description:    Ubuntu 14.04 LTS
 Release:        14.04
 Codename:       trusty
-```果然是最新版，不知道会不会同步更新，应该是不带桌面的server版本。
+
+```
+果然是最新版，不知道会不会同步更新，应该是不带桌面的server版本。
 
 ---
 

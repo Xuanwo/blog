@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, SPFA]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/20/C
@@ -15,7 +15,9 @@ http://codeforces.com/problemset/problem/20/C
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 100000*4+10
 
 const ll maxd = 1E13;
@@ -102,6 +104,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月26日 已AC。

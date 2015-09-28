@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 树状数组]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/contest/12/problem/D
@@ -18,7 +18,9 @@ http://codeforces.com/contest/12/problem/D
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 500000+10
 
 int c[MAXN],n,cnt;
@@ -115,6 +117,8 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月21日 已AC。

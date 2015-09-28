@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, DP, 字符串]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/7/D
@@ -13,13 +13,15 @@ http://codeforces.com/problemset/problem/7/D
 被引入的新概念吓到了= =，其实这道题就是一个求最大回文串的问题。
 不过按照这个数据量，每一次都进行strcmp肯定不现实，所以我们需要一个好的字符串hash（的板子）。预处理之后，分别计算前缀和后缀的hash值。如果hash值相等，说明前缀和后缀相同，它们的度数就是长度/2再加上一。然后结果就是度数的和。
 
-> 
+>
 字符串hash的时候那个素数开大一点比较好，不用去处理hash冲突，23333。
 
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 5000000+10
 #define MOD  1000000007
 #define BIG  10000009
@@ -74,6 +76,8 @@ int main(int argc, char const *argv[])
     cout<<ans<<endl;
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月16日 已AC。

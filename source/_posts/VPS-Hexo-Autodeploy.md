@@ -15,20 +15,28 @@ toc: true
 ## 安装Nginx
 
 使用apt-get程序来安装nginx
+
 ```
+
 apt-get update
 apt-get install nginx
+
 ```
+
 在浏览器中访问http://your-ip-address or domain/， 如果看到`Welcome to nginx!`字样，说明Nginx已经安装成功了。
 
 ## 配置Nginx
 
 修改`/etc/nginx/sites-available/default`文件，在`serve`的框里面的空行中输入：
+
 ```
+
 location /update {
 proxy_pass http://127.0.0.1:1111;
 }
+
 ```
+
 这样设置之后`http://your-ip-address or domain/update`访问就会被重定向到1111端口。
 
 ## 重启Nginx
@@ -59,12 +67,18 @@ proxy_pass http://127.0.0.1:1111;
 ## 编辑Python文件
 
 输入：
+
 ```
+
 cd ~/yourdir
 vi hook.py
+
 ```
+
 在打开的vim界面中，点击一下`i`，进入insert模式，然后粘贴以下代码：
+
 ```
+
 #!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 # start a python service and watch the nginx request dog
@@ -132,7 +146,9 @@ if __name__ == '__main__':
     logging.info('starting the server at 127.0.0.1:%s',port)
     httpd = HTTPServer(('127.0.0.1',port),HttpHandler)
     httpd.serve_forever()
+
 ```
+
 编辑完成后，输入`:wq`退出vi。
 
 # 编辑sh文件
@@ -140,7 +156,9 @@ if __name__ == '__main__':
 切换到yourdir，然后输入：
 `vi build.sh`
 在打开的vi界面中，点击`i`进入编辑模式，然后输入：
+
 ```
+
 #!/bin/bash
 echo "build at `date`"
 . ~/.nvm/nvm.sh
@@ -150,7 +168,9 @@ git pull
 hexo clean
 hexo d -g
 echo "built successfully"
+
 ```
+
 编辑完成后，输入`:wq`退出vi。
 
 # 后台运行Python脚本进行监视

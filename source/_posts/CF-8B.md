@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 暴力]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/problemset/problem/8/B
@@ -20,7 +20,9 @@ http://codeforces.com/problemset/problem/8/B
 <!-- more -->
 
 # 代码
+
 ```
+
 #define MAXN 100+10
 
 char road[MAXN];
@@ -93,6 +95,8 @@ int main(int argc, char const *argv[])
     else printf("BUG\n");
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年11月16日 已AC。

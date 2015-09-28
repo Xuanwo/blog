@@ -23,7 +23,7 @@ https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_
 
 ### 介绍
 下面请允许我引用维基百科上对于该算法的介绍：
-> 
+>
 如果有限状态机、迭代函数或者链表上存在环，那么在某个环上以不同速度前进的2个指针必定会在某个时刻相遇。同时显然地，如果从同一个起点(即使这个起点不在某个环上)同时开始以不同速度前进的2个指针最终相遇，那么可以判定存在一个环，且可以求出2者相遇处所在的环的起点与长度。
 
 ### 实现
@@ -40,7 +40,9 @@ https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_
 为了求出环C的起点，只要令h仍均位于节点M，而令t返回起点节点S。随后，同时让t和h往前推进，且保持二者的速度相同：t每前进1步，h前进1步。持续该过程直至t与h再一次相遇，设此次相遇时位于同一节点P，则节点P即为从节点S出发所到达的环C的第一个节点，即环C的一个起点。
 
 ### 伪代码
-```t := &S
+
+```
+t := &S
 h := &S                 //令指针t和h均指向起点节点S。
 repeat
   t := t->next
@@ -59,7 +61,9 @@ if h != NULL            //如果存在环的话
          t := t->next
          h := h->next
    P := *t
+
 ```
+
 ### 本题应用
 具体到本题中，我只需要将输入的数据分别存入两个数组a和b，然后让a每次操作一次，让b每次操作两次。这样就使得a和b有了不一样的速度，然后每次都进行判断，根据前面讲解的算法，只要a和b相等，那就意味着这个数组一定是循环的。然后再处理一下均为0的情况，这道题的Floyd判圈算法的版本就出来了。
 
@@ -68,7 +72,9 @@ if h != NULL            //如果存在环的话
 
 # 代码
 ## 暴力算法
-```const int maxn = 100;
+
+```
+const int maxn = 100;
 
 int t,n,a[maxn],b[maxn];
 
@@ -122,9 +128,13 @@ int main()
         else printf("ZERO\n");
     }
 }
+
 ```
+
 ## Floyd判圈算法
-```const int maxn = 100;
+
+```
+const int maxn = 100;
 int t,n,a[maxn];
 int b[maxn],c[maxn]= {0};
 
@@ -184,6 +194,8 @@ int main()
         else printf("ZERO\n");
     }
 }
+
 ```
+
 # 更新日志
 - 2015年08月16日 本题已经用两种方法AC

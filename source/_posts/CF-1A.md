@@ -4,7 +4,7 @@ tags: [ACM, Codeforces, C, 水题]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codeforces.com/contest/1/problem/A
@@ -15,7 +15,9 @@ http://codeforces.com/contest/1/problem/A
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -58,6 +60,8 @@ int main(int argc, char const *argv[])
     printf("%I64d", x * y);
     return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年10月14日 已AC。

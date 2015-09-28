@@ -4,7 +4,7 @@ tags: [ACM, CodeVS, C, 模拟, 水题]
 categories: Exercise
 toc: true
 ---
-# 题目	
+# 题目
 源地址：
 
 http://codevs.cn/problem/1501/
@@ -15,7 +15,9 @@ http://codevs.cn/problem/1501/
 <!-- more -->
 
 # 代码
+
 ```
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -69,6 +71,8 @@ int main(void)
 	printf("%d %d",y,x);
 	return 0;
 }
+
 ```
+
 # 更新日志
 - 2014年10月31日 已AC。
