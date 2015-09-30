@@ -16,8 +16,7 @@ toc: true
 多态的话，平时敲代码也经常有用到，所以并没有折腾很久。倒是虚数的四则运算还推了一会儿- -，计算基础真的已经弱成渣了。。
 
 
-```
-cpp
+```cpp
 #include <cstdio>
 #include <cstring>
 #include <iostream>
@@ -87,8 +86,7 @@ int main() {
 这道题也没有什么难度，补全两个函数即可。虽说用到了虚函数这种自己并不是很懂的概念，但是撸代码重在胆大心细，跟着直觉走，直接上。
 
 
-```
-cpp
+```cpp
 #include <iostream>
 using namespace std;
 
@@ -149,8 +147,7 @@ dynamic_cast < new_type > ( expression )
 *纯经验推断= =，如果理解有错，请千万指出*
 
 
-```
-cpp
+```cpp
 /*students please write your program here*/
 #include <cstdio>
 #include <cstring>

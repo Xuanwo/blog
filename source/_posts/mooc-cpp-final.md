@@ -17,8 +17,7 @@ toc: true
 并不难，先预处理之后，再头尾进行比较即可。实际敲的时候，没有考虑到空格- -，WA了很久。
 
 
-```
-cpp
+```cpp
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -88,8 +87,7 @@ int main(int argc, char const *argv[])
 这是一道陈题，用到了`dynamic_cast`。判断出图形的类别，计算面积就很容易了~
 
 
-```
-cpp
+```cpp
 #include <cstdio>
 #include <iostream>
 #include <cmath>
@@ -197,8 +195,7 @@ int main() {
 额- -，这个我做的比较脏，并没有用模板函数的做法。（虽然后来发现是自己的scanf没有处理好，不过并不打算改了，就这样吧。。）
 
 
-```
-cpp
+```cpp
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -252,8 +249,7 @@ int main(int argc, char const *argv[])
 做这道题的时候- -，距离截止还有2分钟，所以再一次脏了起来。。对不起老师= =
 
 
-```
-cpp
+```cpp
 #include <iostream>
 using namespace std;
 

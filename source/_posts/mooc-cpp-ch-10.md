@@ -16,8 +16,7 @@ toc: true
 很简单的题，用map直接搞定。
 
 
-```
-cpp
+```cpp
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -63,8 +62,7 @@ int main(int argc, char const *argv[])
 这道题涨的姿势有点多，学到了很多原来没有用到过的函数，以后再也不用手写去重啦~
 
 
-```
-cpp
+```cpp
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -122,8 +120,7 @@ int main(int argc, char const *argv[])
 我觉得我的实现并不是老师的意图，这样写有点蠢= =，感觉运行效率并没有提高。
 
 
-```
-cpp
+```cpp
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

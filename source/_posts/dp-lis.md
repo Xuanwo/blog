@@ -14,8 +14,7 @@ toc: true
 如果写成递推公式，我们可以得到`dp[i]=max(dp[j](0<=j<i))+(a[i]>a[j]?1:0)`。
 于是我们就能够得到O(n^2)的动态规划方法的实现：
 
-```
-cpp
+```cpp
 const int MAXN = 1010;
 int n;
 int a[MAXN];
@@ -55,8 +54,7 @@ int lis()
 在这里我们使用[lower_bound函数](http://www.cplusplus.com/reference/algorithm/lower_bound/?kw=lower_bound)，这个函数将会返回小于等于val的第一个值的指针，如果不存在就返回end指针。
 
 
-```
-cpp
+```cpp
 const int MAXN = 1010;
 int n;
 int a[MAXN];

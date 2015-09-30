@@ -16,8 +16,7 @@ toc: true
 这道题做了很久，甚至还拿去问了队友，都没有满意的答案。一怒之下，还是用了各种string来完成。
 
 
-```
-cpp
+```cpp
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -60,8 +59,7 @@ int main(void)
 这道题并不是很难，只需要重载输入输出和小于即可。
 
 
-```
-cpp
+```cpp
 #include <iostream>
 #include <vector>
 #include <string>

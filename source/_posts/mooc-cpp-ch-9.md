@@ -17,8 +17,7 @@ toc: true
 很简单的一个题，只要对模板有最基本的了解就可以完成。
 
 
-```
-cpp
+```cpp
 #include <iostream>
 using namespace std;
 
@@ -56,8 +55,7 @@ int main()
 用模板实现一下折半查找= =，坑点是要求输出查找序号。
 
 
-```
-cpp
+```cpp
 #include <iostream>
 using namespace std;
 
@@ -105,8 +103,7 @@ int main()
 题意就这么简单= =。首先实现一个栈的模板类，然后解决一下括号匹配的问题。
 
 
-```
-cpp
+```cpp
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
