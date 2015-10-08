@@ -40,7 +40,7 @@ toc: true
 
 - Xshell
 - Xftp
-- Listary
+- [Listary](https://xuanwo.org/2015/07/28/listary/)
 
 ### 办公
 
@@ -69,7 +69,7 @@ toc: true
 ### 编程
 
 - Code::Blocks
-- Sublime Text 3
+- [Sublime Text 3](https://xuanwo.org/2014/06/05/sublime-text-3-IDE/)
 - Microsoft Visual Studio
 - JetBrains CLion
 - JetBrains PyCharm
