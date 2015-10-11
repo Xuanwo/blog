@@ -151,12 +151,15 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 到目前为止，Hexo在本地的配置已经全都结束了。
 
 # 使用Hexo
+
+> 在配置过程中请使用[yamllint](http://www.yamllint.com/)来保证自己的yaml语法正确
+
 ## 修改全局配置文件
 *此段落引用自[Hexo官方文档](http://hexo.io/zh-cn/docs/configuration.html)*
 
 您可以在 `_config.yml` 中修改大部份的配置。
 
-## 网站
+### 网站
 
 参数 | 描述
 --- | ---
@@ -167,7 +170,7 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 `language` | 网站使用的语言
 `timezone` | 网站时区。Hexo 预设使用您电脑的时区。[时区列表](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
 
-## 网址
+### 网址
 
 参数 | 描述 | 默认值
 --- | --- | ---
@@ -178,7 +181,7 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 
 > 如果您的网站存放在子目录中，例如 `http://yoursite.com/blog`，则请将您的 `url` 设为 `http://yoursite.com/blog` 并把 `root` 设为 `/blog/`。
 
-## 目录
+### 目录
 
 参数 | 描述 | 默认值
 --- | --- | ---
@@ -191,7 +194,7 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 `i18n_dir` | 国际化（i18n）文件夹 | :lang
 `skip_render` | 跳过指定文件的渲染，您可使用 glob 来配置路径。 |
 
-## 文章
+### 文章
 
 参数 | 描述 | 默认值
 --- | --- | ---
@@ -207,7 +210,7 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 `future` | 显示未来的文章 | true
 `highlight` | 代码块的设置 |
 
-## 分类 & 标签
+### 分类 & 标签
 
 参数 | 描述 | 默认值
 --- | --- | ---
@@ -215,7 +218,7 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 `category_map` | 分类别名 |
 `tag_map` | 标签别名 |
 
-## 日期 / 时间格式
+### 日期 / 时间格式
 
 Hexo 使用 [Moment.js](http://momentjs.com/) 来解析和显示时间。
 
@@ -224,14 +227,14 @@ Hexo 使用 [Moment.js](http://momentjs.com/) 来解析和显示时间。
 `date_format` | 日期格式 | MMM D YYYY
 `time_format` | 时间格式 | H:mm:ss
 
-## 分页
+### 分页
 
 参数 | 描述 | 默认值
 --- | --- | ---
 `per_page` | 每页显示的文章量 (0 = 关闭分页功能) | 10
 `pagination_dir` | 分页目录 | page
 
-## 扩展
+### 扩展
 
 参数 | 描述
 --- | ---
@@ -256,6 +259,9 @@ deploy:
   branch: master
 
 ```
+
+> 如果使用git方式进行部署，执行`npm install hexo-deployer-git --save`来安装所需的插件
+
 然后在当前目录打开命令行，输入：
 
 ```
@@ -281,6 +287,7 @@ toc: true  //在此处设定是否开启目录，需要主题支持。
 
 # 进阶
 如果成功完成了上述的全部步骤，恭喜你，你已经搭建了一个最为简单且基础的博客。但是这个博客还非常简单， 没有个人的定制，操作也比较复杂，下面的进阶技巧将会让你获得对Hexo更为深入的了解。
+
 ## 更换主题
 *可以在[此处](https://github.com/hexojs/hexo/wiki/Themes)寻找自己喜欢的主题*
 下载所有的主题文件，保存到Hexo目录下的`themes`文件夹下。然后在`_config.yml`文件中修改：
@@ -324,3 +331,4 @@ f1g1ns2.dnspod.net
 - 2015年03月31日 添加了CNAME的相关内容。
 - 2015年04月30日 修复了错误的git命令。
 - 2015年06月11日 更新了`.config_yml`配置
+- 2015年10月12日 完善了Deployment部分操作，添加了yaml语法检测网址
