@@ -19,7 +19,7 @@ toc: true
 # 搭建
 > 以Hostinger为例
 
-- 下载[7ghost程序](https://drive.google.com/file/d/0B9QMnnRkfvWjMnhVdDVsb21qazA/view?usp=sharing)
+- 下载7ghost程序[(墙外，推荐)](https://drive.google.com/file/d/0B9QMnnRkfvWjMnhVdDVsb21qazA/view?usp=sharing)&[(墙内，密码b5te)](http://pan.baidu.com/s/1mgGkEYc)
 - FTP上传至指定目录
 - 使用域名进行访问
 
