@@ -101,6 +101,17 @@
     </div>
 
     <div class="post-footer">
+      {% if not is_index %}
+        <div class="copyright">
+           <p><span>本文标题:</span><a href="{{ url_for(post.path) }}">{{ post.title }}</a></p>
+           <p><span>文章作者:</span><a href="/" title="访问 {{ theme.author }} 的个人博客">{{ theme.author }}</a></p>
+           <p><span>发布时间:</span>{{ post.date.format("YYYY年M月D日 - HH时MM分") }}</p>
+           <p><span>最后更新:</span>{{ post.updated.format("YYYY年M月D日 - HH时MM分") }}</p>
+           <p><span>原始链接:</span><a href="{{ url_for(post.path) }}" title="{{ post.title }}">{{ post.permalink }}</a></p>
+           <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">"Attribution-NonCommercial 4.0"</a></p>
+           <p><span>转载请保留以上信息。</span></p>
+        </div>
+      {% endif %}
       {% if post.tags and post.tags.length and not is_index %}
         <div class="post-tags">
           {% for tag in post.tags %}
@@ -108,7 +119,6 @@
           {% endfor %}
         </div>
       {% endif %}
-
       {% if not is_index and (post.prev or post.next) %}
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
