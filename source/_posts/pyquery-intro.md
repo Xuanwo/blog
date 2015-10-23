@@ -4,11 +4,13 @@ tags: [Software, Python, HTML]
 categories: Opinion
 toc: true
 ---
-# pyquery介绍
+# pyQuery介绍
+
+pyquery 可以让你用jquery语法来对xml进行查询。这个API和jquery十分类似。如果利用lxml，pyquery对xml和html的操作将更加快速。
 
 <!-- more -->
 
-# pyquery安装
+# pyQuery安装
 > 首先，你得有一个python环境，最好是类linux的，因为安装pyquery的过程中需要编译某一个包，在windows上比较难解决依赖问题
 
 ## 安装Python环境
@@ -21,7 +23,7 @@ sudo apt-get install python python-dev python-pip
 - `python-dev` 安装python开发环境
 - `python-pip` 安装pip来进行python包管理
 
-## 解决pyquery所需依赖
+## 解决pyQuery所需依赖
 
 ```
 sudo apt-get install libxml2-dev libxslt1-dev libz-dev
@@ -30,7 +32,7 @@ sudo apt-get install libxml2-dev libxslt1-dev libz-dev
 - `libxml2-dev`和`libxslt1-dev`是编译lxml所需要的包，缺少会导致编译失败
 - 某些情况下会提示`/usr/bin/ld: cannot find -lz`，所以需要安装`libz-dev`
 
-## 安装pyquery
+## 安装pyQuery
 
 ```
 pip install pyquery
@@ -39,7 +41,7 @@ pip install pyquery
 解决了依赖问题之后，就可以进行pyquery的安装了。
 > 有一个坑点是在虚拟机编译lxml的过程中，如果内存过小会导致编译失败。如果出现错误，请把虚拟机的内存调整至1024M或更大。
 
-# pyquery使用
+# pyQuery使用
 
 ## 最简样例
 
