@@ -12,7 +12,7 @@ toc: true
 # 需要准备的东西
 - [VMware 11.1.1](http://pan.baidu.com/s/1mgAazK8)
 - [Unlocker](http://pan.baidu.com/s/1i3nLNXr)
-- [OS X 10.10 懒人包镜像](http://pan.baidu.com/s/1eQzxrge)
+- [OS X 10.10 懒人包镜像](http://pan.baidu.com/s/1p1F0i)
 
 # 配置VMware
 ## 安装并激活VMware
