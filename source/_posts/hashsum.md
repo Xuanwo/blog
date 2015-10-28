@@ -26,7 +26,9 @@ toc: true
 
 ## Web
 
-<embed src="//xuanwo.org/hashcalc" />
+[hashcalc](https://xuanwo.org/hashcalc)
+
+*基于[HTML5HASH](https://github.com/hacst/HTML5HASH)修改而来，感谢[Stefan Hacker](http://hacst.net/)*
 
 ## Windows
 
