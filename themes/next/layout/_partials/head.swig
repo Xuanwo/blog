@@ -1,9 +1,3 @@
-<script type="text/javascript">
-    var host = "xuanwo.org";
-    if ((host == window.location.host) && (window.location.protocol != "https:"))
-        window.location.protocol = "https";
-</script>
-
 {% if theme.fancybox %}
   <link rel="stylesheet" type="text/css" href="{{ url_for(theme.vendors) }}/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
 {% endif %}
