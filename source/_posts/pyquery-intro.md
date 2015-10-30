@@ -1,7 +1,7 @@
 title: 使用pyQuery解析HTML
 date: 2015-10-23 01:03:09
 tags: [Software, Python, HTML]
-categories: Opinion
+categories: Develop
 toc: true
 ---
 # pyQuery介绍
