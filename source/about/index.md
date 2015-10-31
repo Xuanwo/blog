@@ -12,7 +12,8 @@ layout: "post"
 # 奖项
 - 幼儿园时多次获得小红花
 - 第六届[蓝桥杯](http://www.lanqiao.org/)北京赛区二等奖
-- 第一届[中国大学生程序设计竞赛](http://ccpc.io/)铜奖
+- 第一届[CCPC](http://ccpc.io/)铜奖
+- 第三十届[ACM/ICPC](https://icpc.baylor.edu/)沈阳站铜奖
 
 # 兴趣
 - 动漫（偏治愈向，喜欢AB，CL，那朵花，言叶之庭等作。）
