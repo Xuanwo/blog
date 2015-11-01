@@ -7,18 +7,29 @@ toc: true
 # 前言
 最近在电脑上配置了VMware，想要搭建一个Mac OS X的虚拟机以供体验。不过网上的资料过于老旧，版本更新不及时，导致我在配置的过程中遇到了无数的坑，折腾了一个晚上才配置成功。事后我总结了相关的经验和实践完成了这份教程，希望能够对大家有所益处~
 
+> Update:
+> 因为要用到[Vagrant]()，所以又捣鼓了一番在VitualBox上安装Mac OS X，同样踩了不少坑，相关的总结如下。
+
 <!-- more -->
 
 # 需要准备的东西
+
+## 基于Vmware
 - [VMware 11.1.1](http://pan.baidu.com/s/1mgAazK8)
 - [Unlocker](http://pan.baidu.com/s/1i3nLNXr)
 - [OS X 10.10 懒人包镜像](http://xuanwo.qiniudn.com/Soft/Yosemite%20Install(14A389).cdr)
 
-# 配置VMware
-## 安装并激活VMware
+## 基于VitualBox
+- [VitualBox]()
+- [OS X 10.10 懒人包镜像](http://xuanwo.qiniudn.com/Soft/Yosemite%20Install(14A389).cdr)
+
+# 虚拟机环境配置
+
+## 配置VMware
+### 安装并激活VMware
 首先自然是安装好VMware，然后是一串奇怪的字符序列：`1F04Z-6D111-7Z029-AV0Q4-3AEH8`，我也不知道怎么用（>.<）。
 
-## 使用Unlocker解锁VMware
+### 使用Unlocker解锁VMware
 >
 VMware Workstation并不支持Mac OS X的安装，只有VMware Fusion（也就是Mac平台上的VMware）才支持。于是有大神推出了这个解锁补丁，安装好这个补丁之后，VMware便可以支持OS X 的虚拟机安装。
 
@@ -28,42 +39,58 @@ VMware Workstation并不支持Mac OS X的安装，只有VMware Fusion（也就�
 这时候再打开VMware，你将会看到`Apple Mac OX X`的字样，说明你已经成功解锁了Mac OS X的安装功能。
 ![可以选择Apple Mac OS X了](/imgs/opinion/vmware-apple-appear.png)
 
-# 配置Mac OS X虚拟机
+## 基于Vmware配置Mac OS X虚拟机
 
-## 启动新建虚拟机向导
+### 启动新建虚拟机向导
 没啥好说的，选择`典型`。
 ![配置类型选择](/imgs/opinion/vmware-apple-1.png)
 
-## 安装客户机操作系统
+### 安装客户机操作系统
 因为我们还需要一些特别的配置，所以这里我们选择`稍后安装操作系统`。
 ![安装客户机操作系统](/imgs/opinion/vmware-apple-2.png)
 
-## 选择客户机操作系统
+### 选择客户机操作系统
 这里我们选择`Apple Mac OS X`，版本就选择最新的`OS X 10.10`，其实这个版本对我们的安装没啥大的影响，主要是涉及到一些硬件兼容性的问题，无须在意。
 ![选择客户机操作系统](/imgs/opinion/vmware-apple-3.png)
 
-## 命名虚拟机
+### 命名虚拟机
 在这里我们需要设定虚拟机的名称以及位置，这里就按照自己的喜好设定吧。
 ![命名虚拟机](/imgs/opinion/vmware-apple-4.png)
 
-## 指定磁盘容量
+### 指定磁盘容量
 这里我们需要指定Mac虚拟机最大占用的空间大小，VMware推荐的是40G，如果空间够的话，可以设置的更大一些。然后下面的设置可以根据自己的喜好来，如果对性能比较注重，可以使用存储为单个文件的方式。
 ![指定磁盘容量](/imgs/opinion/vmware-apple-5.png)
 
-## 开始创建虚拟机
+### 开始创建虚拟机
 到这里，Mac虚拟机的一些简单设置就已经全部完成了，点击完成，我们进入到下一个阶段。
 ![开始创建虚拟机](/imgs/opinion/vmware-apple-6.png)
 
-# 虚拟机故障排除
-## 选择cdr镜像
+## 虚拟机故障排除
+### 选择cdr镜像
 在新弹出的页面中选择`编辑虚拟机设置`，然后点击`CD/DVD(SATA)`
 ![虚拟机设置](/imgs/opinion/vmware-error-1.png)
 选择`浏览`，在弹出的`浏览ISO映像`中，点击右下角的`CD-ROM 映像(.iso)`，切换成`所有文件`，然后就可以正常打开我们的cdr镜像了。
 ![切换所有文件](/imgs/opinion/vmware-error-2.png)
 
-## 修复无法正常引导
+### 修复无法正常引导
 即使前面的操作全部正确，我们依然无法正常启动我们的虚拟机。为了可以正常引导，我们还需要修改我们虚拟机的vmx文件。
 进入我们之前设定的虚拟机位置，在文件夹中可以找到`xxxxx.vmx`这样的文件，右击选择打开方式，使用记事本打开。在`smc.present = "TRUE"`后面添加`smc.version = 0`，保存之后退出，便可以解决。
+
+## 配置VitualBox
+
+### 安装VitualBox
+安装没有什么坑点，一路Next即可
+
+### Hack一下VitualBox
+VitualBox原生支持Mac OS X的安装，但是只有在系统环境为Mac的环境下，才能正常引导，因为在非Mac环境下，安装程序会检测出我们的CPU不是已经识别的型号，从而拒绝进一步的安装。为此，我们需要执行以下命令来Hack：
+
+```bash
+VBoxManage setextradata "yourvboxname" "VBoxInternal/Devices/smc/0/Config/DeviceKey" "ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc"
+```
+
+*如果VBoxManage没有被加入PATH的话，可能会提示VBoxManage不是可执行的命令。只需要进入VitualBox的安装目录下`Shift+右键`在当前目录打开命令行执行即可~*
+
+原理非常简单：利用VBox的命令行工具在虚拟机的DeviceKey中加入Apple的声明即可。理论上来讲，这应该是侵犯苹果权益的行为，所以请不要用于商业行为，后果自负~
 
 # 开始安装Mac OS X
 经过如上配置之后，我们终于可以进入到Mac OS X的安装界面了~
@@ -106,3 +133,4 @@ VMware Workstation并不支持Mac OS X的安装，只有VMware Fusion（也就�
 # 更新日志
 - 2015年08月09日 初步完成教程
 - 2015年10月31日 更换懒人包下载链接，请在页面上直接点击~
+- 2015年11月02日 加入了VitualBox的相关配置
