@@ -65,14 +65,14 @@ VMware Workstation并不支持Mac OS X的安装，只有VMware Fusion（也就�
 到这里，Mac虚拟机的一些简单设置就已经全部完成了，点击完成，我们进入到下一个阶段。
 ![开始创建虚拟机](/imgs/opinion/vmware-apple-6.png)
 
-## 虚拟机故障排除
-### 选择cdr镜像
+### 虚拟机故障排除
+**选择cdr镜像**
 在新弹出的页面中选择`编辑虚拟机设置`，然后点击`CD/DVD(SATA)`
 ![虚拟机设置](/imgs/opinion/vmware-error-1.png)
 选择`浏览`，在弹出的`浏览ISO映像`中，点击右下角的`CD-ROM 映像(.iso)`，切换成`所有文件`，然后就可以正常打开我们的cdr镜像了。
 ![切换所有文件](/imgs/opinion/vmware-error-2.png)
 
-### 修复无法正常引导
+**修复无法正常引导**
 即使前面的操作全部正确，我们依然无法正常启动我们的虚拟机。为了可以正常引导，我们还需要修改我们虚拟机的vmx文件。
 进入我们之前设定的虚拟机位置，在文件夹中可以找到`xxxxx.vmx`这样的文件，右击选择打开方式，使用记事本打开。在`smc.present = "TRUE"`后面添加`smc.version = 0`，保存之后退出，便可以解决。
 
