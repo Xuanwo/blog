@@ -8,7 +8,7 @@ toc: true
 最近在电脑上配置了VMware，想要搭建一个Mac OS X的虚拟机以供体验。不过网上的资料过于老旧，版本更新不及时，导致我在配置的过程中遇到了无数的坑，折腾了一个晚上才配置成功。事后我总结了相关的经验和实践完成了这份教程，希望能够对大家有所益处~
 
 > Update:
-> 因为要用到[Vagrant]()，所以又捣鼓了一番在VitualBox上安装Mac OS X，同样踩了不少坑，相关的总结如下。
+> 因为要用到[Vagrant](https://xuanwo.org/2015/10/22/vagrant-intro/)，所以又捣鼓了一番在VirtualBox上安装Mac OS X，同样踩了不少坑，相关的总结如下。
 
 <!-- more -->
 
@@ -19,8 +19,8 @@ toc: true
 - [Unlocker](http://pan.baidu.com/s/1i3nLNXr)
 - [OS X 10.10 懒人包镜像](http://xuanwo.qiniudn.com/Soft/Yosemite%20Install(14A389).cdr)
 
-## 基于VitualBox
-- [VitualBox]()
+## 基于VirtualBox
+- [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 - [OS X 10.10 懒人包镜像](http://xuanwo.qiniudn.com/Soft/Yosemite%20Install(14A389).cdr)
 
 # 虚拟机环境配置
@@ -76,19 +76,19 @@ VMware Workstation并不支持Mac OS X的安装，只有VMware Fusion（也就�
 即使前面的操作全部正确，我们依然无法正常启动我们的虚拟机。为了可以正常引导，我们还需要修改我们虚拟机的vmx文件。
 进入我们之前设定的虚拟机位置，在文件夹中可以找到`xxxxx.vmx`这样的文件，右击选择打开方式，使用记事本打开。在`smc.present = "TRUE"`后面添加`smc.version = 0`，保存之后退出，便可以解决。
 
-## 配置VitualBox
+## 配置VirtualBox
 
-### 安装VitualBox
+### 安装VirtualBox
 安装没有什么坑点，一路Next即可
 
-### Hack一下VitualBox
-VitualBox原生支持Mac OS X的安装，但是只有在系统环境为Mac的环境下，才能正常引导，因为在非Mac环境下，安装程序会检测出我们的CPU不是已经识别的型号，从而拒绝进一步的安装。为此，我们需要执行以下命令来Hack：
+### Hack一下VirtualBox
+VirtualBox原生支持Mac OS X的安装，但是只有在系统环境为Mac的环境下，才能正常引导，因为在非Mac环境下，安装程序会检测出我们的CPU不是已经识别的型号，从而拒绝进一步的安装。为此，我们需要执行以下命令来Hack：
 
 ```bash
 VBoxManage setextradata "yourvboxname" "VBoxInternal/Devices/smc/0/Config/DeviceKey" "ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc"
 ```
 
-*如果VBoxManage没有被加入PATH的话，可能会提示VBoxManage不是可执行的命令。只需要进入VitualBox的安装目录下`Shift+右键`在当前目录打开命令行执行即可~*
+*如果VBoxManage没有被加入PATH的话，可能会提示VBoxManage不是可执行的命令。只需要进入VirtualBox的安装目录下`Shift+右键`在当前目录打开命令行执行即可~*
 
 原理非常简单：利用VBox的命令行工具在虚拟机的DeviceKey中加入Apple的声明即可。理论上来讲，这应该是侵犯苹果权益的行为，所以请不要用于商业行为，后果自负~
 
@@ -133,4 +133,4 @@ VBoxManage setextradata "yourvboxname" "VBoxInternal/Devices/smc/0/Config/Device
 # 更新日志
 - 2015年08月09日 初步完成教程
 - 2015年10月31日 更换懒人包下载链接，请在页面上直接点击~
-- 2015年11月02日 加入了VitualBox的相关配置
+- 2015年11月02日 加入了VirtualBox的相关配置
