@@ -17,11 +17,11 @@ toc: true
 ## 基于Vmware
 - [VMware 11.1.1](http://pan.baidu.com/s/1mgAazK8)
 - [Unlocker](http://pan.baidu.com/s/1i3nLNXr)
-- [OS X 10.10 懒人包镜像](http://xuanwo.qiniudn.com/Soft/Yosemite%20Install(14A389).cdr)
+- [OS X 10.10 懒人包镜像](http://xuanwo.qiniudn.com/Soft/Yosemite%20Install-14A389.cdr)
 
 ## 基于VirtualBox
 - [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-- [OS X 10.10 懒人包镜像](http://xuanwo.qiniudn.com/Soft/Yosemite%20Install(14A389).cdr)
+- [OS X 10.10 懒人包镜像](http://xuanwo.qiniudn.com/Soft/Yosemite%20Install-14A389.cdr)
 
 # 虚拟机环境配置
 
@@ -134,3 +134,4 @@ VBoxManage setextradata "yourvboxname" "VBoxInternal/Devices/smc/0/Config/Device
 - 2015年08月09日 初步完成教程
 - 2015年10月31日 更换懒人包下载链接，请在页面上直接点击~
 - 2015年11月02日 加入了VirtualBox的相关配置
+- 2015年11月03日 修复了镜像链接错误
