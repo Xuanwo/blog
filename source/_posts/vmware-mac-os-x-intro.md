@@ -32,8 +32,8 @@ toc: true
 首先自然是安装好VMware，然后是一串奇怪的字符序列：`1F04Z-6D111-7Z029-AV0Q4-3AEH8`，我也不知道怎么用（>.<）。
 
 ### 使用Unlocker解锁VMware
->
-VMware Workstation并不支持Mac OS X的安装，只有VMware Fusion（也就是Mac平台上的VMware）才支持。于是有大神推出了这个解锁补丁，安装好这个补丁之后，VMware便可以支持OS X 的虚拟机安装。
+
+> VMware Workstation并不支持Mac OS X的安装，只有VMware Fusion（也就是Mac平台上的VMware）才支持。于是有大神推出了这个解锁补丁，安装好这个补丁之后，VMware便可以支持OS X 的虚拟机安装。
 
 下载并解压Unlocker，右击使用管理员权限打开`win-install.cmd`，当任务执行完毕后，窗口会自动退出。
 ![运行Unlocker](/imgs/opinion/vmware-unlocker.png)
