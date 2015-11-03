@@ -76,6 +76,7 @@ setup(
 #### Meta-Data
 
 Meta-Data| 描述值
+--|--
 name |  包名
 version | 此次发布版本
 author  |作者名
@@ -189,7 +190,8 @@ python setup.py bdist
 默认情况下，这个命令将会创建基于自身平台的分发包。
 同样的，你也可以添加`--format=zip`参数来指定生成的文件，支持的参数见[此处](https://docs.python.org/3.5/distutils/builtdist.html)
 除此之外，也可以使用以下的命令直接生成对应格式的分发包：
-命令|合适
+
+命令|格式
 --|--
 bdist_dumb  |tar, gztar, bztar, xztar, ztar, zip
 bdist_rpm   |rpm, srpm
