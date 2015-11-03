@@ -8,6 +8,8 @@ toc: true
 用Python写过不少的脚本，现在要把脚本打包成模块并进行发布，然后才明白脚本Boy到正规的码农差距有多大= =。
 踩了很多天的坑之后，自己学习到了Python的包分发机制，以及如何利用Pypi向全世界分发自己的模。现在简单地做一些整理。
 
+<!-- more -->
+
 # Python包机制
 
 > 包是一个模块或模块/子模块的集合，一般情况下被压缩到一个压缩包中。
@@ -64,7 +66,29 @@ setup(
 )
 ```
 
-### 参数详解（Todo）
+### 参数介绍
+
+#### 指定整个包
+#### 指定单独模块
+#### 依赖关系
+#### 包内数据
+#### 其他数据
+#### Meta-Data
+
+Meta-Data| 描述值
+name |  包名
+version | 此次发布版本
+author  |作者名
+author_email  | 作者邮箱
+maintainer | 维护者名
+maintainer_email  |  维护者邮箱
+url | 主页
+description | 简要描述
+long_description  |  详细描述
+download_url  |  下载地址
+classifiers | 分类，参见[此处](https://pypi.python.org/pypi?%3Aaction=list_classifiers)
+platforms  | 平台列表
+license | 授权协议
 
 ### 典型配置
 
@@ -196,3 +220,6 @@ python setup.py sdist bdist_wininst upload
 - [10.8 读取位于包中的数据文件](http://python3-cookbook.readthedocs.org/zh_CN/latest/c10/p08_read_datafile_within_package.html)
 - [Creating a Source Distribution](https://docs.python.org/3.5/distutils/sourcedist.html)
 - [Examples](https://docs.python.org/3.5/distutils/examples.html)
+
+# 更新日志
+- 2015年11月03日 初步完成
