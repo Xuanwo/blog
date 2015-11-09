@@ -137,3 +137,4 @@ VBoxManage setextradata "yourvboxname" "VBoxInternal/Devices/smc/0/Config/Device
 - 2015年10月31日 更换懒人包下载链接，请在页面上直接点击~
 - 2015年11月02日 加入了VirtualBox的相关配置
 - 2015年11月03日 修复了镜像链接错误，新增了10.11的懒人包镜像
+- 2015年11月09日 镜像下载地址被迅雷抓取了，流量持续血崩，持续关注中
