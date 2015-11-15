@@ -15,7 +15,6 @@ toc: true
 # 需要准备的东西
 
 ## 懒人包镜像
-- [OS X 10.11 懒人包镜像 密码:2z3i](http://pan.baidu.com/s/1v8roU)
 - [OS X 10.10 懒人包镜像 密码:a5cq](http://pan.baidu.com/s/1ntkw77V)
 
 ## 基于Vmware

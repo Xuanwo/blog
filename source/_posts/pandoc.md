@@ -95,6 +95,9 @@ pandoc -f html -t markdown http://www.fsf.org
 
 *如果不使用`-f`和`-t`参数，pandoc将会根据输入文件以及`-o`指定的输出文件格式来确定转换的格式类型*
 
+# 注意事项
+
+- Pandoc不支持`.doc`格式，如果需要进行转换，则需要先将`.doc`转换为`.docx`
 
 # 引用资源
 
