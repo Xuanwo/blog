@@ -137,3 +137,4 @@ VBoxManage setextradata "yourvboxname" "VBoxInternal/Devices/smc/0/Config/Device
 - 2015年11月02日 加入了VirtualBox的相关配置
 - 2015年11月03日 修复了镜像链接错误，新增了10.11的懒人包镜像
 - 2015年11月09日 镜像下载地址被迅雷抓取了，流量持续血崩，更换为百度云
+- 2015年11月16日 据读者反馈10.11懒人包不可用，已移除
