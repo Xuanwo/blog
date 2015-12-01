@@ -432,8 +432,7 @@ skip_render:
 
 *这个命令适用于所有Node.js模块*
 
->
-少数情况下会出现Node.js版本问题，可以使用`nvm install 版本号`来安装报错信息中需要的版本。
+> 少数情况下会出现Node.js版本问题，可以使用`nvm install 版本号`来安装报错信息中需要的版本。
 
 *推荐使用nvm来管理Node.js版本*
 
