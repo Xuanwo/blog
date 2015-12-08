@@ -1,3 +1,4 @@
+---
 title: POJ 2470 Ambiguous permutations
 date: 2014-08-22 22:09:08
 tags: [ACM, POJ, C, 水题]

@@ -1,4 +1,5 @@
-﻿title: POJ 1663 Max Factor
+﻿---
+title: POJ 1663 Max Factor
 date: 2014-08-03 12:27:41
 tags: [ACM, POJ, C, 水题]
 categories: Exercise

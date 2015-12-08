@@ -1,3 +1,4 @@
+---
 title: POJ 3069 Saruman's Army
 date: 2014-08-25 09:31:30
 tags: [ACM, POJ, C, 贪心]

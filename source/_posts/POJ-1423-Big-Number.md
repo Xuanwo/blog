@@ -1,4 +1,5 @@
-﻿title: POJ 1423 Big Number
+﻿---
+title: POJ 1423 Big Number
 date: 2014-07-23 23:26:52
 tags: [ACM, POJ, Java, 高精度计算]
 categories: Exercise

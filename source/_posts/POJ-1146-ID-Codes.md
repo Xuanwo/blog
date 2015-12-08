@@ -1,4 +1,5 @@
-﻿title: POJ 1146 ID Codes
+﻿---
+title: POJ 1146 ID Codes
 date: 2014-07-22 20:52:19
 tags: [ACM, POJ, C, STL]
 categories: Exercise

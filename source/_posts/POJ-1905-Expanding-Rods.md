@@ -1,4 +1,5 @@
-﻿title: POJ 1905 Expanding Rods
+﻿---
+title: POJ 1905 Expanding Rods
 date: 2014-07-23 23:40:45
 tags: [ACM, POJ, C, 二分]
 categories: Exercise

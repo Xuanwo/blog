@@ -1,4 +1,5 @@
-﻿title: POJ 1159 Palindrome
+﻿---
+title: POJ 1159 Palindrome
 date: 2014-08-12 00:38:00
 tags: [ACM, POJ, C, DP]
 categories: Exercise

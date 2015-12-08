@@ -1,4 +1,5 @@
-﻿title: POJ 1936 All in All
+﻿---
+title: POJ 1936 All in All
 date: 2014-08-05 20:41:00
 tags: [ACM, POJ, C, 字符串]
 categories: Exercise

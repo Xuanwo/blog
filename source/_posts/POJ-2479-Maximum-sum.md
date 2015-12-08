@@ -1,3 +1,4 @@
+---
 title: POJ 2479 Maximum sum
 date: 2014-10-7 00:25:21
 tags: [ACM, POJ, C, DP]

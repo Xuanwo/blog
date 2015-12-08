@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 3 B Lorry
 date: 2014-11-7 10:18:47
 tags: [ACM, Codeforces, C, 贪心]

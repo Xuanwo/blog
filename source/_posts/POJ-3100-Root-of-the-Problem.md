@@ -1,3 +1,4 @@
+---
 title: POJ 3100 Root of the Problem
 date: 2014-08-21 18:36:21
 tags: [ACM, POJ, C, 水题]

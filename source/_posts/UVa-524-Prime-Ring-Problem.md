@@ -1,3 +1,4 @@
+---
 title: UVa 524 Prime Ring Problem
 date: 2014-11-2 13:47:34
 tags: [ACM, UVa, C, DFS]

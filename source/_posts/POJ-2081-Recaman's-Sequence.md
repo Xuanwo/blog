@@ -1,4 +1,5 @@
-﻿title: POJ 2081 Recaman's Sequence
+﻿---
+title: POJ 2081 Recaman's Sequence
 date: 2014-07-17 23:53:55
 tags: [ACM, POJ, C, 打表, 水题]
 categories: Exercise

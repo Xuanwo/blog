@@ -1,4 +1,5 @@
-﻿title: POJ 2039 To and Fro
+﻿---
+title: POJ 2039 To and Fro
 date: 2014-08-06 14:33:00
 tags: [ACM, POJ, C, 模拟]
 categories: Exercise

@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 2 A Winner
 date: 2014-10-22 15:06:04
 tags: [ACM, Codeforces, C, 模拟]

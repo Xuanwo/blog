@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 8 C Looking for Order
 date: 2014-11-19 13:11:43
 tags: [ACM, Codeforces, C, DP]

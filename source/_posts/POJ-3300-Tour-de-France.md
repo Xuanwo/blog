@@ -1,3 +1,4 @@
+---
 title: POJ 3300 Tour de France
 date: 2014-08-22 17:24:38
 tags: [ACM, POJ, C, 水题]

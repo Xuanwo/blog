@@ -1,3 +1,4 @@
+---
 title: UVa 120 Stacks of Flapjacks
 date: 2014-11-4 15:19:29
 tags: [ACM, UVa, C, STL, Deque]

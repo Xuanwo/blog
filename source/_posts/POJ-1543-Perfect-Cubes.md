@@ -1,4 +1,5 @@
-﻿title: POJ 1543 Perfect Cubes
+﻿---
+title: POJ 1543 Perfect Cubes
 date: 2014-08-03 11:36:27
 tags: [ACM, POJ, C, 水题]
 categories: Exercise

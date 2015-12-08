@@ -1,4 +1,5 @@
-﻿title: POJ 1703 Find them, Catch them
+﻿---
+title: POJ 1703 Find them, Catch them
 date: 2014-07-22 13:51:22
 tags: [ACM, POJ, C, 并查集]
 categories: Exercise

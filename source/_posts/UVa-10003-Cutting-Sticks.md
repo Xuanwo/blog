@@ -1,3 +1,4 @@
+---
 title: UVa 10003 Cutting Sticks
 date: 2014-11-16 17:12:15
 tags: [ACM, UVa, C, DP]

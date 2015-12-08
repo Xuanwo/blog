@@ -1,3 +1,4 @@
+---
 title: POJ 1050 To the Max
 date: 2014-10-7 23:41:26
 tags: [ACM, POJ, C, DP]

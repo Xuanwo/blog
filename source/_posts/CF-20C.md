@@ -1,3 +1,4 @@
+---
 title: Codeforces Alpha Round 20 C Dijkstra? (Codeforces format)
 date: 2014-11-26 13:59:18
 tags: [ACM, Codeforces, C, SPFA]

@@ -1,3 +1,4 @@
+---
 title: CF拉练第六场
 date: 2014-11-21 22:56:15
 tags: [ACM, Contest, C]

@@ -1,4 +1,5 @@
-﻿title: POJ 2017 Speed Limit
+﻿---
+title: POJ 2017 Speed Limit
 date: 2014-08-06 14:06:00
 tags: [ACM, POJ, C, 模拟]
 categories: Exercise

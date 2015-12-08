@@ -1,4 +1,5 @@
-﻿title: POJ 2028 When Can We Meet?
+﻿---
+title: POJ 2028 When Can We Meet?
 date: 2014-08-06 14:13:00
 tags: [ACM, POJ, C, 模拟]
 categories: Exercise

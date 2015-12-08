@@ -1,3 +1,4 @@
+---
 title: POJ 2109 Power of Cryptography
 date: 2014-08-22 22:32:28
 tags: [ACM, POJ, C, 水题]

@@ -1,3 +1,4 @@
+---
 title: Teambition团队协作实践
 date: 2015-7-2 19:08:55
 tags: [实习, 项目, Together, 协作]

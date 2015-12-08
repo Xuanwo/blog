@@ -1,3 +1,4 @@
+---
 title: POJ 2656 Unhappy Jinjin
 date: 2014-08-17 16:29:05
 tags: [ACM, POJ, C, 水题]

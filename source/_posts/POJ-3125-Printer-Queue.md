@@ -1,3 +1,4 @@
+---
 title: POJ 3125 Printer Queue
 date: 2014-08-21 19:43:07
 tags: [ACM, POJ, C, 模拟, Queue]

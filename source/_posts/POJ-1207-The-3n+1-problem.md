@@ -1,4 +1,5 @@
-﻿title: POJ 1207 The 3n + 1 problem
+﻿---
+title: POJ 1207 The 3n + 1 problem
 date: 2014-07-10 16:55:39
 tags: [ACM, POJ, C, 模拟, 数论]
 categories: Exercise

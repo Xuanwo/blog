@@ -1,3 +1,4 @@
+---
 title: UVa 11134 Fabled Rooks
 date: 2014-11-4 12:58:56
 tags: [ACM, UVa, C, 贪心]

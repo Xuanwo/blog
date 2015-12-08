@@ -1,3 +1,4 @@
+---
 title: POJ 3750 小孩报数问题
 date: 2014-08-21 22:26:15
 tags: [ACM, POJ, C, STL, Queue]

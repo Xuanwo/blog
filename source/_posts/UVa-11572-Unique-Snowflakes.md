@@ -1,3 +1,4 @@
+---
 title: UVa 11572 Unique Snowflakes
 date: 2014-11-5 19:38:51
 tags: [ACM, UVa, C, 模拟]

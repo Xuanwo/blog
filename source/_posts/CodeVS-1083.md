@@ -1,3 +1,4 @@
+---
 title: CodeVS 1083 Cantor表
 date: 2014-10-29 21:05:44
 tags: [ACM, CodeVS, C, 数论]

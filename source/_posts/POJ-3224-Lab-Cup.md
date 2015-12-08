@@ -1,3 +1,4 @@
+---
 title: POJ 3224 Lab杯
 date: 2014-08-18 22:15:49
 tags: [ACM, POJ, C, 水题]

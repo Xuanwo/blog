@@ -1,4 +1,5 @@
-﻿title: POJ 1611 The Suspects
+﻿---
+title: POJ 1611 The Suspects
 date: 2014-08-12 05:03:00
 tags: [ACM, POJ, C, 并查集]
 categories: Exercise

@@ -1,4 +1,5 @@
-﻿title: POJ 3299 Humidex
+﻿---
+title: POJ 3299 Humidex
 date: 2014-07-10 23:14:26
 tags: [ACM, POJ, C, 模拟]
 categories: Exercise

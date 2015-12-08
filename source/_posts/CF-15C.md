@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 15 C Industrial Nim
 date: 2014-11-26 14:25:00
 tags: [ACM, Codeforces, C, 博弈]

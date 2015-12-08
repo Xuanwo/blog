@@ -1,3 +1,4 @@
+---
 title: POJ 2623 Sequence Median
 date: 2014-08-17 16:44:10
 tags: [ACM, POJ, C, 排序]

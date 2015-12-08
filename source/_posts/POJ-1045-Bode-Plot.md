@@ -1,4 +1,5 @@
-﻿title: POJ 1045 Bode Plot
+﻿---
+title: POJ 1045 Bode Plot
 date: 2014-07-20 14:39:05
 tags: [ACM, POJ, C, 水题, 物理]
 categories: Exercise

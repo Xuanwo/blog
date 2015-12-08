@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 16 C Monitor (Div. 2 Only)
 date: 2014-11-26 14:04:11
 tags: [ACM, Codeforces, C, 数论]

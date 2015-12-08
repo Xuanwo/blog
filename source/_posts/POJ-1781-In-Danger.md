@@ -1,3 +1,4 @@
+---
 title: POJ 1781 In Danger
 date: 2014-08-15 20:46:00
 tags: [ACM, POJ, C, 水题]

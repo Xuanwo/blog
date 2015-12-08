@@ -1,4 +1,5 @@
-﻿title: POJ 3981 字符串替换
+﻿---
+title: POJ 3981 字符串替换
 date: 2014-08-06 16:00:00
 tags: [ACM, POJ, C, 字符串]
 categories: Exercise

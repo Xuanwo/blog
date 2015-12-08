@@ -1,4 +1,5 @@
-﻿title: POJ 1007 DNA Sorting
+﻿---
+title: POJ 1007 DNA Sorting
 date: 2014-07-07 14:09:22
 tags: [ACM, POJ, 排序, C]
 categories: Exercise

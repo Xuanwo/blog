@@ -1,3 +1,4 @@
+---
 title: ACM队友们的博客
 date: 2014-06-12 15:00:00
 tags: [ACM, Blog]
@@ -6,7 +7,7 @@ toc: true
 ---
 
 ## 2009级
-- JoinHands http://blog.csdn.net/wsniyufang   
+- JoinHands http://blog.csdn.net/wsniyufang
 
 ## 2010级
 - Alan http://blog.csdn.net/cugb1004101218

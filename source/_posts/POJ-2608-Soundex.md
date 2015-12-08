@@ -1,3 +1,4 @@
+---
 title: POJ 2608 Soundex
 date: 2014-08-17 16:36:16
 tags: [ACM, POJ, C, 字符串]

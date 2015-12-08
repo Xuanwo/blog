@@ -1,3 +1,4 @@
+---
 title: UVa 12627 Erratic Expansion
 date: 2014-11-5 20:11:48
 tags: [ACM, UVa, C, 分治]

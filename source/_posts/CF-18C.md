@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 18 C Stripe (Div.2 Only)
 date: 2014-11-26 13:16:29
 tags: [ACM, Codeforces, C, 暴力]

@@ -1,3 +1,4 @@
+---
 title: UVa 11059 Maximum Product
 date: 2014-10-27 14:05:31
 tags: [ACM, UVa, C, 暴力]

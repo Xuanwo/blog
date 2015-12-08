@@ -1,3 +1,4 @@
+---
 title: POJ 2136 Vertical Histogram
 date: 2014-08-16 00:37:49
 tags: [ACM, POJ, C, 水题]

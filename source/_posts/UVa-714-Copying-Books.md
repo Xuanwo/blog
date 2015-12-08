@@ -1,3 +1,4 @@
+---
 title: UVa 714 Copying Books
 date: 2014-11-4 13:29:52
 tags: [ACM, UVa, C, 贪心]

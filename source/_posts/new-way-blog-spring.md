@@ -1,4 +1,5 @@
-﻿title: 使用Github Pages做博客的新思路——Spring
+﻿---
+title: 使用Github Pages做博客的新思路——Spring
 date: 2014-06-11 14:00:00
 tags: [Spring, Blog, JavaScript, Github-Pages]
 categories: Opinion
@@ -29,6 +30,7 @@ Spring拥有响应式的页面设计，可以在手机、平板和桌面端完�
 ```
 $.extend(spring.config, {
 // my blog title
+---
 title: 'Your Blog title',
 // my blog description
 desc: "A blog engine written by github issues [Fork me on GitHub](https://github.com/zhaoda/spring)",

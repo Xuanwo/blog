@@ -1,3 +1,4 @@
+---
 title: POJ 1118 Lining Up
 date: 2014-08-17 16:47:52
 tags: [ACM, POJ, C, 几何]

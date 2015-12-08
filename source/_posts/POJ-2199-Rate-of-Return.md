@@ -1,4 +1,5 @@
-﻿title: POJ 2199 Rate of Return
+﻿---
+title: POJ 2199 Rate of Return
 date: 2014-07-20 14:25:25
 tags: [ACM, POJ, C, 二分]
 categories: Exercise

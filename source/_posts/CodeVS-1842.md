@@ -1,3 +1,4 @@
+---
 title: CodeVS 1842 递归第一次
 date: 2014-10-20 21:40:51
 tags: [ACM, CodeVS, C, 递归]

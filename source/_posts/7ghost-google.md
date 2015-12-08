@@ -1,3 +1,4 @@
+---
 title: 低成本搭建谷歌镜像
 date: 2015-10-12 16:53:25
 tags: [Google, CloudFlare, FuckWall, PHP]

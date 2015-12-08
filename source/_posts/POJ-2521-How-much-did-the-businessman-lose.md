@@ -1,3 +1,4 @@
+---
 title: POJ 2521 How much did the businessman lose
 date: 2014-08-17 16:14:20
 tags: [ACM, POJ, C, 水题]

@@ -1,3 +1,4 @@
+---
 title: CodeVS 1212 最大公约数
 date: 2014-10-15 12:04:02
 tags: [ACM, CodeVS, C, 数论]

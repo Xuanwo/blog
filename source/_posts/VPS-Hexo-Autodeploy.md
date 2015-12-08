@@ -1,3 +1,4 @@
+---
 title: VPS搭配Github Webhook实现Hexo自动发布
 date: 2015-2-5 23:22:30
 tags: [Blog, Github-Pages, VPS, Hexo]

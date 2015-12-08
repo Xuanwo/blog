@@ -1,4 +1,5 @@
-﻿title: 使用Hexo构建项目Wiki
+﻿---
+title: 使用Hexo构建项目Wiki
 date: 2014-07-07 0:38:09
 tags: [Blog, Software, Windows, Github-Pages, Wiki]
 categories: Opinion
@@ -65,6 +66,7 @@ deploy:
 <p>6. 进入source文件夹，打开_post文件夹，新建一个md文档，在文档的开头加入
 
 ```
+---
 title: your title //这将会是wiki文档的标题
 date: 2014-03-16 10:17:16  //构建时间，wiki中用不到
 categories: Docs //这将会是本文档所属的类别

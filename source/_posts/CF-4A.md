@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 4 A Watermelon
 date: 2014-11-3 11:23:56
 tags: [ACM, Codeforces, C, 水题]

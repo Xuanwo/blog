@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 2 B The least round way
 date: 2014-11-3 15:02:38
 tags: [ACM, Codeforces, C, DP]

@@ -1,4 +1,5 @@
-﻿title: POJ 1979 Red and Black
+﻿---
+title: POJ 1979 Red and Black
 date: 2014-08-02 15:37:31
 tags: [ACM, POJ, C, DFS]
 categories: Exercise

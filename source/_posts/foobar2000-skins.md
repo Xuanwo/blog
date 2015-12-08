@@ -1,3 +1,4 @@
+---
 title: 修改Foobar2000的皮肤
 date: 2014-08-28 22:09:00
 tags: [Software]

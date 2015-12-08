@@ -1,3 +1,4 @@
+---
 title: 使用Github SSH Key以免去Hexo部署时输入密码
 date: 2015-2-7 14:40:16
 tags: [Hexo, Github-Pages, Blog]

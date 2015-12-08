@@ -1,3 +1,4 @@
+---
 title: POJ 3006 Dirichlet's Theorem on Arithmetic Progressions
 date: 2014-08-22 18:13:27
 tags: [ACM, POJ, C, 水题]

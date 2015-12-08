@@ -1,3 +1,4 @@
+---
 title: POJ 3414 Pots
 date: 2014-08-24 21:11:39
 tags: [ACM, POJ, C, BFS]

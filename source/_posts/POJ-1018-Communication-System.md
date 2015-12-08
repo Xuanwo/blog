@@ -1,4 +1,5 @@
-﻿title: POJ 1018 Communication System
+﻿---
+title: POJ 1018 Communication System
 date: 2014-07-12 13:06:29
 tags: [ACM, POJ, C, 剪枝, 枚举, Sublime-Text]
 categories: Exercise

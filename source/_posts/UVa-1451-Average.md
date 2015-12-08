@@ -1,3 +1,4 @@
+---
 title: UVa 1451 Average
 date: 2014-11-4 19:58:06
 tags: [ACM, UVa, C, 几何]

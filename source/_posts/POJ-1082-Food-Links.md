@@ -1,4 +1,5 @@
-﻿title: POJ 1082 食物链
+﻿---
+title: POJ 1082 食物链
 date: 2014-07-22 02:43:08
 tags: [ACM, POJ, C, 并查集]
 categories: Exercise

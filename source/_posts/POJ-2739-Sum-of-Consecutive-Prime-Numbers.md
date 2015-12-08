@@ -1,4 +1,5 @@
-﻿title: POJ 2739 Sum of Consecutive Prime Numbers
+﻿---
+title: POJ 2739 Sum of Consecutive Prime Numbers
 date: 2014-07-11 19:49:38
 tags: [ACM, POJ, C, 模拟]
 categories: Exercise

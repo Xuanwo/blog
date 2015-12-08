@@ -1,3 +1,4 @@
+---
 title: POJ 1250 Tanning Salon
 date: 2014-08-22 22:41:28
 tags: [ACM, POJ, C, 水题]

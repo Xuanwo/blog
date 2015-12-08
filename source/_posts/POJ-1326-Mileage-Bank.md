@@ -1,4 +1,5 @@
-﻿title: POJ 1326 Mileage Bank
+﻿---
+title: POJ 1326 Mileage Bank
 date: 2014-07-23 14:10:08
 tags: [ACM, POJ, C, 水题]
 categories: Exercise

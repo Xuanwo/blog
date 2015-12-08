@@ -1,3 +1,4 @@
+---
 title: 使用Travis CI自动部署Hexo
 date: 2015-2-7 14:00:51
 tags: [Hexo, Github-Pages, Blog]

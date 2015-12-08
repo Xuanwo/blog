@@ -1,3 +1,4 @@
+---
 title: POJ 2388 Who's in the Middle
 date: 2014-08-16 15:12:33
 tags: [ACM, POJ, C, 排序, STL]

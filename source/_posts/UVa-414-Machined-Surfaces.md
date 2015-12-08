@@ -1,3 +1,4 @@
+---
 title: UVa 414 Machined Surfaces
 date: 2014-10-31 17:13:19
 tags: [ACM, UVa, C, 水题, 模拟]

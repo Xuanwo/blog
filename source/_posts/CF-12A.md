@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 12 A Super Agent (Div.2 Only)
 date: 2014-11-21 21:44:24
 tags: [ACM, Codeforces, C, 暴力]

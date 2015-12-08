@@ -1,4 +1,5 @@
-﻿title: POJ 2891 Strange Way to Express Integers
+﻿---
+title: POJ 2891 Strange Way to Express Integers
 date: 2014-07-24 01:57:51
 tags: [ACM, POJ, C, 数论]
 categories: Exercise

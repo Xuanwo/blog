@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 2 C Commentator problem
 date: 2014-11-6 23:40:26
 tags: [ACM, Codeforces, C, 几何]

@@ -1,3 +1,4 @@
+---
 title: CodeVS 1011 数的计算
 date: 2014-11-1 10:39:19
 tags: [ACM, CodeVS, C, 数论]

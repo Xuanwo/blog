@@ -1,3 +1,4 @@
+---
 title: POJ 2407 Relatives
 date: 2014-08-16 22:04:50
 tags: [ACM, POJ, C, 数论]

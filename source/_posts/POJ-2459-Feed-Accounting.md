@@ -1,3 +1,4 @@
+---
 title: POJ 2459 Feed Accounting
 date: 2014-08-22 22:12:13
 tags: [ACM, POJ, C, 水题]

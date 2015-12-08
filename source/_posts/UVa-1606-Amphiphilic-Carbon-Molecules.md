@@ -1,3 +1,4 @@
+---
 title: UVa 1606 Amphiphilic Carbon Molecules
 date: 2014-11-4 16:47:35
 tags: [ACM, UVa, C, 几何]

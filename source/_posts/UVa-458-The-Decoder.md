@@ -1,3 +1,4 @@
+---
 title: UVa 458 The Decoder
 date: 2014-10-30 15:16:38
 tags: [ACM, UVa, C, 水题]

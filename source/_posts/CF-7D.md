@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 7 D Palindrome Degree
 date: 2014-11-16 11:29:22
 tags: [ACM, Codeforces, C, DP, 字符串]

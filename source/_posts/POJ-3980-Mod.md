@@ -1,3 +1,4 @@
+---
 title: POJ 3980 取模运算
 date: 2014-08-21 23:31:30
 tags: [ACM, POJ, C, 水题]

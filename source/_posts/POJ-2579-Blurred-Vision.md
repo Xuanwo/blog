@@ -1,3 +1,4 @@
+---
 title: POJ 2579 Blurred Vision
 date: 2014-08-22 21:35:15
 tags: [ACM, POJ, C, 水题]

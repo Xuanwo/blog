@@ -1,3 +1,4 @@
+---
 title: Bestcoder Round 16 C Revenge of Nim II
 date: 2015-8-17 02:09:37
 tags: [ACM, Bestcoder, C, 数学]

@@ -1,3 +1,4 @@
+---
 title: POJ 2535 Very Simple Problem
 date: 2014-08-22 22:04:55
 tags: [ACM, POJ, C, 水题]

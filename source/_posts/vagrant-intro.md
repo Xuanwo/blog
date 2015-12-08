@@ -1,3 +1,4 @@
+---
 title: Vagrant——构建虚拟开发环境的新思路
 date: 2015-10-22 09:24:57
 tags: [Software, Develop]

@@ -1,3 +1,4 @@
+---
 title: POJ 2707 Copier Reduction
 date: 2014-08-18 22:05:01
 tags: [ACM, POJ, C, 水题]

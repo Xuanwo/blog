@@ -1,4 +1,5 @@
-﻿title: POJ 1426 Find The Multiple
+﻿---
+title: POJ 1426 Find The Multiple
 date: 2014-08-12 04:27:00
 tags: [ACM, POJ, C, STL, Queue, BFS]
 categories: Exercise

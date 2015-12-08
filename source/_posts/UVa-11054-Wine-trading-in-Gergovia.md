@@ -1,3 +1,4 @@
+---
 title: UVa 11054 Wine trading in Gergovia
 date: 2014-11-5 19:34:31
 tags: [ACM, UVa, C, 贪心]

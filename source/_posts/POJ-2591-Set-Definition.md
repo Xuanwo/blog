@@ -1,3 +1,4 @@
+---
 title: POJ 2591 Set Definition
 date: 2014-08-18 22:35:08
 tags: [ACM, POJ, C, 递归]

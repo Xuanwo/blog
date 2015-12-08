@@ -1,4 +1,5 @@
-﻿title: POJ 1503 Integer Inquiry
+﻿---
+title: POJ 1503 Integer Inquiry
 date: 2014-07-18 15:04:04
 tags: [ACM, POJ, Java, 高精度计算]
 categories: Exercise

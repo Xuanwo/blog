@@ -1,3 +1,4 @@
+---
 title: Sublime For Wiz —— 为知笔记的Sublime插件
 date: 2014-08-27 15:59:17
 tags: [Software]

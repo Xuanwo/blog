@@ -1,4 +1,5 @@
-﻿title: POJ 1298 史上最难的问题
+﻿---
+title: POJ 1298 史上最难的问题
 date: 2014-07-23 02:35:36
 tags: [ACM, POJ, C, 字符串]
 categories: Exercise

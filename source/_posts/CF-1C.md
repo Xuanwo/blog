@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 1 C Ancient Berland Circus
 date: 2014-10-21 17:23:43
 tags: [ACM, Codeforces, C, 几何]

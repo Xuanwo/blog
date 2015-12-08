@@ -1,3 +1,4 @@
+---
 title: POJ 2371 Questions and answers
 date: 2014-08-16 15:35:31
 tags: [ACM, POJ, C, STL, 排序]

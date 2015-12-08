@@ -1,4 +1,5 @@
-﻿title: POJ 1575 Easier Done Than Said?
+﻿---
+title: POJ 1575 Easier Done Than Said?
 date: 2014-08-03 11:54:33
 tags: [ACM, POJ, C, 字符串]
 categories: Exercise

@@ -1,4 +1,5 @@
-﻿title: POJ 1157 LITTLE SHOP OF FLOWERS
+﻿---
+title: POJ 1157 LITTLE SHOP OF FLOWERS
 date: 2014-08-12 00:55:00
 tags: [ACM, POJ, C, DP]
 categories: Exercise

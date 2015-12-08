@@ -1,3 +1,4 @@
+---
 title: POJ 2602 Superlong sums
 date: 2014-08-17 16:33:30
 tags: [ACM, POJ, C, 高精度计算]

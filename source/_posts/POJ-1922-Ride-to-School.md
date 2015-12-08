@@ -1,4 +1,5 @@
-﻿title: POJ 1922 Ride to School
+﻿---
+title: POJ 1922 Ride to School
 date: 2014-08-05 20:36:00
 tags: [ACM, POJ, C, 贪心, 水题]
 categories: Exercise

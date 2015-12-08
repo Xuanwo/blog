@@ -1,3 +1,4 @@
+---
 title: POJ 3278 Catch That Cow
 date: 2014-08-18 17:00:55
 tags: [ACM, POJ, C, BFS]

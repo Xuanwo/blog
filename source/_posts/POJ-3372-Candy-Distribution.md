@@ -1,3 +1,4 @@
+---
 title: POJ 3372 Candy Distribution
 date: 2014-08-15 20:41:15
 tags: [ACM, POJ, C, 水题]

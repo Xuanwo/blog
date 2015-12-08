@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 5 B Center Alignment
 date: 2014-11-5 15:43:15
 tags: [ACM, Codeforces, C, 字符串]

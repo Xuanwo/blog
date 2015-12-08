@@ -1,3 +1,4 @@
+---
 title: POJ 2876 Cantoring Along
 date: 2014-08-18 23:19:45
 tags: [ACM, POJ, C, ]

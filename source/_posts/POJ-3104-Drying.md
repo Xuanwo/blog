@@ -1,3 +1,4 @@
+---
 title: POJ 3104 Drying
 date: 2014-08-21 19:23:22
 tags: [ACM, POJ, C, 二分]

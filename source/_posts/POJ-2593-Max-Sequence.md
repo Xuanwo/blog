@@ -1,3 +1,4 @@
+---
 title: POJ 2593 Max Sequence
 date: 2014-08-18 22:30:24
 tags: [ACM, POJ, C, DP]

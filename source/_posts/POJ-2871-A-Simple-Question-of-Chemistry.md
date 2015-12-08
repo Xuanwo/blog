@@ -1,3 +1,4 @@
+---
 title: POJ 2871 A Simple Question of Chemistry
 date: 2014-08-18 22:39:35
 tags: [ACM, POJ, C, 水题]

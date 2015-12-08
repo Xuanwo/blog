@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 15 E Triangles
 date: 2014-11-23 13:50:17
 tags: [ACM, Codeforces, C, DP, 组合数学]

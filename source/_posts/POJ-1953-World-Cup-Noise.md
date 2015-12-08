@@ -1,4 +1,5 @@
-﻿title: POJ 1953 World Cup Noise
+﻿---
+title: POJ 1953 World Cup Noise
 date: 2014-08-12 05:19:00
 tags: [ACM, POJ, C, 水题]
 categories: Exercise

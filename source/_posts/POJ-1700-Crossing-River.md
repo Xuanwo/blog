@@ -1,3 +1,4 @@
+---
 title: POJ 1700 Crossing River
 date: 2014-08-18 22:27:39
 tags: [ACM, POJ, C, 贪心]

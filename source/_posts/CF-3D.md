@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 3 D Least Cost Bracket Sequence
 date: 2014-11-3 17:18:07
 tags: [ACM, Codeforces, C, 贪心]

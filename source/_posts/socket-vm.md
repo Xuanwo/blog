@@ -1,3 +1,4 @@
+---
 title: 基于Socket.io的虚拟计算机
 date: 2015-7-6 21:05:38
 tags: [实习, 项目, Together, 虚拟化]

@@ -1,3 +1,4 @@
+---
 title: POJ 2070 Filling Out the Team
 date: 2014-08-16 00:19:37
 tags: [ACM, POJ, C, 水题]

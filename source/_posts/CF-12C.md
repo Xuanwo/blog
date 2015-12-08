@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 12 C Fruits (Div.2 Only)
 date: 2014-11-21 21:54:07
 tags: [ACM, Codeforces, C, 字符串, 贪心]

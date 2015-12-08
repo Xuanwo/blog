@@ -1,3 +1,4 @@
+---
 title: POJ 3062 Celebrity jeopardy
 date: 2014-08-21 10:00:09
 tags: [ACM, POJ, C, 字符串]

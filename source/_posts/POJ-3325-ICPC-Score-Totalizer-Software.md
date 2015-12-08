@@ -1,3 +1,4 @@
+---
 title: POJ 3325 ICPC Score Totalizer Software
 date: 2014-08-22 17:18:27
 tags: [ACM, POJ, C, 水题]

@@ -1,4 +1,5 @@
-﻿title: POJ 1218 THE DRUNK JAILER
+﻿---
+title: POJ 1218 THE DRUNK JAILER
 date: 2014-07-22 21:37:10
 tags: [ACM, POJ, C, 水题]
 categories: Exercise

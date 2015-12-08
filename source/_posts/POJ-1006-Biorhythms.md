@@ -1,4 +1,5 @@
-﻿title: POJ 1006 Biorhythms
+﻿---
+title: POJ 1006 Biorhythms
 date: 2014-07-06 19:30:41
 tags: [ACM, POJ, 模拟, C, 数论]
 categories: Exercise

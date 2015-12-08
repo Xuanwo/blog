@@ -1,3 +1,4 @@
+---
 title: POJ 2992 Divisors
 date: 2014-08-21 09:49:58
 tags: [ACM, POJ, C, 数论]

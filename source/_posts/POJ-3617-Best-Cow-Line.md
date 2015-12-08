@@ -1,3 +1,4 @@
+---
 title: POJ 3617 Best Cow Line
 date: 2014-08-24 21:42:20
 tags: [ACM, POJ, C, 贪心, 字符串]

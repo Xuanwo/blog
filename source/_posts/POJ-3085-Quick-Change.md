@@ -1,3 +1,4 @@
+---
 title: POJ 3085 Quick Change
 date: 2014-08-21 18:28:06
 tags: [ACM, POJ, C, 水题, 贪心]

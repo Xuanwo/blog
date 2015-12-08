@@ -1,3 +1,4 @@
+---
 title: CodeVS 1475 m进制转十进制
 date: 2014-10-20 20:55:41
 tags: [ACM, CodeVS, C, 数论]

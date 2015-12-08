@@ -1,3 +1,4 @@
+---
 title: POJ 2301 Beat the Spread!
 date: 2014-08-16 15:19:47
 tags: [ACM, POJ, C, 水题]

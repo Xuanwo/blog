@@ -1,4 +1,5 @@
-﻿title: POJ 2586 Y2K Accounting Bug
+﻿---
+title: POJ 2586 Y2K Accounting Bug
 date: 2014-08-06 15:23:00
 tags: [ACM, POJ, C, 贪心, 水题]
 categories: Exercise

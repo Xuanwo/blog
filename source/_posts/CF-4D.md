@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 4 D Mysterious Present
 date: 2014-11-7 10:05:24
 tags: [ACM, Codeforces, C, DP]

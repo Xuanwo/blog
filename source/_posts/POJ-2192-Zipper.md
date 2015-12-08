@@ -1,3 +1,4 @@
+---
 title: POJ 2192 Zipper
 date: 2014-08-16 14:35:52
 tags: [ACM, POJ, C, 字符串, DP]

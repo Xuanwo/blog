@@ -1,3 +1,4 @@
+---
 title: POJ 2229 Sumsets
 date: 2014-08-16 15:05:56
 tags: [ACM, POJ, C, DP]

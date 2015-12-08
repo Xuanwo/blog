@@ -1,3 +1,4 @@
+---
 title: POJ 2002 Squares
 date: 2014-08-16 00:15:45
 tags: [ACM, POJ, C, STL, 二分]

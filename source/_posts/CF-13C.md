@@ -1,3 +1,4 @@
+---
 title: Codeforces Beta Round 13 C Sequence
 date: 2014-11-21 22:06:59
 tags: [ACM, Codeforces, C, DP]
