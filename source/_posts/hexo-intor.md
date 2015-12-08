@@ -19,8 +19,8 @@ toc: true
 ## Windows
 ### 配置Node.js环境
 下载Node.js安装文件：
-- [Windows Installer 32-bit](http://nodejs.org/dist/v0.12.1/node-v0.12.1-x86.msi)
-- [Windows Installer 64-bit](http://nodejs.org/dist/v0.12.1/x64/node-v0.12.1-x64.msi)
+- [Windows Installer 32-bit](https://nodejs.org/dist/v4.2.3/node-v4.2.3-x86.msi)
+- [Windows Installer 64-bit](https://nodejs.org/dist/v4.2.3/node-v4.2.3-x64.msi)
 根据自己的Windows版本选择相应的安装文件，要是不知道，就安装32-bit的吧- -。
 如图所示：
 ![Node.js安装界面](/imgs/opinion/Nodejs-install.png)
@@ -33,14 +33,13 @@ toc: true
 ```
 node -v
 npm -v
-
 ```
 如果结果如下图所示，则说明安装正确，可以进行下一步了，如果不正确，则需要回头检查自己的安装过程。
 ![Node.js安装测试](/imgs/opinion/Nodejs-test.png)
 
 ### 配置Git环境
 下载Git安装文件：
-- [Git-1.9.5-preview20150319.exe](https://github.com/msysgit/msysgit/releases/download/Git-1.9.5-preview20150319/Git-1.9.5-preview20150319.exe)
+- [Git-2.6.3-64-bit.exe](https://github.com/git-for-windows/git/releases/download/v2.6.3.windows.1/Git-2.6.3-64-bit.exe)
 然后就进入了Git的安装界面，如图：
 ![Git安装界面](/imgs/opinion/Git-install.png)
 和Node.js一样，大部分设置都只需要保持默认，但是出于我们操作方便考虑，建议PATH选项按照下图选择：
@@ -52,7 +51,6 @@ npm -v
 
 ```
 git --version
-
 ```
 如果结果如下图所示，则说明安装正确，可以进行下一步了，如果不正确，则需要回头检查自己的安装过程。
 ![Git安装测试](/imgs/opinion/Git-test.png)
@@ -90,7 +88,6 @@ git --version
 
 ```
 npm install hexo-cli -g
-
 ```
 然后你将会看到:
 ![安装hexo-cli](/imgs/opinion/npm-install-hexo-cli.png)
@@ -99,14 +96,12 @@ npm install hexo-cli -g
 
 ```
 npm install hexo --save
-
 ```
 然后你会看到命令行窗口刷了一大堆白字，下面我们来看一看Hexo是不是已经安装好了。
 在命令行中输入：
 
 ```
 hexo -v
-
 ```
 如果你看到了如图文字，则说明已经安装成功了。
 ![Hexo测试](/imgs/opinion/hexo-v.png)
@@ -115,12 +110,10 @@ hexo -v
 
 ```
 hexo init
-
 ```
 如图：
 ![hexo初始化](/imgs/opinion/hexo-init.png)
 然后输入：
-
 ```
 npm install
 
@@ -131,7 +124,6 @@ npm install
 
 ```
 hexo g
-
 ```
 如图：
 ![hexo渲染](/imgs/opinion/hexo-g.png)
@@ -139,13 +131,11 @@ hexo g
 
 ```
 hexo s
-
 ```
 然后会提示：
 
 ```
 INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
-
 ```
 在浏览器中打开`http://localhost:4000/`，你将会看到：
 ![hexo初体验](/imgs/opinion/hexo-first-time.png)
@@ -160,6 +150,7 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 
 您可以在 `_config.yml` 中修改大部份的配置。
 
+
 ### 网站
 
 参数 | 描述
@@ -169,7 +160,7 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 `description` | 网站描述
 `author` | 您的名字
 `language` | 网站使用的语言
-`timezone` | 网站时区。Hexo 预设使用您电脑的时区。[时区列表](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+`timezone` | 网站时区。Hexo 默认使用您电脑的时区。[时区列表](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)。比如说：`America/New_York`, `Japan`, 和 `UTC` 。
 
 ### 网址
 
@@ -177,23 +168,25 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 --- | --- | ---
 `url` | 网址 |
 `root` | 网站根目录 |
-`permalink` | 文章的 [永久链接](permalinks.html) 格式 | :year/:month/:day/:title/
+`permalink` | 文章的 [永久链接](permalinks.html) 格式 | `:year/:month/:day/:title/`
 `permalink_default` | 永久链接中各部分的默认值 |
 
-> 如果您的网站存放在子目录中，例如 `http://yoursite.com/blog`，则请将您的 `url` 设为 `http://yoursite.com/blog` 并把 `root` 设为 `/blog/`。
+{% note info 网站存放在子目录 %}
+如果您的网站存放在子目录中，例如 `http://yoursite.com/blog`，则请将您的 `url` 设为 `http://yoursite.com/blog` 并把 `root` 设为 `/blog/`。
+{% endnote %}
 
 ### 目录
 
 参数 | 描述 | 默认值
 --- | --- | ---
-`source_dir` | 资源文件夹，这个文件夹用来存放内容。 | source
-`public_dir` | 公共文件夹，这个文件夹用于存放生成的站点文件。 | public
-`tag_dir` | 标签文件夹 | tags
-`archive_dir` | 归档文件夹 | archives
-`category_dir` | 分类文件夹 | categories
-`code_dir` | Include code 文件夹 | downloads/code
-`i18n_dir` | 国际化（i18n）文件夹 | :lang
-`skip_render` | 跳过指定文件的渲染，您可使用 glob 来配置路径。 |
+`source_dir` | 资源文件夹，这个文件夹用来存放内容。 | `source`
+`public_dir` | 公共文件夹，这个文件夹用于存放生成的站点文件。 | `public`
+`tag_dir` | 标签文件夹 | `tags`
+`archive_dir` | 归档文件夹 | `archives`
+`category_dir` | 分类文件夹 | `categories`
+`code_dir` | Include code 文件夹 | `downloads/code
+`i18n_dir` | 国际化（i18n）文件夹 | `:lang`
+`skip_render` | 跳过指定文件的渲染，您可使用 [glob 表达式](https://github.com/isaacs/node-glob)来匹配路径。 |
 
 ### 文章
 
@@ -215,7 +208,7 @@ INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 
 参数 | 描述 | 默认值
 --- | --- | ---
-`default_category` | 默认分类 | uncategorized
+`default_category` | 默认分类 | `uncategorized`
 `category_map` | 分类别名 |
 `tag_map` | 标签别名 |
 
@@ -225,23 +218,22 @@ Hexo 使用 [Moment.js](http://momentjs.com/) 来解析和显示时间。
 
 参数 | 描述 | 默认值
 --- | --- | ---
-`date_format` | 日期格式 | MMM D YYYY
-`time_format` | 时间格式 | H:mm:ss
+`date_format` | 日期格式 | `MMM D YYYY`
+`time_format` | 时间格式 | `H:mm:ss`
 
 ### 分页
 
 参数 | 描述 | 默认值
 --- | --- | ---
-`per_page` | 每页显示的文章量 (0 = 关闭分页功能) | 10
-`pagination_dir` | 分页目录 | page
+`per_page` | 每页显示的文章量 (0 = 关闭分页功能) | `10`
+`pagination_dir` | 分页目录 | `page`
 
 ### 扩展
 
 参数 | 描述
 --- | ---
-`theme` | 当前主题名称
-`deploy` | 部署
-
+`theme` | 当前主题名称。值为`false`时禁用主题
+`deploy` | 部署部分的设置
 
 ## 配置Deployment
 首先，你需要为自己配置身份信息，打开命令行，然后输入：
@@ -249,7 +241,6 @@ Hexo 使用 [Moment.js](http://momentjs.com/) 来解析和显示时间。
 ```
 git config --global user.name "yourname"
 git config --global user.email "youremail"
-
 ```
 同样在`_config.yml`文件中，找到`Deployment`，然后按照如下修改：
 
@@ -258,7 +249,6 @@ deploy:
   type: git
   repo: git@github.com:yourname/yourname.github.io.git
   branch: master
-
 ```
 
 > 如果使用git方式进行部署，执行`npm install hexo-deployer-git --save`来安装所需的插件
@@ -267,7 +257,6 @@ deploy:
 
 ```
 hexo d
-
 ```
 随后按照提示，分别输入自己的Github账号用户名和密码，开始上传。
 然后通过http://yourname.github.io/来访问自己刚刚上传的网站。
@@ -284,7 +273,6 @@ tags: [ACM, UVa, C/C++]  //在此处添加这篇文章的标签，多个标签�
 categories: Exercise   //在此处输入这篇文章的分类。
 toc: true  //在此处设定是否开启目录，需要主题支持。
 ---
-
 ```
 
 # 进阶
@@ -299,7 +287,6 @@ toc: true  //在此处设定是否开启目录，需要主题支持。
 ## Plugins: http://hexo.io/plugins/
 ## Themes: http://hexo.io/themes/
 theme: landscape //themes文件夹中对应文件夹的名称
-
 ```
 然后先执行`hexo clean`，然后重新`hexo g`，并且`hexo d`，很快就能看到新主题的效果了~
 
@@ -310,7 +297,6 @@ theme: landscape //themes文件夹中对应文件夹的名称
 ```
 f1g1ns1.dnspod.net
 f1g1ns2.dnspod.net
-
 ```
 以新网为例，首先点击域名管理进入管理页面：
 ![点击域名管理](/imgs/opinion/domin-setting.png)
@@ -334,3 +320,4 @@ f1g1ns2.dnspod.net
 - 2015年04月30日 修复了错误的git命令。
 - 2015年06月11日 更新了`.config_yml`配置
 - 2015年10月12日 完善了Deployment部分操作，添加了yaml语法检测网址
+- 2015年12月09日 更新软件版本，为Hexo 3.2做准备
