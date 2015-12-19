@@ -9,7 +9,7 @@ toc: true
 # 前言
 因为学习需要，产生了一个这样的需求：要从Youtube上批量下载视频。自然，出于方便使用的角度来看，音画不能分离，最好带有对应的字幕。一番搜罗之后，我找到了基于Python的开源产品： [youtube-dl](https://rg3.github.io/youtube-dl/)
 
-> 值得一提的是，youtube-dl不仅仅能下载youtube上的视频，它支持的视频链接种类多达700+种，几乎囊括了所有在线视频网站，列表参见[此处](https://rg3.github.io/youtube-dl/supportedsites.html)。让我不由得感慨开源的力量。
+> 值得一提的是，youtube-dl不仅仅能下载youtube上的视频，它支持的视频链接种类多达700+种，几乎囊括了所有在线视频网站，列表参见[此处](https://rg3.github.io/youtube-dl/supportedsites.html)。让我不由得感慨开源的力量。除此以外，某些不存在的网址需要自备梯子，不再赘述。
 
 <!-- more -->
 
@@ -75,7 +75,7 @@ youtube-dl.exe --yes-playlist https://www.youtube.com/playlist?list=PLZlv_N0_O1g
 ## 下载字幕
 以Youtube Playlist为例，自动生成字幕并指定下载中文和英文字幕：
 ``` bash
-youtube-dl.exe --yes-playlist https://www.youtube.com/playlist?list=PLZlv_N0_O1gZg3dTMetmsfm_s4lb4-Tg0 --proxy http://127.0.0.1:1080 --write-auto-sub --sub-lang 'en,cn'
+youtube-dl.exe --yes-playlist https://www.youtube.com/playlist?list=PLZlv_N0_O1gZg3dTMetmsfm_s4lb4-Tg0 --proxy http://127.0.0.1:1080 --write-auto-sub --sub-lang en,cn
 ```
 
 字幕相关设定：
@@ -85,8 +85,7 @@ youtube-dl.exe --yes-playlist https://www.youtube.com/playlist?list=PLZlv_N0_O1g
 --all-subs                       下载所有可提供的字幕
 --list-subs                      列出当前视频支持的所有字幕
 --sub-format FORMAT              指定字幕格式，比如 "srt" 或者 "ass/srt/best"
---sub-lang LANGS                 指定字幕语言，用`,`分隔, 使用 IETF
-                                 语言标记，比如 'en,pt'
+--sub-lang LANGS                 指定字幕语言，用`,`分隔, 使用 IETF 语言标记，比如 'en,pt'
 ```
 
 > IETF语言标记参见[此处](http://www.ietf.org/assignments/language-subtag-registry/language-subtag-registry)
