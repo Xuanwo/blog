@@ -1,7 +1,6 @@
 ---
 title: UVa 129 Krypton Factor
 date: 2014-11-2 14:52:47
-tags: [ACM, UVa, C, 字符串]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1504 Adding Reversed Numbers
 date: 2014-07-25 03:40:50
-tags: [ACM, POJ, C, 字符串]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ---
 title: POJ 3117 World Cup
 date: 2014-08-21 18:47:38
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

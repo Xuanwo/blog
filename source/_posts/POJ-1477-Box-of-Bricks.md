@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1477 Box of Bricks
 date: 2014-08-12 04:32:00
-tags: [ACM, POJ, C, 模拟]
 categories: Exercise
 toc: true
 ---

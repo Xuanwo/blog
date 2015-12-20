@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1306 Combinations
 date: 2014-07-18 15:43:53
-tags: [ACM, POJ, Java, 高精度计算]
 categories: Exercise
 toc: true
 ---

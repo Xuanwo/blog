@@ -1,7 +1,6 @@
 ---
 title: UVa 1347 Tour
 date: 2014-11-16 14:35:27
-tags: [ACM, UVa, C, DP]
 categories: Exercise
 toc: true
 ---

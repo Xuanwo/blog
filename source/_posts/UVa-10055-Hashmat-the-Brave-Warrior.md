@@ -1,7 +1,6 @@
 ---
 title: UVa 10055  Hashmat the Brave Warrior
 date: 2014-10-29 13:24:02
-tags: [ACM, UVa, C, 水题]
 categories: Exercise
 toc: true
 ---

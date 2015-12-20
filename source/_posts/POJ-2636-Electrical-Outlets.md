@@ -1,7 +1,6 @@
 ---
 title: POJ 2636 Electrical Outlets
 date: 2014-08-22 21:32:53
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

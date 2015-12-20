@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1308 Is It A Tree?
 date: 2014-07-22 04:16:00
-tags: [ACM, POJ, C, 并查集]
 categories: Exercise
 toc: true
 ---

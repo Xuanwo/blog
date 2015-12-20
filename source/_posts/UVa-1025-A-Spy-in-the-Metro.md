@@ -1,7 +1,6 @@
 ---
 title: UVa 1025 A Spy in the Metro
 date: 2014-11-15 11:04:23
-tags: [ACM, UVa, C, DP]
 categories: Exercise
 toc: true
 ---

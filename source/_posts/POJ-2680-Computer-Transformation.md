@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 2680 Computer Transformation
 date: 2014-07-15 19:28:08
-tags: [ACM, POJ, C, 高精度计算]
 categories: Exercise
 toc: true
 ---

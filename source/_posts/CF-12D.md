@@ -1,7 +1,6 @@
 ---
 title: Codeforces Beta Round 12 D Ball (Div.2 Only)
 date: 2014-11-21 22:35:22
-tags: [ACM, Codeforces, C, 树状数组]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1001 求高精度幂
 date: 2014-07-15 23:09:03
-tags: [ACM, POJ, Java, 高精度计算]
 categories: Exercise
 toc: true
 ---

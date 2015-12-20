@@ -1,7 +1,6 @@
 ---
 title: CodeVS 3038 3n+1问题
 date: 2014-10-15 14:40:28
-tags: [ACM, CodeVS, C, 递归]
 categories: Exercise
 toc: true
 ---

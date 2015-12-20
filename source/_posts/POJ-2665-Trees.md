@@ -1,7 +1,6 @@
 ---
 title: POJ 2665 Trees
 date: 2014-08-17 23:42:32
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

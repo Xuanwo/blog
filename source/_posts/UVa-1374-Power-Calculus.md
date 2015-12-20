@@ -1,7 +1,6 @@
 ---
 title: UVa 1374 Power Calculus
 date: 2014-11-2 15:04:43
-tags: [ACM, UVa, C, DFS]
 categories: Exercise
 toc: true
 ---

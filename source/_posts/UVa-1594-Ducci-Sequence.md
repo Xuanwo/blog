@@ -1,7 +1,6 @@
 ---
 title: UVa 1594 Ducci Sequence
 date: 2015-8-16 04:04:26
-tags: [ACM, UVa, C]
 categories: Exercise
 toc: true
 ---

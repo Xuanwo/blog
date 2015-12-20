@@ -1,7 +1,6 @@
 ---
 title: Codeforces Beta Round 1 B Spreadsheets
 date: 2014-10-21 14:35:33
-tags: [ACM, Codeforces, C, 模拟]
 categories: Exercise
 toc: true
 ---

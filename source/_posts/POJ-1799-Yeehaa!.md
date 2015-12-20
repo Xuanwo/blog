@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1799 Yeehaa!
 date: 2014-08-05 16:13:00
-tags: [ACM, POJ, C, 模拟]
 categories: Exercise
 toc: true
 ---

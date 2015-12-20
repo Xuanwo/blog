@@ -1,7 +1,6 @@
 ---
 title: POJ 2363 Blocks
 date: 2014-08-22 22:21:48
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

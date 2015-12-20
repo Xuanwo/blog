@@ -1,7 +1,6 @@
 ---
 title: CodeVS 1474 十进制转m进制
 date: 2014-10-20 20:18:02
-tags: [ACM, CodeVS, C, 数论]
 categories: Exercise
 toc: true
 ---

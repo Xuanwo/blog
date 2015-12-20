@@ -1,7 +1,6 @@
 ---
 title: POJ 2904 Gauß in Elementary School
 date: 2014-08-21 09:43:27
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

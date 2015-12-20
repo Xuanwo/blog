@@ -1,7 +1,6 @@
 ---
 title: UVa 10976 Fractions Again?!
 date: 2014-10-27 16:13:36
-tags: [ACM, UVa, C, 暴力]
 categories: Exercise
 toc: true
 ---

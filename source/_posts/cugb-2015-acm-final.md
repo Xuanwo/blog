@@ -1,7 +1,6 @@
 ---
 title: 2015年中国地质大学(北京)14级ACM程序设计结课赛
 date: 2015-7-16 20:09:41
-tags: [ACM, C, CUGB]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ---
 title: Codeforces Beta Round 11 A Increasing Sequence
 date: 2014-11-16 10:45:44
-tags: [ACM, Codeforces, C, 贪心]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ---
 title: POJ 3176 Cow Bowling
 date: 2014-08-21 18:30:38
-tags: [ACM, POJ, C, DP]
 categories: Exercise
 toc: true
 ---

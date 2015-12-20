@@ -1,7 +1,6 @@
 ---
 title: POJ 3083 Children of the Candy Corn
 date: 2014-08-19 16:58:57
-tags: [ACM, POJ, C, DFS, BFS]
 categories: Exercise
 toc: true
 ---

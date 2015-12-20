@@ -1,7 +1,6 @@
 ---
 title: POJ 2140 Herd Sums
 date: 2014-08-16 00:28:06
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

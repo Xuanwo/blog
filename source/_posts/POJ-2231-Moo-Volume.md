@@ -1,7 +1,6 @@
 ---
 title: POJ 2231 Moo Volume
 date: 2014-08-16 14:52:02
-tags: [ACM, POJ, C, 水题, 排序]
 categories: Exercise
 toc: true
 ---

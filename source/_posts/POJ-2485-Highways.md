@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 2485 Highways
 date: 2014-08-06 22:47:00
-tags: [ACM, POJ, C, Graph, Prim, 最小生成树]
 categories: Exercise
 toc: true
 ---

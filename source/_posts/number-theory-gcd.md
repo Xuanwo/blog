@@ -1,7 +1,6 @@
 ---
 title: 数论——欧几里得算法
 date: 2015-3-11 10:32:31
-tags: [ACM, C, 数论]
 categories: Summary
 toc: true
 ---

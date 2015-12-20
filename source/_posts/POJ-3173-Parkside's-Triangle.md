@@ -1,7 +1,6 @@
 ---
 title: POJ 3173 Parkside's Triangle
 date: 2014-08-21 18:40:11
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ---
 title: POJ 2696 A Mysterious Function
 date: 2014-08-17 23:52:44
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

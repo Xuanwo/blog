@@ -1,7 +1,6 @@
 ---
 title: POJ 3086 Triangular Sums
 date: 2014-08-21 10:06:22
-tags: [ACM, POJ, C, 水题, 打表]
 categories: Exercise
 toc: true
 ---

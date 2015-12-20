@@ -1,7 +1,6 @@
 ---
 title: POJ 2498 StuPId
 date: 2014-08-16 16:12:54
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

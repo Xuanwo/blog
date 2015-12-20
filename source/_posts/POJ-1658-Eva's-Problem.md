@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1658 Eva's Problem
 date: 2014-08-03 12:19:40
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ---
 title: Codeforces Beta Round 7 C Line
 date: 2014-11-19 10:40:15
-tags: [ACM, Codeforces, C, 几何]
 categories: Exercise
 toc: true
 ---

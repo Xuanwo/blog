@@ -1,7 +1,6 @@
 ---
 title: POJ 2664 Prerequisites?
 date: 2014-08-22 21:30:44
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

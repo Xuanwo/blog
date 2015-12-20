@@ -1,7 +1,6 @@
 ---
 title: POJ 2350 Above Average
 date: 2014-08-16 15:23:55
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

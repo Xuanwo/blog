@@ -1,7 +1,6 @@
 ---
 title: 数论——快速幂
 date: 2015-3-18 17:43:59
-tags: [ACM, C, 数论]
 categories: Summary
 toc: true
 ---

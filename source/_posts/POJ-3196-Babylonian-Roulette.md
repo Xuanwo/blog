@@ -1,7 +1,6 @@
 ---
 title: POJ 3196 Babylonian Roulette
 date: 2014-08-21 20:02:37
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

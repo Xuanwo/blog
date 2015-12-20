@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1604 Just the Facts
 date: 2014-08-03 12:16:39
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

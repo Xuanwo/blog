@@ -1,7 +1,6 @@
 ---
 title: POJ 2551 Ones
 date: 2014-08-17 16:17:59
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

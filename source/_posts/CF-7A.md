@@ -1,7 +1,6 @@
 ---
 title: Codeforces Beta Round 7 A Kalevitch and Chess
 date: 2014-11-13 19:34:59
-tags: [ACM, Codeforces, C, 模拟]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1731 Orders
 date: 2014-08-05 15:57:00
-tags: [ACM, POJ, C, STL, 字符串]
 categories: Exercise
 toc: true
 ---

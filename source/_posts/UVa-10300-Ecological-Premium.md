@@ -1,7 +1,6 @@
 ---
 title: UVa 10300 Ecological Premium
 date: 2014-10-30 15:00:57
-tags: [ACM, UVa, C, 水题]
 categories: Exercise
 toc: true
 ---

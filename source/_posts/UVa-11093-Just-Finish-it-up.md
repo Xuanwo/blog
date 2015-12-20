@@ -1,7 +1,6 @@
 ---
 title: UVa 11093 Just Finish it up
 date: 2014-11-6 14:18:10
-tags: [ACM, UVa, C, 模拟, 剪枝]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ---
 title: Codeforces Beta Round 3 C Tic-tac-toe
 date: 2014-11-2 17:30:22
-tags: [ACM, Codeforces, C, 模拟]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 2080 Calendar
 date: 2014-08-06 14:44:00
-tags: [ACM, POJ, C, 模拟]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ---
 title: UVa 1152 4 Values whose Sum is 0
 date: 2014-11-5 19:31:30
-tags: [ACM, UVa, C, 二分, 暴力]
 categories: Exercise
 toc: true
 ---

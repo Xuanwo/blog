@@ -1,7 +1,6 @@
 ---
 title: UVa 494 Kindergarten Counting Game
 date: 2014-10-31 16:20:15
-tags: [ACM, UVa, C, 水题]
 categories: Exercise
 toc: true
 ---

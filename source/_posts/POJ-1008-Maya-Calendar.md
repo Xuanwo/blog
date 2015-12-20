@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1008 Maya Calendar
 date: 2014-07-07 23:04:08
-tags: [ACM, POJ, 字典, C, 模拟]
 categories: Exercise
 toc: true
 ---

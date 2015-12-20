@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1488 TEX Quotes
 date: 2014-08-12 04:51:00
-tags: [ACM, POJ, C, 字符串]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ---
 title: POJ 2601 Simple calculations
 date: 2014-08-17 23:49:14
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

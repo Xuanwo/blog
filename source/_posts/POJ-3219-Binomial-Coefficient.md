@@ -1,7 +1,6 @@
 ---
 title: POJ 3219 二项式系数
 date: 2014-08-18 22:18:58
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

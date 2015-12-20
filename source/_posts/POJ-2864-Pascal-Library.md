@@ -1,7 +1,6 @@
 ---
 title: POJ 2864 Pascal Library
 date: 2014-08-18 22:57:52
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ---
 title: UVa 1605 Building for UN
 date: 2014-11-5 19:10:54
-tags: [ACM, UVa, C, 构造]
 categories: Exercise
 toc: true
 ---

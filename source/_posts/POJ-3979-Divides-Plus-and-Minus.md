@@ -1,7 +1,6 @@
 ---
 title: POJ 3979 分数加减法
 date: 2014-08-21 23:37:02
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

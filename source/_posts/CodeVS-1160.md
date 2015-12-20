@@ -1,7 +1,6 @@
 ---
 title: CodeVS 1160 蛇形矩阵
 date: 2014-10-29 22:01:17
-tags: [ACM, CodeVS, C, 模拟]
 categories: Exercise
 toc: true
 ---

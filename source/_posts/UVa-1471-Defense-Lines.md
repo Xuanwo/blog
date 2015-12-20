@@ -1,7 +1,6 @@
 ---
 title: UVa 1471 Defense Lines
 date: 2014-11-5 19:51:46
-tags: [ACM, UVa, C, 二分]
 categories: Exercise
 toc: true
 ---

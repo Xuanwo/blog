@@ -1,7 +1,6 @@
 ---
 title: Codeforces Beta Round 14 B Young Photographer (Div. 2)
 date: 2014-11-21 21:56:23
-tags: [ACM, Codeforces, C, 贪心]
 categories: Exercise
 toc: true
 ---

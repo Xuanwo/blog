@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 2013 Symmetric Order
 date: 2014-08-05 21:40:00
-tags: [ACM, POJ, C, 字符串]
 categories: Exercise
 toc: true
 ---

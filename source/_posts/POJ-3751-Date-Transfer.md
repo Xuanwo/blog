@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 3751 时间日期格式转换
 date: 2014-08-12 00:19:00
-tags: [ACM, POJ, C, 字符串]
 categories: Exercise
 toc: true
 ---

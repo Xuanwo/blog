@@ -1,7 +1,6 @@
 ---
 title: POJ 2853 Sequence Sum Possibilities
 date: 2014-08-18 22:42:34
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

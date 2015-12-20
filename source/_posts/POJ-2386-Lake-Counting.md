@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 2386 Lake Counting
 date: 2014-07-12 21:34:56
-tags: [ACM, POJ, C, DFS]
 categories: Exercise
 toc: true
 ---

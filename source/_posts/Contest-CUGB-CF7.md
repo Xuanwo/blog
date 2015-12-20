@@ -1,7 +1,6 @@
 ---
 title: CF拉练第七场
 date: 2014-11-26 16:40:28
-tags: [ACM, Contest, C]
 categories: Exercise
 toc: true
 ---

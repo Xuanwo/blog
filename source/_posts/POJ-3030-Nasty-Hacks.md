@@ -1,7 +1,6 @@
 ---
 title: POJ 3030 Nasty Hacks
 date: 2014-08-21 09:57:23
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1405 Heritage
 date: 2014-08-03 11:25:44
-tags: [ACM, POJ, Java, 贪心, 高精度计算]
 categories: Exercise
 toc: true
 ---

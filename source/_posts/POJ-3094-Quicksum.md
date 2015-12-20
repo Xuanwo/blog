@@ -1,7 +1,6 @@
 ---
 title: POJ 3094 Quicksum
 date: 2014-08-21 09:54:26
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

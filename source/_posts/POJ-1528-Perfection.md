@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1528 Perfection
 date: 2014-07-25 04:34:58
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

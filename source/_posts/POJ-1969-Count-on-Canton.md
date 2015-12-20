@@ -1,7 +1,6 @@
 ---
 title: POJ 1969 Count on Canton
 date: 2014-08-15 19:28:52
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

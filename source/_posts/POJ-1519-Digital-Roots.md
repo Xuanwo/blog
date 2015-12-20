@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1519 Digital Roots
 date: 2014-07-25 04:29:15
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

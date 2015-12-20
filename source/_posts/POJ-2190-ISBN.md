@@ -1,7 +1,6 @@
 ---
 title: POJ 2190 ISBN
 date: 2014-08-16 14:25:01
-tags: [ACM, POJ, C, 字符串]
 categories: Exercise
 toc: true
 ---

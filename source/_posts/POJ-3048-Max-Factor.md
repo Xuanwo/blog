@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 3048 Max Factor
 date: 2014-07-14 17:21:24
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

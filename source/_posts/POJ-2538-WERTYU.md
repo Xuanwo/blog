@@ -1,7 +1,6 @@
 ---
 title: POJ 2538 WERTYU
 date: 2014-08-22 21:44:21
-tags: [ACM, POJ, C, 打表]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ---
 title: Codeforces Beta Round 1 A Theatre Square
 date: 2014-10-14 17:00:08
-tags: [ACM, Codeforces, C, 水题]
 categories: Exercise
 toc: true
 ---

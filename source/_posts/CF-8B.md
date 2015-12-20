@@ -1,7 +1,6 @@
 ---
 title: Codeforces Beta Round 8 B Obsession with Robots
 date: 2014-11-16 11:16:13
-tags: [ACM, Codeforces, C, 暴力]
 categories: Exercise
 toc: true
 ---

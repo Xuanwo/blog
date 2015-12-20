@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 3518 Prime Gap
 date: 2014-07-23 23:50:16
-tags: [ACM, POJ, C, 二分]
 categories: Exercise
 toc: true
 ---

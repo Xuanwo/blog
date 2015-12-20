@@ -1,7 +1,6 @@
 ---
 title: POJ 2196 Specialized Four-Digit Numbers
 date: 2014-08-16 14:41:33
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

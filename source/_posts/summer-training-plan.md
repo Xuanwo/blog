@@ -1,7 +1,6 @@
 ﻿---
 title: 暑期刷题计划
 date: 2014-07-03 20:04:23
-tags: [ACM, POJ]
 categories: Daily
 toc: true
 ---

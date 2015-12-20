@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1061 青蛙的约会
 date: 2014-07-23 13:49:00
-tags: [ACM, POJ, C, 数论]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 2389 Bull Math
 date: 2014-08-06 15:03:00
-tags: [ACM, POJ, Java, 高精度计算]
 categories: Exercise
 toc: true
 ---

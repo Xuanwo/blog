@@ -1,7 +1,6 @@
 ---
 title: POJ 2503 Babelfish
 date: 2014-08-16 23:41:45
-tags: [ACM, POJ, C, STL, Map]
 categories: Exercise
 toc: true
 ---

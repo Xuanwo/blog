@@ -1,7 +1,6 @@
 ---
 title: POJ 2251 Dungeon Master
 date: 2014-08-22 09:23:20
-tags: [ACM, POJ, C, BFS]
 categories: Exercise
 toc: true
 ---

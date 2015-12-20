@@ -1,7 +1,6 @@
 ﻿---
 title: POJ 1517 u Calculate e
 date: 2014-07-25 04:00:19
-tags: [ACM, POJ, C, 水题]
 categories: Exercise
 toc: true
 ---

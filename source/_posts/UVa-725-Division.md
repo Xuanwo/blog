@@ -1,7 +1,6 @@
 ---
 title: UVa 725 Division
 date: 2014-11-2 11:58:24
-tags: [ACM, UVa, C, 水题]
 categories: Exercise
 toc: true
 ---

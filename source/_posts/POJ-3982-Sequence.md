@@ -1,7 +1,6 @@
 ---
 title: POJ 3982 序列
 date: 2014-08-21 23:47:20
-tags: [ACM, POJ, C, 高精度计算]
 categories: Exercise
 toc: true
 ---
