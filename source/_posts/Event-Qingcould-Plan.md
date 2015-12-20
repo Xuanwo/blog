@@ -1,7 +1,7 @@
 ---
 title: 青云参观计划
 date: 2015-2-18 22:50:33
-tags: [Cloud, Event]
+tags: [Event]
 categories: Daily
 toc: true
 ---

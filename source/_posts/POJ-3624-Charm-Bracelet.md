@@ -1,7 +1,6 @@
 ---
 title: POJ 3624 Charm Bracelet
 date: 2014-10-5 10:52:48
-tags: [ACM]
 categories: Exercise
 toc: true
 ---

@@ -1,7 +1,7 @@
 ---
 title: 动态规划——最长上升子序列问题
 date: 2015-7-31 15:58:35
-tags: [C, DP, LIS, STL]
+tags: [C]
 categories: Summary
 toc: true
 ---
