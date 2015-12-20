@@ -1,7 +1,7 @@
 ﻿---
 title: 使用Github Pages做博客的新思路——Spring
 date: 2014-06-11 14:00:00
-tags: [Spring, Blog, JavaScript, Github-Pages]
+tags: [Blog, JavaScript, Github-Pages]
 categories: Opinion
 toc: true
 ---
