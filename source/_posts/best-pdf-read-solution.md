@@ -25,23 +25,26 @@ toc: true
 按照上面思路中的讨论，我在每一个平台上的解决方案都分成两个部分，第一是解决PDF阅读、批注问题，第二是解决PDF文件双向同步问题。
 
 ## Windows
+### Goodsync
 ![Goodsync](/imgs/opinion/goodsync.png)
 [**Goodsync**](http://www.goodsync.com/)是一款非常强大的同步工具，我们通过它来提供本地到Google Drive的双向同步功能。
 
 > 如果通过SS艹墙，配置Google Drive时请勾选`基于WinInet`，如图：![Goodsync Proxy Setting](/imgs/opinion/goodsync-proxy-setting.png)
 
-
+### Foxit Reader
 ![Foxit Reader](/imgs/opinion/foxit-reader.png)
 [**Foxit Reader**](http://www.foxitsoftware.cn/)，也就是福昕阅读器，不多说了，新版的界面还是可以的。（尽管我觉得颜值没有Adobe Reader DC高）
 
 > 为什么不选Adobe？Adobe最新版本的批注功能在特定的PDF上好像有点问题，我尝试了几个都不能正常保存，总是提示错误110，无奈放弃。
 
 ## Android
+### Flodersync
 ![Flodersync](/imgs/opinion/Flodersync.png)
 [**Flodersync**](https://play.google.com/store/apps/details?id=dk.tacit.android.foldersync.lite)是一款基于安卓平台的非常棒的一款应用，我们通过它来实现安卓平台的双向同步。
 
 > 开启双向同步请取消勾选`不同步删除`
 
+### Moon+
 ![Moon+](/imgs/opinion/Moon.png)
 [**Moon+**](https://play.google.com/store/apps/details?id=com.flyersoft.moonreader)，静读天下，安卓平台上首屈一指的阅读器，支持格式众多，速度流畅，除了免费版有些功能阉割和广告之外，没有别的问题。
 
