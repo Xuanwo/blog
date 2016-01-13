@@ -106,10 +106,10 @@
           <hr class="eof">
         </div>
         <div style="float:left;width:50%;">
-          <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox"><img alt="微信扫一扫，获取新文章推送" style="border-width:0" src="/imgs/dachui.jpg"></a>
+          <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox"><img alt="微信扫一扫，获取新文章推送" style="margin: 0 0 0 80px" src="/imgs/dachui.jpg"></a>
         </div>
         <div style="display:inline;">
-            <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox"><img alt="微信扫一扫，请博主喝咖啡" class="" style="border-width:0" src="/imgs/wechat.png" height="258" width="258"></a>
+            <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox"><img alt="微信扫一扫，请博主喝咖啡" class="" style="border-width:0" src="/imgs/wechat.png" height="258px" width="258px"></a>
         </div>
         <div class="copyright">
            <p><span>本文标题:</span><a href="{{ url_for(post.path) }}">{{ post.title }}</a></p>
