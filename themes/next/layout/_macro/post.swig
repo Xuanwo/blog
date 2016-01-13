@@ -109,7 +109,7 @@
           <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox"><img alt="微信扫一扫，获取新文章推送" class="" style="border-width:0" src="/imgs/dachui.jpg"></a>
         </div>
         <div align="center" style="float:right;display:inline;">
-          <a href="/imgs/tencnetpay.jpg" title="微信扫一扫，请博主喝咖啡" class="fancybox"><img alt="微信扫一扫，请博主喝咖啡" class="" style="border-width:0" src="/imgs/tencnetpay.jpg"></a>
+          <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox"><img alt="微信扫一扫，请博主喝咖啡" class="" style="border-width:0" src="/imgs/wechat.png"></a>
         </div>
         <div class="copyright">
            <p><span>本文标题:</span><a href="{{ url_for(post.path) }}">{{ post.title }}</a></p>
