@@ -107,9 +107,15 @@
         </div>
         <div style="float:left;width:50%;">
           <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox"><img alt="微信扫一扫，获取新文章推送" style="margin: 0 0 0 80px" src="/imgs/dachui.jpg"></a>
+          <span class="caption" style="color: #999;display: block;font-size: .9em;margin-top: .5em;margin-left:6em;position: relative;text-align: center;">
+              微信扫一扫，获取新文章推送
+          </span>
         </div>
         <div style="display:inline;">
             <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox"><img alt="微信扫一扫，请博主喝咖啡" class="" style="border-width:0" src="/imgs/wechat.png" height="258px" width="258px"></a>
+            <span class="caption" style="color: #999;display: block;font-size: .9em;margin-right:6em;position: relative;text-align: center;">
+              微信扫一扫，请博主喝咖啡
+          </span>
         </div>
         <div class="copyright">
            <p><span>本文标题:</span><a href="{{ url_for(post.path) }}">{{ post.title }}</a></p>
