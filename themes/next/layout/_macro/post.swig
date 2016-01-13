@@ -105,7 +105,7 @@
         <div id="eof" class="print-invisible">
           <hr class="eof">
         </div>
-        <div align="center" style="float:left;display:inline;">
+        <div>
           <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox"><img alt="微信扫一扫，获取新文章推送" class="" style="border-width:0" src="/imgs/dachui.jpg"></a>
         </div>
         <div align="center" style="float:right;display:inline;">
