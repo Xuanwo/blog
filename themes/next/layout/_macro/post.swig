@@ -102,6 +102,9 @@
 
     <div class="post-footer">
       {% if not is_index %}
+        <div id="eof" class="print-invisible">
+          <hr class="eof">
+        </div>
         <div class="copyright">
            <p><span>本文标题:</span><a href="{{ url_for(post.path) }}">{{ post.title }}</a></p>
            <p><span>文章作者:</span><a href="/" title="访问 {{ theme.author }} 的个人博客">{{ theme.author }}</a></p>
