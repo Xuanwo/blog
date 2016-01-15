@@ -106,13 +106,13 @@
           <hr class="eof">
         </div>
         <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-          <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block";><img alt="微信扫一扫，获取新文章推送" style="margin: 0 0 0 80px;display:inline-block;" src="/imgs/dachui.jpg"></a>
+          <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block";><img alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
           <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
               微信扫一扫，获取新文章推送
           </span>
         </div>
         <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-          <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img alt="微信扫一扫，请博主喝咖啡" style="margin: 0 0 0 80px;display:inline-block;" src="/imgs/wechat.png"></a>
+          <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
           <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
               微信扫一扫，请博主喝咖啡
           </span>
