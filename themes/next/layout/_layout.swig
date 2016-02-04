@@ -21,12 +21,6 @@
         <div id="content" class="content">
           {% block content %}{% endblock %}
         </div>
-
-        {% if (theme.duoshuo_hotartical and page.title)  %}
-        <!-- 多说热评文章-->
-        <p>热评文章</p>
-        <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
-        {% endif %}
       </div>
 
 
