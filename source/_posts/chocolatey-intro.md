@@ -15,13 +15,13 @@ toc: true
 
 ## CMD
 打开一个具有管理员权限的命令行窗口，执行如下命令：
-```
+```PowerShell
 @powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))" && SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin
 ```
 
 ## PowerShell
 打开一个具有管理员权限的PowerShell窗口，执行如下命令：
-```
+```PowerShell
 iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))
 ```
 
@@ -31,7 +31,7 @@ iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.p
 
 安装包十分的容易，只需要打开管理员权限的命令行即可：
 
-```
+```PowerShell
 choco install <package>
 ```
 
@@ -39,7 +39,7 @@ choco install <package>
 
 卸载也同样十分简单，打开管理员权限命令行，执行：
 
-```
+```PowerShell
 choco uninstall <package>
 ```
 
@@ -47,7 +47,7 @@ choco uninstall <package>
 
 更新包则需要使用如下命令：
 
-```
+```PowerShell
 choco upgrade <package>
 ```
 
@@ -57,9 +57,9 @@ Chocolatey的一个特点就是社区化的环境，每一个人都可以向它�
 
 ## 注册APIKey
 
-提交包则会略为复杂一点，首先你需要在https://chocolatey.org/注册一个账号，并获取跟你账户绑定的唯一APIKey。然后在命令行中执行如下命令：
+提交包则会略为复杂一点，首先你需要在https://chocolatey.org/ 注册一个账号，并获取跟你账户绑定的唯一APIKey。然后在命令行中执行如下命令：
 
-```
+```PowerShell
 choco apikey -k <your key here> -s https://chocolatey.org
 ```
 
@@ -67,13 +67,13 @@ choco apikey -k <your key here> -s https://chocolatey.org
 
 在命令行中运行
 
-```
+```PowerShell
 choco new <package name here>
 # 为方便理解，此处使用test做包名
 ```
 则当前目录下就会自动生成一个名为`test`的文件夹，目录结构如下：
 
-```
+```PowerShell
 test.nuspec
 tools
   |--chocolateyinstall.ps1
@@ -87,7 +87,7 @@ tools
 
 自动生成的描述文件在需要填写的位置都有大写英文注释，只需要按照要求一一填写即可，下面我列举一份已经通过审核的Datagrip的描述文件作为参考：
 
-```
+```XML
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
@@ -137,7 +137,7 @@ Allows you to execute queries in different modes and provides local history that
 
 下面同样列举一份已经填写完成的样例：
 
-```
+```PowerShell
 $packageName= 'datagrip'
 $installerType = 'EXE'
 $toolsDir   = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
@@ -151,7 +151,7 @@ Install-ChocolateyPackage "$packageName" "$installerType" "$silentArgs" "$url" "
 
 需要注意的是，填写完毕之后，一定要在Powershell中运行下列代码以删除所有的注释文字：
 
-```
+```PowerShell
 $f='c:\path\to\thisFile.ps1'
 gc $f | ? {$_ -notmatch "^\s*#"} | % {$_ -replace '(^.*?)\s*?[^``]#.*','$1'} | Out-File $f+".~" -en utf8; mv -fo $f+".~" $f
 ```
@@ -161,7 +161,7 @@ gc $f | ? {$_ -notmatch "^\s*#"} | % {$_ -replace '(^.*?)\s*?[^``]#.*','$1'} | O
 所有的信息填写完成后，在`test.nuspec`所在目录下执行`choco pack`就会自动进行打包。
 如果有重要的信息没有填写，choco将会报错，并红字提示：
 
-```
+```PowerShell
 LicenseUrl cannot be empty.
 ProjectUrl cannot be empty.
 PackageSourceUrl cannot be empty.
@@ -169,7 +169,7 @@ PackageSourceUrl cannot be empty.
 
 如果没有问题，则会有如下提示：
 
-```
+```PowerShell
 Attempting to build package from 'datagrip.nuspec'.
 Successfully created package 'datagrip.1.0.1.nupkg'
 ```
