@@ -104,12 +104,12 @@ Allows you to execute queries in different modes and provides local history that
 ......(省略)
 </description>
     <projectUrl>https://www.jetbrains.com/datagrip/</projectUrl>
-    <packageSourceUrl>https://download.jetbrains.com/datagrip/datagrip-1.0.1.exe</packageSourceUrl>
+    <packageSourceUrl>https://github.com/Xuanwo/datagrip-chocolatey-package</packageSourceUrl>
     <!--<projectSourceUrl></projectSourceUrl>
     <docsUrl></docsUrl>
     <mailingListUrl></mailingListUrl>-->
     <bugTrackerUrl>https://youtrack.jetbrains.com/issues/DBE</bugTrackerUrl>
-    <tags>datagrip admin jetbrains trail 30days</tags>
+    <tags>datagrip admin jetbrains trial 30days</tags>
     <copyright>Commercial</copyright>
     <!--<licenseUrl></licenseUrl>-->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -142,11 +142,10 @@ $packageName= 'datagrip'
 $installerType = 'EXE'
 $toolsDir   = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 $url        = 'https://download.jetbrains.com/datagrip/datagrip-1.0.1.exe'
-$url64      = $url
 $silentArgs = '/S'
 $validExitCodes = @(0)
 
-Install-ChocolateyPackage "$packageName" "$installerType" "$silentArgs" "$url" "$url64"  -validExitCodes $validExitCodes
+Install-ChocolateyPackage "$packageName" "$installerType" "$silentArgs" "$url"  -validExitCodes $validExitCodes
 ```
 
 需要注意的是，填写完毕之后，一定要在Powershell中运行下列代码以删除所有的注释文字：
@@ -185,3 +184,4 @@ Successfully created package 'datagrip.1.0.1.nupkg'
 # 更新日志
 
 - 2016年02月15日 初步完成
+- 2016年02月20日 修复脚本中的部分错误
