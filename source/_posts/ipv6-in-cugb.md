@@ -38,7 +38,7 @@ Win + R 快捷键调出“运行”对话框，输入“ncpa.cpl”。如图：
 
 向下浏览，确保`TCP/IPv6`这一项已经被选中。
 
-然后使用[此网址](gate.cugbteam.org)登陆，深澜自带的登录器貌似有BUG，IPv6不会进行拨号。
+然后使用[此网址](http://gate.cugbteam.org)登陆，深澜自带的登录器貌似有BUG，IPv6不会进行拨号。
 
 ## IPv6应用
 
@@ -62,6 +62,12 @@ PT可进行私密范围下载，因此提供PT的讨论区大多非公开的，�
 - [北地PT](http://pt.cugb.edu.cn) *无需邀请，荒废多年，不过借这波机会应该会复苏了~*
 - [北邮人PT](http://bt.byr.cn/) *我校IPv6入口就在北邮，速度相当快，资源也很多，非常活跃*
 - [六维空间](http://bt.neu6.edu.cn/) *应当是教育网最大的PT站了，资源最多，非常活跃*
+
+推荐的PT下载工具：
+- [utorrent](http://ll.www.utorrent.com/intl/en/)
+- [bittorrent](http://www.bittorrent.com/)
+
+**绝对禁止使用迅雷下载，严重者可能导致封号。**
 
 ### IPv6电视
 
@@ -99,3 +105,7 @@ IPv6电视就相对显得比较简单易懂了，直接在线收看即可，不�
 
 - [IPv6](https://zh.wikipedia.org/wiki/IPv6)
 - [PT下载](https://zh.wikipedia.org/wiki/PT%E4%B8%8B%E8%BC%89)
+
+# 更新日志
+- 2016年02月17日 初次发布
+- 2016年02月20日 修复网关登录链接，补充PT下载工具
