@@ -1,0 +1,627 @@
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
+<head>
+  
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.3"/>
+
+
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<link rel="canonical" href=" { { site.url } }{ { page.url } }" />
+
+
+
+
+
+    <meta name="description" content="Keep learning!" />
+
+
+
+  <meta name="keywords" content="实习,项目,Together,虚拟化," />
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Xuanwo's Blog" type="application/atom+xml" />
+
+
+
+  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.3" />
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    analytics: {
+      google: 'UA-51515330-1'
+    },
+    sidebar: 'post'
+  };
+</script>
+
+<meta name="google-site-verification" content="YAHxtBFjjhWkrycLOhOBuMHETNYVTtS3h4cPY4Wgo2A" />
+  <title> 基于Socket.io的虚拟计算机 // Xuanwo's Blog </title>
+</head>
+
+<body>
+<!--[if lte IE 8]> <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'> <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode"><img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari." style='margin-left:auto;margin-right:auto;display: block;'/></a></div> <![endif]-->
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <div id="header" class="header">
+      <div class="header-inner">
+        <h1 class="site-meta">
+  <span class="logo-line-before"><i></i></span>
+  <a href="/" class="brand">
+      <span class="logo">
+        <i class="icon-logo"></i>
+      </span>
+      <span class="site-title" style="opacity: 1; top: 0px;box-shadow: 5px 1px 10px #888;" >Xuanwo's Blog</span>
+  </a>
+  <span class="logo-line-after"><i></i></span>
+</h1>
+
+
+  <ul id="menu" class="menu">
+  
+      
+      <li class="menu-item menu-item-home">
+        <a href="/">
+          <i class="menu-item-icon icon-home"></i> <br />
+          首页
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-archives">
+        <a href="/archives">
+          <i class="menu-item-icon icon-archives"></i> <br />
+          归档
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-categories">
+        <a href="/categories">
+          <i class="menu-item-icon icon-categories"></i> <br />
+          分类
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-tags">
+        <a href="/tags">
+          <i class="menu-item-icon icon-tags"></i> <br />
+          标签
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-about">
+        <a href="/about">
+          <i class="menu-item-icon icon-about"></i> <br />
+          关于
+        </a>
+      </li>
+    
+  </ul>
+
+
+      </div>
+    </div>
+
+    <div id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  <div class="post post-type-normal ">
+    <div class="post-header">
+
+      
+      
+        <h1 class="post-title">
+          
+          
+            
+              基于Socket.io的虚拟计算机
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          发表于 2015-07-06
+        </span>
+
+        
+          <span class="post-category">
+            &nbsp; | &nbsp; 分类于
+            
+              <a href="/categories/Learn/">Learn</a>
+
+              
+              
+
+            
+          </span>
+        
+
+        
+          
+            <span class="post-comments-count">
+            &nbsp; | &nbsp;
+            <a href="/2015/07/06/socket-vm/#comments" >
+              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/07/06/socket-vm/"></span>
+            </a>
+          </span>
+          
+        
+      </div>
+    </div>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>基于Socket.io有很多特别强大的应用，socket.io官方提供的一个<a href="http://socket.io/demos/computer/" target="_blank" rel="external">虚拟计算机Demo</a>就非常赞。通过将使用Qemu虚拟取出来的PC界面转发至Socket.io的端口，然后对Canvas不断地进行绘制，形成了近似与远程操控的体验。我们<a href="http://xuanwo.org/2015/06/30/together-project/">Together项目</a>用到了这个库，但由于这个库发布于很久之前，再加上相关文档过少，导致部署起来极为困难。所以我完成了这篇文章，希望能让后来人少走一些弯路。<br><a id="more"></a><br><em>下文基于Ubuntu 14.04 x64，其他系统请自行转换相应命令，谢谢~</em></p>
+<h1 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h1><h2 id="安装nodejs"><a href="#安装nodejs" class="headerlink" title="安装nodejs"></a>安装nodejs</h2><p>使用APT安装</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get -y install nodejs-legacy</span><br></pre></td></tr></table></figure>
+<p>或使用nvm来管理不同版本的nodejs</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh | bash</span><br></pre></td></tr></table></figure>
+<p><em>Canvas库在Debian系的OS上会有些诡异的行为，所以需要格外的做一些处理，感谢<a href="https://github.com/computernewb" target="_blank" rel="external">@computernewb</a>的<a href="https://github.com/kevin-roark/socket.io-computer/issues/11#issuecomment-118790681" target="_blank" rel="external">回复</a></em></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ln -s /usr/bin/nodejs /usr/sbin/node</span><br></pre></td></tr></table></figure>
+<h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get -y install libcairo2-dev libpango1.0-dev libgif-dev build-essential g++</span><br></pre></td></tr></table></figure>
+<h2 id="安装libjpeg9和libjpeg9-dev"><a href="#安装libjpeg9和libjpeg9-dev" class="headerlink" title="安装libjpeg9和libjpeg9-dev"></a>安装libjpeg9和libjpeg9-dev</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9_9a-2_amd64.deb</span><br><span class="line">dpkg -i libjpeg9_9a-2_amd64.deb</span><br><span class="line">wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9-dev_9a-2_amd64.deb</span><br><span class="line">dpkg -i libjpeg9-dev_9a-2_amd64.deb</span><br></pre></td></tr></table></figure>
+<h1 id="处理WinXp镜像"><a href="#处理WinXp镜像" class="headerlink" title="处理WinXp镜像"></a>处理WinXp镜像</h1><h2 id="下载XP镜像"><a href="#下载XP镜像" class="headerlink" title="下载XP镜像"></a>下载XP镜像</h2><h3 id="下载后使用网盘中转"><a href="#下载后使用网盘中转" class="headerlink" title="下载后使用网盘中转"></a>下载后使用网盘中转</h3><p>在<a href="http://msdn.itellyou.cn/" target="_blank" rel="external">I Tell You</a>上下载纯净的XP镜像。（如果使用盗版的镜像，VPS可能会因为违反其Tos而封号）<br>比如，WinXP的中文简体专业版：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ed2k://|file|CN_WINXP_PRO_ISO.img|530186240|7855069CE4216615D761654E2B75A4F7|/</span><br></pre></td></tr></table></figure>
+<h3 id="使用sftp上传"><a href="#使用sftp上传" class="headerlink" title="使用sftp上传"></a>使用sftp上传</h3><p>可以使用类似于FileZilla这样的FTP工具直接上传，大部分国内的网盘到国外的速度都不理想= =，百度云还会出现断流，而好用的国外网盘都被墙，本身就需要翻墙上传。所以还不如直接使用sftp传到服务器上。</p>
+<h2 id="格式转换"><a href="#格式转换" class="headerlink" title="格式转换"></a>格式转换</h2><p><a href="http://msdn.itellyou.cn/" target="_blank" rel="external">I Tell You</a>上下载下来的是img镜像文件，然而我们需要的是ISO，所以还需要进行转换。将img转换为iso，我们需要<code>ccd2iso</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install ccd2iso</span><br></pre></td></tr></table></figure>
+<p>使用方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ccd2iso &lt;.img filename&gt; &lt;.iso filename&gt;</span><br></pre></td></tr></table></figure>
+<h1 id="socket-io-computer配置"><a href="#socket-io-computer配置" class="headerlink" title="socket.io-computer配置"></a>socket.io-computer配置</h1><h2 id="安装依赖-1"><a href="#安装依赖-1" class="headerlink" title="安装依赖"></a>安装依赖</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get -y install qemu redis-server</span><br></pre></td></tr></table></figure>
+<h2 id="虚拟机配置"><a href="#虚拟机配置" class="headerlink" title="虚拟机配置"></a>虚拟机配置</h2><p>生成一个光盘镜像文件用来加载ISO</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 winxp.img 10G</span><br></pre></td></tr></table></figure>
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><h3 id="启动Web服务器"><a href="#启动Web服务器" class="headerlink" title="启动Web服务器"></a>启动Web服务器</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node app.js</span><br></pre></td></tr></table></figure>
+<h3 id="启动IO服务器"><a href="#启动IO服务器" class="headerlink" title="启动IO服务器"></a>启动IO服务器</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node io.js</span><br></pre></td></tr></table></figure>
+<h3 id="生成qemu实例"><a href="#生成qemu实例" class="headerlink" title="生成qemu实例"></a>生成qemu实例</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">COMPUTER_ISO=winxp.iso COMPUTER_IMG=winxp.img node qemu.js</span><br></pre></td></tr></table></figure>
+<h3 id="启动虚拟机"><a href="#启动虚拟机" class="headerlink" title="启动虚拟机"></a>启动虚拟机</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">COMPUTER_IMG=winxp.img node emu-runner.js</span><br></pre></td></tr></table></figure>
+<h1 id="运行-1"><a href="#运行-1" class="headerlink" title="运行"></a>运行</h1><p>访问<code>http://localhost:5000</code></p>
+<h1 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h1><h2 id="若搭建在服务器上，使用IP访问"><a href="#若搭建在服务器上，使用IP访问" class="headerlink" title="若搭建在服务器上，使用IP访问"></a>若搭建在服务器上，使用IP访问</h2><p>需要修改</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var url = process.env.COMPUTER_IO_URL || &apos;http://localhost:6001&apos;;</span><br></pre></td></tr></table></figure>
+<p>为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var url = process.env.COMPUTER_IO_URL || &apos;http://your IP address:6001&apos;;</span><br></pre></td></tr></table></figure>
+<p>否则无法正常连接</p>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<li>2015年07月06日 完成主体框架</li>
+</ul>
+
+      
+    </div>
+
+    <div class="post-footer">
+      
+        <div id="eof" class="print-invisible">
+          <hr class="eof">
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block";><img alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，获取新文章推送
+          </span>
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，请博主喝咖啡
+          </span>
+        </div>
+        <div class="copyright" style="clear:both;">
+           <p><span>本文标题:</span><a href="/2015/07/06/socket-vm/">基于Socket.io的虚拟计算机</a></p>
+           <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
+           <p><span>发布时间:</span>2015年7月6日 - 21时07分</p>
+           <p><span>最后更新:</span>2016年2月29日 - 15时02分</p>
+           <p><span>原始链接:</span><a href="/2015/07/06/socket-vm/" title="基于Socket.io的虚拟计算机">https://xuanwo.org/2015/07/06/socket-vm/</a></p>
+           <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial 4.0</a></p>
+           <p><span>转载请保留以上信息。</span></p>
+        </div>
+      
+      
+        <div class="post-tags">
+          
+            <a href="/tags/实习/"> #实习 </a>
+          
+            <a href="/tags/项目/"> #项目 </a>
+          
+            <a href="/tags/Together/"> #Together </a>
+          
+            <a href="/tags/虚拟化/"> #虚拟化 </a>
+          
+        </div>
+      
+      
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/07/16/cugb-2015-acm-final/">2015年中国地质大学(北京)14级ACM程序设计结课赛</a>
+            
+          </div>
+
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/07/02/teambition-work/">Teambition团队协作实践</a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </div>
+  </div>
+
+
+
+    
+      <div class="comments" id="comments">
+        
+          <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+          </div>
+        
+      </div>
+    
+  </div>
+
+
+        </div>
+      </div>
+
+
+      
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview">
+        <div class="site-author motion-element">
+          <img class="site-author-image" src="/avatar.jpg" alt="Xuanwo" />
+          <p class="site-author-name">Xuanwo</p>
+        </div>
+        <p class="site-description motion-element">Keep learning!</p>
+        <div class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">383</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            <a href="/categories">
+              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-name">分类</span>
+              </a>
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">53</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </div>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml">
+              <i class="menu-item-icon icon-feed"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element">
+            <a href="http://creativecommons.org/licenses/by-nc/4.0" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+      </div>
+
+      
+        <div class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#环境配置"><span class="nav-number">2.</span> <span class="nav-text">环境配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装nodejs"><span class="nav-number">2.1.</span> <span class="nav-text">安装nodejs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装依赖"><span class="nav-number">2.2.</span> <span class="nav-text">安装依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装libjpeg9和libjpeg9-dev"><span class="nav-number">2.3.</span> <span class="nav-text">安装libjpeg9和libjpeg9-dev</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#处理WinXp镜像"><span class="nav-number">3.</span> <span class="nav-text">处理WinXp镜像</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#下载XP镜像"><span class="nav-number">3.1.</span> <span class="nav-text">下载XP镜像</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#下载后使用网盘中转"><span class="nav-number">3.1.1.</span> <span class="nav-text">下载后使用网盘中转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用sftp上传"><span class="nav-number">3.1.2.</span> <span class="nav-text">使用sftp上传</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#格式转换"><span class="nav-number">3.2.</span> <span class="nav-text">格式转换</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#socket-io-computer配置"><span class="nav-number">4.</span> <span class="nav-text">socket.io-computer配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装依赖-1"><span class="nav-number">4.1.</span> <span class="nav-text">安装依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟机配置"><span class="nav-number">4.2.</span> <span class="nav-text">虚拟机配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运行"><span class="nav-number">4.3.</span> <span class="nav-text">运行</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#启动Web服务器"><span class="nav-number">4.3.1.</span> <span class="nav-text">启动Web服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动IO服务器"><span class="nav-number">4.3.2.</span> <span class="nav-text">启动IO服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成qemu实例"><span class="nav-number">4.3.3.</span> <span class="nav-text">生成qemu实例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动虚拟机"><span class="nav-number">4.3.4.</span> <span class="nav-text">启动虚拟机</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#运行-1"><span class="nav-number">5.</span> <span class="nav-text">运行</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#注意"><span class="nav-number">6.</span> <span class="nav-text">注意</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#若搭建在服务器上，使用IP访问"><span class="nav-number">6.1.</span> <span class="nav-text">若搭建在服务器上，使用IP访问</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新日志"><span class="nav-number">7.</span> <span class="nav-text">更新日志</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </div>
+      
+
+    </div>
+  </div>
+
+
+    </div>
+
+    <div id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright-page">
+  
+  &copy; &nbsp;  2014 - 
+  2016
+  <span class="with-love">
+    <i class="icon-heart"></i>
+  </span>
+  <span class="author">Xuanwo</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </div>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js" id="motion.global"></script>
+
+
+
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var $sidebarInner = $('.sidebar-inner');
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.didShow', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+          var self = this;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      $(indicator).velocity('stop').velocity({
+        opacity: action === 'show' ? 0.4 : 0
+      }, { duration: 100 });
+    }
+
+  });
+</script>
+
+
+  <script type="text/javascript" id="sidebar.nav">
+    $(document).ready(function () {
+      var html = $('html');
+
+      $('.sidebar-nav li').on('click', function () {
+        var item = $(this);
+        var activeTabClassName = 'sidebar-nav-active';
+        var activePanelClassName = 'sidebar-panel-active';
+        if (item.hasClass(activeTabClassName)) {
+          return;
+        }
+
+        var currentTarget = $('.' + activePanelClassName);
+        var target = $('.' + item.data('target'));
+
+        currentTarget.velocity('transition.slideUpOut', 200, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', 200)
+            .addClass(activePanelClassName);
+        });
+
+        item.siblings().removeClass(activeTabClassName);
+        item.addClass(activeTabClassName);
+      });
+
+      $('.post-toc a').on('click', function (e) {
+        e.preventDefault();
+        var offset = $(escapeSelector(this.getAttribute('href'))).offset().top;
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        });
+      });
+
+      // Expand sidebar on post detail page by default, when post has a toc.
+      var $tocContent = $('.post-toc-content');
+      if (isDesktop() && CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    });
+  </script>
+
+
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      if (CONFIG.sidebar === 'always') {
+        displaySidebar();
+      }
+    });
+  </script>
+
+  
+
+  
+  
+  
+
+  
+
+    
+      
+    
+
+    <script type="text/javascript">
+      var disqus_shortname = 'only0god';
+      var disqus_identifier = '2015/07/06/socket-vm/';
+      var disqus_title = '基于Socket.io的虚拟计算机';
+      var disqus_url = 'https://xuanwo.org/2015/07/06/socket-vm/';
+
+      (function(){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }());
+    </script>
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/js/analytics_google-analytics.js"></script>
+
+
+</body>
+</html>

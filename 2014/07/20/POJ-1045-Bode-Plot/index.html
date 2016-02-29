@@ -1,273 +1,592 @@
-<!DOCTYPE HTML>
-<html>
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
 <head>
-  <meta charset="utf-8">
   
-  <title>POJ 1045 Bode Plot | Xuanwo&#39;s Blog</title>
-  <meta name="author" content="Xuanwo">
-  
-  <meta name="description" content="Xuanwo&#39;s Blog is a blog for ACM， author is Xuanwo">
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
 
-  <meta property="og:title" content="POJ 1045 Bode Plot"/>
-  <meta property="og:site_name" content="Xuanwo&#39;s Blog"/>
 
-  
-    <meta property="og:image" content="undefined"/>
-  
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.3"/>
 
-  
-    <link rel="alternative" href="/atom.xml" title="Xuanwo&#39;s Blog" type="application/atom+xml">
-  
-  
-    <link href="/favicon.ico" rel="icon">
-  
-  
-  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
-  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
-  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
-  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
-  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
-  <script src="/js/jquery-2.0.3.min.js"></script>
 
-  <!-- analytics -->
-  
-<script type="text/javascript">
-var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-51515330-1']);
-_gaq.push(['_trackPageview']);
-(function() {
-var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<link rel="canonical" href=" { { site.url } }{ { page.url } }" />
 
-ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';
 
-var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-})();
+
+
+
+    <meta name="description" content="Keep learning!" />
+
+
+
+  <meta name="keywords" content="Hexo,C++,Learn" />
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Xuanwo's Blog" type="application/atom+xml" />
+
+
+
+  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.3" />
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    analytics: {
+      google: 'UA-51515330-1'
+    },
+    sidebar: 'post'
+  };
 </script>
 
+<meta name="google-site-verification" content="YAHxtBFjjhWkrycLOhOBuMHETNYVTtS3h4cPY4Wgo2A" />
+  <title> POJ 1045 Bode Plot // Xuanwo's Blog </title>
 </head>
 
- <body>  
-  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-    <div class="container">
-      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-		<span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-	  <a class="navbar-brand" href="/">Xuanwo&#39;s Blog</a>
-      <div class="collapse navbar-collapse nav-menu">
-		<ul class="nav navbar-nav">
-		  
-		  <li>
-			<a href="/archives" title="All the articles.">
-			  <i class="fa fa-archive"></i>Archives
-			</a>
-		  </li>
-		  
-		  <li>
-			<a href="/categories" title="All the categories.">
-			  <i class="fa fa-folder"></i>Categories
-			</a>
-		  </li>
-		  
-		  <li>
-			<a href="/tags" title="All the tags.">
-			  <i class="fa fa-tags"></i>Tags
-			</a>
-		  </li>
-		  
-		  <li>
-			<a href="/about" title="About me.">
-			  <i class="fa fa-user"></i>About
-			</a>
-		  </li>
-		  
-		</ul>
+<body>
+<!--[if lte IE 8]> <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'> <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode"><img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari." style='margin-left:auto;margin-right:auto;display: block;'/></a></div> <![endif]-->
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <div id="header" class="header">
+      <div class="header-inner">
+        <h1 class="site-meta">
+  <span class="logo-line-before"><i></i></span>
+  <a href="/" class="brand">
+      <span class="logo">
+        <i class="icon-logo"></i>
+      </span>
+      <span class="site-title" style="opacity: 1; top: 0px;box-shadow: 5px 1px 10px #888;" >Xuanwo's Blog</span>
+  </a>
+  <span class="logo-line-after"><i></i></span>
+</h1>
+
+
+  <ul id="menu" class="menu">
+  
+      
+      <li class="menu-item menu-item-home">
+        <a href="/">
+          <i class="menu-item-icon icon-home"></i> <br />
+          首页
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-archives">
+        <a href="/archives">
+          <i class="menu-item-icon icon-archives"></i> <br />
+          归档
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-categories">
+        <a href="/categories">
+          <i class="menu-item-icon icon-categories"></i> <br />
+          分类
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-tags">
+        <a href="/tags">
+          <i class="menu-item-icon icon-tags"></i> <br />
+          标签
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-about">
+        <a href="/about">
+          <i class="menu-item-icon icon-about"></i> <br />
+          关于
+        </a>
+      </li>
+    
+  </ul>
+
+
       </div>
-    </div> <!-- container -->
-</nav>
-<div class="clearfix"></div>
+    </div>
 
-  <div class="container">
-  	<div class="content">
-    	 
+    <div id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
 
+  <div id="posts" class="posts-expand">
+    
 
-	
-		<div class="page-header">		
-			<h1> POJ 1045 Bode Plot</h1>
-		</div>		
-	
+  <div class="post post-type-normal ">
+    <div class="post-header">
 
+      
+      
+        <h1 class="post-title">
+          
+          
+            
+              POJ 1045 Bode Plot
+            
+          
+        </h1>
+      
 
+      <div class="post-meta">
+        <span class="post-time">
+          发表于 2014-07-20
+        </span>
 
-<div class="row post">
-	<!-- cols -->
-	
-	<div class="col-md-9">
-	
+        
+          <span class="post-category">
+            &nbsp; | &nbsp; 分类于
+            
+              <a href="/categories/Exercise/">Exercise</a>
 
-			
+              
+              
 
-	<!-- content -->
-	<div class="mypage">		
-	    <h1 id="题目">题目</h1>
-<p>源地址：<a href="http://poj.org/problem?id=1045" target="_blank" rel="external">http://poj.org/problem?id=1045</a></p>
-<h1 id="理解">理解</h1>
-<p>额- -，居然考到了物理公式。推倒的过程中，卡在了题目中的相位不是已知量。知道看了discuss才明白，可以通过令t=0特殊值带入的方法求解。果真是物理题做得少了- -，不机智了。类似于这样的精度问题，G++都是WA，只有C++才能A。至今不知原因。</p>
+            
+          </span>
+        
+
+        
+          
+            <span class="post-comments-count">
+            &nbsp; | &nbsp;
+            <a href="/2014/07/20/POJ-1045-Bode-Plot/#comments" >
+              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2014/07/20/POJ-1045-Bode-Plot/"></span>
+            </a>
+          </span>
+          
+        
+      </div>
+    </div>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
+<p><a href="http://poj.org/problem?id=1045" target="_blank" rel="external">http://poj.org/problem?id=1045</a></p>
+<h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>额- -，居然考到了物理公式。推倒的过程中，卡在了题目中的相位不是已知量。知道看了discuss才明白，可以通过令t=0特殊值带入的方法求解。果真是物理题做得少了- -，不机智了。类似于这样的精度问题，G++都是WA，只有C++才能A。至今不知原因。</p>
 <a id="more"></a>
-
-<h1 id="新技能get">新技能get</h1>
-<p>特殊值带入求未知量</p>
-<h1 id="代码">代码</h1>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;cstdio&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;iostream&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;cmath&gt;</span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="keyword">int</span> n;</div><div class="line"><span class="keyword">double</span> vs,r,c,w;</div><div class="line"></div><div class="line"><span class="keyword">int</span> main(<span class="keyword">int</span> argc, <span class="keyword">char</span> <span class="keyword">const</span> *argv[])</div><div class="line">{</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;vs&gt;&gt;r&gt;&gt;c&gt;&gt;n;</div><div class="line">    <span class="keyword">while</span>(n--)</div><div class="line">    {</div><div class="line">        <span class="built_in">cin</span>&gt;&gt;w;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%.3lf\n"</span>,(c*r*w*vs)/<span class="built_in">sqrt</span>(<span class="number">1</span>+(c*r*w)*(c*r*w)));</div><div class="line">    }</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
-
-<h1 id="更新日志">更新日志</h1>
-<ul>
+<h1 id="新技能get"><a href="#新技能get" class="headerlink" title="新技能get"></a>新技能get</h1><p>特殊值带入求未知量</p>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int n;</span><br><span class="line">double vs,r,c,w;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    cin&gt;&gt;vs&gt;&gt;r&gt;&gt;c&gt;&gt;n;</span><br><span class="line">    while(n--)</span><br><span class="line">    &#123;</span><br><span class="line">        cin&gt;&gt;w;</span><br><span class="line">        printf(&quot;%.3lf\n&quot;,(c*r*w*vs)/sqrt(1+(c*r*w)*(c*r*w)));</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月日 已AC，C++。</li>
 </ul>
-	  
-	</div>
 
-	<div>
-  	<center>
-	<div class="pagination">
-<ul class="pagination">
-	 
-				
-    	<li class="prev"><a href="/2014/07/20/POJ-1028-Web-Navigation/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
-  		
+      
+    </div>
 
-        <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
+    <div class="post-footer">
+      
+        <div id="eof" class="print-invisible">
+          <hr class="eof">
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block";><img alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，获取新文章推送
+          </span>
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，请博主喝咖啡
+          </span>
+        </div>
+        <div class="copyright" style="clear:both;">
+           <p><span>本文标题:</span><a href="/2014/07/20/POJ-1045-Bode-Plot/">POJ 1045 Bode Plot</a></p>
+           <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
+           <p><span>发布时间:</span>2014年7月20日 - 14时07分</p>
+           <p><span>最后更新:</span>2016年2月29日 - 15时02分</p>
+           <p><span>原始链接:</span><a href="/2014/07/20/POJ-1045-Bode-Plot/" title="POJ 1045 Bode Plot">https://xuanwo.org/2014/07/20/POJ-1045-Bode-Plot/</a></p>
+           <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial 4.0</a></p>
+           <p><span>转载请保留以上信息。</span></p>
+        </div>
+      
+      
+      
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/07/20/POJ-1028-Web-Navigation/">POJ 1028 Web Navigation</a>
+            
+          </div>
 
-		
-		   <li class="next"><a href="/2014/07/20/POJ-2199-Rate-of-Return/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>         
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/07/20/POJ-2199-Rate-of-Return/">POJ 2199 Rate of Return</a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </div>
+  </div>
+
+
+
+    
+      <div class="comments" id="comments">
         
-	
-</ul>
+          <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+          </div>
+        
+      </div>
+    
+  </div>
+
+
+        </div>
+      </div>
+
+
+      
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview">
+        <div class="site-author motion-element">
+          <img class="site-author-image" src="/avatar.jpg" alt="Xuanwo" />
+          <p class="site-author-name">Xuanwo</p>
+        </div>
+        <p class="site-description motion-element">Keep learning!</p>
+        <div class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">383</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            <a href="/categories">
+              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-name">分类</span>
+              </a>
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">53</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </div>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml">
+              <i class="menu-item-icon icon-feed"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element">
+            <a href="http://creativecommons.org/licenses/by-nc/4.0" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+      </div>
+
+      
+        <div class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#题目"><span class="nav-number">1.</span> <span class="nav-text">题目</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#理解"><span class="nav-number">2.</span> <span class="nav-text">理解</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#新技能get"><span class="nav-number">3.</span> <span class="nav-text">新技能get</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#代码"><span class="nav-number">4.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新日志"><span class="nav-number">5.</span> <span class="nav-text">更新日志</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </div>
+      
+
+    </div>
+  </div>
+
+
+    </div>
+
+    <div id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright-page">
+  
+  &copy; &nbsp;  2014 - 
+  2016
+  <span class="with-love">
+    <i class="icon-heart"></i>
+  </span>
+  <span class="author">Xuanwo</span>
 </div>
 
-    </center>
-	</div>
-	
-	<!-- comment -->
-	
-<section id="comment">
-  <h2 class="title">Comments</h2>
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
 
-  
-</section>
-
-	
-	</div> <!-- col-md-9/col-md-12 -->
-	
-	
-		<div class="col-md-3"> 
-
-	<!-- date -->
-	
-	<div class="meta-widget">
-	<i class="fa fa-clock-o"></i>
-	Jul 20 2014 
-	</div>
-	
-
-	<!-- categories -->
-    
-	<div class="meta-widget">
-	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
-    <ul id="categorys" class="tag_box list-unstyled collapse in">
-          
-  <li>
-    <li><a href="/categories/Exercise/">Exercise<span>72</span></a></li>
-  </li>
-
-    </ul>
-	</div>
-	
-
-	<!-- tags -->
-	
-	<div class="meta-widget">
-	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
-    <ul id="tags" class="tag_box list-unstyled collapse in">	  
-	    
-  <li><a href="/tags/ACM/">ACM<span>74</span></a></li> <li><a href="/tags/POJ/">POJ<span>73</span></a></li> <li><a href="/tags/CC++/">C/C++<span>66</span></a></li> <li><a href="/tags/简单计算/">简单计算<span>15</span></a></li> <li><a href="/tags/物理/">物理<span>1</span></a></li>
-    </ul>
-	</div>
-		
-
-	<!-- toc -->
-	<div class="meta-widget">
-	
-	   <a data-toggle="collapse" data-target="#toc"><i class="fa fa-bars"></i></a>
-	   <div id="toc" class="toc collapse in">
-			<ol class="toc-article"><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#题目"><span class="toc-article-text">题目</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#理解"><span class="toc-article-text">理解</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#新技能get"><span class="toc-article-text">新技能get</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#代码"><span class="toc-article-text">代码</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#更新日志"><span class="toc-article-text">更新日志</span></a></li></ol>
-		</div>
-	
-	</div>
-	
-    <hr>
-	
-</div><!-- col-md-3 -->
-
-	
-
-</div><!-- row -->
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
 
 
-        <div class="ds-thread" data-thread-key="2014/07/20/POJ-1045-Bode-Plot/"></div>
 
-	</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"></div>
   </div>
-  <div class="container-narrow">
-  <footer> <p>
-  &copy; 2014 Xuanwo
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
   
-      with help from <a href="http://zespia.tw/hexo/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
-
-<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a>进行许可。
-</p> </footer>
-</div> <!-- container-narrow -->
   
-<a id="gotop" href="#">   
-  <span>▲</span> 
-</a>
 
-<script src="/js/jquery.imagesloaded.min.js"></script>
-<script src="/js/gallery.js"></script>
-<script src="/js/bootstrap.min.js"></script>
-<script src="/js/main.js"></script>
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js"></script>
 
 
+  <script type="text/javascript" src="/js/helpers.js"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js" id="motion.global"></script>
 
 
-<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
-<script src="/fancybox/jquery.fancybox.pack.js"></script>
-<script type="text/javascript">
-(function($){
-  $('.fancybox').fancybox();
-})(jQuery);
+
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var $sidebarInner = $('.sidebar-inner');
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.didShow', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+          var self = this;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      $(indicator).velocity('stop').velocity({
+        opacity: action === 'show' ? 0.4 : 0
+      }, { duration: 100 });
+    }
+
+  });
 </script>
 
 
-<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"xuanwo"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		 || document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-	</script>
-<!-- 多说公共JS代码 end -->
+  <script type="text/javascript" id="sidebar.nav">
+    $(document).ready(function () {
+      var html = $('html');
+
+      $('.sidebar-nav li').on('click', function () {
+        var item = $(this);
+        var activeTabClassName = 'sidebar-nav-active';
+        var activePanelClassName = 'sidebar-panel-active';
+        if (item.hasClass(activeTabClassName)) {
+          return;
+        }
+
+        var currentTarget = $('.' + activePanelClassName);
+        var target = $('.' + item.data('target'));
+
+        currentTarget.velocity('transition.slideUpOut', 200, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', 200)
+            .addClass(activePanelClassName);
+        });
+
+        item.siblings().removeClass(activeTabClassName);
+        item.addClass(activeTabClassName);
+      });
+
+      $('.post-toc a').on('click', function (e) {
+        e.preventDefault();
+        var offset = $(escapeSelector(this.getAttribute('href'))).offset().top;
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        });
+      });
+
+      // Expand sidebar on post detail page by default, when post has a toc.
+      var $tocContent = $('.post-toc-content');
+      if (isDesktop() && CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    });
+  </script>
+
+
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      if (CONFIG.sidebar === 'always') {
+        displaySidebar();
+      }
+    });
+  </script>
+
+  
+
+  
+  
+  
+
+  
+
+    
+      
+    
+
+    <script type="text/javascript">
+      var disqus_shortname = 'only0god';
+      var disqus_identifier = '2014/07/20/POJ-1045-Bode-Plot/';
+      var disqus_title = 'POJ 1045 Bode Plot';
+      var disqus_url = 'https://xuanwo.org/2014/07/20/POJ-1045-Bode-Plot/';
+
+      (function(){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }());
+    </script>
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/js/analytics_google-analytics.js"></script>
+
+
 </body>
-   </html>
+</html>

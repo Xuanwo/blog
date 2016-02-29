@@ -1,0 +1,681 @@
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
+<head>
+  
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.3"/>
+
+
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<link rel="canonical" href=" { { site.url } }{ { page.url } }" />
+
+
+
+
+
+    <meta name="description" content="Keep learning!" />
+
+
+
+  <meta name="keywords" content="VPS,Linux,SSH," />
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Xuanwo's Blog" type="application/atom+xml" />
+
+
+
+  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.3" />
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    analytics: {
+      google: 'UA-51515330-1'
+    },
+    sidebar: 'post'
+  };
+</script>
+
+<meta name="google-site-verification" content="YAHxtBFjjhWkrycLOhOBuMHETNYVTtS3h4cPY4Wgo2A" />
+  <title> 使用Screen管理会话 // Xuanwo's Blog </title>
+</head>
+
+<body>
+<!--[if lte IE 8]> <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'> <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode"><img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari." style='margin-left:auto;margin-right:auto;display: block;'/></a></div> <![endif]-->
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <div id="header" class="header">
+      <div class="header-inner">
+        <h1 class="site-meta">
+  <span class="logo-line-before"><i></i></span>
+  <a href="/" class="brand">
+      <span class="logo">
+        <i class="icon-logo"></i>
+      </span>
+      <span class="site-title" style="opacity: 1; top: 0px;box-shadow: 5px 1px 10px #888;" >Xuanwo's Blog</span>
+  </a>
+  <span class="logo-line-after"><i></i></span>
+</h1>
+
+
+  <ul id="menu" class="menu">
+  
+      
+      <li class="menu-item menu-item-home">
+        <a href="/">
+          <i class="menu-item-icon icon-home"></i> <br />
+          首页
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-archives">
+        <a href="/archives">
+          <i class="menu-item-icon icon-archives"></i> <br />
+          归档
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-categories">
+        <a href="/categories">
+          <i class="menu-item-icon icon-categories"></i> <br />
+          分类
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-tags">
+        <a href="/tags">
+          <i class="menu-item-icon icon-tags"></i> <br />
+          标签
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-about">
+        <a href="/about">
+          <i class="menu-item-icon icon-about"></i> <br />
+          关于
+        </a>
+      </li>
+    
+  </ul>
+
+
+      </div>
+    </div>
+
+    <div id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  <div class="post post-type-normal ">
+    <div class="post-header">
+
+      
+      
+        <h1 class="post-title">
+          
+          
+            
+              使用Screen管理会话
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          发表于 2015-07-01
+        </span>
+
+        
+          <span class="post-category">
+            &nbsp; | &nbsp; 分类于
+            
+              <a href="/categories/Opinion/">Opinion</a>
+
+              
+              
+
+            
+          </span>
+        
+
+        
+          
+            <span class="post-comments-count">
+            &nbsp; | &nbsp;
+            <a href="/2015/07/01/screen-ssh/#comments" >
+              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/07/01/screen-ssh/"></span>
+            </a>
+          </span>
+          
+        
+      </div>
+    </div>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在实现<a href="http://xuanwo.org/2015/06/30/together-project/">Together项目</a>的过程中，有一个需求是需要下载一个500M左右系统镜像包，由于文件源在国内，国外的下载速度简直感人。在经历多次因为SSH超时导致下载意外终止后，我终于决定要解决掉这个问题。</p>
+<a id="more"></a>
+<h1 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h1><p><strong>SIGHUP 信号</strong><br>首先介绍Linux/Unix中的几个概念：</p>
+<blockquote>
+<p><a href="">进程组（process group）</a>：一个或多个进程的集合，每一个进程组有唯一一个进程组ID，即进程组长进程的ID。<br><a href="">会话期（session）</a>：一个或多个进程组的集合，有唯一一个会话期首进程（session leader）。会话期ID为首进程的ID。<br>会话期可以有一个单独的控制终端（controlling terminal）。与控制终端连接的会话期首进程叫做控制进程（controlling process）。当前与终端交互的进程称为前台进程组。其余进程组称为后台进程组。</p>
+</blockquote>
+<p>根据<a href="https://zh.wikipedia.org/wiki/POSIX" target="_blank" rel="external">POSIX.1</a>定义：</p>
+<ul>
+<li>挂断信号（SIGHUP）默认的动作是终止程序。</li>
+<li>当终端接口检测到网络连接断开，将挂断信号发送给控制进程（会话期首进程）。</li>
+<li>如果会话期首进程终止，则该信号发送到该会话期前台进程组。</li>
+<li>一个进程退出导致一个孤儿进程组中产生时，如果任意一个孤儿进程组进程处于STOP状态，发送SIGHUP和SIGCONT信号到该进程组中所有进程。</li>
+</ul>
+<p>也就是说，一旦putty因为超时产生了SIGHUP信号，那么会连带着当前终端正在运行的程序全部终止。所以，只要避免SIGHUP信号的产生，就可以规避这个问题。</p>
+<h1 id="Screen"><a href="#Screen" class="headerlink" title="Screen"></a>Screen</h1><p>简单来说，Screen是一个可以在多个进程之间多路复用一个物理终端的窗口管理器。Screen中有会话的概念，用户可以在一个screen会话中创建多个screen窗口，在每一个screen窗口中就像操作一个真实的telnet/SSH连接窗口那样。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>很多发行版会预装Screen，如果没有（比如Ubuntu），则需要自行安装，以Ubuntu为例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">sudo apt-get install screen</span><br></pre></td></tr></table></figure>
+<h2 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h2><h3 id="直接创建"><a href="#直接创建" class="headerlink" title="直接创建"></a>直接创建</h3><p>直接在命令行下输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">screen</span><br></pre></td></tr></table></figure>
+<p>之后你会看到几页字，按回车跳过之后，你就来到了一个shell的全屏窗口。你可以执行任意shell程序，就像在ssh窗口中那样。在该窗口中键入exit退出该窗口，如果这是该screen会话的唯一窗口，该screen会话退出，否则screen自动切换到前一个窗口。</p>
+<h3 id="快捷键创建新窗口"><a href="#快捷键创建新窗口" class="headerlink" title="快捷键创建新窗口"></a>快捷键创建新窗口</h3><p>在已经激活的Screen会话下，使用快捷键<code>Ctrl+A</code>然后点击<code>C</code>，screen 在该会话内生成一个新的窗口并切换到该窗口。</p>
+<h2 id="暂时中断"><a href="#暂时中断" class="headerlink" title="暂时中断"></a>暂时中断</h2><p>screen还有更高级的功能。你可以不中断screen窗口中程序的运行而暂时断开（detach）screen会话，并在随后时间重新连接（attach）该会话，重新控制各窗口中运行的程序。例如，我们使用wget下载一个文件：<br><img src="/imgs/learn/ssh-time-out.png" alt="SSH超时样例"><br>之后我们想暂时退出做点别的事情，比如出去散散步，那么在screen窗口键入<code>Ctrl+A</code>然后点击<code>D</code>，Screen会给出detached提示：<br><img src="/imgs/learn/screen-detached.png" alt="Screen Detached"><br>半个小时之后回来了，找到该screen会话：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">screen -ls</span><br></pre></td></tr></table></figure>
+<p>重新连接会话：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">screen -r 会话ID</span><br></pre></td></tr></table></figure>
+<p>一切工作都会完全回来，区别只在于，他可能已经做好了&gt;_&lt;。</p>
+<h2 id="键绑定"><a href="#键绑定" class="headerlink" title="键绑定"></a>键绑定</h2><blockquote>
+<p>你可能注意到给screen发送命令使用了特殊的键组合<code>Ctrl+A</code>。这是因为我们在键盘上键入的信息是直接发送给当前screen窗口，必须用其他方式向screen窗口管理器发出命令，默认情况下，screen接收以<code>Ctrl+A</code>开始的命令。这种命令形式在screen中叫做键绑定（key binding），<code>Ctrl+A</code>叫做命令字符（command character）。</p>
+</blockquote>
+<p>可以通过<code>Ctrl+A ?</code>来查看所有的键绑定，常用的键绑定有：</p>
+<table>
+<thead>
+<tr>
+<th><code>Ctrl+A ?</code></th>
+<th>显示所有键绑定信息</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Ctrl+A w</code></td>
+<td>显示所有窗口列表</td>
+</tr>
+<tr>
+<td><code>Ctrl+A Ctrl+A</code></td>
+<td>切换到之前显示的窗口</td>
+</tr>
+<tr>
+<td><code>Ctrl+A c</code></td>
+<td>创建一个新的运行shell的窗口并切换到该窗口</td>
+</tr>
+<tr>
+<td><code>Ctrl+A n</code></td>
+<td>切换到下一个窗口</td>
+</tr>
+<tr>
+<td><code>Ctrl+A p</code></td>
+<td>切换到前一个窗口(与Ctrl+A n相对)</td>
+</tr>
+<tr>
+<td><code>Ctrl+A 0..9</code></td>
+<td>切换到窗口0..9</td>
+</tr>
+<tr>
+<td><code>Ctrl+A a</code></td>
+<td>发送 Ctrl+A到当前窗口</td>
+</tr>
+<tr>
+<td><code>Ctrl+A d</code></td>
+<td>暂时断开screen会话</td>
+</tr>
+<tr>
+<td><code>Ctrl+A k</code></td>
+<td>杀掉当前窗口</td>
+</tr>
+<tr>
+<td><code>Ctrl+A [</code></td>
+<td>进入拷贝/回滚模式</td>
+</tr>
+</tbody>
+</table>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a href="http://www.ibm.com/developerworks/cn/linux/l-cn-screen/index.html" target="_blank" rel="external">linux 技巧：使用 screen 管理你的远程会话</a></li>
+<li><a href="http://www.gnu.org/software/screen/" target="_blank" rel="external">GNU Screen</a></li>
+<li><a href="http://www.slac.stanford.edu/comp/unix/package/epics/extensions/iocConsole/screen.1.html" target="_blank" rel="external">Screen的man page提供了最详细的信息</a></li>
+</ul>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<li>2015年07月01日 完成关于Screen的介绍</li>
+</ul>
+
+      
+    </div>
+
+    <div class="post-footer">
+      
+        <div id="eof" class="print-invisible">
+          <hr class="eof">
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block";><img alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，获取新文章推送
+          </span>
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，请博主喝咖啡
+          </span>
+        </div>
+        <div class="copyright" style="clear:both;">
+           <p><span>本文标题:</span><a href="/2015/07/01/screen-ssh/">使用Screen管理会话</a></p>
+           <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
+           <p><span>发布时间:</span>2015年7月1日 - 09时07分</p>
+           <p><span>最后更新:</span>2016年2月29日 - 15时02分</p>
+           <p><span>原始链接:</span><a href="/2015/07/01/screen-ssh/" title="使用Screen管理会话">https://xuanwo.org/2015/07/01/screen-ssh/</a></p>
+           <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial 4.0</a></p>
+           <p><span>转载请保留以上信息。</span></p>
+        </div>
+      
+      
+        <div class="post-tags">
+          
+            <a href="/tags/VPS/"> #VPS </a>
+          
+            <a href="/tags/Linux/"> #Linux </a>
+          
+            <a href="/tags/SSH/"> #SSH </a>
+          
+        </div>
+      
+      
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/07/02/teambition-work/">Teambition团队协作实践</a>
+            
+          </div>
+
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/06/30/together-project/">Together网站项目设计</a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </div>
+  </div>
+
+
+
+    
+      <div class="comments" id="comments">
+        
+          <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+          </div>
+        
+      </div>
+    
+  </div>
+
+
+        </div>
+      </div>
+
+
+      
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview">
+        <div class="site-author motion-element">
+          <img class="site-author-image" src="/avatar.jpg" alt="Xuanwo" />
+          <p class="site-author-name">Xuanwo</p>
+        </div>
+        <p class="site-description motion-element">Keep learning!</p>
+        <div class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">383</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            <a href="/categories">
+              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-name">分类</span>
+              </a>
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">53</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </div>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml">
+              <i class="menu-item-icon icon-feed"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element">
+            <a href="http://creativecommons.org/licenses/by-nc/4.0" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+      </div>
+
+      
+        <div class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#原因"><span class="nav-number">2.</span> <span class="nav-text">原因</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Screen"><span class="nav-number">3.</span> <span class="nav-text">Screen</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">3.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建"><span class="nav-number">3.2.</span> <span class="nav-text">创建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#直接创建"><span class="nav-number">3.2.1.</span> <span class="nav-text">直接创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快捷键创建新窗口"><span class="nav-number">3.2.2.</span> <span class="nav-text">快捷键创建新窗口</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#暂时中断"><span class="nav-number">3.3.</span> <span class="nav-text">暂时中断</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#键绑定"><span class="nav-number">3.4.</span> <span class="nav-text">键绑定</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新日志"><span class="nav-number">5.</span> <span class="nav-text">更新日志</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </div>
+      
+
+    </div>
+  </div>
+
+
+    </div>
+
+    <div id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright-page">
+  
+  &copy; &nbsp;  2014 - 
+  2016
+  <span class="with-love">
+    <i class="icon-heart"></i>
+  </span>
+  <span class="author">Xuanwo</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </div>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js" id="motion.global"></script>
+
+
+
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var $sidebarInner = $('.sidebar-inner');
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.didShow', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+          var self = this;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      $(indicator).velocity('stop').velocity({
+        opacity: action === 'show' ? 0.4 : 0
+      }, { duration: 100 });
+    }
+
+  });
+</script>
+
+
+  <script type="text/javascript" id="sidebar.nav">
+    $(document).ready(function () {
+      var html = $('html');
+
+      $('.sidebar-nav li').on('click', function () {
+        var item = $(this);
+        var activeTabClassName = 'sidebar-nav-active';
+        var activePanelClassName = 'sidebar-panel-active';
+        if (item.hasClass(activeTabClassName)) {
+          return;
+        }
+
+        var currentTarget = $('.' + activePanelClassName);
+        var target = $('.' + item.data('target'));
+
+        currentTarget.velocity('transition.slideUpOut', 200, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', 200)
+            .addClass(activePanelClassName);
+        });
+
+        item.siblings().removeClass(activeTabClassName);
+        item.addClass(activeTabClassName);
+      });
+
+      $('.post-toc a').on('click', function (e) {
+        e.preventDefault();
+        var offset = $(escapeSelector(this.getAttribute('href'))).offset().top;
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        });
+      });
+
+      // Expand sidebar on post detail page by default, when post has a toc.
+      var $tocContent = $('.post-toc-content');
+      if (isDesktop() && CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    });
+  </script>
+
+
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      if (CONFIG.sidebar === 'always') {
+        displaySidebar();
+      }
+    });
+  </script>
+
+  
+
+  
+  
+  
+
+  
+
+    
+      
+    
+
+    <script type="text/javascript">
+      var disqus_shortname = 'only0god';
+      var disqus_identifier = '2015/07/01/screen-ssh/';
+      var disqus_title = '使用Screen管理会话';
+      var disqus_url = 'https://xuanwo.org/2015/07/01/screen-ssh/';
+
+      (function(){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }());
+    </script>
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/js/analytics_google-analytics.js"></script>
+
+
+</body>
+</html>

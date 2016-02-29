@@ -1,0 +1,629 @@
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
+<head>
+  
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.3"/>
+
+
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<link rel="canonical" href=" { { site.url } }{ { page.url } }" />
+
+
+
+
+
+    <meta name="description" content="Keep learning!" />
+
+
+
+  <meta name="keywords" content="Software,Python,HTML," />
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Xuanwo's Blog" type="application/atom+xml" />
+
+
+
+  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.3" />
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    analytics: {
+      google: 'UA-51515330-1'
+    },
+    sidebar: 'post'
+  };
+</script>
+
+<meta name="google-site-verification" content="YAHxtBFjjhWkrycLOhOBuMHETNYVTtS3h4cPY4Wgo2A" />
+  <title> 使用pyQuery解析HTML // Xuanwo's Blog </title>
+</head>
+
+<body>
+<!--[if lte IE 8]> <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'> <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode"><img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari." style='margin-left:auto;margin-right:auto;display: block;'/></a></div> <![endif]-->
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <div id="header" class="header">
+      <div class="header-inner">
+        <h1 class="site-meta">
+  <span class="logo-line-before"><i></i></span>
+  <a href="/" class="brand">
+      <span class="logo">
+        <i class="icon-logo"></i>
+      </span>
+      <span class="site-title" style="opacity: 1; top: 0px;box-shadow: 5px 1px 10px #888;" >Xuanwo's Blog</span>
+  </a>
+  <span class="logo-line-after"><i></i></span>
+</h1>
+
+
+  <ul id="menu" class="menu">
+  
+      
+      <li class="menu-item menu-item-home">
+        <a href="/">
+          <i class="menu-item-icon icon-home"></i> <br />
+          首页
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-archives">
+        <a href="/archives">
+          <i class="menu-item-icon icon-archives"></i> <br />
+          归档
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-categories">
+        <a href="/categories">
+          <i class="menu-item-icon icon-categories"></i> <br />
+          分类
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-tags">
+        <a href="/tags">
+          <i class="menu-item-icon icon-tags"></i> <br />
+          标签
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-about">
+        <a href="/about">
+          <i class="menu-item-icon icon-about"></i> <br />
+          关于
+        </a>
+      </li>
+    
+  </ul>
+
+
+      </div>
+    </div>
+
+    <div id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  <div class="post post-type-normal ">
+    <div class="post-header">
+
+      
+      
+        <h1 class="post-title">
+          
+          
+            
+              使用pyQuery解析HTML
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          发表于 2015-10-23
+        </span>
+
+        
+          <span class="post-category">
+            &nbsp; | &nbsp; 分类于
+            
+              <a href="/categories/Develop/">Develop</a>
+
+              
+              
+
+            
+          </span>
+        
+
+        
+          
+            <span class="post-comments-count">
+            &nbsp; | &nbsp;
+            <a href="/2015/10/23/pyquery-intro/#comments" >
+              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/10/23/pyquery-intro/"></span>
+            </a>
+          </span>
+          
+        
+      </div>
+    </div>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <h1 id="pyQuery介绍"><a href="#pyQuery介绍" class="headerlink" title="pyQuery介绍"></a>pyQuery介绍</h1><p>pyquery 可以让你用jquery语法来对xml进行查询。这个API和jquery十分类似。如果利用lxml，pyquery对xml和html的操作将更加快速。</p>
+<a id="more"></a>
+<h1 id="pyQuery安装"><a href="#pyQuery安装" class="headerlink" title="pyQuery安装"></a>pyQuery安装</h1><blockquote>
+<p>首先，你得有一个python环境，最好是类linux的，因为安装pyquery的过程中需要编译某一个包，在windows上比较难解决依赖问题</p>
+</blockquote>
+<h2 id="安装Python环境"><a href="#安装Python环境" class="headerlink" title="安装Python环境"></a>安装Python环境</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install python python-dev python-pip</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>python</code> 安装python环境</li>
+<li><code>python-dev</code> 安装python开发环境</li>
+<li><code>python-pip</code> 安装pip来进行python包管理</li>
+</ul>
+<h2 id="解决pyQuery所需依赖"><a href="#解决pyQuery所需依赖" class="headerlink" title="解决pyQuery所需依赖"></a>解决pyQuery所需依赖</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install libxml2-dev libxslt1-dev libz-dev</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>libxml2-dev</code>和<code>libxslt1-dev</code>是编译lxml所需要的包，缺少会导致编译失败</li>
+<li>某些情况下会提示<code>/usr/bin/ld: cannot find -lz</code>，所以需要安装<code>libz-dev</code></li>
+</ul>
+<h2 id="安装pyQuery"><a href="#安装pyQuery" class="headerlink" title="安装pyQuery"></a>安装pyQuery</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install pyquery</span><br></pre></td></tr></table></figure>
+<p>解决了依赖问题之后，就可以进行pyquery的安装了。</p>
+<blockquote>
+<p>有一个坑点是在虚拟机编译lxml的过程中，如果内存过小会导致编译失败。如果出现错误，请把虚拟机的内存调整至1024M或更大。</p>
+</blockquote>
+<h1 id="pyQuery使用"><a href="#pyQuery使用" class="headerlink" title="pyQuery使用"></a>pyQuery使用</h1><h2 id="最简样例"><a href="#最简样例" class="headerlink" title="最简样例"></a>最简样例</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pyquery <span class="keyword">import</span> PyQuery <span class="keyword">as</span> pyq</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">html = <span class="string">'''</span><br><span class="line">&lt;html&gt;</span><br><span class="line">    &lt;head&gt;</span><br><span class="line">        &lt;title&gt;这是标题&lt;/title&gt;</span><br><span class="line">    &lt;/head&gt;</span><br><span class="line">    &lt;body&gt;</span><br><span class="line">        &lt;p id="hi"&gt;Hello&lt;/p&gt;</span><br><span class="line">        &lt;ul&gt;</span><br><span class="line">            &lt;li&gt;list1&lt;/li&gt;</span><br><span class="line">            &lt;div class="ha"&gt;</span><br><span class="line">                Cool!</span><br><span class="line">            &lt;/div&gt;</span><br><span class="line">            &lt;li&gt;list2&lt;/li&gt;</span><br><span class="line">        &lt;/ul&gt;</span><br><span class="line">    &lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line">'''</span></span><br><span class="line"></span><br><span class="line">doc = pyq(html)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> doc(<span class="string">'title'</span>) <span class="comment"># 获取 title 标签的源码</span></span><br><span class="line"><span class="comment"># &lt;title&gt;这是标题&lt;/title&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> doc(<span class="string">'title'</span>).text() <span class="comment"># 获取 title 标签的内容</span></span><br><span class="line"><span class="comment"># 这是标题</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> doc(<span class="string">'.ha'</span>).text() <span class="comment"># 获取 class 为 ha 的标签的内容</span></span><br><span class="line"><span class="comment"># Cool!</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> doc(<span class="string">'#hi'</span>).text() <span class="comment"># 获取 id 为 hi 的标签的内容</span></span><br><span class="line"><span class="comment"># Hello</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> doc(<span class="string">'p:first'</span>).text() <span class="comment"># 还可以支持伪类</span></span><br><span class="line"></span><br><span class="line">li = doc(<span class="string">'li'</span>) <span class="comment"># 处理多个元素</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> li:</span><br><span class="line">    <span class="keyword">print</span> pyq(i).text()</span><br><span class="line"><span class="comment"># list1</span></span><br><span class="line"><span class="comment"># list2</span></span><br></pre></td></tr></table></figure>
+<h2 id="指定网址"><a href="#指定网址" class="headerlink" title="指定网址"></a>指定网址</h2><h3 id="直接访问"><a href="#直接访问" class="headerlink" title="直接访问"></a>直接访问</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pyquery <span class="keyword">import</span> PyQuery <span class="keyword">as</span> pyq</span><br><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"></span><br><span class="line"><span class="comment"># 直接访问并获取相关信息</span></span><br><span class="line"><span class="keyword">print</span> pyq(url=<span class="string">'https://www.google.com'</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="指定headers"><a href="#指定headers" class="headerlink" title="指定headers"></a>指定headers</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pyquery <span class="keyword">import</span> PyQuery <span class="keyword">as</span> pyq</span><br><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以指定headers访问并获取相关信息，好处是不会被某些网站拒绝访问</span></span><br><span class="line"><span class="keyword">print</span> pyq(url=<span class="string">'https://www.google.com'</span>, headers=&#123;<span class="string">'User-Agent'</span>: <span class="string">'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.71 Safari/537.36'</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="指定文件"><a href="#指定文件" class="headerlink" title="指定文件"></a>指定文件</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/python</span><br><span class="line"># -*- coding: UTF-8 -*-</span><br><span class="line"></span><br><span class="line">from pyquery import PyQuery as pyq</span><br><span class="line"></span><br><span class="line">print pyq(filename=&apos;path/to/html/file&apos;).text()</span><br></pre></td></tr></table></figure>
+<h2 id="指定lxml文档"><a href="#指定lxml文档" class="headerlink" title="指定lxml文档"></a>指定lxml文档</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/python</span><br><span class="line"># -*- coding: UTF-8 -*-</span><br><span class="line"></span><br><span class="line">from pyquery import PyQuery as pyq</span><br><span class="line">from lxml import etree</span><br><span class="line"></span><br><span class="line"># pyquery支持etree的API</span><br><span class="line">print pyq(etree.fromstring(&quot;&lt;html&gt;&lt;/html&gt;&quot;)).text()</span><br></pre></td></tr></table></figure>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a href="https://github.com/gawel/pyquery" target="_blank" rel="external">gawel/pyquery</a></li>
+<li><a href="http://www.powerxing.com/python-use-pyquery-to-parse-html/" target="_blank" rel="external">Python使用pyQuery解析HTML内容</a></li>
+<li><a href="http://stackoverflow.com/questions/26053982/error-setup-script-exited-with-error-command-x86-64-linux-gnu-gcc-failed-wit" target="_blank" rel="external">error: Setup script exited with error: command ‘x86_64-linux-gnu-gcc’ failed with exit status 1</a></li>
+<li><a href="http://stackoverflow.com/questions/24455238/lxml-installation-error-ubuntu-14-04-internal-compiler-error" target="_blank" rel="external">lxml installation error ubuntu 14.04 (internal compiler error)</a></li>
+<li><a href="http://stackoverflow.com/a/22256546" target="_blank" rel="external">can’t installing lxml on Ubuntu 12.04</a></li>
+</ul>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<li>2015年10月23日 初步完成</li>
+</ul>
+
+      
+    </div>
+
+    <div class="post-footer">
+      
+        <div id="eof" class="print-invisible">
+          <hr class="eof">
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block";><img alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，获取新文章推送
+          </span>
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，请博主喝咖啡
+          </span>
+        </div>
+        <div class="copyright" style="clear:both;">
+           <p><span>本文标题:</span><a href="/2015/10/23/pyquery-intro/">使用pyQuery解析HTML</a></p>
+           <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
+           <p><span>发布时间:</span>2015年10月23日 - 01时10分</p>
+           <p><span>最后更新:</span>2016年2月29日 - 15时02分</p>
+           <p><span>原始链接:</span><a href="/2015/10/23/pyquery-intro/" title="使用pyQuery解析HTML">https://xuanwo.org/2015/10/23/pyquery-intro/</a></p>
+           <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial 4.0</a></p>
+           <p><span>转载请保留以上信息。</span></p>
+        </div>
+      
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Software/"> #Software </a>
+          
+            <a href="/tags/Python/"> #Python </a>
+          
+            <a href="/tags/HTML/"> #HTML </a>
+          
+        </div>
+      
+      
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/10/28/hashsum/">Hash以及Hash校验工具介绍</a>
+            
+          </div>
+
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/10/22/vagrant-intro/">Vagrant——构建虚拟开发环境的新思路</a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </div>
+  </div>
+
+
+
+    
+      <div class="comments" id="comments">
+        
+          <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+          </div>
+        
+      </div>
+    
+  </div>
+
+
+        </div>
+      </div>
+
+
+      
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview">
+        <div class="site-author motion-element">
+          <img class="site-author-image" src="/avatar.jpg" alt="Xuanwo" />
+          <p class="site-author-name">Xuanwo</p>
+        </div>
+        <p class="site-description motion-element">Keep learning!</p>
+        <div class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">383</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            <a href="/categories">
+              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-name">分类</span>
+              </a>
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">53</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </div>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml">
+              <i class="menu-item-icon icon-feed"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element">
+            <a href="http://creativecommons.org/licenses/by-nc/4.0" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+      </div>
+
+      
+        <div class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#pyQuery介绍"><span class="nav-number">1.</span> <span class="nav-text">pyQuery介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#pyQuery安装"><span class="nav-number">2.</span> <span class="nav-text">pyQuery安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Python环境"><span class="nav-number">2.1.</span> <span class="nav-text">安装Python环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决pyQuery所需依赖"><span class="nav-number">2.2.</span> <span class="nav-text">解决pyQuery所需依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装pyQuery"><span class="nav-number">2.3.</span> <span class="nav-text">安装pyQuery</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#pyQuery使用"><span class="nav-number">3.</span> <span class="nav-text">pyQuery使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#最简样例"><span class="nav-number">3.1.</span> <span class="nav-text">最简样例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#指定网址"><span class="nav-number">3.2.</span> <span class="nav-text">指定网址</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#直接访问"><span class="nav-number">3.2.1.</span> <span class="nav-text">直接访问</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#指定headers"><span class="nav-number">3.2.2.</span> <span class="nav-text">指定headers</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#指定文件"><span class="nav-number">3.3.</span> <span class="nav-text">指定文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#指定lxml文档"><span class="nav-number">3.4.</span> <span class="nav-text">指定lxml文档</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新日志"><span class="nav-number">5.</span> <span class="nav-text">更新日志</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </div>
+      
+
+    </div>
+  </div>
+
+
+    </div>
+
+    <div id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright-page">
+  
+  &copy; &nbsp;  2014 - 
+  2016
+  <span class="with-love">
+    <i class="icon-heart"></i>
+  </span>
+  <span class="author">Xuanwo</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </div>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js" id="motion.global"></script>
+
+
+
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var $sidebarInner = $('.sidebar-inner');
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.didShow', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+          var self = this;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      $(indicator).velocity('stop').velocity({
+        opacity: action === 'show' ? 0.4 : 0
+      }, { duration: 100 });
+    }
+
+  });
+</script>
+
+
+  <script type="text/javascript" id="sidebar.nav">
+    $(document).ready(function () {
+      var html = $('html');
+
+      $('.sidebar-nav li').on('click', function () {
+        var item = $(this);
+        var activeTabClassName = 'sidebar-nav-active';
+        var activePanelClassName = 'sidebar-panel-active';
+        if (item.hasClass(activeTabClassName)) {
+          return;
+        }
+
+        var currentTarget = $('.' + activePanelClassName);
+        var target = $('.' + item.data('target'));
+
+        currentTarget.velocity('transition.slideUpOut', 200, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', 200)
+            .addClass(activePanelClassName);
+        });
+
+        item.siblings().removeClass(activeTabClassName);
+        item.addClass(activeTabClassName);
+      });
+
+      $('.post-toc a').on('click', function (e) {
+        e.preventDefault();
+        var offset = $(escapeSelector(this.getAttribute('href'))).offset().top;
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        });
+      });
+
+      // Expand sidebar on post detail page by default, when post has a toc.
+      var $tocContent = $('.post-toc-content');
+      if (isDesktop() && CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    });
+  </script>
+
+
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      if (CONFIG.sidebar === 'always') {
+        displaySidebar();
+      }
+    });
+  </script>
+
+  
+
+  
+  
+  
+
+  
+
+    
+      
+    
+
+    <script type="text/javascript">
+      var disqus_shortname = 'only0god';
+      var disqus_identifier = '2015/10/23/pyquery-intro/';
+      var disqus_title = '使用pyQuery解析HTML';
+      var disqus_url = 'https://xuanwo.org/2015/10/23/pyquery-intro/';
+
+      (function(){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }());
+    </script>
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/js/analytics_google-analytics.js"></script>
+
+
+</body>
+</html>

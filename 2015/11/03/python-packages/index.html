@@ -1,0 +1,746 @@
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
+<head>
+  
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.3"/>
+
+
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<link rel="canonical" href=" { { site.url } }{ { page.url } }" />
+
+
+
+
+
+    <meta name="description" content="Keep learning!" />
+
+
+
+  <meta name="keywords" content="Python," />
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Xuanwo's Blog" type="application/atom+xml" />
+
+
+
+  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.3" />
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    analytics: {
+      google: 'UA-51515330-1'
+    },
+    sidebar: 'post'
+  };
+</script>
+
+<meta name="google-site-verification" content="YAHxtBFjjhWkrycLOhOBuMHETNYVTtS3h4cPY4Wgo2A" />
+  <title> Python包分发详解 // Xuanwo's Blog </title>
+</head>
+
+<body>
+<!--[if lte IE 8]> <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'> <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode"><img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari." style='margin-left:auto;margin-right:auto;display: block;'/></a></div> <![endif]-->
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <div id="header" class="header">
+      <div class="header-inner">
+        <h1 class="site-meta">
+  <span class="logo-line-before"><i></i></span>
+  <a href="/" class="brand">
+      <span class="logo">
+        <i class="icon-logo"></i>
+      </span>
+      <span class="site-title" style="opacity: 1; top: 0px;box-shadow: 5px 1px 10px #888;" >Xuanwo's Blog</span>
+  </a>
+  <span class="logo-line-after"><i></i></span>
+</h1>
+
+
+  <ul id="menu" class="menu">
+  
+      
+      <li class="menu-item menu-item-home">
+        <a href="/">
+          <i class="menu-item-icon icon-home"></i> <br />
+          首页
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-archives">
+        <a href="/archives">
+          <i class="menu-item-icon icon-archives"></i> <br />
+          归档
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-categories">
+        <a href="/categories">
+          <i class="menu-item-icon icon-categories"></i> <br />
+          分类
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-tags">
+        <a href="/tags">
+          <i class="menu-item-icon icon-tags"></i> <br />
+          标签
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-about">
+        <a href="/about">
+          <i class="menu-item-icon icon-about"></i> <br />
+          关于
+        </a>
+      </li>
+    
+  </ul>
+
+
+      </div>
+    </div>
+
+    <div id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  <div class="post post-type-normal ">
+    <div class="post-header">
+
+      
+      
+        <h1 class="post-title">
+          
+          
+            
+              Python包分发详解
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          发表于 2015-11-03
+        </span>
+
+        
+          <span class="post-category">
+            &nbsp; | &nbsp; 分类于
+            
+              <a href="/categories/Develop/">Develop</a>
+
+              
+              
+
+            
+          </span>
+        
+
+        
+          
+            <span class="post-comments-count">
+            &nbsp; | &nbsp;
+            <a href="/2015/11/03/python-packages/#comments" >
+              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/11/03/python-packages/"></span>
+            </a>
+          </span>
+          
+        
+      </div>
+    </div>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>用Python写过不少的脚本，现在要把脚本打包成模块并进行发布，然后才明白脚本Boy到正规的码农差距有多大= =。<br>踩了很多天的坑之后，自己学习到了Python的包分发机制，以及如何利用Pypi向全世界分发自己的模。现在简单地做一些整理。</p>
+<a id="more"></a>
+<h1 id="Python包机制"><a href="#Python包机制" class="headerlink" title="Python包机制"></a>Python包机制</h1><blockquote>
+<p>包是一个模块或模块/子模块的集合，一般情况下被压缩到一个压缩包中。<br>其中包含</p>
+<ol>
+<li>依赖信息</li>
+<li>将文件拷贝到标准的包搜索路径的指令。</li>
+<li>编译指令(如果在安装前代码必须被编译的话)。</li>
+</ol>
+</blockquote>
+<p>也就是说，为了分发模块，我们需要把模块的依赖信息和模块一起打包。在Python中，这个打包好的可分发的文件一般以<code>.egg</code>结尾，其作用可以理解为java中的jar。Python的包管理以及分发曾经经历过非常混乱的一段时期，但是如今已经基本稳定（或者说，流行？）为两个套件：</p>
+<ul>
+<li>打包&amp;分发：<a href="https://pythonhosted.org/setuptools/" target="_blank" rel="external">Setuptools</a></li>
+<li>安装&amp;管理：<a href="https://pip.readthedocs.org/en/stable/" target="_blank" rel="external">pip</a></li>
+</ul>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><h2 id="注册Pypi"><a href="#注册Pypi" class="headerlink" title="注册Pypi"></a>注册Pypi</h2><blockquote>
+<p>Pypi - the Python Package Index<br>Pypi是Python语言包的仓库，全世界所有开源Python开发者都会在Pypi上提交&amp;下载软件包</p>
+</blockquote>
+<p>为了我们后续的提交操作，我们需要首先<a href="https://pypi.python.org/pypi?%3Aaction=register_form" target="_blank" rel="external">注册</a>一个Pypi的账号，注册非常简单，提供用户名，密码以及邮箱，经过验证之后就注册完成了。</p>
+<h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><p>Python没有严格的工程目录要求，只要有<code>__init__.py</code>在的地方，就会被认为是一个Python的包。但是出于方便协作考虑，可以把自己的源代码与各种脚本分开存放。具体的结构可以学习Github上比较流行的Python项目，选择自己喜欢的即可。</p>
+<h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><p>首先你需要有pip，pip自从<code>3.4</code>版本开始已经随python内置发布，如果使用的版本比较低，可以自己手动进行安装：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install python-pip</span><br></pre></td></tr></table></figure>
+<p>然后我们需要安装<code>setuptools</code>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install setuptools</span><br></pre></td></tr></table></figure>
+<h1 id="编写安装脚本"><a href="#编写安装脚本" class="headerlink" title="编写安装脚本"></a>编写安装脚本</h1><p>准备工作就绪之后，我们就可以开始编写安装脚本了。</p>
+<h2 id="填写配置信息"><a href="#填写配置信息" class="headerlink" title="填写配置信息"></a>填写配置信息</h2><h3 id="基本框架"><a href="#基本框架" class="headerlink" title="基本框架"></a>基本框架</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup, find_packages <span class="comment"># 引入setuptools包</span></span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    option = values, <span class="comment"># 本质上是一个函数的参数，分行写便于维护</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<h3 id="参数介绍"><a href="#参数介绍" class="headerlink" title="参数介绍"></a>参数介绍</h3><h4 id="指定整个包"><a href="#指定整个包" class="headerlink" title="指定整个包"></a>指定整个包</h4><h4 id="指定单独模块"><a href="#指定单独模块" class="headerlink" title="指定单独模块"></a>指定单独模块</h4><h4 id="依赖关系"><a href="#依赖关系" class="headerlink" title="依赖关系"></a>依赖关系</h4><h4 id="包内数据"><a href="#包内数据" class="headerlink" title="包内数据"></a>包内数据</h4><h4 id="其他数据"><a href="#其他数据" class="headerlink" title="其他数据"></a>其他数据</h4><h4 id="Meta-Data"><a href="#Meta-Data" class="headerlink" title="Meta-Data"></a>Meta-Data</h4><table>
+<thead>
+<tr>
+<th>Meta-Data</th>
+<th>描述值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>name</td>
+<td>包名</td>
+</tr>
+<tr>
+<td>version</td>
+<td>此次发布版本</td>
+</tr>
+<tr>
+<td>author</td>
+<td>作者名</td>
+</tr>
+<tr>
+<td>author_email</td>
+<td>作者邮箱</td>
+</tr>
+<tr>
+<td>maintainer</td>
+<td>维护者名</td>
+</tr>
+<tr>
+<td>maintainer_email</td>
+<td>维护者邮箱</td>
+</tr>
+<tr>
+<td>url</td>
+<td>主页</td>
+</tr>
+<tr>
+<td>description</td>
+<td>简要描述</td>
+</tr>
+<tr>
+<td>long_description</td>
+<td>详细描述</td>
+</tr>
+<tr>
+<td>download_url</td>
+<td>下载地址</td>
+</tr>
+<tr>
+<td>classifiers</td>
+<td>分类，参见<a href="https://pypi.python.org/pypi?%3Aaction=list_classifiers" target="_blank" rel="external">此处</a></td>
+</tr>
+<tr>
+<td>platforms</td>
+<td>平台列表</td>
+</tr>
+<tr>
+<td>license</td>
+<td>授权协议</td>
+</tr>
+</tbody>
+</table>
+<h3 id="典型配置"><a href="#典型配置" class="headerlink" title="典型配置"></a>典型配置</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup, find_packages</span><br><span class="line">setup(</span><br><span class="line">    name = <span class="string">"HelloWorld"</span>,</span><br><span class="line">    version = <span class="string">"0.1"</span>,</span><br><span class="line">    packages = find_packages(),</span><br><span class="line">    scripts = [<span class="string">'say_hello.py'</span>],</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Project uses reStructuredText, so ensure that the docutils get</span></span><br><span class="line">    <span class="comment"># installed or upgraded on the target machine</span></span><br><span class="line">    install_requires = [<span class="string">'docutils&gt;=0.3'</span>],</span><br><span class="line"></span><br><span class="line">    package_data = &#123;</span><br><span class="line">        <span class="comment"># If any package contains *.txt or *.rst files, include them:</span></span><br><span class="line">        <span class="string">''</span>: [<span class="string">'*.txt'</span>, <span class="string">'*.rst'</span>],</span><br><span class="line">        <span class="comment"># And include any *.msg files found in the 'hello' package, too:</span></span><br><span class="line">        <span class="string">'hello'</span>: [<span class="string">'*.msg'</span>],</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    <span class="comment"># metadata for upload to PyPI</span></span><br><span class="line">    author = <span class="string">"Me"</span>,</span><br><span class="line">    author_email = <span class="string">"me@example.com"</span>,</span><br><span class="line">    description = <span class="string">"This is an Example Package"</span>,</span><br><span class="line">    license = <span class="string">"PSF"</span>,</span><br><span class="line">    keywords = <span class="string">"hello world example examples"</span>,</span><br><span class="line">    url = <span class="string">"http://example.com/HelloWorld/"</span>,   <span class="comment"># project home page, if any</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># could also include long_description, download_url, classifiers, etc.</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<h2 id="打包"><a href="#打包" class="headerlink" title="打包"></a>打包</h2><blockquote>
+<p>这个坑踩了很久- -，没有老司机的带的痛苦<br>与开发环境不同的时候，当用户运行你的包时，使用open等命令是以当前目录为根运行的，所以你必须指定数据所在位置，否则会出现IOError甚至更糟糕的情况</p>
+</blockquote>
+<h3 id="指定需要分发的文件"><a href="#指定需要分发的文件" class="headerlink" title="指定需要分发的文件"></a>指定需要分发的文件</h3><p><strong>自动处理</strong></p>
+<p>当没有<code>MANIFEST.in</code>文件时，Setuptools将会按照下面的原则处理文件：</p>
+<ul>
+<li>所有<code>py_modules</code>和<code>packages</code>选项包含的Python源文件</li>
+<li>所有<code>ext_modules</code>或<code>libraries</code>选项指定的C源文件</li>
+<li><code>scripts</code>指定的脚本（<em>参见<a href="https://docs.python.org/3.5/distutils/setupscript.html#distutils-installing-scripts" target="_blank" rel="external">Installing Scripts</a></em>）</li>
+<li>形如<code>test/test*.py</code>的文件</li>
+<li><code>README.txt</code>（或<code>README</code>），<code>setup.py</code>和<code>setup.cfg</code></li>
+<li>符合<code>package_data</code>选项的所有文件（<em>参见<a href="https://docs.python.org/3.5/distutils/setupscript.html#distutils-installing-package-data" target="_blank" rel="external">Installing Package Data</a></em>）</li>
+<li>符合<code>data_files</code>选项的所有文件（<em>参见<a href="https://docs.python.org/3.5/distutils/setupscript.html#distutils-additional-files" target="_blank" rel="external">Installing Additional Files</a></em>）</li>
+</ul>
+<p><em>翻译自<a href="https://docs.python.org/3.5/distutils/sourcedist.html#specifying-the-files-to-distribute" target="_blank" rel="external">Python官方文档 Specifying the files to distribute</a></em></p>
+<p><strong>手动处理</strong></p>
+<p>一般而言，自动处理已经足够，但是如果想要自己指定的话，则需要编辑<code>MANIFEST.in</code>模板文件。<br><code>MANIFEST.in</code>模板文件很简单，每一行都导入或者导出表示符合正则的一类文件。比如说：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 导入根目录下满足*.txt的文件</span><br><span class="line">include *.txt</span><br><span class="line"># 递归导入examples目录下满足*.txt和*.py的文件</span><br><span class="line">recursive-include examples *.txt *.py</span><br><span class="line"># 导入满足examples/sample?/build的文件夹下所有文件</span><br><span class="line">prune examples/sample?/build</span><br></pre></td></tr></table></figure></p>
+<p><em>详细语法参见<a href="https://docs.python.org/3.5/distutils/commandref.html#sdist-cmd" target="_blank" rel="external">此处</a></em></p>
+<blockquote>
+<p>注意：<br>当根目录下存在<code>MANIFEST.in</code>文件时，Setuptools将不会再采用自动处理的设定，因此需要在<code>MANIFEST.in</code>文件中指明所有需要导入的文件。</p>
+</blockquote>
+<h3 id="调用数据"><a href="#调用数据" class="headerlink" title="调用数据"></a>调用数据</h3><p>当你需要调用Python包中的文件时，你可以使用下面的方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pkg_resources <span class="keyword">import</span> resource_string</span><br><span class="line">data = resource_string(__name__, <span class="string">'data.dat'</span>)</span><br></pre></td></tr></table></figure>
+<p>此时，指定的<code>data.dat</code>文件将会以二进制文件流的形式赋值到data变量中，你可以按照自己的需要进行进一步处理。</p>
+<h3 id="创建源码分发包"><a href="#创建源码分发包" class="headerlink" title="创建源码分发包"></a>创建源码分发包</h3><p>在包的根目录下执行：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python setup.py sdist</span><br></pre></td></tr></table></figure></p>
+<p>默认情况下，<code>sdist</code>命令将会为Unix创建<code>gzip</code>压缩文件，为Windows创建<code>zip</code>压缩文件<br>你也可以添加参数<code>--formats=zip</code>指定生成的文件类型，所有支持的参数见<a href="https://docs.python.org/3.5/distutils/sourcedist.html" target="_blank" rel="external">此处</a></p>
+<h3 id="创建二进制分发包"><a href="#创建二进制分发包" class="headerlink" title="创建二进制分发包"></a>创建二进制分发包</h3><p>除了创建源码分发之外，我们还可以创建基于平台的二进制分发包。<br>在包的根目录下执行：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python setup.py bdist</span><br></pre></td></tr></table></figure></p>
+<p>默认情况下，这个命令将会创建基于自身平台的分发包。<br>同样的，你也可以添加<code>--format=zip</code>参数来指定生成的文件，支持的参数见<a href="https://docs.python.org/3.5/distutils/builtdist.html" target="_blank" rel="external">此处</a><br>除此之外，也可以使用以下的命令直接生成对应格式的分发包：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>格式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bdist_dumb</td>
+<td>tar, gztar, bztar, xztar, ztar, zip</td>
+</tr>
+<tr>
+<td>bdist_rpm</td>
+<td>rpm, srpm</td>
+</tr>
+<tr>
+<td>bdist_wininst</td>
+<td>wininst</td>
+</tr>
+<tr>
+<td>bdist_msi</td>
+<td>msi</td>
+</tr>
+</tbody>
+</table>
+<h1 id="上传到Pypi"><a href="#上传到Pypi" class="headerlink" title="上传到Pypi"></a>上传到Pypi</h1><h2 id="注册包"><a href="#注册包" class="headerlink" title="注册包"></a>注册包</h2><p>在上传我们的包之前，我们需要首先向Pypi提交包的相关信息。<br>在包的根目录下执行:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python setup.py register</span><br></pre></td></tr></table></figure></p>
+<p>没有登陆的话，需要进行登陆；如果已经登陆，直接回车使用默认设置即可。</p>
+<h2 id="上传包"><a href="#上传包" class="headerlink" title="上传包"></a>上传包</h2><p>注册完毕后，我们可以提交我们的包了。<br>在包的根目录下执行：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python setup.py sdist bdist_wininst upload</span><br></pre></td></tr></table></figure></p>
+<p>这条命令将会向Pypi提交源码和Win下的安装包，如果需要上传别的包，只要直接写出即可。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a href="https://github.com/dccrazyboy/pyeco/blob/master/pyeco.rst" target="_blank" rel="external">Python开发生态环境简介</a></li>
+<li><a href="http://timd.cn/2015/10/20/setuptools/" target="_blank" rel="external">使用Setuptools构建和分发python包</a></li>
+<li><a href="http://python3-cookbook.readthedocs.org/zh_CN/latest/c10/p08_read_datafile_within_package.html" target="_blank" rel="external">10.8 读取位于包中的数据文件</a></li>
+<li><a href="https://docs.python.org/3.5/distutils/sourcedist.html" target="_blank" rel="external">Creating a Source Distribution</a></li>
+<li><a href="https://docs.python.org/3.5/distutils/examples.html" target="_blank" rel="external">Examples</a></li>
+</ul>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<li>2015年11月03日 初步完成</li>
+</ul>
+
+      
+    </div>
+
+    <div class="post-footer">
+      
+        <div id="eof" class="print-invisible">
+          <hr class="eof">
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block";><img alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，获取新文章推送
+          </span>
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，请博主喝咖啡
+          </span>
+        </div>
+        <div class="copyright" style="clear:both;">
+           <p><span>本文标题:</span><a href="/2015/11/03/python-packages/">Python包分发详解</a></p>
+           <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
+           <p><span>发布时间:</span>2015年11月3日 - 15时11分</p>
+           <p><span>最后更新:</span>2016年2月29日 - 15时02分</p>
+           <p><span>原始链接:</span><a href="/2015/11/03/python-packages/" title="Python包分发详解">https://xuanwo.org/2015/11/03/python-packages/</a></p>
+           <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial 4.0</a></p>
+           <p><span>转载请保留以上信息。</span></p>
+        </div>
+      
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/"> #Python </a>
+          
+        </div>
+      
+      
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/14/pandoc/">文本转换神器——Pandoc</a>
+            
+          </div>
+
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/10/30/python-JSON/">在Python中使用JSON</a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </div>
+  </div>
+
+
+
+    
+      <div class="comments" id="comments">
+        
+          <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+          </div>
+        
+      </div>
+    
+  </div>
+
+
+        </div>
+      </div>
+
+
+      
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview">
+        <div class="site-author motion-element">
+          <img class="site-author-image" src="/avatar.jpg" alt="Xuanwo" />
+          <p class="site-author-name">Xuanwo</p>
+        </div>
+        <p class="site-description motion-element">Keep learning!</p>
+        <div class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">383</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            <a href="/categories">
+              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-name">分类</span>
+              </a>
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">53</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </div>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml">
+              <i class="menu-item-icon icon-feed"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element">
+            <a href="http://creativecommons.org/licenses/by-nc/4.0" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+      </div>
+
+      
+        <div class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Python包机制"><span class="nav-number">2.</span> <span class="nav-text">Python包机制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#准备工作"><span class="nav-number">3.</span> <span class="nav-text">准备工作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#注册Pypi"><span class="nav-number">3.1.</span> <span class="nav-text">注册Pypi</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#目录结构"><span class="nav-number">3.2.</span> <span class="nav-text">目录结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境配置"><span class="nav-number">3.3.</span> <span class="nav-text">环境配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#编写安装脚本"><span class="nav-number">4.</span> <span class="nav-text">编写安装脚本</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#填写配置信息"><span class="nav-number">4.1.</span> <span class="nav-text">填写配置信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本框架"><span class="nav-number">4.1.1.</span> <span class="nav-text">基本框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参数介绍"><span class="nav-number">4.1.2.</span> <span class="nav-text">参数介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#指定整个包"><span class="nav-number">4.1.2.1.</span> <span class="nav-text">指定整个包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#指定单独模块"><span class="nav-number">4.1.2.2.</span> <span class="nav-text">指定单独模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#依赖关系"><span class="nav-number">4.1.2.3.</span> <span class="nav-text">依赖关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#包内数据"><span class="nav-number">4.1.2.4.</span> <span class="nav-text">包内数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#其他数据"><span class="nav-number">4.1.2.5.</span> <span class="nav-text">其他数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Meta-Data"><span class="nav-number">4.1.2.6.</span> <span class="nav-text">Meta-Data</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#典型配置"><span class="nav-number">4.1.3.</span> <span class="nav-text">典型配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#打包"><span class="nav-number">4.2.</span> <span class="nav-text">打包</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#指定需要分发的文件"><span class="nav-number">4.2.1.</span> <span class="nav-text">指定需要分发的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调用数据"><span class="nav-number">4.2.2.</span> <span class="nav-text">调用数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建源码分发包"><span class="nav-number">4.2.3.</span> <span class="nav-text">创建源码分发包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建二进制分发包"><span class="nav-number">4.2.4.</span> <span class="nav-text">创建二进制分发包</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#上传到Pypi"><span class="nav-number">5.</span> <span class="nav-text">上传到Pypi</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#注册包"><span class="nav-number">5.1.</span> <span class="nav-text">注册包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#上传包"><span class="nav-number">5.2.</span> <span class="nav-text">上传包</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新日志"><span class="nav-number">7.</span> <span class="nav-text">更新日志</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </div>
+      
+
+    </div>
+  </div>
+
+
+    </div>
+
+    <div id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright-page">
+  
+  &copy; &nbsp;  2014 - 
+  2016
+  <span class="with-love">
+    <i class="icon-heart"></i>
+  </span>
+  <span class="author">Xuanwo</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </div>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js" id="motion.global"></script>
+
+
+
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var $sidebarInner = $('.sidebar-inner');
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.didShow', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+          var self = this;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      $(indicator).velocity('stop').velocity({
+        opacity: action === 'show' ? 0.4 : 0
+      }, { duration: 100 });
+    }
+
+  });
+</script>
+
+
+  <script type="text/javascript" id="sidebar.nav">
+    $(document).ready(function () {
+      var html = $('html');
+
+      $('.sidebar-nav li').on('click', function () {
+        var item = $(this);
+        var activeTabClassName = 'sidebar-nav-active';
+        var activePanelClassName = 'sidebar-panel-active';
+        if (item.hasClass(activeTabClassName)) {
+          return;
+        }
+
+        var currentTarget = $('.' + activePanelClassName);
+        var target = $('.' + item.data('target'));
+
+        currentTarget.velocity('transition.slideUpOut', 200, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', 200)
+            .addClass(activePanelClassName);
+        });
+
+        item.siblings().removeClass(activeTabClassName);
+        item.addClass(activeTabClassName);
+      });
+
+      $('.post-toc a').on('click', function (e) {
+        e.preventDefault();
+        var offset = $(escapeSelector(this.getAttribute('href'))).offset().top;
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        });
+      });
+
+      // Expand sidebar on post detail page by default, when post has a toc.
+      var $tocContent = $('.post-toc-content');
+      if (isDesktop() && CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    });
+  </script>
+
+
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      if (CONFIG.sidebar === 'always') {
+        displaySidebar();
+      }
+    });
+  </script>
+
+  
+
+  
+  
+  
+
+  
+
+    
+      
+    
+
+    <script type="text/javascript">
+      var disqus_shortname = 'only0god';
+      var disqus_identifier = '2015/11/03/python-packages/';
+      var disqus_title = 'Python包分发详解';
+      var disqus_url = 'https://xuanwo.org/2015/11/03/python-packages/';
+
+      (function(){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }());
+    </script>
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/js/analytics_google-analytics.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,632 @@
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
+<head>
+  
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.3"/>
+
+
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<link rel="canonical" href=" { { site.url } }{ { page.url } }" />
+
+
+
+
+
+    <meta name="description" content="Keep learning!" />
+
+
+
+  <meta name="keywords" content="Database,Oracle,VB," />
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Xuanwo's Blog" type="application/atom+xml" />
+
+
+
+  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.3" />
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    analytics: {
+      google: 'UA-51515330-1'
+    },
+    sidebar: 'post'
+  };
+</script>
+
+<meta name="google-site-verification" content="YAHxtBFjjhWkrycLOhOBuMHETNYVTtS3h4cPY4Wgo2A" />
+  <title> VS2015连接Oracle数据库 // Xuanwo's Blog </title>
+</head>
+
+<body>
+<!--[if lte IE 8]> <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'> <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode"><img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari." style='margin-left:auto;margin-right:auto;display: block;'/></a></div> <![endif]-->
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <div id="header" class="header">
+      <div class="header-inner">
+        <h1 class="site-meta">
+  <span class="logo-line-before"><i></i></span>
+  <a href="/" class="brand">
+      <span class="logo">
+        <i class="icon-logo"></i>
+      </span>
+      <span class="site-title" style="opacity: 1; top: 0px;box-shadow: 5px 1px 10px #888;" >Xuanwo's Blog</span>
+  </a>
+  <span class="logo-line-after"><i></i></span>
+</h1>
+
+
+  <ul id="menu" class="menu">
+  
+      
+      <li class="menu-item menu-item-home">
+        <a href="/">
+          <i class="menu-item-icon icon-home"></i> <br />
+          首页
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-archives">
+        <a href="/archives">
+          <i class="menu-item-icon icon-archives"></i> <br />
+          归档
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-categories">
+        <a href="/categories">
+          <i class="menu-item-icon icon-categories"></i> <br />
+          分类
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-tags">
+        <a href="/tags">
+          <i class="menu-item-icon icon-tags"></i> <br />
+          标签
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-about">
+        <a href="/about">
+          <i class="menu-item-icon icon-about"></i> <br />
+          关于
+        </a>
+      </li>
+    
+  </ul>
+
+
+      </div>
+    </div>
+
+    <div id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  <div class="post post-type-normal ">
+    <div class="post-header">
+
+      
+      
+        <h1 class="post-title">
+          
+          
+            
+              VS2015连接Oracle数据库
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          发表于 2016-01-03
+        </span>
+
+        
+          <span class="post-category">
+            &nbsp; | &nbsp; 分类于
+            
+              <a href="/categories/Develop/">Develop</a>
+
+              
+              
+
+            
+          </span>
+        
+
+        
+          
+            <span class="post-comments-count">
+            &nbsp; | &nbsp;
+            <a href="/2016/01/03/vs-oracle-11g/#comments" >
+              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2016/01/03/vs-oracle-11g/"></span>
+            </a>
+          </span>
+          
+        
+      </div>
+    </div>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <h1 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h1><p>宿主机：Win10 + VS2015 + ODP.Net for VS2015<br>虚拟机：Win7 + Oracle 11g + 桥接</p>
+<a id="more"></a>
+<h1 id="配置ODP-Net"><a href="#配置ODP-Net" class="headerlink" title="配置ODP.Net"></a>配置ODP.Net</h1><p>首先下载 <a href="http://www.oracle.com/technetwork/topics/dotnet/downloads/odacmsidownload-2745497.html" target="_blank" rel="external">Oracle Developer Tools for Visual Studio 2015</a> ，下载此文件需要注册Oracle社区账号并接受相关的协议，此文件提供了以下组件：</p>
+<ul>
+<li>Oracle Developer Tools for Visual Studio 12.1.0.2.4</li>
+<li>Oracle Data Provider for .NET 4 12.1.0.2.0</li>
+<li>Oracle Providers for ASP.NET 4 12.1.0.2.0</li>
+</ul>
+<p>下载完成后运行MSI安装程序进行安装，安装完成后会自动注册VS2015的相关插件，重新启动VS2015后将会看到Oracle的相关命令，比如SQL *PLUS支持等。同时添加数据库时也能看到相应的选项。</p>
+<blockquote>
+<p>ODP.Net支持所有Oracle版本，因此下载时只需要注意VS的版本即可。</p>
+</blockquote>
+<h1 id="配置tnsnames-ora"><a href="#配置tnsnames-ora" class="headerlink" title="配置tnsnames.ora"></a>配置tnsnames.ora</h1><blockquote>
+<p>ODP.Net默认使用安装目录下的<code>tnsnames.ora</code>，若安装目录在Program Files下，可能会遇到无权限等问题，此时使用管理员权限打开命令行，切换到对应目录并使用notepad编辑。</p>
+</blockquote>
+<p>复制服务器端的tnsnames.ora文件内容，或者自己手动编辑，格式如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;数据源别名&gt; =</span><br><span class="line">  (DESCRIPTION =</span><br><span class="line">    (ADDRESS = (PROTOCOL = TCP)(HOST = &lt;主机名或IP&gt;)(PORT = &lt;端口号&gt;))</span><br><span class="line">    (CONNECT_DATA =</span><br><span class="line">      (SERVER = DEDICATED)</span><br><span class="line">      (SERVICE_NAME = &lt;数据库服务名&gt;)</span><br><span class="line">    )</span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
+<h1 id="添加数据库"><a href="#添加数据库" class="headerlink" title="添加数据库"></a>添加数据库</h1><p>打开<code>工具</code>-<code>连接到数据库</code>，数据源修改为<code>Oracle数据库</code>下的<code>ODP.NET,托管驱动程序</code>，然后点击<code>确定</code>，打开<code>添加连接</code>窗口。<br><img src="/imgs/develop/add-database.png" alt="添加连接"><br>填写用户名，密码并选择数据源，然后测试连接，成功的话说明已经连通，点击确定即可。</p>
+<blockquote>
+<p>使用虚拟机搭建数据库的额外Tips<br>根据某网友分析，Oracle的监听器在通过1521端口连接后，会开启另外一个新的随机端口进行数据通讯，因此使用NAT方式虚拟网卡可能会导致连接失败。这种情况下，请使用桥接方式虚拟网卡，并在<code>net manager</code>中将<code>loaclhost</code>修改为虚拟机当前的IP。重启监听服务后，再试。</p>
+</blockquote>
+<h1 id="连接数据库并使用"><a href="#连接数据库并使用" class="headerlink" title="连接数据库并使用"></a>连接数据库并使用</h1><h2 id="连接数据库"><a href="#连接数据库" class="headerlink" title="连接数据库"></a>连接数据库</h2><figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Dim</span> oradb <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"User ID=system;Password=123456;Data Source=lol"</span></span><br><span class="line"><span class="keyword">Dim</span> conn <span class="keyword">As</span> <span class="keyword">New</span> OracleConnection(oradb)</span><br><span class="line">conn.Open()</span><br><span class="line"><span class="keyword">Dim</span> sql <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"create table xxx"</span></span><br><span class="line"><span class="keyword">Dim</span> sqlCom <span class="keyword">As</span> <span class="keyword">New</span> OracleCommand</span><br><span class="line">sqlCom.CommandText = sql</span><br><span class="line">sqlCom.Connection = conn</span><br><span class="line">sqlCom.ExecuteNonQuery()</span><br></pre></td></tr></table></figure>
+<h2 id="查询数据"><a href="#查询数据" class="headerlink" title="查询数据"></a>查询数据</h2><p>成功配置数据源之后，只需要向界面上拖动<code>DataGridView</code>，并进行相关配置，选择自己需要的表即可。</p>
+<h2 id="插入图片的正确姿势"><a href="#插入图片的正确姿势" class="headerlink" title="插入图片的正确姿势"></a>插入图片的正确姿势</h2><p>图片作为二进制数据无法直接拼凑出SQL命令，我们需要使用<code>OracleCommand</code>自带的<code>Parameters</code>功能。在SQL命令中用<code>:photo</code>来代表一个参量，然后使用</p>
+<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sqlCom.Parameters.Add(<span class="string">"photo"</span>, OracleDbType.Blob, imgData.Length)</span><br></pre></td></tr></table></figure>
+<p>来分别指定这个参量的类型和所占空间大小</p>
+<p>最后使用</p>
+<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sqlCom.Parameters(<span class="number">0</span>).Value = imgData</span><br></pre></td></tr></table></figure>
+<p>来指定这个参量的值。</p>
+<p>整个插入图片过程的代码如下：</p>
+<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Dim</span> conn <span class="keyword">As</span> <span class="keyword">New</span> OracleConnection(oradb)</span><br><span class="line"><span class="keyword">Dim</span> imgData(<span class="number">0</span>) <span class="keyword">As</span> <span class="built_in">Byte</span></span><br><span class="line"><span class="keyword">Dim</span> ms <span class="keyword">As</span> <span class="keyword">New</span> System.IO.MemoryStream</span><br><span class="line">PictureBox1.BackgroundImage.Save(ms, PictureBox1.BackgroundImage.RawFormat)</span><br><span class="line"><span class="keyword">ReDim</span> imgData(ms.Length - <span class="number">1</span>)</span><br><span class="line">ms.Read(imgData, <span class="number">0</span>, ms.Length)</span><br><span class="line">ms.Close()</span><br><span class="line">conn.Open()</span><br><span class="line"><span class="keyword">Dim</span> sql <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"insert into hero values"</span> &amp; <span class="string">"("</span> &amp; TextBox1.<span class="keyword">Text</span> &amp; <span class="string">":photo"</span> &amp; <span class="string">")"</span></span><br><span class="line"><span class="keyword">Dim</span> sqlCom <span class="keyword">As</span> <span class="keyword">New</span> OracleCommand</span><br><span class="line">sqlCom.CommandText = sql</span><br><span class="line">sqlCom.Connection = conn</span><br><span class="line">sqlCom.Parameters.Add(<span class="string">"photo"</span>, OracleDbType.Blob, imgData.Length)</span><br><span class="line">sqlCom.Parameters(<span class="number">0</span>).Value = imgData</span><br><span class="line">sqlCom.ExecuteNonQuery()</span><br></pre></td></tr></table></figure>
+<h1 id="常见错误"><a href="#常见错误" class="headerlink" title="常见错误"></a>常见错误</h1><h2 id="column-not-allowed-here"><a href="#column-not-allowed-here" class="headerlink" title="column not allowed here"></a>column not allowed here</h2><p>数据类型不符，检查对应项目数据类型是否正确。</p>
+<h2 id="missing-comma"><a href="#missing-comma" class="headerlink" title="missing comma"></a>missing comma</h2><p>命令格式不对，检查一下自己的SQL命令是否有错误，特别是在有字符串的时候，需要使用<code>&quot;&quot;</code>来代表一个字符串中的<code>&quot;</code>。</p>
+<h2 id="identifier-is-too-long"><a href="#identifier-is-too-long" class="headerlink" title="identifier is too long"></a>identifier is too long</h2><p>标识符过长（不得超过30字符），不是非常明白原因，不过我取消掉insert命令中指定位置的部分之后，这个错误消失了。</p>
+<h2 id="missing-INTO-keyword"><a href="#missing-INTO-keyword" class="headerlink" title="missing INTO keyword"></a>missing INTO keyword</h2><p>缺少into关键字（手滑打成了inte），检查一下自己的SQL命令是否有错误。</p>
+<h2 id="cannot-insert-NULL-into-“SYSTEM”-”HERO”-”HEROCATEGORYID”"><a href="#cannot-insert-NULL-into-“SYSTEM”-”HERO”-”HEROCATEGORYID”" class="headerlink" title="cannot insert NULL into (“SYSTEM”.”HERO”.”HEROCATEGORYID”)"></a>cannot insert NULL into (“SYSTEM”.”HERO”.”HEROCATEGORYID”)</h2><p>这些项都指定了非0值，故不能不赋值，为对应项目赋值即可。</p>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<li>2016年01月03日 初步完成</li>
+</ul>
+
+      
+    </div>
+
+    <div class="post-footer">
+      
+        <div id="eof" class="print-invisible">
+          <hr class="eof">
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block";><img alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，获取新文章推送
+          </span>
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，请博主喝咖啡
+          </span>
+        </div>
+        <div class="copyright" style="clear:both;">
+           <p><span>本文标题:</span><a href="/2016/01/03/vs-oracle-11g/">VS2015连接Oracle数据库</a></p>
+           <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
+           <p><span>发布时间:</span>2016年1月3日 - 15时01分</p>
+           <p><span>最后更新:</span>2016年2月29日 - 15时02分</p>
+           <p><span>原始链接:</span><a href="/2016/01/03/vs-oracle-11g/" title="VS2015连接Oracle数据库">https://xuanwo.org/2016/01/03/vs-oracle-11g/</a></p>
+           <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial 4.0</a></p>
+           <p><span>转载请保留以上信息。</span></p>
+        </div>
+      
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Database/"> #Database </a>
+          
+            <a href="/tags/Oracle/"> #Oracle </a>
+          
+            <a href="/tags/VB/"> #VB </a>
+          
+        </div>
+      
+      
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/13/how-to-differ-invalid-link/">如何识别真假链接？</a>
+            
+          </div>
+
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/12/23/best-pdf-read-solution/">最佳跨平台PDF阅读解决方案</a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </div>
+  </div>
+
+
+
+    
+      <div class="comments" id="comments">
+        
+          <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+          </div>
+        
+      </div>
+    
+  </div>
+
+
+        </div>
+      </div>
+
+
+      
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview">
+        <div class="site-author motion-element">
+          <img class="site-author-image" src="/avatar.jpg" alt="Xuanwo" />
+          <p class="site-author-name">Xuanwo</p>
+        </div>
+        <p class="site-description motion-element">Keep learning!</p>
+        <div class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">383</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            <a href="/categories">
+              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-name">分类</span>
+              </a>
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">53</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </div>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml">
+              <i class="menu-item-icon icon-feed"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element">
+            <a href="http://creativecommons.org/licenses/by-nc/4.0" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+      </div>
+
+      
+        <div class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#开发环境"><span class="nav-number">1.</span> <span class="nav-text">开发环境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置ODP-Net"><span class="nav-number">2.</span> <span class="nav-text">配置ODP.Net</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置tnsnames-ora"><span class="nav-number">3.</span> <span class="nav-text">配置tnsnames.ora</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#添加数据库"><span class="nav-number">4.</span> <span class="nav-text">添加数据库</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#连接数据库并使用"><span class="nav-number">5.</span> <span class="nav-text">连接数据库并使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#连接数据库"><span class="nav-number">5.1.</span> <span class="nav-text">连接数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查询数据"><span class="nav-number">5.2.</span> <span class="nav-text">查询数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插入图片的正确姿势"><span class="nav-number">5.3.</span> <span class="nav-text">插入图片的正确姿势</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#常见错误"><span class="nav-number">6.</span> <span class="nav-text">常见错误</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#column-not-allowed-here"><span class="nav-number">6.1.</span> <span class="nav-text">column not allowed here</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#missing-comma"><span class="nav-number">6.2.</span> <span class="nav-text">missing comma</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#identifier-is-too-long"><span class="nav-number">6.3.</span> <span class="nav-text">identifier is too long</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#missing-INTO-keyword"><span class="nav-number">6.4.</span> <span class="nav-text">missing INTO keyword</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cannot-insert-NULL-into-“SYSTEM”-”HERO”-”HEROCATEGORYID”"><span class="nav-number">6.5.</span> <span class="nav-text">cannot insert NULL into (“SYSTEM”.”HERO”.”HEROCATEGORYID”)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新日志"><span class="nav-number">7.</span> <span class="nav-text">更新日志</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </div>
+      
+
+    </div>
+  </div>
+
+
+    </div>
+
+    <div id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright-page">
+  
+  &copy; &nbsp;  2014 - 
+  2016
+  <span class="with-love">
+    <i class="icon-heart"></i>
+  </span>
+  <span class="author">Xuanwo</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </div>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js" id="motion.global"></script>
+
+
+
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var $sidebarInner = $('.sidebar-inner');
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.didShow', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+          var self = this;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      $(indicator).velocity('stop').velocity({
+        opacity: action === 'show' ? 0.4 : 0
+      }, { duration: 100 });
+    }
+
+  });
+</script>
+
+
+  <script type="text/javascript" id="sidebar.nav">
+    $(document).ready(function () {
+      var html = $('html');
+
+      $('.sidebar-nav li').on('click', function () {
+        var item = $(this);
+        var activeTabClassName = 'sidebar-nav-active';
+        var activePanelClassName = 'sidebar-panel-active';
+        if (item.hasClass(activeTabClassName)) {
+          return;
+        }
+
+        var currentTarget = $('.' + activePanelClassName);
+        var target = $('.' + item.data('target'));
+
+        currentTarget.velocity('transition.slideUpOut', 200, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', 200)
+            .addClass(activePanelClassName);
+        });
+
+        item.siblings().removeClass(activeTabClassName);
+        item.addClass(activeTabClassName);
+      });
+
+      $('.post-toc a').on('click', function (e) {
+        e.preventDefault();
+        var offset = $(escapeSelector(this.getAttribute('href'))).offset().top;
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        });
+      });
+
+      // Expand sidebar on post detail page by default, when post has a toc.
+      var $tocContent = $('.post-toc-content');
+      if (isDesktop() && CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    });
+  </script>
+
+
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      if (CONFIG.sidebar === 'always') {
+        displaySidebar();
+      }
+    });
+  </script>
+
+  
+
+  
+  
+  
+
+  
+
+    
+      
+    
+
+    <script type="text/javascript">
+      var disqus_shortname = 'only0god';
+      var disqus_identifier = '2016/01/03/vs-oracle-11g/';
+      var disqus_title = 'VS2015连接Oracle数据库';
+      var disqus_url = 'https://xuanwo.org/2016/01/03/vs-oracle-11g/';
+
+      (function(){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }());
+    </script>
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/js/analytics_google-analytics.js"></script>
+
+
+</body>
+</html>

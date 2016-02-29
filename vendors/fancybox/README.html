@@ -1,0 +1,158 @@
+<h1 id="fancyBox"><a href="#fancyBox" class="headerlink" title="fancyBox"></a>fancyBox</h1><p>fancyBox is a tool that offers a nice and elegant way to add zooming functionality for images, html content and multi-media on your webpages.</p>
+<p>More information and examples: <a href="http://www.fancyapps.com/fancybox/">http://www.fancyapps.com/fancybox/</a></p>
+<p>License: <a href="http://www.fancyapps.com/fancybox/#license">http://www.fancyapps.com/fancybox/#license</a></p>
+<p>Copyright (c) 2012 Janis Skarnelis - janis@fancyapps.com</p>
+<h2 id="How-to-use"><a href="#How-to-use" class="headerlink" title="How to use"></a>How to use</h2><p>To get started, download the plugin, unzip it and copy files to your website/application directory.<br>Load files in the <head> section of your HTML document. Make sure you also add the jQuery library.</p>
+<pre><code>&lt;head&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js&quot;&gt;&lt;/script&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;/fancybox/jquery.fancybox.css&quot; type=&quot;text/css&quot; media=&quot;screen&quot; /&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;/fancybox/jquery.fancybox.pack.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+</code></pre><p>Create your links with a <code>title</code> if you want a title to be shown, and add a class:</p>
+<pre><code>&lt;a href=&quot;large_image.jpg&quot; class=&quot;fancybox&quot; title=&quot;Sample title&quot;&gt;&lt;img src=&quot;small_image.jpg&quot; /&gt;&lt;/a&gt;
+</code></pre><p>If you have a set of related items that you would like to group,<br>additionally include a group name in the <code>rel</code> (or <code>data-fancybox-group</code>) attribute:</p>
+<pre><code>&lt;a href=&quot;large_1.jpg&quot; class=&quot;fancybox&quot; rel=&quot;gallery&quot; title=&quot;Sample title 1&quot;&gt;&lt;img src=&quot;small_1.jpg&quot; /&gt;&lt;/a&gt;
+&lt;a href=&quot;large_2.jpg&quot; class=&quot;fancybox&quot; rel=&quot;gallery&quot; title=&quot;Sample title 1&quot;&gt;&lt;img src=&quot;small_2.jpg&quot; /&gt;&lt;/a&gt;
+</code></pre><p>Initialise the script like this:</p>
+<pre><code>&lt;script&gt;
+    $(document).ready(function() {
+        $(&apos;.fancybox&apos;).fancybox();
+    });
+&lt;/script&gt;
+</code></pre><p>May also be passed an optional options object which will extend the default values. Example:</p>
+<pre><code>&lt;script&gt;
+    $(document).ready(function() {
+        $(&apos;.fancybox&apos;).fancybox({
+            padding : 0,
+            openEffect  : &apos;elastic&apos;
+        });
+    });
+&lt;/script&gt;
+</code></pre><p>Tip: Automatically group and apply fancyBox to all images:</p>
+<pre><code>$(&quot;a[href$=&apos;.jpg&apos;],a[href$=&apos;.jpeg&apos;],a[href$=&apos;.png&apos;],a[href$=&apos;.gif&apos;]&quot;).attr(&apos;rel&apos;, &apos;gallery&apos;).fancybox();
+</code></pre><p>Script uses the <code>href</code> attribute of the matched elements to obtain the location of the content and to figure out content type you want to display.<br>You can specify type directly by adding classname (fancybox.image, fancybox.iframe, etc) or <code>data-fancybox-type</code> attribute:</p>
+<pre><code>//Ajax:
+&lt;a href=&quot;/example.html&quot; class=&quot;fancybox fancybox.ajax&quot;&gt;Example&lt;/a&gt;
+//or
+&lt;a href=&quot;/example.html&quot; class=&quot;fancybox&quot; data-fancybox-type=&quot;ajax&quot;&gt;Example&lt;/a&gt;
+
+//Iframe:
+&lt;a href=&quot;example.html&quot; class=&quot;fancybox fancybox.iframe&quot;&gt;Example&lt;/a&gt;
+
+//Inline (will display an element with `id=&quot;example&quot;`)
+&lt;a href=&quot;#example&quot; class=&quot;fancybox&quot;&gt;Example&lt;/a&gt;
+
+//SWF:
+&lt;a href=&quot;example.swf&quot; class=&quot;fancybox&quot;&gt;Example&lt;/a&gt;
+
+//Image:
+&lt;a href=&quot;example.jpg&quot; class=&quot;fancybox&quot;&gt;Example&lt;/a&gt;
+</code></pre><p>Note, ajax requests are subject to the <a href="http://en.wikipedia.org/wiki/Same_origin_policy">same origin policy</a>.<br>If fancyBox will not be able to get content type, it will try to guess based on ‘href’ and will quit silently if would not succeed.<br>(this is different from previsous versions where ‘ajax’ was used as default type or an error message was displayed).</p>
+<h2 id="Advanced"><a href="#Advanced" class="headerlink" title="Advanced"></a>Advanced</h2><h3 id="Helpers"><a href="#Helpers" class="headerlink" title="Helpers"></a>Helpers</h3><p>Helpers provide a simple mechanism to extend the capabilities of fancyBox. There are two built-in helpers - ‘overlay’ and ‘title’.<br>You can disable them, set custom options or enable other helpers. Examples:</p>
+<pre><code>//Disable title helper
+$(&quot;.fancybox&quot;).fancybox({
+    helpers:  {
+        title:  null
+    }
+});
+
+//Disable overlay helper
+$(&quot;.fancybox&quot;).fancybox({
+    helpers:  {
+        overlay : null
+    }
+});
+
+//Change title position and overlay color
+$(&quot;.fancybox&quot;).fancybox({
+    helpers:  {
+        title : {
+            type : &apos;inside&apos;
+        },
+        overlay : {
+            css : {
+                &apos;background&apos; : &apos;rgba(255,255,255,0.5)&apos;
+            }
+        }
+    }
+});
+
+//Enable thumbnail helper and set custom options
+$(&quot;.fancybox&quot;).fancybox({
+    helpers:  {
+        thumbs : {
+            width: 50,
+            height: 50
+        }
+    }
+});
+</code></pre><h3 id="API"><a href="#API" class="headerlink" title="API"></a>API</h3><p>Also available are event driven callback methods.  The <code>this</code> keyword refers to the current or upcoming object (depends on callback method). Here is how you can change title:</p>
+<pre><code>$(&quot;.fancybox&quot;).fancybox({
+    beforeLoad : function() {
+        this.title = &apos;Image &apos; + (this.index + 1) + &apos; of &apos; + this.group.length + (this.title ? &apos; - &apos; + this.title : &apos;&apos;);
+
+        /*
+            &quot;this.element&quot; refers to current element, so you can, for example, use the &quot;alt&quot; attribute of the image to store the title:
+            this.title = $(this.element).find(&apos;img&apos;).attr(&apos;alt&apos;);
+        */
+    }
+});
+</code></pre><p>It`s possible to open fancyBox programmatically in various ways:</p>
+<pre><code>//HTML content:
+$.fancybox( &apos;&lt;div&gt;&lt;h1&gt;Lorem Lipsum&lt;/h1&gt;&lt;p&gt;Lorem lipsum&lt;/p&gt;&lt;/div&gt;&apos;, {
+    title : &apos;Custom Title&apos;
+});
+
+//DOM element:
+$.fancybox( $(&quot;#inline&quot;), {
+    title : &apos;Custom Title&apos;
+});
+
+//Custom object:
+$.fancybox({
+    href: &apos;example.jpg&apos;,
+    title : &apos;Custom Title&apos;
+});
+
+//Array of objects:
+$.fancybox([
+    {
+        href: &apos;example1.jpg&apos;,
+        title : &apos;Custom Title 1&apos;
+    },
+    {
+        href: &apos;example2.jpg&apos;,
+        title : &apos;Custom Title 2&apos;
+    }
+], {
+    padding: 0
+});
+</code></pre><p>There are several methods that allow you to interact with and manipulate fancyBox, example:</p>
+<pre><code>//Close fancybox:
+$.fancybox.close();
+</code></pre><p>There is a simply way to access wrapping elements using JS:</p>
+<pre><code>$.fancybox.wrap
+$.fancybox.skin
+$.fancybox.outer
+$.fancybox.inner
+</code></pre><p>You can override CSS to customize the look. For example, make navigation arrows always visible,<br>change width and move them outside of area (use this snippet after including fancybox.css):</p>
+<pre><code>.fancybox-nav span {
+    visibility: visible;
+}
+
+.fancybox-nav {
+    width: 80px;
+}
+
+.fancybox-prev {
+    left: -80px;
+}
+
+.fancybox-next {
+    right: -80px;
+}
+</code></pre><p>In that case, you might want to increase space around box:</p>
+<pre><code>$(&quot;.fancybox&quot;).fancybox({
+    margin : [20, 60, 20, 60]
+});
+</code></pre><h2 id="Bug-tracker"><a href="#Bug-tracker" class="headerlink" title="Bug tracker"></a>Bug tracker</h2><p>Have a bug? Please create an issue on GitHub at <a href="https://github.com/fancyapps/fancyBox/issues">https://github.com/fancyapps/fancyBox/issues</a></p>
