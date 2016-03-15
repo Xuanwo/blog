@@ -42,6 +42,7 @@ sudo apt-get install neovim
 `yG` 复制光标以上全部行
 `ygg` 复制光标以下全部行
 `p` 粘贴
+`u` 撤销
 
 ## 入门
 
@@ -69,5 +70,28 @@ sudo apt-get install neovim
 
 ![vim-airline demo](https://github.com/vim-airline/vim-airline/wiki/screenshots/demo.gif)
 
+> 安装此插件后启动nvim会报错，自行编译后错误消失，不知道具体的原因。
+
+### Smarter tab line
+
+在`init.vim`中加入
+
+```
+' 开启tabline功能
+let g:airline#extensions#tabline#enabled = 1
+' 设置tabline分隔符
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
+```
+
+支持的一些快捷操作命令：
+
+`:bn`: 跳转下一个buffer
+`:bp`: 往上一个buffer
+`:b<n>`: 跳往第n个buffer
+`:bd`: 关掉目前buffer
+
+
 # 更新日志
 - 2016年03月12日 首次发布
+- 2016年03月15日 增加air-line相关内容
