@@ -7,7 +7,7 @@ toc: true
 ---
 # 前言
 用Python写过不少的脚本，现在要把脚本打包成模块并进行发布，然后才明白脚本Boy到正规的码农差距有多大= =。
-踩了很多天的坑之后，自己学习到了Python的包分发机制，以及如何利用Pypi向全世界分发自己的模。现在简单地做一些整理。
+踩了很多天的坑之后，自己学习到了Python的包分发机制，以及如何利用Pypi向全世界分发自己的模块。现在简单地做一些整理。
 
 <!-- more -->
 
@@ -78,19 +78,19 @@ setup(
 
 Meta-Data| 描述值
 --|--
-name |  包名
-version | 此次发布版本
-author  |作者名
-author_email  | 作者邮箱
-maintainer | 维护者名
-maintainer_email  |  维护者邮箱
-url | 主页
-description | 简要描述
-long_description  |  详细描述
-download_url  |  下载地址
-classifiers | 分类，参见[此处](https://pypi.python.org/pypi?%3Aaction=list_classifiers)
-platforms  | 平台列表
-license | 授权协议
+`name` |  包名
+`version` | 此次发布版本
+`author`  |作者名
+`author_email`  | 作者邮箱
+`maintainer` | 维护者名
+`maintainer_email`  |  维护者邮箱
+`url` | 主页
+`description` | 简要描述
+`long_description`  |  详细描述
+`download_url`  |  下载地址
+`classifiers` | 分类，参见[此处](https://pypi.python.org/pypi?%3Aaction=list_classifiers)
+`platforms`  | 平台列表
+`license` | 授权协议
 
 ### 典型配置
 
@@ -150,6 +150,7 @@ setup(
 
 一般而言，自动处理已经足够，但是如果想要自己指定的话，则需要编辑`MANIFEST.in`模板文件。
 `MANIFEST.in`模板文件很简单，每一行都导入或者导出表示符合正则的一类文件。比如说：
+
 ```
 # 导入根目录下满足*.txt的文件
 include *.txt
@@ -172,22 +173,39 @@ from pkg_resources import resource_string
 data = resource_string(__name__, 'data.dat')
 ```
 
-此时，指定的`data.dat`文件将会以二进制文件流的形式赋值到data变量中，你可以按照自己的需要进行进一步处理。
+此时，指定的`data.dat`文件将会以二进制文件流的形式赋值到data变量中，你可以按照自己的需要进行进一步处理。比如说：
+
+```
+from pkg_resources import resource_string
+    data = resource_string(__name__, 'example.yml')
+    with open('config.yml', 'w') as f:
+        f.write(str(data, encoding='utf-8'))
+        f.close()
+```
+
+上述代码实现了从`example.yml`中读取数据并保存到`config.yml`文件中。
 
 ### 创建源码分发包
 在包的根目录下执行：
+
 ```python
 python setup.py sdist
 ```
+
 默认情况下，`sdist`命令将会为Unix创建`gzip`压缩文件，为Windows创建`zip`压缩文件
 你也可以添加参数`--formats=zip`指定生成的文件类型，所有支持的参数见[此处](https://docs.python.org/3.5/distutils/sourcedist.html)
 
+> 源码分发似乎不会导入`package_data`中指定的数据，如果上传本分发包可能导致用户通过`pip`安装的包中没有需要的数据。
+
 ### 创建二进制分发包
+
 除了创建源码分发之外，我们还可以创建基于平台的二进制分发包。
 在包的根目录下执行：
+
 ```python
 python setup.py bdist
 ```
+
 默认情况下，这个命令将会创建基于自身平台的分发包。
 同样的，你也可以添加`--format=zip`参数来指定生成的文件，支持的参数见[此处](https://docs.python.org/3.5/distutils/builtdist.html)
 除此之外，也可以使用以下的命令直接生成对应格式的分发包：
@@ -198,6 +216,22 @@ bdist_dumb  |tar, gztar, bztar, xztar, ztar, zip
 bdist_rpm   |rpm, srpm
 bdist_wininst |  wininst
 bdist_msi  | msi
+
+> 这一命令无法跨平台， 在Linux上选择制作`wininst`分发包时会提示缺乏相应的支持。
+
+### 创建wheel分发包
+
+wheel是新出的分发格式，旨在取代egg，你可以通过下列命令进行安装：
+
+```
+pip install wheel
+```
+
+然后在包的根目录下执行：
+
+```
+python setup.ppy bdist_wheel
+```
 
 # 上传到Pypi
 ## 注册包
@@ -226,3 +260,4 @@ python setup.py sdist bdist_wininst upload
 
 # 更新日志
 - 2015年11月03日 初步完成
+- 2016年03月30日 修复了部分笔误，添加了一些注释，增加了wheel相关的内容
