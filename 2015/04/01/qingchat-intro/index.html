@@ -1,0 +1,664 @@
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
+<head>
+  
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.3"/>
+
+
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<link rel="canonical" href=" { { site.url } }{ { page.url } }" />
+
+
+
+
+
+    <meta name="description" content="Keep learning!" />
+
+
+
+  <meta name="keywords" content="Hexo,C++,Learn" />
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Xuanwo's Blog" type="application/atom+xml" />
+
+
+
+  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.3" />
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    analytics: {
+      google: 'UA-51515330-1'
+    },
+    sidebar: 'post'
+  };
+</script>
+
+<meta name="google-site-verification" content="YAHxtBFjjhWkrycLOhOBuMHETNYVTtS3h4cPY4Wgo2A" />
+  <title> 微信多群直播的新探索——Qingchat // Xuanwo's Blog </title>
+</head>
+
+<body>
+<!--[if lte IE 8]> <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'> <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode"><img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari." style='margin-left:auto;margin-right:auto;display: block;'/></a></div> <![endif]-->
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <div id="header" class="header">
+      <div class="header-inner">
+        <h1 class="site-meta">
+  <span class="logo-line-before"><i></i></span>
+  <a href="/" class="brand">
+      <span class="logo">
+        <i class="icon-logo"></i>
+      </span>
+      <span class="site-title" style="opacity: 1; top: 0px;box-shadow: 5px 1px 10px #888;" >Xuanwo's Blog</span>
+  </a>
+  <span class="logo-line-after"><i></i></span>
+</h1>
+
+
+  <ul id="menu" class="menu">
+  
+      
+      <li class="menu-item menu-item-home">
+        <a href="/">
+          <i class="menu-item-icon icon-home"></i> <br />
+          首页
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-archives">
+        <a href="/archives">
+          <i class="menu-item-icon icon-archives"></i> <br />
+          归档
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-categories">
+        <a href="/categories">
+          <i class="menu-item-icon icon-categories"></i> <br />
+          分类
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-tags">
+        <a href="/tags">
+          <i class="menu-item-icon icon-tags"></i> <br />
+          标签
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-about">
+        <a href="/about">
+          <i class="menu-item-icon icon-about"></i> <br />
+          关于
+        </a>
+      </li>
+    
+  </ul>
+
+
+      </div>
+    </div>
+
+    <div id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  <div class="post post-type-normal ">
+    <div class="post-header">
+
+      
+      
+        <h1 class="post-title">
+          
+          
+            
+              微信多群直播的新探索——Qingchat
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          发表于 2015-04-01
+        </span>
+
+        
+          <span class="post-category">
+            &nbsp; | &nbsp; 分类于
+            
+              <a href="/categories/Develop/">Develop</a>
+
+              
+              
+
+            
+          </span>
+        
+
+        
+          
+            <span class="post-comments-count">
+            &nbsp; | &nbsp;
+            <a href="/2015/04/01/qingchat-intro/#comments" >
+              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/04/01/qingchat-intro/"></span>
+            </a>
+          </span>
+          
+        
+      </div>
+    </div>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在我之前写过的一篇文章中，我曾经探索过类似的问题：<a href="https://xuanwo.org/2016/02/28/wechat-remove/">微信群重复人员识别</a>。当初我就提出过能否自动获取相关数据，但因为种种原因的限制不了了之了。后来发现了<a href="https://github.com/sjdy521/Mojo-Weixin" target="_blank" rel="external">Mojo-Weixin</a>这个库之后，我决定在这个的基础上实现一个微信多群直播的工具——Qingchat。（<em>尽管在刚刚实现完不久，微信就更新了转发到多个群的功能，Sad。</em>）探索的成果如下： <a href="https://github.com/Xuanwo/qingchat" target="_blank" rel="external">Qingchat</a>，目前仅支持 python3 ，欢迎各位看官提 issues ，交 code ，或者拍砖。<br>接下来我会先介绍一下 Qingchat 的原理，然后介绍 Qingchat 的使用，最后展望一下 Qingchat 未来的发展方向。</p>
+<a id="more"></a>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>Qingchat 基于 <a href="https://github.com/sjdy521/Mojo-Weixin" target="_blank" rel="external">Mojo-Weixin</a> 进行开发，通过调用 Mojo－Winxin 的 http 接口与微信服务器进行通信以实现群发功能。目前主要支持微信群发工作，可以从文件中读取内容，并根据内容长度设置发送延时以模拟真人输入效果。</p>
+<h1 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h1><h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>想要使用Qingchat，首先需要在服务器或者本地配置好 Mojo－Weixin 环境。</p>
+<h3 id="测试-amp-安装perl环境"><a href="#测试-amp-安装perl环境" class="headerlink" title="测试&amp;安装perl环境"></a>测试&amp;安装perl环境</h3><p>除了 Windows 环境，大部门环境下已经默认预装了 perl 环境，可以通过｀perl －－version｀查看。本环境要求 perl 5.10 以上。<br>缺乏相关环境的，可以安装对应系统的集成包：</p>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>推荐选择</th>
+<th>下载地址</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows</td>
+<td>1. <strong>StrawberryPerl</strong><br>2. ActivePerl<br></td>
+<td><a href="http://strawberryperl.com/" target="_blank" rel="external">StrawberryPerl下载地址</a><br><a href="http://www.activestate.com/activeperl/downloads" target="_blank" rel="external">ActivePerl下载地址</a></td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>1. <strong>ActivePerl</strong><br>2. 官方源码<br>3. yum/apt等包管理器<br>4. Mojo-ActivePerl</td>
+<td><a href="http://www.activestate.com/activeperl/downloads" target="_blank" rel="external">ActivePerl下载地址</a><br><a href="https://github.com/sjdy521/Mojo-ActivePerl" target="_blank" rel="external">Mojo-ActivePerl下载地址</a></td>
+</tr>
+<tr>
+<td>Mac</td>
+<td>1. <strong>ActivePerl</strong></td>
+<td><a href="http://www.activestate.com/activeperl/downloads" target="_blank" rel="external">ActivePerl下载地址</a>｜</td>
+</tr>
+</tbody>
+</table>
+<h3 id="安装-Mojo-Weixin-模块"><a href="#安装-Mojo-Weixin-模块" class="headerlink" title="安装 Mojo::Weixin 模块"></a>安装 Mojo::Weixin 模块</h3><p>首先需要安装 cpanm 工具：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpan -i App::cpanminus</span><br></pre></td></tr></table></figure></p>
+<p>然后通过 cpanm 工具安装 Mojo::Weixin</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpanm Mojo::Weixin</span><br></pre></td></tr></table></figure>
+<h3 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h3><p>将如下代码使用utf－8编码保存为源码文件：</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env perl</span></span><br><span class="line"><span class="keyword">use</span> Mojo::Weixin;</span><br><span class="line"><span class="keyword">my</span> ($host,$port,$post_api);</span><br><span class="line"></span><br><span class="line">$host = <span class="string">"0.0.0.0"</span>; <span class="comment">#发送消息接口监听地址，修改为自己希望监听的地址</span></span><br><span class="line">$port = <span class="number">3000</span>;      <span class="comment">#发送消息接口监听端口，修改为自己希望监听的端口</span></span><br><span class="line"><span class="comment">#$post_api = 'http://xxxx';  #接收到的消息上报接口，如果不需要接收消息上报，可以删除或注释此行</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">my</span> $client = Mojo::Weixin-&gt;new(<span class="string">log_level=&gt;</span><span class="string">"info"</span>,<span class="string">ua_debug=&gt;</span><span class="number">0</span>,<span class="string">qrcode_path=&gt;</span><span class="string">"qrcode.jpg"</span>);</span><br><span class="line">$client-&gt;login();</span><br><span class="line">$client-&gt;load(<span class="string">"ShowMsg"</span>);</span><br><span class="line">$client-&gt;load(<span class="string">"Openwx"</span>,<span class="string">data=&gt;</span>&#123;<span class="string">listen=&gt;</span>[&#123;<span class="string">host=&gt;</span>$host,<span class="string">port=&gt;</span>$port&#125;], <span class="string">post_api=&gt;</span>$post_api&#125;);</span><br><span class="line">$client-&gt;run();</span><br></pre></td></tr></table></figure>
+<p>上述代码保存为 <code>test.pl</code> ， 并通过 perl 来运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perl test.pl</span><br></pre></td></tr></table></figure>
+<p>然后就会产生一个监听 3000 端口的 http 服务器。</p>
+<p>未竟事宜可以参考<a href="https://github.com/sjdy521/Mojo-Weixin/blob/master/README.md" target="_blank" rel="external">此处</a></p>
+<h3 id="配置Nginx"><a href="#配置Nginx" class="headerlink" title="配置Nginx"></a>配置Nginx</h3><p>为了方便调用二维码，还需要配置一个 Web 服务器。安装Nginx，在配置文件中添加：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80 default_server;</span><br><span class="line">    listen [::]:80 default_server ipv6only=on;</span><br><span class="line"></span><br><span class="line">    root /path/to/your/qrcode; # </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最终，能在浏览器中以 <code>http://xxx.xxx.xxx.xxx/qrcode.jpg</code> 的形式访问到二维码即配置成功。</p>
+<h2 id="安装Qingchat"><a href="#安装Qingchat" class="headerlink" title="安装Qingchat"></a>安装Qingchat</h2><h3 id="pip"><a href="#pip" class="headerlink" title="pip"></a>pip</h3><p>Qingchat已经上传到了pypi，只需要使用pip进行安装即可：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install qingchat</span><br></pre></td></tr></table></figure>
+<h3 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h3><p>Qingchat最新开发版代码位于： <a href="https://github.com/Xuanwo/qingchat/tree/dev" target="_blank" rel="external">https://github.com/Xuanwo/qingchat/tree/dev</a></p>
+<p>你可以使用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install <span class="_">-e</span> git+https://github.com/Xuanwo/qingchat/tree/dev</span><br></pre></td></tr></table></figure>
+<p>或</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/Xuanwo/qingchat/tree/dev</span><br><span class="line"><span class="built_in">cd</span> qingchat</span><br><span class="line">python setup.py install</span><br></pre></td></tr></table></figure>
+<p>以进行安装。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>Qingchat 的使用非常简单：</p>
+<h3 id="配置-1"><a href="#配置-1" class="headerlink" title="配置"></a>配置</h3><p>通过如下命令配置后端服务器的 ip 地址和端口：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">qingchat config ip &lt;ip&gt;</span><br><span class="line">qingchat config port &lt;port&gt;</span><br></pre></td></tr></table></figure>
+<p>配置文件默认会保存在<code>~/.config/qingchat/config.yml</code>。</p>
+<blockquote>
+<p>Win下可能需要设置<code>HOME</code>环境变量才能正常运行</p>
+</blockquote>
+<h3 id="登陆"><a href="#登陆" class="headerlink" title="登陆"></a>登陆</h3><p>配置完毕后，执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qingchat config login</span><br></pre></td></tr></table></figure>
+<p>就会自动弹出一个二维码，使用微信扫描并登录后即可。如果出现问题，请再次执行此命令。</p>
+<h3 id="群发消息"><a href="#群发消息" class="headerlink" title="群发消息"></a>群发消息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qingchat group list</span><br></pre></td></tr></table></figure>
+<p>此命令可以列出你保存到通讯录中的所有群组。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qingchat group choose &lt;group_name&gt;</span><br></pre></td></tr></table></figure>
+<p>此命令可以将指定群组加入列表，支持正则</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qingchat group clean</span><br></pre></td></tr></table></figure>
+<p>此命令可以清除列表</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">qingchat group send -t &lt;content&gt;</span><br><span class="line">qingchat group send -i &lt;media&gt;</span><br><span class="line">qingchat group send <span class="_">-f</span> &lt;file&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>-t</code> 参数用于发送文本信息</li>
+<li><code>-i</code> 参数用于发送媒体信息，图片会直接显示，其他类型将以文件形式传输</li>
+<li><code>-f</code> 参数用于指定文件，逐行发送，在开头添加<code>!</code>可以发送媒体信息</li>
+</ul>
+<h1 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h1><p>Qingchat 目前还处于开发阶段，功能不完善，BUG也很多，部署也相当麻烦。接下来，我将努力完成以下工作：</p>
+<ul>
+<li>更好的二维码呈现机制</li>
+<li>基于 Web 的图形化界面</li>
+<li>支持消息上报的 Server 端</li>
+<li>更多功能的实现，支持好友管理&amp;群组管理等</li>
+</ul>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><p>－ 2016年04月01日 初次发布</p>
+
+      
+    </div>
+
+    <div class="post-footer">
+      
+        <div id="eof" class="print-invisible">
+          <hr class="eof">
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block";><img alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，获取新文章推送
+          </span>
+        </div>
+        <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+          <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，请博主喝咖啡
+          </span>
+        </div>
+        <div class="copyright" style="clear:both;">
+           <p><span>本文标题:</span><a href="/2015/04/01/qingchat-intro/">微信多群直播的新探索——Qingchat</a></p>
+           <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
+           <p><span>发布时间:</span>2015年4月1日 - 22时04分</p>
+           <p><span>最后更新:</span>2016年4月1日 - 15时04分</p>
+           <p><span>原始链接:</span><a href="/2015/04/01/qingchat-intro/" title="微信多群直播的新探索——Qingchat">https://xuanwo.org/2015/04/01/qingchat-intro/</a></p>
+           <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial 4.0</a></p>
+           <p><span>转载请保留以上信息。</span></p>
+        </div>
+      
+      
+      
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/06/12/database-review/">数据库系统概论复习</a>
+            
+          </div>
+
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/03/26/hexo-intor/">史上最详细的Hexo博客搭建图文教程</a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </div>
+  </div>
+
+
+
+    
+      <div class="comments" id="comments">
+        
+          <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+          </div>
+        
+      </div>
+    
+  </div>
+
+
+        </div>
+      </div>
+
+
+      
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview">
+        <div class="site-author motion-element">
+          <img class="site-author-image" src="/avatar.jpg" alt="Xuanwo" />
+          <p class="site-author-name">Xuanwo</p>
+        </div>
+        <p class="site-description motion-element">Keep learning!</p>
+        <div class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">386</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            <a href="/categories">
+              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-name">分类</span>
+              </a>
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">53</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </div>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml">
+              <i class="menu-item-icon icon-feed"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element">
+            <a href="http://creativecommons.org/licenses/by-nc/4.0" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+      </div>
+
+      
+        <div class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#原理"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#用法"><span class="nav-number">3.</span> <span class="nav-text">用法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置"><span class="nav-number">3.1.</span> <span class="nav-text">配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#测试-amp-安装perl环境"><span class="nav-number">3.1.1.</span> <span class="nav-text">测试&安装perl环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-Mojo-Weixin-模块"><span class="nav-number">3.1.2.</span> <span class="nav-text">安装 Mojo::Weixin 模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行"><span class="nav-number">3.1.3.</span> <span class="nav-text">运行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置Nginx"><span class="nav-number">3.1.4.</span> <span class="nav-text">配置Nginx</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Qingchat"><span class="nav-number">3.2.</span> <span class="nav-text">安装Qingchat</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pip"><span class="nav-number">3.2.1.</span> <span class="nav-text">pip</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#源码"><span class="nav-number">3.2.2.</span> <span class="nav-text">源码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用"><span class="nav-number">3.3.</span> <span class="nav-text">使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-1"><span class="nav-number">3.3.1.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#登陆"><span class="nav-number">3.3.2.</span> <span class="nav-text">登陆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#群发消息"><span class="nav-number">3.3.3.</span> <span class="nav-text">群发消息</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#展望"><span class="nav-number">4.</span> <span class="nav-text">展望</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新日志"><span class="nav-number">5.</span> <span class="nav-text">更新日志</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </div>
+      
+
+    </div>
+  </div>
+
+
+    </div>
+
+    <div id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright-page">
+  
+  &copy; &nbsp;  2014 - 
+  2016
+  <span class="with-love">
+    <i class="icon-heart"></i>
+  </span>
+  <span class="author">Xuanwo</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </div>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js" id="motion.global"></script>
+
+
+
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var $sidebarInner = $('.sidebar-inner');
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.didShow', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+          var self = this;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      $(indicator).velocity('stop').velocity({
+        opacity: action === 'show' ? 0.4 : 0
+      }, { duration: 100 });
+    }
+
+  });
+</script>
+
+
+  <script type="text/javascript" id="sidebar.nav">
+    $(document).ready(function () {
+      var html = $('html');
+
+      $('.sidebar-nav li').on('click', function () {
+        var item = $(this);
+        var activeTabClassName = 'sidebar-nav-active';
+        var activePanelClassName = 'sidebar-panel-active';
+        if (item.hasClass(activeTabClassName)) {
+          return;
+        }
+
+        var currentTarget = $('.' + activePanelClassName);
+        var target = $('.' + item.data('target'));
+
+        currentTarget.velocity('transition.slideUpOut', 200, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', 200)
+            .addClass(activePanelClassName);
+        });
+
+        item.siblings().removeClass(activeTabClassName);
+        item.addClass(activeTabClassName);
+      });
+
+      $('.post-toc a').on('click', function (e) {
+        e.preventDefault();
+        var offset = $(escapeSelector(this.getAttribute('href'))).offset().top;
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        });
+      });
+
+      // Expand sidebar on post detail page by default, when post has a toc.
+      var $tocContent = $('.post-toc-content');
+      if (isDesktop() && CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    });
+  </script>
+
+
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      if (CONFIG.sidebar === 'always') {
+        displaySidebar();
+      }
+    });
+  </script>
+
+  
+
+  
+  
+  
+
+  
+
+    
+      
+    
+
+    <script type="text/javascript">
+      var disqus_shortname = 'only0god';
+      var disqus_identifier = '2015/04/01/qingchat-intro/';
+      var disqus_title = '微信多群直播的新探索——Qingchat';
+      var disqus_url = 'https://xuanwo.org/2015/04/01/qingchat-intro/';
+
+      (function(){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }());
+    </script>
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/js/analytics_google-analytics.js"></script>
+
+
+</body>
+</html>
