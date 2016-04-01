@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://xuanwo.org/"/>
-  <updated>2016-04-01T15:12:29.672Z</updated>
+  <updated>2016-04-01T15:32:10.460Z</updated>
   <id>https://xuanwo.org/</id>
   
   <author>
@@ -16,11 +16,114 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>微信多群直播的新探索——Qingchat</title>
+    <link href="https://xuanwo.org/2016/04/01/qingchat-intro/"/>
+    <id>https://xuanwo.org/2016/04/01/qingchat-intro/</id>
+    <published>2016-04-01T22:03:00.000Z</published>
+    <updated>2016-04-01T15:32:10.460Z</updated>
+    
+    <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;在我之前写过的一篇文章中，我曾经探索过类似的问题：&lt;a href=&quot;https://xuanwo.org/2016/02/28/wechat-remove/&quot;&gt;微信群重复人员识别&lt;/a&gt;。当初我就提出过能否自动获取相关数据，但因为种种原因的限制不了了之了。后来发现了&lt;a href=&quot;https://github.com/sjdy521/Mojo-Weixin&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Mojo-Weixin&lt;/a&gt;这个库之后，我决定在这个的基础上实现一个微信多群直播的工具——Qingchat。（&lt;em&gt;尽管在刚刚实现完不久，微信就更新了转发到多个群的功能，Sad。&lt;/em&gt;）探索的成果如下： &lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Qingchat&lt;/a&gt;，目前仅支持 python3 ，欢迎各位看官提 issues ，交 code ，或者拍砖。&lt;br&gt;接下来我会先介绍一下 Qingchat 的原理，然后介绍 Qingchat 的使用，最后展望一下 Qingchat 未来的发展方向。&lt;/p&gt;
+&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
+&lt;h1 id=&quot;原理&quot;&gt;&lt;a href=&quot;#原理&quot; class=&quot;headerlink&quot; title=&quot;原理&quot;&gt;&lt;/a&gt;原理&lt;/h1&gt;&lt;p&gt;Qingchat 基于 &lt;a href=&quot;https://github.com/sjdy521/Mojo-Weixin&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Mojo-Weixin&lt;/a&gt; 进行开发，通过调用 Mojo－Winxin 的 http 接口与微信服务器进行通信以实现群发功能。目前主要支持微信群发工作，可以从文件中读取内容，并根据内容长度设置发送延时以模拟真人输入效果。&lt;/p&gt;
+&lt;h1 id=&quot;用法&quot;&gt;&lt;a href=&quot;#用法&quot; class=&quot;headerlink&quot; title=&quot;用法&quot;&gt;&lt;/a&gt;用法&lt;/h1&gt;&lt;h2 id=&quot;配置&quot;&gt;&lt;a href=&quot;#配置&quot; class=&quot;headerlink&quot; title=&quot;配置&quot;&gt;&lt;/a&gt;配置&lt;/h2&gt;&lt;p&gt;想要使用Qingchat，首先需要在服务器或者本地配置好 Mojo－Weixin 环境。&lt;/p&gt;
+&lt;h3 id=&quot;测试-amp-安装perl环境&quot;&gt;&lt;a href=&quot;#测试-amp-安装perl环境&quot; class=&quot;headerlink&quot; title=&quot;测试&amp;amp;安装perl环境&quot;&gt;&lt;/a&gt;测试&amp;amp;安装perl环境&lt;/h3&gt;&lt;p&gt;除了 Windows 环境，大部门环境下已经默认预装了 perl 环境，可以通过｀perl －－version｀查看。本环境要求 perl 5.10 以上。&lt;br&gt;缺乏相关环境的，可以安装对应系统的集成包：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;平台&lt;/th&gt;
+&lt;th&gt;推荐选择&lt;/th&gt;
+&lt;th&gt;下载地址&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Windows&lt;/td&gt;
+&lt;td&gt;1. &lt;strong&gt;StrawberryPerl&lt;/strong&gt;&lt;br&gt;2. ActivePerl&lt;br&gt;&lt;/td&gt;
+&lt;td&gt;&lt;a href=&quot;http://strawberryperl.com/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;StrawberryPerl下载地址&lt;/a&gt;&lt;br&gt;&lt;a href=&quot;http://www.activestate.com/activeperl/downloads&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;ActivePerl下载地址&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Linux&lt;/td&gt;
+&lt;td&gt;1. &lt;strong&gt;ActivePerl&lt;/strong&gt;&lt;br&gt;2. 官方源码&lt;br&gt;3. yum/apt等包管理器&lt;br&gt;4. Mojo-ActivePerl&lt;/td&gt;
+&lt;td&gt;&lt;a href=&quot;http://www.activestate.com/activeperl/downloads&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;ActivePerl下载地址&lt;/a&gt;&lt;br&gt;&lt;a href=&quot;https://github.com/sjdy521/Mojo-ActivePerl&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Mojo-ActivePerl下载地址&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Mac&lt;/td&gt;
+&lt;td&gt;1. &lt;strong&gt;ActivePerl&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;a href=&quot;http://www.activestate.com/activeperl/downloads&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;ActivePerl下载地址&lt;/a&gt;｜&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&quot;安装-Mojo-Weixin-模块&quot;&gt;&lt;a href=&quot;#安装-Mojo-Weixin-模块&quot; class=&quot;headerlink&quot; title=&quot;安装 Mojo::Weixin 模块&quot;&gt;&lt;/a&gt;安装 Mojo::Weixin 模块&lt;/h3&gt;&lt;p&gt;首先需要安装 cpanm 工具：&lt;br&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;cpan -i App::cpanminus&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;然后通过 cpanm 工具安装 Mojo::Weixin&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;cpanm Mojo::Weixin&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h3 id=&quot;运行&quot;&gt;&lt;a href=&quot;#运行&quot; class=&quot;headerlink&quot; title=&quot;运行&quot;&gt;&lt;/a&gt;运行&lt;/h3&gt;&lt;p&gt;将如下代码使用utf－8编码保存为源码文件：&lt;/p&gt;
+&lt;figure class=&quot;highlight perl&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;#!/usr/bin/env perl&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;use&lt;/span&gt; Mojo::Weixin;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;my&lt;/span&gt; ($host,$port,$post_api);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;$host = &lt;span class=&quot;string&quot;&gt;&quot;0.0.0.0&quot;&lt;/span&gt;; &lt;span class=&quot;comment&quot;&gt;#发送消息接口监听地址，修改为自己希望监听的地址&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;$port = &lt;span class=&quot;number&quot;&gt;3000&lt;/span&gt;;      &lt;span class=&quot;comment&quot;&gt;#发送消息接口监听端口，修改为自己希望监听的端口&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;#$post_api = &#39;http://xxxx&#39;;  #接收到的消息上报接口，如果不需要接收消息上报，可以删除或注释此行&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;my&lt;/span&gt; $client = Mojo::Weixin-&amp;gt;new(&lt;span class=&quot;string&quot;&gt;log_level=&amp;gt;&lt;/span&gt;&lt;span class=&quot;string&quot;&gt;&quot;info&quot;&lt;/span&gt;,&lt;span class=&quot;string&quot;&gt;ua_debug=&amp;gt;&lt;/span&gt;&lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;,&lt;span class=&quot;string&quot;&gt;qrcode_path=&amp;gt;&lt;/span&gt;&lt;span class=&quot;string&quot;&gt;&quot;qrcode.jpg&quot;&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;$client-&amp;gt;login();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;$client-&amp;gt;load(&lt;span class=&quot;string&quot;&gt;&quot;ShowMsg&quot;&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;$client-&amp;gt;load(&lt;span class=&quot;string&quot;&gt;&quot;Openwx&quot;&lt;/span&gt;,&lt;span class=&quot;string&quot;&gt;data=&amp;gt;&lt;/span&gt;&amp;#123;&lt;span class=&quot;string&quot;&gt;listen=&amp;gt;&lt;/span&gt;[&amp;#123;&lt;span class=&quot;string&quot;&gt;host=&amp;gt;&lt;/span&gt;$host,&lt;span class=&quot;string&quot;&gt;port=&amp;gt;&lt;/span&gt;$port&amp;#125;], &lt;span class=&quot;string&quot;&gt;post_api=&amp;gt;&lt;/span&gt;$post_api&amp;#125;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;$client-&amp;gt;run();&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;上述代码保存为 &lt;code&gt;test.pl&lt;/code&gt; ， 并通过 perl 来运行：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;perl test.pl&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;然后就会产生一个监听 3000 端口的 http 服务器。&lt;/p&gt;
+&lt;p&gt;未竟事宜可以参考&lt;a href=&quot;https://github.com/sjdy521/Mojo-Weixin/blob/master/README.md&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;此处&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&quot;配置Nginx&quot;&gt;&lt;a href=&quot;#配置Nginx&quot; class=&quot;headerlink&quot; title=&quot;配置Nginx&quot;&gt;&lt;/a&gt;配置Nginx&lt;/h3&gt;&lt;p&gt;为了方便调用二维码，还需要配置一个 Web 服务器。安装Nginx，在配置文件中添加：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;server &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    listen 80 default_server;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    listen [::]:80 default_server ipv6only=on;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    root /path/to/your/qrcode; # &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;最终，能在浏览器中以 &lt;code&gt;http://xxx.xxx.xxx.xxx/qrcode.jpg&lt;/code&gt; 的形式访问到二维码即配置成功。&lt;/p&gt;
+&lt;h2 id=&quot;安装Qingchat&quot;&gt;&lt;a href=&quot;#安装Qingchat&quot; class=&quot;headerlink&quot; title=&quot;安装Qingchat&quot;&gt;&lt;/a&gt;安装Qingchat&lt;/h2&gt;&lt;h3 id=&quot;pip&quot;&gt;&lt;a href=&quot;#pip&quot; class=&quot;headerlink&quot; title=&quot;pip&quot;&gt;&lt;/a&gt;pip&lt;/h3&gt;&lt;p&gt;Qingchat已经上传到了pypi，只需要使用pip进行安装即可：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;pip install qingchat&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h3 id=&quot;源码&quot;&gt;&lt;a href=&quot;#源码&quot; class=&quot;headerlink&quot; title=&quot;源码&quot;&gt;&lt;/a&gt;源码&lt;/h3&gt;&lt;p&gt;Qingchat最新开发版代码位于： &lt;a href=&quot;https://github.com/Xuanwo/qingchat/tree/dev&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://github.com/Xuanwo/qingchat/tree/dev&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;你可以使用&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;pip install &lt;span class=&quot;_&quot;&gt;-e&lt;/span&gt; git+https://github.com/Xuanwo/qingchat/tree/dev&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;或&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;git &lt;span class=&quot;built_in&quot;&gt;clone&lt;/span&gt; https://github.com/Xuanwo/qingchat/tree/dev&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;cd&lt;/span&gt; qingchat&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;python setup.py install&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;以进行安装。&lt;/p&gt;
+&lt;h2 id=&quot;使用&quot;&gt;&lt;a href=&quot;#使用&quot; class=&quot;headerlink&quot; title=&quot;使用&quot;&gt;&lt;/a&gt;使用&lt;/h2&gt;&lt;p&gt;Qingchat 的使用非常简单：&lt;/p&gt;
+&lt;h3 id=&quot;配置-1&quot;&gt;&lt;a href=&quot;#配置-1&quot; class=&quot;headerlink&quot; title=&quot;配置&quot;&gt;&lt;/a&gt;配置&lt;/h3&gt;&lt;p&gt;通过如下命令配置后端服务器的 ip 地址和端口：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;qingchat config ip &amp;lt;ip&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;qingchat config port &amp;lt;port&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;配置文件默认会保存在&lt;code&gt;~/.config/qingchat/config.yml&lt;/code&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Win下可能需要设置&lt;code&gt;HOME&lt;/code&gt;环境变量才能正常运行&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&quot;登陆&quot;&gt;&lt;a href=&quot;#登陆&quot; class=&quot;headerlink&quot; title=&quot;登陆&quot;&gt;&lt;/a&gt;登陆&lt;/h3&gt;&lt;p&gt;配置完毕后，执行&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;qingchat config login&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;就会自动弹出一个二维码，使用微信扫描并登录后即可。如果出现问题，请再次执行此命令。&lt;/p&gt;
+&lt;h3 id=&quot;群发消息&quot;&gt;&lt;a href=&quot;#群发消息&quot; class=&quot;headerlink&quot; title=&quot;群发消息&quot;&gt;&lt;/a&gt;群发消息&lt;/h3&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;qingchat group list&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;此命令可以列出你保存到通讯录中的所有群组。&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;qingchat group choose &amp;lt;group_name&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;此命令可以将指定群组加入列表，支持正则&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;qingchat group clean&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;此命令可以清除列表&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;qingchat group send -t &amp;lt;content&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;qingchat group send -i &amp;lt;media&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;qingchat group send &lt;span class=&quot;_&quot;&gt;-f&lt;/span&gt; &amp;lt;file&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;-t&lt;/code&gt; 参数用于发送文本信息&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-i&lt;/code&gt; 参数用于发送媒体信息，图片会直接显示，其他类型将以文件形式传输&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-f&lt;/code&gt; 参数用于指定文件，逐行发送，在开头添加&lt;code&gt;!&lt;/code&gt;可以发送媒体信息&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&quot;展望&quot;&gt;&lt;a href=&quot;#展望&quot; class=&quot;headerlink&quot; title=&quot;展望&quot;&gt;&lt;/a&gt;展望&lt;/h1&gt;&lt;p&gt;Qingchat 目前还处于开发阶段，功能不完善，BUG也很多，部署也相当麻烦。接下来，我将努力完成以下工作：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;更好的二维码呈现机制&lt;/li&gt;
+&lt;li&gt;基于 Web 的图形化界面&lt;/li&gt;
+&lt;li&gt;支持消息上报的 Server 端&lt;/li&gt;
+&lt;li&gt;更多功能的实现，支持好友管理&amp;amp;群组管理等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&quot;更新日志&quot;&gt;&lt;a href=&quot;#更新日志&quot; class=&quot;headerlink&quot; title=&quot;更新日志&quot;&gt;&lt;/a&gt;更新日志&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;2016年04月01日 初次发布&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;在我之前写过的一篇文章中，我曾经探索过类似的问题：&lt;a href=&quot;https://xuanwo.org/2016/02/28/wechat-remove/&quot;&gt;微信群重复人员识别&lt;/a&gt;。当初我就提出过能否自动获取相关数据，但因为种种原因的限制不了了之了。后来发现了&lt;a href=&quot;https://github.com/sjdy521/Mojo-Weixin&quot;&gt;Mojo-Weixin&lt;/a&gt;这个库之后，我决定在这个的基础上实现一个微信多群直播的工具——Qingchat。（&lt;em&gt;尽管在刚刚实现完不久，微信就更新了转发到多个群的功能，Sad。&lt;/em&gt;）探索的成果如下： &lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot;&gt;Qingchat&lt;/a&gt;，目前仅支持 python3 ，欢迎各位看官提 issues ，交 code ，或者拍砖。&lt;br&gt;接下来我会先介绍一下 Qingchat 的原理，然后介绍 Qingchat 的使用，最后展望一下 Qingchat 未来的发展方向。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Develop" scheme="https://xuanwo.org/categories/Develop/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>罹患痛风感言</title>
     <link href="https://xuanwo.org/2016/03/13/gout/"/>
     <id>https://xuanwo.org/2016/03/13/gout/</id>
     <published>2016-03-13T13:44:00.000Z</published>
-    <updated>2016-04-01T15:12:29.672Z</updated>
+    <updated>2016-04-01T15:32:10.456Z</updated>
     
     <content type="html">&lt;p&gt;其实我很想写出获奖感言的感觉，但是痛风发作的时候真的好疼啊。。。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -57,7 +160,7 @@
     <link href="https://xuanwo.org/2016/03/12/neovim-slow-upgrade/"/>
     <id>https://xuanwo.org/2016/03/12/neovim-slow-upgrade/</id>
     <published>2016-03-12T11:00:00.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;一直都非常羡慕那些能把vim用得非常溜的人，但是自己总是不情愿去学，总是觉得vim的操作方式非常反人类，难度曲线太陡，不适合我。真正让我下定决心去学的，是因为系统切换到Ubuntu Gnome之后发现，Sublime Text 3 不能原生支持中文输入。同时我也发现，如果我不上来就折腾spf13这样的东西的话，其实vim非常好懂。于是，Neovim的慢速升级攻略就这样诞生了。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -109,7 +212,7 @@
     <link href="https://xuanwo.org/2016/02/28/wechat-remove/"/>
     <id>https://xuanwo.org/2016/02/28/wechat-remove/</id>
     <published>2016-02-28T10:05:00.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;由于微信的限制，人数超过一百以后，只有邀请才能加入。所以，如果想要组织大型的在线活动，就只有建立很多个分群。然而分群的问题在于，会有很多人重复加群，挤占了本来就缺乏的空间。所以需要找到一个可行的办法，清除两个群中的重复人员。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -153,7 +256,7 @@
     <link href="https://xuanwo.org/2016/02/26/debug-for-hexo-1775/"/>
     <id>https://xuanwo.org/2016/02/26/debug-for-hexo-1775/</id>
     <published>2016-02-26T12:54:00.000Z</published>
-    <updated>2016-04-01T15:12:29.672Z</updated>
+    <updated>2016-04-01T15:32:10.456Z</updated>
     
     <content type="html">&lt;h2 id=&quot;起因&quot;&gt;&lt;a href=&quot;#起因&quot; class=&quot;headerlink&quot; title=&quot;起因&quot;&gt;&lt;/a&gt;起因&lt;/h2&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/hexojs/hexo/issues/1775&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;hexojs/hexo #1775&lt;/a&gt;&lt;br&gt;BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -194,7 +297,7 @@
     <link href="https://xuanwo.org/2016/02/17/ipv6-in-cugb/"/>
     <id>https://xuanwo.org/2016/02/17/ipv6-in-cugb/</id>
     <published>2016-02-17T18:59:02.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;p&gt;主旨只有两条：开源，节流&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -281,7 +384,7 @@
     <link href="https://xuanwo.org/2016/02/15/chocolatey-intro/"/>
     <id>https://xuanwo.org/2016/02/15/chocolatey-intro/</id>
     <published>2016-02-15T20:15:46.000Z</published>
-    <updated>2016-04-01T15:12:29.672Z</updated>
+    <updated>2016-04-01T15:32:10.456Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://chocolatey.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Chocolatey&lt;/a&gt;是一个基于Nuget的Windows包管理工具，截止到我更新此文章的时候，一共有3.7k多个独立包。本文旨在介绍Chocolatey这一工具的安装和用法，希望能有更多人享受到该工具的便利之处。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -346,7 +449,7 @@
     <link href="https://xuanwo.org/2016/02/04/unlock-your-smart-tv/"/>
     <id>https://xuanwo.org/2016/02/04/unlock-your-smart-tv/</id>
     <published>2016-02-04T23:12:52.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;现在很多人都买了智能电视，但是出于种种你懂得原因，厂商通常都不允许用户自行安装自己想要的APP，比如腾讯视频，优酷视频之类的。本教程旨在突破这些限制，彻底解放智能电视的全部潜力。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -435,7 +538,7 @@
     <link href="https://xuanwo.org/2016/01/13/how-to-differ-invalid-link/"/>
     <id>https://xuanwo.org/2016/01/13/how-to-differ-invalid-link/</id>
     <published>2016-01-13T01:18:51.000Z</published>
-    <updated>2016-04-01T15:12:29.672Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;前两天我的朋友圈被微信公开课活动的链接+截图刷屏，随后一大帮“业内人士”站出来说这个是盗号连接，只要点开，微信钱包和支付宝就会被盗。作为半个业内人士，我不能忍了，决定跟大家谈一谈如何识别真假链接。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -509,7 +612,7 @@
     <link href="https://xuanwo.org/2016/01/03/vs-oracle-11g/"/>
     <id>https://xuanwo.org/2016/01/03/vs-oracle-11g/</id>
     <published>2016-01-03T15:31:32.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;开发环境&quot;&gt;&lt;a href=&quot;#开发环境&quot; class=&quot;headerlink&quot; title=&quot;开发环境&quot;&gt;&lt;/a&gt;开发环境&lt;/h1&gt;&lt;p&gt;宿主机：Win10 + VS2015 + ODP.Net for VS2015&lt;br&gt;虚拟机：Win7 + Oracle 11g + 桥接&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -574,7 +677,7 @@
     <link href="https://xuanwo.org/2015/12/23/best-pdf-read-solution/"/>
     <id>https://xuanwo.org/2015/12/23/best-pdf-read-solution/</id>
     <published>2015-12-23T16:15:20.000Z</published>
-    <updated>2016-04-01T15:12:29.672Z</updated>
+    <updated>2016-04-01T15:32:10.456Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;最近因为学习需要，要大量阅读纯文字的PDF文档。然后我惊讶地发现市场上居然没有哪家提供一套完整可用的跨平台PDF阅读解决方案，于是我在尝试了市面几乎所有叫得上名字的各类阅读器之后，形成了一套自己的跨平台PDF阅读解决方案。本文记录了这套方案的详细内容，希望会有所益处。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -631,7 +734,7 @@
     <link href="https://xuanwo.org/2015/12/18/online-video-download-solution/"/>
     <id>https://xuanwo.org/2015/12/18/online-video-download-solution/</id>
     <published>2015-12-18T12:49:49.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;因为学习需要，产生了一个这样的需求：要从Youtube上批量下载视频。自然，出于方便使用的角度来看，音画不能分离，最好带有对应的字幕。一番搜罗之后，我找到了基于Python的开源产品： &lt;a href=&quot;https://rg3.github.io/youtube-dl/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;youtube-dl&lt;/a&gt;&lt;/p&gt;
 &lt;blockquote&gt;
@@ -687,7 +790,7 @@
     <link href="https://xuanwo.org/2015/11/27/surf-with-poweroff/"/>
     <id>https://xuanwo.org/2015/11/27/surf-with-poweroff/</id>
     <published>2015-11-27T01:34:33.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;前两天我对我们宿舍的路由器进行了小小的改造，使得我们在断电之后也能照常上网。原理非常简单：就是使用充电宝来给路由器供电——因为我们墙上的网口是不会断电的，所以只要解决了路由器没有电的问题，就可以解决断网问题。路由器要求的输入电压为5V，电流为0.3A，恰好跟我们常用的充电宝是一致的，淘宝买一根USB转DV线成功解决问题。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -728,7 +831,7 @@
     <link href="https://xuanwo.org/2015/11/14/pandoc/"/>
     <id>https://xuanwo.org/2015/11/14/pandoc/</id>
     <published>2015-11-14T14:29:18.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;Pandoc是一个用haskell编写的文本转换工具，小巧迅速且支持格式广泛，堪称文本转换应用的瑞士军刀。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -808,7 +911,7 @@
     <link href="https://xuanwo.org/2015/11/03/python-packages/"/>
     <id>https://xuanwo.org/2015/11/03/python-packages/</id>
     <published>2015-11-03T15:24:06.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;用Python写过不少的脚本，现在要把脚本打包成模块并进行发布，然后才明白脚本Boy到正规的码农差距有多大= =。&lt;br&gt;踩了很多天的坑之后，自己学习到了Python的包分发机制，以及如何利用Pypi向全世界分发自己的模块。现在简单地做一些整理。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1003,7 +1106,7 @@
     <link href="https://xuanwo.org/2015/10/30/python-JSON/"/>
     <id>https://xuanwo.org/2015/10/30/python-JSON/</id>
     <published>2015-10-30T23:47:23.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;JSON介绍&quot;&gt;&lt;a href=&quot;#JSON介绍&quot; class=&quot;headerlink&quot; title=&quot;JSON介绍&quot;&gt;&lt;/a&gt;JSON介绍&lt;/h1&gt;&lt;p&gt;JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。 易于人阅读和编写。同时也易于机器解析和生成。 它基于JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999的一个子集。 JSON采用完全独立于语言的文本格式，但是也使用了类似于C语言家族的习惯（包括C, C++, C#, Java, JavaScript, Perl, Python等）。 这些特性使JSON成为理想的数据交换语言。&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;引用自&lt;a href=&quot;http://www.json.org/json-zh.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;json.org&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
@@ -1154,7 +1257,7 @@
     <link href="https://xuanwo.org/2015/10/29/regex/"/>
     <id>https://xuanwo.org/2015/10/29/regex/</id>
     <published>2015-10-29T16:26:47.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;一直都知道正则表达式的强大，但是总是觉得正则很难学不会，所以一直不得要领。这次因为工作原因，不得不用到正则，于是顺手将它学了起来。入门之后才发现，花费一点时间学习一下正则非常值得，可以成千上百倍地提升你的工作效率。特别是当你经常和批量数据以及规则文本打交道的时候，你会发现完全离不开正则。闲话到此为止，下面进入正题。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1329,7 +1432,7 @@
     <link href="https://xuanwo.org/2015/10/28/hashsum/"/>
     <id>https://xuanwo.org/2015/10/28/hashsum/</id>
     <published>2015-10-28T11:14:56.000Z</published>
-    <updated>2016-04-01T15:12:29.672Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;前一阵子的Xcodeghost事件给所有人都好好的上了一课——校验的重要性。无论何时，一定要校验！一定要校验！！一定要校验！！！重要的事情重复三遍总是没错的。如果真的无法做到这一点，最起码这些一定要注意：&lt;/p&gt;
 &lt;ul&gt;
@@ -1381,7 +1484,7 @@
     <link href="https://xuanwo.org/2015/10/23/pyquery-intro/"/>
     <id>https://xuanwo.org/2015/10/23/pyquery-intro/</id>
     <published>2015-10-23T01:03:09.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;pyQuery介绍&quot;&gt;&lt;a href=&quot;#pyQuery介绍&quot; class=&quot;headerlink&quot; title=&quot;pyQuery介绍&quot;&gt;&lt;/a&gt;pyQuery介绍&lt;/h1&gt;&lt;p&gt;pyquery 可以让你用jquery语法来对xml进行查询。这个API和jquery十分类似。如果利用lxml，pyquery对xml和html的操作将更加快速。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1443,7 +1546,7 @@
     <link href="https://xuanwo.org/2015/10/22/vagrant-intro/"/>
     <id>https://xuanwo.org/2015/10/22/vagrant-intro/</id>
     <published>2015-10-22T09:24:57.000Z</published>
-    <updated>2016-04-01T15:12:29.676Z</updated>
+    <updated>2016-04-01T15:32:10.460Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;说到虚拟开发环境，人人都觉得好，但是在实际应用中，人们还是在一台电脑上配置所有用到的环境。究其原因，还是因为搭建虚拟开发环境的过程不比在实体机上配置更简单。但是，Vagrant出现了。Vagrant抹平了不同的虚拟化软件的差异，以统一的命令取而代之；抛弃了传统的系统镜像分发安装方式，以直接封装好的虚拟磁盘代替。除此以外，还提供了各种已经封装好的环境下载，搭建一个虚拟开发环境的便利程度有了大幅提高。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1480,97 +1583,6 @@
       <category term="Software" scheme="https://xuanwo.org/tags/Software/"/>
     
       <category term="Develop" scheme="https://xuanwo.org/tags/Develop/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>低成本搭建谷歌镜像</title>
-    <link href="https://xuanwo.org/2015/10/12/7ghost-google/"/>
-    <id>https://xuanwo.org/2015/10/12/7ghost-google/</id>
-    <published>2015-10-12T16:53:25.000Z</published>
-    <updated>2016-04-01T15:12:29.656Z</updated>
-    
-    <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;尽管自己已经搭建好了Shadowsocks等翻墙工具，但是总有一些时刻需要临时地使用Google查看一些网页，这个时候一个可用的谷歌镜像就显得很重要。本文旨在使用低成本方案来搭建一个可用的谷歌镜像服务，用以部分解决这个问题。&lt;/p&gt;
-&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
-&lt;h1 id=&quot;条件&quot;&gt;&lt;a href=&quot;#条件&quot; class=&quot;headerlink&quot; title=&quot;条件&quot;&gt;&lt;/a&gt;条件&lt;/h1&gt;&lt;p&gt;你需要具备以下条件：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;一台支持PHP的境外服务器（主机）&lt;/li&gt;
-&lt;li&gt;一个可用（未被墙）的域名&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;如果没有的话，推荐使用&lt;a href=&quot;http://api.hostinger.com.hk/redir/6395538&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Hostinger&lt;/a&gt;的免费主机并注册免费一年的&lt;code&gt;.xyz&lt;/code&gt;域名。&lt;/p&gt;
-&lt;h1 id=&quot;搭建&quot;&gt;&lt;a href=&quot;#搭建&quot; class=&quot;headerlink&quot; title=&quot;搭建&quot;&gt;&lt;/a&gt;搭建&lt;/h1&gt;&lt;blockquote&gt;
-&lt;p&gt;以Hostinger为例&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;ul&gt;
-&lt;li&gt;下载7ghost程序&lt;a href=&quot;https://drive.google.com/file/d/0B9QMnnRkfvWjMnhVdDVsb21qazA/view?usp=sharing&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;(墙外，推荐)&lt;/a&gt;&amp;amp;&lt;a href=&quot;http://pan.baidu.com/s/1mgGkEYc&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;(墙内，密码b5te)&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;FTP上传至指定目录&lt;/li&gt;
-&lt;li&gt;使用域名进行访问&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&quot;配置&quot;&gt;&lt;a href=&quot;#配置&quot; class=&quot;headerlink&quot; title=&quot;配置&quot;&gt;&lt;/a&gt;配置&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;访问&lt;code&gt;http://yourname.xxx/_admin&lt;/code&gt;以进行管理&lt;/li&gt;
-&lt;li&gt;默认密码为123456，可在&lt;code&gt;\_admin\data\config.php&lt;/code&gt;中自行修改&lt;/li&gt;
-&lt;li&gt;在需要代理的网址中填写&lt;code&gt;https://www.google.com/&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;点击提交即可&lt;/li&gt;
-&lt;li&gt;现在可以访问自己的域名测试反代效果了&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&quot;进阶&quot;&gt;&lt;a href=&quot;#进阶&quot; class=&quot;headerlink&quot; title=&quot;进阶&quot;&gt;&lt;/a&gt;进阶&lt;/h1&gt;&lt;h2 id=&quot;使用CloudFlare加速&quot;&gt;&lt;a href=&quot;#使用CloudFlare加速&quot; class=&quot;headerlink&quot; title=&quot;使用CloudFlare加速&quot;&gt;&lt;/a&gt;使用CloudFlare加速&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;登陆CloudFlare&lt;/li&gt;
-&lt;li&gt;点击&lt;code&gt;add site&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;然后修改CloudFlare指定的NS服务器&lt;/li&gt;
-&lt;li&gt;显示为&lt;code&gt;Actived&lt;/code&gt;之后即为配置完成&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;使用CloudFlare的免费SSL&quot;&gt;&lt;a href=&quot;#使用CloudFlare的免费SSL&quot; class=&quot;headerlink&quot; title=&quot;使用CloudFlare的免费SSL&quot;&gt;&lt;/a&gt;使用CloudFlare的免费SSL&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;登陆CloudFlare&lt;/li&gt;
-&lt;li&gt;点击&lt;code&gt;Crypto&lt;/code&gt;选项卡，SSL设置中选择&lt;code&gt;Flexible&lt;/code&gt;，等待几个小时后即可&lt;/li&gt;
-&lt;li&gt;可以选择HSTS（必须保证SSL可用，否则将无法正常访问）&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;开启全站强制HTTPS&quot;&gt;&lt;a href=&quot;#开启全站强制HTTPS&quot; class=&quot;headerlink&quot; title=&quot;开启全站强制HTTPS&quot;&gt;&lt;/a&gt;开启全站强制HTTPS&lt;/h2&gt;&lt;blockquote&gt;
-&lt;p&gt;由于反代加上CDN的特殊性，所以无法通过修改.htaccess或者php文件来强制使用HTTPS。不过还是有办法的，可以使用CloudFlare的Page Rules功能。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;ul&gt;
-&lt;li&gt;登陆CloudFlare&lt;/li&gt;
-&lt;li&gt;切换到Page Rules选项卡&lt;/li&gt;
-&lt;li&gt;在&lt;code&gt;Add new rule&lt;/code&gt;下方的&lt;code&gt;URL pattern&lt;/code&gt;中填写&lt;code&gt;http://yourname.xxx/*&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;选中下方的&lt;code&gt;Always use https&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;点击&lt;code&gt;Add rule&lt;/code&gt;即可&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;子目录配置&quot;&gt;&lt;a href=&quot;#子目录配置&quot; class=&quot;headerlink&quot; title=&quot;子目录配置&quot;&gt;&lt;/a&gt;子目录配置&lt;/h2&gt;&lt;blockquote&gt;
-&lt;p&gt;这个是源程序中的一些BUG，好像也跟Google本身页面中的资源引用有关&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;&lt;em&gt;假定子目录名为&lt;code&gt;sub&lt;/code&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;登录到管理后台&lt;/li&gt;
-&lt;li&gt;添加内容替换，查找内容&lt;code&gt;sub/&lt;/code&gt;，替换为&lt;code&gt;/&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;点击&lt;code&gt;提交&lt;/code&gt;即可&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&quot;注意事项&quot;&gt;&lt;a href=&quot;#注意事项&quot; class=&quot;headerlink&quot; title=&quot;注意事项&quot;&gt;&lt;/a&gt;注意事项&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;不建议大规模进行使用，可能会被Google屏蔽或者被GFW干扰&lt;/li&gt;
-&lt;li&gt;建议使用垃圾域名，万一被BAN也不心疼的那种= =&lt;/li&gt;
-&lt;li&gt;强烈建议花点时间配置HTTPS&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&quot;更新日志&quot;&gt;&lt;a href=&quot;#更新日志&quot; class=&quot;headerlink&quot; title=&quot;更新日志&quot;&gt;&lt;/a&gt;更新日志&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;2015年10月13日 初步完成&lt;/li&gt;
-&lt;li&gt;2015年11月05日 增加了修改密码的详细指示&lt;/li&gt;
-&lt;li&gt;2015年11月29日 增加了子目录的配置&lt;/li&gt;
-&lt;/ul&gt;
-</content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;尽管自己已经搭建好了Shadowsocks等翻墙工具，但是总有一些时刻需要临时地使用Google查看一些网页，这个时候一个可用的谷歌镜像就显得很重要。本文旨在使用低成本方案来搭建一个可用的谷歌镜像服务，用以部分解决这个问题。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="Opinion" scheme="https://xuanwo.org/categories/Opinion/"/>
-    
-    
-      <category term="Google" scheme="https://xuanwo.org/tags/Google/"/>
-    
-      <category term="CloudFlare" scheme="https://xuanwo.org/tags/CloudFlare/"/>
-    
-      <category term="FuckWall" scheme="https://xuanwo.org/tags/FuckWall/"/>
-    
-      <category term="PHP" scheme="https://xuanwo.org/tags/PHP/"/>
     
   </entry>
   
