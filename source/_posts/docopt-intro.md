@@ -8,7 +8,7 @@ doc: true
 
 # 前言
 
-[`Qingchat`](https://github.com/Xuanwo/qingchat) 使用的命令行参数解释器是 [`docopt`](http://docopt.org/)，用下来感觉非常棒，所以决定介绍一下这个库。（*奉劝各位看官，真爱生命，远离argparse。*）
+[`Qingchat`](https://github.com/Xuanwo/qingchat) 使用的命令行参数解释器是 [`docopt`](http://docopt.org/)，用下来感觉非常棒，所以决定介绍一下这个库。（*奉劝各位看官，珍爱生命，远离argparse。*）
 
 <!-- more -->
 
