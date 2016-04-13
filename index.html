@@ -135,7 +135,7 @@
           
             
               <a class="post-title-link" href="/2016/04/13/gitlab-install-intro/">
-                未命名
+                Gitlab部署和汉化以及简单运维
               </a>
             
           
@@ -180,55 +180,12 @@
 
       
         
-          <h1 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h1><p>在跟网络中心的老师沟通成立镜像站的相关事宜的时候，意外地接下来搭建一套校内的 Git 服务的任务。<br><a href="https://imnerd.org/" target="_blank" rel="external">@怡红公子</a> 曾经搭建过一套类似的服务，但由于服务器端没有开启 VT 虚拟化导致不能安装 64 位的操作系统，再加上 Gitlab 不提供 32 位的安装包，所以长期以来怡红公子一直都是自行编译并配置 Gitlab 。考虑到后续维护的方便，我们决定趁着这个机会使用另一台支持安装 64 位操作系统的服务器，一劳永逸地解决这个问题。<br>我们的服务器环境是 <strong>CentOS 7.2 64bit</strong> ，以下所有操作均以此为基准。</p>
-<h1 id="Gitlab-安装"><a href="#Gitlab-安装" class="headerlink" title="Gitlab 安装"></a>Gitlab 安装</h1><p>推荐使用 <a href="https://about.gitlab.com/downloads" target="_blank" rel="external">Install a GitLab CE Omnibus package</a> 安装 ，其他发行版可以点选对应版本，不再赘述。</p>
-<h2 id="安装和配置依赖"><a href="#安装和配置依赖" class="headerlink" title="安装和配置依赖"></a>安装和配置依赖</h2><p>如果需要安装 Postfix 来发送邮件，则需要在安装过程中选择 <code>Internet Site</code>。你也可以使用 Sendmail 之类的第三方发信服务或者使用自行配制的 SMTP 服务器。<br>除此以外，下列命令将会在防火墙中打开 HTTP(80) 和 SSH(22) 对应端口。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install curl policycoreutils openssh-server openssh-clients</span><br><span class="line">sudo systemctl <span class="built_in">enable</span> sshd</span><br><span class="line">sudo systemctl start sshd</span><br><span class="line">sudo yum install postfix</span><br><span class="line">sudo systemctl <span class="built_in">enable</span> postfix</span><br><span class="line">sudo systemctl start postfix</span><br><span class="line">sudo firewall-cmd --permanent --add-service=http</span><br><span class="line">sudo systemctl reload firewalld</span><br></pre></td></tr></table></figure>
-<h2 id="添加-Gitlab-源并安装"><a href="#添加-Gitlab-源并安装" class="headerlink" title="添加 Gitlab 源并安装"></a>添加 Gitlab 源并安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl <span class="_">-s</span>S https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash</span><br><span class="line">sudo yum install gitlab-ce</span><br></pre></td></tr></table></figure>
-<p>这个脚本会在源中添加 Gitlab-CE ，并自动执行<code>yum makecache</code>，然后安装<code>gitlab-ce</code>。由于源在国外，可能速度较慢，也可以手动添加来自 清华tuna 的源： <a href="https://mirrors.tuna.tsinghua.edu.cn/help/gitlab-ce/" target="_blank" rel="external">https://mirrors.tuna.tsinghua.edu.cn/help/gitlab-ce/</a> ， 链接中为各发行版下的教程，感谢 清华tuna 提供镜像。</p>
-<h2 id="配置并启动-Gitlab"><a href="#配置并启动-Gitlab" class="headerlink" title="配置并启动 Gitlab"></a>配置并启动 Gitlab</h2><p>此时已经可以启动服务了：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gitlab-ctl reconfigure</span><br></pre></td></tr></table></figure>
-<p>进行一长串复杂的启动流程之后， gitlab 就已经可以通过 <code>localhost</code> 进行访问了。</p>
-<h1 id="Gitlab-配置"><a href="#Gitlab-配置" class="headerlink" title="Gitlab 配置"></a>Gitlab 配置</h1><h2 id="修改域名"><a href="#修改域名" class="headerlink" title="修改域名"></a>修改域名</h2><p>默认的配置文件保存在 <code>/etc/gitlab/gitlab.rb</code> ，执行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/gitlab/gitlab.rb</span><br></pre></td></tr></table></figure>
-<p>打开文件，并修改：</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">external_url <span class="string">'http://your.domain'</span></span><br></pre></td></tr></table></figure>
-<p>再次执行</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gitlab-ctl reconfigure</span><br></pre></td></tr></table></figure>
-<p>即可。</p>
-<p>有一定概率出现 502 错误，刷新浏览器或者再次更新配置即可。</p>
-<h2 id="Gitlab-汉化"><a href="#Gitlab-汉化" class="headerlink" title="Gitlab 汉化"></a>Gitlab 汉化</h2><p>由于服务对象是广大师生，为了降低新手上手的难度，所有进行汉化也是非常有必要的。好在国内有人已经进行了这方面的工作，我们只需要共享其成果即可（欢迎向<a href="https://gitlab.com/larryli/gitlab" target="_blank" rel="external">原项目</a>提交高质量翻译）。</p>
-<p>首先确认版本：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo cat /opt/gitlab/embedded/service/gitlab-rails/VERSION</span><br></pre></td></tr></table></figure>
-<p>并确认当前汉化版本的 VERSION 是否相同，当前最新的汉化版本为 8.6 。<br>如果安装版本小于当前汉化版本，请先升级。如果安装版本大于当前汉化版本，请在本项目中提交新的 issue。<br>如果版本相同，首先在本地 clone 仓库。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># GitLab.com 仓库</span></span><br><span class="line">git <span class="built_in">clone</span> https://gitlab.com/larryli/gitlab.git</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或 Coding.net 镜像</span></span><br><span class="line">git <span class="built_in">clone</span> https://git.coding.net/larryli/gitlab.git</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>根据我的测试， Coding.net 的镜像不完整，clone 之后无法 checkout</p>
-</blockquote>
-<p>然后比较汉化分支和原分支，导出 patch 用的 diff 文件。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 8.1 版本的汉化补丁</span></span><br><span class="line">git diff origin/8-6-stable..8-6-zh &gt; ../8.6.diff</span><br></pre></td></tr></table></figure>
-<p>然后上传 <code>8.6.diff</code> 文件到服务器。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 停止 gitlab</span></span><br><span class="line">sudo gitlab-ctl stop</span><br><span class="line">sudo patch <span class="_">-d</span> /opt/gitlab/embedded/service/gitlab-rails -p1 &lt; 8.6.diff</span><br></pre></td></tr></table></figure>
-<p>确定没有 .rej 文件，重启 GitLab 即可。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gitlab-ctl start</span><br></pre></td></tr></table></figure>
-<p>如果汉化中出现问题，请重新安装 GitLab（<strong>注意备份数据</strong>）。</p>
-<h1 id="Gitlab-运维"><a href="#Gitlab-运维" class="headerlink" title="Gitlab 运维"></a>Gitlab 运维</h1><h2 id="管理"><a href="#管理" class="headerlink" title="管理"></a>管理</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动所有 gitlab 组件：</span></span><br><span class="line">sudo gitlab-ctl start</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止所有 gitlab 组件：</span></span><br><span class="line">sudo gitlab-ctl stop</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启所有 gitlab 组件：</span></span><br><span class="line">sudo gitlab-ctl restart</span><br></pre></td></tr></table></figure>
-<h2 id="备份"><a href="#备份" class="headerlink" title="备份"></a>备份</h2><p>备份GitLab repositories and GitLab metadata<br>在 crontab 中加入如下命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0 2 * * * /usr/bin/gitlab-rake gitlab:backup:create</span><br></pre></td></tr></table></figure></p>
-<h2 id="恢复"><a href="#恢复" class="headerlink" title="恢复"></a>恢复</h2><p>首先进入备份 gitlab 的目录，这个目录是配置文件中的<code>gitlab_rails[&#39;backup_path&#39;]</code>，默认为<code>/var/opt/gitlab/backups</code>。</p>
-<p>然后停止 unicorn 和 sidekiq ，保证数据库没有新的连接，不会有写数据情况。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo gitlab-ctl stop unicorn</span><br><span class="line"><span class="comment"># ok: down: unicorn: 0s, normally up</span></span><br><span class="line">sudo gitlab-ctl stop sidekiq</span><br><span class="line"><span class="comment"># ok: down: sidekiq: 0s, normally up</span></span><br></pre></td></tr></table></figure>
-<p>然后恢复数据，1406691018为备份文件的时间戳</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gitlab-rake gitlab:backup:restore BACKUP=1406691018</span><br></pre></td></tr></table></figure>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
-<li><a href="https://about.gitlab.com/downloads/" target="_blank" rel="external"> Gitlab 下载</a></li>
-<li><a href="https://gitlab.com/larryli/gitlab/wikis/home" target="_blank" rel="external">GitLab Community Edition · Wiki</a></li>
-<li><a href="http://linuxtools-rst.readthedocs.org/zh_CN/latest/tool/crontab.html" target="_blank" rel="external">crontab 定时任务</a></li>
-<li><a href="https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/raketasks/backup_restore.md" target="_blank" rel="external">Backup restore</a></li>
-</ul>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年04月14日 首次发布</li>
-</ul>
-
+          <h1 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h1><p>在跟网络中心的老师沟通成立镜像站的相关事宜的时候，意外地接下来搭建一套校内的 Git 服务的任务。<br><a href="https://imnerd.org/">@怡红公子</a> 曾经搭建过一套类似的服务，但由于服务器端没有开启 VT 虚拟化导致不能安装 64 位的操作系统，再加上 Gitlab 不提供 32 位的安装包，所以长期以来怡红公子一直都是自行编译并配置 Gitlab 。考虑到后续维护的方便，我们决定趁着这个机会使用另一台支持安装 64 位操作系统的服务器，一劳永逸地解决这个问题。<br>我们的服务器环境是 <strong>CentOS 7.2 64bit</strong> ，以下所有操作均以此为基准。</p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/04/13/gitlab-install-intro/#more">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>
