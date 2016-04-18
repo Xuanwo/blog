@@ -165,11 +165,91 @@ sudo gitlab-ctl stop sidekiq
 gitlab-rake gitlab:backup:restore BACKUP=1406691018
 ```
 
+## 修改数据存储地址
+
+默认情况下，gitlab 将数据存储在`/var/opt/gitlab/git-data`目录下，受限于分区情况&方便管理，我们需要将数据迁移到别的目录下。
+
+### 无需数据迁移
+
+如果还没有投入使用，则可以直接在配置文件中添加：
+
+```ruby
+git_data_dir "/path/to/git-data"
+```
+
+然后执行：
+
+```bash
+sudo gitlab-ctl reconfigure
+```
+
+就可以生效了。
+
+### 进行数据迁移
+
+如果已经有数据了，则需要进行迁移。
+
+首先需要暂停服务，避免用户在迁移期间读写数据：
+
+```ruby
+sudo gitlab-ctl stop
+```
+
+然后使用rsync数据进行迁移：
+
+> 注意前一个地址不需要`/`，后一个地址需要`/`，且只需要迁移`repositories`目录即可
+
+```bash
+sudo rsync -av /var/opt/gitlab/git-data/repositories /path/to/git-data/
+```
+
+然后运行配置工具以更新并重启服务：
+
+> 官网文档是先更新配置再启动服务，但我在使用中发现先更新配置会提示无法连接上服务器，出现这种问题时可以先启动服务再更新配置。
+
+```bash
+sudo gitlab-ctl reconfigure
+sudo gitlab-ctl start
+```
+
+最后不要忘了在网页端确认数据的地址是否正确。
+
+> 关于权限问题
+> 在使用中，我一开始创建了一个`gitlabhq`用户并创建了一个文件夹，然后修改地址，服务正常启动后提示500。
+> 后来使用`root`账户在`/home`下直接创建文件夹解决了这个问题。
+> 如果有遇到类似问题的，可以尝试用`root`创建目录。
+
+### 监听IPv6
+
+教育网拥有得天独厚的IPv6资源，所以为我们的gitlab服务添加IPv6支持很有必要。
+
+修改`/etc/gitlab/gitlab.rb`文件中的：
+
+```ruby
+# nginx['listen_addresses'] = ['*']
+```
+
+为
+
+```ruby
+nginx['listen_addresses'] = ['*', '[::]']
+```
+
+然后执行
+
+```bash
+sudo gitlab-ctl reconfigure
+```
+
+然后就可以通过IPv6访问了。
+
 # 参考资料
-- [ Gitlab 下载](https://about.gitlab.com/downloads/)
+- [Gitlab 下载](https://about.gitlab.com/downloads/)
 - [GitLab Community Edition · Wiki](https://gitlab.com/larryli/gitlab/wikis/home)
 - [crontab 定时任务](http://linuxtools-rst.readthedocs.org/zh_CN/latest/tool/crontab.html)
 - [Backup restore](https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/raketasks/backup_restore.md)
+- [Storing Git data in an alternative directory](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/doc/settings/configuration.md#storing-git-data-in-an-alternative-directory)
 
 # 更新日志
 - 2016年04月14日 首次发布
+- 2016年04月18日 新增数据迁移&监听IPv6配置
