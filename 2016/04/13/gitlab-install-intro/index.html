@@ -215,14 +215,47 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo gitlab-ctl stop unicorn</span><br><span class="line"><span class="comment"># ok: down: unicorn: 0s, normally up</span></span><br><span class="line">sudo gitlab-ctl stop sidekiq</span><br><span class="line"><span class="comment"># ok: down: sidekiq: 0s, normally up</span></span><br></pre></td></tr></table></figure>
 <p>然后恢复数据，1406691018为备份文件的时间戳</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gitlab-rake gitlab:backup:restore BACKUP=1406691018</span><br></pre></td></tr></table></figure>
+<h2 id="修改数据存储地址"><a href="#修改数据存储地址" class="headerlink" title="修改数据存储地址"></a>修改数据存储地址</h2><p>默认情况下，gitlab 将数据存储在<code>/var/opt/gitlab/git-data</code>目录下，受限于分区情况&amp;方便管理，我们需要将数据迁移到别的目录下。</p>
+<h3 id="无需数据迁移"><a href="#无需数据迁移" class="headerlink" title="无需数据迁移"></a>无需数据迁移</h3><p>如果还没有投入使用，则可以直接在配置文件中添加：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git_data_dir <span class="string">"/path/to/git-data"</span></span><br></pre></td></tr></table></figure>
+<p>然后执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gitlab-ctl reconfigure</span><br></pre></td></tr></table></figure>
+<p>就可以生效了。</p>
+<h3 id="进行数据迁移"><a href="#进行数据迁移" class="headerlink" title="进行数据迁移"></a>进行数据迁移</h3><p>如果已经有数据了，则需要进行迁移。</p>
+<p>首先需要暂停服务，避免用户在迁移期间读写数据：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gitlab-ctl stop</span><br></pre></td></tr></table></figure>
+<p>然后使用rsync数据进行迁移：</p>
+<blockquote>
+<p>注意前一个地址不需要<code>/</code>，后一个地址需要<code>/</code>，且只需要迁移<code>repositories</code>目录即可</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo rsync -av /var/opt/gitlab/git-data/repositories /path/to/git-data/</span><br></pre></td></tr></table></figure>
+<p>然后运行配置工具以更新并重启服务：</p>
+<blockquote>
+<p>官网文档是先更新配置再启动服务，但我在使用中发现先更新配置会提示无法连接上服务器，出现这种问题时可以先启动服务再更新配置。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo gitlab-ctl reconfigure</span><br><span class="line">sudo gitlab-ctl start</span><br></pre></td></tr></table></figure>
+<p>最后不要忘了在网页端确认数据的地址是否正确。</p>
+<blockquote>
+<p>关于权限问题<br>在使用中，我一开始创建了一个<code>gitlabhq</code>用户并创建了一个文件夹，然后修改地址，服务正常启动后提示500。<br>后来使用<code>root</code>账户在<code>/home</code>下直接创建文件夹解决了这个问题。<br>如果有遇到类似问题的，可以尝试用<code>root</code>创建目录。</p>
+</blockquote>
+<h3 id="监听IPv6"><a href="#监听IPv6" class="headerlink" title="监听IPv6"></a>监听IPv6</h3><p>教育网拥有得天独厚的IPv6资源，所以为我们的gitlab服务添加IPv6支持很有必要。</p>
+<p>修改<code>/etc/gitlab/gitlab.rb</code>文件中的：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># nginx['listen_addresses'] = ['*']</span></span><br></pre></td></tr></table></figure>
+<p>为</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nginx[<span class="string">'listen_addresses'</span>] = [<span class="string">'*'</span>, <span class="string">'[::]'</span>]</span><br></pre></td></tr></table></figure>
+<p>然后执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gitlab-ctl reconfigure</span><br></pre></td></tr></table></figure>
+<p>然后就可以通过IPv6访问了。</p>
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
-<li><a href="https://about.gitlab.com/downloads/" target="_blank" rel="external"> Gitlab 下载</a></li>
+<li><a href="https://about.gitlab.com/downloads/" target="_blank" rel="external">Gitlab 下载</a></li>
 <li><a href="https://gitlab.com/larryli/gitlab/wikis/home" target="_blank" rel="external">GitLab Community Edition · Wiki</a></li>
 <li><a href="http://linuxtools-rst.readthedocs.org/zh_CN/latest/tool/crontab.html" target="_blank" rel="external">crontab 定时任务</a></li>
 <li><a href="https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/raketasks/backup_restore.md" target="_blank" rel="external">Backup restore</a></li>
+<li><a href="https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/doc/settings/configuration.md#storing-git-data-in-an-alternative-directory" target="_blank" rel="external">Storing Git data in an alternative directory</a></li>
 </ul>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2016年04月14日 首次发布</li>
+<li>2016年04月18日 新增数据迁移&amp;监听IPv6配置</li>
 </ul>
 
       
@@ -249,7 +282,7 @@
            <p><span>本文标题:</span><a href="/2016/04/13/gitlab-install-intro/">Gitlab部署和汉化以及简单运维</a></p>
            <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
            <p><span>发布时间:</span>2016年4月13日 - 23时04分</p>
-           <p><span>最后更新:</span>2016年4月13日 - 16时04分</p>
+           <p><span>最后更新:</span>2016年4月18日 - 06时04分</p>
            <p><span>原始链接:</span><a href="/2016/04/13/gitlab-install-intro/" title="Gitlab部署和汉化以及简单运维">https://xuanwo.org/2016/04/13/gitlab-install-intro/</a></p>
            <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial 4.0</a></p>
            <p><span>转载请保留以上信息。</span></p>
@@ -387,7 +420,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#起因"><span class="nav-number">1.</span> <span class="nav-text">起因</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gitlab-安装"><span class="nav-number">2.</span> <span class="nav-text">Gitlab 安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装和配置依赖"><span class="nav-number">2.1.</span> <span class="nav-text">安装和配置依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#添加-Gitlab-源并安装"><span class="nav-number">2.2.</span> <span class="nav-text">添加 Gitlab 源并安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置并启动-Gitlab"><span class="nav-number">2.3.</span> <span class="nav-text">配置并启动 Gitlab</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gitlab-配置"><span class="nav-number">3.</span> <span class="nav-text">Gitlab 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#修改域名"><span class="nav-number">3.1.</span> <span class="nav-text">修改域名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gitlab-汉化"><span class="nav-number">3.2.</span> <span class="nav-text">Gitlab 汉化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gitlab-运维"><span class="nav-number">4.</span> <span class="nav-text">Gitlab 运维</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#管理"><span class="nav-number">4.1.</span> <span class="nav-text">管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#备份"><span class="nav-number">4.2.</span> <span class="nav-text">备份</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#恢复"><span class="nav-number">4.3.</span> <span class="nav-text">恢复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新日志"><span class="nav-number">6.</span> <span class="nav-text">更新日志</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#起因"><span class="nav-number">1.</span> <span class="nav-text">起因</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gitlab-安装"><span class="nav-number">2.</span> <span class="nav-text">Gitlab 安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装和配置依赖"><span class="nav-number">2.1.</span> <span class="nav-text">安装和配置依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#添加-Gitlab-源并安装"><span class="nav-number">2.2.</span> <span class="nav-text">添加 Gitlab 源并安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置并启动-Gitlab"><span class="nav-number">2.3.</span> <span class="nav-text">配置并启动 Gitlab</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gitlab-配置"><span class="nav-number">3.</span> <span class="nav-text">Gitlab 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#修改域名"><span class="nav-number">3.1.</span> <span class="nav-text">修改域名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gitlab-汉化"><span class="nav-number">3.2.</span> <span class="nav-text">Gitlab 汉化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gitlab-运维"><span class="nav-number">4.</span> <span class="nav-text">Gitlab 运维</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#管理"><span class="nav-number">4.1.</span> <span class="nav-text">管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#备份"><span class="nav-number">4.2.</span> <span class="nav-text">备份</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#恢复"><span class="nav-number">4.3.</span> <span class="nav-text">恢复</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改数据存储地址"><span class="nav-number">4.4.</span> <span class="nav-text">修改数据存储地址</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#无需数据迁移"><span class="nav-number">4.4.1.</span> <span class="nav-text">无需数据迁移</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进行数据迁移"><span class="nav-number">4.4.2.</span> <span class="nav-text">进行数据迁移</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#监听IPv6"><span class="nav-number">4.4.3.</span> <span class="nav-text">监听IPv6</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新日志"><span class="nav-number">6.</span> <span class="nav-text">更新日志</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
