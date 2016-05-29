@@ -3,7 +3,7 @@ title: docopt——好用的Python命令行参数解释器
 date: 2016-04-04 21:39
 tags: [python, qingchat]
 categories: Develop
-doc: true
+toc: true
 ---
 
 # 前言
