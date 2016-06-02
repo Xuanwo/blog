@@ -2,7 +2,7 @@
 title: 我从Qingchat中学到的教训
 date: 2016-05-29 20:57:00
 categories: Develop
-tags: [python, qingchat, 实习, 青云QingCloud]
+tags: [python, qingchat, 实习, QingCloud]
 toc: true
 ---
 

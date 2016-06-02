@@ -1,7 +1,7 @@
 ---
 title: 单页批量规则数据抓取解决方案
 date: 2015-9-22 09:07:22
-tags: [青云, Work, 爬虫]
+tags: [QingCloud, Work, 爬虫]
 categories: Opinion
 toc: true
 ---

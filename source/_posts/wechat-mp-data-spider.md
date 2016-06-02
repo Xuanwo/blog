@@ -1,7 +1,7 @@
 ---
 title: 微信公众平台数据抓取解决方案
 date: 2015-9-30 10:12:58
-tags: [青云, Work, 爬虫]
+tags: [QingCloud, Work, 爬虫]
 categories: Opinion
 toc: true
 ---
