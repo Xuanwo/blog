@@ -41,7 +41,7 @@ toc: true
 
 如图所示，我们在一个私有网络中创建一台主机和一个数据库，并为整个VPC网络分配了一个公网IP和防火墙。
 
-![](/imgs/opinion/qingcloud-woncloud-tp.png)
+![](/imgs/opinion/qingcloud-owncloud-tp.png)
 
 如图，整套资源预计需要每小时0.56元。
 
