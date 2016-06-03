@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://xuanwo.org/"/>
-  <updated>2016-06-02T23:59:21.711Z</updated>
+  <updated>2016-06-03T02:17:43.994Z</updated>
   <id>https://xuanwo.org/</id>
   
   <author>
@@ -16,11 +16,128 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>在QingCloud上部署弹性扩容的OwnCloud</title>
+    <link href="https://xuanwo.org/2016/06/03/owncloud-on-qingcloud/"/>
+    <id>https://xuanwo.org/2016/06/03/owncloud-on-qingcloud/</id>
+    <published>2016-06-03T08:00:00.000Z</published>
+    <updated>2016-06-03T02:17:43.994Z</updated>
+    
+    <content type="html">&lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;因为不满意百度云的一些缺陷，我们决定部署一套自己使用的云存储平台。希望得到的特性如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;数据安全性高&lt;/li&gt;
+&lt;li&gt;权限控制能力强&lt;/li&gt;
+&lt;li&gt;分享功能更强，可以设置密码和过期时间等&lt;/li&gt;
+&lt;li&gt;允许匿名第三方上传数据&lt;/li&gt;
+&lt;li&gt;没有文件上传大小限制&lt;/li&gt;
+&lt;li&gt;支持多平台同步功能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;综合考量之后，我们决定部署一套OwnCloud。&lt;/p&gt;
+&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
+&lt;h2 id=&quot;部署&quot;&gt;&lt;a href=&quot;#部署&quot; class=&quot;headerlink&quot; title=&quot;部署&quot;&gt;&lt;/a&gt;部署&lt;/h2&gt;&lt;p&gt;在部署之前，我们首先要考虑这套系统大概会有多少人用，会使用多大的空间，需要多少带宽，服务器的配置等问题。但是非常有意思的事情是，在青云QingCloud平台上，一切都是可以动态扩容的，所以我们完全可以以最少的资源验证服务是否符合需求，然后再增加服务所使用的资源。&lt;/p&gt;
+&lt;h3 id=&quot;资源编排&quot;&gt;&lt;a href=&quot;#资源编排&quot; class=&quot;headerlink&quot; title=&quot;资源编排&quot;&gt;&lt;/a&gt;资源编排&lt;/h3&gt;&lt;p&gt;在实际生成需要的资源之前，我们先通过青云QingCloud的提供的资源编排功能看看青云是否能够满足我们的需求以及搭建这一套服务需要多少钱：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/imgs/Opinion/qingcloud-owncloud-1.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;p&gt;如图所示，我们在一个私有网络中创建了一台主机和一个数据库，并为整个VPC网络分配了一个公网IP和防火墙。整套资源预计需要每小时0.57元。&lt;/p&gt;
+&lt;h3 id=&quot;创建并修改配置&quot;&gt;&lt;a href=&quot;#创建并修改配置&quot; class=&quot;headerlink&quot; title=&quot;创建并修改配置&quot;&gt;&lt;/a&gt;创建并修改配置&lt;/h3&gt;&lt;p&gt;生成模板之后，我们点击创建。等待大概一分钟之后，所有资源全部创建完毕。在我们SSH连接上服务器开始实际的配置工作之前，我们先修改VPC的设置。&lt;/p&gt;
+&lt;h4 id=&quot;添加端口转发规则&quot;&gt;&lt;a href=&quot;#添加端口转发规则&quot; class=&quot;headerlink&quot; title=&quot;添加端口转发规则&quot;&gt;&lt;/a&gt;添加端口转发规则&lt;/h4&gt;&lt;p&gt;我们需要将来自公网的流量转发到我们的主机上，主要有两条，一个是SSH，一个是HTTP。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/imgs/Opinion/qingcloud-owncloud-2.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;p&gt;首先我们知道主机的内网地址是&lt;code&gt;192.168.0.2&lt;/code&gt;，所以需要把所有来自22和80的端口都转发到这个地址。&lt;/p&gt;
+&lt;h4 id=&quot;添加防火墙规则&quot;&gt;&lt;a href=&quot;#添加防火墙规则&quot; class=&quot;headerlink&quot; title=&quot;添加防火墙规则&quot;&gt;&lt;/a&gt;添加防火墙规则&lt;/h4&gt;&lt;p&gt;出于安全性考虑，青云的防火墙默认只开放了22和ICMP。为了可以正常访问到主机，我们还需要添加80端口的例外规则：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/imgs/Opinion/qingcloud-owncloud-3.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;p&gt;我们看到青云在右边提供了常用端口的配置，选择http即可。&lt;/p&gt;
+&lt;h3 id=&quot;安装OwnCloud&quot;&gt;&lt;a href=&quot;#安装OwnCloud&quot; class=&quot;headerlink&quot; title=&quot;安装OwnCloud&quot;&gt;&lt;/a&gt;安装OwnCloud&lt;/h3&gt;&lt;p&gt;OwnCloud为CentOS平台提供了二进制的包，没有特殊需求的话，我们直接使用即可。&lt;br&gt;首先添加OwnCloud官方的Key文件：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;rpm --import https://download.owncloud.org/download/repositories/stable/CentOS_7/repodata/repomd.xml.key&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;然后添加OwnCloud的repo：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;wget http://download.owncloud.org/download/repositories/stable/CentOS_7/ce:stable.repo -O /etc/yum.repos.d/ce:stable.repo&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;更新repo之后开始安装：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;yum clean expire-cache&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;yum install owncloud&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;yum将会自动处理依赖，如果速度不佳的话，可以直接将包下载到本地：&lt;a href=&quot;http://download.owncloud.org/download/repositories/stable/CentOS_7/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;直接下载&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&quot;启用httpd，并测试是否安装正确&quot;&gt;&lt;a href=&quot;#启用httpd，并测试是否安装正确&quot; class=&quot;headerlink&quot; title=&quot;启用httpd，并测试是否安装正确&quot;&gt;&lt;/a&gt;启用httpd，并测试是否安装正确&lt;/h3&gt;&lt;p&gt;OwnCloud默认使用Apache作为Web服务器，上一步我们已经安装了Apache，接下来我们需要启用它：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;systemctl start httpd&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;如需要开机自行启动，可以输入：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;systemctl &lt;span class=&quot;built_in&quot;&gt;enable&lt;/span&gt; httpd&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;然后在浏览器中访问：&lt;code&gt;http://&amp;lt;your ip&amp;gt;/owncloud&lt;/code&gt;，如果出现OwnCloud的安装界面，说明已经配置成功了。&lt;/p&gt;
+&lt;h3 id=&quot;使用LVM管理分区，实现空间动态扩容&quot;&gt;&lt;a href=&quot;#使用LVM管理分区，实现空间动态扩容&quot; class=&quot;headerlink&quot; title=&quot;使用LVM管理分区，实现空间动态扩容&quot;&gt;&lt;/a&gt;使用LVM管理分区，实现空间动态扩容&lt;/h3&gt;&lt;p&gt;OwnCloud在安装的时候只能选择一个目录，为了能够实现空间的动态扩容，我们需要使用LVM创建一个逻辑分区并挂载到指定的数据目录下。&lt;/p&gt;
+&lt;p&gt;首先我们在青云QingCloud的控制台中创建一块硬盘，然后挂载到主机中。之后，我们就能够通过&lt;code&gt;/dev/sdb&lt;/code&gt;等形式来访问这块硬盘。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;需要注意的是，主机在每次重启的时候硬盘的顺序可能会发生改变，所以如果需要自动挂载的话，需要使用UUID或者LABLE的方式来指定硬盘，不能使用设备名。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;接下来我们需要在CentOS下使用LVM来配置分区，实现分区的动态扩容。&lt;/p&gt;
+&lt;h4 id=&quot;安装LVM工具&quot;&gt;&lt;a href=&quot;#安装LVM工具&quot; class=&quot;headerlink&quot; title=&quot;安装LVM工具&quot;&gt;&lt;/a&gt;安装LVM工具&lt;/h4&gt;&lt;p&gt;青云QingCloud提供的CentOS 7.2默认映像是没有LVM工具的，所以我们首先需要安装它：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;yum install lvm2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h4 id=&quot;创建物理卷（PV）&quot;&gt;&lt;a href=&quot;#创建物理卷（PV）&quot; class=&quot;headerlink&quot; title=&quot;创建物理卷（PV）&quot;&gt;&lt;/a&gt;创建物理卷（PV）&lt;/h4&gt;&lt;p&gt;首先检测能够被作为物理卷的设备：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;lvmdiskscan&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;然后在指定设备上创建物理卷，所有需要用到的设备都需要执行如下命令：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;pvcreate /dev/sdb&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;然后查看我们已经创建好的物理卷：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;pvdisplay&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;输出大概如下：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;--- Physical volume ---&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; PV Name               /dev/sdb&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; PV Size               1000.00 GiB / not usable 4.00 MiB&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Allocatable           yes &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; PE Size               4.00 MiB&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Total PE              255999&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Free PE               255999&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Allocated PE          0&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; PV UUID               EHIeTJ-WBPv-rQkQ-LnuI-0IWE-SM4z-bMPAWx&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h4 id=&quot;创建卷组（VG）&quot;&gt;&lt;a href=&quot;#创建卷组（VG）&quot; class=&quot;headerlink&quot; title=&quot;创建卷组（VG）&quot;&gt;&lt;/a&gt;创建卷组（VG）&lt;/h4&gt;&lt;p&gt;物理卷创建完毕后，我们需要创建一个卷组来实现物理卷的统一管理：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;vgcreate owncloud-vg /dev/sdb /dev/sdc /dev/sdd&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;后续如果需要扩展的话，可以使用如下命令：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;vgextend owncloud-vg /dev/sde&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;同样地，使用&lt;code&gt;vgdisplay&lt;/code&gt;来查看创建好的卷组：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;--- Volume group ---&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; VG Name               owncloud-vg&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; System ID             &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Format                lvm2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Metadata Areas        1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Metadata Sequence No  2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; VG Access             &lt;span class=&quot;built_in&quot;&gt;read&lt;/span&gt;/write&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; VG Status             resizable&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; MAX LV                0&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Cur LV                1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Open LV               1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Max PV                0&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Cur PV                1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Act PV                1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; VG Size               1000.00 GiB&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; PE Size               4.00 MiB&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Total PE              255999&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Alloc PE / Size       230400 / 900.00 GiB&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Free  PE / Size       25599 / 100.00 GiB&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; VG UUID               xCCtSR-QFcZ-StcI-HM7O-KDAz-PvMC-EgYcSV&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h4 id=&quot;创建逻辑卷（LV）&quot;&gt;&lt;a href=&quot;#创建逻辑卷（LV）&quot; class=&quot;headerlink&quot; title=&quot;创建逻辑卷（LV）&quot;&gt;&lt;/a&gt;创建逻辑卷（LV）&lt;/h4&gt;&lt;p&gt;然后我们可以开始创建逻辑卷了：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;lvcreate -L 900G owncloud-vg -n owncloud-data&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;创建完毕后，我们就可以通过&lt;code&gt;/dev/mapper/owncloud--vg-owncloud--data&lt;/code&gt;或者&lt;code&gt;/dev/owncloud-vg/owncloud-data&lt;/code&gt;来访问这个设备了。&lt;/p&gt;
+&lt;p&gt;如果需要扩大逻辑卷，我们可以使用：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;lvextend -L 1000G /dev/owncloud-vg/owncloud-data&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;确认扩展成功后，我们再更新文件系统：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;resize2fs /dev/owncloud-vg/owncloud-data&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h4 id=&quot;创建文件系统并挂载&quot;&gt;&lt;a href=&quot;#创建文件系统并挂载&quot; class=&quot;headerlink&quot; title=&quot;创建文件系统并挂载&quot;&gt;&lt;/a&gt;创建文件系统并挂载&lt;/h4&gt;&lt;p&gt;我们在逻辑卷上创建一个ext4分区：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;mkfs.ext4 /dev/mapper/owncloud--vg-owncloud--data&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;然后将分区挂载到我们期望的目录下，比如&lt;code&gt;/data&lt;/code&gt;&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;mount /dev/mapper/owncloud--vg-owncloud--data /data&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h3 id=&quot;修改文件夹权限&quot;&gt;&lt;a href=&quot;#修改文件夹权限&quot; class=&quot;headerlink&quot; title=&quot;修改文件夹权限&quot;&gt;&lt;/a&gt;修改文件夹权限&lt;/h3&gt;&lt;p&gt;为了OwnCloud能够正确读写我们的数据分区，我们需要修改&lt;code&gt;/data&lt;/code&gt;的所有者和权限：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;chown -R apache:apache /data&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;chmod 775 /data -R&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h3 id=&quot;网页安装OwnCloud&quot;&gt;&lt;a href=&quot;#网页安装OwnCloud&quot; class=&quot;headerlink&quot; title=&quot;网页安装OwnCloud&quot;&gt;&lt;/a&gt;网页安装OwnCloud&lt;/h3&gt;&lt;p&gt;全部配置完毕后，我们可以开始在网页进行OwnCloud安装了。&lt;/p&gt;
+&lt;p&gt;管理员帐号： 自定义&lt;br&gt;管理员密码： 自定义&lt;br&gt;数据路径：&lt;code&gt;/data&lt;/code&gt;&lt;br&gt;数据库用户：&lt;code&gt;root&lt;/code&gt;&lt;br&gt;数据库密码：&lt;code&gt;&amp;lt;your password&amp;gt;&lt;/code&gt;&lt;br&gt;数据库名称自定义，比如：&lt;code&gt;owncloud&lt;/code&gt;&lt;br&gt;数据库地址：&lt;code&gt;&amp;lt;your rdb ip&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;你在创建RDB时，系统会自动用相同的密码创建Root用户。OwnCloud在安装时需要创建一个新的账户来进行管理，而青云提供的默认用户没有这样的权限。因此我们需要使用Root用户而不是创建时指定的用户。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;提示创建完毕后，就可以使用管理员用户登陆了。&lt;/p&gt;
+&lt;h2 id=&quot;应用&quot;&gt;&lt;a href=&quot;#应用&quot; class=&quot;headerlink&quot; title=&quot;应用&quot;&gt;&lt;/a&gt;应用&lt;/h2&gt;&lt;p&gt;下面我们来聊一聊OwnCloud的一些应用。&lt;/p&gt;
+&lt;h3 id=&quot;分享功能&quot;&gt;&lt;a href=&quot;#分享功能&quot; class=&quot;headerlink&quot; title=&quot;分享功能&quot;&gt;&lt;/a&gt;分享功能&lt;/h3&gt;&lt;p&gt;&lt;img src=&quot;/imgs/Opinion/qingcloud-owncloud-4.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;p&gt;分享功能是我比较看重的一个部分。OwnCloud的分享可以选择用户和组，然后还能通过链接进行分享。通过链接分享时，可以指定密码和过期时间，还能允许编辑。这样就可以实现给用户发送需要的资料以及收集来自合作伙伴的视频，文件等功能。&lt;/p&gt;
+&lt;h3 id=&quot;团队协作&quot;&gt;&lt;a href=&quot;#团队协作&quot; class=&quot;headerlink&quot; title=&quot;团队协作&quot;&gt;&lt;/a&gt;团队协作&lt;/h3&gt;&lt;p&gt;OwnCloud内建了一个版本管理功能，同一个文件可以提供多个历史版本，这样方便大家进行版本追溯和管理，为团队协作编辑提供了便利。除此以外还有评论系统，实时性能还不错，基本可以用于对具体文档的简单协作。&lt;/p&gt;
+&lt;h1 id=&quot;更新日志&quot;&gt;&lt;a href=&quot;#更新日志&quot; class=&quot;headerlink&quot; title=&quot;更新日志&quot;&gt;&lt;/a&gt;更新日志&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;2016年06月03日 首次发布&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;因为不满意百度云的一些缺陷，我们决定部署一套自己使用的云存储平台。希望得到的特性如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;数据安全性高&lt;/li&gt;
+&lt;li&gt;权限控制能力强&lt;/li&gt;
+&lt;li&gt;分享功能更强，可以设置密码和过期时间等&lt;/li&gt;
+&lt;li&gt;允许匿名第三方上传数据&lt;/li&gt;
+&lt;li&gt;没有文件上传大小限制&lt;/li&gt;
+&lt;li&gt;支持多平台同步功能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;综合考量之后，我们决定部署一套OwnCloud。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Opinion" scheme="https://xuanwo.org/categories/Opinion/"/>
+    
+    
+      <category term="Software" scheme="https://xuanwo.org/tags/Software/"/>
+    
+      <category term="QingCloud" scheme="https://xuanwo.org/tags/QingCloud/"/>
+    
+      <category term="Work" scheme="https://xuanwo.org/tags/Work/"/>
+    
+  </entry>
+  
+  <entry>
     <title>我从Qingchat中学到的教训</title>
     <link href="https://xuanwo.org/2016/05/29/learn-from-qingchat/"/>
     <id>https://xuanwo.org/2016/05/29/learn-from-qingchat/</id>
     <published>2016-05-29T20:57:00.000Z</published>
-    <updated>2016-06-02T23:59:21.711Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;之前的一段时间一直在从事&lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Qingchat&lt;/a&gt;的相关开发工作，这个项目是一个基于Mojo-Weixin提供的Rest API开发的一个微信机器人，承担了十余个群，上千人的微信直播活动。秉承着ACM训练出来的“暴力加乱搞”风格，我花了大概一个星期的课余时间，搞出了一个可用的版本。期间也迭代了很多次，既欣慰于Coding的力量，也苦恼于当初设计的不完善带来的种种问题。在这个项目即将大规模重构的前夕，我总结一下开发Qingchat的过程中的经验教训，希望自己能成为一个更好更聪明的Coder。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -57,7 +174,7 @@
     <link href="https://xuanwo.org/2016/05/09/msp430g2553-bellring/"/>
     <id>https://xuanwo.org/2016/05/09/msp430g2553-bellring/</id>
     <published>2016-05-09T08:42:00.000Z</published>
-    <updated>2016-06-02T23:59:21.711Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;我萌萌哒的妹纸是一个代码苦手，完全无法理解 C 语言，所以每一次到单片机上机需要交作业的时候都是愁眉苦脸的样子。而我又总是因为自己确实不懂单片机里面的种种奇怪定义（中断，串口，P1.x 之类），所以也一直没有什么好办法去帮她。这一次的作业对编码能力要求较高，但是涉及到的硬件比较少，于是决定以此为契机，开始我的嵌入式开发之旅。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -134,7 +251,7 @@
     <link href="https://xuanwo.org/2016/04/13/gitlab-install-intro/"/>
     <id>https://xuanwo.org/2016/04/13/gitlab-install-intro/</id>
     <published>2016-04-13T23:20:00.000Z</published>
-    <updated>2016-06-02T23:59:21.711Z</updated>
+    <updated>2016-06-03T02:17:43.990Z</updated>
     
     <content type="html">&lt;h1 id=&quot;起因&quot;&gt;&lt;a href=&quot;#起因&quot; class=&quot;headerlink&quot; title=&quot;起因&quot;&gt;&lt;/a&gt;起因&lt;/h1&gt;&lt;p&gt;在跟网络中心的老师沟通成立镜像站的相关事宜的时候，意外地接下来搭建一套校内的 Git 服务的任务。&lt;br&gt;&lt;a href=&quot;https://imnerd.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;@怡红公子&lt;/a&gt; 曾经搭建过一套类似的服务，但由于服务器端没有开启 VT 虚拟化导致不能安装 64 位的操作系统，再加上 Gitlab 不提供 32 位的安装包，所以长期以来怡红公子一直都是自行编译并配置 Gitlab 。考虑到后续维护的方便，我们决定趁着这个机会使用另一台支持安装 64 位操作系统的服务器，一劳永逸地解决这个问题。&lt;br&gt;我们的服务器环境是 &lt;strong&gt;CentOS 7.2 64bit&lt;/strong&gt; ，以下所有操作均以此为基准。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -242,7 +359,7 @@
     <link href="https://xuanwo.org/2016/04/04/docopt-intro/"/>
     <id>https://xuanwo.org/2016/04/04/docopt-intro/</id>
     <published>2016-04-04T21:39:00.000Z</published>
-    <updated>2016-06-02T23:59:21.711Z</updated>
+    <updated>2016-06-03T02:17:43.990Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;code&gt;Qingchat&lt;/code&gt;&lt;/a&gt; 使用的命令行参数解释器是 &lt;a href=&quot;http://docopt.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;code&gt;docopt&lt;/code&gt;&lt;/a&gt;，用下来感觉非常棒，所以决定介绍一下这个库。（&lt;em&gt;奉劝各位看官，珍爱生命，远离argparse。&lt;/em&gt;）&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -312,7 +429,7 @@
     <link href="https://xuanwo.org/2016/04/01/qingchat-intro/"/>
     <id>https://xuanwo.org/2016/04/01/qingchat-intro/</id>
     <published>2016-04-01T22:03:00.000Z</published>
-    <updated>2016-06-02T23:59:21.715Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;在我之前写过的一篇文章中，我曾经探索过类似的问题：&lt;a href=&quot;https://xuanwo.org/2016/02/28/wechat-remove/&quot;&gt;微信群重复人员识别&lt;/a&gt;。当初我就提出过能否自动获取相关数据，但因为种种原因的限制不了了之了。后来发现了&lt;a href=&quot;https://github.com/sjdy521/Mojo-Weixin&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Mojo-Weixin&lt;/a&gt;这个库之后，我决定在这个的基础上实现一个微信多群直播的工具——Qingchat。（&lt;em&gt;尽管在刚刚实现完不久，微信就更新了转发到多个群的功能，Sad。&lt;/em&gt;）探索的成果如下： &lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Qingchat&lt;/a&gt;，目前仅支持 python3 ，欢迎各位看官提 issues ，交 code ，或者拍砖。&lt;br&gt;接下来我会先介绍一下 Qingchat 的原理，然后介绍 Qingchat 的使用，最后展望一下 Qingchat 未来的发展方向。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -415,7 +532,7 @@
     <link href="https://xuanwo.org/2016/03/13/gout/"/>
     <id>https://xuanwo.org/2016/03/13/gout/</id>
     <published>2016-03-13T13:44:00.000Z</published>
-    <updated>2016-06-02T23:59:21.711Z</updated>
+    <updated>2016-06-03T02:17:43.990Z</updated>
     
     <content type="html">&lt;p&gt;其实我很想写出获奖感言的感觉，但是痛风发作的时候真的好疼啊。。。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -452,7 +569,7 @@
     <link href="https://xuanwo.org/2016/03/12/neovim-slow-upgrade/"/>
     <id>https://xuanwo.org/2016/03/12/neovim-slow-upgrade/</id>
     <published>2016-03-12T11:00:00.000Z</published>
-    <updated>2016-06-02T23:59:21.711Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;一直都非常羡慕那些能把vim用得非常溜的人，但是自己总是不情愿去学，总是觉得vim的操作方式非常反人类，难度曲线太陡，不适合我。真正让我下定决心去学的，是因为系统切换到Ubuntu Gnome之后发现，Sublime Text 3 不能原生支持中文输入。同时我也发现，如果我不上来就折腾spf13这样的东西的话，其实vim非常好懂。于是，Neovim的慢速升级攻略就这样诞生了。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -504,7 +621,7 @@
     <link href="https://xuanwo.org/2016/02/28/wechat-remove/"/>
     <id>https://xuanwo.org/2016/02/28/wechat-remove/</id>
     <published>2016-02-28T10:05:00.000Z</published>
-    <updated>2016-06-02T23:59:21.715Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;由于微信的限制，人数超过一百以后，只有邀请才能加入。所以，如果想要组织大型的在线活动，就只有建立很多个分群。然而分群的问题在于，会有很多人重复加群，挤占了本来就缺乏的空间。所以需要找到一个可行的办法，清除两个群中的重复人员。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -548,7 +665,7 @@
     <link href="https://xuanwo.org/2016/02/26/debug-for-hexo-1775/"/>
     <id>https://xuanwo.org/2016/02/26/debug-for-hexo-1775/</id>
     <published>2016-02-26T12:54:00.000Z</published>
-    <updated>2016-06-02T23:59:21.711Z</updated>
+    <updated>2016-06-03T02:17:43.990Z</updated>
     
     <content type="html">&lt;h2 id=&quot;起因&quot;&gt;&lt;a href=&quot;#起因&quot; class=&quot;headerlink&quot; title=&quot;起因&quot;&gt;&lt;/a&gt;起因&lt;/h2&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/hexojs/hexo/issues/1775&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;hexojs/hexo #1775&lt;/a&gt;&lt;br&gt;BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -589,7 +706,7 @@
     <link href="https://xuanwo.org/2016/02/17/ipv6-in-cugb/"/>
     <id>https://xuanwo.org/2016/02/17/ipv6-in-cugb/</id>
     <published>2016-02-17T18:59:02.000Z</published>
-    <updated>2016-06-02T23:59:21.711Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;p&gt;主旨只有两条：开源，节流&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -676,7 +793,7 @@
     <link href="https://xuanwo.org/2016/02/15/chocolatey-intro/"/>
     <id>https://xuanwo.org/2016/02/15/chocolatey-intro/</id>
     <published>2016-02-15T20:15:46.000Z</published>
-    <updated>2016-06-02T23:59:21.711Z</updated>
+    <updated>2016-06-03T02:17:43.990Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://chocolatey.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Chocolatey&lt;/a&gt;是一个基于Nuget的Windows包管理工具，截止到我更新此文章的时候，一共有3.7k多个独立包。本文旨在介绍Chocolatey这一工具的安装和用法，希望能有更多人享受到该工具的便利之处。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -741,7 +858,7 @@
     <link href="https://xuanwo.org/2016/02/04/unlock-your-smart-tv/"/>
     <id>https://xuanwo.org/2016/02/04/unlock-your-smart-tv/</id>
     <published>2016-02-04T23:12:52.000Z</published>
-    <updated>2016-06-02T23:59:21.715Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;现在很多人都买了智能电视，但是出于种种你懂得原因，厂商通常都不允许用户自行安装自己想要的APP，比如腾讯视频，优酷视频之类的。本教程旨在突破这些限制，彻底解放智能电视的全部潜力。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -830,7 +947,7 @@
     <link href="https://xuanwo.org/2016/01/13/how-to-differ-invalid-link/"/>
     <id>https://xuanwo.org/2016/01/13/how-to-differ-invalid-link/</id>
     <published>2016-01-13T01:18:51.000Z</published>
-    <updated>2016-06-02T23:59:21.711Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;前两天我的朋友圈被微信公开课活动的链接+截图刷屏，随后一大帮“业内人士”站出来说这个是盗号连接，只要点开，微信钱包和支付宝就会被盗。作为半个业内人士，我不能忍了，决定跟大家谈一谈如何识别真假链接。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -904,7 +1021,7 @@
     <link href="https://xuanwo.org/2016/01/03/vs-oracle-11g/"/>
     <id>https://xuanwo.org/2016/01/03/vs-oracle-11g/</id>
     <published>2016-01-03T15:31:32.000Z</published>
-    <updated>2016-06-02T23:59:21.715Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;h1 id=&quot;开发环境&quot;&gt;&lt;a href=&quot;#开发环境&quot; class=&quot;headerlink&quot; title=&quot;开发环境&quot;&gt;&lt;/a&gt;开发环境&lt;/h1&gt;&lt;p&gt;宿主机：Win10 + VS2015 + ODP.Net for VS2015&lt;br&gt;虚拟机：Win7 + Oracle 11g + 桥接&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -969,7 +1086,7 @@
     <link href="https://xuanwo.org/2015/12/23/best-pdf-read-solution/"/>
     <id>https://xuanwo.org/2015/12/23/best-pdf-read-solution/</id>
     <published>2015-12-23T16:15:20.000Z</published>
-    <updated>2016-06-02T23:59:21.711Z</updated>
+    <updated>2016-06-03T02:17:43.990Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;最近因为学习需要，要大量阅读纯文字的PDF文档。然后我惊讶地发现市场上居然没有哪家提供一套完整可用的跨平台PDF阅读解决方案，于是我在尝试了市面几乎所有叫得上名字的各类阅读器之后，形成了一套自己的跨平台PDF阅读解决方案。本文记录了这套方案的详细内容，希望会有所益处。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1026,7 +1143,7 @@
     <link href="https://xuanwo.org/2015/12/18/online-video-download-solution/"/>
     <id>https://xuanwo.org/2015/12/18/online-video-download-solution/</id>
     <published>2015-12-18T12:49:49.000Z</published>
-    <updated>2016-06-02T23:59:21.715Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;因为学习需要，产生了一个这样的需求：要从Youtube上批量下载视频。自然，出于方便使用的角度来看，音画不能分离，最好带有对应的字幕。一番搜罗之后，我找到了基于Python的开源产品： &lt;a href=&quot;https://rg3.github.io/youtube-dl/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;youtube-dl&lt;/a&gt;&lt;/p&gt;
 &lt;blockquote&gt;
@@ -1082,7 +1199,7 @@
     <link href="https://xuanwo.org/2015/11/27/surf-with-poweroff/"/>
     <id>https://xuanwo.org/2015/11/27/surf-with-poweroff/</id>
     <published>2015-11-27T01:34:33.000Z</published>
-    <updated>2016-06-02T23:59:21.715Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;前两天我对我们宿舍的路由器进行了小小的改造，使得我们在断电之后也能照常上网。原理非常简单：就是使用充电宝来给路由器供电——因为我们墙上的网口是不会断电的，所以只要解决了路由器没有电的问题，就可以解决断网问题。路由器要求的输入电压为5V，电流为0.3A，恰好跟我们常用的充电宝是一致的，淘宝买一根USB转DV线成功解决问题。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1123,7 +1240,7 @@
     <link href="https://xuanwo.org/2015/11/14/pandoc/"/>
     <id>https://xuanwo.org/2015/11/14/pandoc/</id>
     <published>2015-11-14T14:29:18.000Z</published>
-    <updated>2016-06-02T23:59:21.715Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;Pandoc是一个用haskell编写的文本转换工具，小巧迅速且支持格式广泛，堪称文本转换应用的瑞士军刀。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1203,7 +1320,7 @@
     <link href="https://xuanwo.org/2015/11/03/python-packages/"/>
     <id>https://xuanwo.org/2015/11/03/python-packages/</id>
     <published>2015-11-03T15:24:06.000Z</published>
-    <updated>2016-06-02T23:59:21.715Z</updated>
+    <updated>2016-06-03T02:17:43.994Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;用Python写过不少的脚本，现在要把脚本打包成模块并进行发布，然后才明白脚本Boy到正规的码农差距有多大= =。&lt;br&gt;踩了很多天的坑之后，自己学习到了Python的包分发机制，以及如何利用Pypi向全世界分发自己的模块。现在简单地做一些整理。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1390,157 +1507,6 @@
     
     
       <category term="Python" scheme="https://xuanwo.org/tags/Python/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>在Python中使用JSON</title>
-    <link href="https://xuanwo.org/2015/10/30/python-JSON/"/>
-    <id>https://xuanwo.org/2015/10/30/python-JSON/</id>
-    <published>2015-10-30T23:47:23.000Z</published>
-    <updated>2016-06-02T23:59:21.715Z</updated>
-    
-    <content type="html">&lt;h1 id=&quot;JSON介绍&quot;&gt;&lt;a href=&quot;#JSON介绍&quot; class=&quot;headerlink&quot; title=&quot;JSON介绍&quot;&gt;&lt;/a&gt;JSON介绍&lt;/h1&gt;&lt;p&gt;JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。 易于人阅读和编写。同时也易于机器解析和生成。 它基于JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999的一个子集。 JSON采用完全独立于语言的文本格式，但是也使用了类似于C语言家族的习惯（包括C, C++, C#, Java, JavaScript, Perl, Python等）。 这些特性使JSON成为理想的数据交换语言。&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;引用自&lt;a href=&quot;http://www.json.org/json-zh.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;json.org&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
-&lt;h1 id=&quot;语法&quot;&gt;&lt;a href=&quot;#语法&quot; class=&quot;headerlink&quot; title=&quot;语法&quot;&gt;&lt;/a&gt;语法&lt;/h1&gt;&lt;h2 id=&quot;结构&quot;&gt;&lt;a href=&quot;#结构&quot; class=&quot;headerlink&quot; title=&quot;结构&quot;&gt;&lt;/a&gt;结构&lt;/h2&gt;&lt;p&gt;JSON只提供了两种结构——字典和数组。也就是说，JSON可以存储一对一或者一对多的键值对关系。&lt;/p&gt;
-&lt;h2 id=&quot;形式&quot;&gt;&lt;a href=&quot;#形式&quot; class=&quot;headerlink&quot; title=&quot;形式&quot;&gt;&lt;/a&gt;形式&lt;/h2&gt;&lt;h3 id=&quot;对象&quot;&gt;&lt;a href=&quot;#对象&quot; class=&quot;headerlink&quot; title=&quot;对象&quot;&gt;&lt;/a&gt;对象&lt;/h3&gt;&lt;p&gt;对象是一个无序的键值对集合。&lt;br&gt;一个对象以&lt;code&gt;{&lt;/code&gt;开始，&lt;code&gt;}&lt;/code&gt;结束。每个&lt;code&gt;键&lt;/code&gt;后跟一个&lt;code&gt;:&lt;/code&gt;；键值对之间使用&lt;code&gt;,&lt;/code&gt;分隔。&lt;br&gt;&lt;img src=&quot;/imgs/develop/object.gif&quot; alt=&quot;object&quot;&gt;&lt;/p&gt;
-&lt;h3 id=&quot;数组&quot;&gt;&lt;a href=&quot;#数组&quot; class=&quot;headerlink&quot; title=&quot;数组&quot;&gt;&lt;/a&gt;数组&lt;/h3&gt;&lt;p&gt;数组是值的有序集合，一个键可以对应一个数组。&lt;br&gt;一个数组以&lt;code&gt;[&lt;/code&gt;开始，&lt;code&gt;]&lt;/code&gt;结束。值之间使用&lt;code&gt;,&lt;/code&gt;分隔。&lt;br&gt;&lt;img src=&quot;/imgs/develop/array.gif&quot; alt=&quot;array&quot;&gt;&lt;/p&gt;
-&lt;h3 id=&quot;值&quot;&gt;&lt;a href=&quot;#值&quot; class=&quot;headerlink&quot; title=&quot;值&quot;&gt;&lt;/a&gt;值&lt;/h3&gt;&lt;p&gt;值可以是双引号括起来的字符串、数值、true、false、 null、对象或者数组。这些结构可以嵌套。&lt;br&gt;&lt;img src=&quot;/imgs/develop/value.gif&quot; alt=&quot;value&quot;&gt;&lt;/p&gt;
-&lt;h3 id=&quot;字符串&quot;&gt;&lt;a href=&quot;#字符串&quot; class=&quot;headerlink&quot; title=&quot;字符串&quot;&gt;&lt;/a&gt;字符串&lt;/h3&gt;&lt;p&gt;字符串是由双引号包围的任意数量Unicode字符的集合，使用反斜线转义。一个字符即一个单独的字符串。&lt;br&gt;字符串与C/C++中的字符串非常相似，包括常见的各种转义符号。&lt;br&gt;&lt;img src=&quot;/imgs/develop/string.gif&quot; alt=&quot;value&quot;&gt;&lt;/p&gt;
-&lt;h3 id=&quot;数值&quot;&gt;&lt;a href=&quot;#数值&quot; class=&quot;headerlink&quot; title=&quot;数值&quot;&gt;&lt;/a&gt;数值&lt;/h3&gt;&lt;p&gt;数值与C/C++中的数值非常相似，但没有八进制和十六进制格式。&lt;br&gt;&lt;img src=&quot;/imgs/develop/number.gif&quot; alt=&quot;number&quot;&gt;&lt;/p&gt;
-&lt;h3 id=&quot;空白&quot;&gt;&lt;a href=&quot;#空白&quot; class=&quot;headerlink&quot; title=&quot;空白&quot;&gt;&lt;/a&gt;空白&lt;/h3&gt;&lt;p&gt;空白符号（包括空格，Tab以及回车）可以加入到任何符号之间，不会影响JSON的含义&lt;/p&gt;
-&lt;h1 id=&quot;Python中的JSON库&quot;&gt;&lt;a href=&quot;#Python中的JSON库&quot; class=&quot;headerlink&quot; title=&quot;Python中的JSON库&quot;&gt;&lt;/a&gt;Python中的JSON库&lt;/h1&gt;&lt;p&gt;&lt;em&gt;以Python 3为基准&lt;/em&gt;&lt;/p&gt;
-&lt;h2 id=&quot;编码&quot;&gt;&lt;a href=&quot;#编码&quot; class=&quot;headerlink&quot; title=&quot;编码&quot;&gt;&lt;/a&gt;编码&lt;/h2&gt;&lt;h3 id=&quot;对应类型&quot;&gt;&lt;a href=&quot;#对应类型&quot; class=&quot;headerlink&quot; title=&quot;对应类型&quot;&gt;&lt;/a&gt;对应类型&lt;/h3&gt;&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;Python&lt;/th&gt;
-&lt;th&gt;JSON&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;dict&lt;/td&gt;
-&lt;td&gt;object&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;list, tuple&lt;/td&gt;
-&lt;td&gt;array&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;str&lt;/td&gt;
-&lt;td&gt;string&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;int, float&lt;/td&gt;
-&lt;td&gt;number&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;True&lt;/td&gt;
-&lt;td&gt;true&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;False&lt;/td&gt;
-&lt;td&gt;false&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;None&lt;/td&gt;
-&lt;td&gt;null&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h3 id=&quot;函数&quot;&gt;&lt;a href=&quot;#函数&quot; class=&quot;headerlink&quot; title=&quot;函数&quot;&gt;&lt;/a&gt;函数&lt;/h3&gt;&lt;p&gt;我们使用&lt;code&gt;JSON&lt;/code&gt;库中的&lt;code&gt;dump&lt;/code&gt;以及&lt;code&gt;dumps&lt;/code&gt;函数来进行&lt;code&gt;JSON&lt;/code&gt;编码。&lt;code&gt;dump&lt;/code&gt;和&lt;code&gt;dumps&lt;/code&gt;各项参数含义基本一致，唯一区别在于&lt;code&gt;dump&lt;/code&gt;函数编码产生一个JSON文件流，而&lt;code&gt;dumps&lt;/code&gt;编码产生一个JSON字符串。&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;json.dump(obj, fp, skipkeys=&lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;, ensure_ascii=&lt;span class=&quot;keyword&quot;&gt;True&lt;/span&gt;, check_circular=&lt;span class=&quot;keyword&quot;&gt;True&lt;/span&gt;, allow_nan=&lt;span class=&quot;keyword&quot;&gt;True&lt;/span&gt;, cls=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, indent=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, separators=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, default=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, sort_keys=&lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;, **kw)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;json.dumps(obj, skipkeys=&lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;, ensure_ascii=&lt;span class=&quot;keyword&quot;&gt;True&lt;/span&gt;, check_circular=&lt;span class=&quot;keyword&quot;&gt;True&lt;/span&gt;, allow_nan=&lt;span class=&quot;keyword&quot;&gt;True&lt;/span&gt;, cls=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, indent=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, separators=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, default=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, sort_keys=&lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;, **kw)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;obj&lt;/code&gt;：编码对象&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;fp&lt;/code&gt;：指定文件流&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;skipkeys&lt;/code&gt;：若skipkeys为真，则非标准类型将会跳过；否则返回&lt;code&gt;TypeError&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ensure_ascii&lt;/code&gt;：若&lt;code&gt;ensure_ascii&lt;/code&gt;为真，则输出时将会确保没有非ASCII字符；否则将会原样输出&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;check_circular&lt;/code&gt;：若&lt;code&gt;check_circular&lt;/code&gt;为真，则将会检测是否存在循环调用；否则会跳过检测&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;allow_nan&lt;/code&gt;：若&lt;code&gt;allow_nan&lt;/code&gt;为真，则将会允许存在空值（无穷大值）；否则会返回&lt;code&gt;ValueError&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;cls&lt;/code&gt;：若&lt;code&gt;cls&lt;/code&gt;为空值，则使用&lt;code&gt;JSONEncoder&lt;/code&gt;；否则使用指定子类进行编码&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;indent&lt;/code&gt;：若&lt;code&gt;indent&lt;/code&gt;为空值，则无缩进；否则使用指定值进行缩进&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;separators&lt;/code&gt;：若&lt;code&gt;separators&lt;/code&gt;为空值，则使用&lt;code&gt;(&amp;#39;,&amp;#39;, &amp;#39;: &amp;#39;)&lt;/code&gt;分隔；否则使用指定的元组进行分隔&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;default&lt;/code&gt;：若&lt;code&gt;default&lt;/code&gt;为空值，则使用自带的&lt;code&gt;default&lt;/code&gt;方法；否则使用指定值&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sort_keys&lt;/code&gt;：若&lt;code&gt;sort_keys&lt;/code&gt;为真，则输出将会按照键进行排序&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&quot;示范&quot;&gt;&lt;a href=&quot;#示范&quot; class=&quot;headerlink&quot; title=&quot;示范&quot;&gt;&lt;/a&gt;示范&lt;/h3&gt;&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class=&quot;keyword&quot;&gt;import&lt;/span&gt; json&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;json.dumps([&lt;span class=&quot;string&quot;&gt;&#39;foo&#39;&lt;/span&gt;, &amp;#123;&lt;span class=&quot;string&quot;&gt;&#39;bar&#39;&lt;/span&gt;: (&lt;span class=&quot;string&quot;&gt;&#39;baz&#39;&lt;/span&gt;, &lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, &lt;span class=&quot;number&quot;&gt;1.0&lt;/span&gt;, &lt;span class=&quot;number&quot;&gt;2&lt;/span&gt;)&amp;#125;])&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;string&quot;&gt;&#39;[&quot;foo&quot;, &amp;#123;&quot;bar&quot;: [&quot;baz&quot;, null, 1.0, 2]&amp;#125;]&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# 排序&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;print(json.dumps(&amp;#123;&lt;span class=&quot;string&quot;&gt;&quot;c&quot;&lt;/span&gt;: &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&quot;b&quot;&lt;/span&gt;: &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&quot;a&quot;&lt;/span&gt;: &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;&amp;#125;, sort_keys=&lt;span class=&quot;keyword&quot;&gt;True&lt;/span&gt;))&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;&lt;span class=&quot;string&quot;&gt;&quot;a&quot;&lt;/span&gt;: &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&quot;b&quot;&lt;/span&gt;: &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&quot;c&quot;&lt;/span&gt;: &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# 分隔符&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;json.dumps([&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;,&lt;span class=&quot;number&quot;&gt;2&lt;/span&gt;,&lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;,&amp;#123;&lt;span class=&quot;string&quot;&gt;&#39;4&#39;&lt;/span&gt;: &lt;span class=&quot;number&quot;&gt;5&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&#39;6&#39;&lt;/span&gt;: &lt;span class=&quot;number&quot;&gt;7&lt;/span&gt;&amp;#125;], separators=(&lt;span class=&quot;string&quot;&gt;&#39;,&#39;&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&#39;:&#39;&lt;/span&gt;))&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;string&quot;&gt;&#39;[1,2,3,&amp;#123;&quot;4&quot;:5,&quot;6&quot;:7&amp;#125;]&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# Unicode输出&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;json.dumps(&lt;span class=&quot;string&quot;&gt;&quot;\u5317\u4eac&quot;&lt;/span&gt;, ensure_ascii=&lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;string&quot;&gt;&#39;北京&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h2 id=&quot;解码&quot;&gt;&lt;a href=&quot;#解码&quot; class=&quot;headerlink&quot; title=&quot;解码&quot;&gt;&lt;/a&gt;解码&lt;/h2&gt;&lt;h3 id=&quot;对应类型-1&quot;&gt;&lt;a href=&quot;#对应类型-1&quot; class=&quot;headerlink&quot; title=&quot;对应类型&quot;&gt;&lt;/a&gt;对应类型&lt;/h3&gt;&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;JSON&lt;/th&gt;
-&lt;th&gt;Python&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;object&lt;/td&gt;
-&lt;td&gt;dict&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;array&lt;/td&gt;
-&lt;td&gt;list&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;string&lt;/td&gt;
-&lt;td&gt;str&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;number (int)&lt;/td&gt;
-&lt;td&gt;int&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;number (real)&lt;/td&gt;
-&lt;td&gt;float&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;true&lt;/td&gt;
-&lt;td&gt;True&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;false&lt;/td&gt;
-&lt;td&gt;False&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;null&lt;/td&gt;
-&lt;td&gt;None&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h3 id=&quot;函数-1&quot;&gt;&lt;a href=&quot;#函数-1&quot; class=&quot;headerlink&quot; title=&quot;函数&quot;&gt;&lt;/a&gt;函数&lt;/h3&gt;&lt;p&gt;我们使用&lt;code&gt;JSON&lt;/code&gt;库中的&lt;code&gt;load&lt;/code&gt;以及&lt;code&gt;loads&lt;/code&gt;函数来进行&lt;code&gt;JSON&lt;/code&gt;解码。&lt;code&gt;load&lt;/code&gt;和&lt;code&gt;loads&lt;/code&gt;各项参数含义基本一致，唯一区别在于&lt;code&gt;load&lt;/code&gt;函数用于解码JSON文件流，而&lt;code&gt;loads&lt;/code&gt;用于解码JSON字符串。&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;json.load(fp, cls=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, object_hook=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, parse_float=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, parse_int=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, parse_constant=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, object_pairs_hook=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, **kw)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;json.loads(s, encoding=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, cls=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, object_hook=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, parse_float=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, parse_int=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, parse_constant=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, object_pairs_hook=&lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, **kw)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;fp&lt;/code&gt;：指定文件流&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;s&lt;/code&gt;：指定字符串&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;encoding&lt;/code&gt;：指定字符串编码&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;cls&lt;/code&gt;：若&lt;code&gt;cls&lt;/code&gt;为空值，则使用&lt;code&gt;JSONEncoder&lt;/code&gt;；否则使用指定子类进行编码&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;object_hook&lt;/code&gt;：若&lt;code&gt;object_hook&lt;/code&gt;为空值，对象则返回解码器&lt;code&gt;dict&lt;/code&gt;；否则使用自定义类型返回&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;parse_float&lt;/code&gt;：若&lt;code&gt;parse_float&lt;/code&gt;为空，则JSON浮点数转换为浮点数；否则转换为指定类型&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;parse_int&lt;/code&gt;：若&lt;code&gt;parse_int&lt;/code&gt;为空，则JSON整数转换为整数；否则转换为指定类型&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;parse_constant&lt;/code&gt;若&lt;code&gt;parse_constant&lt;/code&gt;为空，则不会处理非法输入；否则抛出异常&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;object_pairs_hook&lt;/code&gt;：若&lt;code&gt;object_pairs_hook&lt;/code&gt;为空值，则数组返回解码器&lt;code&gt;dict&lt;/code&gt;；否则使用自定义类型返回&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&quot;示范-1&quot;&gt;&lt;a href=&quot;#示范-1&quot; class=&quot;headerlink&quot; title=&quot;示范&quot;&gt;&lt;/a&gt;示范&lt;/h3&gt;&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class=&quot;keyword&quot;&gt;import&lt;/span&gt; json&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;json.loads(&lt;span class=&quot;string&quot;&gt;&#39;[&quot;foo&quot;, &amp;#123;&quot;bar&quot;:[&quot;baz&quot;, null, 1.0, 2]&amp;#125;]&#39;&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;[&lt;span class=&quot;string&quot;&gt;&#39;foo&#39;&lt;/span&gt;, &amp;#123;&lt;span class=&quot;string&quot;&gt;&#39;bar&#39;&lt;/span&gt;: [&lt;span class=&quot;string&quot;&gt;&#39;baz&#39;&lt;/span&gt;, &lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;, &lt;span class=&quot;number&quot;&gt;1.0&lt;/span&gt;, &lt;span class=&quot;number&quot;&gt;2&lt;/span&gt;]&amp;#125;]&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h1 id=&quot;更新日志&quot;&gt;&lt;a href=&quot;#更新日志&quot; class=&quot;headerlink&quot; title=&quot;更新日志&quot;&gt;&lt;/a&gt;更新日志&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;2015年10月30日 初步完成&lt;/li&gt;
-&lt;/ul&gt;
-</content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;JSON介绍&quot;&gt;&lt;a href=&quot;#JSON介绍&quot; class=&quot;headerlink&quot; title=&quot;JSON介绍&quot;&gt;&lt;/a&gt;JSON介绍&lt;/h1&gt;&lt;p&gt;JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。 易于人阅读和编写。同时也易于机器解析和生成。 它基于JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999的一个子集。 JSON采用完全独立于语言的文本格式，但是也使用了类似于C语言家族的习惯（包括C, C++, C#, Java, JavaScript, Perl, Python等）。 这些特性使JSON成为理想的数据交换语言。&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;引用自&lt;a href=&quot;http://www.json.org/json-zh.html&quot;&gt;json.org&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="Develop" scheme="https://xuanwo.org/categories/Develop/"/>
-    
-    
-      <category term="Software" scheme="https://xuanwo.org/tags/Software/"/>
-    
-      <category term="Python" scheme="https://xuanwo.org/tags/Python/"/>
-    
-      <category term="JSON" scheme="https://xuanwo.org/tags/JSON/"/>
     
   </entry>
   
