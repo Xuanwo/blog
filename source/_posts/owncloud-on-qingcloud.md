@@ -137,7 +137,7 @@ pvdisplay
 --- Physical volume ---
  PV Name               /dev/sdb
  PV Size               1000.00 GiB / not usable 4.00 MiB
- Allocatable           yes 
+ Allocatable           yes
  PE Size               4.00 MiB
  Total PE              255999
  Free PE               255999
@@ -164,7 +164,6 @@ vgextend owncloud-vg /dev/sde
 ```bash
 --- Volume group ---
  VG Name               owncloud-vg
- System ID             
  Format                lvm2
  Metadata Areas        1
  Metadata Sequence No  2
