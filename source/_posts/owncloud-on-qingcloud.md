@@ -6,7 +6,7 @@ tags: [QingCloud, Software, Work]
 toc: true
 ---
 
-## 前言
+# 前言
 
 因为不满意百度云的一些缺陷，我们决定部署一套自己使用的云存储平台。希望得到的特性如下：
 
@@ -21,39 +21,39 @@ toc: true
 
 <!-- more -->
 
-## 部署
+# 部署
 
 在部署之前，我们首先要考虑这套系统大概会有多少人用，会使用多大的空间，需要多少带宽，服务器的配置等问题。但是非常有意思的事情是，在青云QingCloud平台上，一切都是可以动态扩容的，所以我们完全可以以最少的资源验证服务是否符合需求，然后再增加服务所使用的资源。
 
-### 资源编排
+## 资源编排
 
 在实际生成需要的资源之前，我们先通过青云QingCloud的提供的资源编排功能看看青云是否能够满足我们的需求以及搭建这一套服务需要多少钱：
 
-![](/imgs/Opinion/qingcloud-owncloud-1.png)
+![](/imgs/opinion/qingcloud-owncloud-1.png)
 
 如图所示，我们在一个私有网络中创建了一台主机和一个数据库，并为整个VPC网络分配了一个公网IP和防火墙。整套资源预计需要每小时0.57元。
 
-### 创建并修改配置
+## 创建并修改配置
 
 生成模板之后，我们点击创建。等待大概一分钟之后，所有资源全部创建完毕。在我们SSH连接上服务器开始实际的配置工作之前，我们先修改VPC的设置。
 
-#### 添加端口转发规则
+### 添加端口转发规则
 
 我们需要将来自公网的流量转发到我们的主机上，主要有两条，一个是SSH，一个是HTTP。
 
-![](/imgs/Opinion/qingcloud-owncloud-2.png)
+![](/imgs/opinion/qingcloud-owncloud-2.png)
 
 首先我们知道主机的内网地址是`192.168.0.2`，所以需要把所有来自22和80的端口都转发到这个地址。
 
-#### 添加防火墙规则
+### 添加防火墙规则
 
 出于安全性考虑，青云的防火墙默认只开放了22和ICMP。为了可以正常访问到主机，我们还需要添加80端口的例外规则：
 
-![](/imgs/Opinion/qingcloud-owncloud-3.png)
+![](/imgs/opinion/qingcloud-owncloud-3.png)
 
 我们看到青云在右边提供了常用端口的配置，选择http即可。
 
-### 安装OwnCloud
+## 安装OwnCloud
 
 OwnCloud为CentOS平台提供了二进制的包，没有特殊需求的话，我们直接使用即可。
 首先添加OwnCloud官方的Key文件：
@@ -77,7 +77,7 @@ yum install owncloud
 
 yum将会自动处理依赖，如果速度不佳的话，可以直接将包下载到本地：[直接下载](http://download.owncloud.org/download/repositories/stable/CentOS_7/)
 
-### 启用httpd，并测试是否安装正确
+## 启用httpd，并测试是否安装正确
 
 OwnCloud默认使用Apache作为Web服务器，上一步我们已经安装了Apache，接下来我们需要启用它：
 
@@ -93,7 +93,7 @@ systemctl enable httpd
 
 然后在浏览器中访问：`http://<your ip>/owncloud`，如果出现OwnCloud的安装界面，说明已经配置成功了。
 
-### 使用LVM管理分区，实现空间动态扩容
+## 使用LVM管理分区，实现空间动态扩容
 
 OwnCloud在安装的时候只能选择一个目录，为了能够实现空间的动态扩容，我们需要使用LVM创建一个逻辑分区并挂载到指定的数据目录下。
 
@@ -103,7 +103,7 @@ OwnCloud在安装的时候只能选择一个目录，为了能够实现空间的
 
 接下来我们需要在CentOS下使用LVM来配置分区，实现分区的动态扩容。
 
-#### 安装LVM工具
+### 安装LVM工具
 
 青云QingCloud提供的CentOS 7.2默认映像是没有LVM工具的，所以我们首先需要安装它：
 
@@ -111,7 +111,7 @@ OwnCloud在安装的时候只能选择一个目录，为了能够实现空间的
 yum install lvm2
 ```
 
-#### 创建物理卷（PV）
+### 创建物理卷（PV）
 
 首先检测能够被作为物理卷的设备：
 
@@ -145,7 +145,7 @@ pvdisplay
  PV UUID               EHIeTJ-WBPv-rQkQ-LnuI-0IWE-SM4z-bMPAWx
 ```
 
-#### 创建卷组（VG）
+### 创建卷组（VG）
 
 物理卷创建完毕后，我们需要创建一个卷组来实现物理卷的统一管理：
 
@@ -184,7 +184,7 @@ vgextend owncloud-vg /dev/sde
  VG UUID               xCCtSR-QFcZ-StcI-HM7O-KDAz-PvMC-EgYcSV
 ```
 
-#### 创建逻辑卷（LV）
+### 创建逻辑卷（LV）
 
 然后我们可以开始创建逻辑卷了：
 
@@ -206,7 +206,7 @@ lvextend -L 1000G /dev/owncloud-vg/owncloud-data
 resize2fs /dev/owncloud-vg/owncloud-data
 ```
 
-#### 创建文件系统并挂载
+### 创建文件系统并挂载
 
 我们在逻辑卷上创建一个ext4分区：
 
@@ -220,7 +220,7 @@ mkfs.ext4 /dev/mapper/owncloud--vg-owncloud--data
 mount /dev/mapper/owncloud--vg-owncloud--data /data
 ```
 
-### 修改文件夹权限
+## 修改文件夹权限
 
 为了OwnCloud能够正确读写我们的数据分区，我们需要修改`/data`的所有者和权限：
 
@@ -229,7 +229,7 @@ chown -R apache:apache /data
 chmod 775 /data -R
 ```
 
-### 网页安装OwnCloud
+## 网页安装OwnCloud
 
 全部配置完毕后，我们可以开始在网页进行OwnCloud安装了。
 
@@ -245,17 +245,17 @@ chmod 775 /data -R
 
 提示创建完毕后，就可以使用管理员用户登陆了。
 
-## 应用
+# 应用
 
 下面我们来聊一聊OwnCloud的一些应用。
 
-### 分享功能
+## 分享功能
 
-![](/imgs/Opinion/qingcloud-owncloud-4.png)
+![](/imgs/opinion/qingcloud-owncloud-4.png)
 
 分享功能是我比较看重的一个部分。OwnCloud的分享可以选择用户和组，然后还能通过链接进行分享。通过链接分享时，可以指定密码和过期时间，还能允许编辑。这样就可以实现给用户发送需要的资料以及收集来自合作伙伴的视频，文件等功能。
 
-### 团队协作
+## 团队协作
 
 OwnCloud内建了一个版本管理功能，同一个文件可以提供多个历史版本，这样方便大家进行版本追溯和管理，为团队协作编辑提供了便利。除此以外还有评论系统，实时性能还不错，基本可以用于对具体文档的简单协作。
 
