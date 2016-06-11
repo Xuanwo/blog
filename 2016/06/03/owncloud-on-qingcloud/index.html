@@ -260,6 +260,32 @@
 <p>在创建RDB时，系统会自动用相同的密码创建Root用户。OwnCloud在安装时需要创建一个新的账户来进行管理，而青云提供的默认用户没有这样的权限。因此需要使用Root用户而不是创建时指定的用户。</p>
 </blockquote>
 <p>提示创建完毕后，就可以使用管理员用户登陆了。</p>
+<h1 id="维护"><a href="#维护" class="headerlink" title="维护"></a>维护</h1><h2 id="自动备份"><a href="#自动备份" class="headerlink" title="自动备份"></a>自动备份</h2><p>一个存储类的应用，必须要有自动备份的功能，保证用户在最坏的情况下都能找回他们的数据，对于存储着工作资料的私有云存储而言更是如此。所以，需要对主机，硬盘和数据库进行定时备份。</p>
+<h3 id="主机和硬盘"><a href="#主机和硬盘" class="headerlink" title="主机和硬盘"></a>主机和硬盘</h3><p>青云QingCloud 提供了一个叫定时器的功能，可以设置在每天的三点重复执行备份任务。</p>
+<p>首先创建一个定时器，每天3：00重复执行：</p>
+<p><img src="/imgs/opinion/qingcloud-owncloud-backup-1.png" alt=""></p>
+<p>然后在该定时器中添加对应的定时器任务：</p>
+<p><img src="/imgs/opinion/qingcloud-owncloud-backup-2.png" alt=""></p>
+<p>选中需要备份的主机和硬盘即可。</p>
+<h3 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h3><p>青云QingCloud 上的数据库自带自动备份功能，只需要开启它。</p>
+<p>在需要备份的数据库上右击，选择<code>修改自动备份策略</code>：</p>
+<p><img src="/imgs/opinion/qingcloud-owncloud-backup-3.png" alt=""></p>
+<blockquote>
+<p>青云QingCloud 首次备份是全量备份，之后是增量备份。当变化较大时，会自动创建新的备份链。</p>
+</blockquote>
+<h2 id="自动伸缩"><a href="#自动伸缩" class="headerlink" title="自动伸缩"></a>自动伸缩</h2><p>云存储服务的一个最显著的特点是有明显的高峰期，如果能够实现高峰期时自动增加带宽，低峰期时自动降低带宽就能够节省昂贵的带宽费用的目的。青云QingCloud提供的自动伸缩就能有效地满足这一痛点。</p>
+<p>首先创建一个自动伸缩策略：</p>
+<p>操作类型为调整公网IP带宽上限，然后选择需要自动伸缩的资源。</p>
+<p><img src="/imgs/opinion/qingcloud-owncloud-autoscaling-1.png" alt=""></p>
+<p>然后添加带宽提高和降低的触发条件：</p>
+<p>以带宽提高为例，我们可以在公网进流量连续15分钟平均值大于当前带宽的80%时提高带宽。</p>
+<blockquote>
+<p>青云QingCloud的监控周期为5分钟，而数据采样周期为1分钟。</p>
+</blockquote>
+<p><img src="/imgs/opinion/qingcloud-owncloud-autosacling-2.png" alt=""></p>
+<p>最后添加操作参数：</p>
+<p>可以设置每次提高5Mbps，最高允许的带宽为20Mbps。</p>
+<p><img src="/imgs/opinion/qingcloud-owncloud-autosacling-3.png" alt=""></p>
 <h1 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h1><p>下面来聊一聊OwnCloud的一些应用。</p>
 <h2 id="分享功能"><a href="#分享功能" class="headerlink" title="分享功能"></a>分享功能</h2><p><img src="/imgs/opinion/qingcloud-owncloud-4.png" alt=""></p>
 <p>分享功能是我比较看重的一个部分。OwnCloud的分享可以选择用户和组，然后还能通过链接进行分享。通过链接分享时，可以指定密码和过期时间，还能允许编辑。这样就可以实现给用户发送需要的资料以及收集来自合作伙伴的视频，文件等功能。</p>
@@ -267,6 +293,7 @@
 <p><img src="/imgs/opinion/qingcloud-owncloud-show-1.png" alt=""></p>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2016年06月03日 首次发布</li>
+<li>2016年06月11日 增加自动备份和自动伸缩的配置</li>
 </ul>
 
       
@@ -293,7 +320,7 @@
            <p><span>本文标题:</span><a href="/2016/06/03/owncloud-on-qingcloud/">在QingCloud上部署弹性扩容的OwnCloud</a></p>
            <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
            <p><span>发布时间:</span>2016年6月3日 - 08时06分</p>
-           <p><span>最后更新:</span>2016年6月3日 - 06时06分</p>
+           <p><span>最后更新:</span>2016年6月11日 - 00时06分</p>
            <p><span>原始链接:</span><a href="/2016/06/03/owncloud-on-qingcloud/" title="在QingCloud上部署弹性扩容的OwnCloud">https://xuanwo.org/2016/06/03/owncloud-on-qingcloud/</a></p>
            <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial 4.0</a></p>
            <p><span>转载请保留以上信息。</span></p>
@@ -431,7 +458,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#部署"><span class="nav-number">2.</span> <span class="nav-text">部署</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#资源编排"><span class="nav-number">2.1.</span> <span class="nav-text">资源编排</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建并修改配置"><span class="nav-number">2.2.</span> <span class="nav-text">创建并修改配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#添加端口转发规则"><span class="nav-number">2.2.1.</span> <span class="nav-text">添加端口转发规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加防火墙规则"><span class="nav-number">2.2.2.</span> <span class="nav-text">添加防火墙规则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装OwnCloud"><span class="nav-number">2.3.</span> <span class="nav-text">安装OwnCloud</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启用httpd，并测试是否安装正确"><span class="nav-number">2.4.</span> <span class="nav-text">启用httpd，并测试是否安装正确</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用LVM管理分区，实现空间动态扩容"><span class="nav-number">2.5.</span> <span class="nav-text">使用LVM管理分区，实现空间动态扩容</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装LVM工具"><span class="nav-number">2.5.1.</span> <span class="nav-text">安装LVM工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建物理卷（PV）"><span class="nav-number">2.5.2.</span> <span class="nav-text">创建物理卷（PV）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建卷组（VG）"><span class="nav-number">2.5.3.</span> <span class="nav-text">创建卷组（VG）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建逻辑卷（LV）"><span class="nav-number">2.5.4.</span> <span class="nav-text">创建逻辑卷（LV）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建文件系统并挂载"><span class="nav-number">2.5.5.</span> <span class="nav-text">创建文件系统并挂载</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改文件夹权限"><span class="nav-number">2.6.</span> <span class="nav-text">修改文件夹权限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#网页安装OwnCloud"><span class="nav-number">2.7.</span> <span class="nav-text">网页安装OwnCloud</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#应用"><span class="nav-number">3.</span> <span class="nav-text">应用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#分享功能"><span class="nav-number">3.1.</span> <span class="nav-text">分享功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#团队协作"><span class="nav-number">3.2.</span> <span class="nav-text">团队协作</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新日志"><span class="nav-number">4.</span> <span class="nav-text">更新日志</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#部署"><span class="nav-number">2.</span> <span class="nav-text">部署</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#资源编排"><span class="nav-number">2.1.</span> <span class="nav-text">资源编排</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建并修改配置"><span class="nav-number">2.2.</span> <span class="nav-text">创建并修改配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#添加端口转发规则"><span class="nav-number">2.2.1.</span> <span class="nav-text">添加端口转发规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加防火墙规则"><span class="nav-number">2.2.2.</span> <span class="nav-text">添加防火墙规则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装OwnCloud"><span class="nav-number">2.3.</span> <span class="nav-text">安装OwnCloud</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启用httpd，并测试是否安装正确"><span class="nav-number">2.4.</span> <span class="nav-text">启用httpd，并测试是否安装正确</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用LVM管理分区，实现空间动态扩容"><span class="nav-number">2.5.</span> <span class="nav-text">使用LVM管理分区，实现空间动态扩容</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装LVM工具"><span class="nav-number">2.5.1.</span> <span class="nav-text">安装LVM工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建物理卷（PV）"><span class="nav-number">2.5.2.</span> <span class="nav-text">创建物理卷（PV）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建卷组（VG）"><span class="nav-number">2.5.3.</span> <span class="nav-text">创建卷组（VG）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建逻辑卷（LV）"><span class="nav-number">2.5.4.</span> <span class="nav-text">创建逻辑卷（LV）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建文件系统并挂载"><span class="nav-number">2.5.5.</span> <span class="nav-text">创建文件系统并挂载</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改文件夹权限"><span class="nav-number">2.6.</span> <span class="nav-text">修改文件夹权限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#网页安装OwnCloud"><span class="nav-number">2.7.</span> <span class="nav-text">网页安装OwnCloud</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#维护"><span class="nav-number">3.</span> <span class="nav-text">维护</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#自动备份"><span class="nav-number">3.1.</span> <span class="nav-text">自动备份</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主机和硬盘"><span class="nav-number">3.1.1.</span> <span class="nav-text">主机和硬盘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据库"><span class="nav-number">3.1.2.</span> <span class="nav-text">数据库</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自动伸缩"><span class="nav-number">3.2.</span> <span class="nav-text">自动伸缩</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#应用"><span class="nav-number">4.</span> <span class="nav-text">应用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#分享功能"><span class="nav-number">4.1.</span> <span class="nav-text">分享功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#团队协作"><span class="nav-number">4.2.</span> <span class="nav-text">团队协作</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新日志"><span class="nav-number">5.</span> <span class="nav-text">更新日志</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
