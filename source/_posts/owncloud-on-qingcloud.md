@@ -302,13 +302,13 @@ chmod 775 /data -R
 
 > 青云QingCloud的监控周期为5分钟，而数据采样周期为1分钟。
 
-![](/imgs/opinion/qingcloud-owncloud-autosacling-2.png)
+![](/imgs/opinion/qingcloud-owncloud-autoscaling-2.png)
 
 最后添加操作参数：
 
 可以设置每次提高5Mbps，最高允许的带宽为20Mbps。
 
-![](/imgs/opinion/qingcloud-owncloud-autosacling-3.png)
+![](/imgs/opinion/qingcloud-owncloud-autoscaling-3.png)
 
 # 应用
 
