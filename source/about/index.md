@@ -4,18 +4,21 @@ layout: "post"
 ---
 
 # 现状
+
 - 中国地质大学（北京）本科三年级在读生
 - 信息管理与信息系统专业
 - [QingCloud](https://www.qingcloud.com/)实习中
 - 恋爱ing
 
 # 奖项
+
 - 幼儿园时多次获得小红花
 - 第六届[蓝桥杯](http://www.lanqiao.org/)北京赛区二等奖
 - 第一届[CCPC](http://ccpc.io/)铜奖
 - 第三十届[ACM/ICPC](https://icpc.baylor.edu/)沈阳站铜奖
 
 # 兴趣
+
 - 动漫（偏治愈向，喜欢AB，CL，那朵花，言叶之庭等作。）
 - 游戏（玩过很多，都不精通，撸啊撸郊区黄金）
 - 小说（主要看科幻和玄幻类作品，喜欢大刘和猫腻，正在看[择天记](http://chuangshi.qq.com/bk/xh/357735.html)）
@@ -26,21 +29,22 @@ layout: "post"
 # 技能
 
 ## 语言类
+
 - C/C++ 熟练
-- html，css，js 入门
-- java 入门
+- html，css，js 初步
 - python 初步
-- ruby 入门
-- nodejs 入门
 
 ## 工具类
+
 - git 熟练
 - office 熟练
-- shell/bash 入门
+- shell/bash 初步
 - 各类艹墙工具 熟练
 
 # 正在捣鼓
-- 基于Unreal引擎的VR游戏
+
+- [Qingchat *一个比较蠢的微信群发机器人*](https://github.com/Xuanwo/qingchat)
+- [Jade-ims *系统分析与设计的大作业，基于Flask+Sqlite3*](https://github.com/Xuanwo/jade-ims)
 
 # 博客更新日志
 - 2014年06月12日 完成`现状`和`兴趣`介绍。
@@ -66,3 +70,4 @@ layout: "post"
 - 2015年10月23日 为每一篇文章添加了Copyright信息
 - 2015年12月20日 删除了ACM时期文章的tags
 - 2016年01月15日 为每一篇文章添加了微信公众号&捐赠二维码
+- 2016年06月13日 更新近期动态
