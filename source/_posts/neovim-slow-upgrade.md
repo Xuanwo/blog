@@ -27,6 +27,9 @@ sudo apt-get install neovim
 
 ### 光标移动
 
+`gg` 移动到文件开头
+`G` 移动到文件末尾
+
 ### 文件操作相关
 
 `:w <filename>` 按照<filename>保存文件
@@ -48,7 +51,7 @@ sudo apt-get install neovim
 
 ### 使用内置终端
 
-`:terminal` 打开终端，输入exit并使用esc即可退出
+`:terminal` 打开终端，输入exit并使用`esc`或`enter`即可退出
 
 ### 与系统剪切板集成
 
@@ -91,7 +94,42 @@ let g:airline#extensions#tabline#left_alt_sep = '|'
 `:b<n>`: 跳往第n个buffer
 `:bd`: 关掉目前buffer
 
+### vim-airline-themes
+
+个人比较偏爱`solarized`的暗色皮肤，所以需要使用这个库来安装airline配套的皮肤。
+在`init.vim`中添加
+
+```
+Plug 'vim-airline/vim-airline-themes'
+```
+
+然后修改：
+
+```
+let g:airline_theme="solarized"
+```
+
+即可
+
+## vim-colors-solarized
+
+顾名思义，这是`solarized for vim`。
+在`init.vim`中添加
+
+```
+Plug 'altercation/vim-colors-solarized'
+```
+
+然后修改：
+
+```
+set background=dark
+colorscheme solarized
+```
+
+即可
 
 # 更新日志
 - 2016年03月12日 首次发布
 - 2016年03月15日 增加air-line相关内容
+- 2016年06月16日 增加主题配置相关内容，并添加了部分常用快捷键
