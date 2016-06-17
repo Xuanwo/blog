@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://xuanwo.org/"/>
-  <updated>2016-06-16T09:15:15.847Z</updated>
+  <updated>2016-06-17T09:25:12.660Z</updated>
   <id>https://xuanwo.org/</id>
   
   <author>
@@ -16,11 +16,80 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>马可波罗珠宝进销存系统开发手记</title>
+    <link href="https://xuanwo.org/2016/06/16/jade_ims/"/>
+    <id>https://xuanwo.org/2016/06/16/jade_ims/</id>
+    <published>2016-06-16T22:00:00.000Z</published>
+    <updated>2016-06-17T09:25:12.660Z</updated>
+    
+    <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;img src=&quot;/imgs/develop/jade-ims-index.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;p&gt;这个项目从我们这个学期开了&lt;strong&gt;系统分析与设计&lt;/strong&gt;这门课之后就开始了，首次创建这个项目是在3月26号，实际上真正的开发时间集中在6月上旬。差不多用两个星期的闲暇时间时间完成了这个简单的进销存系统。这个系统基于Flask框架，使用SQLite3数据库，前端则是使用Bootstrap框架，实现了包括客户，库存，销售，进货等管理子系统。说是管理，其实也就是简单的增加和删除而已。&lt;br&gt;前人经常说，不要重复造轮子。既然有类似于Odoo这样强大的ERP系统珠玉在前，我为什么要再自己造一个功能简单，甚至根本不会有人用的轮子呢？从前我确实是这么想的，但是稍微有一点工作经验之后发现再造轮子的原因有两条：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;作为一个处在知识积累阶段的学生而言，再造轮子很有必要。不造一次轮子，你就永远不会明白轮子内部的真实构造。很多技术虽然看起来简单，但是想要有一个完善且健壮的实现却有很多坑需要踩。踩这些坑的过程，也正是一个技术人员成长最快的过程。&lt;/li&gt;
+&lt;li&gt;别人的轮子终究是别人的。你不知道这个轮子最大能承受多少压力，你也不知道这个轮子在什么样的情况下会爆胎。当一个轮子装上企业呼呼向前的列车，再要想把它替换下来是一件很难且成本很高的事情。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接下来，讲讲造这个轮子的一些经历吧~&lt;/p&gt;
+&lt;h1 id=&quot;项目启动&quot;&gt;&lt;a href=&quot;#项目启动&quot; class=&quot;headerlink&quot; title=&quot;项目启动&quot;&gt;&lt;/a&gt;项目启动&lt;/h1&gt;&lt;p&gt;正如前言中说的，这个项目是系统分析与设计这门课的课程设计，也是贯穿着整个学期的一个主旋律。早在这学期开学之初，我们就知道了自己需要做这样的一个系统。经历了上个学期各种技术炫了半天，最后却只是抄袭各种开源项目草草实现的&lt;a href=&quot;https://xuanwo.org/2015/06/30/together-project/&quot;&gt;失败&lt;/a&gt;，这个学期我务实了很多。从最开始的讨论就一直跟组员强调技术的可行性，基本上否决了所有试图增大项目复杂度的建议，把主题定在了一个纯粹的进销存管理系统。之所以如此，是因为我的观念发生了很大的变化：原来觉得技术的先进是最重要的，开发项目一定要用最现代的技术，最炫目的特效；现在觉得哪怕是一个用VB写出来的能稳定运行的丑陋系统都要胜过采用了种种最新潮技术却漏洞百出根本没法运行的“先进”系统。&lt;br&gt;在讨论到最极端的时候，我甚至想只做一个仓库的管理系统，只包括进库和出库这样的简单功能。这样的态度曾经闹得有一次讨论直接不欢而散，好在组员都是非常Nice的人，在我主动表达歉意之后大度地表示没什么。经过多次讨论之后，我们终于达成了共识，要做一个进销存系统，功能尽可能简单，在实现基础功能的前提下，再考虑加入新的功能。&lt;br&gt;接下来的事情就没有什么大的分歧了，整体系统采用B/S架构，开发语言选用我个人比较喜欢的Python，使用Flask框架，数据库选用无需配置的SQLite。然后服务器选择阿里云的学生机，系统选择成熟稳定的CentOS 7.2，Web Server选用Nginx，也就是我个人目前比较喜欢的开发平台——LESP(Linux, Nginx, SQLite, Python)。&lt;/p&gt;
+&lt;h1 id=&quot;项目细节&quot;&gt;&lt;a href=&quot;#项目细节&quot; class=&quot;headerlink&quot; title=&quot;项目细节&quot;&gt;&lt;/a&gt;项目细节&lt;/h1&gt;&lt;p&gt;下面再介绍一下项目的细节。&lt;/p&gt;
+&lt;h2 id=&quot;设计模式&quot;&gt;&lt;a href=&quot;#设计模式&quot; class=&quot;headerlink&quot; title=&quot;设计模式&quot;&gt;&lt;/a&gt;设计模式&lt;/h2&gt;&lt;p&gt;项目大体上采用了MVC的思想，不过在具体的实现上并没有太过纠结于概念上的东西。所有的网页模板都在&lt;code&gt;templates&lt;/code&gt;文件夹下，静态资源都扔到了&lt;code&gt;static&lt;/code&gt;目录，使用一个&lt;code&gt;models.py&lt;/code&gt;模块来单独存放所有的数据库定义，然后所有的路由以及操作都在&lt;code&gt;views&lt;/code&gt;中实现。对于我来说，快速地实现需求才是头等大事，是不是符合正统的MVC理念并不是十分重要。实际上现在这样的结构开发起来感觉也蛮顺手的，需要调整前端的样式和表单就在&lt;code&gt;templates&lt;/code&gt;文件夹下操作，需要修改程序的逻辑就去&lt;code&gt;views&lt;/code&gt;，他们基本上是一一对应的关系。&lt;a href=&quot;https://spacewander.github.io/explore-flask-zh/4-organizing_your_project.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;这里&lt;/a&gt;有更加清晰的讲解，值得一看。&lt;/p&gt;
+&lt;h2 id=&quot;项目中的问题-amp-解决方案&quot;&gt;&lt;a href=&quot;#项目中的问题-amp-解决方案&quot; class=&quot;headerlink&quot; title=&quot;项目中的问题&amp;amp;解决方案&quot;&gt;&lt;/a&gt;项目中的问题&amp;amp;解决方案&lt;/h2&gt;&lt;h3 id=&quot;在Flask框架中同时使用蓝图与Flask-SQLAlchemy&quot;&gt;&lt;a href=&quot;#在Flask框架中同时使用蓝图与Flask-SQLAlchemy&quot; class=&quot;headerlink&quot; title=&quot;在Flask框架中同时使用蓝图与Flask_SQLAlchemy&quot;&gt;&lt;/a&gt;在Flask框架中同时使用蓝图与Flask_SQLAlchemy&lt;/h3&gt;&lt;p&gt;&lt;a href=&quot;https://segmentfault.com/q/1010000005640527&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://segmentfault.com/q/1010000005640527&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;感谢@Ethan和@，他们强有力地向我证明了有师傅带路的好处。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;这个问题纯粹是因为一直以来都是一个脚本Boy，没有系统性的学习过软件开发导致的。很显然，按照我原来的代码去产生实例，就会导致循环导入的错误。想要解决这样的问题，就需要使用工厂函数去生成实例，而不是自己去生成它。&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;__init__.py&lt;/code&gt;中添加一个&lt;code&gt;create_app()&lt;/code&gt;函数，在函数中进行参数配置，初始化和导入蓝图的操作：&lt;/p&gt;
+&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;bps = [&lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.dashboard:dashboard&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.install:install&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.login:login&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.sale:sale&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.customer:customer&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.purchase.inputbill:inputbill&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.purchase.supplier:supplier&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.stock.enterstockbill:enterstockbill&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.stock.leavestockbill:leavestockbill&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.stock.stock:stock&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       ]&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;create_app&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    app = Flask(__name__)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    app.config.from_object(&lt;span class=&quot;string&quot;&gt;&#39;config&#39;&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    app.config.from_pyfile(&lt;span class=&quot;string&quot;&gt;&#39;config.py&#39;&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    db.init_app(app)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;for&lt;/span&gt; path &lt;span class=&quot;keyword&quot;&gt;in&lt;/span&gt; bps:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        bp = import_string(path)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        app.register_blueprint(bp)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; app&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h3 id=&quot;Flask如何优雅地重定向所有未登录用户到登陆界面&quot;&gt;&lt;a href=&quot;#Flask如何优雅地重定向所有未登录用户到登陆界面&quot; class=&quot;headerlink&quot; title=&quot;Flask如何优雅地重定向所有未登录用户到登陆界面&quot;&gt;&lt;/a&gt;Flask如何优雅地重定向所有未登录用户到登陆界面&lt;/h3&gt;&lt;p&gt;&lt;a href=&quot;https://segmentfault.com/q/1010000005645821&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://segmentfault.com/q/1010000005645821&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;感谢@zwillon和@igaozp&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;有一个Feature是想要把所有未登录的用户都重定向到登录页面。当时手头上的技术方案主要有两种：第一种是自己包装一个装饰器，并添加在每一个视图函数中；第二种是使用第三方库&lt;code&gt;Flask-Login&lt;/code&gt;，在视图函数中添加&lt;code&gt;@login_required&lt;/code&gt;。但是感觉姿势都不怎么优雅，因为我需要不断地在视图函数中添加这个装饰器，不太符合DRY(Don’t Repeat Yourself)准则。&lt;br&gt;SF的老司机给了我一个相当优雅的方案——Hook到app的&lt;code&gt;before_request&lt;/code&gt;方法。也就是这样来实现：&lt;/p&gt;
+&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@app.before_request&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;check_need_login&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;# 检查登录的逻辑&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;pass&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;我第一次是这样实现的：&lt;/p&gt;
+&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@app.before_request&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;check_need_login&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&#39;logged_in&#39;&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;in&lt;/span&gt; session:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; redirect(url_for(&lt;span class=&quot;string&quot;&gt;&#39;login.user_login&#39;&lt;/span&gt;))&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;这样就带来了一个问题，对于未登录的用户来说，所有页面都会不断地重定向从而导致整个应用崩溃。因此还需要指定在某些情况下停止重定向，所以我们还需要修改一下&lt;code&gt;check_need_login&lt;/code&gt;的逻辑：&lt;/p&gt;
+&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@app.before_request&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;check_need_login&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&#39;logged_in&#39;&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;in&lt;/span&gt; session &lt;span class=&quot;keyword&quot;&gt;and&lt;/span&gt; request.endpoint &lt;span class=&quot;keyword&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;in&lt;/span&gt; (&lt;span class=&quot;string&quot;&gt;&#39;login.user_login&#39;&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&#39;static&#39;&lt;/span&gt;):&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; redirect(url_for(&lt;span class=&quot;string&quot;&gt;&#39;login.user_login&#39;&lt;/span&gt;))&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;当&lt;code&gt;session&lt;/code&gt;中没有&lt;code&gt;logged_in&lt;/code&gt;字段且&lt;code&gt;endpoint&lt;/code&gt;不是&lt;code&gt;user_login&lt;/code&gt;和&lt;code&gt;static&lt;/code&gt;的时候就重定向到登录页面，这样就比较优雅地解决了重定向未登录用户到登陆界面的需求。&lt;/p&gt;
+&lt;h3 id=&quot;flask-sqlalchemy-插入数据时发生错误后如何处理&quot;&gt;&lt;a href=&quot;#flask-sqlalchemy-插入数据时发生错误后如何处理&quot; class=&quot;headerlink&quot; title=&quot;flask_sqlalchemy 插入数据时发生错误后如何处理&quot;&gt;&lt;/a&gt;flask_sqlalchemy 插入数据时发生错误后如何处理&lt;/h3&gt;&lt;p&gt;&lt;a href=&quot;https://segmentfault.com/q/1010000005647431&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://segmentfault.com/q/1010000005647431&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;在实际开发的过程中发现，如果&lt;code&gt;db.session&lt;/code&gt;中添加的记录有问题，在commit的时候会出现一个报错。所以我们需要在出错的时候进行一些处理，以保证程序出错之后还能够正常地运行。网友 @学不会编程的永仲 给出的回答是我应该在form中验证数据的正确性。虽然我相信他的理解可能是正确的，但是不太符合我的哲学，我更加倾向于&lt;strong&gt;让它崩溃，然后处理异常&lt;/strong&gt;而不是&lt;strong&gt;事先处理好所有的错误&lt;/strong&gt;。&lt;br&gt;通过查阅文档，了解到&lt;code&gt;db.session.rollback()&lt;/code&gt;这一函数可以在出错是进行回滚，于是最后的实现变成了这样：&lt;/p&gt;
+&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@supplier.route(&#39;/purchase/supplier/add&#39;, methods=[&#39;POST&#39;])&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;add_supplier&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    form = request.form&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; request.method == &lt;span class=&quot;string&quot;&gt;&#39;POST&#39;&lt;/span&gt;:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        print(form)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        supplier = Supplier(form[&lt;span class=&quot;string&quot;&gt;&#39;supplier_name&#39;&lt;/span&gt;],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;                            form[&lt;span class=&quot;string&quot;&gt;&#39;supplier_constract&#39;&lt;/span&gt;],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;                            form[&lt;span class=&quot;string&quot;&gt;&#39;supplier_phone&#39;&lt;/span&gt;],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;                            form[&lt;span class=&quot;string&quot;&gt;&#39;supplier_address&#39;&lt;/span&gt;],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;                            form[&lt;span class=&quot;string&quot;&gt;&#39;supplier_remark&#39;&lt;/span&gt;])&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;try&lt;/span&gt;:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            db.session.add(supplier)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            db.session.commit()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            flash(&lt;span class=&quot;string&quot;&gt;&#39;供应商添加成功！&#39;&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&#39;success&#39;&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;except&lt;/span&gt;:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            db.session.rollback()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            flash(&lt;span class=&quot;string&quot;&gt;&#39;输入不合法，请重新输入！&#39;&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&#39;danger&#39;&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; redirect(url_for(&lt;span class=&quot;string&quot;&gt;&#39;supplier.list_supplier&#39;&lt;/span&gt;))&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h1 id=&quot;项目总结&quot;&gt;&lt;a href=&quot;#项目总结&quot; class=&quot;headerlink&quot; title=&quot;项目总结&quot;&gt;&lt;/a&gt;项目总结&lt;/h1&gt;&lt;p&gt;随着答辩的完成，这个项目进入了尾声。因为很多东西需要去学习，有新的东西需要去探索，所以这个项目也很有可能不会再继续维护了。那么这个项目开源出来的价值在哪里呢？我想，这个项目虽然简单，但它毕竟还算是一个完整的Flask项目，除了&lt;code&gt;flask_sqlalchemy&lt;/code&gt;之外没有多余的依赖，非常适合一个跟我一样的Python初学者进行入门学习。如果说有人能够因为这个项目少走一些弯路，少在一些死胡同浪费时间，我想这个项目的价值就已经实现了。如果再往大一点来说，开源的价值也就实现了。&lt;br&gt;如果要我自评的话，我觉得这样的项目应该有60分。之所以给一个及格分，是因为这个项目毕竟实现了需求的大多数功能，也有好好地跑在阿里云的服务器上。丢分的话，大体上是因为这个项目毫无注释，没有安装文档，也没有配置手册，很多东西都是硬编码到了代码中。不仅如此，编程的风格也是相当的不佳，在模板部分缺乏良好的顶层设计，出现了大量的重复代码。这些问题希望自己能在下一个项目中得到一些改善。&lt;br&gt;Anyway，随着这个项目的结束，我的大三生涯也要结束了。接下来是波澜壮阔的实习阶段，希望自己能够在实习的时候多踩一些坑，多走一些弯路，多&lt;br&gt;得到一些来自“长者”的指点。&lt;/p&gt;
+&lt;h1 id=&quot;参考资源&quot;&gt;&lt;a href=&quot;#参考资源&quot; class=&quot;headerlink&quot; title=&quot;参考资源&quot;&gt;&lt;/a&gt;参考资源&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://docs.jinkan.org/docs/flask/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Flask 中文文档 &lt;em&gt;文档略有过时，代码以Github上为准&lt;/em&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://spacewander.github.io/explore-flask-zh/index.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Flask 之旅&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://docs.jinkan.org/docs/flask-sqlalchemy/index.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Flask-SQLALchemy 中文文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&quot;更新日志&quot;&gt;&lt;a href=&quot;#更新日志&quot; class=&quot;headerlink&quot; title=&quot;更新日志&quot;&gt;&lt;/a&gt;更新日志&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;2016年06月17日 首次发布&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;img src=&quot;/imgs/develop/jade-ims-index.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;p&gt;这个项目从我们这个学期
+    
+    </summary>
+    
+      <category term="Develop" scheme="https://xuanwo.org/categories/Develop/"/>
+    
+    
+      <category term="Information" scheme="https://xuanwo.org/tags/Information/"/>
+    
+      <category term="项目" scheme="https://xuanwo.org/tags/%E9%A1%B9%E7%9B%AE/"/>
+    
+      <category term="Python" scheme="https://xuanwo.org/tags/Python/"/>
+    
+      <category term="Flask" scheme="https://xuanwo.org/tags/Flask/"/>
+    
+      <category term="HTML" scheme="https://xuanwo.org/tags/HTML/"/>
+    
+      <category term="JavaScript" scheme="https://xuanwo.org/tags/JavaScript/"/>
+    
+  </entry>
+  
+  <entry>
     <title>在QingCloud上部署弹性扩容的OwnCloud</title>
     <link href="https://xuanwo.org/2016/06/03/owncloud-on-qingcloud/"/>
     <id>https://xuanwo.org/2016/06/03/owncloud-on-qingcloud/</id>
     <published>2016-06-03T08:00:00.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.664Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;因为实在不满意百度云的一些缺陷，我们最终决定部署一套团队内部使用的云存储平台，用于团队协作及资料长期存储。希望能够达到如下目标：&lt;/p&gt;
 &lt;ul&gt;
@@ -175,7 +244,7 @@
     <link href="https://xuanwo.org/2016/05/29/learn-from-qingchat/"/>
     <id>https://xuanwo.org/2016/05/29/learn-from-qingchat/</id>
     <published>2016-05-29T20:57:00.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.660Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;之前的一段时间一直在从事&lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Qingchat&lt;/a&gt;的相关开发工作，这个项目是一个基于Mojo-Weixin提供的Rest API开发的一个微信机器人，承担了十余个群，上千人的微信直播活动。秉承着ACM训练出来的“暴力加乱搞”风格，我花了大概一个星期的课余时间，搞出了一个可用的版本。期间也迭代了很多次，既欣慰于Coding的力量，也苦恼于当初设计的不完善带来的种种问题。在这个项目即将大规模重构的前夕，我总结一下开发Qingchat的过程中的经验教训，希望自己能成为一个更好更聪明的Coder。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -212,7 +281,7 @@
     <link href="https://xuanwo.org/2016/05/09/msp430g2553-bellring/"/>
     <id>https://xuanwo.org/2016/05/09/msp430g2553-bellring/</id>
     <published>2016-05-09T08:42:00.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.664Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;我萌萌哒的妹纸是一个代码苦手，完全无法理解 C 语言，所以每一次到单片机上机需要交作业的时候都是愁眉苦脸的样子。而我又总是因为自己确实不懂单片机里面的种种奇怪定义（中断，串口，P1.x 之类），所以也一直没有什么好办法去帮她。这一次的作业对编码能力要求较高，但是涉及到的硬件比较少，于是决定以此为契机，开始我的嵌入式开发之旅。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -289,7 +358,7 @@
     <link href="https://xuanwo.org/2016/04/13/gitlab-install-intro/"/>
     <id>https://xuanwo.org/2016/04/13/gitlab-install-intro/</id>
     <published>2016-04-13T23:20:00.000Z</published>
-    <updated>2016-06-16T09:15:15.843Z</updated>
+    <updated>2016-06-17T09:25:12.660Z</updated>
     
     <content type="html">&lt;h1 id=&quot;起因&quot;&gt;&lt;a href=&quot;#起因&quot; class=&quot;headerlink&quot; title=&quot;起因&quot;&gt;&lt;/a&gt;起因&lt;/h1&gt;&lt;p&gt;在跟网络中心的老师沟通成立镜像站的相关事宜的时候，意外地接下来搭建一套校内的 Git 服务的任务。&lt;br&gt;&lt;a href=&quot;https://imnerd.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;@怡红公子&lt;/a&gt; 曾经搭建过一套类似的服务，但由于服务器端没有开启 VT 虚拟化导致不能安装 64 位的操作系统，再加上 Gitlab 不提供 32 位的安装包，所以长期以来怡红公子一直都是自行编译并配置 Gitlab 。考虑到后续维护的方便，我们决定趁着这个机会使用另一台支持安装 64 位操作系统的服务器，一劳永逸地解决这个问题。&lt;br&gt;我们的服务器环境是 &lt;strong&gt;CentOS 7.2 64bit&lt;/strong&gt; ，以下所有操作均以此为基准。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -397,7 +466,7 @@
     <link href="https://xuanwo.org/2016/04/04/docopt-intro/"/>
     <id>https://xuanwo.org/2016/04/04/docopt-intro/</id>
     <published>2016-04-04T21:39:00.000Z</published>
-    <updated>2016-06-16T09:15:15.843Z</updated>
+    <updated>2016-06-17T09:25:12.660Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;code&gt;Qingchat&lt;/code&gt;&lt;/a&gt; 使用的命令行参数解释器是 &lt;a href=&quot;http://docopt.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;code&gt;docopt&lt;/code&gt;&lt;/a&gt;，用下来感觉非常棒，所以决定介绍一下这个库。（&lt;em&gt;奉劝各位看官，珍爱生命，远离argparse。&lt;/em&gt;）&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -467,7 +536,7 @@
     <link href="https://xuanwo.org/2016/04/01/qingchat-intro/"/>
     <id>https://xuanwo.org/2016/04/01/qingchat-intro/</id>
     <published>2016-04-01T22:03:00.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.664Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;在我之前写过的一篇文章中，我曾经探索过类似的问题：&lt;a href=&quot;https://xuanwo.org/2016/02/28/wechat-remove/&quot;&gt;微信群重复人员识别&lt;/a&gt;。当初我就提出过能否自动获取相关数据，但因为种种原因的限制不了了之了。后来发现了&lt;a href=&quot;https://github.com/sjdy521/Mojo-Weixin&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Mojo-Weixin&lt;/a&gt;这个库之后，我决定在这个的基础上实现一个微信多群直播的工具——Qingchat。（&lt;em&gt;尽管在刚刚实现完不久，微信就更新了转发到多个群的功能，Sad。&lt;/em&gt;）探索的成果如下： &lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Qingchat&lt;/a&gt;，目前仅支持 python3 ，欢迎各位看官提 issues ，交 code ，或者拍砖。&lt;br&gt;接下来我会先介绍一下 Qingchat 的原理，然后介绍 Qingchat 的使用，最后展望一下 Qingchat 未来的发展方向。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -570,7 +639,7 @@
     <link href="https://xuanwo.org/2016/03/13/gout/"/>
     <id>https://xuanwo.org/2016/03/13/gout/</id>
     <published>2016-03-13T13:44:00.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.660Z</updated>
     
     <content type="html">&lt;p&gt;其实我很想写出获奖感言的感觉，但是痛风发作的时候真的好疼啊。。。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -607,7 +676,7 @@
     <link href="https://xuanwo.org/2016/03/12/neovim-slow-upgrade/"/>
     <id>https://xuanwo.org/2016/03/12/neovim-slow-upgrade/</id>
     <published>2016-03-12T11:00:00.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.664Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;一直都非常羡慕那些能把vim用得非常溜的人，但是自己总是不情愿去学，总是觉得vim的操作方式非常反人类，难度曲线太陡，不适合我。真正让我下定决心去学的，是因为系统切换到Ubuntu Gnome之后发现，Sublime Text 3 不能原生支持中文输入。同时我也发现，如果我不上来就折腾spf13这样的东西的话，其实vim非常好懂。于是，Neovim的慢速升级攻略就这样诞生了。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -671,7 +740,7 @@
     <link href="https://xuanwo.org/2016/02/28/wechat-remove/"/>
     <id>https://xuanwo.org/2016/02/28/wechat-remove/</id>
     <published>2016-02-28T10:05:00.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.664Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;由于微信的限制，人数超过一百以后，只有邀请才能加入。所以，如果想要组织大型的在线活动，就只有建立很多个分群。然而分群的问题在于，会有很多人重复加群，挤占了本来就缺乏的空间。所以需要找到一个可行的办法，清除两个群中的重复人员。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -715,7 +784,7 @@
     <link href="https://xuanwo.org/2016/02/26/debug-for-hexo-1775/"/>
     <id>https://xuanwo.org/2016/02/26/debug-for-hexo-1775/</id>
     <published>2016-02-26T12:54:00.000Z</published>
-    <updated>2016-06-16T09:15:15.843Z</updated>
+    <updated>2016-06-17T09:25:12.660Z</updated>
     
     <content type="html">&lt;h2 id=&quot;起因&quot;&gt;&lt;a href=&quot;#起因&quot; class=&quot;headerlink&quot; title=&quot;起因&quot;&gt;&lt;/a&gt;起因&lt;/h2&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/hexojs/hexo/issues/1775&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;hexojs/hexo #1775&lt;/a&gt;&lt;br&gt;BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -756,7 +825,7 @@
     <link href="https://xuanwo.org/2016/02/17/ipv6-in-cugb/"/>
     <id>https://xuanwo.org/2016/02/17/ipv6-in-cugb/</id>
     <published>2016-02-17T18:59:02.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.660Z</updated>
     
     <content type="html">&lt;p&gt;主旨只有两条：开源，节流&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -843,7 +912,7 @@
     <link href="https://xuanwo.org/2016/02/15/chocolatey-intro/"/>
     <id>https://xuanwo.org/2016/02/15/chocolatey-intro/</id>
     <published>2016-02-15T20:15:46.000Z</published>
-    <updated>2016-06-16T09:15:15.843Z</updated>
+    <updated>2016-06-17T09:25:12.660Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://chocolatey.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Chocolatey&lt;/a&gt;是一个基于Nuget的Windows包管理工具，截止到我更新此文章的时候，一共有3.7k多个独立包。本文旨在介绍Chocolatey这一工具的安装和用法，希望能有更多人享受到该工具的便利之处。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -908,7 +977,7 @@
     <link href="https://xuanwo.org/2016/02/04/unlock-your-smart-tv/"/>
     <id>https://xuanwo.org/2016/02/04/unlock-your-smart-tv/</id>
     <published>2016-02-04T23:12:52.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.664Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;现在很多人都买了智能电视，但是出于种种你懂得原因，厂商通常都不允许用户自行安装自己想要的APP，比如腾讯视频，优酷视频之类的。本教程旨在突破这些限制，彻底解放智能电视的全部潜力。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -997,7 +1066,7 @@
     <link href="https://xuanwo.org/2016/01/13/how-to-differ-invalid-link/"/>
     <id>https://xuanwo.org/2016/01/13/how-to-differ-invalid-link/</id>
     <published>2016-01-13T01:18:51.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.660Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;前两天我的朋友圈被微信公开课活动的链接+截图刷屏，随后一大帮“业内人士”站出来说这个是盗号连接，只要点开，微信钱包和支付宝就会被盗。作为半个业内人士，我不能忍了，决定跟大家谈一谈如何识别真假链接。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1071,7 +1140,7 @@
     <link href="https://xuanwo.org/2016/01/03/vs-oracle-11g/"/>
     <id>https://xuanwo.org/2016/01/03/vs-oracle-11g/</id>
     <published>2016-01-03T15:31:32.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.664Z</updated>
     
     <content type="html">&lt;h1 id=&quot;开发环境&quot;&gt;&lt;a href=&quot;#开发环境&quot; class=&quot;headerlink&quot; title=&quot;开发环境&quot;&gt;&lt;/a&gt;开发环境&lt;/h1&gt;&lt;p&gt;宿主机：Win10 + VS2015 + ODP.Net for VS2015&lt;br&gt;虚拟机：Win7 + Oracle 11g + 桥接&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1136,7 +1205,7 @@
     <link href="https://xuanwo.org/2015/12/23/best-pdf-read-solution/"/>
     <id>https://xuanwo.org/2015/12/23/best-pdf-read-solution/</id>
     <published>2015-12-23T16:15:20.000Z</published>
-    <updated>2016-06-16T09:15:15.843Z</updated>
+    <updated>2016-06-17T09:25:12.660Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;最近因为学习需要，要大量阅读纯文字的PDF文档。然后我惊讶地发现市场上居然没有哪家提供一套完整可用的跨平台PDF阅读解决方案，于是我在尝试了市面几乎所有叫得上名字的各类阅读器之后，形成了一套自己的跨平台PDF阅读解决方案。本文记录了这套方案的详细内容，希望会有所益处。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1193,7 +1262,7 @@
     <link href="https://xuanwo.org/2015/12/18/online-video-download-solution/"/>
     <id>https://xuanwo.org/2015/12/18/online-video-download-solution/</id>
     <published>2015-12-18T12:49:49.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.664Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;因为学习需要，产生了一个这样的需求：要从Youtube上批量下载视频。自然，出于方便使用的角度来看，音画不能分离，最好带有对应的字幕。一番搜罗之后，我找到了基于Python的开源产品： &lt;a href=&quot;https://rg3.github.io/youtube-dl/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;youtube-dl&lt;/a&gt;&lt;/p&gt;
 &lt;blockquote&gt;
@@ -1249,7 +1318,7 @@
     <link href="https://xuanwo.org/2015/11/27/surf-with-poweroff/"/>
     <id>https://xuanwo.org/2015/11/27/surf-with-poweroff/</id>
     <published>2015-11-27T01:34:33.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.664Z</updated>
     
     <content type="html">&lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;前两天我对我们宿舍的路由器进行了小小的改造，使得我们在断电之后也能照常上网。原理非常简单：就是使用充电宝来给路由器供电——因为我们墙上的网口是不会断电的，所以只要解决了路由器没有电的问题，就可以解决断网问题。路由器要求的输入电压为5V，电流为0.3A，恰好跟我们常用的充电宝是一致的，淘宝买一根USB转DV线成功解决问题。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1290,7 +1359,7 @@
     <link href="https://xuanwo.org/2015/11/14/pandoc/"/>
     <id>https://xuanwo.org/2015/11/14/pandoc/</id>
     <published>2015-11-14T14:29:18.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
+    <updated>2016-06-17T09:25:12.664Z</updated>
     
     <content type="html">&lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;Pandoc是一个用haskell编写的文本转换工具，小巧迅速且支持格式广泛，堪称文本转换应用的瑞士军刀。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1362,201 +1431,6 @@
     
     
       <category term="Software" scheme="https://xuanwo.org/tags/Software/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Python包分发详解</title>
-    <link href="https://xuanwo.org/2015/11/03/python-packages/"/>
-    <id>https://xuanwo.org/2015/11/03/python-packages/</id>
-    <published>2015-11-03T15:24:06.000Z</published>
-    <updated>2016-06-16T09:15:15.847Z</updated>
-    
-    <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;用Python写过不少的脚本，现在要把脚本打包成模块并进行发布，然后才明白脚本Boy到正规的码农差距有多大= =。&lt;br&gt;踩了很多天的坑之后，自己学习到了Python的包分发机制，以及如何利用Pypi向全世界分发自己的模块。现在简单地做一些整理。&lt;/p&gt;
-&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
-&lt;h1 id=&quot;Python包机制&quot;&gt;&lt;a href=&quot;#Python包机制&quot; class=&quot;headerlink&quot; title=&quot;Python包机制&quot;&gt;&lt;/a&gt;Python包机制&lt;/h1&gt;&lt;blockquote&gt;
-&lt;p&gt;包是一个模块或模块/子模块的集合，一般情况下被压缩到一个压缩包中。&lt;br&gt;其中包含&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;依赖信息&lt;/li&gt;
-&lt;li&gt;将文件拷贝到标准的包搜索路径的指令。&lt;/li&gt;
-&lt;li&gt;编译指令(如果在安装前代码必须被编译的话)。&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;也就是说，为了分发模块，我们需要把模块的依赖信息和模块一起打包。在Python中，这个打包好的可分发的文件一般以&lt;code&gt;.egg&lt;/code&gt;结尾，其作用可以理解为java中的jar。Python的包管理以及分发曾经经历过非常混乱的一段时期，但是如今已经基本稳定（或者说，流行？）为两个套件：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;打包&amp;amp;分发：&lt;a href=&quot;https://pythonhosted.org/setuptools/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Setuptools&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;安装&amp;amp;管理：&lt;a href=&quot;https://pip.readthedocs.org/en/stable/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;pip&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&quot;准备工作&quot;&gt;&lt;a href=&quot;#准备工作&quot; class=&quot;headerlink&quot; title=&quot;准备工作&quot;&gt;&lt;/a&gt;准备工作&lt;/h1&gt;&lt;h2 id=&quot;注册Pypi&quot;&gt;&lt;a href=&quot;#注册Pypi&quot; class=&quot;headerlink&quot; title=&quot;注册Pypi&quot;&gt;&lt;/a&gt;注册Pypi&lt;/h2&gt;&lt;blockquote&gt;
-&lt;p&gt;Pypi - the Python Package Index&lt;br&gt;Pypi是Python语言包的仓库，全世界所有开源Python开发者都会在Pypi上提交&amp;amp;下载软件包&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;为了我们后续的提交操作，我们需要首先&lt;a href=&quot;https://pypi.python.org/pypi?%3Aaction=register_form&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;注册&lt;/a&gt;一个Pypi的账号，注册非常简单，提供用户名，密码以及邮箱，经过验证之后就注册完成了。&lt;/p&gt;
-&lt;h2 id=&quot;目录结构&quot;&gt;&lt;a href=&quot;#目录结构&quot; class=&quot;headerlink&quot; title=&quot;目录结构&quot;&gt;&lt;/a&gt;目录结构&lt;/h2&gt;&lt;p&gt;Python没有严格的工程目录要求，只要有&lt;code&gt;__init__.py&lt;/code&gt;在的地方，就会被认为是一个Python的包。但是出于方便协作考虑，可以把自己的源代码与各种脚本分开存放。具体的结构可以学习Github上比较流行的Python项目，选择自己喜欢的即可。&lt;/p&gt;
-&lt;h2 id=&quot;环境配置&quot;&gt;&lt;a href=&quot;#环境配置&quot; class=&quot;headerlink&quot; title=&quot;环境配置&quot;&gt;&lt;/a&gt;环境配置&lt;/h2&gt;&lt;p&gt;首先你需要有pip，pip自从&lt;code&gt;3.4&lt;/code&gt;版本开始已经随python内置发布，如果使用的版本比较低，可以自己手动进行安装：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo apt-get install python-pip&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;然后我们需要安装&lt;code&gt;setuptools&lt;/code&gt;：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;pip install setuptools&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h1 id=&quot;编写安装脚本&quot;&gt;&lt;a href=&quot;#编写安装脚本&quot; class=&quot;headerlink&quot; title=&quot;编写安装脚本&quot;&gt;&lt;/a&gt;编写安装脚本&lt;/h1&gt;&lt;p&gt;准备工作就绪之后，我们就可以开始编写安装脚本了。&lt;/p&gt;
-&lt;h2 id=&quot;填写配置信息&quot;&gt;&lt;a href=&quot;#填写配置信息&quot; class=&quot;headerlink&quot; title=&quot;填写配置信息&quot;&gt;&lt;/a&gt;填写配置信息&lt;/h2&gt;&lt;h3 id=&quot;基本框架&quot;&gt;&lt;a href=&quot;#基本框架&quot; class=&quot;headerlink&quot; title=&quot;基本框架&quot;&gt;&lt;/a&gt;基本框架&lt;/h3&gt;&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;from&lt;/span&gt; setuptools &lt;span class=&quot;keyword&quot;&gt;import&lt;/span&gt; setup, find_packages &lt;span class=&quot;comment&quot;&gt;# 引入setuptools包&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;setup(&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    option = values, &lt;span class=&quot;comment&quot;&gt;# 本质上是一个函数的参数，分行写便于维护&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h3 id=&quot;参数介绍&quot;&gt;&lt;a href=&quot;#参数介绍&quot; class=&quot;headerlink&quot; title=&quot;参数介绍&quot;&gt;&lt;/a&gt;参数介绍&lt;/h3&gt;&lt;h4 id=&quot;指定整个包&quot;&gt;&lt;a href=&quot;#指定整个包&quot; class=&quot;headerlink&quot; title=&quot;指定整个包&quot;&gt;&lt;/a&gt;指定整个包&lt;/h4&gt;&lt;h4 id=&quot;指定单独模块&quot;&gt;&lt;a href=&quot;#指定单独模块&quot; class=&quot;headerlink&quot; title=&quot;指定单独模块&quot;&gt;&lt;/a&gt;指定单独模块&lt;/h4&gt;&lt;h4 id=&quot;依赖关系&quot;&gt;&lt;a href=&quot;#依赖关系&quot; class=&quot;headerlink&quot; title=&quot;依赖关系&quot;&gt;&lt;/a&gt;依赖关系&lt;/h4&gt;&lt;h4 id=&quot;包内数据&quot;&gt;&lt;a href=&quot;#包内数据&quot; class=&quot;headerlink&quot; title=&quot;包内数据&quot;&gt;&lt;/a&gt;包内数据&lt;/h4&gt;&lt;h4 id=&quot;其他数据&quot;&gt;&lt;a href=&quot;#其他数据&quot; class=&quot;headerlink&quot; title=&quot;其他数据&quot;&gt;&lt;/a&gt;其他数据&lt;/h4&gt;&lt;h4 id=&quot;Meta-Data&quot;&gt;&lt;a href=&quot;#Meta-Data&quot; class=&quot;headerlink&quot; title=&quot;Meta-Data&quot;&gt;&lt;/a&gt;Meta-Data&lt;/h4&gt;&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;Meta-Data&lt;/th&gt;
-&lt;th&gt;描述值&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;name&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;包名&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;version&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;此次发布版本&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;author&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;作者名&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;author_email&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;作者邮箱&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;maintainer&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;维护者名&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;maintainer_email&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;维护者邮箱&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;url&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;主页&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;description&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;简要描述&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;long_description&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;详细描述&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;download_url&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;下载地址&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;classifiers&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;分类，参见&lt;a href=&quot;https://pypi.python.org/pypi?%3Aaction=list_classifiers&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;此处&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;platforms&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;平台列表&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;license&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;授权协议&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h3 id=&quot;典型配置&quot;&gt;&lt;a href=&quot;#典型配置&quot; class=&quot;headerlink&quot; title=&quot;典型配置&quot;&gt;&lt;/a&gt;典型配置&lt;/h3&gt;&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;28&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;from&lt;/span&gt; setuptools &lt;span class=&quot;keyword&quot;&gt;import&lt;/span&gt; setup, find_packages&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;setup(&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    name = &lt;span class=&quot;string&quot;&gt;&quot;HelloWorld&quot;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    version = &lt;span class=&quot;string&quot;&gt;&quot;0.1&quot;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    packages = find_packages(),&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    scripts = [&lt;span class=&quot;string&quot;&gt;&#39;say_hello.py&#39;&lt;/span&gt;],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;# Project uses reStructuredText, so ensure that the docutils get&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;# installed or upgraded on the target machine&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    install_requires = [&lt;span class=&quot;string&quot;&gt;&#39;docutils&amp;gt;=0.3&#39;&lt;/span&gt;],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    package_data = &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;comment&quot;&gt;# If any package contains *.txt or *.rst files, include them:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;string&quot;&gt;&#39;&#39;&lt;/span&gt;: [&lt;span class=&quot;string&quot;&gt;&#39;*.txt&#39;&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&#39;*.rst&#39;&lt;/span&gt;],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;comment&quot;&gt;# And include any *.msg files found in the &#39;hello&#39; package, too:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;string&quot;&gt;&#39;hello&#39;&lt;/span&gt;: [&lt;span class=&quot;string&quot;&gt;&#39;*.msg&#39;&lt;/span&gt;],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;# metadata for upload to PyPI&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    author = &lt;span class=&quot;string&quot;&gt;&quot;Me&quot;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    author_email = &lt;span class=&quot;string&quot;&gt;&quot;me@example.com&quot;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    description = &lt;span class=&quot;string&quot;&gt;&quot;This is an Example Package&quot;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    license = &lt;span class=&quot;string&quot;&gt;&quot;PSF&quot;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    keywords = &lt;span class=&quot;string&quot;&gt;&quot;hello world example examples&quot;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    url = &lt;span class=&quot;string&quot;&gt;&quot;http://example.com/HelloWorld/&quot;&lt;/span&gt;,   &lt;span class=&quot;comment&quot;&gt;# project home page, if any&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;# could also include long_description, download_url, classifiers, etc.&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h2 id=&quot;打包&quot;&gt;&lt;a href=&quot;#打包&quot; class=&quot;headerlink&quot; title=&quot;打包&quot;&gt;&lt;/a&gt;打包&lt;/h2&gt;&lt;blockquote&gt;
-&lt;p&gt;这个坑踩了很久- -，没有老司机的带的痛苦&lt;br&gt;与开发环境不同的时候，当用户运行你的包时，使用open等命令是以当前目录为根运行的，所以你必须指定数据所在位置，否则会出现IOError甚至更糟糕的情况&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h3 id=&quot;指定需要分发的文件&quot;&gt;&lt;a href=&quot;#指定需要分发的文件&quot; class=&quot;headerlink&quot; title=&quot;指定需要分发的文件&quot;&gt;&lt;/a&gt;指定需要分发的文件&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;自动处理&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;当没有&lt;code&gt;MANIFEST.in&lt;/code&gt;文件时，Setuptools将会按照下面的原则处理文件：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;所有&lt;code&gt;py_modules&lt;/code&gt;和&lt;code&gt;packages&lt;/code&gt;选项包含的Python源文件&lt;/li&gt;
-&lt;li&gt;所有&lt;code&gt;ext_modules&lt;/code&gt;或&lt;code&gt;libraries&lt;/code&gt;选项指定的C源文件&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;scripts&lt;/code&gt;指定的脚本（&lt;em&gt;参见&lt;a href=&quot;https://docs.python.org/3.5/distutils/setupscript.html#distutils-installing-scripts&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Installing Scripts&lt;/a&gt;&lt;/em&gt;）&lt;/li&gt;
-&lt;li&gt;形如&lt;code&gt;test/test*.py&lt;/code&gt;的文件&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;README.txt&lt;/code&gt;（或&lt;code&gt;README&lt;/code&gt;），&lt;code&gt;setup.py&lt;/code&gt;和&lt;code&gt;setup.cfg&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;符合&lt;code&gt;package_data&lt;/code&gt;选项的所有文件（&lt;em&gt;参见&lt;a href=&quot;https://docs.python.org/3.5/distutils/setupscript.html#distutils-installing-package-data&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Installing Package Data&lt;/a&gt;&lt;/em&gt;）&lt;/li&gt;
-&lt;li&gt;符合&lt;code&gt;data_files&lt;/code&gt;选项的所有文件（&lt;em&gt;参见&lt;a href=&quot;https://docs.python.org/3.5/distutils/setupscript.html#distutils-additional-files&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Installing Additional Files&lt;/a&gt;&lt;/em&gt;）&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;em&gt;翻译自&lt;a href=&quot;https://docs.python.org/3.5/distutils/sourcedist.html#specifying-the-files-to-distribute&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Python官方文档 Specifying the files to distribute&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;手动处理&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;一般而言，自动处理已经足够，但是如果想要自己指定的话，则需要编辑&lt;code&gt;MANIFEST.in&lt;/code&gt;模板文件。&lt;br&gt;&lt;code&gt;MANIFEST.in&lt;/code&gt;模板文件很简单，每一行都导入或者导出表示符合正则的一类文件。比如说：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;# 导入根目录下满足*.txt的文件&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;include *.txt&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;# 递归导入examples目录下满足*.txt和*.py的文件&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;recursive-include examples *.txt *.py&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;# 导入满足examples/sample?/build的文件夹下所有文件&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;prune examples/sample?/build&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;&lt;em&gt;详细语法参见&lt;a href=&quot;https://docs.python.org/3.5/distutils/commandref.html#sdist-cmd&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;此处&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;注意：&lt;br&gt;当根目录下存在&lt;code&gt;MANIFEST.in&lt;/code&gt;文件时，Setuptools将不会再采用自动处理的设定，因此需要在&lt;code&gt;MANIFEST.in&lt;/code&gt;文件中指明所有需要导入的文件。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h3 id=&quot;调用数据&quot;&gt;&lt;a href=&quot;#调用数据&quot; class=&quot;headerlink&quot; title=&quot;调用数据&quot;&gt;&lt;/a&gt;调用数据&lt;/h3&gt;&lt;p&gt;当你需要调用Python包中的文件时，你可以使用下面的方法：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;from&lt;/span&gt; pkg_resources &lt;span class=&quot;keyword&quot;&gt;import&lt;/span&gt; resource_string&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;data = resource_string(__name__, &lt;span class=&quot;string&quot;&gt;&#39;data.dat&#39;&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;此时，指定的&lt;code&gt;data.dat&lt;/code&gt;文件将会以二进制文件流的形式赋值到data变量中，你可以按照自己的需要进行进一步处理。比如说：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;from pkg_resources import resource_string&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    data = resource_string(__name__, &amp;apos;example.yml&amp;apos;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    with open(&amp;apos;config.yml&amp;apos;, &amp;apos;w&amp;apos;) as f:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        f.write(str(data, encoding=&amp;apos;utf-8&amp;apos;))&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        f.close()&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;上述代码实现了从&lt;code&gt;example.yml&lt;/code&gt;中读取数据并保存到&lt;code&gt;config.yml&lt;/code&gt;文件中。&lt;/p&gt;
-&lt;h3 id=&quot;创建源码分发包&quot;&gt;&lt;a href=&quot;#创建源码分发包&quot; class=&quot;headerlink&quot; title=&quot;创建源码分发包&quot;&gt;&lt;/a&gt;创建源码分发包&lt;/h3&gt;&lt;p&gt;在包的根目录下执行：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;python setup.py sdist&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;默认情况下，&lt;code&gt;sdist&lt;/code&gt;命令将会为Unix创建&lt;code&gt;gzip&lt;/code&gt;压缩文件，为Windows创建&lt;code&gt;zip&lt;/code&gt;压缩文件&lt;br&gt;你也可以添加参数&lt;code&gt;--formats=zip&lt;/code&gt;指定生成的文件类型，所有支持的参数见&lt;a href=&quot;https://docs.python.org/3.5/distutils/sourcedist.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;此处&lt;/a&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;源码分发似乎不会导入&lt;code&gt;package_data&lt;/code&gt;中指定的数据，如果上传本分发包可能导致用户通过&lt;code&gt;pip&lt;/code&gt;安装的包中没有需要的数据。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h3 id=&quot;创建二进制分发包&quot;&gt;&lt;a href=&quot;#创建二进制分发包&quot; class=&quot;headerlink&quot; title=&quot;创建二进制分发包&quot;&gt;&lt;/a&gt;创建二进制分发包&lt;/h3&gt;&lt;p&gt;除了创建源码分发之外，我们还可以创建基于平台的二进制分发包。&lt;br&gt;在包的根目录下执行：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;python setup.py bdist&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;默认情况下，这个命令将会创建基于自身平台的分发包。&lt;br&gt;同样的，你也可以添加&lt;code&gt;--format=zip&lt;/code&gt;参数来指定生成的文件，支持的参数见&lt;a href=&quot;https://docs.python.org/3.5/distutils/builtdist.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;此处&lt;/a&gt;&lt;br&gt;除此之外，也可以使用以下的命令直接生成对应格式的分发包：&lt;/p&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;命令&lt;/th&gt;
-&lt;th&gt;格式&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;bdist_dumb&lt;/td&gt;
-&lt;td&gt;tar, gztar, bztar, xztar, ztar, zip&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bdist_rpm&lt;/td&gt;
-&lt;td&gt;rpm, srpm&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bdist_wininst&lt;/td&gt;
-&lt;td&gt;wininst&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bdist_msi&lt;/td&gt;
-&lt;td&gt;msi&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;blockquote&gt;
-&lt;p&gt;这一命令无法跨平台， 在Linux上选择制作&lt;code&gt;wininst&lt;/code&gt;分发包时会提示缺乏相应的支持。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h3 id=&quot;创建wheel分发包&quot;&gt;&lt;a href=&quot;#创建wheel分发包&quot; class=&quot;headerlink&quot; title=&quot;创建wheel分发包&quot;&gt;&lt;/a&gt;创建wheel分发包&lt;/h3&gt;&lt;p&gt;wheel是新出的分发格式，旨在取代egg，你可以通过下列命令进行安装：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;pip install wheel&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;然后在包的根目录下执行：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;python setup.ppy bdist_wheel&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h1 id=&quot;上传到Pypi&quot;&gt;&lt;a href=&quot;#上传到Pypi&quot; class=&quot;headerlink&quot; title=&quot;上传到Pypi&quot;&gt;&lt;/a&gt;上传到Pypi&lt;/h1&gt;&lt;h2 id=&quot;注册包&quot;&gt;&lt;a href=&quot;#注册包&quot; class=&quot;headerlink&quot; title=&quot;注册包&quot;&gt;&lt;/a&gt;注册包&lt;/h2&gt;&lt;p&gt;在上传我们的包之前，我们需要首先向Pypi提交包的相关信息。&lt;br&gt;在包的根目录下执行:&lt;br&gt;&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;python setup.py register&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
-&lt;p&gt;没有登陆的话，需要进行登陆；如果已经登陆，直接回车使用默认设置即可。&lt;/p&gt;
-&lt;h2 id=&quot;上传包&quot;&gt;&lt;a href=&quot;#上传包&quot; class=&quot;headerlink&quot; title=&quot;上传包&quot;&gt;&lt;/a&gt;上传包&lt;/h2&gt;&lt;p&gt;注册完毕后，我们可以提交我们的包了。&lt;br&gt;在包的根目录下执行：&lt;br&gt;&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;python setup.py sdist bdist_wininst upload&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
-&lt;p&gt;这条命令将会向Pypi提交源码和Win下的安装包，如果需要上传别的包，只要直接写出即可。&lt;/p&gt;
-&lt;h1 id=&quot;参考资料&quot;&gt;&lt;a href=&quot;#参考资料&quot; class=&quot;headerlink&quot; title=&quot;参考资料&quot;&gt;&lt;/a&gt;参考资料&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https://github.com/dccrazyboy/pyeco/blob/master/pyeco.rst&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Python开发生态环境简介&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://timd.cn/2015/10/20/setuptools/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;使用Setuptools构建和分发python包&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://python3-cookbook.readthedocs.org/zh_CN/latest/c10/p08_read_datafile_within_package.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;10.8 读取位于包中的数据文件&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://docs.python.org/3.5/distutils/sourcedist.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Creating a Source Distribution&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://docs.python.org/3.5/distutils/examples.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Examples&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&quot;更新日志&quot;&gt;&lt;a href=&quot;#更新日志&quot; class=&quot;headerlink&quot; title=&quot;更新日志&quot;&gt;&lt;/a&gt;更新日志&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;2015年11月03日 初步完成&lt;/li&gt;
-&lt;li&gt;2016年03月30日 修复了部分笔误，添加了一些注释，增加了wheel相关的内容&lt;/li&gt;
-&lt;/ul&gt;
-</content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;用Python写过不少的脚本，现在要把脚本打包成模块并进行发布，然后才明白脚本Boy到正规的码农差距有多大= =。&lt;br&gt;踩了很多天的坑之后，自己学习到了Python的包分发机制，以及如何利用Pypi向全世界分发自己的模块。现在简单地做一些整理。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="Develop" scheme="https://xuanwo.org/categories/Develop/"/>
-    
-    
-      <category term="Python" scheme="https://xuanwo.org/tags/Python/"/>
     
   </entry>
   
