@@ -1,0 +1,420 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+<meta name="description" content="Long way to go">
+<meta name="author" content="Xuanwo">
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="stylesheet" href="/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="/dist/css/animate.min.css">
+<link rel="stylesheet" href="/dist/css/style.css">
+<link rel="stylesheet" href="/dist/css/font-awesome.min.css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+    <title>  阅读 | Xuanwo's Blog </title>
+</head>
+<body id="home">
+<div id="menu" class="menu-right">
+    <ul>
+        <li>
+            <form class="menu-search">
+                <div class="form-group header">
+                    <span>
+                    <i class="fa fa-search searchico"></i>
+                    <input type="text" placeholder="Blog Search">
+                    <a href="#" class="close-menu"><i class="fa fa-close"></i></a>
+                        </span>
+                </div>
+            </form>
+        </li>
+        <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+        <li><a href="/about"><i class="fa fa-user"></i>About</a></li>
+        <li class="submenu">
+            <a href="#"><i class="fa fa-book"></i>Categories<b class="caret"></b></a>
+            <ul class="submenu-list">
+                
+                    <li><a href="/categories/Opinion/">Opinion <span
+                                    class="badge">41</span></a></li>
+                
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
+                    <li><a href="/categories/Daily/">Daily <span
+                                    class="badge">8</span></a></li>
+                
+                    <li><a href="/categories/Learn/">Learn <span
+                                    class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">11</span></a></li>
+                
+                    <li><a href="/categories/Summary/">Summary <span
+                                    class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Operate/">Operate <span
+                                    class="badge">1</span></a></li>
+                
+            </ul>
+        </li>
+        <li class="submenu">
+            <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
+            <ul class="submenu-list"><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2016/">2016</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2015/">2015</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2014/">2014</a></li></ul>
+        </li>
+        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
+    </ul>
+</div>
+<div id="wrap">
+    <div id="main-nav" class="">
+    <div class="container">
+        <div class="nav-header">
+            <a class="nav-brand" href="/">Xuanwo's Blog</a>
+            <a class="menu-link nav-icon" href="#"><i class="fa fa-navicon"></i></a>
+        </div>
+    </div>
+</div>
+    <section id="hero" class="light-typo">
+    <div id="cover-image" class="image-bg animated fadeIn"></div>
+    <div class="container welcome-content">
+        <div class="middle-text">
+            <h1>Coding your future</h1>
+            <a class="btn smooth-scroll" href="#start">Get Stated</a>
+        </div>
+    </div>
+</section>
+    <div id="start" class="container content">
+        
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            
+                
+    <article class="clearfix">
+        <div class="post-date">
+            发表于
+            <time datetime="2015-08-12T01:31:22+00:00"
+                  content="Aug 12 2015">
+                Aug 12 2015
+            </time>
+            &nbsp;|&nbsp;分类于
+            
+                
+                    <a href="/categories/Opinion/" rel="index">
+                        Opinion
+                        
+                        
+                    </a>
+                
+            
+            <span>
+            <a href="/2015/08/12/OpenSourceBook/#disqus_thread" data-disqus-identifier="2015/08/12/OpenSourceBook/">
+              <span class="disqus-comment-count" data-disqus-identifier="2015/08/12/OpenSourceBook/"></span>
+            </a>
+          </span>
+        </div>
+        <h2><a href="/2015/08/12/OpenSourceBook/">Markdown + Travis CI 构建自己的开源电子书</a></h2>
+        
+            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>作为一只ACMer，一个非常现实的需求就是我们需要准备自己的模板。在我的想象当中，我们的模板应当有如下的这些特性：</p>
+<ul>
+<li>可以生成PDF格式，保证在多个平台下的一致性</li>
+<li>编辑起来比较简单，我的队友无需学习LaTeX即可开始编辑</li>
+<li>共同协作比较方便，我和队友无需将代码互相复制粘贴</li>
+<li>代码必须要支持高亮！（很重要！）</li>
+<li>代码编辑容易，因为我们的模板白手起家，经常会需要修改。</li>
+</ul>
+<p>这些需求，单个实现都比较容易，但是如果想要找到一个全部符合并且简单易行的方案，就有些困难了。在<a href="http://www.larrycaiyu.com/" target="_blank" rel="external">@larrycai</a>推出的<a href="https://github.com/larrycai/kaiyuanbook" target="_blank" rel="external">中文开源电子书项目</a>的启发下，我想到了使用 <code>Markdown</code> + <code>Github</code> + <code>Travis CI</code> 的一套工具链来构建了我的开源电子书的方法。<br>下面我来简单地介绍一下。</p>
+<a id="more"></a>
+<h1 id="实现方法"><a href="#实现方法" class="headerlink" title="实现方法"></a>实现方法</h1><p>我的思路非常简单：</p>
+<ol>
+<li>所有文件使用Markdown进行编辑，代码文件以代码块的形式保存在Markdown文件中。</li>
+<li>原文件通过Git进行管理，通过Travis CI进行自动构建，并将生成的PDF文件以Release形式回传到Github上</li>
+<li>Travis CI调用multimarkdown将md文件转换为tex，再使用latex将tex编译为pdf</li>
+</ol>
+<p>整套流程看起来需要的操作很多，但是通过Travis CI进行自动构建，我们需要做的仅仅是push我们的代码，几分钟之后，最新编译的PDF就会出现在我们代码库的Release中。下面我详细地介绍一下实现的步骤。</p>
+<h1 id="实现流程"><a href="#实现流程" class="headerlink" title="实现流程"></a>实现流程</h1><h2 id="Fork我的模板"><a href="#Fork我的模板" class="headerlink" title="Fork我的模板"></a>Fork我的模板</h2><p>第一步是需要先Fork我的<a href="https://github.com/Xuanwo/OpenSourceBook" target="_blank" rel="external">模板</a>，使用git将其clone到本地方便我们进行编辑，当然，库名可以随意修改，这个无需在意。</p>
+<h2 id="配置Travis-CI"><a href="#配置Travis-CI" class="headerlink" title="配置Travis CI"></a>配置Travis CI</h2><h3 id="登陆Travis-CI"><a href="#登陆Travis-CI" class="headerlink" title="登陆Travis CI"></a>登陆Travis CI</h3><p>访问<a href="https://travis-ci.org/" target="_blank" rel="external">Travis CI</a>，点击使用Github账号登陆后，Travis CI将会获得访问你的公开库相关信息的权限。<br><em>比较看重自己信息安全的朋友也无需担心，Travis CI默认获得的权限是非常的低的只读权限，而且只能访问你的公开库。</em><br>然后Travis CI将会列出你所有的公开库，我们在勾选<code>OpenSourceBook</code>前面的按钮使得它打开自动构建。</p>
+<h3 id="travis-yml文件配置"><a href="#travis-yml文件配置" class="headerlink" title=".travis.yml文件配置"></a>.travis.yml文件配置</h3><p>上一步中，我们打开了自动构建，也就是你的每一次push和pr都会触发Travis CI的自动构建。但是如果没有配置好的脚本，自动构建的结果通常都是失败的，所以我们要配置好相应的脚本。在我的库中已经有了配置好的脚本，只需要做一些细微的修改就可以应用于不同的库。</p>
+<p><em>Travis CI十分强大，有想进一步了解Travis CI的同学可以通过<a href="http://docs.travis-ci.com/" target="_blank" rel="external">文档</a>来进一步的学习。</em></p>
+<h3 id="配置Github-Release"><a href="#配置Github-Release" class="headerlink" title="配置Github-Release"></a>配置Github-Release</h3><p>通过前面的操作，我们已经可以通过Travis CI来自动构建我们的PDF文件，但是这个文件并不能上传到Github上来，因为Travis CI默认是不会取得这样的权限的。为了解决这个问题，我们可以使用Github的Release API以及Travis CI的加密。</p>
+<p>首先我们需要一个ruby的环境，如果没有的话可以考虑使用<a href="https://c9.io/" target="_blank" rel="external">Cloud9</a>。<br>安装travis的gem包</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">xuanwo@ruby:~/workspace $ gem install travis</span><br><span class="line">Fetching: addressable-2.3.8.gem (100%)</span><br><span class="line">Successfully installed addressable-2.3.8</span><br><span class="line">（中间省略）</span><br><span class="line">Fetching: travis-1.8.0.gem (100%)</span><br><span class="line">Successfully installed travis-1.8.0</span><br><span class="line">18 gems installed</span><br></pre></td></tr></table></figure>
+<p>登陆Travis，需要使用Github的账号和密码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">xuanwo@ruby:~/workspace $ cd OpenSourceBook/</span><br><span class="line">xuanwo@ruby:~/workspace/OpenSourceBook (master) $</span><br><span class="line">xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis login --auto</span><br><span class="line">Shell completion not installed. Would you like to install it now? |y|</span><br><span class="line">We need your GitHub login to identify you.</span><br><span class="line">This information will not be sent to Travis CI, only to api.github.com.</span><br><span class="line">The password will not be displayed.</span><br><span class="line"></span><br><span class="line">Try running with --github-token or --auto if you don&apos;t want to enter your password anyway.</span><br><span class="line"></span><br><span class="line">Username: Xuanwo</span><br><span class="line">Password for Xuanwo: **********</span><br><span class="line">Two-factor authentication code for Xuanwo: 147447</span><br><span class="line">Successfully logged in as Xuanwo!</span><br></pre></td></tr></table></figure>
+<p>使用Travis的Release-Guide生成相应的脚本代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis setup releases</span><br><span class="line">Detected repository as Xuanwo/OpenSourceBook, is this correct? |yes|</span><br><span class="line">//此处错误表明这个库是新建的，Travis CI还没有同步，手动同步即可。</span><br><span class="line">repository not known to https://api.travis-ci.org/: Xuanwo/OpenSourceBook</span><br><span class="line">xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis setup releases</span><br><span class="line">Username: Xuanwo</span><br><span class="line">Password for Xuanwo: **********</span><br><span class="line">Two-factor authentication code for Xuanwo: 603930</span><br><span class="line">//设定需要上传的文件名</span><br><span class="line">File to Upload: OpenSourceBook.pdf</span><br><span class="line">//设定只从当前库进行上传</span><br><span class="line">Deploy only from Xuanwo/OpenSourceBook? |yes|</span><br><span class="line">//设定进行API key加密（强烈要求）</span><br><span class="line">Encrypt API key? |yes|</span><br></pre></td></tr></table></figure>
+<p>到这里，我们已经实现了一本电子书由Markdown到PDF的自动构建，下面我来具体的讲解一下如何使用。</p>
+<h1 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h1><h2 id="触发Release发布"><a href="#触发Release发布" class="headerlink" title="触发Release发布"></a>触发Release发布</h2><p>由于Github的强制要求，所有发布都必须归属于某一个Tags，所以我们在push的时候，需要带上tags，生成的文件才能够上传到Github上去。具体的操作如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git add --all</span><br><span class="line">git commit -m &quot;update content&quot;</span><br><span class="line">git tag -a v0.0.1 -m &quot;tags content&quot;</span><br><span class="line">git push --tags</span><br><span class="line">git push</span><br></pre></td></tr></table></figure>
+<h2 id="文件结构介绍"><a href="#文件结构介绍" class="headerlink" title="文件结构介绍"></a>文件结构介绍</h2><p>所有的源代码文件都保存在<code>content</code>文件夹下，所有文件都遵循<a href="http://www.jianshu.com/p/q81RER" target="_blank" rel="external">Markdown语法</a>。图片保存在<code>content/img</code>目录下，调用时使用<code>![图片描述](img/pic.png)</code>。<br>每一本书分为前言，内容和目录。其中<code>0-prefaceX-xxx.md</code>表示前言的第X章，<code>1-chapterX-xxx.md</code>表示正文的第X章，<code>2-appendixX-xxx.md</code>表示附录的第X章，都是从1开始的。</p>
+<p><em>目前为止，修改封面还需要修改Tex文件</em></p>
+<h2 id="跳过自动构建"><a href="#跳过自动构建" class="headerlink" title="跳过自动构建"></a>跳过自动构建</h2><p>只是单纯想更新内容，不想生成PDF时，只需要在commit信息中添加<code>[ci skip]</code>即可。比如</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git commit -m &quot;[ci skip] commit message&quot;</span><br></pre></td></tr></table></figure>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<li>2015年08月12日 初步完成教程</li>
+</ul>
+
+        
+        <div class="post-footer">
+            
+                <div id="eof" class="print-invisible">
+                    <hr class="eof">
+                </div>
+                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
+                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，获取新文章推送
+          </span>
+                </div>
+                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
+                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，请博主喝咖啡
+          </span>
+                </div>
+                <div class="copyright" style="clear:both;">
+                    <p><span>本文标题:</span><a href="/2015/08/12/OpenSourceBook/">Markdown + Travis CI 构建自己的开源电子书</a></p>
+                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
+                    <p><span>发布时间:</span>2015年8月12日 - 01时08分</p>
+                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
+                    <p><span>原始链接:</span><a href="/2015/08/12/OpenSourceBook/"
+                                            title="Markdown + Travis CI 构建自己的开源电子书">https://xuanwo.org/2015/08/12/OpenSourceBook/</a></p>
+                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
+                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
+                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
+                            4.0</a></p>
+                    <p><span>转载请保留以上信息。</span></p>
+                </div>
+            
+            
+                <div class="post-tags">
+                    
+                        <a href="/tags/Github/"> #Github </a>
+                    
+                        <a href="/tags/CI/"> #CI </a>
+                    
+                        <a href="/tags/阅读/"> #阅读 </a>
+                    
+                        <a href="/tags/Markdown/"> #Markdown </a>
+                    
+                </div>
+            
+        </div>
+
+    </article>
+
+
+
+            
+            
+        </div>
+    </div>
+
+    </div>
+    <footer>
+    <div class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-2 col-md-2 footer-widget">
+                    <h3>Statistics</h3>
+
+                    <span>No BB, just do it!</span>
+
+                    <div class="stats">
+                        <div class="line">
+                            <span class="counter">392</span>
+                            <span class="caption">Articles</span>
+                        </div>
+                        <div class="line">
+                            <span class="counter">7</span>
+                            <span class="caption">Categories</span>
+                        </div>
+                        <div class="line">
+                            <span class="counter">60</span>
+                            <span class="caption">Tags</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-4 col-md-4 footer-widget">
+                    <h3>Recent posts</h3>
+                    <div class="post-recent-widget">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/06/16/jade_ims/">马可波罗珠宝进销存系统开发手记</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/03/owncloud-on-qingcloud/">在QingCloud上部署弹性扩容的OwnCloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/29/learn-from-qingchat/">我从Qingchat中学到的教训</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/09/msp430g2553-bellring/">基于MSP430G2553的打铃系统开发手记</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/gitlab-install-intro/">Gitlab部署和汉化以及简单运维</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/docopt-intro/">docopt——好用的Python命令行参数解释器</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/01/qingchat-intro/">微信多群直播的新探索——Qingchat</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/13/gout/">罹患痛风感言</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/12/neovim-slow-upgrade/">Neovim慢速升级攻略</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/wechat-remove/">微信群重复人员识别</a></li></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-6 footer-widget clearfix">
+                    <h3>Tags</h3>
+                    <ul class="tags">
+                        
+                            <li><a href="/tags/Google/">Google</a></li>
+                        
+                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
+                        
+                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
+                        
+                            <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/阅读/">阅读</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/Ubuntu/">Ubuntu</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="copyright">
+        <div class="container">
+            <p class="pull-left">Designed by <a href="http://xuanwo.org">Xuanwo.</a> Powered by <a
+                        href="https://hexo.io">Hexo.</a></p>
+            <ul class="social-links pull-right">
+                <li><a href="https://twitter.com/OnlyXuanwo"><i class="fa fa-twitter"></i></a></li>
+                <li><a href="https://www.facebook.com/onlyxuanwo"><i class="fa fa-facebook"></i></a></li>
+                <li><a href="https://plus.google.com/u/0/116093463258836167644"><i class="fa fa-google-plus"></i></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</footer>
+
+<script type="text/javascript" src="/dist/js/jquery.min.js"></script>
+<script type="text/javascript" src="/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/dist/js/wow.min.js"></script>
+<script type="text/javascript" src="/dist/js/custom.js"></script>
+<script id="dsq-count-scr" src="//only0god.disqus.com/count.js" async></script>
+<script>
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function () {
+                    (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date();
+        a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+    ga('create', 'UA-51515330-1', 'auto');
+    ga('send', 'pageview');
+</script>
+</div>
+<script type="text/javascript">
+    $("img").addClass("img-responsive");
+</script>
+</body>
+</html>

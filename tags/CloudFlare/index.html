@@ -1,0 +1,445 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+<meta name="description" content="Long way to go">
+<meta name="author" content="Xuanwo">
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="stylesheet" href="/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="/dist/css/animate.min.css">
+<link rel="stylesheet" href="/dist/css/style.css">
+<link rel="stylesheet" href="/dist/css/font-awesome.min.css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+    <title>  CloudFlare | Xuanwo's Blog </title>
+</head>
+<body id="home">
+<div id="menu" class="menu-right">
+    <ul>
+        <li>
+            <form class="menu-search">
+                <div class="form-group header">
+                    <span>
+                    <i class="fa fa-search searchico"></i>
+                    <input type="text" placeholder="Blog Search">
+                    <a href="#" class="close-menu"><i class="fa fa-close"></i></a>
+                        </span>
+                </div>
+            </form>
+        </li>
+        <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+        <li><a href="/about"><i class="fa fa-user"></i>About</a></li>
+        <li class="submenu">
+            <a href="#"><i class="fa fa-book"></i>Categories<b class="caret"></b></a>
+            <ul class="submenu-list">
+                
+                    <li><a href="/categories/Opinion/">Opinion <span
+                                    class="badge">41</span></a></li>
+                
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
+                    <li><a href="/categories/Daily/">Daily <span
+                                    class="badge">8</span></a></li>
+                
+                    <li><a href="/categories/Learn/">Learn <span
+                                    class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">11</span></a></li>
+                
+                    <li><a href="/categories/Summary/">Summary <span
+                                    class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Operate/">Operate <span
+                                    class="badge">1</span></a></li>
+                
+            </ul>
+        </li>
+        <li class="submenu">
+            <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
+            <ul class="submenu-list"><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2016/">2016</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2015/">2015</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2014/">2014</a></li></ul>
+        </li>
+        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
+    </ul>
+</div>
+<div id="wrap">
+    <div id="main-nav" class="">
+    <div class="container">
+        <div class="nav-header">
+            <a class="nav-brand" href="/">Xuanwo's Blog</a>
+            <a class="menu-link nav-icon" href="#"><i class="fa fa-navicon"></i></a>
+        </div>
+    </div>
+</div>
+    <section id="hero" class="light-typo">
+    <div id="cover-image" class="image-bg animated fadeIn"></div>
+    <div class="container welcome-content">
+        <div class="middle-text">
+            <h1>Coding your future</h1>
+            <a class="btn smooth-scroll" href="#start">Get Stated</a>
+        </div>
+    </div>
+</section>
+    <div id="start" class="container content">
+        
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            
+                
+    <article class="clearfix">
+        <div class="post-date">
+            发表于
+            <time datetime="2015-10-12T16:53:25+00:00"
+                  content="Oct 12 2015">
+                Oct 12 2015
+            </time>
+            &nbsp;|&nbsp;分类于
+            
+                
+                    <a href="/categories/Opinion/" rel="index">
+                        Opinion
+                        
+                        
+                    </a>
+                
+            
+            <span>
+            <a href="/2015/10/12/7ghost-google/#disqus_thread" data-disqus-identifier="2015/10/12/7ghost-google/">
+              <span class="disqus-comment-count" data-disqus-identifier="2015/10/12/7ghost-google/"></span>
+            </a>
+          </span>
+        </div>
+        <h2><a href="/2015/10/12/7ghost-google/">低成本搭建谷歌镜像</a></h2>
+        
+            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>尽管自己已经搭建好了Shadowsocks等翻墙工具，但是总有一些时刻需要临时地使用Google查看一些网页，这个时候一个可用的谷歌镜像就显得很重要。本文旨在使用低成本方案来搭建一个可用的谷歌镜像服务，用以部分解决这个问题。</p>
+<a id="more"></a>
+<h1 id="条件"><a href="#条件" class="headerlink" title="条件"></a>条件</h1><p>你需要具备以下条件：</p>
+<ul>
+<li>一台支持PHP的境外服务器（主机）</li>
+<li>一个可用（未被墙）的域名</li>
+</ul>
+<p>如果没有的话，推荐使用<a href="http://api.hostinger.com.hk/redir/6395538" target="_blank" rel="external">Hostinger</a>的免费主机并注册免费一年的<code>.xyz</code>域名。</p>
+<h1 id="搭建"><a href="#搭建" class="headerlink" title="搭建"></a>搭建</h1><blockquote>
+<p>以Hostinger为例</p>
+</blockquote>
+<ul>
+<li>下载7ghost程序<a href="https://drive.google.com/file/d/0B9QMnnRkfvWjMnhVdDVsb21qazA/view?usp=sharing" target="_blank" rel="external">(墙外，推荐)</a>&amp;<a href="http://pan.baidu.com/s/1mgGkEYc" target="_blank" rel="external">(墙内，密码b5te)</a></li>
+<li>FTP上传至指定目录</li>
+<li>使用域名进行访问</li>
+</ul>
+<h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><ul>
+<li>访问<code>http://yourname.xxx/_admin</code>以进行管理</li>
+<li>默认密码为123456，可在<code>\_admin\data\config.php</code>中自行修改</li>
+<li>在需要代理的网址中填写<code>https://www.google.com/</code></li>
+<li>点击提交即可</li>
+<li>现在可以访问自己的域名测试反代效果了</li>
+</ul>
+<h1 id="进阶"><a href="#进阶" class="headerlink" title="进阶"></a>进阶</h1><h2 id="使用CloudFlare加速"><a href="#使用CloudFlare加速" class="headerlink" title="使用CloudFlare加速"></a>使用CloudFlare加速</h2><ul>
+<li>登陆CloudFlare</li>
+<li>点击<code>add site</code></li>
+<li>然后修改CloudFlare指定的NS服务器</li>
+<li>显示为<code>Actived</code>之后即为配置完成</li>
+</ul>
+<h2 id="使用CloudFlare的免费SSL"><a href="#使用CloudFlare的免费SSL" class="headerlink" title="使用CloudFlare的免费SSL"></a>使用CloudFlare的免费SSL</h2><ul>
+<li>登陆CloudFlare</li>
+<li>点击<code>Crypto</code>选项卡，SSL设置中选择<code>Flexible</code>，等待几个小时后即可</li>
+<li>可以选择HSTS（必须保证SSL可用，否则将无法正常访问）</li>
+</ul>
+<h2 id="开启全站强制HTTPS"><a href="#开启全站强制HTTPS" class="headerlink" title="开启全站强制HTTPS"></a>开启全站强制HTTPS</h2><blockquote>
+<p>由于反代加上CDN的特殊性，所以无法通过修改.htaccess或者php文件来强制使用HTTPS。不过还是有办法的，可以使用CloudFlare的Page Rules功能。</p>
+</blockquote>
+<ul>
+<li>登陆CloudFlare</li>
+<li>切换到Page Rules选项卡</li>
+<li>在<code>Add new rule</code>下方的<code>URL pattern</code>中填写<code>http://yourname.xxx/*</code></li>
+<li>选中下方的<code>Always use https</code></li>
+<li>点击<code>Add rule</code>即可</li>
+</ul>
+<h2 id="子目录配置"><a href="#子目录配置" class="headerlink" title="子目录配置"></a>子目录配置</h2><blockquote>
+<p>这个是源程序中的一些BUG，好像也跟Google本身页面中的资源引用有关</p>
+</blockquote>
+<p><em>假定子目录名为<code>sub</code></em></p>
+<ul>
+<li>登录到管理后台</li>
+<li>添加内容替换，查找内容<code>sub/</code>，替换为<code>/</code></li>
+<li>点击<code>提交</code>即可</li>
+</ul>
+<h1 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h1><ul>
+<li>不建议大规模进行使用，可能会被Google屏蔽或者被GFW干扰</li>
+<li>建议使用垃圾域名，万一被BAN也不心疼的那种= =</li>
+<li>强烈建议花点时间配置HTTPS</li>
+</ul>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<li>2015年10月13日 初步完成</li>
+<li>2015年11月05日 增加了修改密码的详细指示</li>
+<li>2015年11月29日 增加了子目录的配置</li>
+</ul>
+
+        
+        <div class="post-footer">
+            
+                <div id="eof" class="print-invisible">
+                    <hr class="eof">
+                </div>
+                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
+                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，获取新文章推送
+          </span>
+                </div>
+                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
+                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
+                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
+          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
+              微信扫一扫，请博主喝咖啡
+          </span>
+                </div>
+                <div class="copyright" style="clear:both;">
+                    <p><span>本文标题:</span><a href="/2015/10/12/7ghost-google/">低成本搭建谷歌镜像</a></p>
+                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
+                    <p><span>发布时间:</span>2015年10月12日 - 16时10分</p>
+                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
+                    <p><span>原始链接:</span><a href="/2015/10/12/7ghost-google/"
+                                            title="低成本搭建谷歌镜像">https://xuanwo.org/2015/10/12/7ghost-google/</a></p>
+                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
+                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
+                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
+                            4.0</a></p>
+                    <p><span>转载请保留以上信息。</span></p>
+                </div>
+            
+            
+                <div class="post-tags">
+                    
+                        <a href="/tags/Google/"> #Google </a>
+                    
+                        <a href="/tags/CloudFlare/"> #CloudFlare </a>
+                    
+                        <a href="/tags/FuckWall/"> #FuckWall </a>
+                    
+                        <a href="/tags/PHP/"> #PHP </a>
+                    
+                </div>
+            
+        </div>
+
+    </article>
+
+
+
+            
+            
+        </div>
+    </div>
+
+    </div>
+    <footer>
+    <div class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-2 col-md-2 footer-widget">
+                    <h3>Statistics</h3>
+
+                    <span>No BB, just do it!</span>
+
+                    <div class="stats">
+                        <div class="line">
+                            <span class="counter">392</span>
+                            <span class="caption">Articles</span>
+                        </div>
+                        <div class="line">
+                            <span class="counter">7</span>
+                            <span class="caption">Categories</span>
+                        </div>
+                        <div class="line">
+                            <span class="counter">60</span>
+                            <span class="caption">Tags</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-4 col-md-4 footer-widget">
+                    <h3>Recent posts</h3>
+                    <div class="post-recent-widget">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/06/16/jade_ims/">马可波罗珠宝进销存系统开发手记</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/03/owncloud-on-qingcloud/">在QingCloud上部署弹性扩容的OwnCloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/29/learn-from-qingchat/">我从Qingchat中学到的教训</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/09/msp430g2553-bellring/">基于MSP430G2553的打铃系统开发手记</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/gitlab-install-intro/">Gitlab部署和汉化以及简单运维</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/docopt-intro/">docopt——好用的Python命令行参数解释器</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/01/qingchat-intro/">微信多群直播的新探索——Qingchat</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/13/gout/">罹患痛风感言</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/12/neovim-slow-upgrade/">Neovim慢速升级攻略</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/wechat-remove/">微信群重复人员识别</a></li></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-6 footer-widget clearfix">
+                    <h3>Tags</h3>
+                    <ul class="tags">
+                        
+                            <li><a href="/tags/Google/">Google</a></li>
+                        
+                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
+                        
+                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
+                        
+                            <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/阅读/">阅读</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/Ubuntu/">Ubuntu</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="copyright">
+        <div class="container">
+            <p class="pull-left">Designed by <a href="http://xuanwo.org">Xuanwo.</a> Powered by <a
+                        href="https://hexo.io">Hexo.</a></p>
+            <ul class="social-links pull-right">
+                <li><a href="https://twitter.com/OnlyXuanwo"><i class="fa fa-twitter"></i></a></li>
+                <li><a href="https://www.facebook.com/onlyxuanwo"><i class="fa fa-facebook"></i></a></li>
+                <li><a href="https://plus.google.com/u/0/116093463258836167644"><i class="fa fa-google-plus"></i></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</footer>
+
+<script type="text/javascript" src="/dist/js/jquery.min.js"></script>
+<script type="text/javascript" src="/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/dist/js/wow.min.js"></script>
+<script type="text/javascript" src="/dist/js/custom.js"></script>
+<script id="dsq-count-scr" src="//only0god.disqus.com/count.js" async></script>
+<script>
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function () {
+                    (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date();
+        a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+    ga('create', 'UA-51515330-1', 'auto');
+    ga('send', 'pageview');
+</script>
+</div>
+<script type="text/javascript">
+    $("img").addClass("img-responsive");
+</script>
+</body>
+</html>
