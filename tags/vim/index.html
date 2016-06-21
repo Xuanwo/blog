@@ -63,7 +63,6 @@
             <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
             <ul class="submenu-list"><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2016/">2016</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2015/">2015</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2014/">2014</a></li></ul>
         </li>
-        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
     </ul>
 </div>
 <div id="wrap">
@@ -115,89 +114,13 @@
         </div>
         <h2><a href="/2016/03/12/neovim-slow-upgrade/">Neovim慢速升级攻略</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>一直都非常羡慕那些能把vim用得非常溜的人，但是自己总是不情愿去学，总是觉得vim的操作方式非常反人类，难度曲线太陡，不适合我。真正让我下定决心去学的，是因为系统切换到Ubuntu Gnome之后发现，Sublime Text 3 不能原生支持中文输入。同时我也发现，如果我不上来就折腾spf13这样的东西的话，其实vim非常好懂。于是，Neovim的慢速升级攻略就这样诞生了。</p>
-<a id="more"></a>
-<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>安装可以参考<a href="https://github.com/neovim/neovim/wiki/Installing-Neovim" target="_blank" rel="external">此处</a><br>如果是Ubuntu 的话，则可以执行如下代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo add-apt-repository ppa:neovim-ppa/unstable</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install neovim</span><br></pre></td></tr></table></figure>
-<h1 id="Neovim常用操作"><a href="#Neovim常用操作" class="headerlink" title="Neovim常用操作"></a>Neovim常用操作</h1><h2 id="初步"><a href="#初步" class="headerlink" title="初步"></a>初步</h2><h3 id="光标移动"><a href="#光标移动" class="headerlink" title="光标移动"></a>光标移动</h3><p><code>gg</code> 移动到文件开头<br><code>G</code> 移动到文件末尾</p>
-<h3 id="文件操作相关"><a href="#文件操作相关" class="headerlink" title="文件操作相关"></a>文件操作相关</h3><p><code>:w &lt;filename&gt;</code> 按照<filename>保存文件<br><code>:wq</code> 保存并退出<br><code>:q!</code> 退出不保存<br><code>:e</code> 打开新的文件并关闭当前文件，使用Tab可以补全</filename></p>
-<h3 id="文件编辑相关"><a href="#文件编辑相关" class="headerlink" title="文件编辑相关"></a>文件编辑相关</h3><p><code>dd</code> 删除当前行<br><code>y</code> 复制<br><code>yy</code> 复制当前行<br><code>yG</code> 复制光标以上全部行<br><code>ygg</code> 复制光标以下全部行<br><code>p</code> 粘贴<br><code>u</code> 撤销</p>
-<h2 id="入门"><a href="#入门" class="headerlink" title="入门"></a>入门</h2><h3 id="使用内置终端"><a href="#使用内置终端" class="headerlink" title="使用内置终端"></a>使用内置终端</h3><p><code>:terminal</code> 打开终端，输入exit并使用<code>esc</code>或<code>enter</code>即可退出</p>
-<h3 id="与系统剪切板集成"><a href="#与系统剪切板集成" class="headerlink" title="与系统剪切板集成"></a>与系统剪切板集成</h3><p>这个地方折腾了好久，Neovim默认是支持<code>+</code>寄存器的，但是我通过<code>&quot;+y</code>命令调用寄存器时却提示<code>Clipboard No Provider</code>。通过阅读<a href="https://github.com/neovim/neovim/blob/master/runtime/doc/nvim_clipboard.txt#L19-L27" target="_blank" rel="external">文档</a>之后，我得知，必须要安装下列三个包中的至少一个，才能正常使用剪切板：</p>
-<ul>
-<li>xclip</li>
-<li>xsel (newer alternative to xclip)</li>
-<li>pbcopy/pbpaste (only for Mac OS X)</li>
-</ul>
-<p>安装好之后再打开，就可以正常使用了。</p>
-<p><em>快速复制全文的技巧： 在Normal模式下，<code>gg</code>跳转到文章开头，<code>VG</code>选中全文，<code>&quot;+y</code>复制到剪切板。</em></p>
-<h1 id="Neovim插件"><a href="#Neovim插件" class="headerlink" title="Neovim插件"></a>Neovim插件</h1><h2 id="vim-airline"><a href="#vim-airline" class="headerlink" title="vim-airline"></a>vim-airline</h2><p><a href="https://github.com/vim-airline/vim-airline" target="_blank" rel="external">vim-airline</a>是一个vim的状态栏插件，同样支持neovim。</p>
-<p><img src="https://github.com/vim-airline/vim-airline/wiki/screenshots/demo.gif" alt="vim-airline demo"></p>
-<blockquote>
-<p>安装此插件后启动nvim会报错，自行编译后错误消失，不知道具体的原因。</p>
-</blockquote>
-<h3 id="Smarter-tab-line"><a href="#Smarter-tab-line" class="headerlink" title="Smarter tab line"></a>Smarter tab line</h3><p>在<code>init.vim</code>中加入</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&apos; 开启tabline功能</span><br><span class="line">let g:airline#extensions#tabline#enabled = 1</span><br><span class="line">&apos; 设置tabline分隔符</span><br><span class="line">let g:airline#extensions#tabline#left_sep = &apos; &apos;</span><br><span class="line">let g:airline#extensions#tabline#left_alt_sep = &apos;|&apos;</span><br></pre></td></tr></table></figure>
-<p>支持的一些快捷操作命令：</p>
-<p><code>:bn</code>: 跳转下一个buffer<br><code>:bp</code>: 往上一个buffer<br><code>:b&lt;n&gt;</code>: 跳往第n个buffer<br><code>:bd</code>: 关掉目前buffer</p>
-<h3 id="vim-airline-themes"><a href="#vim-airline-themes" class="headerlink" title="vim-airline-themes"></a>vim-airline-themes</h3><p>个人比较偏爱<code>solarized</code>的暗色皮肤，所以需要使用这个库来安装airline配套的皮肤。<br>在<code>init.vim</code>中添加</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Plug &apos;vim-airline/vim-airline-themes&apos;</span><br></pre></td></tr></table></figure>
-<p>然后修改：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">let g:airline_theme=&quot;solarized&quot;</span><br></pre></td></tr></table></figure>
-<p>即可</p>
-<h2 id="vim-colors-solarized"><a href="#vim-colors-solarized" class="headerlink" title="vim-colors-solarized"></a>vim-colors-solarized</h2><p>顾名思义，这是<code>solarized for vim</code>。<br>在<code>init.vim</code>中添加</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Plug &apos;altercation/vim-colors-solarized&apos;</span><br></pre></td></tr></table></figure>
-<p>然后修改：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">set background=dark</span><br><span class="line">colorscheme solarized</span><br></pre></td></tr></table></figure>
-<p>即可</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年03月12日 首次发布</li>
-<li>2016年03月15日 增加air-line相关内容</li>
-<li>2016年06月16日 增加主题配置相关内容，并添加了部分常用快捷键</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>一直都非常羡慕那些能把vim用得非常溜的人，但是自己总是不情愿去学，总是觉得vim的操作方式非常反人类，难度曲线太陡，不适合我。真正让我下定决心去学的，是因为系统切换到Ubuntu Gnome之后发现，Sublime Text 3 不能原生支持中文输入。同时我也发现，如果我不上来就折腾spf13这样的东西的话，其实vim非常好懂。于是，Neovim的慢速升级攻略就这样诞生了。</p>
+                <a class="" href="/2016/03/12/neovim-slow-upgrade/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/03/12/neovim-slow-upgrade/">Neovim慢速升级攻略</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年3月12日 - 11时03分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/03/12/neovim-slow-upgrade/"
-                                            title="Neovim慢速升级攻略">https://xuanwo.org/2016/03/12/neovim-slow-upgrade/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Software/"> #Software </a>
-                    
-                        <a href="/tags/vim/"> #vim </a>
-                    
-                </div>
             
         </div>
 
@@ -309,8 +232,6 @@
                         
                             <li><a href="/tags/Information/">Information</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
                             <li><a href="/tags/项目/">项目</a></li>
                         
                             <li><a href="/tags/Python/">Python</a></li>
@@ -321,15 +242,17 @@
                         
                             <li><a href="/tags/JavaScript/">JavaScript</a></li>
                         
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
                             <li><a href="/tags/实习/">实习</a></li>
                         
                             <li><a href="/tags/QingCloud/">QingCloud</a></li>
                         
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
                             <li><a href="/tags/Work/">Work</a></li>
                         
                             <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/Hardware/">Hardware</a></li>
                         

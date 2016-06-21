@@ -63,7 +63,6 @@
             <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
             <ul class="submenu-list"><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2016/">2016</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2015/">2015</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2014/">2014</a></li></ul>
         </li>
-        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
     </ul>
 </div>
 <div id="wrap">
@@ -115,90 +114,13 @@
         </div>
         <h2><a href="/2016/01/03/vs-oracle-11g/">VS2015连接Oracle数据库</a></h2>
         
-            <h1 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h1><p>宿主机：Win10 + VS2015 + ODP.Net for VS2015<br>虚拟机：Win7 + Oracle 11g + 桥接</p>
-<a id="more"></a>
-<h1 id="配置ODP-Net"><a href="#配置ODP-Net" class="headerlink" title="配置ODP.Net"></a>配置ODP.Net</h1><p>首先下载 <a href="http://www.oracle.com/technetwork/topics/dotnet/downloads/odacmsidownload-2745497.html" target="_blank" rel="external">Oracle Developer Tools for Visual Studio 2015</a> ，下载此文件需要注册Oracle社区账号并接受相关的协议，此文件提供了以下组件：</p>
-<ul>
-<li>Oracle Developer Tools for Visual Studio 12.1.0.2.4</li>
-<li>Oracle Data Provider for .NET 4 12.1.0.2.0</li>
-<li>Oracle Providers for ASP.NET 4 12.1.0.2.0</li>
-</ul>
-<p>下载完成后运行MSI安装程序进行安装，安装完成后会自动注册VS2015的相关插件，重新启动VS2015后将会看到Oracle的相关命令，比如SQL *PLUS支持等。同时添加数据库时也能看到相应的选项。</p>
-<blockquote>
-<p>ODP.Net支持所有Oracle版本，因此下载时只需要注意VS的版本即可。</p>
-</blockquote>
-<h1 id="配置tnsnames-ora"><a href="#配置tnsnames-ora" class="headerlink" title="配置tnsnames.ora"></a>配置tnsnames.ora</h1><blockquote>
-<p>ODP.Net默认使用安装目录下的<code>tnsnames.ora</code>，若安装目录在Program Files下，可能会遇到无权限等问题，此时使用管理员权限打开命令行，切换到对应目录并使用notepad编辑。</p>
-</blockquote>
-<p>复制服务器端的tnsnames.ora文件内容，或者自己手动编辑，格式如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;数据源别名&gt; =</span><br><span class="line">  (DESCRIPTION =</span><br><span class="line">    (ADDRESS = (PROTOCOL = TCP)(HOST = &lt;主机名或IP&gt;)(PORT = &lt;端口号&gt;))</span><br><span class="line">    (CONNECT_DATA =</span><br><span class="line">      (SERVER = DEDICATED)</span><br><span class="line">      (SERVICE_NAME = &lt;数据库服务名&gt;)</span><br><span class="line">    )</span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
-<h1 id="添加数据库"><a href="#添加数据库" class="headerlink" title="添加数据库"></a>添加数据库</h1><p>打开<code>工具</code>-<code>连接到数据库</code>，数据源修改为<code>Oracle数据库</code>下的<code>ODP.NET,托管驱动程序</code>，然后点击<code>确定</code>，打开<code>添加连接</code>窗口。<br><img src="/imgs/develop/add-database.png" alt="添加连接"><br>填写用户名，密码并选择数据源，然后测试连接，成功的话说明已经连通，点击确定即可。</p>
-<blockquote>
-<p>使用虚拟机搭建数据库的额外Tips<br>根据某网友分析，Oracle的监听器在通过1521端口连接后，会开启另外一个新的随机端口进行数据通讯，因此使用NAT方式虚拟网卡可能会导致连接失败。这种情况下，请使用桥接方式虚拟网卡，并在<code>net manager</code>中将<code>loaclhost</code>修改为虚拟机当前的IP。重启监听服务后，再试。</p>
-</blockquote>
-<h1 id="连接数据库并使用"><a href="#连接数据库并使用" class="headerlink" title="连接数据库并使用"></a>连接数据库并使用</h1><h2 id="连接数据库"><a href="#连接数据库" class="headerlink" title="连接数据库"></a>连接数据库</h2><figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Dim</span> oradb <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"User ID=system;Password=123456;Data Source=lol"</span></span><br><span class="line"><span class="keyword">Dim</span> conn <span class="keyword">As</span> <span class="keyword">New</span> OracleConnection(oradb)</span><br><span class="line">conn.Open()</span><br><span class="line"><span class="keyword">Dim</span> sql <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"create table xxx"</span></span><br><span class="line"><span class="keyword">Dim</span> sqlCom <span class="keyword">As</span> <span class="keyword">New</span> OracleCommand</span><br><span class="line">sqlCom.CommandText = sql</span><br><span class="line">sqlCom.Connection = conn</span><br><span class="line">sqlCom.ExecuteNonQuery()</span><br></pre></td></tr></table></figure>
-<h2 id="查询数据"><a href="#查询数据" class="headerlink" title="查询数据"></a>查询数据</h2><p>成功配置数据源之后，只需要向界面上拖动<code>DataGridView</code>，并进行相关配置，选择自己需要的表即可。</p>
-<h2 id="插入图片的正确姿势"><a href="#插入图片的正确姿势" class="headerlink" title="插入图片的正确姿势"></a>插入图片的正确姿势</h2><p>图片作为二进制数据无法直接拼凑出SQL命令，我们需要使用<code>OracleCommand</code>自带的<code>Parameters</code>功能。在SQL命令中用<code>:photo</code>来代表一个参量，然后使用</p>
-<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sqlCom.Parameters.Add(<span class="string">"photo"</span>, OracleDbType.Blob, imgData.Length)</span><br></pre></td></tr></table></figure>
-<p>来分别指定这个参量的类型和所占空间大小</p>
-<p>最后使用</p>
-<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sqlCom.Parameters(<span class="number">0</span>).Value = imgData</span><br></pre></td></tr></table></figure>
-<p>来指定这个参量的值。</p>
-<p>整个插入图片过程的代码如下：</p>
-<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Dim</span> conn <span class="keyword">As</span> <span class="keyword">New</span> OracleConnection(oradb)</span><br><span class="line"><span class="keyword">Dim</span> imgData(<span class="number">0</span>) <span class="keyword">As</span> <span class="built_in">Byte</span></span><br><span class="line"><span class="keyword">Dim</span> ms <span class="keyword">As</span> <span class="keyword">New</span> System.IO.MemoryStream</span><br><span class="line">PictureBox1.BackgroundImage.Save(ms, PictureBox1.BackgroundImage.RawFormat)</span><br><span class="line"><span class="keyword">ReDim</span> imgData(ms.Length - <span class="number">1</span>)</span><br><span class="line">ms.Read(imgData, <span class="number">0</span>, ms.Length)</span><br><span class="line">ms.Close()</span><br><span class="line">conn.Open()</span><br><span class="line"><span class="keyword">Dim</span> sql <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"insert into hero values"</span> &amp; <span class="string">"("</span> &amp; TextBox1.<span class="keyword">Text</span> &amp; <span class="string">":photo"</span> &amp; <span class="string">")"</span></span><br><span class="line"><span class="keyword">Dim</span> sqlCom <span class="keyword">As</span> <span class="keyword">New</span> OracleCommand</span><br><span class="line">sqlCom.CommandText = sql</span><br><span class="line">sqlCom.Connection = conn</span><br><span class="line">sqlCom.Parameters.Add(<span class="string">"photo"</span>, OracleDbType.Blob, imgData.Length)</span><br><span class="line">sqlCom.Parameters(<span class="number">0</span>).Value = imgData</span><br><span class="line">sqlCom.ExecuteNonQuery()</span><br></pre></td></tr></table></figure>
-<h1 id="常见错误"><a href="#常见错误" class="headerlink" title="常见错误"></a>常见错误</h1><h2 id="column-not-allowed-here"><a href="#column-not-allowed-here" class="headerlink" title="column not allowed here"></a>column not allowed here</h2><p>数据类型不符，检查对应项目数据类型是否正确。</p>
-<h2 id="missing-comma"><a href="#missing-comma" class="headerlink" title="missing comma"></a>missing comma</h2><p>命令格式不对，检查一下自己的SQL命令是否有错误，特别是在有字符串的时候，需要使用<code>&quot;&quot;</code>来代表一个字符串中的<code>&quot;</code>。</p>
-<h2 id="identifier-is-too-long"><a href="#identifier-is-too-long" class="headerlink" title="identifier is too long"></a>identifier is too long</h2><p>标识符过长（不得超过30字符），不是非常明白原因，不过我取消掉insert命令中指定位置的部分之后，这个错误消失了。</p>
-<h2 id="missing-INTO-keyword"><a href="#missing-INTO-keyword" class="headerlink" title="missing INTO keyword"></a>missing INTO keyword</h2><p>缺少into关键字（手滑打成了inte），检查一下自己的SQL命令是否有错误。</p>
-<h2 id="cannot-insert-NULL-into-“SYSTEM”-”HERO”-”HEROCATEGORYID”"><a href="#cannot-insert-NULL-into-“SYSTEM”-”HERO”-”HEROCATEGORYID”" class="headerlink" title="cannot insert NULL into (“SYSTEM”.”HERO”.”HEROCATEGORYID”)"></a>cannot insert NULL into (“SYSTEM”.”HERO”.”HEROCATEGORYID”)</h2><p>这些项都指定了非0值，故不能不赋值，为对应项目赋值即可。</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年01月03日 初步完成</li>
-</ul>
-
+            
+                <h1 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h1><p>宿主机：Win10 + VS2015 + ODP.Net for VS2015<br>虚拟机：Win7 + Oracle 11g + 桥接</p>
+                <a class="" href="/2016/01/03/vs-oracle-11g/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/01/03/vs-oracle-11g/">VS2015连接Oracle数据库</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年1月3日 - 15时01分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/01/03/vs-oracle-11g/"
-                                            title="VS2015连接Oracle数据库">https://xuanwo.org/2016/01/03/vs-oracle-11g/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Database/"> #Database </a>
-                    
-                        <a href="/tags/Oracle/"> #Oracle </a>
-                    
-                        <a href="/tags/VB/"> #VB </a>
-                    
-                </div>
             
         </div>
 
@@ -233,7 +155,8 @@
         </div>
         <h2><a href="/2015/06/12/database-review/">数据库系统概论复习</a></h2>
         
-            <h1 id="绪论"><a href="#绪论" class="headerlink" title="绪论"></a>绪论</h1><h2 id="数据库系统概述"><a href="#数据库系统概述" class="headerlink" title="数据库系统概述"></a>数据库系统概述</h2><p>数据（Data）： 描述事物的符号记录称为数据。<br>记录： 计算机中表示和存储数据的一种格式或一种方法。<br>数据库（DataBase，简称DB）： 数据库是长期存储在计算机内、有组织的、可共享的大量数据的集合。<br>特点：</p>
+            
+                <h1 id="绪论"><a href="#绪论" class="headerlink" title="绪论"></a>绪论</h1><h2 id="数据库系统概述"><a href="#数据库系统概述" class="headerlink" title="数据库系统概述"></a>数据库系统概述</h2><p>数据（Data）： 描述事物的符号记录称为数据。<br>记录： 计算机中表示和存储数据的一种格式或一种方法。<br>数据库（DataBase，简称DB）： 数据库是长期存储在计算机内、有组织的、可共享的大量数据的集合。<br>特点：</p>
 <ul>
 <li>数据按一定的数据模型组织、描述和存储</li>
 <li>可为各种用户共享</li>
@@ -241,355 +164,11 @@
 <li>数据独立性较高</li>
 <li>易扩展</li>
 </ul>
-<a id="more"></a>
-<p>数据库管理系统（DataBase Management System，DBMS）：位于用户与操作系统之间的一层数据管理软件，它为用户或应用程序提供访问DB的方法，包括DB的建立、查询、更新及各种数据控制。<br>主要功能如下：</p>
-<ul>
-<li>数据定义功能</li>
-<li>数据组织、存储和管理</li>
-<li>数据操纵功能</li>
-<li>数据库的事务管理和运行管理</li>
-<li>数据库的建立和维护功能</li>
-<li>其他功能</li>
-</ul>
-<p>数据库系统（DataBase System， DBS）：DBS是实现有组织地、动态地存储大量关联数据、方便多用户访问的计算机硬件、软件和数据资源组成的系统，即它是采用数据库技术的计算机系统。<br>组成：<br>计算机硬件、数据库、数据库管理系统、应用软件、数据库管理员</p>
-<p>数据库技术：是研究数据库的结构、存储、设计、管理和使用的一门软件学科。</p>
-<h2 id="数据模型"><a href="#数据模型" class="headerlink" title="数据模型"></a>数据模型</h2><p>模型： 现实世界特征的模拟和抽象<br>数据模型定义：能表示实体类型及实体间联系的模型<br>要求：</p>
-<ul>
-<li>能比较真实的模拟现实世界</li>
-<li>容易为人所理解</li>
-<li>便于在计算机上实现</li>
-</ul>
-<h3 id="概念数据模型"><a href="#概念数据模型" class="headerlink" title="概念数据模型"></a>概念数据模型</h3><p>按用户观点对数据建模，是对现实世界的第一层抽象，如ER图。主要用于数据库设计，是数据模型建立的基础。</p>
-<p>实体：客观存在并可相互区别的事物。<br>属性：实体所具有的某一特性称为属性。用属性来刻画实体。<br>码：唯一标识实体的属性集，如学号。<br>域：属性的取值范围称为该属性的域。<br>实体型：具有相同性质的实体必然具有共同的特征和性质。<br>实体集：同型实体的集合。<br>联系：可分为一对一，一对多，多对多。</p>
-<h3 id="逻辑数据模型"><a href="#逻辑数据模型" class="headerlink" title="逻辑数据模型"></a>逻辑数据模型</h3><p>直接面向数据库的逻辑结构，是对现实世界的第二层抽象。可分为：网状、层次、关系、面对对象等；也可分为模糊、时态、空间、时空、概率、粗糙、分形等。组成包括：数据结构、数据操作、数据的约束条件。</p>
-<p><strong>层次数据模型：</strong><br>层次数据模型对应数据结构中的树形结构：</p>
-<ul>
-<li>有且只有一个称为根的结点</li>
-<li>当结点数大于1时，除根节点外的结点可以分为M个互相不相交的有限集，其中每一个集合又是一棵数。</li>
-</ul>
-<p>数据操纵：查询、插入、删除和修改<br>数据约束条件：</p>
-<ul>
-<li>进行插入操作时，如果没有相应的双亲结点值，不能插入子女结点值。</li>
-<li>进行删除操作时，如果删除双亲结点值，则相应的子女结点值也被删除。</li>
-<li>进行修改操作时，应修改所有相应记录，以保证数据的一致性。</li>
-</ul>
-<p><strong>网状数据模型：</strong><br>针对数据结构中的图</p>
-<p><strong>面向对象的数据模型：</strong><br>最关键的两个概念：<br>对象：现实世界中实体的模型化<br>类：对象类型和对这个对象模型进行的操作方法</p>
-<p><img src="/imgs/learn/four-data-modal.png" alt="四种数据模型的比较"></p>
-<h2 id="数据库系统结构"><a href="#数据库系统结构" class="headerlink" title="数据库系统结构"></a>数据库系统结构</h2><p>数据库系统的三级模式结构</p>
-<ul>
-<li>外模式/模式映像</li>
-<li>内模式/模式映像</li>
-</ul>
-<h2 id="数据库系统的组成"><a href="#数据库系统的组成" class="headerlink" title="数据库系统的组成"></a>数据库系统的组成</h2><h3 id="硬件平台及数据库"><a href="#硬件平台及数据库" class="headerlink" title="硬件平台及数据库"></a>硬件平台及数据库</h3><h3 id="软件"><a href="#软件" class="headerlink" title="软件"></a>软件</h3><h3 id="人员"><a href="#人员" class="headerlink" title="人员"></a>人员</h3><ol>
-<li>数据库管理员</li>
-<li>系统分析员和数据库设计人员</li>
-<li>应用程序员</li>
-<li>用户</li>
-</ol>
-<h1 id="关系型数据库理论"><a href="#关系型数据库理论" class="headerlink" title="关系型数据库理论"></a>关系型数据库理论</h1><p><img src="/imgs/learn/relate-database-theory.png" alt="关系数据库理论概述"></p>
-<h2 id="关系模型概述"><a href="#关系模型概述" class="headerlink" title="关系模型概述"></a>关系模型概述</h2><p><img src="/imgs/learn/relate-database-modal.png" alt="关系模型概述"></p>
-<h2 id="关系数据结构"><a href="#关系数据结构" class="headerlink" title="关系数据结构"></a>关系数据结构</h2><p>域：是一组具有相同数据类型的值的集合<br>域的笛卡儿积：给定一组域D1，D2，…，Dn，其笛卡尔积为：<br><img src="/imgs/learn/cartesian-product.png" alt="笛卡儿积"></p>
-<h3 id="关系"><a href="#关系" class="headerlink" title="关系"></a>关系</h3><p>关系：D1×D2×…×Dn的子集叫做在域D1，D2，…，Dn上的关系，记做：R(D1，D2，…，Dn)。</p>
-<blockquote>
-<p>关系是笛卡尔积的有一定意义、有限的子集。<br>关系也是一个二维表，表的每一行对应一个元组，表的每一列对应一个域。<br>对每列起一个唯一的名字，称为属性。<br>n元关系有n个属性。<br>当n=1时，称该关系为单元关系；<br>当n=2时，称该关系为二元关系。<br>若关系中的某一属性组的值能够唯一地标识一个元组，则称该属性组为候选码。<br>若一个关系有多个候选码，则选定其中一个作为主码。<br>候选码的诸属性称为主属性。不包含在任何候选码中的属性称为非主属性或非码属性。</p>
-</blockquote>
-<p>关系的性质：</p>
-<ul>
-<li>同质的列</li>
-<li>不同属性应该有不同的名称</li>
-<li>属性是无序的</li>
-<li>元组不能重复</li>
-<li>元组无序</li>
-<li>分量是原子（即每一个分量都必须是不可分的数据项）</li>
-</ul>
-<h3 id="关系模式"><a href="#关系模式" class="headerlink" title="关系模式"></a>关系模式</h3><p>在数据库中要区分型和值，型是指关系模式，值是指关系。</p>
-<p>关系：<br>一张二维表格，其中每一行为一元组，每一列为一属性。</p>
-<p>关系模式：<br>关系的描述称为关系模式。它可以形式化的表示为：<br>R(U, D, dom, F)<br>其中：<br>R：关系名<br>U：组成该关系的属性集合<br>D：属性来自的域<br>dom：属性向域的映象集合<br>F：属性间数据依赖关系集合</p>
-<p>关系模式与关系的关系：</p>
-<ul>
-<li>关系模式是静态的，稳定的</li>
-<li>关系是动态地，随时间不断变化的</li>
-<li>关系是关系模式在某一时刻的状态和内容</li>
-</ul>
-<h2 id="关系的完整性"><a href="#关系的完整性" class="headerlink" title="关系的完整性"></a>关系的完整性</h2><p>关系模型的完整性规则是对关系的某种约束条件。</p>
-<h3 id="关系的三类完整性约束"><a href="#关系的三类完整性约束" class="headerlink" title="关系的三类完整性约束"></a>关系的三类完整性约束</h3><ul>
-<li>实体完整性</li>
-<li>参照完整性</li>
-<li>用户定义的完整性</li>
-</ul>
-<h3 id="实体完整性"><a href="#实体完整性" class="headerlink" title="实体完整性"></a>实体完整性</h3><p>若属性A是基本关系R的主属性，则属性A不能取空值。</p>
-<h3 id="参照完整性"><a href="#参照完整性" class="headerlink" title="参照完整性"></a>参照完整性</h3><blockquote>
-<p>外码<br>设F市基本关系R的一个或一组属性，但不是关系R的码。Ks是基本关系S的主码。如果F与Ks相对应，则称D是R的外码。<br>并称基本关系R为参照关系，基本关系S为被参照关系或目标关系。<br><em>关系R和S不一定是不同的关系。</em></p>
-</blockquote>
-<p>若属性（或属性组）F是基本关系R的外码，它与基本关系S的主码Ks相对应（基本关系R和S不一定是不同的关系），则对于R中每个元组在F上的值必须为：</p>
-<ul>
-<li>或者取空值（F的每个属性值均为空值）</li>
-<li>或者等于S中某个元组的主码值</li>
-</ul>
-<h3 id="用户定义的完整性"><a href="#用户定义的完整性" class="headerlink" title="用户定义的完整性"></a>用户定义的完整性</h3><p>针对某一具体关系数据库的约束条件</p>
-<h2 id="关系代数"><a href="#关系代数" class="headerlink" title="关系代数"></a>关系代数</h2><p>关系代数是一种抽象的查询语言，它用作对关系的运算来表达查询。<br><img src="/imgs/learn/relate-cal.png" alt="关系代数运算符"></p>
-<h3 id="传统的集合运算"><a href="#传统的集合运算" class="headerlink" title="传统的集合运算"></a>传统的集合运算</h3><ul>
-<li>并</li>
-<li>差</li>
-<li>交</li>
-<li>笛卡儿积</li>
-</ul>
-<h3 id="专门的关系演算"><a href="#专门的关系演算" class="headerlink" title="专门的关系演算"></a>专门的关系演算</h3><p><strong>选择</strong><br>从关系R中选取使得逻辑表达式F为真的元组，这是从行的角度进行的运算。<br><strong>投影</strong><br>从关系R中选取若干属性列组成新的关系，这是从列的角度进行的运算。<br><em>需要消除重复行，因此有可能导致某些元组被取消。</em><br><strong>连接</strong><br>从两个关系的笛卡尔积中选取属性间满足一定条件的元组</p>
-<ul>
-<li>等值连接：要求选取的A，B属性组的值相等</li>
-<li>自然连接：特殊的等值连接，要求把重复属性列去掉</li>
-</ul>
-<p>如果把舍弃的元组也保存在结果关系中，而在其他的属性上填空值（NULL），那么这种连接叫做外连接。<br>如果只保留左边关系中要舍弃的部分，叫做左外连接；<br>如果只保留右边关系中要舍弃的部分，叫做右外连接。</p>
-<p><strong>除</strong><br><img src="/imgs/learn/divide.png" alt="关系运算-除"></p>
-<h1 id="SQL数据语言"><a href="#SQL数据语言" class="headerlink" title="SQL数据语言"></a>SQL数据语言</h1><h2 id="SQL概述"><a href="#SQL概述" class="headerlink" title="SQL概述"></a>SQL概述</h2><h3 id="产生与发展"><a href="#产生与发展" class="headerlink" title="产生与发展"></a>产生与发展</h3><ul>
-<li>1974年由Boyce和Chamberlin提出</li>
-<li>1975-1979年，IBM的System R上实现</li>
-<li>1986年，ANSI通过SQL标准</li>
-<li>后来相继提出SQL-89与SQL-92标准</li>
-<li>目前，大多数数据库均采用SQL作为共同的数据存取和标准接口</li>
-</ul>
-<h3 id="SQL的特点"><a href="#SQL的特点" class="headerlink" title="SQL的特点"></a>SQL的特点</h3><ul>
-<li>综合统一</li>
-<li>高度非过程化</li>
-<li>面向集合的操作方式</li>
-<li>一种语法结构两种方式</li>
-<li>语言简洁，易学易用</li>
-</ul>
-<h3 id="SQL基本概念"><a href="#SQL基本概念" class="headerlink" title="SQL基本概念"></a>SQL基本概念</h3><p>SQL支持关系数据库三级模式结构，其中：</p>
-<ul>
-<li>外模式——视图和部分基本表（不能独立存在）</li>
-<li>模式——基本表（独立存在，关系-基本表-存储文件一一对应）</li>
-<li>内模式——存储文件（存储文件的逻辑结构组成了关系数据库的内模式）</li>
-</ul>
-<h3 id="SQL对象"><a href="#SQL对象" class="headerlink" title="SQL对象"></a>SQL对象</h3><p>SQL对象包括数据库、表、视图、属性名等，这些对象名符合一定规则：</p>
-<blockquote>
-<p>SQL SERVER 1-30字符<br>ACCESS 64字符<br>ORACLE 限制为8个字符</p>
-<p>应以字母开头，其他字符可以使字母、数字、下划线</p>
-</blockquote>
-<h3 id="SQL语句"><a href="#SQL语句" class="headerlink" title="SQL语句"></a>SQL语句</h3><ol>
-<li>尖括号”&lt;&gt;”中的内容为实际意义</li>
-<li>中括号”[]”中的内容为任选项</li>
-<li>[,…]意思是等等</li>
-<li>大括号”{}”与竖线”|”标明此处为选择项，在所列举的各项中仅需选择一项。</li>
-<li>SQL中的数据项（包括列项、表和视图）分隔符为”,”；其字符串常数的定界符用单引号”‘“表示。</li>
-</ol>
-<h2 id="数据定义"><a href="#数据定义" class="headerlink" title="数据定义"></a>数据定义</h2><p><img src="/imgs/learn/SQL-data-define.png" alt="SQL的数据定义语句"></p>
-<h3 id="数据库的创建与删除"><a href="#数据库的创建与删除" class="headerlink" title="数据库的创建与删除"></a>数据库的创建与删除</h3><p>创建数据库</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE DATABASE &lt;数据库名&gt;;</span><br><span class="line">CREATE DATABASE Mydb;</span><br></pre></td></tr></table></figure>
-<p>删除数据库</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DROP DATABASE &lt;数据库名&gt; [,&lt;数据库名&gt;] [,...];</span><br><span class="line">DROP DATABASE Mydb;</span><br></pre></td></tr></table></figure>
-<h3 id="表的创建与删除"><a href="#表的创建与删除" class="headerlink" title="表的创建与删除"></a>表的创建与删除</h3><p>创建基本表</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE &lt;表名&gt;</span><br><span class="line">    (&lt;列名&gt; &lt;数据类型&gt; [&lt;列级完整性约束条件&gt;] [&lt;列名&gt; &lt;数据类型&gt; [ &lt;列级完整性约束条件&gt; ] [,...] ] [,&lt;表级完整性约束条件&gt;] [,..]);</span><br></pre></td></tr></table></figure>
-<p><img src="/imgs/learn/main-type.png" alt="主要数据类型"></p>
-<p>约束条件：</p>
-<ul>
-<li>列级完整性约束条件——只能用于列</li>
-<li>表级完整性约束条件——只能够用于一张中的多列</li>
-</ul>
-<p>SQL完整性约束条件</p>
-<ul>
-<li>NOT NULL或NULL，列级，是否允许为空</li>
-<li>UNIQUE，列级，唯一性约束</li>
-<li>DEFAULT，列级，默认值约束</li>
-<li>CHECK，列级，检验约束，为插入列中的数据指定约束条件</li>
-<li>PRIMARY KEY，表级，主键约束，使得主键的数值在每一行中各不相同，不能为空</li>
-<li>FOREIGN KEY，表级，外键约束，是参照完整性约束</li>
-</ul>
-<p>举例<br>创建<code>学生表：Student(sno, sname, sdate, ssex, sdept)</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Create Table Student(</span><br><span class="line">    sno char(5) not null unique,</span><br><span class="line">    sdate date,</span><br><span class="line">    ssex char(2) default &apos;男&apos;,</span><br><span class="line">    sdept char(2)</span><br><span class="line">    Constraint C1 Check (ssex In (&apos;男&apos;, &apos;女&apos;)));</span><br></pre></td></tr></table></figure>
-<p>删除基本表</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP TABLE &lt;表名&gt;;</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP TABLE Student;</span><br></pre></td></tr></table></figure>
-<h3 id="表结构的修改"><a href="#表结构的修改" class="headerlink" title="表结构的修改"></a>表结构的修改</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE &lt;表名&gt;</span><br><span class="line">    [ADD ( &lt;新列名&gt; &lt;数据类型&gt; [&lt;完整性约束条件&gt;][,...])]</span><br><span class="line">    [DROP &lt;完整性约束名&gt;]</span><br><span class="line">    [MODIFY ( &lt;列名&gt; &lt;数据类型&gt; [,...])];</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<blockquote>
-<p>在Student表中增加‘籍贯native_place’列，数据类型为字符型</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Alter Table Student</span><br><span class="line">    Add native_place Varchar(50);</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>删除Student表中学生姓名必须取唯一值的约束条件</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Alter Table Student</span><br><span class="line">    Drop unique(sname);</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>修改Student表中sname列的数据类型为定长字符型</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Alter Table Student</span><br><span class="line">    Modify sname char(8) unique;</span><br></pre></td></tr></table></figure>
-<h3 id="建立和删除索引"><a href="#建立和删除索引" class="headerlink" title="建立和删除索引"></a>建立和删除索引</h3><p>建立索引</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE [UNIQUE] [CLUSTER] INDEX  &lt;索引名&gt;</span><br><span class="line">    ON &lt;表名&gt; (&lt;列名&gt; [&lt;次序&gt;] [, &lt;列名&gt; [&lt;次序&gt;] ] [,…]);</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Create unique Index stusno_ind</span><br><span class="line">    On Student (sno ASC);</span><br></pre></td></tr></table></figure>
-<p>删除索引</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP INDEX &lt;索引名&gt;;</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP INDEX Stusno_Ind;</span><br></pre></td></tr></table></figure>
-<h2 id="数据查询"><a href="#数据查询" class="headerlink" title="数据查询"></a>数据查询</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SELECT [ALL|DISTINCT] &lt;目标列表达式&gt; [,&lt;目标列表达式&gt;] [,…]</span><br><span class="line">[INTO &lt;新表名&gt;]</span><br><span class="line">FROM &lt;表名/视图名&gt; [,&lt;表名/视图名&gt;] [,…]</span><br><span class="line">[WHERE &lt;条件表达式&gt;]</span><br><span class="line">[GROUP BY &lt;列名1&gt;] [HAVING &lt;条件表达式&gt;]]</span><br><span class="line">[ORDER BY &lt;列名2&gt; [ASC|DESC]];</span><br></pre></td></tr></table></figure>
-<h3 id="目标列表达式"><a href="#目标列表达式" class="headerlink" title="目标列表达式"></a>目标列表达式</h3><p>目标列表达式是一个逗号分隔的表达式列表</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[&lt;表名&gt;.]&lt;属性列名表达式&gt; [, [&lt;表名&gt;.] &lt;属性列名表达式&gt;] [, …]</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//查询单表中全体学生的学号与姓名</span><br><span class="line">SELECT sno, sname FROM Student;</span><br><span class="line">//查询单表中的全体学生</span><br><span class="line">SELECT * FROM Student;</span><br></pre></td></tr></table></figure>
-<p>集函数</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;集函数&gt; ( [ DISTINCT | ALL ] * )</span><br><span class="line">//集函数：SUM、AVG、COUNT、MAX、MIN</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT DISTINCT sname, Year(GetDate())-Year(sdate) AS age FROM Student;</span><br></pre></td></tr></table></figure>
-<h3 id="条件表达式"><a href="#条件表达式" class="headerlink" title="条件表达式"></a>条件表达式</h3><p><img src="/imgs/learn/where.png" alt="条件表达式"><br>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//从Student表中，查询男同学</span><br><span class="line">SELECT * FROM Student WHERE ssex=&apos;男&apos;;</span><br><span class="line">//从Student表中，查询出生日期在1980年和1990年之间的学生</span><br><span class="line">SELECT * FROM Student WHERE sdate BETWEEN &apos;1980-01-01&apos; AND &apos;1990-12-31&apos;;</span><br></pre></td></tr></table></figure>
-<p>通配符</p>
-<blockquote>
-<p>%：百分号，代表任意长度的字符串<br>a%b:ab,acb,addb<br>_：下划线，代表单个字符<br>a_b: acb,adb, afb</p>
-<p>[ ]：表示中括号里面的任意一个字符<br>A[BCDE]表示第一个字符为A，第二个字符为B,C,D,E中的任意一个<br>[^ ]：表示不在中括号里面的任意一个字符<br>A[^BCDE]表示第一个字符为A，第二个字符为不为B,C,D,E的任意一个字符</p>
-</blockquote>
-<h2 id="数据操纵"><a href="#数据操纵" class="headerlink" title="数据操纵"></a>数据操纵</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">数据插入——INSERT——向数据库中插入新纪录</span><br><span class="line">数据修改——UPDATE——修改数据库中的某记录</span><br><span class="line">数据删除——DELETE——删除数据库中的某记录</span><br></pre></td></tr></table></figure>
-<h3 id="数据插入"><a href="#数据插入" class="headerlink" title="数据插入"></a>数据插入</h3><p>插入元组</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">INSERT</span><br><span class="line">INTO &lt;表名&gt; [( &lt;字段1&gt;[, &lt;字段2&gt;] [,…])]</span><br><span class="line">VALUES (&lt;常量1&gt; [, &lt;常量2&gt;] [,…]);</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//将一条新学生记录（所有字段都有值）插入到表中</span><br><span class="line">Insert Into S</span><br><span class="line">Values (‘95020’,‘陈东’,‘男’,‘IS’,’18’);</span><br><span class="line">将一条学生记录（部分字段有值）插入表中</span><br><span class="line">Insert Into S(Sno,Sname)</span><br><span class="line">Values (‘95020’,‘陈东’);</span><br></pre></td></tr></table></figure>
-<p>插入子查询<br>子查询不仅可以嵌套在SELECT语句中，也可以嵌套在INSERT语句中，用于生成要插入的批量数据。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">INSERT</span><br><span class="line">INTO &lt;表名&gt; [( &lt;字段1&gt;[, &lt;字段2&gt;] [,…])]</span><br><span class="line">子查询;</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Insert Into Deptage(Sdept, Avgage)</span><br><span class="line">    Select Sdept, AVG(Sage)</span><br><span class="line">    From S  Group By Sdept;</span><br></pre></td></tr></table></figure>
-<h3 id="数据修改"><a href="#数据修改" class="headerlink" title="数据修改"></a>数据修改</h3><p>一般格式</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UPDATE &lt;表名&gt;</span><br><span class="line">SET  &lt;字段名1&gt;＝&lt;表达式1&gt;[, &lt;字段2&gt;= &lt;表达式2&gt;] [,…]]</span><br><span class="line">[WHERE &lt;条件表达式&gt;];</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">//修改某一元组的值：如将学生95001的年龄改为22岁</span><br><span class="line">Update S</span><br><span class="line">Set Sage=22</span><br><span class="line">Where Sno=&apos;95001&apos;;</span><br><span class="line">//修改多个元组的值：如将所有学生的年龄加一岁</span><br><span class="line">Update S</span><br><span class="line">Set Sage= Sage+1;</span><br><span class="line">//带子查询的修改语句：将信息管理系的所有学生成绩置零</span><br><span class="line">Update SC</span><br><span class="line">Set Grade=0</span><br><span class="line">Where &apos;IS&apos;=</span><br><span class="line">    (Select Sdept</span><br><span class="line">    From S</span><br><span class="line">    Where S.Sno=SC.Sno);</span><br></pre></td></tr></table></figure>
-<h3 id="删除数据"><a href="#删除数据" class="headerlink" title="删除数据"></a>删除数据</h3><p>一般格式</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DELETE</span><br><span class="line">FROM  &lt;表名&gt;</span><br><span class="line">[WHERE &lt;条件表达式&gt;];</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">//删除某一元组：如删除学号为95001的学生记录</span><br><span class="line">Delete</span><br><span class="line">From S</span><br><span class="line">Where Sno=&apos;95001&apos;;</span><br><span class="line">//将S表清空</span><br><span class="line">Delete</span><br><span class="line">From S;</span><br><span class="line">//带查询的删除语句：如删除信息系所有学生的选课记录</span><br><span class="line">Delete</span><br><span class="line">From SC</span><br><span class="line">Where &apos;IS&apos;=</span><br><span class="line">    (Select Sdept</span><br><span class="line">    From S</span><br><span class="line">    Where S.Sno=SC.Sno);</span><br></pre></td></tr></table></figure>
-<h2 id="数据控制"><a href="#数据控制" class="headerlink" title="数据控制"></a>数据控制</h2><p>共享程度与安全性问题的冲突<br>数据控制功能：</p>
-<ul>
-<li>事务管理功能</li>
-<li>数据保护功能</li>
-</ul>
-<p>授予权限<br>一般格式</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">GRANT  &lt;权限&gt; [,&lt;权限&gt;][,…]</span><br><span class="line">    [ON  &lt;对象类型&gt; &lt;对象名称&gt;]</span><br><span class="line">    TO  &lt;用户&gt; [, &lt;用户&gt;] [,…]</span><br><span class="line">    [WITH  GRANT OPTION];</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//把查询S表的权限授权给用户U1</span><br><span class="line">GRANT  SELECT</span><br><span class="line">ON  TABLE  S</span><br><span class="line">TO U1;</span><br><span class="line">//把查询S表和C表的全部权限授权给用户U1和U2</span><br><span class="line">GRANT ALL PRIVILEGES</span><br><span class="line">ON TABLE S, C</span><br><span class="line">TO U1, U2;</span><br></pre></td></tr></table></figure>
-<p>收回权限<br>一般格式</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">REVOKE  &lt;权限&gt; [,&lt;权限&gt;][,…]</span><br><span class="line">    [ON  &lt;对象类型&gt; &lt;对象名称&gt;]</span><br><span class="line">    FROM  &lt;用户&gt; [, &lt;用户&gt;] [,…]</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//把用户U1修改学号的权限收回</span><br><span class="line">REVOKE UPDATE(Sno)</span><br><span class="line">ON TABLE S</span><br><span class="line">FROM U1;</span><br><span class="line">//收回所有用户对表SC的查询权限</span><br><span class="line">REVOKE SELECT</span><br><span class="line">ON TABLE SC</span><br><span class="line">FROM PUBLIC;</span><br></pre></td></tr></table></figure>
-<h1 id="关系数据库设计"><a href="#关系数据库设计" class="headerlink" title="关系数据库设计"></a>关系数据库设计</h1><h2 id="关系数据库设计理论"><a href="#关系数据库设计理论" class="headerlink" title="关系数据库设计理论"></a>关系数据库设计理论</h2><h3 id="关系模式-1"><a href="#关系模式-1" class="headerlink" title="关系模式"></a>关系模式</h3><p><code>R(U , F)</code><br>当且仅当U上的一个关系r满足F时，r称为关系模式R(U , F)的一个关系</p>
-<h3 id="函数依赖定义"><a href="#函数依赖定义" class="headerlink" title="函数依赖定义"></a>函数依赖定义</h3><p>定义：<br>设R（U）是属性集U上的关系模式。X，Y是U上的子集。<br>若R（U）的任意一个可能的关系r，r中不可能存在两个元组在X上的属性值相等而在Y上的属性值不等，则称：<br>X函数依赖确定Y或Y函数依赖确定于X，记做<code>X-&gt;Y</code>。</p>
-<p>术语：<br><img src="/imgs/learn/func-define.png" alt="函数依赖术语"></p>
-<h3 id="第一范式（1NF）"><a href="#第一范式（1NF）" class="headerlink" title="第一范式（1NF）"></a>第一范式（1NF）</h3><p>每一个分量必须是不可分的数据项。<br>存在问题：<br>数据冗余；插入异常；删除异常。</p>
-<h3 id="第二范式（2NF）"><a href="#第二范式（2NF）" class="headerlink" title="第二范式（2NF）"></a>第二范式（2NF）</h3><p>在第一范式的基础上，每一个非主属性完全函数依赖于码。<br>存在问题：<br>插入异常；删除异常；修改复杂。</p>
-<h3 id="第三范式（3NF）"><a href="#第三范式（3NF）" class="headerlink" title="第三范式（3NF）"></a>第三范式（3NF）</h3><p>若关系R（U）的每个非主属性都不部分依赖于也不于传递于码，则称R（U）满足第三范式。</p>
-<h3 id="BCNF"><a href="#BCNF" class="headerlink" title="BCNF"></a>BCNF</h3><ul>
-<li>所有非主属性对每一个码都是完全函数依赖</li>
-<li>所有的主属性对每一个不包含它的码，是完全函数依赖</li>
-<li>没有任何属性完全依赖于非码的任何一组属性</li>
-</ul>
-<h3 id="多值依赖"><a href="#多值依赖" class="headerlink" title="多值依赖"></a>多值依赖</h3><p><img src="/imgs/learn/MVD.png" alt="多值依赖"></p>
-<h3 id="第四范式（4NF）"><a href="#第四范式（4NF）" class="headerlink" title="第四范式（4NF）"></a>第四范式（4NF）</h3><p>关系模式R<u,f>符合第一范式，对于R的每一个非平凡多值依赖，X都含有码，则称关系模式R符合第四范式</u,f></p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><img src="/imgs/learn/func-depand-conclusion.png" alt="函数依赖总结"></p>
-<h2 id="关系数据库设计的步骤"><a href="#关系数据库设计的步骤" class="headerlink" title="关系数据库设计的步骤"></a>关系数据库设计的步骤</h2><ul>
-<li>需求分析</li>
-<li>概念结构设计</li>
-<li>逻辑结构设计</li>
-<li>数据库物理设计</li>
-<li>数据库实施</li>
-<li>数据库运行和维护</li>
-</ul>
-<h3 id="需求分析"><a href="#需求分析" class="headerlink" title="需求分析"></a>需求分析</h3><ol>
-<li>业务流程分析</li>
-<li>数据流程分析</li>
-<li>画出ER图</li>
-</ol>
-<h3 id="概念结构设计"><a href="#概念结构设计" class="headerlink" title="概念结构设计"></a>概念结构设计</h3><p>特点：</p>
-<ul>
-<li>能真实、充分地反映现实世界，包括事物与事物之间的联系</li>
-<li>易于理解，从而可以用它和不熟悉计算机的用户交换意见</li>
-<li>易于更改</li>
-<li>易于向关系、网状、层次等数据模型转换</li>
-</ul>
-<p>设计方法：</p>
-<ul>
-<li>自顶向下</li>
-<li>自底向上</li>
-<li>逐步扩张：核心概念结构，向外扩张</li>
-<li>混合策略：自顶向下和自底向上相结合</li>
-</ul>
-<p>数据抽象：</p>
-<ul>
-<li>分类</li>
-<li>聚集</li>
-<li>概括</li>
-</ul>
-<p>任务：<br>ER图变为数据库逻辑结构</p>
-<p>转换原则：<br>实体及其属性的转换：<br>一个实体型转换为一个关系模式。<br>实体的属性就是关系的属性，实体的码就是关系的码。</p>
-<p>1:1<br>可以转换为一个独立模式，也可以与任意一段的对应的关系模式合并<br>1:n<br>可以转换为一个独立模式，可以与N端对应的关系模式合并<br>m:n<br>转换为一个独立模式</p>
-<p>设计用户子模式——视图</p>
-<h3 id="数据库的物理设计"><a href="#数据库的物理设计" class="headerlink" title="数据库的物理设计"></a>数据库的物理设计</h3><ul>
-<li>存取方法</li>
-<li>存取结构</li>
-</ul>
-<h3 id="实施与维护阶段"><a href="#实施与维护阶段" class="headerlink" title="实施与维护阶段"></a>实施与维护阶段</h3><ul>
-<li>定义数据库的结构</li>
-<li>数据装载/编写程序</li>
-<li>数据库软件试运行</li>
-</ul>
-<h1 id="数据库安全保护"><a href="#数据库安全保护" class="headerlink" title="数据库安全保护"></a>数据库安全保护</h1><h2 id="信息安全综述"><a href="#信息安全综述" class="headerlink" title="信息安全综述"></a>信息安全综述</h2><p>安全：免于危险的质量和状态<br>信息安全：是对信息、系统以及使用、存储和传输信息的硬件的保护<br>数据库安全：是指保护数据库以防止不合法的使用所造成的数据泄露、更改或破坏<br>访问：一个主题或对象使用、操作、修改或者影响另一个主题或对象的能力<br>资产：被保护的机构资源<br>安全蓝本：对机构里新的安全措施的实施计划<br>漏洞：系统内的弱点或错误，或者是使信息暴露给攻击或破坏的保护性机制</p>
-<h2 id="数据库安全性控制"><a href="#数据库安全性控制" class="headerlink" title="数据库安全性控制"></a>数据库安全性控制</h2><p>计算机系统的安全模型<br><img src="/imgs/learn/safe-modal.png" alt="计算机系统的安全模型"></p>
-<h3 id="用户标识和鉴别"><a href="#用户标识和鉴别" class="headerlink" title="用户标识和鉴别"></a>用户标识和鉴别</h3><p>用户标识和鉴别是系统提供的最外层安全保护措施<br>举例：校园网登录</p>
-<h3 id="存取控制"><a href="#存取控制" class="headerlink" title="存取控制"></a>存取控制</h3><p>数据库安全性主要是存取控制机制</p>
-<ol>
-<li>定义用户权限</li>
-<li>合法用户权限检查</li>
-</ol>
-<h3 id="审计"><a href="#审计" class="headerlink" title="审计"></a>审计</h3><p>把用户对数据库的所有操作自动记录下来放入审计日志</p>
-<h3 id="数据加密"><a href="#数据加密" class="headerlink" title="数据加密"></a>数据加密</h3><p>高度敏感性数据，需要采用数据加密技术</p>
-<h2 id="统计数据库安全性"><a href="#统计数据库安全性" class="headerlink" title="统计数据库安全性"></a>统计数据库安全性</h2><p>在统计数据库中存在着特殊的安全性问题，需要注意。</p>
-<h2 id="SQL-SERVER系统安全性"><a href="#SQL-SERVER系统安全性" class="headerlink" title="SQL SERVER系统安全性"></a>SQL SERVER系统安全性</h2><p>简要介绍，略过</p>
-<h1 id="版权信息"><a href="#版权信息" class="headerlink" title="版权信息"></a>版权信息</h1><p>大部分内容来自于中国地质大学（北京）安海忠老师的授课PPT以及王珊，萨师煊所著的《数据库系统概论》（第四版），可在非商用-署名前提下自由分发。</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2015年06月12日 完成初稿</li>
-<li>2015年06月14日 修复了一些格式错误</li>
-</ul>
-
+                <a class="" href="/2015/06/12/database-review/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2015/06/12/database-review/">数据库系统概论复习</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2015年6月12日 - 14时06分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2015/06/12/database-review/"
-                                            title="数据库系统概论复习">https://xuanwo.org/2015/06/12/database-review/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Database/"> #Database </a>
-                    
-                        <a href="/tags/复习/"> #复习 </a>
-                    
-                </div>
             
         </div>
 
@@ -701,8 +280,6 @@
                         
                             <li><a href="/tags/Information/">Information</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
                             <li><a href="/tags/项目/">项目</a></li>
                         
                             <li><a href="/tags/Python/">Python</a></li>
@@ -713,15 +290,17 @@
                         
                             <li><a href="/tags/JavaScript/">JavaScript</a></li>
                         
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
                             <li><a href="/tags/实习/">实习</a></li>
                         
                             <li><a href="/tags/QingCloud/">QingCloud</a></li>
                         
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
                             <li><a href="/tags/Work/">Work</a></li>
                         
                             <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/Hardware/">Hardware</a></li>
                         

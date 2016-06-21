@@ -63,7 +63,6 @@
             <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
             <ul class="submenu-list"><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2016/">2016</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2015/">2015</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2014/">2014</a></li></ul>
         </li>
-        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
     </ul>
 </div>
 <div id="wrap">
@@ -115,139 +114,13 @@
         </div>
         <h2><a href="/2015/07/01/screen-ssh/">使用Screen管理会话</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在实现<a href="http://xuanwo.org/2015/06/30/together-project/">Together项目</a>的过程中，有一个需求是需要下载一个500M左右系统镜像包，由于文件源在国内，国外的下载速度简直感人。在经历多次因为SSH超时导致下载意外终止后，我终于决定要解决掉这个问题。</p>
-<a id="more"></a>
-<h1 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h1><p><strong>SIGHUP 信号</strong><br>首先介绍Linux/Unix中的几个概念：</p>
-<blockquote>
-<p><a href="">进程组（process group）</a>：一个或多个进程的集合，每一个进程组有唯一一个进程组ID，即进程组长进程的ID。<br><a href="">会话期（session）</a>：一个或多个进程组的集合，有唯一一个会话期首进程（session leader）。会话期ID为首进程的ID。<br>会话期可以有一个单独的控制终端（controlling terminal）。与控制终端连接的会话期首进程叫做控制进程（controlling process）。当前与终端交互的进程称为前台进程组。其余进程组称为后台进程组。</p>
-</blockquote>
-<p>根据<a href="https://zh.wikipedia.org/wiki/POSIX" target="_blank" rel="external">POSIX.1</a>定义：</p>
-<ul>
-<li>挂断信号（SIGHUP）默认的动作是终止程序。</li>
-<li>当终端接口检测到网络连接断开，将挂断信号发送给控制进程（会话期首进程）。</li>
-<li>如果会话期首进程终止，则该信号发送到该会话期前台进程组。</li>
-<li>一个进程退出导致一个孤儿进程组中产生时，如果任意一个孤儿进程组进程处于STOP状态，发送SIGHUP和SIGCONT信号到该进程组中所有进程。</li>
-</ul>
-<p>也就是说，一旦putty因为超时产生了SIGHUP信号，那么会连带着当前终端正在运行的程序全部终止。所以，只要避免SIGHUP信号的产生，就可以规避这个问题。</p>
-<h1 id="Screen"><a href="#Screen" class="headerlink" title="Screen"></a>Screen</h1><p>简单来说，Screen是一个可以在多个进程之间多路复用一个物理终端的窗口管理器。Screen中有会话的概念，用户可以在一个screen会话中创建多个screen窗口，在每一个screen窗口中就像操作一个真实的telnet/SSH连接窗口那样。</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>很多发行版会预装Screen，如果没有（比如Ubuntu），则需要自行安装，以Ubuntu为例：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">sudo apt-get install screen</span><br></pre></td></tr></table></figure>
-<h2 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h2><h3 id="直接创建"><a href="#直接创建" class="headerlink" title="直接创建"></a>直接创建</h3><p>直接在命令行下输入</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">screen</span><br></pre></td></tr></table></figure>
-<p>之后你会看到几页字，按回车跳过之后，你就来到了一个shell的全屏窗口。你可以执行任意shell程序，就像在ssh窗口中那样。在该窗口中键入exit退出该窗口，如果这是该screen会话的唯一窗口，该screen会话退出，否则screen自动切换到前一个窗口。</p>
-<h3 id="快捷键创建新窗口"><a href="#快捷键创建新窗口" class="headerlink" title="快捷键创建新窗口"></a>快捷键创建新窗口</h3><p>在已经激活的Screen会话下，使用快捷键<code>Ctrl+A</code>然后点击<code>C</code>，screen 在该会话内生成一个新的窗口并切换到该窗口。</p>
-<h2 id="暂时中断"><a href="#暂时中断" class="headerlink" title="暂时中断"></a>暂时中断</h2><p>screen还有更高级的功能。你可以不中断screen窗口中程序的运行而暂时断开（detach）screen会话，并在随后时间重新连接（attach）该会话，重新控制各窗口中运行的程序。例如，我们使用wget下载一个文件：<br><img src="/imgs/learn/ssh-time-out.png" alt="SSH超时样例"><br>之后我们想暂时退出做点别的事情，比如出去散散步，那么在screen窗口键入<code>Ctrl+A</code>然后点击<code>D</code>，Screen会给出detached提示：<br><img src="/imgs/learn/screen-detached.png" alt="Screen Detached"><br>半个小时之后回来了，找到该screen会话：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">screen -ls</span><br></pre></td></tr></table></figure>
-<p>重新连接会话：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">screen -r 会话ID</span><br></pre></td></tr></table></figure>
-<p>一切工作都会完全回来，区别只在于，他可能已经做好了&gt;_&lt;。</p>
-<h2 id="键绑定"><a href="#键绑定" class="headerlink" title="键绑定"></a>键绑定</h2><blockquote>
-<p>你可能注意到给screen发送命令使用了特殊的键组合<code>Ctrl+A</code>。这是因为我们在键盘上键入的信息是直接发送给当前screen窗口，必须用其他方式向screen窗口管理器发出命令，默认情况下，screen接收以<code>Ctrl+A</code>开始的命令。这种命令形式在screen中叫做键绑定（key binding），<code>Ctrl+A</code>叫做命令字符（command character）。</p>
-</blockquote>
-<p>可以通过<code>Ctrl+A ?</code>来查看所有的键绑定，常用的键绑定有：</p>
-<table>
-<thead>
-<tr>
-<th><code>Ctrl+A ?</code></th>
-<th>显示所有键绑定信息</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>Ctrl+A w</code></td>
-<td>显示所有窗口列表</td>
-</tr>
-<tr>
-<td><code>Ctrl+A Ctrl+A</code></td>
-<td>切换到之前显示的窗口</td>
-</tr>
-<tr>
-<td><code>Ctrl+A c</code></td>
-<td>创建一个新的运行shell的窗口并切换到该窗口</td>
-</tr>
-<tr>
-<td><code>Ctrl+A n</code></td>
-<td>切换到下一个窗口</td>
-</tr>
-<tr>
-<td><code>Ctrl+A p</code></td>
-<td>切换到前一个窗口(与Ctrl+A n相对)</td>
-</tr>
-<tr>
-<td><code>Ctrl+A 0..9</code></td>
-<td>切换到窗口0..9</td>
-</tr>
-<tr>
-<td><code>Ctrl+A a</code></td>
-<td>发送 Ctrl+A到当前窗口</td>
-</tr>
-<tr>
-<td><code>Ctrl+A d</code></td>
-<td>暂时断开screen会话</td>
-</tr>
-<tr>
-<td><code>Ctrl+A k</code></td>
-<td>杀掉当前窗口</td>
-</tr>
-<tr>
-<td><code>Ctrl+A [</code></td>
-<td>进入拷贝/回滚模式</td>
-</tr>
-</tbody>
-</table>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
-<li><a href="http://www.ibm.com/developerworks/cn/linux/l-cn-screen/index.html" target="_blank" rel="external">linux 技巧：使用 screen 管理你的远程会话</a></li>
-<li><a href="http://www.gnu.org/software/screen/" target="_blank" rel="external">GNU Screen</a></li>
-<li><a href="http://www.slac.stanford.edu/comp/unix/package/epics/extensions/iocConsole/screen.1.html" target="_blank" rel="external">Screen的man page提供了最详细的信息</a></li>
-</ul>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2015年07月01日 完成关于Screen的介绍</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在实现<a href="http://xuanwo.org/2015/06/30/together-project/">Together项目</a>的过程中，有一个需求是需要下载一个500M左右系统镜像包，由于文件源在国内，国外的下载速度简直感人。在经历多次因为SSH超时导致下载意外终止后，我终于决定要解决掉这个问题。</p>
+                <a class="" href="/2015/07/01/screen-ssh/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2015/07/01/screen-ssh/">使用Screen管理会话</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2015年7月1日 - 09时07分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2015/07/01/screen-ssh/"
-                                            title="使用Screen管理会话">https://xuanwo.org/2015/07/01/screen-ssh/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/VPS/"> #VPS </a>
-                    
-                        <a href="/tags/Linux/"> #Linux </a>
-                    
-                        <a href="/tags/SSH/"> #SSH </a>
-                    
-                </div>
             
         </div>
 
@@ -359,8 +232,6 @@
                         
                             <li><a href="/tags/Information/">Information</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
                             <li><a href="/tags/项目/">项目</a></li>
                         
                             <li><a href="/tags/Python/">Python</a></li>
@@ -371,15 +242,17 @@
                         
                             <li><a href="/tags/JavaScript/">JavaScript</a></li>
                         
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
                             <li><a href="/tags/实习/">实习</a></li>
                         
                             <li><a href="/tags/QingCloud/">QingCloud</a></li>
                         
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
                             <li><a href="/tags/Work/">Work</a></li>
                         
                             <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/Hardware/">Hardware</a></li>
                         

@@ -63,7 +63,6 @@
             <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
             <ul class="submenu-list"><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2016/">2016</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2015/">2015</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2014/">2014</a></li></ul>
         </li>
-        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
     </ul>
 </div>
 <div id="wrap">
@@ -115,102 +114,13 @@
         </div>
         <h2><a href="/2016/05/09/msp430g2553-bellring/">基于MSP430G2553的打铃系统开发手记</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>我萌萌哒的妹纸是一个代码苦手，完全无法理解 C 语言，所以每一次到单片机上机需要交作业的时候都是愁眉苦脸的样子。而我又总是因为自己确实不懂单片机里面的种种奇怪定义（中断，串口，P1.x 之类），所以也一直没有什么好办法去帮她。这一次的作业对编码能力要求较高，但是涉及到的硬件比较少，于是决定以此为契机，开始我的嵌入式开发之旅。</p>
-<a id="more"></a>
-<h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><p>这次的如下：</p>
-<h2 id="基本要求"><a href="#基本要求" class="headerlink" title="基本要求"></a>基本要求</h2><ul>
-<li>基本计时和显示功能(用 12 小时制显示)。<br>包括上下午标志,时、分的数字显示,秒信号指示。</li>
-<li>能设置当前时间(含上、下午,时,分)</li>
-<li>能实现基本打铃功能,规定:<br>上午 6:00 起床铃;打铃 5 秒、停 2 秒、再打铃 5 秒。<br>下午 10:30 熄灯铃;打铃 5 秒、停 2 秒、再打铃 5 秒。</li>
-</ul>
-<blockquote>
-<p>铃声可用 LED 灯光显示,如果实验装置没有 LED 发光管,可以用七段显示管的小数点显示,也可以用显示小时的十位数码管的多余段显示。凡是用到铃声功能的均可如此处理。</p>
-</blockquote>
-<h2 id="发挥部分"><a href="#发挥部分" class="headerlink" title="发挥部分"></a>发挥部分</h2><ul>
-<li>增加整点报时功能,整点时响铃 5 秒,要求有控制启动和关闭功能。</li>
-<li>增加调整起床铃、熄灯铃时间的功能。</li>
-<li>增加调整打铃时间长短和间歇时间长短的功能。</li>
-<li>增设上午 4 节课的上、下课打铃功能,规定:<br>7:30 上课,8:20 下课;8:30 上课,9:20 下课;9:40 上课,10:30 下课;10:40 上课,11:30 下课;每次铃声 5 秒。</li>
-<li>利用板上按键做一个 12 小时/24 小时的显示格式切换</li>
-</ul>
-<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><blockquote>
-<p>既然我都出动了，肯定不能满足于只完成基本要求，决定把所有功能全都完整的实现。</p>
-</blockquote>
-<p>简单的来说，整体需求可以分为三个部分：显示，打铃，修改。</p>
-<p>需要用到的东西有：串口，指示灯和一个按键。</p>
-<h2 id="显示"><a href="#显示" class="headerlink" title="显示"></a>显示</h2><p>遵循简单的前后端分离的思想，我们可以使用三个全局变量 hour ， minute ， second 来存储当前的时间，只需要在显示的时候区分上下午和 12 小时／ 24 小时即可。这两个部分解耦之后会发现，我们后面的利用板上按键修改显示格式也变得容易了很多。<br>通过串口显示也就是需要向指定变量发送字符，将这个功能抽象并封装之后，对于我后续的编程来说，也就是调用一下 Send_Str(str) 的过程。</p>
-<h2 id="打铃"><a href="#打铃" class="headerlink" title="打铃"></a>打铃</h2><p>打铃是这套系统的重头戏，因为学校方面的资源限制，所以使用指示灯示意的方法来代替打铃。<br>指示灯的亮灭是通过控制一个变量的值来确定的，于是我只要在正确时候设置正确的值，打铃系统就能按照我期望的方式工作。</p>
-<h2 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h2><p>修改同样是通过串口进行的。</p>
-<blockquote>
-<p>在最开始的设计文档中，本来是要求使用4个按键来进行设计，也就是说跟一个普通的电子表差不多。但是非常因缺思艇的事情是学校的按键不够了，所以老师要求所有功能都用串口实现。</p>
-</blockquote>
-<p>跟显示有些不同的地方是，通过串口向芯片发送数据需要正确使用串口中断。</p>
-<p>综上，这个系统所需要的全部内容就已经实现了。可以看到我做了很多将对硬件的操作抽象化的处理，其实这一点非常重要。因为对于我来说，嵌入式开发最大的难题在于，我不知道里面种种变量的含义，不知道如何操作具体的硬件。将硬件操作抽象化处理之后，我就可以很方便地开展我的后续开发。</p>
-<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>实现就不再赘述了，想必读者一定都比我强，下面聊一聊遇到的问题以及 debug 的经历。</p>
-<h2 id="串口配置"><a href="#串口配置" class="headerlink" title="串口配置"></a>串口配置</h2><p>串口的收和发其实是分开的，这里用到了两个变量： UCA0TXBUF ， UCA0RXBUF 。从字面意思上可以看出，前一个用于发送，后一个用于接收（相对于开发者来说）。发送和接收其实就是给这两个值赋值的过程，看起来这两个变量在接受到值之后会将这个值传给别的变量，所以只要不断的将值赋给它就行，我们写了这样的函数：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> vector=USCIAB0RX_VECTOR <span class="comment">//中断服务函数</span></span></span><br><span class="line"></span><br><span class="line">__<span class="function">interrupt <span class="keyword">void</span> <span class="title">uart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    rec = UCA0RXBUF;</span><br><span class="line">    <span class="comment">//读取到缓冲区</span></span><br><span class="line">    strtmp[<span class="built_in">strlen</span>++] = rec;</span><br><span class="line">    strtmp[<span class="built_in">strlen</span>] = <span class="string">'\0'</span>;</span><br><span class="line">    <span class="comment">//切换模式</span></span><br><span class="line">    mode = strtmp[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//发送字符</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Send_Char</span><span class="params">(<span class="keyword">char</span> ch)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (!(IFG2 &amp; UCA0TXIFG));</span><br><span class="line">    UCA0TXBUF = ch;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//发送字符串</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Send_Str</span><span class="params">(<span class="keyword">char</span> *p)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> i;</span><br><span class="line">    i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (*(p + i) != <span class="string">'\0'</span>) &#123;</span><br><span class="line">        <span class="keyword">while</span> (!(IFG2 &amp; UCA0TXIFG));</span><br><span class="line">        UCA0TXBUF = *(p + i);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    Send_Char(<span class="number">0x0d</span>);</span><br><span class="line">    Send_Char(<span class="number">0x0a</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>uart 貌似是一个内置的中断函数，用来处理串口的接收，只要将变量 UCA0RXBUF 的值存储起来即可；后面的 Send_Str 就非常好理解了，将值发送给 UCA0TXBUF ，从而实现串口的输出。</p>
-<p>思路如此清晰，但是测试的时候却遇到了问题，我们的输出是空的，转为16进制显示后，全都是0x00。这个问题调试了很久，拿着原来的代码逐行比对之后发现，出了这样的问题：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">- UCA0BR0 = <span class="number">130</span>;</span><br><span class="line">- UCA0BR1 = <span class="number">6</span>;</span><br><span class="line">+ UCA0BR0 = <span class="number">104</span>;</span><br><span class="line">+ UCA0BR1 = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
-<p>Google 一下才明白，原来 UCA0BR0 和 UCA0BR1 是由系统的时钟速度和波特率决定的值，如果设置错误就会导致串口发送失败。具体的值可以参考<a href="http://www.ti.com/lit/ug/slau144j/slau144j.pdf" target="_blank" rel="external">用户手册</a>， Ctrl＋F 搜索 <code>Table 15-4. Commonly Used Baud Rates</code> 即可。</p>
-<h2 id="串口输出异常"><a href="#串口输出异常" class="headerlink" title="串口输出异常"></a>串口输出异常</h2><p>前面提到我们直接使用三个变量保存当前时间，在输出时做进一步处理，转为字符串的过程中，我们进行了这样的操作：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Time[<span class="number">0</span>] = hour / <span class="number">10</span> + <span class="string">'0'</span>;</span><br></pre></td></tr></table></figure>
-<p>但有趣的事情是，在初始化之后，我们得到的输出是这样的： <code>0/:0/:0/</code> 。随手输出了一下 <code>/</code> 的 ASCII 码，发现它刚好比 <code>0</code> 小一。</p>
-<p>难道说，存储器中的默认值不是 0 吗？ Google 一下之后发现，还真的不是 0 。 MSP430G2553 中的 Flash 存储器在默认状态下的值全为 1 ，然后写入时只能将 1 置为 0 ，所以每一次写入数据都需要先清空再写入。那么问题来了，为什么全为 1 会导致最后输出的结果小 1 呢？我来简单的阐述一下我的理解：</p>
-<p>假设这个存储器只有 8 位，也就是说，现在的值为 <code>11111111</code> ，然后我加上一个 <code>1</code> ，于是我们得到：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">  11111111</span><br><span class="line">+        1</span><br><span class="line"> 100000000</span><br></pre></td></tr></table></figure>
-<p>显然，我们最后的结果已经移除了，此时会产生截断，也就是说，存储器现在的数据变成了 <code>00000000</code> ，也就是 <code>0</code>，跟我们期望的结果 <code>1</code> 刚好相差一。</p>
-<p>当然，实际的情况要比我上面的举例要复杂的多，不过我想已经足够我们认识到这个 BUG 的本质，就不再多说啦。</p>
-<h2 id="Flash-存储器未清空"><a href="#Flash-存储器未清空" class="headerlink" title="Flash 存储器未清空"></a>Flash 存储器未清空</h2><p>在测试中，我们发现每一次烧录程序之后， Flash 存储器不会清空，依然会从上一次我们保存的时间开始计时。我觉得这是正确的行为，没有在意，但是我妹纸和她的队友告诉我她们在完成上一个作业的时候每次都是会清空的。我对着这次和上次的代码研究了很久，认为代码里面根本就没有清空 Flash 存储器的操作，如果有的话，掉电保存这项功能根本无从谈起。我妹纸她们也同意我的分析，但是她们的实践确实证明了每次都会清空 Flash 存储区。</p>
-<p>这个问题也困扰了很久，直到第二天，用别人的电脑重新烧录了一遍程序，发现他们的是会正常清空的。所以说，问题在于 CCS 的版本：我妹纸使用的 CCS 版本是 6.1 ，而<br>他们用的版本是 5.1.1 ，也就是说，不同版本的 CCS 在烧录程序期间的不同行为导致了这次错误。我们换用了 5.1.1 之后，成功解决了这个问题。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>对嵌入式开发有了初步的了解，向着真·全栈开发工程师又近了一步。</p>
-<p>这一次的开发经历遇到了很多因缺思艇的问题，因为嵌入式开发本身比较偏向底层，这次开发甚至还遇到了存储器的存储原理。也有一点将自己看的 CSAPP 融会贯通的感觉，还是很有意思的。</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年05月09日  首次发布</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>我萌萌哒的妹纸是一个代码苦手，完全无法理解 C 语言，所以每一次到单片机上机需要交作业的时候都是愁眉苦脸的样子。而我又总是因为自己确实不懂单片机里面的种种奇怪定义（中断，串口，P1.x 之类），所以也一直没有什么好办法去帮她。这一次的作业对编码能力要求较高，但是涉及到的硬件比较少，于是决定以此为契机，开始我的嵌入式开发之旅。</p>
+                <a class="" href="/2016/05/09/msp430g2553-bellring/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/05/09/msp430g2553-bellring/">基于MSP430G2553的打铃系统开发手记</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年5月9日 - 08时05分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/05/09/msp430g2553-bellring/"
-                                            title="基于MSP430G2553的打铃系统开发手记">https://xuanwo.org/2016/05/09/msp430g2553-bellring/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/C/"> #C </a>
-                    
-                        <a href="/tags/单片机/"> #单片机 </a>
-                    
-                </div>
             
         </div>
 
@@ -322,8 +232,6 @@
                         
                             <li><a href="/tags/Information/">Information</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
                             <li><a href="/tags/项目/">项目</a></li>
                         
                             <li><a href="/tags/Python/">Python</a></li>
@@ -334,15 +242,17 @@
                         
                             <li><a href="/tags/JavaScript/">JavaScript</a></li>
                         
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
                             <li><a href="/tags/实习/">实习</a></li>
                         
                             <li><a href="/tags/QingCloud/">QingCloud</a></li>
                         
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
                             <li><a href="/tags/Work/">Work</a></li>
                         
                             <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/Hardware/">Hardware</a></li>
                         

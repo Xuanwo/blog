@@ -63,7 +63,6 @@
             <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
             <ul class="submenu-list"><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2016/">2016</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2015/">2015</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2014/">2014</a></li></ul>
         </li>
-        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
     </ul>
 </div>
 <div id="wrap">
@@ -115,90 +114,13 @@
         </div>
         <h2><a href="/2016/02/15/chocolatey-intro/">Chocolatey——Windows下的包管理工具</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><a href="https://chocolatey.org/" target="_blank" rel="external">Chocolatey</a>是一个基于Nuget的Windows包管理工具，截止到我更新此文章的时候，一共有3.7k多个独立包。本文旨在介绍Chocolatey这一工具的安装和用法，希望能有更多人享受到该工具的便利之处。</p>
-<a id="more"></a>
-<h1 id="安装chocolatey"><a href="#安装chocolatey" class="headerlink" title="安装chocolatey"></a>安装chocolatey</h1><h2 id="CMD"><a href="#CMD" class="headerlink" title="CMD"></a>CMD</h2><p>打开一个具有管理员权限的命令行窗口，执行如下命令：<br><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@powershell -NoProfile -ExecutionPolicy Bypass -Command <span class="string">"iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))"</span> &amp;&amp; SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin</span><br></pre></td></tr></table></figure></p>
-<h2 id="PowerShell"><a href="#PowerShell" class="headerlink" title="PowerShell"></a>PowerShell</h2><p>打开一个具有管理员权限的PowerShell窗口，执行如下命令：<br><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iex ((<span class="built_in">new-object</span> net.webclient).DownloadString(<span class="string">'https://chocolatey.org/install.ps1'</span>))</span><br></pre></td></tr></table></figure></p>
-<h1 id="使用chocolatey"><a href="#使用chocolatey" class="headerlink" title="使用chocolatey"></a>使用chocolatey</h1><h2 id="安装包"><a href="#安装包" class="headerlink" title="安装包"></a>安装包</h2><p>安装包十分的容易，只需要打开管理员权限的命令行即可：</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">choco install &lt;package&gt;</span><br></pre></td></tr></table></figure>
-<h2 id="卸载包"><a href="#卸载包" class="headerlink" title="卸载包"></a>卸载包</h2><p>卸载也同样十分简单，打开管理员权限命令行，执行：</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">choco uninstall &lt;package&gt;</span><br></pre></td></tr></table></figure>
-<h2 id="更新包"><a href="#更新包" class="headerlink" title="更新包"></a>更新包</h2><p>更新包则需要使用如下命令：</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">choco upgrade &lt;package&gt;</span><br></pre></td></tr></table></figure>
-<h1 id="为chocolatey做贡献"><a href="#为chocolatey做贡献" class="headerlink" title="为chocolatey做贡献"></a>为chocolatey做贡献</h1><p>Chocolatey的一个特点就是社区化的环境，每一个人都可以向它提交自己喜爱的包。因为Chocolatey总是从官方下载所需要的包，所以避免了授权等问题。当然，本来收费的软件，同样需要收费，比如JetBrains系列的产品。</p>
-<h2 id="注册APIKey"><a href="#注册APIKey" class="headerlink" title="注册APIKey"></a>注册APIKey</h2><p>提交包则会略为复杂一点，首先你需要在<a href="https://chocolatey.org/" target="_blank" rel="external">https://chocolatey.org/</a> 注册一个账号，并获取跟你账户绑定的唯一APIKey。然后在命令行中执行如下命令：</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">choco apikey -k &lt;your key here&gt; -s https://chocolatey.org</span><br></pre></td></tr></table></figure>
-<h2 id="新建软件包"><a href="#新建软件包" class="headerlink" title="新建软件包"></a>新建软件包</h2><p>在命令行中运行</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">choco new &lt;package name here&gt;</span><br><span class="line"><span class="comment"># 为方便理解，此处使用test做包名</span></span><br></pre></td></tr></table></figure>
-<p>则当前目录下就会自动生成一个名为<code>test</code>的文件夹，目录结构如下：</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">test.nuspec</span><br><span class="line">tools</span><br><span class="line">  |--chocolateyinstall.ps1</span><br><span class="line">  |--chocolateyuninstall.ps1</span><br><span class="line">  |--ReadMe.md</span><br></pre></td></tr></table></figure>
-<h2 id="完善信息"><a href="#完善信息" class="headerlink" title="完善信息"></a>完善信息</h2><h3 id="修改test-nuspec"><a href="#修改test-nuspec" class="headerlink" title="修改test.nuspec"></a>修改test.nuspec</h3><p>自动生成的描述文件在需要填写的位置都有大写英文注释，只需要按照要求一一填写即可，下面我列举一份已经通过审核的Datagrip的描述文件作为参考：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span><br><span class="line"><span class="comment">&lt;!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">package</span> <span class="attr">xmlns</span>=<span class="string">"http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">metadata</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- Read this before publishing packages to chocolatey.org: https://github.com/chocolatey/chocolatey/wiki/CreatePackages --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>datagrip<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>DataGrip<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">authors</span>&gt;</span>JetBrains<span class="tag">&lt;/<span class="name">authors</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">owners</span>&gt;</span>Xuanwo<span class="tag">&lt;/<span class="name">owners</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">summary</span>&gt;</span>Your Swiss Army Knife for Databases and SQL<span class="tag">&lt;/<span class="name">summary</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">description</span>&gt;</span>## Intelligent query console</span><br><span class="line">Allows you to execute queries in different modes and provides local history that keeps track of all your activity and protects you from losing your work.</span><br><span class="line">......(省略)</span><br><span class="line"><span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">projectUrl</span>&gt;</span>https://www.jetbrains.com/datagrip/<span class="tag">&lt;/<span class="name">projectUrl</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">packageSourceUrl</span>&gt;</span>https://github.com/Xuanwo/datagrip-chocolatey-package<span class="tag">&lt;/<span class="name">packageSourceUrl</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--&lt;projectSourceUrl&gt;&lt;/projectSourceUrl&gt;</span><br><span class="line">    &lt;docsUrl&gt;&lt;/docsUrl&gt;</span><br><span class="line">    &lt;mailingListUrl&gt;&lt;/mailingListUrl&gt;--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">bugTrackerUrl</span>&gt;</span>https://youtrack.jetbrains.com/issues/DBE<span class="tag">&lt;/<span class="name">bugTrackerUrl</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tags</span>&gt;</span>datagrip admin jetbrains trial 30days<span class="tag">&lt;/<span class="name">tags</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">copyright</span>&gt;</span>Commercial<span class="tag">&lt;/<span class="name">copyright</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--&lt;licenseUrl&gt;&lt;/licenseUrl&gt;--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">requireLicenseAcceptance</span>&gt;</span>false<span class="tag">&lt;/<span class="name">requireLicenseAcceptance</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--&lt;iconUrl&gt;http://cdn.rawgit.com/__REPLACE_YOUR_REPO__/master/icons/datagrip.png&lt;/iconUrl&gt;--&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--&lt;dependencies&gt;</span><br><span class="line">      &lt;dependency id="" version="__VERSION__" /&gt;</span><br><span class="line">      &lt;dependency id="" /&gt;</span><br><span class="line">    &lt;/dependencies&gt;--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">releaseNotes</span>&gt;</span>https://confluence.jetbrains.com/display/DBE/DataGrip+1.0.1+Release+Notes<span class="tag">&lt;/<span class="name">releaseNotes</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--&lt;provides&gt;&lt;/provides&gt;--&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">metadata</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">files</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">file</span> <span class="attr">src</span>=<span class="string">"tools\**"</span> <span class="attr">target</span>=<span class="string">"tools"</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">files</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">package</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>有一个比较坑的地方是<code>&lt;description&gt;</code>部分是支持Markdown的，内容直接顶着括号写就OK，不用另起一行，也不用自己加缩进。</p>
-<h3 id="补充chocolateyinstall-ps1"><a href="#补充chocolateyinstall-ps1" class="headerlink" title="补充chocolateyinstall.ps1"></a>补充chocolateyinstall.ps1</h3><blockquote>
-<p><code>chocolateyuninstall</code>可以没有，但是一定要有<code>chocolateyinstall</code>脚本。</p>
-</blockquote>
-<p><code>chocolateyinstall.ps1</code>如果点击<code>编辑</code>打开的话，会自动调用<code>Windows Powershell ISE</code>编辑器。</p>
-<p>下面同样列举一份已经填写完成的样例：</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$packageName</span>= <span class="string">'datagrip'</span></span><br><span class="line"><span class="variable">$installerType</span> = <span class="string">'EXE'</span></span><br><span class="line"><span class="variable">$toolsDir</span>   = <span class="string">"$(Split-Path -parent <span class="variable">$MyInvocation</span>.MyCommand.Definition)"</span></span><br><span class="line"><span class="variable">$url</span>        = <span class="string">'https://download.jetbrains.com/datagrip/datagrip-1.0.1.exe'</span></span><br><span class="line"><span class="variable">$silentArgs</span> = <span class="string">'/S'</span></span><br><span class="line"><span class="variable">$validExitCodes</span> = @(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">Install-ChocolateyPackage <span class="string">"<span class="variable">$packageName</span>"</span> <span class="string">"<span class="variable">$installerType</span>"</span> <span class="string">"<span class="variable">$silentArgs</span>"</span> <span class="string">"<span class="variable">$url</span>"</span>  -validExitCodes <span class="variable">$validExitCodes</span></span><br></pre></td></tr></table></figure>
-<p>需要注意的是，填写完毕之后，一定要在Powershell中运行下列代码以删除所有的注释文字：</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$f</span>=<span class="string">'c:\path\to\thisFile.ps1'</span></span><br><span class="line">gc <span class="variable">$f</span> | ? &#123;<span class="variable">$_</span> <span class="nomarkup">-notmatch</span> <span class="string">"^\s*#"</span>&#125; | % &#123;<span class="variable">$_</span> <span class="nomarkup">-replace</span> <span class="string">'(^.*?)\s*?[^``]#.*'</span>,<span class="string">'$1'</span>&#125; | <span class="built_in">Out-File</span> <span class="variable">$f</span>+<span class="string">".~"</span> -en utf8; mv -fo <span class="variable">$f</span>+<span class="string">".~"</span> <span class="variable">$f</span></span><br></pre></td></tr></table></figure>
-<h3 id="打包上传"><a href="#打包上传" class="headerlink" title="打包上传"></a>打包上传</h3><p>所有的信息填写完成后，在<code>test.nuspec</code>所在目录下执行<code>choco pack</code>就会自动进行打包。<br>如果有重要的信息没有填写，choco将会报错，并红字提示：</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LicenseUrl cannot be empty.</span><br><span class="line">ProjectUrl cannot be empty.</span><br><span class="line">PackageSourceUrl cannot be empty.</span><br></pre></td></tr></table></figure>
-<p>如果没有问题，则会有如下提示：</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Attempting to build package from <span class="string">'datagrip.nuspec'</span>.</span><br><span class="line">Successfully created package <span class="string">'datagrip.1.0.1.nupkg'</span></span><br></pre></td></tr></table></figure>
-<p>之后执行 <code>choco push datagrip.1.0.1.nupkg</code>即可将包上传至Chocolatey，通过管理员的审核之后，就会出现在软件列表中供人们下载了。</p>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
-<li><a href="https://chocolatey.org/" target="_blank" rel="external">Chocolatey 官方网站</a></li>
-<li><a href="http://isaachan.github.io/blog/2013/02/07/chocolatey-i-love-you/" target="_blank" rel="external">Chocolatey, 我爱你</a></li>
-</ul>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年02月15日 初步完成</li>
-<li>2016年02月20日 修复脚本中的部分错误</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><a href="https://chocolatey.org/">Chocolatey</a>是一个基于Nuget的Windows包管理工具，截止到我更新此文章的时候，一共有3.7k多个独立包。本文旨在介绍Chocolatey这一工具的安装和用法，希望能有更多人享受到该工具的便利之处。</p>
+                <a class="" href="/2016/02/15/chocolatey-intro/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/02/15/chocolatey-intro/">Chocolatey——Windows下的包管理工具</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年2月15日 - 20时02分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/02/15/chocolatey-intro/"
-                                            title="Chocolatey——Windows下的包管理工具">https://xuanwo.org/2016/02/15/chocolatey-intro/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Software/"> #Software </a>
-                    
-                        <a href="/tags/Windows/"> #Windows </a>
-                    
-                </div>
             
         </div>
 
@@ -233,82 +155,13 @@
         </div>
         <h2><a href="/2015/12/23/best-pdf-read-solution/">最佳跨平台PDF阅读解决方案</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近因为学习需要，要大量阅读纯文字的PDF文档。然后我惊讶地发现市场上居然没有哪家提供一套完整可用的跨平台PDF阅读解决方案，于是我在尝试了市面几乎所有叫得上名字的各类阅读器之后，形成了一套自己的跨平台PDF阅读解决方案。本文记录了这套方案的详细内容，希望会有所益处。</p>
-<a id="more"></a>
-<h1 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h1><ul>
-<li>跨平台（目前支持Windows和Android）</li>
-<li>阅读记录同步</li>
-<li>支持标准PDF的批注和高亮等功能</li>
-<li>对PDF文件管理方便</li>
-</ul>
-<h1 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h1><p>标准PDF的批注和高亮功能是内嵌在PDF文件中的，只要同步了PDF文件，也就同步了所有在PDF文件上的批注和高亮。因此这个问题很大程度上就变成了解决跨平台文件双向同步问题。</p>
-<blockquote>
-<p>跨平台双向同步在很多人看来是一个已经被Dropbox以及Google Drive解决了问题，但是实际上，它们在PC和移动端的行为是不一样的。PC端是完整的双向同步，而在移动端，为了节省流量和空间，它们都是提供了一个File list，你必须要自己下载指定文件。不仅如此，这个下载下来的文件大多是Read-Only的，用阅读器批注之后，你会发现这个文件无法保存，这样的话，PDF跨平台批注就无从谈起。</p>
-</blockquote>
-<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>按照上面思路中的讨论，我在每一个平台上的解决方案都分成两个部分，第一是解决PDF阅读、批注问题，第二是解决PDF文件双向同步问题。</p>
-<h2 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h2><h3 id="Goodsync"><a href="#Goodsync" class="headerlink" title="Goodsync"></a>Goodsync</h3><p><img src="/imgs/opinion/goodsync.png" alt="Goodsync"><br><a href="http://www.goodsync.com/" target="_blank" rel="external"><strong>Goodsync</strong></a>是一款非常强大的同步工具，我们通过它来提供本地到Google Drive的双向同步功能。</p>
-<blockquote>
-<p>如果通过SS艹墙，配置Google Drive时请勾选<code>基于WinInet</code>，如图：<img src="/imgs/opinion/goodsync-proxy-setting.png" alt="Goodsync Proxy Setting"></p>
-</blockquote>
-<h3 id="Foxit-Reader"><a href="#Foxit-Reader" class="headerlink" title="Foxit Reader"></a>Foxit Reader</h3><p><img src="/imgs/opinion/foxit-reader.png" alt="Foxit Reader"><br><a href="http://www.foxitsoftware.cn/" target="_blank" rel="external"><strong>Foxit Reader</strong></a>，也就是福昕阅读器，不多说了，新版的界面还是可以的。（尽管我觉得颜值没有Adobe Reader DC高）</p>
-<blockquote>
-<p>为什么不选Adobe？Adobe最新版本的批注功能在特定的PDF上好像有点问题，我尝试了几个都不能正常保存，总是提示错误110，无奈放弃。</p>
-</blockquote>
-<h2 id="Android"><a href="#Android" class="headerlink" title="Android"></a>Android</h2><h3 id="Flodersync"><a href="#Flodersync" class="headerlink" title="Flodersync"></a>Flodersync</h3><p><img src="/imgs/opinion/Flodersync.png" alt="Flodersync"><br><a href="https://play.google.com/store/apps/details?id=dk.tacit.android.foldersync.lite" target="_blank" rel="external"><strong>Flodersync</strong></a>是一款基于安卓平台的非常棒的一款应用，我们通过它来实现安卓平台的双向同步。</p>
-<blockquote>
-<p>开启双向同步请取消勾选<code>不同步删除</code></p>
-</blockquote>
-<h3 id="Moon"><a href="#Moon" class="headerlink" title="Moon+"></a>Moon+</h3><p><img src="/imgs/opinion/Moon.png" alt="Moon+"><br><a href="https://play.google.com/store/apps/details?id=com.flyersoft.moonreader" target="_blank" rel="external"><strong>Moon+</strong></a>，静读天下，安卓平台上首屈一指的阅读器，支持格式众多，速度流畅，除了免费版有些功能阉割和广告之外，没有别的问题。</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2015年12月23日 初始发布</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近因为学习需要，要大量阅读纯文字的PDF文档。然后我惊讶地发现市场上居然没有哪家提供一套完整可用的跨平台PDF阅读解决方案，于是我在尝试了市面几乎所有叫得上名字的各类阅读器之后，形成了一套自己的跨平台PDF阅读解决方案。本文记录了这套方案的详细内容，希望会有所益处。</p>
+                <a class="" href="/2015/12/23/best-pdf-read-solution/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2015/12/23/best-pdf-read-solution/">最佳跨平台PDF阅读解决方案</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2015年12月23日 - 16时12分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2015/12/23/best-pdf-read-solution/"
-                                            title="最佳跨平台PDF阅读解决方案">https://xuanwo.org/2015/12/23/best-pdf-read-solution/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Software/"> #Software </a>
-                    
-                        <a href="/tags/Read/"> #Read </a>
-                    
-                        <a href="/tags/Windows/"> #Windows </a>
-                    
-                        <a href="/tags/Android/"> #Android </a>
-                    
-                </div>
             
         </div>
 
@@ -343,73 +196,13 @@
         </div>
         <h2><a href="/2015/07/28/listary/">Listary——让文件在指尖流动</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>今天想为大家介绍的是我使用了两年的神器——<a href="http://www.listary.com/" target="_blank" rel="external">Listary</a>，作为一款Windows文件浏览增强工具，它为Windows自带的资源管理器添加了很多实用的功能，包括智能命令、最近文档以及收藏功能。与此同时，它还能与很多第三方应用集成，包括鼎鼎大名的Total Commander，还有WinRAR，7zip，FileZilla等等。<br>值得一提的是，Listary由国人Channing开发，默认添加了简体中文支持，是不可多得的精品，典型的墙内开花墙外香的典范。可能是由于国人还并不是非常重视效率这个方面，感觉使用Listary的主要人群还是集中在国外，从Listary的论坛上也能看得出来。所以我完成了这样一篇文章，希望我也能为这样的精品应用在国内的推广做出些贡献。<br>恩？说我是水军？唔，谁说我不是呢？<br><em>官网上的广告语<code>Keep files at your fingertips</code>被我翻译成了<code>让文件在指尖流动</code>，不知道Channing会怎么想~</em></p>
-<a id="more"></a>
-<h1 id="初步使用"><a href="#初步使用" class="headerlink" title="初步使用"></a>初步使用</h1><h2 id="基础配置"><a href="#基础配置" class="headerlink" title="基础配置"></a>基础配置</h2><p><img src="/imgs/opinion/listary-setting.png" alt="Listary设置页面"><br>如果是第一次安装，Listary会有一个引导教程，建议大家都跟着操作一下。在教程的最后会让你设置一个激活Listary的快捷键，这个快捷键的设置完全可以根据自己的喜好来设置，只要不跟系统或者别的软件热键相冲突即可。我使用的是<code>Alt+Q</code>，感觉十分顺手，推荐大家也这样设置~</p>
-<h2 id="基础用法"><a href="#基础用法" class="headerlink" title="基础用法"></a>基础用法</h2><p><img src="/imgs/opinion/listary-main.png" alt="Listary主窗体"><br>在任一窗体下使用快捷键<code>Alt+Q</code>即可激活Listary，同时光标会自动定位在Listary的输入窗口<br>，只要直接开始输入，Listary就自动进行匹配了。使用快捷键<code>Alt+Q</code>可以在启动程序模式与常规模式间进行切换。<br>Listary的匹配总共有三种，分别为命令，路径，启动程序，下面分别介绍一下。</p>
-<ul>
-<li>命令：包括一些常用的系统命令，如打开命令行（基于当前路径）等。</li>
-<li>路径：返回匹配的文件以及路径（只要是文件或者路径的一部分都可以识别）</li>
-<li>启动程序：可以启动预先设置的路径中的程序（再次使用快捷键<code>Alt+Q</code>就可以在启动程序与常规模式间进行切换）</li>
-</ul>
-<h2 id="收藏功能"><a href="#收藏功能" class="headerlink" title="收藏功能"></a>收藏功能</h2><p><img src="/imgs/opinion/listary-loves.png" alt="Listary收藏功能"><br>激活Listary之后点击有爱心标识的收藏按钮，就可以打开自己的收藏列表，能够更快捷的打开自己常用的软件或者文件。</p>
-<h2 id="历史记录"><a href="#历史记录" class="headerlink" title="历史记录"></a>历史记录</h2><p><img src="/imgs/opinion/listary-history.png" alt="Listary历史记录"><br>激活Listary之后点击历史记录，就可以打开自己最近打开的文件或者文件夹。</p>
-<h2 id="快捷功能"><a href="#快捷功能" class="headerlink" title="快捷功能"></a>快捷功能</h2><p><img src="/imgs/opinion/listary-quick.png" alt="Listary快捷功能"><br>激活Listary之后点击快捷功能，就可以弹出一些常用的功能，个人最喜欢的是显示隐藏文件和显示文件扩展名，相当的好用~</p>
-<h1 id="常用功能"><a href="#常用功能" class="headerlink" title="常用功能"></a>常用功能</h1><h2 id="智能匹配"><a href="#智能匹配" class="headerlink" title="智能匹配"></a>智能匹配</h2><p>只要输入文件名的一部分就可以找到这个文件，支持中文与英文。<br>比如，我输入<code>测试 md</code>就可以搜索到<code>测XX试OO.md</code>这个文件。<br>自然，输入的越多，返回的结果越精确。随着使用记录的积累，常用的文件或程序会获得更高的优先级。</p>
-<h2 id="全盘搜索"><a href="#全盘搜索" class="headerlink" title="全盘搜索"></a>全盘搜索</h2><p>使用与<a href="http://www.voidtools.com/" target="_blank" rel="external">Everything</a>相似的原理，通过遍历USN journal更新索引，可以实现秒级的索引建立与搜索反馈（只支持NTFS文件系统，FAT32等不支持）。结合前面的智能匹配功能，你可以轻易地找到在你硬盘中的每一个文件。</p>
-<h2 id="快速选择"><a href="#快速选择" class="headerlink" title="快速选择"></a>快速选择</h2><p><img src="/imgs/opinion/listary-quick-switch.png" alt="Listary快速选择"><br>在任意一个打开的资源管理器界面（焦点需要锁定在资源管理器界面上），输入关键字，光标会自动跳转到当前文件夹中匹配的文件或者目录上。你只要直接回车就可以打开自己想要的文件，而不需要再去使用鼠标双击打开。真正的让文件在指尖舞蹈~</p>
-<h1 id="Pro版功能"><a href="#Pro版功能" class="headerlink" title="Pro版功能"></a>Pro版功能</h1><h1 id="进阶技巧"><a href="#进阶技巧" class="headerlink" title="进阶技巧"></a>进阶技巧</h1><h1 id="尾言"><a href="#尾言" class="headerlink" title="尾言"></a>尾言</h1><p>Channing已经跳票很久了，Listary 5 据说完成度还是不够高，连预览版都木有放出来。这篇文章写在Listary 5 发布之前，希望Channing能够加快速度，早日把这个憋了两年的大招放出来~~</p>
-<h1 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h1><ul>
-<li><a href="http://www.listary.com/download/Listary.exe" target="_blank" rel="external">安装版下载</a></li>
-<li><a href="http://www.listary.com/download/ListaryPortable.zip" target="_blank" rel="external">绿色版下载</a></li>
-<li><a href="http://discussion.listary.com/" target="_blank" rel="external">官方论坛</a></li>
-</ul>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2015年07月28日 完成初步使用介绍</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>今天想为大家介绍的是我使用了两年的神器——<a href="http://www.listary.com/">Listary</a>，作为一款Windows文件浏览增强工具，它为Windows自带的资源管理器添加了很多实用的功能，包括智能命令、最近文档以及收藏功能。与此同时，它还能与很多第三方应用集成，包括鼎鼎大名的Total Commander，还有WinRAR，7zip，FileZilla等等。<br>值得一提的是，Listary由国人Channing开发，默认添加了简体中文支持，是不可多得的精品，典型的墙内开花墙外香的典范。可能是由于国人还并不是非常重视效率这个方面，感觉使用Listary的主要人群还是集中在国外，从Listary的论坛上也能看得出来。所以我完成了这样一篇文章，希望我也能为这样的精品应用在国内的推广做出些贡献。<br>恩？说我是水军？唔，谁说我不是呢？<br><em>官网上的广告语<code>Keep files at your fingertips</code>被我翻译成了<code>让文件在指尖流动</code>，不知道Channing会怎么想~</em></p>
+                <a class="" href="/2015/07/28/listary/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2015/07/28/listary/">Listary——让文件在指尖流动</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2015年7月28日 - 21时07分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2015/07/28/listary/"
-                                            title="Listary——让文件在指尖流动">https://xuanwo.org/2015/07/28/listary/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Software/"> #Software </a>
-                    
-                        <a href="/tags/Windows/"> #Windows </a>
-                    
-                </div>
             
         </div>
 
@@ -444,96 +237,13 @@
         </div>
         <h2><a href="/2014/07/07/use-hexo-to-bulid-project-wiki/">使用Hexo构建项目Wiki</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>七七事件前一天，我有幸加入了<a href="https://github.com/cugbacm/oj" target="_blank" rel="external">本校OJ2.0</a>项目组。非常高兴能够为我们学校自己的OJ开源项目做出一份贡献，虽然只是一份整理Wiki的小活儿，但是这是我第一次真正的参与一个源项目。经过谨慎考虑之后，我决定项目的Wiki使用Github Pages来构建。</p>
-<a id="more"></a>
-<h1 id="为什么是Github-Pages？"><a href="#为什么是Github-Pages？" class="headerlink" title="为什么是Github Pages？"></a>为什么是Github Pages？</h1><ul>
-<li>免费，无限流量</li>
-<li>享受git的版本管理功能，不用担心文章遗失。</li>
-<li>你只要用自己喜欢的编辑器写文章就可以了，其他事情一概不用操心，都由github处理。<br><em>以上引用自<a href="http://www.ruanyifeng.com/blog/2012/08/blogging_with_jekyll.html" target="_blank" rel="external">阮一峰先生的相关博文</a></em></li>
-<li>同Github Wiki一样支持多人协作，但是更加便于查阅，特别是在涉及主题繁杂的时候。</li>
-<li>比Github Wiki拥有更大的控制权限，避免Wiki被错误操作。</li>
-</ul>
-<h1 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h1><h2 id="Hexo的安装与配置"><a href="#Hexo的安装与配置" class="headerlink" title="Hexo的安装与配置"></a>Hexo的安装与配置</h2><h3 id="Windows环境下"><a href="#Windows环境下" class="headerlink" title="Windows环境下"></a>Windows环境下</h3><p>32位地址:<a href="http://nodejs.org/dist/v0.10.29/node-v0.10.29-x86.msi" target="_blank" rel="external">http://nodejs.org/dist/v0.10.29/node-v0.10.29-x86.msi</a><br>64位地址:<a href="http://nodejs.org/dist/v0.10.29/x64/node-v0.10.29-x64.msi" target="_blank" rel="external">http://nodejs.org/dist/v0.10.29/x64/node-v0.10.29-x64.msi</a></p>
-<h3 id="Mac-OS环境下"><a href="#Mac-OS环境下" class="headerlink" title="Mac OS环境下"></a>Mac OS环境下</h3><p>安装包地址:<a href="http://nodejs.org/dist/v0.10.29/node-v0.10.29.pkg" target="_blank" rel="external">http://nodejs.org/dist/v0.10.29/node-v0.10.29.pkg</a></p>
-<h3 id="Linux环境下"><a href="#Linux环境下" class="headerlink" title="Linux环境下"></a>Linux环境下</h3><p>建议使用<code>nvm</code>来管理nodejs环境</p>
-<ol>
-<li>打开终端，输入<code>wget -qO- https://raw.github.com/creationix/nvm/master/install.sh | sh</code></li>
-<li>重启终端之后,输入<code>nvm ls</code>，则会列出所有的可用版本</li>
-<li>输入<code>nvm install 0.10.29</code>（此处以最新版为例）</li>
-<li>下面配置nodejs的环境，分别输入<code>nvm use 0.10.29</code>以及<code>nvm alias default 0.10.29</code></li>
-</ol>
-<h2 id="Git的安装与配置"><a href="#Git的安装与配置" class="headerlink" title="Git的安装与配置"></a>Git的安装与配置</h2><h3 id="Windows环境下-1"><a href="#Windows环境下-1" class="headerlink" title="Windows环境下"></a>Windows环境下</h3><p>不妨使用Github For Windows， 通过添加命令行参数启动环境，无须配置PATH，完全绿色化。（TODO：有待补充）</p>
-<h3 id="Mac-OS环境下-1"><a href="#Mac-OS环境下-1" class="headerlink" title="Mac OS环境下"></a>Mac OS环境下</h3><p>同理，使用Github For Mac即可。</p>
-<h3 id="Linux环境下-1"><a href="#Linux环境下-1" class="headerlink" title="Linux环境下"></a>Linux环境下</h3><p>Ubuntu, Debian：<code>sudo apt-get install git-core</code><br>Fedora, Red Hat, CentOS：<code>sudo yum install git-core</code></p>
-<h3 id="开启SSH，避免重复输入帐号密码"><a href="#开启SSH，避免重复输入帐号密码" class="headerlink" title="开启SSH，避免重复输入帐号密码"></a>开启SSH，避免重复输入帐号密码</h3><p>可以参考<a href="http://xuanwo.org/2015/02/07/generate-a-ssh-key/">此处</a>。</p>
-<h1 id="Wiki配置"><a href="#Wiki配置" class="headerlink" title="Wiki配置"></a>Wiki配置</h1><p>感谢<a href="http://www.hahack.com/" target="_blank" rel="external">wzpan</a>开源的主题，其实还是我主动索要的- -，幸好他非常热情地提供了帮助，在此表示衷心的感谢。<br>致谢完毕，下面转入配置的细节。</p>
-<ol>
-<li>在github上建立一个新的仓库，名为<code>yourname.github.io</code></li>
-<li>事先建立好准备存放wiki的文件夹，然后在当前目录下打开终端（或者不停地cd进入），然后输入<code>hexo init</code>，初始化。</li>
-<li>然后输入<code>npm install</code>，自动下载相关的依赖包，此时一个最基本的框架已经构建完毕了。</li>
-<li>然后输入<code>git clone https://github.com/wzpan/hexo-theme-wixo.git themes/wixo</code>，下载wiki用的主题。</li>
-<li>然后修改<code>_config.yml</code>中的<code>theme</code>条目为<code>wixo</code>，注意<code>theme</code>后有一个空格。<br>&gt;<br>补充一下关于<code>deploy</code>的设置<br>同样是在_config.yml文件夹中，修改<code>deploy</code>的部分为</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: github</span><br><span class="line">  repo: repository url //使用之前创建的那个库，建议使用SSH</span><br><span class="line">  branch: branch //Hexo会自动识别个人wiki还是项目wiki</span><br></pre></td></tr></table></figure>
-<p></p><p>6. 进入source文件夹，打开_post文件夹，新建一个md文档，在文档的开头加入</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: your title //这将会是wiki文档的标题</span><br><span class="line">date: 2014-03-16 10:17:16  //构建时间，wiki中用不到</span><br><span class="line">categories: Docs //这将会是本文档所属的类别</span><br><span class="line">toc: true //默认开启，生成table of contents</span><br><span class="line">--- //不可省略，敲回车后，下面的内容就自由发挥了～</span><br></pre></td></tr></table></figure>
-<p></p><p>7. 保存文档后，返回wiki所在文件夹， 输入<code>hexo d -g</code>，此时wiki已经自动生成并上传完毕了。</p>
-<h1 id="协作注意事项"><a href="#协作注意事项" class="headerlink" title="协作注意事项"></a>协作注意事项</h1><h2 id="项目创建者"><a href="#项目创建者" class="headerlink" title="项目创建者"></a>项目创建者</h2><p>按照上述设置，<code>wiki</code>默认保存在<code>yourname.github.io</code>的<code>master</code>分支下。建议另外开启一个<code>source</code>分支，用来将整个wiki文件夹上传，方便多地编辑以及同步协作。<br>&gt;<br>一开始可能会发现wiki文件夹不能使用git管理，这是因为主题wixo是使用git管理的。所以在上传wiki文件夹之前，要删除位于wixo文件夹下的.git文件夹。</p>
-<h2 id="项目参与者"><a href="#项目参与者" class="headerlink" title="项目参与者"></a>项目参与者</h2><p>让项目创建者在项目的settings中的Collaborators栏目中输入自己的用户名，即可获得对这个项目的控制权。<br>环境配置完毕后，fork<code>source</code>分支，即可开始编辑工作。根据<code>.gitignore</code>文件的不同，可能还需要进行<code>npm install</code>以解决依赖问题。</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2014年07月07日 完成<code>前言</code>和<code>为什么</code>板块</li>
-<li>2014年07月24日 完成<code>前期准备</code>和<code>Wiki配置</code>以及<code>注意事项</code>版块，接下来完成免PATH配置的详细步骤以及SSH的配置。此外发现步骤有些混杂不清，下一个版本中将进行修正。</li>
-<li>2015年04月01日 添加了SSH配置。</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>七七事件前一天，我有幸加入了<a href="https://github.com/cugbacm/oj">本校OJ2.0</a>项目组。非常高兴能够为我们学校自己的OJ开源项目做出一份贡献，虽然只是一份整理Wiki的小活儿，但是这是我第一次真正的参与一个源项目。经过谨慎考虑之后，我决定项目的Wiki使用Github Pages来构建。</p>
+                <a class="" href="/2014/07/07/use-hexo-to-bulid-project-wiki/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2014/07/07/use-hexo-to-bulid-project-wiki/">使用Hexo构建项目Wiki</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2014年7月7日 - 00时07分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2014/07/07/use-hexo-to-bulid-project-wiki/"
-                                            title="使用Hexo构建项目Wiki">https://xuanwo.org/2014/07/07/use-hexo-to-bulid-project-wiki/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Github-Pages/"> #Github-Pages </a>
-                    
-                        <a href="/tags/Blog/"> #Blog </a>
-                    
-                        <a href="/tags/Software/"> #Software </a>
-                    
-                        <a href="/tags/Windows/"> #Windows </a>
-                    
-                        <a href="/tags/Wiki/"> #Wiki </a>
-                    
-                </div>
             
         </div>
 
@@ -645,8 +355,6 @@
                         
                             <li><a href="/tags/Information/">Information</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
                             <li><a href="/tags/项目/">项目</a></li>
                         
                             <li><a href="/tags/Python/">Python</a></li>
@@ -657,15 +365,17 @@
                         
                             <li><a href="/tags/JavaScript/">JavaScript</a></li>
                         
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
                             <li><a href="/tags/实习/">实习</a></li>
                         
                             <li><a href="/tags/QingCloud/">QingCloud</a></li>
                         
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
                             <li><a href="/tags/Work/">Work</a></li>
                         
                             <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/Hardware/">Hardware</a></li>
                         

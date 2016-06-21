@@ -63,7 +63,6 @@
             <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
             <ul class="submenu-list"><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2016/">2016</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2015/">2015</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2014/">2014</a></li></ul>
         </li>
-        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
     </ul>
 </div>
 <div id="wrap">
@@ -115,94 +114,19 @@
         </div>
         <h2><a href="/2016/06/16/jade_ims/">马可波罗珠宝进销存系统开发手记</a></h2>
         
-            <p><img src="/imgs/develop/jade-ims-index.png" alt=""></p>
+            
+                <p><img src="/imgs/develop/jade-ims-index.png" alt=""></p>
 <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这个项目从我们这个学期开了<strong>系统分析与设计</strong>这门课之后就开始了，首次创建这个项目是在3月26号，实际上真正的开发时间集中在6月上旬。差不多用两个星期的闲暇时间时间完成了这个简单的进销存系统。这个系统基于Flask框架，使用SQLite3数据库，前端则是使用Bootstrap框架，实现了包括客户，库存，销售，进货等管理子系统。说是管理，其实也就是简单的增加和删除而已。<br>前人经常说，不要重复造轮子。既然有类似于Odoo这样强大的ERP系统珠玉在前，我为什么要再自己造一个功能简单，甚至根本不会有人用的轮子呢？从前我确实是这么想的，但是稍微有一点工作经验之后发现再造轮子的原因有两条：</p>
 <ul>
 <li>作为一个处在知识积累阶段的学生而言，再造轮子很有必要。不造一次轮子，你就永远不会明白轮子内部的真实构造。很多技术虽然看起来简单，但是想要有一个完善且健壮的实现却有很多坑需要踩。踩这些坑的过程，也正是一个技术人员成长最快的过程。</li>
 <li>别人的轮子终究是别人的。你不知道这个轮子最大能承受多少压力，你也不知道这个轮子在什么样的情况下会爆胎。当一个轮子装上企业呼呼向前的列车，再要想把它替换下来是一件很难且成本很高的事情。</li>
 </ul>
 <p>接下来，讲讲造这个轮子的一些经历吧~</p>
-<a id="more"></a>
-<h1 id="项目启动"><a href="#项目启动" class="headerlink" title="项目启动"></a>项目启动</h1><p>正如前言中说的，这个项目是系统分析与设计这门课的课程设计，也是贯穿着整个学期的一个主旋律。早在这学期开学之初，我们就知道了自己需要做这样的一个系统。经历了上个学期各种技术炫了半天，最后却只是抄袭各种开源项目草草实现的<a href="https://xuanwo.org/2015/06/30/together-project/">失败</a>，这个学期我务实了很多。从最开始的讨论就一直跟组员强调技术的可行性，基本上否决了所有试图增大项目复杂度的建议，把主题定在了一个纯粹的进销存管理系统。之所以如此，是因为我的观念发生了很大的变化：原来觉得技术的先进是最重要的，开发项目一定要用最现代的技术，最炫目的特效；现在觉得哪怕是一个用VB写出来的能稳定运行的丑陋系统都要胜过采用了种种最新潮技术却漏洞百出根本没法运行的“先进”系统。<br>在讨论到最极端的时候，我甚至想只做一个仓库的管理系统，只包括进库和出库这样的简单功能。这样的态度曾经闹得有一次讨论直接不欢而散，好在组员都是非常Nice的人，在我主动表达歉意之后大度地表示没什么。经过多次讨论之后，我们终于达成了共识，要做一个进销存系统，功能尽可能简单，在实现基础功能的前提下，再考虑加入新的功能。<br>接下来的事情就没有什么大的分歧了，整体系统采用B/S架构，开发语言选用我个人比较喜欢的Python，使用Flask框架，数据库选用无需配置的SQLite。然后服务器选择阿里云的学生机，系统选择成熟稳定的CentOS 7.2，Web Server选用Nginx，也就是我个人目前比较喜欢的开发平台——LESP(Linux, Nginx, SQLite, Python)。</p>
-<h1 id="项目细节"><a href="#项目细节" class="headerlink" title="项目细节"></a>项目细节</h1><p>下面再介绍一下项目的细节。</p>
-<h2 id="设计模式"><a href="#设计模式" class="headerlink" title="设计模式"></a>设计模式</h2><p>项目大体上采用了MVC的思想，不过在具体的实现上并没有太过纠结于概念上的东西。所有的网页模板都在<code>templates</code>文件夹下，静态资源都扔到了<code>static</code>目录，使用一个<code>models.py</code>模块来单独存放所有的数据库定义，然后所有的路由以及操作都在<code>views</code>中实现。对于我来说，快速地实现需求才是头等大事，是不是符合正统的MVC理念并不是十分重要。实际上现在这样的结构开发起来感觉也蛮顺手的，需要调整前端的样式和表单就在<code>templates</code>文件夹下操作，需要修改程序的逻辑就去<code>views</code>，他们基本上是一一对应的关系。<a href="https://spacewander.github.io/explore-flask-zh/4-organizing_your_project.html" target="_blank" rel="external">这里</a>有更加清晰的讲解，值得一看。</p>
-<h2 id="项目中的问题-amp-解决方案"><a href="#项目中的问题-amp-解决方案" class="headerlink" title="项目中的问题&amp;解决方案"></a>项目中的问题&amp;解决方案</h2><h3 id="在Flask框架中同时使用蓝图与Flask-SQLAlchemy"><a href="#在Flask框架中同时使用蓝图与Flask-SQLAlchemy" class="headerlink" title="在Flask框架中同时使用蓝图与Flask_SQLAlchemy"></a>在Flask框架中同时使用蓝图与Flask_SQLAlchemy</h3><p><a href="https://segmentfault.com/q/1010000005640527" target="_blank" rel="external">https://segmentfault.com/q/1010000005640527</a></p>
-<p><em>感谢@Ethan和@，他们强有力地向我证明了有师傅带路的好处。</em></p>
-<p>这个问题纯粹是因为一直以来都是一个脚本Boy，没有系统性的学习过软件开发导致的。很显然，按照我原来的代码去产生实例，就会导致循环导入的错误。想要解决这样的问题，就需要使用工厂函数去生成实例，而不是自己去生成它。</p>
-<p>在<code>__init__.py</code>中添加一个<code>create_app()</code>函数，在函数中进行参数配置，初始化和导入蓝图的操作：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">bps = [<span class="string">'jade_ims.views.dashboard:dashboard'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.install:install'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.login:login'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.sale:sale'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.customer:customer'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.purchase.inputbill:inputbill'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.purchase.supplier:supplier'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.stock.enterstockbill:enterstockbill'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.stock.leavestockbill:leavestockbill'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.stock.stock:stock'</span></span><br><span class="line">       ]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_app</span><span class="params">()</span>:</span></span><br><span class="line">    app = Flask(__name__)</span><br><span class="line">    app.config.from_object(<span class="string">'config'</span>)</span><br><span class="line">    app.config.from_pyfile(<span class="string">'config.py'</span>)</span><br><span class="line"></span><br><span class="line">    db.init_app(app)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> path <span class="keyword">in</span> bps:</span><br><span class="line">        bp = import_string(path)</span><br><span class="line">        app.register_blueprint(bp)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> app</span><br></pre></td></tr></table></figure>
-<h3 id="Flask如何优雅地重定向所有未登录用户到登陆界面"><a href="#Flask如何优雅地重定向所有未登录用户到登陆界面" class="headerlink" title="Flask如何优雅地重定向所有未登录用户到登陆界面"></a>Flask如何优雅地重定向所有未登录用户到登陆界面</h3><p><a href="https://segmentfault.com/q/1010000005645821" target="_blank" rel="external">https://segmentfault.com/q/1010000005645821</a></p>
-<p><em>感谢@zwillon和@igaozp</em></p>
-<p>有一个Feature是想要把所有未登录的用户都重定向到登录页面。当时手头上的技术方案主要有两种：第一种是自己包装一个装饰器，并添加在每一个视图函数中；第二种是使用第三方库<code>Flask-Login</code>，在视图函数中添加<code>@login_required</code>。但是感觉姿势都不怎么优雅，因为我需要不断地在视图函数中添加这个装饰器，不太符合DRY(Don’t Repeat Yourself)准则。<br>SF的老司机给了我一个相当优雅的方案——Hook到app的<code>before_request</code>方法。也就是这样来实现：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.before_request</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">check_need_login</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 检查登录的逻辑</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
-<p>我第一次是这样实现的：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.before_request</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">check_need_login</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">if</span> <span class="string">'logged_in'</span> <span class="keyword">not</span> <span class="keyword">in</span> session:</span><br><span class="line">        <span class="keyword">return</span> redirect(url_for(<span class="string">'login.user_login'</span>))</span><br></pre></td></tr></table></figure>
-<p>这样就带来了一个问题，对于未登录的用户来说，所有页面都会不断地重定向从而导致整个应用崩溃。因此还需要指定在某些情况下停止重定向，所以我们还需要修改一下<code>check_need_login</code>的逻辑：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.before_request</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">check_need_login</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">if</span> <span class="string">'logged_in'</span> <span class="keyword">not</span> <span class="keyword">in</span> session <span class="keyword">and</span> request.endpoint <span class="keyword">not</span> <span class="keyword">in</span> (<span class="string">'login.user_login'</span>, <span class="string">'static'</span>):</span><br><span class="line">        <span class="keyword">return</span> redirect(url_for(<span class="string">'login.user_login'</span>))</span><br></pre></td></tr></table></figure>
-<p>当<code>session</code>中没有<code>logged_in</code>字段且<code>endpoint</code>不是<code>user_login</code>和<code>static</code>的时候就重定向到登录页面，这样就比较优雅地解决了重定向未登录用户到登陆界面的需求。</p>
-<h3 id="flask-sqlalchemy-插入数据时发生错误后如何处理"><a href="#flask-sqlalchemy-插入数据时发生错误后如何处理" class="headerlink" title="flask_sqlalchemy 插入数据时发生错误后如何处理"></a>flask_sqlalchemy 插入数据时发生错误后如何处理</h3><p><a href="https://segmentfault.com/q/1010000005647431" target="_blank" rel="external">https://segmentfault.com/q/1010000005647431</a></p>
-<p>在实际开发的过程中发现，如果<code>db.session</code>中添加的记录有问题，在commit的时候会出现一个报错。所以我们需要在出错的时候进行一些处理，以保证程序出错之后还能够正常地运行。网友 @学不会编程的永仲 给出的回答是我应该在form中验证数据的正确性。虽然我相信他的理解可能是正确的，但是不太符合我的哲学，我更加倾向于<strong>让它崩溃，然后处理异常</strong>而不是<strong>事先处理好所有的错误</strong>。<br>通过查阅文档，了解到<code>db.session.rollback()</code>这一函数可以在出错是进行回滚，于是最后的实现变成了这样：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@supplier.route('/purchase/supplier/add', methods=['POST'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add_supplier</span><span class="params">()</span>:</span></span><br><span class="line">    form = request.form</span><br><span class="line">    <span class="keyword">if</span> request.method == <span class="string">'POST'</span>:</span><br><span class="line">        print(form)</span><br><span class="line">        supplier = Supplier(form[<span class="string">'supplier_name'</span>],</span><br><span class="line">                            form[<span class="string">'supplier_constract'</span>],</span><br><span class="line">                            form[<span class="string">'supplier_phone'</span>],</span><br><span class="line">                            form[<span class="string">'supplier_address'</span>],</span><br><span class="line">                            form[<span class="string">'supplier_remark'</span>])</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            db.session.add(supplier)</span><br><span class="line">            db.session.commit()</span><br><span class="line">            flash(<span class="string">'供应商添加成功！'</span>, <span class="string">'success'</span>)</span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            db.session.rollback()</span><br><span class="line">            flash(<span class="string">'输入不合法，请重新输入！'</span>, <span class="string">'danger'</span>)</span><br><span class="line">    <span class="keyword">return</span> redirect(url_for(<span class="string">'supplier.list_supplier'</span>))</span><br></pre></td></tr></table></figure>
-<h1 id="项目总结"><a href="#项目总结" class="headerlink" title="项目总结"></a>项目总结</h1><p>随着答辩的完成，这个项目进入了尾声。因为很多东西需要去学习，有新的东西需要去探索，所以这个项目也很有可能不会再继续维护了。那么这个项目开源出来的价值在哪里呢？我想，这个项目虽然简单，但它毕竟还算是一个完整的Flask项目，除了<code>flask_sqlalchemy</code>之外没有多余的依赖，非常适合一个跟我一样的Python初学者进行入门学习。如果说有人能够因为这个项目少走一些弯路，少在一些死胡同浪费时间，我想这个项目的价值就已经实现了。如果再往大一点来说，开源的价值也就实现了。<br>如果要我自评的话，我觉得这样的项目应该有60分。之所以给一个及格分，是因为这个项目毕竟实现了需求的大多数功能，也有好好地跑在阿里云的服务器上。丢分的话，大体上是因为这个项目毫无注释，没有安装文档，也没有配置手册，很多东西都是硬编码到了代码中。不仅如此，编程的风格也是相当的不佳，在模板部分缺乏良好的顶层设计，出现了大量的重复代码。这些问题希望自己能在下一个项目中得到一些改善。<br>Anyway，随着这个项目的结束，我的大三生涯也要结束了。接下来是波澜壮阔的实习阶段，希望自己能够在实习的时候多踩一些坑，多走一些弯路，多<br>得到一些来自“长者”的指点。</p>
-<h1 id="参考资源"><a href="#参考资源" class="headerlink" title="参考资源"></a>参考资源</h1><ul>
-<li><a href="http://docs.jinkan.org/docs/flask/" target="_blank" rel="external">Flask 中文文档 <em>文档略有过时，代码以Github上为准</em></a></li>
-<li><a href="https://spacewander.github.io/explore-flask-zh/index.html" target="_blank" rel="external">Flask 之旅</a></li>
-<li><a href="http://docs.jinkan.org/docs/flask-sqlalchemy/index.html" target="_blank" rel="external">Flask-SQLALchemy 中文文档</a></li>
-</ul>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年06月17日 首次发布</li>
-</ul>
-
+                <a class="" href="/2016/06/16/jade_ims/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/06/16/jade_ims/">马可波罗珠宝进销存系统开发手记</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年6月16日 - 22时06分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/06/16/jade_ims/"
-                                            title="马可波罗珠宝进销存系统开发手记">https://xuanwo.org/2016/06/16/jade_ims/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Information/"> #Information </a>
-                    
-                        <a href="/tags/项目/"> #项目 </a>
-                    
-                        <a href="/tags/Python/"> #Python </a>
-                    
-                        <a href="/tags/Flask/"> #Flask </a>
-                    
-                        <a href="/tags/HTML/"> #HTML </a>
-                    
-                        <a href="/tags/JavaScript/"> #JavaScript </a>
-                    
-                </div>
             
         </div>
 
@@ -237,62 +161,13 @@
         </div>
         <h2><a href="/2016/05/29/learn-from-qingchat/">我从Qingchat中学到的教训</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前的一段时间一直在从事<a href="https://github.com/Xuanwo/qingchat" target="_blank" rel="external">Qingchat</a>的相关开发工作，这个项目是一个基于Mojo-Weixin提供的Rest API开发的一个微信机器人，承担了十余个群，上千人的微信直播活动。秉承着ACM训练出来的“暴力加乱搞”风格，我花了大概一个星期的课余时间，搞出了一个可用的版本。期间也迭代了很多次，既欣慰于Coding的力量，也苦恼于当初设计的不完善带来的种种问题。在这个项目即将大规模重构的前夕，我总结一下开发Qingchat的过程中的经验教训，希望自己能成为一个更好更聪明的Coder。</p>
-<a id="more"></a>
-<h1 id="经验教训"><a href="#经验教训" class="headerlink" title="经验教训"></a>经验教训</h1><h2 id="没有稳定性的世界"><a href="#没有稳定性的世界" class="headerlink" title="没有稳定性的世界"></a>没有稳定性的世界</h2><p>从最开始Coding的时候，就有着一个根深蒂固的信念：计算机不会出错。1是1，0是0，只要自己的实现是对的，那最后的结果也一定是对的。然后，真相并非如此：我们存在于一个没有稳定性的世界。<br>你访问的路径可能是不存在的，你访问的文件可能是不存在或者已经上锁，你期望的服务器响应因为网络环境太差变成了超时。不仅如此，有时候你还会遇到神出鬼没的黑客们，稍有不慎你可能就永远失去了对数据的掌控权（<em>我测试用的服务器被人暴力尝试登陆34万次</em>）。<br>所以我们在编程的时候就应当完全抛弃“这个服务是稳定的”这种前提，学会在万物皆有可能出错的假设下编程，不要轻视程序的鲁棒性。你永远都不会知道用户会以何种方式使用你的程序，同样的，你也不会知道用户到底会输入什么样的数据。灵活运用“防御式编程”和“让它出错”两种思想，让你的代码更健壮。</p>
-<h2 id="拥抱多线程，走向非阻塞"><a href="#拥抱多线程，走向非阻塞" class="headerlink" title="拥抱多线程，走向非阻塞"></a>拥抱多线程，走向非阻塞</h2><p>现在回过头来看，自己当初实现的群发功能就是一个彻头彻尾的失败品：容错性差，效率低下。这些问题其实是由同一个原因导致的：我使用了一个单线程阻塞式的实现，不仅如此，还没有做任何异常的处理。这样导致的结果就是只要某个环节出错，整个群发任务就会直接退出。速度是跟微信群的数量成正比的，群的数量上升之后，群发速度过慢成了我的同事们经常向我吐嘈的问题。<br>开发的时候不计算网络传输延时绝对是一个重大失误——实际上，网络延时是整个系统的关键瓶颈。为了解决这个问题，Node.js 采用了一种单线程非阻塞的设计（一家之言，轻喷）。对于Python来说也是一样的，适度地拥抱多线程开发以提高并行效率，多采用非阻塞式设计以避免单个任务执行时间过长拖慢运行速度。<br>在一次去上课的路上，我形象地把这种设计比作“射后不管”，好像是飞毛腿导弹？</p>
-<h2 id="开源非万能"><a href="#开源非万能" class="headerlink" title="开源非万能"></a>开源非万能</h2><p>我原来是一个开源的死忠粉，认为开源可以解决一切问题，那个时候每天思考的问题就是为什么Windows不开源？等到真的进入业界，才明白自己的这种想法有多么幼稚。<br>除去那些大型的有基金会在背后支撑的项目，绝大多数项目完全依靠开发者个人热情来维持，某些涉及到商业支持的项目更是存在着“人走项目死”的现象。比如我参与管理的<a href="https://github.com/hexojs" target="_blank" rel="external">Hexo</a>项目在作者tommy开始实习之后就进展缓慢，再比如我接手但是现状非常差的<a href="https://github.com/staticfile/static" target="_blank" rel="external">staticfile</a>（<em>很抱歉我并没有能够做出什么正面的贡献，反而让状况变得更加糟糕了</em>）。<br>这些实践都告诉我，开源并不是万能的，真正想要解决一个问题，需要一个完善的制度以及各方面的激励机制。单纯依赖于开发者个人的热情往往不利于一个项目的长远发展，而在自行开发的项目中依赖于一个开源项目往往会带来更多的风险。开发者不一定会开发你期望的功能，开发者也不一定会按照你期望的进度进行开发。<br>作为我个人，我依然是一个热爱开源项目，崇尚开源理念的人；然而作为一个产品的开发者，一个服务的提供者，你必须权衡自行开发，采购商业产品以及使用开源项目之间的利弊。不同的选择取决于不同的项目，不同的需求，不同的自主开发能力，不同的后续维护能力。一味的强调开源理念，不顾实际，往往对开源事业的发展有害无益，挫伤人们对开源的信赖。</p>
-<h1 id="未来展望"><a href="#未来展望" class="headerlink" title="未来展望"></a>未来展望</h1><p>一个项目最具活力与激情的时刻就是在设计之初实现之前，等到实现的时候往往寸步难行，到了后续维护的时候时常想就此了断。我希望这个项目能够存活更长的时间，希望自己向同事们提出的构想都能够一一变为现实。本次重构希望能够实现一个更加稳定更加高效的Qingchat，希望能够进一步减少重复劳动，提高效率。<br>最后感谢同事们的不杀之恩，感谢青云QingCloud的自由空间，可以允许我以自己想要的方式完成工作。最后以青云CTO Reno在某次会上说的话自勉：“你们是青云的Devloper，No excuse。”</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年05月30日 初稿</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前的一段时间一直在从事<a href="https://github.com/Xuanwo/qingchat">Qingchat</a>的相关开发工作，这个项目是一个基于Mojo-Weixin提供的Rest API开发的一个微信机器人，承担了十余个群，上千人的微信直播活动。秉承着ACM训练出来的“暴力加乱搞”风格，我花了大概一个星期的课余时间，搞出了一个可用的版本。期间也迭代了很多次，既欣慰于Coding的力量，也苦恼于当初设计的不完善带来的种种问题。在这个项目即将大规模重构的前夕，我总结一下开发Qingchat的过程中的经验教训，希望自己能成为一个更好更聪明的Coder。</p>
+                <a class="" href="/2016/05/29/learn-from-qingchat/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/05/29/learn-from-qingchat/">我从Qingchat中学到的教训</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年5月29日 - 20时05分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/05/29/learn-from-qingchat/"
-                                            title="我从Qingchat中学到的教训">https://xuanwo.org/2016/05/29/learn-from-qingchat/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/python/"> #python </a>
-                    
-                        <a href="/tags/qingchat/"> #qingchat </a>
-                    
-                        <a href="/tags/实习/"> #实习 </a>
-                    
-                        <a href="/tags/QingCloud/"> #QingCloud </a>
-                    
-                </div>
             
         </div>
 
@@ -327,102 +202,13 @@
         </div>
         <h2><a href="/2016/05/09/msp430g2553-bellring/">基于MSP430G2553的打铃系统开发手记</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>我萌萌哒的妹纸是一个代码苦手，完全无法理解 C 语言，所以每一次到单片机上机需要交作业的时候都是愁眉苦脸的样子。而我又总是因为自己确实不懂单片机里面的种种奇怪定义（中断，串口，P1.x 之类），所以也一直没有什么好办法去帮她。这一次的作业对编码能力要求较高，但是涉及到的硬件比较少，于是决定以此为契机，开始我的嵌入式开发之旅。</p>
-<a id="more"></a>
-<h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><p>这次的如下：</p>
-<h2 id="基本要求"><a href="#基本要求" class="headerlink" title="基本要求"></a>基本要求</h2><ul>
-<li>基本计时和显示功能(用 12 小时制显示)。<br>包括上下午标志,时、分的数字显示,秒信号指示。</li>
-<li>能设置当前时间(含上、下午,时,分)</li>
-<li>能实现基本打铃功能,规定:<br>上午 6:00 起床铃;打铃 5 秒、停 2 秒、再打铃 5 秒。<br>下午 10:30 熄灯铃;打铃 5 秒、停 2 秒、再打铃 5 秒。</li>
-</ul>
-<blockquote>
-<p>铃声可用 LED 灯光显示,如果实验装置没有 LED 发光管,可以用七段显示管的小数点显示,也可以用显示小时的十位数码管的多余段显示。凡是用到铃声功能的均可如此处理。</p>
-</blockquote>
-<h2 id="发挥部分"><a href="#发挥部分" class="headerlink" title="发挥部分"></a>发挥部分</h2><ul>
-<li>增加整点报时功能,整点时响铃 5 秒,要求有控制启动和关闭功能。</li>
-<li>增加调整起床铃、熄灯铃时间的功能。</li>
-<li>增加调整打铃时间长短和间歇时间长短的功能。</li>
-<li>增设上午 4 节课的上、下课打铃功能,规定:<br>7:30 上课,8:20 下课;8:30 上课,9:20 下课;9:40 上课,10:30 下课;10:40 上课,11:30 下课;每次铃声 5 秒。</li>
-<li>利用板上按键做一个 12 小时/24 小时的显示格式切换</li>
-</ul>
-<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><blockquote>
-<p>既然我都出动了，肯定不能满足于只完成基本要求，决定把所有功能全都完整的实现。</p>
-</blockquote>
-<p>简单的来说，整体需求可以分为三个部分：显示，打铃，修改。</p>
-<p>需要用到的东西有：串口，指示灯和一个按键。</p>
-<h2 id="显示"><a href="#显示" class="headerlink" title="显示"></a>显示</h2><p>遵循简单的前后端分离的思想，我们可以使用三个全局变量 hour ， minute ， second 来存储当前的时间，只需要在显示的时候区分上下午和 12 小时／ 24 小时即可。这两个部分解耦之后会发现，我们后面的利用板上按键修改显示格式也变得容易了很多。<br>通过串口显示也就是需要向指定变量发送字符，将这个功能抽象并封装之后，对于我后续的编程来说，也就是调用一下 Send_Str(str) 的过程。</p>
-<h2 id="打铃"><a href="#打铃" class="headerlink" title="打铃"></a>打铃</h2><p>打铃是这套系统的重头戏，因为学校方面的资源限制，所以使用指示灯示意的方法来代替打铃。<br>指示灯的亮灭是通过控制一个变量的值来确定的，于是我只要在正确时候设置正确的值，打铃系统就能按照我期望的方式工作。</p>
-<h2 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h2><p>修改同样是通过串口进行的。</p>
-<blockquote>
-<p>在最开始的设计文档中，本来是要求使用4个按键来进行设计，也就是说跟一个普通的电子表差不多。但是非常因缺思艇的事情是学校的按键不够了，所以老师要求所有功能都用串口实现。</p>
-</blockquote>
-<p>跟显示有些不同的地方是，通过串口向芯片发送数据需要正确使用串口中断。</p>
-<p>综上，这个系统所需要的全部内容就已经实现了。可以看到我做了很多将对硬件的操作抽象化的处理，其实这一点非常重要。因为对于我来说，嵌入式开发最大的难题在于，我不知道里面种种变量的含义，不知道如何操作具体的硬件。将硬件操作抽象化处理之后，我就可以很方便地开展我的后续开发。</p>
-<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>实现就不再赘述了，想必读者一定都比我强，下面聊一聊遇到的问题以及 debug 的经历。</p>
-<h2 id="串口配置"><a href="#串口配置" class="headerlink" title="串口配置"></a>串口配置</h2><p>串口的收和发其实是分开的，这里用到了两个变量： UCA0TXBUF ， UCA0RXBUF 。从字面意思上可以看出，前一个用于发送，后一个用于接收（相对于开发者来说）。发送和接收其实就是给这两个值赋值的过程，看起来这两个变量在接受到值之后会将这个值传给别的变量，所以只要不断的将值赋给它就行，我们写了这样的函数：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> vector=USCIAB0RX_VECTOR <span class="comment">//中断服务函数</span></span></span><br><span class="line"></span><br><span class="line">__<span class="function">interrupt <span class="keyword">void</span> <span class="title">uart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    rec = UCA0RXBUF;</span><br><span class="line">    <span class="comment">//读取到缓冲区</span></span><br><span class="line">    strtmp[<span class="built_in">strlen</span>++] = rec;</span><br><span class="line">    strtmp[<span class="built_in">strlen</span>] = <span class="string">'\0'</span>;</span><br><span class="line">    <span class="comment">//切换模式</span></span><br><span class="line">    mode = strtmp[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//发送字符</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Send_Char</span><span class="params">(<span class="keyword">char</span> ch)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (!(IFG2 &amp; UCA0TXIFG));</span><br><span class="line">    UCA0TXBUF = ch;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//发送字符串</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Send_Str</span><span class="params">(<span class="keyword">char</span> *p)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> i;</span><br><span class="line">    i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (*(p + i) != <span class="string">'\0'</span>) &#123;</span><br><span class="line">        <span class="keyword">while</span> (!(IFG2 &amp; UCA0TXIFG));</span><br><span class="line">        UCA0TXBUF = *(p + i);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    Send_Char(<span class="number">0x0d</span>);</span><br><span class="line">    Send_Char(<span class="number">0x0a</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>uart 貌似是一个内置的中断函数，用来处理串口的接收，只要将变量 UCA0RXBUF 的值存储起来即可；后面的 Send_Str 就非常好理解了，将值发送给 UCA0TXBUF ，从而实现串口的输出。</p>
-<p>思路如此清晰，但是测试的时候却遇到了问题，我们的输出是空的，转为16进制显示后，全都是0x00。这个问题调试了很久，拿着原来的代码逐行比对之后发现，出了这样的问题：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">- UCA0BR0 = <span class="number">130</span>;</span><br><span class="line">- UCA0BR1 = <span class="number">6</span>;</span><br><span class="line">+ UCA0BR0 = <span class="number">104</span>;</span><br><span class="line">+ UCA0BR1 = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
-<p>Google 一下才明白，原来 UCA0BR0 和 UCA0BR1 是由系统的时钟速度和波特率决定的值，如果设置错误就会导致串口发送失败。具体的值可以参考<a href="http://www.ti.com/lit/ug/slau144j/slau144j.pdf" target="_blank" rel="external">用户手册</a>， Ctrl＋F 搜索 <code>Table 15-4. Commonly Used Baud Rates</code> 即可。</p>
-<h2 id="串口输出异常"><a href="#串口输出异常" class="headerlink" title="串口输出异常"></a>串口输出异常</h2><p>前面提到我们直接使用三个变量保存当前时间，在输出时做进一步处理，转为字符串的过程中，我们进行了这样的操作：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Time[<span class="number">0</span>] = hour / <span class="number">10</span> + <span class="string">'0'</span>;</span><br></pre></td></tr></table></figure>
-<p>但有趣的事情是，在初始化之后，我们得到的输出是这样的： <code>0/:0/:0/</code> 。随手输出了一下 <code>/</code> 的 ASCII 码，发现它刚好比 <code>0</code> 小一。</p>
-<p>难道说，存储器中的默认值不是 0 吗？ Google 一下之后发现，还真的不是 0 。 MSP430G2553 中的 Flash 存储器在默认状态下的值全为 1 ，然后写入时只能将 1 置为 0 ，所以每一次写入数据都需要先清空再写入。那么问题来了，为什么全为 1 会导致最后输出的结果小 1 呢？我来简单的阐述一下我的理解：</p>
-<p>假设这个存储器只有 8 位，也就是说，现在的值为 <code>11111111</code> ，然后我加上一个 <code>1</code> ，于是我们得到：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">  11111111</span><br><span class="line">+        1</span><br><span class="line"> 100000000</span><br></pre></td></tr></table></figure>
-<p>显然，我们最后的结果已经移除了，此时会产生截断，也就是说，存储器现在的数据变成了 <code>00000000</code> ，也就是 <code>0</code>，跟我们期望的结果 <code>1</code> 刚好相差一。</p>
-<p>当然，实际的情况要比我上面的举例要复杂的多，不过我想已经足够我们认识到这个 BUG 的本质，就不再多说啦。</p>
-<h2 id="Flash-存储器未清空"><a href="#Flash-存储器未清空" class="headerlink" title="Flash 存储器未清空"></a>Flash 存储器未清空</h2><p>在测试中，我们发现每一次烧录程序之后， Flash 存储器不会清空，依然会从上一次我们保存的时间开始计时。我觉得这是正确的行为，没有在意，但是我妹纸和她的队友告诉我她们在完成上一个作业的时候每次都是会清空的。我对着这次和上次的代码研究了很久，认为代码里面根本就没有清空 Flash 存储器的操作，如果有的话，掉电保存这项功能根本无从谈起。我妹纸她们也同意我的分析，但是她们的实践确实证明了每次都会清空 Flash 存储区。</p>
-<p>这个问题也困扰了很久，直到第二天，用别人的电脑重新烧录了一遍程序，发现他们的是会正常清空的。所以说，问题在于 CCS 的版本：我妹纸使用的 CCS 版本是 6.1 ，而<br>他们用的版本是 5.1.1 ，也就是说，不同版本的 CCS 在烧录程序期间的不同行为导致了这次错误。我们换用了 5.1.1 之后，成功解决了这个问题。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>对嵌入式开发有了初步的了解，向着真·全栈开发工程师又近了一步。</p>
-<p>这一次的开发经历遇到了很多因缺思艇的问题，因为嵌入式开发本身比较偏向底层，这次开发甚至还遇到了存储器的存储原理。也有一点将自己看的 CSAPP 融会贯通的感觉，还是很有意思的。</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年05月09日  首次发布</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>我萌萌哒的妹纸是一个代码苦手，完全无法理解 C 语言，所以每一次到单片机上机需要交作业的时候都是愁眉苦脸的样子。而我又总是因为自己确实不懂单片机里面的种种奇怪定义（中断，串口，P1.x 之类），所以也一直没有什么好办法去帮她。这一次的作业对编码能力要求较高，但是涉及到的硬件比较少，于是决定以此为契机，开始我的嵌入式开发之旅。</p>
+                <a class="" href="/2016/05/09/msp430g2553-bellring/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/05/09/msp430g2553-bellring/">基于MSP430G2553的打铃系统开发手记</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年5月9日 - 08时05分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/05/09/msp430g2553-bellring/"
-                                            title="基于MSP430G2553的打铃系统开发手记">https://xuanwo.org/2016/05/09/msp430g2553-bellring/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/C/"> #C </a>
-                    
-                        <a href="/tags/单片机/"> #单片机 </a>
-                    
-                </div>
             
         </div>
 
@@ -457,95 +243,13 @@
         </div>
         <h2><a href="/2016/04/04/docopt-intro/">docopt——好用的Python命令行参数解释器</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><a href="https://github.com/Xuanwo/qingchat" target="_blank" rel="external"><code>Qingchat</code></a> 使用的命令行参数解释器是 <a href="http://docopt.org/" target="_blank" rel="external"><code>docopt</code></a>，用下来感觉非常棒，所以决定介绍一下这个库。（<em>奉劝各位看官，珍爱生命，远离argparse。</em>）</p>
-<a id="more"></a>
-<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>docopt 本质上是在 Python 中引入了一种针对命令行参数的形式语言，在代码的最开头使用<code>&quot;&quot;&quot;</code>文档注释的形式写出符合要求的文档，就会自动生成对应的parse，体验非常赞。</p>
-<h1 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h1><h2 id="样例"><a href="#样例" class="headerlink" title="样例"></a>样例</h2><p>docopt的使用非常简单，以Qingchat为例，你只需要在代码最开头加入：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"""Qingchat CLI</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  qingchat config ip &lt;ip&gt;</span><br><span class="line">  qingchat config port &lt;port&gt;</span><br><span class="line">  qingchat config login</span><br><span class="line">  qingchat group list</span><br><span class="line">  qingchat group choose &lt;group_name&gt;...</span><br><span class="line">  qingchat group clean</span><br><span class="line">  qingchat group send -t &lt;content&gt;</span><br><span class="line">  qingchat group send -i &lt;media&gt;</span><br><span class="line">  qingchat group send -f &lt;file&gt; [&lt;delaytime&gt;]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  -h --help     Show this screen.</span><br><span class="line">  -v --version     Show version.</span><br><span class="line">"""</span></span><br></pre></td></tr></table></figure>
-<p>然后在执行代码中加入：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arguments = docopt(__doc__, version=<span class="string">'Qingchat 0.3.2'</span>)</span><br></pre></td></tr></table></figure>
-<p>就会在你的程序中导入一个<code>arguments</code>字典，这个字典中的内容形如：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">'-f'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'-i'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'-t'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'&lt;content&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'&lt;file&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'&lt;group_name&gt;'</span>: [],</span><br><span class="line">    <span class="string">'&lt;ip&gt;'</span>: <span class="string">'127.0.0.1'</span>,</span><br><span class="line">    <span class="string">'&lt;media&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'&lt;port&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'choose'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'clean'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'config'</span>: <span class="keyword">True</span>,</span><br><span class="line">    <span class="string">'group'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'ip'</span>: <span class="keyword">True</span>,</span><br><span class="line">    <span class="string">'list'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'login'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'port'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'send'</span>: <span class="keyword">False</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这样应该就能很容易看出来，我们在文档中写的每一个短语，都被转化为一个对应的类型。只要直接调用<code>arguments[&#39;xxx&#39;]</code>就可以判断或者使用对应的值，从而实现对应的功能。</p>
-<h2 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h2><p>前面我们举了一个例子，下面我们来详细介绍一下如何完成一个符合 <code>docopt</code> 要求的注释文档。</p>
-<h3 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h3><p>所有出现在<code>usage:</code>（区分大小写）和一个空行之间的文本都会被识别为一个命令组合，<code>usage</code>后的第一个字母将会被识别为这个程序的名字，所有命令组合的每一个部分（空格分隔）都会成为字典中的一个key。</p>
-<h4 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h4><p>形如 <code>&lt;argument&gt;</code> 或者 <code>ARGUMENT</code> 的文本将会被识别为参数。<br>在转化后的字典中的取值为 <code>True</code> 或者 <code>False</code> 。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program &lt;host&gt; &lt;port&gt;</span><br></pre></td></tr></table></figure>
-<h4 id="选项"><a href="#选项" class="headerlink" title="选项"></a>选项</h4><p>形如 <code>-o</code> 或者 <code>--option</code> 的文本将会被识别为选项。<br>在转化后的字典中的取值为 <code>True</code> 或者 <code>False</code> 。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program -f &lt;file&gt;</span><br></pre></td></tr></table></figure>
-<p>Tips:</p>
-<ul>
-<li>短选项可以组合起来，比如<code>-abc</code>等价于<code>-a -b -c</code></li>
-<li>长选项需要的参数需要使用 <code>=</code> 或者空格来分隔，<code>--input=ARG</code> 等价于 <code>--input ARG</code></li>
-<li>短选项可以不需要空格， <code>-f FILE</code> 等价于 <code>-fFILE</code></li>
-</ul>
-<h4 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h4><p>其他不满足 <code>--options</code> 或者 <code>&lt;arguments&gt;</code> 的文本将会被识别为（子）命令。<br>在转化后的字典中取值为 <code>True</code> 或者 <code>False</code>。</p>
-<h4 id="可选项"><a href="#可选项" class="headerlink" title="可选项"></a>可选项</h4><p>形如 <code>[optional elements]</code> 的文本是可选项。<br><code>elements</code>包括上述的三种类型：参数，选项以及命令。</p>
-<p>在相同或者不同的括号中都是一样的：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program [command --option &lt;argument&gt;]</span><br></pre></td></tr></table></figure>
-<p>等价于</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program [command] [--option] [&lt;argument&gt;]</span><br></pre></td></tr></table></figure>
-<h4 id="必填项"><a href="#必填项" class="headerlink" title="必填项"></a>必填项</h4><p>形如 <code>(required elements)</code> 的文本是必填项。<br>上述三种元素默认都是必填项，<code>()</code>符号用在一些比较特殊的情形下，比如：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program (--either-this &lt;<span class="keyword">and</span>-that&gt; | &lt;<span class="keyword">or</span>-this&gt;)</span><br></pre></td></tr></table></figure>
-<h4 id="选择项"><a href="#选择项" class="headerlink" title="选择项"></a>选择项</h4><p>形如 <code>element|another</code> 的文本是选择项，你可以从中选择一个值。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program go (--up | --down | --left | --right)</span><br></pre></td></tr></table></figure>
-<h4 id="列表项"><a href="#列表项" class="headerlink" title="列表项"></a>列表项</h4><p>形如 <code>element...</code> 的文本是列表项，你可以输入多个参数。</p>
-<p>比如说：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program open &lt;file&gt;...</span><br></pre></td></tr></table></figure>
-<p>然后你可以通过<code>arguments[&#39;&lt;file&gt;&#39;]</code> 来访问这个列表。</p>
-<h3 id="Option"><a href="#Option" class="headerlink" title="Option"></a>Option</h3><p><code>Option</code> 部分用于指定某些特殊情形，比如：</p>
-<ul>
-<li>将某个短参数与长参数关联起来，比如<code>-i &lt;file&gt;, --input &lt;file&gt;</code></li>
-<li>某个选项有一个参数</li>
-<li>选项的默认值，比如<code>--coefficient=K  The K coefficient [default: 2.95]</code></li>
-</ul>
-<h3 id="校验"><a href="#校验" class="headerlink" title="校验"></a>校验</h3><p>如果对自己完成的文档有疑问，可以使用<a href="http://try.docopt.org/" target="_blank" rel="external">在线工具</a>进行校验。</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年04月04日 首次发布</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><a href="https://github.com/Xuanwo/qingchat"><code>Qingchat</code></a> 使用的命令行参数解释器是 <a href="http://docopt.org/"><code>docopt</code></a>，用下来感觉非常棒，所以决定介绍一下这个库。（<em>奉劝各位看官，珍爱生命，远离argparse。</em>）</p>
+                <a class="" href="/2016/04/04/docopt-intro/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/04/04/docopt-intro/">docopt——好用的Python命令行参数解释器</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年4月4日 - 21时04分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/04/04/docopt-intro/"
-                                            title="docopt——好用的Python命令行参数解释器">https://xuanwo.org/2016/04/04/docopt-intro/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/python/"> #python </a>
-                    
-                        <a href="/tags/qingchat/"> #qingchat </a>
-                    
-                </div>
             
         </div>
 
@@ -580,123 +284,12 @@
         </div>
         <h2><a href="/2016/04/01/qingchat-intro/">微信多群直播的新探索——Qingchat</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在我之前写过的一篇文章中，我曾经探索过类似的问题：<a href="https://xuanwo.org/2016/02/28/wechat-remove/">微信群重复人员识别</a>。当初我就提出过能否自动获取相关数据，但因为种种原因的限制不了了之了。后来发现了<a href="https://github.com/sjdy521/Mojo-Weixin" target="_blank" rel="external">Mojo-Weixin</a>这个库之后，我决定在这个的基础上实现一个微信多群直播的工具——Qingchat。（<em>尽管在刚刚实现完不久，微信就更新了转发到多个群的功能，Sad。</em>）探索的成果如下： <a href="https://github.com/Xuanwo/qingchat" target="_blank" rel="external">Qingchat</a>，目前仅支持 python3 ，欢迎各位看官提 issues ，交 code ，或者拍砖。<br>接下来我会先介绍一下 Qingchat 的原理，然后介绍 Qingchat 的使用，最后展望一下 Qingchat 未来的发展方向。</p>
-<a id="more"></a>
-<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>Qingchat 基于 <a href="https://github.com/sjdy521/Mojo-Weixin" target="_blank" rel="external">Mojo-Weixin</a> 进行开发，通过调用 Mojo－Winxin 的 http 接口与微信服务器进行通信以实现群发功能。目前主要支持微信群发工作，可以从文件中读取内容，并根据内容长度设置发送延时以模拟真人输入效果。</p>
-<h1 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h1><h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>想要使用Qingchat，首先需要在服务器或者本地配置好 Mojo－Weixin 环境。</p>
-<h3 id="测试-amp-安装perl环境"><a href="#测试-amp-安装perl环境" class="headerlink" title="测试&amp;安装perl环境"></a>测试&amp;安装perl环境</h3><p>除了 Windows 环境，大部门环境下已经默认预装了 perl 环境，可以通过｀perl －－version｀查看。本环境要求 perl 5.10 以上。<br>缺乏相关环境的，可以安装对应系统的集成包：</p>
-<table>
-<thead>
-<tr>
-<th>平台</th>
-<th>推荐选择</th>
-<th>下载地址</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Windows</td>
-<td>1. <strong>StrawberryPerl</strong><br>2. ActivePerl<br></td>
-<td><a href="http://strawberryperl.com/" target="_blank" rel="external">StrawberryPerl下载地址</a><br><a href="http://www.activestate.com/activeperl/downloads" target="_blank" rel="external">ActivePerl下载地址</a></td>
-</tr>
-<tr>
-<td>Linux</td>
-<td>1. <strong>ActivePerl</strong><br>2. 官方源码<br>3. yum/apt等包管理器<br>4. Mojo-ActivePerl</td>
-<td><a href="http://www.activestate.com/activeperl/downloads" target="_blank" rel="external">ActivePerl下载地址</a><br><a href="https://github.com/sjdy521/Mojo-ActivePerl" target="_blank" rel="external">Mojo-ActivePerl下载地址</a></td>
-</tr>
-<tr>
-<td>Mac</td>
-<td>1. <strong>ActivePerl</strong></td>
-<td><a href="http://www.activestate.com/activeperl/downloads" target="_blank" rel="external">ActivePerl下载地址</a>｜</td>
-</tr>
-</tbody>
-</table>
-<h3 id="安装-Mojo-Weixin-模块"><a href="#安装-Mojo-Weixin-模块" class="headerlink" title="安装 Mojo::Weixin 模块"></a>安装 Mojo::Weixin 模块</h3><p>首先需要安装 cpanm 工具：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpan -i App::cpanminus</span><br></pre></td></tr></table></figure></p>
-<p>然后通过 cpanm 工具安装 Mojo::Weixin</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpanm Mojo::Weixin</span><br></pre></td></tr></table></figure>
-<h3 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h3><p>将如下代码使用utf－8编码保存为源码文件：</p>
-<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env perl</span></span><br><span class="line"><span class="keyword">use</span> Mojo::Weixin;</span><br><span class="line"><span class="keyword">my</span> ($host,$port,$post_api);</span><br><span class="line"></span><br><span class="line">$host = <span class="string">"0.0.0.0"</span>; <span class="comment">#发送消息接口监听地址，修改为自己希望监听的地址</span></span><br><span class="line">$port = <span class="number">3000</span>;      <span class="comment">#发送消息接口监听端口，修改为自己希望监听的端口</span></span><br><span class="line"><span class="comment">#$post_api = 'http://xxxx';  #接收到的消息上报接口，如果不需要接收消息上报，可以删除或注释此行</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">my</span> $client = Mojo::Weixin-&gt;new(<span class="string">log_level=&gt;</span><span class="string">"info"</span>,<span class="string">ua_debug=&gt;</span><span class="number">0</span>,<span class="string">qrcode_path=&gt;</span><span class="string">"qrcode.jpg"</span>);</span><br><span class="line">$client-&gt;login();</span><br><span class="line">$client-&gt;load(<span class="string">"ShowMsg"</span>);</span><br><span class="line">$client-&gt;load(<span class="string">"Openwx"</span>,<span class="string">data=&gt;</span>&#123;<span class="string">listen=&gt;</span>[&#123;<span class="string">host=&gt;</span>$host,<span class="string">port=&gt;</span>$port&#125;], <span class="string">post_api=&gt;</span>$post_api&#125;);</span><br><span class="line">$client-&gt;run();</span><br></pre></td></tr></table></figure>
-<p>上述代码保存为 <code>test.pl</code> ， 并通过 perl 来运行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perl test.pl</span><br></pre></td></tr></table></figure>
-<p>然后就会产生一个监听 3000 端口的 http 服务器。</p>
-<p>未竟事宜可以参考<a href="https://github.com/sjdy521/Mojo-Weixin/blob/master/README.md" target="_blank" rel="external">此处</a></p>
-<h3 id="配置Nginx"><a href="#配置Nginx" class="headerlink" title="配置Nginx"></a>配置Nginx</h3><p>为了方便调用二维码，还需要配置一个 Web 服务器。安装Nginx，在配置文件中添加：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80 default_server;</span><br><span class="line">    listen [::]:80 default_server ipv6only=on;</span><br><span class="line"></span><br><span class="line">    root /path/to/your/qrcode; # </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>最终，能在浏览器中以 <code>http://xxx.xxx.xxx.xxx/qrcode.jpg</code> 的形式访问到二维码即配置成功。</p>
-<h2 id="安装Qingchat"><a href="#安装Qingchat" class="headerlink" title="安装Qingchat"></a>安装Qingchat</h2><h3 id="pip"><a href="#pip" class="headerlink" title="pip"></a>pip</h3><p>Qingchat已经上传到了pypi，只需要使用pip进行安装即可：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install qingchat</span><br></pre></td></tr></table></figure>
-<h3 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h3><p>Qingchat最新开发版代码位于： <a href="https://github.com/Xuanwo/qingchat/tree/dev" target="_blank" rel="external">https://github.com/Xuanwo/qingchat/tree/dev</a></p>
-<p>你可以使用</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install <span class="_">-e</span> git+https://github.com/Xuanwo/qingchat/tree/dev</span><br></pre></td></tr></table></figure>
-<p>或</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/Xuanwo/qingchat/tree/dev</span><br><span class="line"><span class="built_in">cd</span> qingchat</span><br><span class="line">python setup.py install</span><br></pre></td></tr></table></figure>
-<p>以进行安装。</p>
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>Qingchat 的使用非常简单：</p>
-<h3 id="配置-1"><a href="#配置-1" class="headerlink" title="配置"></a>配置</h3><p>通过如下命令配置后端服务器的 ip 地址和端口：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">qingchat config ip &lt;ip&gt;</span><br><span class="line">qingchat config port &lt;port&gt;</span><br></pre></td></tr></table></figure>
-<p>配置文件默认会保存在<code>~/.config/qingchat/config.yml</code>。</p>
-<blockquote>
-<p>Win下可能需要设置<code>HOME</code>环境变量才能正常运行</p>
-</blockquote>
-<h3 id="登陆"><a href="#登陆" class="headerlink" title="登陆"></a>登陆</h3><p>配置完毕后，执行</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qingchat config login</span><br></pre></td></tr></table></figure>
-<p>就会自动弹出一个二维码，使用微信扫描并登录后即可。如果出现问题，请再次执行此命令。</p>
-<h3 id="群发消息"><a href="#群发消息" class="headerlink" title="群发消息"></a>群发消息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qingchat group list</span><br></pre></td></tr></table></figure>
-<p>此命令可以列出你保存到通讯录中的所有群组。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qingchat group choose &lt;group_name&gt;</span><br></pre></td></tr></table></figure>
-<p>此命令可以将指定群组加入列表，支持正则</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qingchat group clean</span><br></pre></td></tr></table></figure>
-<p>此命令可以清除列表</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">qingchat group send -t &lt;content&gt;</span><br><span class="line">qingchat group send -i &lt;media&gt;</span><br><span class="line">qingchat group send <span class="_">-f</span> &lt;file&gt;</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>-t</code> 参数用于发送文本信息</li>
-<li><code>-i</code> 参数用于发送媒体信息，图片会直接显示，其他类型将以文件形式传输</li>
-<li><code>-f</code> 参数用于指定文件，逐行发送，在开头添加<code>!</code>可以发送媒体信息</li>
-</ul>
-<h1 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h1><p>Qingchat 目前还处于开发阶段，功能不完善，BUG也很多，部署也相当麻烦。接下来，我将努力完成以下工作：</p>
-<ul>
-<li>更好的二维码呈现机制</li>
-<li>基于 Web 的图形化界面</li>
-<li>支持消息上报的 Server 端</li>
-<li>更多功能的实现，支持好友管理&amp;群组管理等</li>
-</ul>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年04月01日 初次发布</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在我之前写过的一篇文章中，我曾经探索过类似的问题：<a href="https://xuanwo.org/2016/02/28/wechat-remove/">微信群重复人员识别</a>。当初我就提出过能否自动获取相关数据，但因为种种原因的限制不了了之了。后来发现了<a href="https://github.com/sjdy521/Mojo-Weixin">Mojo-Weixin</a>这个库之后，我决定在这个的基础上实现一个微信多群直播的工具——Qingchat。（<em>尽管在刚刚实现完不久，微信就更新了转发到多个群的功能，Sad。</em>）探索的成果如下： <a href="https://github.com/Xuanwo/qingchat">Qingchat</a>，目前仅支持 python3 ，欢迎各位看官提 issues ，交 code ，或者拍砖。<br>接下来我会先介绍一下 Qingchat 的原理，然后介绍 Qingchat 的使用，最后展望一下 Qingchat 未来的发展方向。</p>
+                <a class="" href="/2016/04/01/qingchat-intro/">Read more</a>
+            
         
         <div class="post-footer">
-            
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/04/01/qingchat-intro/">微信多群直播的新探索——Qingchat</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年4月1日 - 22时04分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/04/01/qingchat-intro/"
-                                            title="微信多群直播的新探索——Qingchat">https://xuanwo.org/2016/04/01/qingchat-intro/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
             
             
         </div>
@@ -732,89 +325,13 @@
         </div>
         <h2><a href="/2016/03/12/neovim-slow-upgrade/">Neovim慢速升级攻略</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>一直都非常羡慕那些能把vim用得非常溜的人，但是自己总是不情愿去学，总是觉得vim的操作方式非常反人类，难度曲线太陡，不适合我。真正让我下定决心去学的，是因为系统切换到Ubuntu Gnome之后发现，Sublime Text 3 不能原生支持中文输入。同时我也发现，如果我不上来就折腾spf13这样的东西的话，其实vim非常好懂。于是，Neovim的慢速升级攻略就这样诞生了。</p>
-<a id="more"></a>
-<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>安装可以参考<a href="https://github.com/neovim/neovim/wiki/Installing-Neovim" target="_blank" rel="external">此处</a><br>如果是Ubuntu 的话，则可以执行如下代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo add-apt-repository ppa:neovim-ppa/unstable</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install neovim</span><br></pre></td></tr></table></figure>
-<h1 id="Neovim常用操作"><a href="#Neovim常用操作" class="headerlink" title="Neovim常用操作"></a>Neovim常用操作</h1><h2 id="初步"><a href="#初步" class="headerlink" title="初步"></a>初步</h2><h3 id="光标移动"><a href="#光标移动" class="headerlink" title="光标移动"></a>光标移动</h3><p><code>gg</code> 移动到文件开头<br><code>G</code> 移动到文件末尾</p>
-<h3 id="文件操作相关"><a href="#文件操作相关" class="headerlink" title="文件操作相关"></a>文件操作相关</h3><p><code>:w &lt;filename&gt;</code> 按照<filename>保存文件<br><code>:wq</code> 保存并退出<br><code>:q!</code> 退出不保存<br><code>:e</code> 打开新的文件并关闭当前文件，使用Tab可以补全</filename></p>
-<h3 id="文件编辑相关"><a href="#文件编辑相关" class="headerlink" title="文件编辑相关"></a>文件编辑相关</h3><p><code>dd</code> 删除当前行<br><code>y</code> 复制<br><code>yy</code> 复制当前行<br><code>yG</code> 复制光标以上全部行<br><code>ygg</code> 复制光标以下全部行<br><code>p</code> 粘贴<br><code>u</code> 撤销</p>
-<h2 id="入门"><a href="#入门" class="headerlink" title="入门"></a>入门</h2><h3 id="使用内置终端"><a href="#使用内置终端" class="headerlink" title="使用内置终端"></a>使用内置终端</h3><p><code>:terminal</code> 打开终端，输入exit并使用<code>esc</code>或<code>enter</code>即可退出</p>
-<h3 id="与系统剪切板集成"><a href="#与系统剪切板集成" class="headerlink" title="与系统剪切板集成"></a>与系统剪切板集成</h3><p>这个地方折腾了好久，Neovim默认是支持<code>+</code>寄存器的，但是我通过<code>&quot;+y</code>命令调用寄存器时却提示<code>Clipboard No Provider</code>。通过阅读<a href="https://github.com/neovim/neovim/blob/master/runtime/doc/nvim_clipboard.txt#L19-L27" target="_blank" rel="external">文档</a>之后，我得知，必须要安装下列三个包中的至少一个，才能正常使用剪切板：</p>
-<ul>
-<li>xclip</li>
-<li>xsel (newer alternative to xclip)</li>
-<li>pbcopy/pbpaste (only for Mac OS X)</li>
-</ul>
-<p>安装好之后再打开，就可以正常使用了。</p>
-<p><em>快速复制全文的技巧： 在Normal模式下，<code>gg</code>跳转到文章开头，<code>VG</code>选中全文，<code>&quot;+y</code>复制到剪切板。</em></p>
-<h1 id="Neovim插件"><a href="#Neovim插件" class="headerlink" title="Neovim插件"></a>Neovim插件</h1><h2 id="vim-airline"><a href="#vim-airline" class="headerlink" title="vim-airline"></a>vim-airline</h2><p><a href="https://github.com/vim-airline/vim-airline" target="_blank" rel="external">vim-airline</a>是一个vim的状态栏插件，同样支持neovim。</p>
-<p><img src="https://github.com/vim-airline/vim-airline/wiki/screenshots/demo.gif" alt="vim-airline demo"></p>
-<blockquote>
-<p>安装此插件后启动nvim会报错，自行编译后错误消失，不知道具体的原因。</p>
-</blockquote>
-<h3 id="Smarter-tab-line"><a href="#Smarter-tab-line" class="headerlink" title="Smarter tab line"></a>Smarter tab line</h3><p>在<code>init.vim</code>中加入</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&apos; 开启tabline功能</span><br><span class="line">let g:airline#extensions#tabline#enabled = 1</span><br><span class="line">&apos; 设置tabline分隔符</span><br><span class="line">let g:airline#extensions#tabline#left_sep = &apos; &apos;</span><br><span class="line">let g:airline#extensions#tabline#left_alt_sep = &apos;|&apos;</span><br></pre></td></tr></table></figure>
-<p>支持的一些快捷操作命令：</p>
-<p><code>:bn</code>: 跳转下一个buffer<br><code>:bp</code>: 往上一个buffer<br><code>:b&lt;n&gt;</code>: 跳往第n个buffer<br><code>:bd</code>: 关掉目前buffer</p>
-<h3 id="vim-airline-themes"><a href="#vim-airline-themes" class="headerlink" title="vim-airline-themes"></a>vim-airline-themes</h3><p>个人比较偏爱<code>solarized</code>的暗色皮肤，所以需要使用这个库来安装airline配套的皮肤。<br>在<code>init.vim</code>中添加</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Plug &apos;vim-airline/vim-airline-themes&apos;</span><br></pre></td></tr></table></figure>
-<p>然后修改：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">let g:airline_theme=&quot;solarized&quot;</span><br></pre></td></tr></table></figure>
-<p>即可</p>
-<h2 id="vim-colors-solarized"><a href="#vim-colors-solarized" class="headerlink" title="vim-colors-solarized"></a>vim-colors-solarized</h2><p>顾名思义，这是<code>solarized for vim</code>。<br>在<code>init.vim</code>中添加</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Plug &apos;altercation/vim-colors-solarized&apos;</span><br></pre></td></tr></table></figure>
-<p>然后修改：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">set background=dark</span><br><span class="line">colorscheme solarized</span><br></pre></td></tr></table></figure>
-<p>即可</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年03月12日 首次发布</li>
-<li>2016年03月15日 增加air-line相关内容</li>
-<li>2016年06月16日 增加主题配置相关内容，并添加了部分常用快捷键</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>一直都非常羡慕那些能把vim用得非常溜的人，但是自己总是不情愿去学，总是觉得vim的操作方式非常反人类，难度曲线太陡，不适合我。真正让我下定决心去学的，是因为系统切换到Ubuntu Gnome之后发现，Sublime Text 3 不能原生支持中文输入。同时我也发现，如果我不上来就折腾spf13这样的东西的话，其实vim非常好懂。于是，Neovim的慢速升级攻略就这样诞生了。</p>
+                <a class="" href="/2016/03/12/neovim-slow-upgrade/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/03/12/neovim-slow-upgrade/">Neovim慢速升级攻略</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年3月12日 - 11时03分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/03/12/neovim-slow-upgrade/"
-                                            title="Neovim慢速升级攻略">https://xuanwo.org/2016/03/12/neovim-slow-upgrade/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Software/"> #Software </a>
-                    
-                        <a href="/tags/vim/"> #vim </a>
-                    
-                </div>
             
         </div>
 
@@ -849,66 +366,13 @@
         </div>
         <h2><a href="/2016/02/26/debug-for-hexo-1775/">记一次debug的经历及反思</a></h2>
         
-            <h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p><a href="https://github.com/hexojs/hexo/issues/1775" target="_blank" rel="external">hexojs/hexo #1775</a><br>BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。</p>
-<a id="more"></a>
-<h2 id="经过"><a href="#经过" class="headerlink" title="经过"></a>经过</h2><p>收到反馈之后，我在我的测试环境中也复现了这个bug。一开始还怀疑是主题的问题，专门测试了next主题，结果发现也存在这样的问题，于是就排除了主题方面的bug。<br>首先我们可以初步判断这个url生成出现了问题，参考landscape主题中此处的代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;% for (var i in theme.menu)&#123; %&gt;</span><br><span class="line">    &lt;a class=&quot;main-nav-link&quot; href=&quot;&lt;%- url_for(theme.menu[i]) %&gt;&quot;&gt;&lt;%= i %&gt;&lt;/a&gt;</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
-<p>这里调用了一个<code>url_for</code>函数来生成超链接，代码如下（去除了与本BUG无关的部分）：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">function urlForHelper(path, options) &#123;</span><br><span class="line">  path = path || &apos;/&apos;;</span><br><span class="line">  </span><br><span class="line">  if (path[0] === &apos;#&apos; || path.substring(0, 2) === &apos;//&apos;) &#123;</span><br><span class="line">    return path;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  var config = this.config;</span><br><span class="line">  var root = config.root;</span><br><span class="line">  var data = url.parse(path);</span><br><span class="line"></span><br><span class="line">  // Exit if this is an external path</span><br><span class="line">  if (data.protocol) &#123;</span><br><span class="line">    return path;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // Prepend root path</span><br><span class="line">  path = root + path;</span><br><span class="line"></span><br><span class="line">  return path.replace(/\/&#123;2,&#125;/g, &apos;/&apos;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>直觉告诉我，这个问题很有可能就是这个函数写搓了。</p>
-<p>然而我仔细研究了一下，发现<code>url_for</code>的逻辑并没有什么问题。而且根据我脑补的代码执行情况来看，应该生成一个正确的链接才对，但是<code>config.root</code>偏偏就丢了。<br>真的是非常奇怪，一时之间，我完全懵逼展开了，不明白到底发生了什么。</p>
-<h2 id="转折"><a href="#转折" class="headerlink" title="转折"></a>转折</h2><p>后来我跟我的朋友聊天的时候提到这个bug，结果他告诉我，这个<code>url_for</code>写搓了，我点点头，应该就是这样。然后他说，一个判断都没有中，直接返回自身了，还贴了一张图。图中的代码大致如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">function urlForHelper(path, options)&#123;</span><br><span class="line">  /* jshint validthis: true */</span><br><span class="line">  path = path || &apos;/&apos;;</span><br><span class="line"></span><br><span class="line">  var config = this.config;</span><br><span class="line">  var root = config.root;</span><br><span class="line">  var data = url.parse(path);</span><br><span class="line"></span><br><span class="line">  // Exit if this is an external path</span><br><span class="line">  if (data.protocol || path.substring(0, 2) === &apos;//&apos;)&#123;</span><br><span class="line">    return path;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // Prepend root path</span><br><span class="line">  if (path[0] !== &apos;/&apos;)&#123;</span><br><span class="line">    return root + path;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  return path;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>看到图我立马懵逼了，连忙说，不对啊，你这个不是最新版本的代码。他被我这气场吓到，弱弱回复，我是刚安装的hexo…。<br>我顿时明白自己错在哪里了，npm源里面的稳定版还是3.1.1，但是我们github库中的代码已经是3.2beta了。使用最新的代码测试以后，发现这个bug已经不存在了。<br>也就是说，我花一个下午的时间，对着最新版的代码找一个已经被fix的bug…</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这一次的事情非常乌龙，事后想想觉得自己真的太傻逼了。<br>吃一堑长一智，以后做debug工作的时候一定要分清楚线上和线下的代码，首先就要明确出问题的是哪个版本，然后再开展相应的分析。<br>除此以外，还跟我不重视流程有关系。尽管我总是让人提供各种version信息，但是我却总是在分析问题的时候忽略这些信息，没有把这些关键的信息加入到自己的分析过程中。<br>总结起来就是，too young ，姿势水平还有待提高。</p>
-<h2 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h2><ul>
-<li>2016年02月26日 初次发布</li>
-</ul>
-
+            
+                <h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p><a href="https://github.com/hexojs/hexo/issues/1775">hexojs/hexo #1775</a><br>BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。</p>
+                <a class="" href="/2016/02/26/debug-for-hexo-1775/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/02/26/debug-for-hexo-1775/">记一次debug的经历及反思</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年2月26日 - 12时02分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/02/26/debug-for-hexo-1775/"
-                                            title="记一次debug的经历及反思">https://xuanwo.org/2016/02/26/debug-for-hexo-1775/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Hexo/"> #Hexo </a>
-                    
-                        <a href="/tags/Software/"> #Software </a>
-                    
-                        <a href="/tags/Nodejs/"> #Nodejs </a>
-                    
-                </div>
             
         </div>
 
@@ -943,90 +407,13 @@
         </div>
         <h2><a href="/2016/01/03/vs-oracle-11g/">VS2015连接Oracle数据库</a></h2>
         
-            <h1 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h1><p>宿主机：Win10 + VS2015 + ODP.Net for VS2015<br>虚拟机：Win7 + Oracle 11g + 桥接</p>
-<a id="more"></a>
-<h1 id="配置ODP-Net"><a href="#配置ODP-Net" class="headerlink" title="配置ODP.Net"></a>配置ODP.Net</h1><p>首先下载 <a href="http://www.oracle.com/technetwork/topics/dotnet/downloads/odacmsidownload-2745497.html" target="_blank" rel="external">Oracle Developer Tools for Visual Studio 2015</a> ，下载此文件需要注册Oracle社区账号并接受相关的协议，此文件提供了以下组件：</p>
-<ul>
-<li>Oracle Developer Tools for Visual Studio 12.1.0.2.4</li>
-<li>Oracle Data Provider for .NET 4 12.1.0.2.0</li>
-<li>Oracle Providers for ASP.NET 4 12.1.0.2.0</li>
-</ul>
-<p>下载完成后运行MSI安装程序进行安装，安装完成后会自动注册VS2015的相关插件，重新启动VS2015后将会看到Oracle的相关命令，比如SQL *PLUS支持等。同时添加数据库时也能看到相应的选项。</p>
-<blockquote>
-<p>ODP.Net支持所有Oracle版本，因此下载时只需要注意VS的版本即可。</p>
-</blockquote>
-<h1 id="配置tnsnames-ora"><a href="#配置tnsnames-ora" class="headerlink" title="配置tnsnames.ora"></a>配置tnsnames.ora</h1><blockquote>
-<p>ODP.Net默认使用安装目录下的<code>tnsnames.ora</code>，若安装目录在Program Files下，可能会遇到无权限等问题，此时使用管理员权限打开命令行，切换到对应目录并使用notepad编辑。</p>
-</blockquote>
-<p>复制服务器端的tnsnames.ora文件内容，或者自己手动编辑，格式如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;数据源别名&gt; =</span><br><span class="line">  (DESCRIPTION =</span><br><span class="line">    (ADDRESS = (PROTOCOL = TCP)(HOST = &lt;主机名或IP&gt;)(PORT = &lt;端口号&gt;))</span><br><span class="line">    (CONNECT_DATA =</span><br><span class="line">      (SERVER = DEDICATED)</span><br><span class="line">      (SERVICE_NAME = &lt;数据库服务名&gt;)</span><br><span class="line">    )</span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
-<h1 id="添加数据库"><a href="#添加数据库" class="headerlink" title="添加数据库"></a>添加数据库</h1><p>打开<code>工具</code>-<code>连接到数据库</code>，数据源修改为<code>Oracle数据库</code>下的<code>ODP.NET,托管驱动程序</code>，然后点击<code>确定</code>，打开<code>添加连接</code>窗口。<br><img src="/imgs/develop/add-database.png" alt="添加连接"><br>填写用户名，密码并选择数据源，然后测试连接，成功的话说明已经连通，点击确定即可。</p>
-<blockquote>
-<p>使用虚拟机搭建数据库的额外Tips<br>根据某网友分析，Oracle的监听器在通过1521端口连接后，会开启另外一个新的随机端口进行数据通讯，因此使用NAT方式虚拟网卡可能会导致连接失败。这种情况下，请使用桥接方式虚拟网卡，并在<code>net manager</code>中将<code>loaclhost</code>修改为虚拟机当前的IP。重启监听服务后，再试。</p>
-</blockquote>
-<h1 id="连接数据库并使用"><a href="#连接数据库并使用" class="headerlink" title="连接数据库并使用"></a>连接数据库并使用</h1><h2 id="连接数据库"><a href="#连接数据库" class="headerlink" title="连接数据库"></a>连接数据库</h2><figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Dim</span> oradb <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"User ID=system;Password=123456;Data Source=lol"</span></span><br><span class="line"><span class="keyword">Dim</span> conn <span class="keyword">As</span> <span class="keyword">New</span> OracleConnection(oradb)</span><br><span class="line">conn.Open()</span><br><span class="line"><span class="keyword">Dim</span> sql <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"create table xxx"</span></span><br><span class="line"><span class="keyword">Dim</span> sqlCom <span class="keyword">As</span> <span class="keyword">New</span> OracleCommand</span><br><span class="line">sqlCom.CommandText = sql</span><br><span class="line">sqlCom.Connection = conn</span><br><span class="line">sqlCom.ExecuteNonQuery()</span><br></pre></td></tr></table></figure>
-<h2 id="查询数据"><a href="#查询数据" class="headerlink" title="查询数据"></a>查询数据</h2><p>成功配置数据源之后，只需要向界面上拖动<code>DataGridView</code>，并进行相关配置，选择自己需要的表即可。</p>
-<h2 id="插入图片的正确姿势"><a href="#插入图片的正确姿势" class="headerlink" title="插入图片的正确姿势"></a>插入图片的正确姿势</h2><p>图片作为二进制数据无法直接拼凑出SQL命令，我们需要使用<code>OracleCommand</code>自带的<code>Parameters</code>功能。在SQL命令中用<code>:photo</code>来代表一个参量，然后使用</p>
-<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sqlCom.Parameters.Add(<span class="string">"photo"</span>, OracleDbType.Blob, imgData.Length)</span><br></pre></td></tr></table></figure>
-<p>来分别指定这个参量的类型和所占空间大小</p>
-<p>最后使用</p>
-<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sqlCom.Parameters(<span class="number">0</span>).Value = imgData</span><br></pre></td></tr></table></figure>
-<p>来指定这个参量的值。</p>
-<p>整个插入图片过程的代码如下：</p>
-<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Dim</span> conn <span class="keyword">As</span> <span class="keyword">New</span> OracleConnection(oradb)</span><br><span class="line"><span class="keyword">Dim</span> imgData(<span class="number">0</span>) <span class="keyword">As</span> <span class="built_in">Byte</span></span><br><span class="line"><span class="keyword">Dim</span> ms <span class="keyword">As</span> <span class="keyword">New</span> System.IO.MemoryStream</span><br><span class="line">PictureBox1.BackgroundImage.Save(ms, PictureBox1.BackgroundImage.RawFormat)</span><br><span class="line"><span class="keyword">ReDim</span> imgData(ms.Length - <span class="number">1</span>)</span><br><span class="line">ms.Read(imgData, <span class="number">0</span>, ms.Length)</span><br><span class="line">ms.Close()</span><br><span class="line">conn.Open()</span><br><span class="line"><span class="keyword">Dim</span> sql <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"insert into hero values"</span> &amp; <span class="string">"("</span> &amp; TextBox1.<span class="keyword">Text</span> &amp; <span class="string">":photo"</span> &amp; <span class="string">")"</span></span><br><span class="line"><span class="keyword">Dim</span> sqlCom <span class="keyword">As</span> <span class="keyword">New</span> OracleCommand</span><br><span class="line">sqlCom.CommandText = sql</span><br><span class="line">sqlCom.Connection = conn</span><br><span class="line">sqlCom.Parameters.Add(<span class="string">"photo"</span>, OracleDbType.Blob, imgData.Length)</span><br><span class="line">sqlCom.Parameters(<span class="number">0</span>).Value = imgData</span><br><span class="line">sqlCom.ExecuteNonQuery()</span><br></pre></td></tr></table></figure>
-<h1 id="常见错误"><a href="#常见错误" class="headerlink" title="常见错误"></a>常见错误</h1><h2 id="column-not-allowed-here"><a href="#column-not-allowed-here" class="headerlink" title="column not allowed here"></a>column not allowed here</h2><p>数据类型不符，检查对应项目数据类型是否正确。</p>
-<h2 id="missing-comma"><a href="#missing-comma" class="headerlink" title="missing comma"></a>missing comma</h2><p>命令格式不对，检查一下自己的SQL命令是否有错误，特别是在有字符串的时候，需要使用<code>&quot;&quot;</code>来代表一个字符串中的<code>&quot;</code>。</p>
-<h2 id="identifier-is-too-long"><a href="#identifier-is-too-long" class="headerlink" title="identifier is too long"></a>identifier is too long</h2><p>标识符过长（不得超过30字符），不是非常明白原因，不过我取消掉insert命令中指定位置的部分之后，这个错误消失了。</p>
-<h2 id="missing-INTO-keyword"><a href="#missing-INTO-keyword" class="headerlink" title="missing INTO keyword"></a>missing INTO keyword</h2><p>缺少into关键字（手滑打成了inte），检查一下自己的SQL命令是否有错误。</p>
-<h2 id="cannot-insert-NULL-into-“SYSTEM”-”HERO”-”HEROCATEGORYID”"><a href="#cannot-insert-NULL-into-“SYSTEM”-”HERO”-”HEROCATEGORYID”" class="headerlink" title="cannot insert NULL into (“SYSTEM”.”HERO”.”HEROCATEGORYID”)"></a>cannot insert NULL into (“SYSTEM”.”HERO”.”HEROCATEGORYID”)</h2><p>这些项都指定了非0值，故不能不赋值，为对应项目赋值即可。</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年01月03日 初步完成</li>
-</ul>
-
+            
+                <h1 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h1><p>宿主机：Win10 + VS2015 + ODP.Net for VS2015<br>虚拟机：Win7 + Oracle 11g + 桥接</p>
+                <a class="" href="/2016/01/03/vs-oracle-11g/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/01/03/vs-oracle-11g/">VS2015连接Oracle数据库</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年1月3日 - 15时01分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/01/03/vs-oracle-11g/"
-                                            title="VS2015连接Oracle数据库">https://xuanwo.org/2016/01/03/vs-oracle-11g/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Database/"> #Database </a>
-                    
-                        <a href="/tags/Oracle/"> #Oracle </a>
-                    
-                        <a href="/tags/VB/"> #VB </a>
-                    
-                </div>
             
         </div>
 
@@ -1061,220 +448,13 @@
         </div>
         <h2><a href="/2015/11/03/python-packages/">Python包分发详解</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>用Python写过不少的脚本，现在要把脚本打包成模块并进行发布，然后才明白脚本Boy到正规的码农差距有多大= =。<br>踩了很多天的坑之后，自己学习到了Python的包分发机制，以及如何利用Pypi向全世界分发自己的模块。现在简单地做一些整理。</p>
-<a id="more"></a>
-<h1 id="Python包机制"><a href="#Python包机制" class="headerlink" title="Python包机制"></a>Python包机制</h1><blockquote>
-<p>包是一个模块或模块/子模块的集合，一般情况下被压缩到一个压缩包中。<br>其中包含</p>
-<ol>
-<li>依赖信息</li>
-<li>将文件拷贝到标准的包搜索路径的指令。</li>
-<li>编译指令(如果在安装前代码必须被编译的话)。</li>
-</ol>
-</blockquote>
-<p>也就是说，为了分发模块，我们需要把模块的依赖信息和模块一起打包。在Python中，这个打包好的可分发的文件一般以<code>.egg</code>结尾，其作用可以理解为java中的jar。Python的包管理以及分发曾经经历过非常混乱的一段时期，但是如今已经基本稳定（或者说，流行？）为两个套件：</p>
-<ul>
-<li>打包&amp;分发：<a href="https://pythonhosted.org/setuptools/" target="_blank" rel="external">Setuptools</a></li>
-<li>安装&amp;管理：<a href="https://pip.readthedocs.org/en/stable/" target="_blank" rel="external">pip</a></li>
-</ul>
-<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><h2 id="注册Pypi"><a href="#注册Pypi" class="headerlink" title="注册Pypi"></a>注册Pypi</h2><blockquote>
-<p>Pypi - the Python Package Index<br>Pypi是Python语言包的仓库，全世界所有开源Python开发者都会在Pypi上提交&amp;下载软件包</p>
-</blockquote>
-<p>为了我们后续的提交操作，我们需要首先<a href="https://pypi.python.org/pypi?%3Aaction=register_form" target="_blank" rel="external">注册</a>一个Pypi的账号，注册非常简单，提供用户名，密码以及邮箱，经过验证之后就注册完成了。</p>
-<h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><p>Python没有严格的工程目录要求，只要有<code>__init__.py</code>在的地方，就会被认为是一个Python的包。但是出于方便协作考虑，可以把自己的源代码与各种脚本分开存放。具体的结构可以学习Github上比较流行的Python项目，选择自己喜欢的即可。</p>
-<h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><p>首先你需要有pip，pip自从<code>3.4</code>版本开始已经随python内置发布，如果使用的版本比较低，可以自己手动进行安装：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install python-pip</span><br></pre></td></tr></table></figure>
-<p>然后我们需要安装<code>setuptools</code>：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install setuptools</span><br></pre></td></tr></table></figure>
-<h1 id="编写安装脚本"><a href="#编写安装脚本" class="headerlink" title="编写安装脚本"></a>编写安装脚本</h1><p>准备工作就绪之后，我们就可以开始编写安装脚本了。</p>
-<h2 id="填写配置信息"><a href="#填写配置信息" class="headerlink" title="填写配置信息"></a>填写配置信息</h2><h3 id="基本框架"><a href="#基本框架" class="headerlink" title="基本框架"></a>基本框架</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup, find_packages <span class="comment"># 引入setuptools包</span></span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    option = values, <span class="comment"># 本质上是一个函数的参数，分行写便于维护</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-<h3 id="参数介绍"><a href="#参数介绍" class="headerlink" title="参数介绍"></a>参数介绍</h3><h4 id="指定整个包"><a href="#指定整个包" class="headerlink" title="指定整个包"></a>指定整个包</h4><h4 id="指定单独模块"><a href="#指定单独模块" class="headerlink" title="指定单独模块"></a>指定单独模块</h4><h4 id="依赖关系"><a href="#依赖关系" class="headerlink" title="依赖关系"></a>依赖关系</h4><h4 id="包内数据"><a href="#包内数据" class="headerlink" title="包内数据"></a>包内数据</h4><h4 id="其他数据"><a href="#其他数据" class="headerlink" title="其他数据"></a>其他数据</h4><h4 id="Meta-Data"><a href="#Meta-Data" class="headerlink" title="Meta-Data"></a>Meta-Data</h4><table>
-<thead>
-<tr>
-<th>Meta-Data</th>
-<th>描述值</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>name</code></td>
-<td>包名</td>
-</tr>
-<tr>
-<td><code>version</code></td>
-<td>此次发布版本</td>
-</tr>
-<tr>
-<td><code>author</code></td>
-<td>作者名</td>
-</tr>
-<tr>
-<td><code>author_email</code></td>
-<td>作者邮箱</td>
-</tr>
-<tr>
-<td><code>maintainer</code></td>
-<td>维护者名</td>
-</tr>
-<tr>
-<td><code>maintainer_email</code></td>
-<td>维护者邮箱</td>
-</tr>
-<tr>
-<td><code>url</code></td>
-<td>主页</td>
-</tr>
-<tr>
-<td><code>description</code></td>
-<td>简要描述</td>
-</tr>
-<tr>
-<td><code>long_description</code></td>
-<td>详细描述</td>
-</tr>
-<tr>
-<td><code>download_url</code></td>
-<td>下载地址</td>
-</tr>
-<tr>
-<td><code>classifiers</code></td>
-<td>分类，参见<a href="https://pypi.python.org/pypi?%3Aaction=list_classifiers" target="_blank" rel="external">此处</a></td>
-</tr>
-<tr>
-<td><code>platforms</code></td>
-<td>平台列表</td>
-</tr>
-<tr>
-<td><code>license</code></td>
-<td>授权协议</td>
-</tr>
-</tbody>
-</table>
-<h3 id="典型配置"><a href="#典型配置" class="headerlink" title="典型配置"></a>典型配置</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup, find_packages</span><br><span class="line">setup(</span><br><span class="line">    name = <span class="string">"HelloWorld"</span>,</span><br><span class="line">    version = <span class="string">"0.1"</span>,</span><br><span class="line">    packages = find_packages(),</span><br><span class="line">    scripts = [<span class="string">'say_hello.py'</span>],</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Project uses reStructuredText, so ensure that the docutils get</span></span><br><span class="line">    <span class="comment"># installed or upgraded on the target machine</span></span><br><span class="line">    install_requires = [<span class="string">'docutils&gt;=0.3'</span>],</span><br><span class="line"></span><br><span class="line">    package_data = &#123;</span><br><span class="line">        <span class="comment"># If any package contains *.txt or *.rst files, include them:</span></span><br><span class="line">        <span class="string">''</span>: [<span class="string">'*.txt'</span>, <span class="string">'*.rst'</span>],</span><br><span class="line">        <span class="comment"># And include any *.msg files found in the 'hello' package, too:</span></span><br><span class="line">        <span class="string">'hello'</span>: [<span class="string">'*.msg'</span>],</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    <span class="comment"># metadata for upload to PyPI</span></span><br><span class="line">    author = <span class="string">"Me"</span>,</span><br><span class="line">    author_email = <span class="string">"me@example.com"</span>,</span><br><span class="line">    description = <span class="string">"This is an Example Package"</span>,</span><br><span class="line">    license = <span class="string">"PSF"</span>,</span><br><span class="line">    keywords = <span class="string">"hello world example examples"</span>,</span><br><span class="line">    url = <span class="string">"http://example.com/HelloWorld/"</span>,   <span class="comment"># project home page, if any</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># could also include long_description, download_url, classifiers, etc.</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-<h2 id="打包"><a href="#打包" class="headerlink" title="打包"></a>打包</h2><blockquote>
-<p>这个坑踩了很久- -，没有老司机的带的痛苦<br>与开发环境不同的时候，当用户运行你的包时，使用open等命令是以当前目录为根运行的，所以你必须指定数据所在位置，否则会出现IOError甚至更糟糕的情况</p>
-</blockquote>
-<h3 id="指定需要分发的文件"><a href="#指定需要分发的文件" class="headerlink" title="指定需要分发的文件"></a>指定需要分发的文件</h3><p><strong>自动处理</strong></p>
-<p>当没有<code>MANIFEST.in</code>文件时，Setuptools将会按照下面的原则处理文件：</p>
-<ul>
-<li>所有<code>py_modules</code>和<code>packages</code>选项包含的Python源文件</li>
-<li>所有<code>ext_modules</code>或<code>libraries</code>选项指定的C源文件</li>
-<li><code>scripts</code>指定的脚本（<em>参见<a href="https://docs.python.org/3.5/distutils/setupscript.html#distutils-installing-scripts" target="_blank" rel="external">Installing Scripts</a></em>）</li>
-<li>形如<code>test/test*.py</code>的文件</li>
-<li><code>README.txt</code>（或<code>README</code>），<code>setup.py</code>和<code>setup.cfg</code></li>
-<li>符合<code>package_data</code>选项的所有文件（<em>参见<a href="https://docs.python.org/3.5/distutils/setupscript.html#distutils-installing-package-data" target="_blank" rel="external">Installing Package Data</a></em>）</li>
-<li>符合<code>data_files</code>选项的所有文件（<em>参见<a href="https://docs.python.org/3.5/distutils/setupscript.html#distutils-additional-files" target="_blank" rel="external">Installing Additional Files</a></em>）</li>
-</ul>
-<p><em>翻译自<a href="https://docs.python.org/3.5/distutils/sourcedist.html#specifying-the-files-to-distribute" target="_blank" rel="external">Python官方文档 Specifying the files to distribute</a></em></p>
-<p><strong>手动处理</strong></p>
-<p>一般而言，自动处理已经足够，但是如果想要自己指定的话，则需要编辑<code>MANIFEST.in</code>模板文件。<br><code>MANIFEST.in</code>模板文件很简单，每一行都导入或者导出表示符合正则的一类文件。比如说：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 导入根目录下满足*.txt的文件</span><br><span class="line">include *.txt</span><br><span class="line"># 递归导入examples目录下满足*.txt和*.py的文件</span><br><span class="line">recursive-include examples *.txt *.py</span><br><span class="line"># 导入满足examples/sample?/build的文件夹下所有文件</span><br><span class="line">prune examples/sample?/build</span><br></pre></td></tr></table></figure>
-<p><em>详细语法参见<a href="https://docs.python.org/3.5/distutils/commandref.html#sdist-cmd" target="_blank" rel="external">此处</a></em></p>
-<blockquote>
-<p>注意：<br>当根目录下存在<code>MANIFEST.in</code>文件时，Setuptools将不会再采用自动处理的设定，因此需要在<code>MANIFEST.in</code>文件中指明所有需要导入的文件。</p>
-</blockquote>
-<h3 id="调用数据"><a href="#调用数据" class="headerlink" title="调用数据"></a>调用数据</h3><p>当你需要调用Python包中的文件时，你可以使用下面的方法：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pkg_resources <span class="keyword">import</span> resource_string</span><br><span class="line">data = resource_string(__name__, <span class="string">'data.dat'</span>)</span><br></pre></td></tr></table></figure>
-<p>此时，指定的<code>data.dat</code>文件将会以二进制文件流的形式赋值到data变量中，你可以按照自己的需要进行进一步处理。比如说：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">from pkg_resources import resource_string</span><br><span class="line">    data = resource_string(__name__, &apos;example.yml&apos;)</span><br><span class="line">    with open(&apos;config.yml&apos;, &apos;w&apos;) as f:</span><br><span class="line">        f.write(str(data, encoding=&apos;utf-8&apos;))</span><br><span class="line">        f.close()</span><br></pre></td></tr></table></figure>
-<p>上述代码实现了从<code>example.yml</code>中读取数据并保存到<code>config.yml</code>文件中。</p>
-<h3 id="创建源码分发包"><a href="#创建源码分发包" class="headerlink" title="创建源码分发包"></a>创建源码分发包</h3><p>在包的根目录下执行：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python setup.py sdist</span><br></pre></td></tr></table></figure>
-<p>默认情况下，<code>sdist</code>命令将会为Unix创建<code>gzip</code>压缩文件，为Windows创建<code>zip</code>压缩文件<br>你也可以添加参数<code>--formats=zip</code>指定生成的文件类型，所有支持的参数见<a href="https://docs.python.org/3.5/distutils/sourcedist.html" target="_blank" rel="external">此处</a></p>
-<blockquote>
-<p>源码分发似乎不会导入<code>package_data</code>中指定的数据，如果上传本分发包可能导致用户通过<code>pip</code>安装的包中没有需要的数据。</p>
-</blockquote>
-<h3 id="创建二进制分发包"><a href="#创建二进制分发包" class="headerlink" title="创建二进制分发包"></a>创建二进制分发包</h3><p>除了创建源码分发之外，我们还可以创建基于平台的二进制分发包。<br>在包的根目录下执行：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python setup.py bdist</span><br></pre></td></tr></table></figure>
-<p>默认情况下，这个命令将会创建基于自身平台的分发包。<br>同样的，你也可以添加<code>--format=zip</code>参数来指定生成的文件，支持的参数见<a href="https://docs.python.org/3.5/distutils/builtdist.html" target="_blank" rel="external">此处</a><br>除此之外，也可以使用以下的命令直接生成对应格式的分发包：</p>
-<table>
-<thead>
-<tr>
-<th>命令</th>
-<th>格式</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>bdist_dumb</td>
-<td>tar, gztar, bztar, xztar, ztar, zip</td>
-</tr>
-<tr>
-<td>bdist_rpm</td>
-<td>rpm, srpm</td>
-</tr>
-<tr>
-<td>bdist_wininst</td>
-<td>wininst</td>
-</tr>
-<tr>
-<td>bdist_msi</td>
-<td>msi</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p>这一命令无法跨平台， 在Linux上选择制作<code>wininst</code>分发包时会提示缺乏相应的支持。</p>
-</blockquote>
-<h3 id="创建wheel分发包"><a href="#创建wheel分发包" class="headerlink" title="创建wheel分发包"></a>创建wheel分发包</h3><p>wheel是新出的分发格式，旨在取代egg，你可以通过下列命令进行安装：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install wheel</span><br></pre></td></tr></table></figure>
-<p>然后在包的根目录下执行：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python setup.ppy bdist_wheel</span><br></pre></td></tr></table></figure>
-<h1 id="上传到Pypi"><a href="#上传到Pypi" class="headerlink" title="上传到Pypi"></a>上传到Pypi</h1><h2 id="注册包"><a href="#注册包" class="headerlink" title="注册包"></a>注册包</h2><p>在上传我们的包之前，我们需要首先向Pypi提交包的相关信息。<br>在包的根目录下执行:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python setup.py register</span><br></pre></td></tr></table></figure></p>
-<p>没有登陆的话，需要进行登陆；如果已经登陆，直接回车使用默认设置即可。</p>
-<h2 id="上传包"><a href="#上传包" class="headerlink" title="上传包"></a>上传包</h2><p>注册完毕后，我们可以提交我们的包了。<br>在包的根目录下执行：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python setup.py sdist bdist_wininst upload</span><br></pre></td></tr></table></figure></p>
-<p>这条命令将会向Pypi提交源码和Win下的安装包，如果需要上传别的包，只要直接写出即可。</p>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
-<li><a href="https://github.com/dccrazyboy/pyeco/blob/master/pyeco.rst" target="_blank" rel="external">Python开发生态环境简介</a></li>
-<li><a href="http://timd.cn/2015/10/20/setuptools/" target="_blank" rel="external">使用Setuptools构建和分发python包</a></li>
-<li><a href="http://python3-cookbook.readthedocs.org/zh_CN/latest/c10/p08_read_datafile_within_package.html" target="_blank" rel="external">10.8 读取位于包中的数据文件</a></li>
-<li><a href="https://docs.python.org/3.5/distutils/sourcedist.html" target="_blank" rel="external">Creating a Source Distribution</a></li>
-<li><a href="https://docs.python.org/3.5/distutils/examples.html" target="_blank" rel="external">Examples</a></li>
-</ul>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2015年11月03日 初步完成</li>
-<li>2016年03月30日 修复了部分笔误，添加了一些注释，增加了wheel相关的内容</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>用Python写过不少的脚本，现在要把脚本打包成模块并进行发布，然后才明白脚本Boy到正规的码农差距有多大= =。<br>踩了很多天的坑之后，自己学习到了Python的包分发机制，以及如何利用Pypi向全世界分发自己的模块。现在简单地做一些整理。</p>
+                <a class="" href="/2015/11/03/python-packages/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2015/11/03/python-packages/">Python包分发详解</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2015年11月3日 - 15时11分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2015/11/03/python-packages/"
-                                            title="Python包分发详解">https://xuanwo.org/2015/11/03/python-packages/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Python/"> #Python </a>
-                    
-                </div>
             
         </div>
 
@@ -1309,175 +489,14 @@
         </div>
         <h2><a href="/2015/10/30/python-JSON/">在Python中使用JSON</a></h2>
         
-            <h1 id="JSON介绍"><a href="#JSON介绍" class="headerlink" title="JSON介绍"></a>JSON介绍</h1><p>JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。 易于人阅读和编写。同时也易于机器解析和生成。 它基于JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999的一个子集。 JSON采用完全独立于语言的文本格式，但是也使用了类似于C语言家族的习惯（包括C, C++, C#, Java, JavaScript, Perl, Python等）。 这些特性使JSON成为理想的数据交换语言。</p>
-<p><em>引用自<a href="http://www.json.org/json-zh.html" target="_blank" rel="external">json.org</a></em></p>
-<a id="more"></a>
-<h1 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h1><h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><p>JSON只提供了两种结构——字典和数组。也就是说，JSON可以存储一对一或者一对多的键值对关系。</p>
-<h2 id="形式"><a href="#形式" class="headerlink" title="形式"></a>形式</h2><h3 id="对象"><a href="#对象" class="headerlink" title="对象"></a>对象</h3><p>对象是一个无序的键值对集合。<br>一个对象以<code>{</code>开始，<code>}</code>结束。每个<code>键</code>后跟一个<code>:</code>；键值对之间使用<code>,</code>分隔。<br><img src="/imgs/develop/object.gif" alt="object"></p>
-<h3 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h3><p>数组是值的有序集合，一个键可以对应一个数组。<br>一个数组以<code>[</code>开始，<code>]</code>结束。值之间使用<code>,</code>分隔。<br><img src="/imgs/develop/array.gif" alt="array"></p>
-<h3 id="值"><a href="#值" class="headerlink" title="值"></a>值</h3><p>值可以是双引号括起来的字符串、数值、true、false、 null、对象或者数组。这些结构可以嵌套。<br><img src="/imgs/develop/value.gif" alt="value"></p>
-<h3 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h3><p>字符串是由双引号包围的任意数量Unicode字符的集合，使用反斜线转义。一个字符即一个单独的字符串。<br>字符串与C/C++中的字符串非常相似，包括常见的各种转义符号。<br><img src="/imgs/develop/string.gif" alt="value"></p>
-<h3 id="数值"><a href="#数值" class="headerlink" title="数值"></a>数值</h3><p>数值与C/C++中的数值非常相似，但没有八进制和十六进制格式。<br><img src="/imgs/develop/number.gif" alt="number"></p>
-<h3 id="空白"><a href="#空白" class="headerlink" title="空白"></a>空白</h3><p>空白符号（包括空格，Tab以及回车）可以加入到任何符号之间，不会影响JSON的含义</p>
-<h1 id="Python中的JSON库"><a href="#Python中的JSON库" class="headerlink" title="Python中的JSON库"></a>Python中的JSON库</h1><p><em>以Python 3为基准</em></p>
-<h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><h3 id="对应类型"><a href="#对应类型" class="headerlink" title="对应类型"></a>对应类型</h3><table>
-<thead>
-<tr>
-<th>Python</th>
-<th>JSON</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>dict</td>
-<td>object</td>
-</tr>
-<tr>
-<td>list, tuple</td>
-<td>array</td>
-</tr>
-<tr>
-<td>str</td>
-<td>string</td>
-</tr>
-<tr>
-<td>int, float</td>
-<td>number</td>
-</tr>
-<tr>
-<td>True</td>
-<td>true</td>
-</tr>
-<tr>
-<td>False</td>
-<td>false</td>
-</tr>
-<tr>
-<td>None</td>
-<td>null</td>
-</tr>
-</tbody>
-</table>
-<h3 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h3><p>我们使用<code>JSON</code>库中的<code>dump</code>以及<code>dumps</code>函数来进行<code>JSON</code>编码。<code>dump</code>和<code>dumps</code>各项参数含义基本一致，唯一区别在于<code>dump</code>函数编码产生一个JSON文件流，而<code>dumps</code>编码产生一个JSON字符串。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">json.dump(obj, fp, skipkeys=<span class="keyword">False</span>, ensure_ascii=<span class="keyword">True</span>, check_circular=<span class="keyword">True</span>, allow_nan=<span class="keyword">True</span>, cls=<span class="keyword">None</span>, indent=<span class="keyword">None</span>, separators=<span class="keyword">None</span>, default=<span class="keyword">None</span>, sort_keys=<span class="keyword">False</span>, **kw)</span><br><span class="line"></span><br><span class="line">json.dumps(obj, skipkeys=<span class="keyword">False</span>, ensure_ascii=<span class="keyword">True</span>, check_circular=<span class="keyword">True</span>, allow_nan=<span class="keyword">True</span>, cls=<span class="keyword">None</span>, indent=<span class="keyword">None</span>, separators=<span class="keyword">None</span>, default=<span class="keyword">None</span>, sort_keys=<span class="keyword">False</span>, **kw)</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>obj</code>：编码对象</li>
-<li><code>fp</code>：指定文件流</li>
-<li><code>skipkeys</code>：若skipkeys为真，则非标准类型将会跳过；否则返回<code>TypeError</code></li>
-<li><code>ensure_ascii</code>：若<code>ensure_ascii</code>为真，则输出时将会确保没有非ASCII字符；否则将会原样输出</li>
-<li><code>check_circular</code>：若<code>check_circular</code>为真，则将会检测是否存在循环调用；否则会跳过检测</li>
-<li><code>allow_nan</code>：若<code>allow_nan</code>为真，则将会允许存在空值（无穷大值）；否则会返回<code>ValueError</code></li>
-<li><code>cls</code>：若<code>cls</code>为空值，则使用<code>JSONEncoder</code>；否则使用指定子类进行编码</li>
-<li><code>indent</code>：若<code>indent</code>为空值，则无缩进；否则使用指定值进行缩进</li>
-<li><code>separators</code>：若<code>separators</code>为空值，则使用<code>(&#39;,&#39;, &#39;: &#39;)</code>分隔；否则使用指定的元组进行分隔</li>
-<li><code>default</code>：若<code>default</code>为空值，则使用自带的<code>default</code>方法；否则使用指定值</li>
-<li><code>sort_keys</code>：若<code>sort_keys</code>为真，则输出将会按照键进行排序</li>
-</ul>
-<h3 id="示范"><a href="#示范" class="headerlink" title="示范"></a>示范</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>json.dumps([<span class="string">'foo'</span>, &#123;<span class="string">'bar'</span>: (<span class="string">'baz'</span>, <span class="keyword">None</span>, <span class="number">1.0</span>, <span class="number">2</span>)&#125;])</span><br><span class="line"><span class="string">'["foo", &#123;"bar": ["baz", null, 1.0, 2]&#125;]'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 排序</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>print(json.dumps(&#123;<span class="string">"c"</span>: <span class="number">0</span>, <span class="string">"b"</span>: <span class="number">0</span>, <span class="string">"a"</span>: <span class="number">0</span>&#125;, sort_keys=<span class="keyword">True</span>))</span><br><span class="line">&#123;<span class="string">"a"</span>: <span class="number">0</span>, <span class="string">"b"</span>: <span class="number">0</span>, <span class="string">"c"</span>: <span class="number">0</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分隔符</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>json.dumps([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,&#123;<span class="string">'4'</span>: <span class="number">5</span>, <span class="string">'6'</span>: <span class="number">7</span>&#125;], separators=(<span class="string">','</span>, <span class="string">':'</span>))</span><br><span class="line"><span class="string">'[1,2,3,&#123;"4":5,"6":7&#125;]'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Unicode输出</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>json.dumps(<span class="string">"\u5317\u4eac"</span>, ensure_ascii=<span class="keyword">False</span>)</span><br><span class="line"><span class="string">'北京'</span></span><br></pre></td></tr></table></figure>
-<h2 id="解码"><a href="#解码" class="headerlink" title="解码"></a>解码</h2><h3 id="对应类型-1"><a href="#对应类型-1" class="headerlink" title="对应类型"></a>对应类型</h3><table>
-<thead>
-<tr>
-<th>JSON</th>
-<th>Python</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>object</td>
-<td>dict</td>
-</tr>
-<tr>
-<td>array</td>
-<td>list</td>
-</tr>
-<tr>
-<td>string</td>
-<td>str</td>
-</tr>
-<tr>
-<td>number (int)</td>
-<td>int</td>
-</tr>
-<tr>
-<td>number (real)</td>
-<td>float</td>
-</tr>
-<tr>
-<td>true</td>
-<td>True</td>
-</tr>
-<tr>
-<td>false</td>
-<td>False</td>
-</tr>
-<tr>
-<td>null</td>
-<td>None</td>
-</tr>
-</tbody>
-</table>
-<h3 id="函数-1"><a href="#函数-1" class="headerlink" title="函数"></a>函数</h3><p>我们使用<code>JSON</code>库中的<code>load</code>以及<code>loads</code>函数来进行<code>JSON</code>解码。<code>load</code>和<code>loads</code>各项参数含义基本一致，唯一区别在于<code>load</code>函数用于解码JSON文件流，而<code>loads</code>用于解码JSON字符串。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">json.load(fp, cls=<span class="keyword">None</span>, object_hook=<span class="keyword">None</span>, parse_float=<span class="keyword">None</span>, parse_int=<span class="keyword">None</span>, parse_constant=<span class="keyword">None</span>, object_pairs_hook=<span class="keyword">None</span>, **kw)</span><br><span class="line"></span><br><span class="line">json.loads(s, encoding=<span class="keyword">None</span>, cls=<span class="keyword">None</span>, object_hook=<span class="keyword">None</span>, parse_float=<span class="keyword">None</span>, parse_int=<span class="keyword">None</span>, parse_constant=<span class="keyword">None</span>, object_pairs_hook=<span class="keyword">None</span>, **kw)</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>fp</code>：指定文件流</li>
-<li><code>s</code>：指定字符串</li>
-<li><code>encoding</code>：指定字符串编码</li>
-<li><code>cls</code>：若<code>cls</code>为空值，则使用<code>JSONEncoder</code>；否则使用指定子类进行编码</li>
-<li><code>object_hook</code>：若<code>object_hook</code>为空值，对象则返回解码器<code>dict</code>；否则使用自定义类型返回</li>
-<li><code>parse_float</code>：若<code>parse_float</code>为空，则JSON浮点数转换为浮点数；否则转换为指定类型</li>
-<li><code>parse_int</code>：若<code>parse_int</code>为空，则JSON整数转换为整数；否则转换为指定类型</li>
-<li><code>parse_constant</code>若<code>parse_constant</code>为空，则不会处理非法输入；否则抛出异常</li>
-<li><code>object_pairs_hook</code>：若<code>object_pairs_hook</code>为空值，则数组返回解码器<code>dict</code>；否则使用自定义类型返回</li>
-</ul>
-<h3 id="示范-1"><a href="#示范-1" class="headerlink" title="示范"></a>示范</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>json.loads(<span class="string">'["foo", &#123;"bar":["baz", null, 1.0, 2]&#125;]'</span>)</span><br><span class="line">[<span class="string">'foo'</span>, &#123;<span class="string">'bar'</span>: [<span class="string">'baz'</span>, <span class="keyword">None</span>, <span class="number">1.0</span>, <span class="number">2</span>]&#125;]</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2015年10月30日 初步完成</li>
-</ul>
-
+            
+                <h1 id="JSON介绍"><a href="#JSON介绍" class="headerlink" title="JSON介绍"></a>JSON介绍</h1><p>JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。 易于人阅读和编写。同时也易于机器解析和生成。 它基于JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999的一个子集。 JSON采用完全独立于语言的文本格式，但是也使用了类似于C语言家族的习惯（包括C, C++, C#, Java, JavaScript, Perl, Python等）。 这些特性使JSON成为理想的数据交换语言。</p>
+<p><em>引用自<a href="http://www.json.org/json-zh.html">json.org</a></em></p>
+                <a class="" href="/2015/10/30/python-JSON/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2015/10/30/python-JSON/">在Python中使用JSON</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2015年10月30日 - 23时10分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2015/10/30/python-JSON/"
-                                            title="在Python中使用JSON">https://xuanwo.org/2015/10/30/python-JSON/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Software/"> #Software </a>
-                    
-                        <a href="/tags/Python/"> #Python </a>
-                    
-                        <a href="/tags/JSON/"> #JSON </a>
-                    
-                </div>
             
         </div>
 
@@ -1512,87 +531,13 @@
         </div>
         <h2><a href="/2015/10/23/pyquery-intro/">使用pyQuery解析HTML</a></h2>
         
-            <h1 id="pyQuery介绍"><a href="#pyQuery介绍" class="headerlink" title="pyQuery介绍"></a>pyQuery介绍</h1><p>pyquery 可以让你用jquery语法来对xml进行查询。这个API和jquery十分类似。如果利用lxml，pyquery对xml和html的操作将更加快速。</p>
-<a id="more"></a>
-<h1 id="pyQuery安装"><a href="#pyQuery安装" class="headerlink" title="pyQuery安装"></a>pyQuery安装</h1><blockquote>
-<p>首先，你得有一个python环境，最好是类linux的，因为安装pyquery的过程中需要编译某一个包，在windows上比较难解决依赖问题</p>
-</blockquote>
-<h2 id="安装Python环境"><a href="#安装Python环境" class="headerlink" title="安装Python环境"></a>安装Python环境</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install python python-dev python-pip</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>python</code> 安装python环境</li>
-<li><code>python-dev</code> 安装python开发环境</li>
-<li><code>python-pip</code> 安装pip来进行python包管理</li>
-</ul>
-<h2 id="解决pyQuery所需依赖"><a href="#解决pyQuery所需依赖" class="headerlink" title="解决pyQuery所需依赖"></a>解决pyQuery所需依赖</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install libxml2-dev libxslt1-dev libz-dev</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>libxml2-dev</code>和<code>libxslt1-dev</code>是编译lxml所需要的包，缺少会导致编译失败</li>
-<li>某些情况下会提示<code>/usr/bin/ld: cannot find -lz</code>，所以需要安装<code>libz-dev</code></li>
-</ul>
-<h2 id="安装pyQuery"><a href="#安装pyQuery" class="headerlink" title="安装pyQuery"></a>安装pyQuery</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install pyquery</span><br></pre></td></tr></table></figure>
-<p>解决了依赖问题之后，就可以进行pyquery的安装了。</p>
-<blockquote>
-<p>有一个坑点是在虚拟机编译lxml的过程中，如果内存过小会导致编译失败。如果出现错误，请把虚拟机的内存调整至1024M或更大。</p>
-</blockquote>
-<h1 id="pyQuery使用"><a href="#pyQuery使用" class="headerlink" title="pyQuery使用"></a>pyQuery使用</h1><h2 id="最简样例"><a href="#最简样例" class="headerlink" title="最简样例"></a>最简样例</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pyquery <span class="keyword">import</span> PyQuery <span class="keyword">as</span> pyq</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">html = <span class="string">'''</span><br><span class="line">&lt;html&gt;</span><br><span class="line">    &lt;head&gt;</span><br><span class="line">        &lt;title&gt;这是标题&lt;/title&gt;</span><br><span class="line">    &lt;/head&gt;</span><br><span class="line">    &lt;body&gt;</span><br><span class="line">        &lt;p id="hi"&gt;Hello&lt;/p&gt;</span><br><span class="line">        &lt;ul&gt;</span><br><span class="line">            &lt;li&gt;list1&lt;/li&gt;</span><br><span class="line">            &lt;div class="ha"&gt;</span><br><span class="line">                Cool!</span><br><span class="line">            &lt;/div&gt;</span><br><span class="line">            &lt;li&gt;list2&lt;/li&gt;</span><br><span class="line">        &lt;/ul&gt;</span><br><span class="line">    &lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line">'''</span></span><br><span class="line"></span><br><span class="line">doc = pyq(html)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> doc(<span class="string">'title'</span>) <span class="comment"># 获取 title 标签的源码</span></span><br><span class="line"><span class="comment"># &lt;title&gt;这是标题&lt;/title&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> doc(<span class="string">'title'</span>).text() <span class="comment"># 获取 title 标签的内容</span></span><br><span class="line"><span class="comment"># 这是标题</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> doc(<span class="string">'.ha'</span>).text() <span class="comment"># 获取 class 为 ha 的标签的内容</span></span><br><span class="line"><span class="comment"># Cool!</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> doc(<span class="string">'#hi'</span>).text() <span class="comment"># 获取 id 为 hi 的标签的内容</span></span><br><span class="line"><span class="comment"># Hello</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> doc(<span class="string">'p:first'</span>).text() <span class="comment"># 还可以支持伪类</span></span><br><span class="line"></span><br><span class="line">li = doc(<span class="string">'li'</span>) <span class="comment"># 处理多个元素</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> li:</span><br><span class="line">    <span class="keyword">print</span> pyq(i).text()</span><br><span class="line"><span class="comment"># list1</span></span><br><span class="line"><span class="comment"># list2</span></span><br></pre></td></tr></table></figure>
-<h2 id="指定网址"><a href="#指定网址" class="headerlink" title="指定网址"></a>指定网址</h2><h3 id="直接访问"><a href="#直接访问" class="headerlink" title="直接访问"></a>直接访问</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pyquery <span class="keyword">import</span> PyQuery <span class="keyword">as</span> pyq</span><br><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"></span><br><span class="line"><span class="comment"># 直接访问并获取相关信息</span></span><br><span class="line"><span class="keyword">print</span> pyq(url=<span class="string">'https://www.google.com'</span>)</span><br></pre></td></tr></table></figure>
-<h3 id="指定headers"><a href="#指定headers" class="headerlink" title="指定headers"></a>指定headers</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pyquery <span class="keyword">import</span> PyQuery <span class="keyword">as</span> pyq</span><br><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以指定headers访问并获取相关信息，好处是不会被某些网站拒绝访问</span></span><br><span class="line"><span class="keyword">print</span> pyq(url=<span class="string">'https://www.google.com'</span>, headers=&#123;<span class="string">'User-Agent'</span>: <span class="string">'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.71 Safari/537.36'</span>)</span><br></pre></td></tr></table></figure>
-<h2 id="指定文件"><a href="#指定文件" class="headerlink" title="指定文件"></a>指定文件</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/python</span><br><span class="line"># -*- coding: UTF-8 -*-</span><br><span class="line"></span><br><span class="line">from pyquery import PyQuery as pyq</span><br><span class="line"></span><br><span class="line">print pyq(filename=&apos;path/to/html/file&apos;).text()</span><br></pre></td></tr></table></figure>
-<h2 id="指定lxml文档"><a href="#指定lxml文档" class="headerlink" title="指定lxml文档"></a>指定lxml文档</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/python</span><br><span class="line"># -*- coding: UTF-8 -*-</span><br><span class="line"></span><br><span class="line">from pyquery import PyQuery as pyq</span><br><span class="line">from lxml import etree</span><br><span class="line"></span><br><span class="line"># pyquery支持etree的API</span><br><span class="line">print pyq(etree.fromstring(&quot;&lt;html&gt;&lt;/html&gt;&quot;)).text()</span><br></pre></td></tr></table></figure>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
-<li><a href="https://github.com/gawel/pyquery" target="_blank" rel="external">gawel/pyquery</a></li>
-<li><a href="http://www.powerxing.com/python-use-pyquery-to-parse-html/" target="_blank" rel="external">Python使用pyQuery解析HTML内容</a></li>
-<li><a href="http://stackoverflow.com/questions/26053982/error-setup-script-exited-with-error-command-x86-64-linux-gnu-gcc-failed-wit" target="_blank" rel="external">error: Setup script exited with error: command ‘x86_64-linux-gnu-gcc’ failed with exit status 1</a></li>
-<li><a href="http://stackoverflow.com/questions/24455238/lxml-installation-error-ubuntu-14-04-internal-compiler-error" target="_blank" rel="external">lxml installation error ubuntu 14.04 (internal compiler error)</a></li>
-<li><a href="http://stackoverflow.com/a/22256546" target="_blank" rel="external">can’t installing lxml on Ubuntu 12.04</a></li>
-</ul>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2015年10月23日 初步完成</li>
-</ul>
-
+            
+                <h1 id="pyQuery介绍"><a href="#pyQuery介绍" class="headerlink" title="pyQuery介绍"></a>pyQuery介绍</h1><p>pyquery 可以让你用jquery语法来对xml进行查询。这个API和jquery十分类似。如果利用lxml，pyquery对xml和html的操作将更加快速。</p>
+                <a class="" href="/2015/10/23/pyquery-intro/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2015/10/23/pyquery-intro/">使用pyQuery解析HTML</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2015年10月23日 - 01时10分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2015/10/23/pyquery-intro/"
-                                            title="使用pyQuery解析HTML">https://xuanwo.org/2015/10/23/pyquery-intro/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Software/"> #Software </a>
-                    
-                        <a href="/tags/Python/"> #Python </a>
-                    
-                        <a href="/tags/HTML/"> #HTML </a>
-                    
-                </div>
             
         </div>
 
@@ -1704,8 +649,6 @@
                         
                             <li><a href="/tags/Information/">Information</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
                             <li><a href="/tags/项目/">项目</a></li>
                         
                             <li><a href="/tags/Python/">Python</a></li>
@@ -1716,15 +659,17 @@
                         
                             <li><a href="/tags/JavaScript/">JavaScript</a></li>
                         
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
                             <li><a href="/tags/实习/">实习</a></li>
                         
                             <li><a href="/tags/QingCloud/">QingCloud</a></li>
                         
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
                             <li><a href="/tags/Work/">Work</a></li>
                         
                             <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/Hardware/">Hardware</a></li>
                         

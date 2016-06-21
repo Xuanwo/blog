@@ -63,7 +63,6 @@
             <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
             <ul class="submenu-list"><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2016/">2016</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2015/">2015</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2014/">2014</a></li></ul>
         </li>
-        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
     </ul>
 </div>
 <div id="wrap">
@@ -115,90 +114,13 @@
         </div>
         <h2><a href="/2016/01/03/vs-oracle-11g/">VS2015连接Oracle数据库</a></h2>
         
-            <h1 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h1><p>宿主机：Win10 + VS2015 + ODP.Net for VS2015<br>虚拟机：Win7 + Oracle 11g + 桥接</p>
-<a id="more"></a>
-<h1 id="配置ODP-Net"><a href="#配置ODP-Net" class="headerlink" title="配置ODP.Net"></a>配置ODP.Net</h1><p>首先下载 <a href="http://www.oracle.com/technetwork/topics/dotnet/downloads/odacmsidownload-2745497.html" target="_blank" rel="external">Oracle Developer Tools for Visual Studio 2015</a> ，下载此文件需要注册Oracle社区账号并接受相关的协议，此文件提供了以下组件：</p>
-<ul>
-<li>Oracle Developer Tools for Visual Studio 12.1.0.2.4</li>
-<li>Oracle Data Provider for .NET 4 12.1.0.2.0</li>
-<li>Oracle Providers for ASP.NET 4 12.1.0.2.0</li>
-</ul>
-<p>下载完成后运行MSI安装程序进行安装，安装完成后会自动注册VS2015的相关插件，重新启动VS2015后将会看到Oracle的相关命令，比如SQL *PLUS支持等。同时添加数据库时也能看到相应的选项。</p>
-<blockquote>
-<p>ODP.Net支持所有Oracle版本，因此下载时只需要注意VS的版本即可。</p>
-</blockquote>
-<h1 id="配置tnsnames-ora"><a href="#配置tnsnames-ora" class="headerlink" title="配置tnsnames.ora"></a>配置tnsnames.ora</h1><blockquote>
-<p>ODP.Net默认使用安装目录下的<code>tnsnames.ora</code>，若安装目录在Program Files下，可能会遇到无权限等问题，此时使用管理员权限打开命令行，切换到对应目录并使用notepad编辑。</p>
-</blockquote>
-<p>复制服务器端的tnsnames.ora文件内容，或者自己手动编辑，格式如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;数据源别名&gt; =</span><br><span class="line">  (DESCRIPTION =</span><br><span class="line">    (ADDRESS = (PROTOCOL = TCP)(HOST = &lt;主机名或IP&gt;)(PORT = &lt;端口号&gt;))</span><br><span class="line">    (CONNECT_DATA =</span><br><span class="line">      (SERVER = DEDICATED)</span><br><span class="line">      (SERVICE_NAME = &lt;数据库服务名&gt;)</span><br><span class="line">    )</span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
-<h1 id="添加数据库"><a href="#添加数据库" class="headerlink" title="添加数据库"></a>添加数据库</h1><p>打开<code>工具</code>-<code>连接到数据库</code>，数据源修改为<code>Oracle数据库</code>下的<code>ODP.NET,托管驱动程序</code>，然后点击<code>确定</code>，打开<code>添加连接</code>窗口。<br><img src="/imgs/develop/add-database.png" alt="添加连接"><br>填写用户名，密码并选择数据源，然后测试连接，成功的话说明已经连通，点击确定即可。</p>
-<blockquote>
-<p>使用虚拟机搭建数据库的额外Tips<br>根据某网友分析，Oracle的监听器在通过1521端口连接后，会开启另外一个新的随机端口进行数据通讯，因此使用NAT方式虚拟网卡可能会导致连接失败。这种情况下，请使用桥接方式虚拟网卡，并在<code>net manager</code>中将<code>loaclhost</code>修改为虚拟机当前的IP。重启监听服务后，再试。</p>
-</blockquote>
-<h1 id="连接数据库并使用"><a href="#连接数据库并使用" class="headerlink" title="连接数据库并使用"></a>连接数据库并使用</h1><h2 id="连接数据库"><a href="#连接数据库" class="headerlink" title="连接数据库"></a>连接数据库</h2><figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Dim</span> oradb <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"User ID=system;Password=123456;Data Source=lol"</span></span><br><span class="line"><span class="keyword">Dim</span> conn <span class="keyword">As</span> <span class="keyword">New</span> OracleConnection(oradb)</span><br><span class="line">conn.Open()</span><br><span class="line"><span class="keyword">Dim</span> sql <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"create table xxx"</span></span><br><span class="line"><span class="keyword">Dim</span> sqlCom <span class="keyword">As</span> <span class="keyword">New</span> OracleCommand</span><br><span class="line">sqlCom.CommandText = sql</span><br><span class="line">sqlCom.Connection = conn</span><br><span class="line">sqlCom.ExecuteNonQuery()</span><br></pre></td></tr></table></figure>
-<h2 id="查询数据"><a href="#查询数据" class="headerlink" title="查询数据"></a>查询数据</h2><p>成功配置数据源之后，只需要向界面上拖动<code>DataGridView</code>，并进行相关配置，选择自己需要的表即可。</p>
-<h2 id="插入图片的正确姿势"><a href="#插入图片的正确姿势" class="headerlink" title="插入图片的正确姿势"></a>插入图片的正确姿势</h2><p>图片作为二进制数据无法直接拼凑出SQL命令，我们需要使用<code>OracleCommand</code>自带的<code>Parameters</code>功能。在SQL命令中用<code>:photo</code>来代表一个参量，然后使用</p>
-<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sqlCom.Parameters.Add(<span class="string">"photo"</span>, OracleDbType.Blob, imgData.Length)</span><br></pre></td></tr></table></figure>
-<p>来分别指定这个参量的类型和所占空间大小</p>
-<p>最后使用</p>
-<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sqlCom.Parameters(<span class="number">0</span>).Value = imgData</span><br></pre></td></tr></table></figure>
-<p>来指定这个参量的值。</p>
-<p>整个插入图片过程的代码如下：</p>
-<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Dim</span> conn <span class="keyword">As</span> <span class="keyword">New</span> OracleConnection(oradb)</span><br><span class="line"><span class="keyword">Dim</span> imgData(<span class="number">0</span>) <span class="keyword">As</span> <span class="built_in">Byte</span></span><br><span class="line"><span class="keyword">Dim</span> ms <span class="keyword">As</span> <span class="keyword">New</span> System.IO.MemoryStream</span><br><span class="line">PictureBox1.BackgroundImage.Save(ms, PictureBox1.BackgroundImage.RawFormat)</span><br><span class="line"><span class="keyword">ReDim</span> imgData(ms.Length - <span class="number">1</span>)</span><br><span class="line">ms.Read(imgData, <span class="number">0</span>, ms.Length)</span><br><span class="line">ms.Close()</span><br><span class="line">conn.Open()</span><br><span class="line"><span class="keyword">Dim</span> sql <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"insert into hero values"</span> &amp; <span class="string">"("</span> &amp; TextBox1.<span class="keyword">Text</span> &amp; <span class="string">":photo"</span> &amp; <span class="string">")"</span></span><br><span class="line"><span class="keyword">Dim</span> sqlCom <span class="keyword">As</span> <span class="keyword">New</span> OracleCommand</span><br><span class="line">sqlCom.CommandText = sql</span><br><span class="line">sqlCom.Connection = conn</span><br><span class="line">sqlCom.Parameters.Add(<span class="string">"photo"</span>, OracleDbType.Blob, imgData.Length)</span><br><span class="line">sqlCom.Parameters(<span class="number">0</span>).Value = imgData</span><br><span class="line">sqlCom.ExecuteNonQuery()</span><br></pre></td></tr></table></figure>
-<h1 id="常见错误"><a href="#常见错误" class="headerlink" title="常见错误"></a>常见错误</h1><h2 id="column-not-allowed-here"><a href="#column-not-allowed-here" class="headerlink" title="column not allowed here"></a>column not allowed here</h2><p>数据类型不符，检查对应项目数据类型是否正确。</p>
-<h2 id="missing-comma"><a href="#missing-comma" class="headerlink" title="missing comma"></a>missing comma</h2><p>命令格式不对，检查一下自己的SQL命令是否有错误，特别是在有字符串的时候，需要使用<code>&quot;&quot;</code>来代表一个字符串中的<code>&quot;</code>。</p>
-<h2 id="identifier-is-too-long"><a href="#identifier-is-too-long" class="headerlink" title="identifier is too long"></a>identifier is too long</h2><p>标识符过长（不得超过30字符），不是非常明白原因，不过我取消掉insert命令中指定位置的部分之后，这个错误消失了。</p>
-<h2 id="missing-INTO-keyword"><a href="#missing-INTO-keyword" class="headerlink" title="missing INTO keyword"></a>missing INTO keyword</h2><p>缺少into关键字（手滑打成了inte），检查一下自己的SQL命令是否有错误。</p>
-<h2 id="cannot-insert-NULL-into-“SYSTEM”-”HERO”-”HEROCATEGORYID”"><a href="#cannot-insert-NULL-into-“SYSTEM”-”HERO”-”HEROCATEGORYID”" class="headerlink" title="cannot insert NULL into (“SYSTEM”.”HERO”.”HEROCATEGORYID”)"></a>cannot insert NULL into (“SYSTEM”.”HERO”.”HEROCATEGORYID”)</h2><p>这些项都指定了非0值，故不能不赋值，为对应项目赋值即可。</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年01月03日 初步完成</li>
-</ul>
-
+            
+                <h1 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h1><p>宿主机：Win10 + VS2015 + ODP.Net for VS2015<br>虚拟机：Win7 + Oracle 11g + 桥接</p>
+                <a class="" href="/2016/01/03/vs-oracle-11g/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/01/03/vs-oracle-11g/">VS2015连接Oracle数据库</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年1月3日 - 15时01分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/01/03/vs-oracle-11g/"
-                                            title="VS2015连接Oracle数据库">https://xuanwo.org/2016/01/03/vs-oracle-11g/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Database/"> #Database </a>
-                    
-                        <a href="/tags/Oracle/"> #Oracle </a>
-                    
-                        <a href="/tags/VB/"> #VB </a>
-                    
-                </div>
             
         </div>
 
@@ -310,8 +232,6 @@
                         
                             <li><a href="/tags/Information/">Information</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
                             <li><a href="/tags/项目/">项目</a></li>
                         
                             <li><a href="/tags/Python/">Python</a></li>
@@ -322,15 +242,17 @@
                         
                             <li><a href="/tags/JavaScript/">JavaScript</a></li>
                         
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
                             <li><a href="/tags/实习/">实习</a></li>
                         
                             <li><a href="/tags/QingCloud/">QingCloud</a></li>
                         
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
                             <li><a href="/tags/Work/">Work</a></li>
                         
                             <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/Hardware/">Hardware</a></li>
                         

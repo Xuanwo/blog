@@ -63,7 +63,6 @@
             <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
             <ul class="submenu-list"><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2016/">2016</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2015/">2015</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2014/">2014</a></li></ul>
         </li>
-        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
     </ul>
 </div>
 <div id="wrap">
@@ -115,85 +114,13 @@
         </div>
         <h2><a href="/2015/07/06/socket-vm/">基于Socket.io的虚拟计算机</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>基于Socket.io有很多特别强大的应用，socket.io官方提供的一个<a href="http://socket.io/demos/computer/" target="_blank" rel="external">虚拟计算机Demo</a>就非常赞。通过将使用Qemu虚拟取出来的PC界面转发至Socket.io的端口，然后对Canvas不断地进行绘制，形成了近似与远程操控的体验。我们<a href="http://xuanwo.org/2015/06/30/together-project/">Together项目</a>用到了这个库，但由于这个库发布于很久之前，再加上相关文档过少，导致部署起来极为困难。所以我完成了这篇文章，希望能让后来人少走一些弯路。<br><a id="more"></a><br><em>下文基于Ubuntu 14.04 x64，其他系统请自行转换相应命令，谢谢~</em></p>
-<h1 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h1><h2 id="安装nodejs"><a href="#安装nodejs" class="headerlink" title="安装nodejs"></a>安装nodejs</h2><p>使用APT安装</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get -y install nodejs-legacy</span><br></pre></td></tr></table></figure>
-<p>或使用nvm来管理不同版本的nodejs</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh | bash</span><br></pre></td></tr></table></figure>
-<p><em>Canvas库在Debian系的OS上会有些诡异的行为，所以需要格外的做一些处理，感谢<a href="https://github.com/computernewb" target="_blank" rel="external">@computernewb</a>的<a href="https://github.com/kevin-roark/socket.io-computer/issues/11#issuecomment-118790681" target="_blank" rel="external">回复</a></em></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ln -s /usr/bin/nodejs /usr/sbin/node</span><br></pre></td></tr></table></figure>
-<h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get -y install libcairo2-dev libpango1.0-dev libgif-dev build-essential g++</span><br></pre></td></tr></table></figure>
-<h2 id="安装libjpeg9和libjpeg9-dev"><a href="#安装libjpeg9和libjpeg9-dev" class="headerlink" title="安装libjpeg9和libjpeg9-dev"></a>安装libjpeg9和libjpeg9-dev</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9_9a-2_amd64.deb</span><br><span class="line">dpkg -i libjpeg9_9a-2_amd64.deb</span><br><span class="line">wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9-dev_9a-2_amd64.deb</span><br><span class="line">dpkg -i libjpeg9-dev_9a-2_amd64.deb</span><br></pre></td></tr></table></figure>
-<h1 id="处理WinXp镜像"><a href="#处理WinXp镜像" class="headerlink" title="处理WinXp镜像"></a>处理WinXp镜像</h1><h2 id="下载XP镜像"><a href="#下载XP镜像" class="headerlink" title="下载XP镜像"></a>下载XP镜像</h2><h3 id="下载后使用网盘中转"><a href="#下载后使用网盘中转" class="headerlink" title="下载后使用网盘中转"></a>下载后使用网盘中转</h3><p>在<a href="http://msdn.itellyou.cn/" target="_blank" rel="external">I Tell You</a>上下载纯净的XP镜像。（如果使用盗版的镜像，VPS可能会因为违反其Tos而封号）<br>比如，WinXP的中文简体专业版：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ed2k://|file|CN_WINXP_PRO_ISO.img|530186240|7855069CE4216615D761654E2B75A4F7|/</span><br></pre></td></tr></table></figure>
-<h3 id="使用sftp上传"><a href="#使用sftp上传" class="headerlink" title="使用sftp上传"></a>使用sftp上传</h3><p>可以使用类似于FileZilla这样的FTP工具直接上传，大部分国内的网盘到国外的速度都不理想= =，百度云还会出现断流，而好用的国外网盘都被墙，本身就需要翻墙上传。所以还不如直接使用sftp传到服务器上。</p>
-<h2 id="格式转换"><a href="#格式转换" class="headerlink" title="格式转换"></a>格式转换</h2><p><a href="http://msdn.itellyou.cn/" target="_blank" rel="external">I Tell You</a>上下载下来的是img镜像文件，然而我们需要的是ISO，所以还需要进行转换。将img转换为iso，我们需要<code>ccd2iso</code>。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install ccd2iso</span><br></pre></td></tr></table></figure>
-<p>使用方法：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ccd2iso &lt;.img filename&gt; &lt;.iso filename&gt;</span><br></pre></td></tr></table></figure>
-<h1 id="socket-io-computer配置"><a href="#socket-io-computer配置" class="headerlink" title="socket.io-computer配置"></a>socket.io-computer配置</h1><h2 id="安装依赖-1"><a href="#安装依赖-1" class="headerlink" title="安装依赖"></a>安装依赖</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get -y install qemu redis-server</span><br></pre></td></tr></table></figure>
-<h2 id="虚拟机配置"><a href="#虚拟机配置" class="headerlink" title="虚拟机配置"></a>虚拟机配置</h2><p>生成一个光盘镜像文件用来加载ISO</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 winxp.img 10G</span><br></pre></td></tr></table></figure>
-<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><h3 id="启动Web服务器"><a href="#启动Web服务器" class="headerlink" title="启动Web服务器"></a>启动Web服务器</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node app.js</span><br></pre></td></tr></table></figure>
-<h3 id="启动IO服务器"><a href="#启动IO服务器" class="headerlink" title="启动IO服务器"></a>启动IO服务器</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node io.js</span><br></pre></td></tr></table></figure>
-<h3 id="生成qemu实例"><a href="#生成qemu实例" class="headerlink" title="生成qemu实例"></a>生成qemu实例</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">COMPUTER_ISO=winxp.iso COMPUTER_IMG=winxp.img node qemu.js</span><br></pre></td></tr></table></figure>
-<h3 id="启动虚拟机"><a href="#启动虚拟机" class="headerlink" title="启动虚拟机"></a>启动虚拟机</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">COMPUTER_IMG=winxp.img node emu-runner.js</span><br></pre></td></tr></table></figure>
-<h1 id="运行-1"><a href="#运行-1" class="headerlink" title="运行"></a>运行</h1><p>访问<code>http://localhost:5000</code></p>
-<h1 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h1><h2 id="若搭建在服务器上，使用IP访问"><a href="#若搭建在服务器上，使用IP访问" class="headerlink" title="若搭建在服务器上，使用IP访问"></a>若搭建在服务器上，使用IP访问</h2><p>需要修改</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var url = process.env.COMPUTER_IO_URL || &apos;http://localhost:6001&apos;;</span><br></pre></td></tr></table></figure>
-<p>为</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var url = process.env.COMPUTER_IO_URL || &apos;http://your IP address:6001&apos;;</span><br></pre></td></tr></table></figure>
-<p>否则无法正常连接</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2015年07月06日 完成主体框架</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>基于Socket.io有很多特别强大的应用，socket.io官方提供的一个<a href="http://socket.io/demos/computer/">虚拟计算机Demo</a>就非常赞。通过将使用Qemu虚拟取出来的PC界面转发至Socket.io的端口，然后对Canvas不断地进行绘制，形成了近似与远程操控的体验。我们<a href="http://xuanwo.org/2015/06/30/together-project/">Together项目</a>用到了这个库，但由于这个库发布于很久之前，再加上相关文档过少，导致部署起来极为困难。所以我完成了这篇文章，希望能让后来人少走一些弯路。<br>
+                <a class="" href="/2015/07/06/socket-vm/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2015/07/06/socket-vm/">基于Socket.io的虚拟计算机</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2015年7月6日 - 21时07分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2015/07/06/socket-vm/"
-                                            title="基于Socket.io的虚拟计算机">https://xuanwo.org/2015/07/06/socket-vm/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/项目/"> #项目 </a>
-                    
-                        <a href="/tags/实习/"> #实习 </a>
-                    
-                        <a href="/tags/Together/"> #Together </a>
-                    
-                        <a href="/tags/虚拟化/"> #虚拟化 </a>
-                    
-                </div>
             
         </div>
 
@@ -228,7 +155,8 @@
         </div>
         <h2><a href="/2015/06/30/together-project/">Together网站项目设计</a></h2>
         
-            <p><strong>本项目仍然处在设计阶段，一切变动以最终成果为准</strong></p>
+            
+                <p><strong>本项目仍然处在设计阶段，一切变动以最终成果为准</strong></p>
 <h1 id="团队介绍"><a href="#团队介绍" class="headerlink" title="团队介绍"></a>团队介绍</h1><h2 id="团队分工"><a href="#团队分工" class="headerlink" title="团队分工"></a>团队分工</h2><ul>
 <li>丁皓（组长），负责网站后端建设及维护（兼产品经理？）</li>
 <li>满全勇，负责网站着陆页设计&amp;文案</li>
@@ -236,144 +164,15 @@
 <li>马可，担任网站首席体验师</li>
 </ul>
 <h2 id="协同工具"><a href="#协同工具" class="headerlink" title="协同工具"></a>协同工具</h2><ul>
-<li>分工：<a href="https://www.teambition.com/" target="_blank" rel="external">Teambition</a></li>
-<li>交流：<a href="http://www.qq.com/" target="_blank" rel="external">QQ</a>，<a href="https://jianliao.com/" target="_blank" rel="external">简聊</a></li>
-<li>分享：<a href="https://www.yinxiang.com/" target="_blank" rel="external">印象笔记</a></li>
+<li>分工：<a href="https://www.teambition.com/">Teambition</a></li>
+<li>交流：<a href="http://www.qq.com/">QQ</a>，<a href="https://jianliao.com/">简聊</a></li>
+<li>分享：<a href="https://www.yinxiang.com/">印象笔记</a></li>
 </ul>
-<a id="more"></a>
-<h1 id="公司简介"><a href="#公司简介" class="headerlink" title="公司简介"></a>公司简介</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Next公司成立于2015年3月，致力于用业界最先进的技术为人们带来更好地互联网生活体验。</p>
-<h2 id="员工"><a href="#员工" class="headerlink" title="员工"></a>员工</h2><p>目前员工有产品经理兼后端工程师一名，前端工程师两名，用户体验师一名。</p>
-<h2 id="产品"><a href="#产品" class="headerlink" title="产品"></a>产品</h2><p>目前推出的产品有NextNote，已经获得三位种子用户，今天我们将带来我公司第二个产品——Together。</p>
-<h2 id="格言"><a href="#格言" class="headerlink" title="格言"></a>格言</h2><p>Next，我们在路上。</p>
-<h1 id="市场分析"><a href="#市场分析" class="headerlink" title="市场分析"></a>市场分析</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>在线教育：<br>即e-learning，通过应用信息科技和互联网技术进行内容传播和快速学习的方法。<br><img src="/imgs/learn/coursera.png" alt="Coursera"></p>
-<h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><ul>
-<li>突破时空限制、知识获取方式灵活；</li>
-<li>碎片化学习、随着移动互联网的发展，移动设备更具便携性；</li>
-<li>内容多样化，除了K12教育、高等教育外，还包括各类学前教育、职业教育、兴趣教育等细分领域</li>
-</ul>
-<h2 id="前景"><a href="#前景" class="headerlink" title="前景"></a>前景</h2><ul>
-<li>据GSV全球教育行业报告预测，2017年全球在线教育市场规模预计将增至2555亿美元，保持23%的年复合增长率。</li>
-<li>据天拓咨询估计，2017年中国在线教育市场规模将达到3000亿元人民币左右，保持31.7%的年复合增长率。<br><img src="/imgs/learn/2014年中国在线教育4.jpg" alt="2014年中国在线教育4"></li>
-</ul>
-<p><em>数据与图片均引用自<a href="http://www.infzm.com/content/101577" target="_blank" rel="external">南方周末-2014年中国在线教育发展前景有多大？</a></em></p>
-<h1 id="产品简介"><a href="#产品简介" class="headerlink" title="产品简介"></a>产品简介</h1><h2 id="特点-1"><a href="#特点-1" class="headerlink" title="特点"></a>特点</h2><ul>
-<li>运用最新技术，革命性的改进在线教育交互体验</li>
-<li>广泛运用开源技术，与开源社区保持密切合作</li>
-<li>服务器要求低，可轻松承载超高并发场景</li>
-</ul>
-<h2 id="对比"><a href="#对比" class="headerlink" title="对比"></a>对比</h2><table>
-<thead>
-<tr>
-<th>我们</th>
-<th>他们</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>支持电子白板功能</td>
-<td>不支持电子白板功能</td>
-</tr>
-<tr>
-<td>支持及时聊天功能</td>
-<td>只能做到响应缓慢的聊天</td>
-</tr>
-<tr>
-<td>支持虚拟计算机功能</td>
-<td>无虚拟计算机功能</td>
-</tr>
-<tr>
-<td>支持HTML5原生的视频接口</td>
-<td>采用过时的Flash技术</td>
-</tr>
-<tr>
-<td>全平台支持</td>
-<td>不支持最新的移动系统</td>
-</tr>
-</tbody>
-</table>
-<h1 id="功能介绍"><a href="#功能介绍" class="headerlink" title="功能介绍"></a>功能介绍</h1><h2 id="视频直播"><a href="#视频直播" class="headerlink" title="视频直播"></a>视频直播</h2><p>运用HTML 5标准中的Canvas以及Jsmpeg技术，我们实现了我们公司高效的支持直播的在线播放器。</p>
-<p><em>当前，此技术已经运用于233手游直播APP，证明有效可行。</em></p>
-<h2 id="在线聊天室"><a href="#在线聊天室" class="headerlink" title="在线聊天室"></a>在线聊天室</h2><p>运用Node.js以及Socket.io，我们公司搭建了响应迅速的在线交流平台，其特点是可以支持大量用户同时在线交流。<br><a href="https://github.com/together-education/together-core-whiteboard" target="_blank" rel="external">源代码</a></p>
-<h2 id="电子白板"><a href="#电子白板" class="headerlink" title="电子白板"></a>电子白板</h2><p>同样基于Node.js以及Socket.io，我们公司搭建了自研发的电子白板平台，基于教师-学生结构的主控端与受控端模型，支持在线演示。<br><a href="https://github.com/together-education/together-core-whiteboard" target="_blank" rel="external">源代码</a></p>
-<h2 id="虚拟计算机"><a href="#虚拟计算机" class="headerlink" title="虚拟计算机"></a>虚拟计算机</h2><p>运用Node.js以及Socket.io，并结合Linux平台上的Qemu虚拟化技术，我们公司首次实现了在线教育领域中的共享操作功能。</p>
-<h1 id="创意总结"><a href="#创意总结" class="headerlink" title="创意总结"></a>创意总结</h1><ul>
-<li>用技术改变教育</li>
-<li>用开源改变业界</li>
-<li>用热情改变未来</li>
-</ul>
-<h1 id="商业推广"><a href="#商业推广" class="headerlink" title="商业推广"></a>商业推广</h1><h2 id="微信推送"><a href="#微信推送" class="headerlink" title="微信推送"></a>微信推送</h2><p>建立企业服务号，定期推送优质资源</p>
-<h2 id="热点聚焦"><a href="#热点聚焦" class="headerlink" title="热点聚焦"></a>热点聚焦</h2><p>捕捉社会热点，制作相应专辑，获取群众关注</p>
-<h2 id="学校合作"><a href="#学校合作" class="headerlink" title="学校合作"></a>学校合作</h2><p>通过与学校进行合作，获取第一批种子客户</p>
-<h1 id="引用资料"><a href="#引用资料" class="headerlink" title="引用资料"></a>引用资料</h1><h2 id="产生文档"><a href="#产生文档" class="headerlink" title="产生文档"></a>产生文档</h2><ul>
-<li><a href="http://xuanwo.org/2015/07/01/screen-ssh/">使用Screen管理会话</a></li>
-<li><a href="http://xuanwo.org/2015/07/02/teambition-work/">Teambition团队协作实践</a></li>
-</ul>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
-<li><a href="https://nodejs.org/documentation/" target="_blank" rel="external">Node.js文档</a></li>
-<li><a href="http://socket.io/docs/" target="_blank" rel="external">Socket.io文档</a></li>
-</ul>
-<h2 id="开源信息"><a href="#开源信息" class="headerlink" title="开源信息"></a>开源信息</h2><p><em>引用的开源库较多，如果发现有用到代码但是没有标注的，请及时通知我加上，谢谢~</em></p>
-<ul>
-<li>视频直播使用<a href="https://github.com/phoboslab/jsmpeg" target="_blank" rel="external">jsmpeg</a></li>
-<li>即时聊天使用<a href="https://github.com/Automattic/socket.io/tree/master/examples/chat" target="_blank" rel="external">chat</a></li>
-<li>在线虚拟机使用<a href="https://github.com/kevin-roark/socket.io-computer" target="_blank" rel="external">socket.io-computer</a></li>
-<li>弹幕功能使用<a href="https://github.com/jabbany/CommentCoreLibrary/" target="_blank" rel="external">CommentCoreLibrary</a></li>
-</ul>
-<h1 id="阶段总结"><a href="#阶段总结" class="headerlink" title="阶段总结"></a>阶段总结</h1><p><a href="/imgs/learn/Together-1.0.0.pptx">点此下载创意汇报PPT</a><br><em>编辑于PowerPoint 2013，2007以下版本可能无法正常显示</em><br>2015年07月04日上午完成了创意汇报，导师最后的总结是：创意不是新的技术。除此之外，还指出了我们项目的很多不足，包括策划书格式不规范，内容不完整，缺少盈利模式，没有做风险评估等。当然啦，在导师们一遍又一遍地强调突出信息管理特色，不要太过追求技术的大方向下，我来做这样一个项目，确实有点逆向行驶的味道，最后得到这样的评价也不会觉得奇怪。<br>下一周，除了要加紧完善我们的网站设计之外，我们还要关注一下自己的策划书的内容。相比于别的小组，我们的内容确实有些单薄。其实老师说的也没有错，好的想法太多了，但是要把想法真正落实，还有很多繁琐但不可少的工作要做。</p>
-<h1 id="版权申明"><a href="#版权申明" class="headerlink" title="版权申明"></a>版权申明</h1><p>本项目是中国地质大学（北京）人文经管学院2013级信息管理与信息系统专业的暑期实习作品，以<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="external">署名-非商业性使用-相同方式共享 4.0 国际</a>协议发布，在此协议下，您可以自由地转载或共享。</p>
-<h1 id="小小赞助"><a href="#小小赞助" class="headerlink" title="小小赞助"></a>小小赞助</h1><p>如果您对本项目感兴趣，欢迎使用支付宝扫一扫进行小额赞助以促成项目尽快上线，谢谢~<br><img src="/imgs/alipay.jpg" alt="支付宝二维码"></p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2015年06月30日 完成项目设计,更新文档结构</li>
-<li>2015年07月02日 添加了项目执行中产生的文档</li>
-<li>2015年07月03日 完善并充实项目内容，重新调整了结构</li>
-<li>2015年07月04日 添加了阶段报告，并提供创意汇报PPT下载</li>
-<li>2015年07月06日 添加了在线聊天室以及电子白板的源代码</li>
-</ul>
-
+                <a class="" href="/2015/06/30/together-project/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2015/06/30/together-project/">Together网站项目设计</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2015年6月30日 - 11时06分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2015/06/30/together-project/"
-                                            title="Together网站项目设计">https://xuanwo.org/2015/06/30/together-project/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/项目/"> #项目 </a>
-                    
-                        <a href="/tags/实习/"> #实习 </a>
-                    
-                        <a href="/tags/Together/"> #Together </a>
-                    
-                </div>
             
         </div>
 
@@ -408,280 +207,15 @@
         </div>
         <h2><a href="/2015/06/19/information-manage-review/">信息资源管理复习</a></h2>
         
-            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="信息资源的分类，方法和类别"><a href="#信息资源的分类，方法和类别" class="headerlink" title="信息资源的分类，方法和类别"></a>信息资源的分类，方法和类别</h2><h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><p>信息资源的类型可以根据多种标准来划分。</p>
+            
+                <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="信息资源的分类，方法和类别"><a href="#信息资源的分类，方法和类别" class="headerlink" title="信息资源的分类，方法和类别"></a>信息资源的分类，方法和类别</h2><h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><p>信息资源的类型可以根据多种标准来划分。</p>
 <ul>
 <li><p>以开发程度为依据，信息资源可划分为潜在的信息资源与现实的信息资源两大类型。</p>
-<a id="more"></a>
-<blockquote>
-<p><strong>潜在的信息资源</strong>是指个人在认知和创造事物的过程中存储在大脑中的信息资源。<br><strong>现实的信息资源</strong>是指潜在的信息资源在经过个人表述和与他人进行交流之后，能够为他人所利用的信息资源。</p>
-</blockquote>
-</li>
-<li><p>按信息资源历史顺序可分为：人类文化遗产(指人类已继承和拥有的知识、历史文献等)信息资源、最新产生的信息和知识所形成的信息资源(新信息和新知识所占的份额反映了信息资源的更新程度)。</p>
-</li>
-<li><p>按信息内容和应用领域可分为：政治信息资源、军事信息资源、经济信息资源、文化信息资源、生活信息资源等。</p>
-</li>
-<li><p>按存储信息的不同物质材料(载体)可分为：文献信息资源，它包括各种书刊文字资料及其复制品和音像资料；非文献信息资源，它包括口头信息资源、实物信息资源和机构信息资源等。</p>
-</li>
-<li><p>根据信息资源的使用范围可分为：内部信息资源、外部信息资源、公开信息资源、秘密信息资源。</p>
-</li>
-<li><p>根据其产生和使用的不同可分为：第一级信息资源、第二级信息资源、第三级信息资源和第四级信息资源。</p>
-</li>
-<li><p>根据其形态的不同可分为：静态信息资源和动态信息资源。一般的文献资源都是静态信息资源；而临时发布的信息和定时发布的信息(资源)为动态信息资源，如天气预报、新闻发布会等。</p>
-</li>
-<li><p>根据其用途的不同可分为：单一信息资源和综合信息资源。如关于某一类产品的生产方式资料，属于单一信息资源；而关于这类产品市场销售的资料，属于综合信息资源。</p>
-</li>
-<li><p>根据其与时间的关系的不同可分为：连续性信息资源和离散性信息资源。连续性信息资源是指相互之间有密切(时间)相关关系的资源，如社会演变过程中的信息资源；离散性信息资源是指相互之间不相关的资源，如各种产品生产的信息资源。</p>
-</li>
-</ul>
-<h3 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h3><h3 id="类别"><a href="#类别" class="headerlink" title="类别"></a>类别</h3><h2 id="卢泰宏“三维结构论”理解"><a href="#卢泰宏“三维结构论”理解" class="headerlink" title="卢泰宏“三维结构论”理解"></a>卢泰宏“三维结构论”理解</h2><p>卢泰宏信息资源管理理论的核心是“三维结构论”。他认为，信息资源管理是三种基本信息管理模式的集约化：<br>对应与信息技术的技术管理模式，其研究内容是新的信息系统、新的信息媒介和新的利用方式；<br>对应与信息经济的经济管理模式，其研究方向是信息商品、信息市场、信息产业和信息经济；<br>对应与信息文化的人文管理模式，其研究方向是信息政策和信息法律等。</p>
-<h2 id="信息资源学派"><a href="#信息资源学派" class="headerlink" title="信息资源学派"></a>信息资源学派</h2><p>IRM的三大流派：即信息系统学派、记录管理学派和信息管理学派。</p>
-<h1 id="第一章"><a href="#第一章" class="headerlink" title="第一章"></a>第一章</h1><h2 id="资源和信息资源概念"><a href="#资源和信息资源概念" class="headerlink" title="资源和信息资源概念"></a>资源和信息资源概念</h2><h3 id="资源的概念"><a href="#资源的概念" class="headerlink" title="资源的概念"></a>资源的概念</h3><p>一切可被人类开发和利用的物质、能量和信息的总称，它广泛地存在于自然界和人类社会中，是一种自然存在物或能够给人类带来财富的财富。或者说，资源就是指自然界和人类社会中一种可以用以创造物质财富和精神财富的具有一定量的积累的客观存在形态，如土地资源、矿产资源、森林资源、海洋资源、石油资源、人力资源、信息资源等。</p>
-<h3 id="信息资源的概念"><a href="#信息资源的概念" class="headerlink" title="信息资源的概念"></a>信息资源的概念</h3><p>一是狭义的理解，认为信息资源是指人类社会活动中大量积累起来的经过加工处理有序的、有用信息的集合。这只限于信息本身。<br>二是广义的理解。认为信息资源是人类社会信息活动中积累起来的信息、信息生产者、信息技术、资金等信息活动的各种要素的总称。<br>信息资源是人类社会信息活动中大量积累起来的经过过加工处理的有序、有用信息以及各种信息活动要素（信息生产者、信息技术、设备、设施、资金等）的集合。</p>
-<h2 id="资源的分类"><a href="#资源的分类" class="headerlink" title="资源的分类"></a>资源的分类</h2><h2 id="按资源性质分类"><a href="#按资源性质分类" class="headerlink" title="按资源性质分类"></a>按资源性质分类</h2><ul>
-<li><p>自然资源：一般是指一切物质资源和自然过程，通常是指在一定技术经济环境条件下对人类有益的资源。</p>
-<blockquote>
-<p>从资源的再生性角度可划分为再生资源和非再生资源 –再生资源有两类：一类是可以循环利用的资源，如太阳能、空气、雨水、风和水能、潮汐能等；一类是生物资源。非再生资源：（或耗竭性资源），这类资源的储量、体积可以测算出来，其质量也可以通过化学成分的百分比来反映，如矿产资源。<br>从资源利用的可控性程度，可划分为专有资源和共享资源–专有资源：如国家控制、管辖内的资源。共享资源：如公海、太空、信息资源等。</p>
-</blockquote>
-</li>
-<li><p>社会经济资源和技术资源：自然资源、社会经济资源、技术资源通常被称为人类社会的三大类资源。社会经济资源又称社会人文资源，是直接或间接对生产发生作用的社会经济因素。其中人口、劳动力是社会经济发展的主要条件。技术资源广义上也属于社会人文资源，其在经济发展中愈益起着重大作用。</p>
-</li>
-</ul>
-<h3 id="按资源用途分类"><a href="#按资源用途分类" class="headerlink" title="按资源用途分类"></a>按资源用途分类</h3><p>（1）农业资源<br>（2）工业资源<br>（3）信息资源（含服务性资源）</p>
-<h3 id="按资源可利用状况分类"><a href="#按资源可利用状况分类" class="headerlink" title="按资源可利用状况分类"></a>按资源可利用状况分类</h3><p>（1）现实资源：即已经被认识和开发的资源。<br>（2）潜在资源：即尚未被认识，或虽已认识却因技术等条件不具备还不能被开发利用的资源。<br>（3）废物资源：即传统被认为是废物，而由于科学技术的使用，又使其转化为可被开发利用的资源。<br>信息资源属于可再生的社会资源</p>
-<h2 id="资源的属性"><a href="#资源的属性" class="headerlink" title="资源的属性"></a>资源的属性</h2><h3 id="自然资源"><a href="#自然资源" class="headerlink" title="自然资源"></a>自然资源</h3><p>根据人类对自然资源的认知度，其主要特点是：</p>
-<ul>
-<li>自然资源分布的不平衡性和规律性</li>
-<li>自然资源的有限性和无限性（现实资源是有限的，但开发利用及转化是无限的）</li>
-<li>自然资源的多功能性</li>
-<li>自然资源的系统性等</li>
-</ul>
-<h3 id="社会资源"><a href="#社会资源" class="headerlink" title="社会资源"></a>社会资源</h3><ul>
-<li>社会性</li>
-<li>继承性</li>
-<li>主导性</li>
-<li>流动性</li>
-<li>不均衡性</li>
-</ul>
-<h3 id="当代信息特点"><a href="#当代信息特点" class="headerlink" title="当代信息特点"></a>当代信息特点</h3><ul>
-<li>数量庞大、分布范围广</li>
-<li>增长快、老化加速</li>
-<li>载体多样化</li>
-<li>传播速度快、传播范围广</li>
-<li>获取途径多</li>
-</ul>
-<h1 id="第二章"><a href="#第二章" class="headerlink" title="第二章"></a>第二章</h1><h2 id="信息技术带来的问题"><a href="#信息技术带来的问题" class="headerlink" title="信息技术带来的问题"></a>信息技术带来的问题</h2><ol>
-<li>信息污染<br>信息超载、虚假信息、有害信息</li>
-<li>计算机病毒</li>
-<li>知识产权的侵犯</li>
-<li>隐私权的侵犯</li>
-<li>计算机犯罪</li>
-<li>信息主权的侵犯<br>信息垄断、舆论侵略、文化渗透</li>
-</ol>
-<h2 id="信息技术体系结构，三个层次"><a href="#信息技术体系结构，三个层次" class="headerlink" title="信息技术体系结构，三个层次"></a>信息技术体系结构，三个层次</h2><p>信息技术的体系结构由三个层次组成：</p>
-<ol>
-<li>第一个层次是信息基础技术，即有关元器件的制造技术，它是整个信息技术体系的基础；</li>
-<li>第二个层次是信息主体技术，即有关信息的获取、传输和处理技术，它是信息技术体系的核心；</li>
-<li>第三个层次是信息应用技术，即信息主体技术在社会各个领域繁衍出来的各种具体应用技术，它是信息技术开发的根本目的所在。</li>
-</ol>
-<h1 id="第三章"><a href="#第三章" class="headerlink" title="第三章"></a>第三章</h1><h2 id="信息资源管理过程"><a href="#信息资源管理过程" class="headerlink" title="信息资源管理过程"></a>信息资源管理过程</h2><ol>
-<li>信息需求分析</li>
-<li>信息源分析</li>
-<li>信息资源采集</li>
-<li>信息资源加工</li>
-<li>信息资源存储</li>
-<li>信息资源检索</li>
-<li>信息资源开发</li>
-<li>信息资源利用</li>
-<li>信息资源传递</li>
-<li>信息资源反馈</li>
-</ol>
-<h2 id="信息用户和信息需求"><a href="#信息用户和信息需求" class="headerlink" title="信息用户和信息需求"></a>信息用户和信息需求</h2><p>信息需求：人们在从事各种社会活动的过程中，为解决不同的问题所产生的对信息的需要。类同于生理上的需求、安全上的需求。<br>信息用户：具备信息需求又有信息行为的人–可分为个人用户和团体用户。</p>
-<h2 id="信息源分类、类型、分布特点"><a href="#信息源分类、类型、分布特点" class="headerlink" title="信息源分类、类型、分布特点"></a>信息源分类、类型、分布特点</h2><h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a>分类</h3><ol>
-<li>按组织边界划分：内部信息源+外部信息源</li>
-<li>按信息的数字化形式划分：数字化信息源+非数字化信息源。</li>
-<li>按信息的载体形式划分：印刷型+缩微型+电子型+实物型+声像信息源。</li>
-<li>按信息的运动形式划分：静态+动态信息源。</li>
-</ol>
-<h3 id="分布特点"><a href="#分布特点" class="headerlink" title="分布特点"></a>分布特点</h3><ol>
-<li>信息源的地区分布不平衡</li>
-<li>信息源的机构分布不平衡</li>
-<li>信息源的个人分布不平衡</li>
-</ol>
-<h2 id="信息资源检索的类型"><a href="#信息资源检索的类型" class="headerlink" title="信息资源检索的类型"></a>信息资源检索的类型</h2><ol>
-<li>按检索内容分：文献检索、数据检索和事实检索。</li>
-<li>按检索手段来分：手工检索和机器检索。</li>
-<li>按检索的组织方式分：全文检索、超文本检索和超媒体检索。</li>
-</ol>
-<h2 id="信息资源开发的含义"><a href="#信息资源开发的含义" class="headerlink" title="信息资源开发的含义"></a>信息资源开发的含义</h2><p>信息资源开发：有广义和狭义之分。<br>广义信息资源开发是指能够改进和加速信息源交流和利用的一切活动，涵盖了信息资源的建设、二次或三次信息资源（索引、文摘、综述等）的编制、增值信息产品的开发等信息活动。<br>狭义信息资源开发是指一种创造和生产新信息产品的活动，它是信息资源开发的一种高级形式。在此重点讨论后者。</p>
-<h1 id="第四章"><a href="#第四章" class="headerlink" title="第四章"></a>第四章</h1><h2 id="标准化的定义"><a href="#标准化的定义" class="headerlink" title="标准化的定义"></a>标准化的定义</h2><p>在经济、技术、科学及管理等社会实践中，对重复性事物和概念通过制订、发布和实施标准，达到统一，以获得最佳秩序和社会效益。</p>
-<h2 id="标准分级"><a href="#标准分级" class="headerlink" title="标准分级"></a>标准分级</h2><p>根据其适用领域和有效范围的不同，可分为不同的级别</p>
-<ul>
-<li>国际标准：由国际上权威组织制定，并为大多数国家所承认和通用的标准。经国际标准化组织认可的标准，也可视为国际标准。</li>
-<li>区域标准：由世界区域性集团的标准化组织制定和发布的标准。</li>
-<li>国家标准：对全国经济、技术发展有重大意义，需要在全国范围内统一的标准。</li>
-<li>行业标准：没有国家标准而又需要在全国某个行业范围内统一的标准，通常由国家标准化组织下设的某个专业技术委员会负责制定。</li>
-<li>地方标准：没有国家标准和行业标准而又需要在省、自治区、直辖市范围内统一的标准。</li>
-<li>企业标准：企业因生产的产品没有相应的国家标准和行业标准而自行制定的标准，是企业组织生产的依据。</li>
-</ul>
-<h2 id="标准化内容，四个方面"><a href="#标准化内容，四个方面" class="headerlink" title="标准化内容，四个方面"></a>标准化内容，四个方面</h2><ol>
-<li>标准化技术</li>
-<li>标准化设施</li>
-<li>标准化术语</li>
-<li>标准化管理过程</li>
-</ol>
-<h2 id="信息技术标准的分类，七类"><a href="#信息技术标准的分类，七类" class="headerlink" title="信息技术标准的分类，七类"></a>信息技术标准的分类，七类</h2><ol>
-<li>信息的采集，编码与记录标准</li>
-<li>中文信息处理标准</li>
-<li>数据通信与开放系统互联标准</li>
-<li>软件工程标准</li>
-<li>信息的安全与保密标准</li>
-<li>声像技术标准</li>
-<li>文献标准</li>
-</ol>
-<h2 id="标准化实施的意义"><a href="#标准化实施的意义" class="headerlink" title="标准化实施的意义"></a>标准化实施的意义</h2><ol>
-<li>是进行科学管理和组织生产的重要前提；</li>
-<li>是进行技术开发，提高技术水平的重要途径</li>
-<li>是保证信息产品质量，进行全面质量管理的重要基础。</li>
-<li>是获得最佳经济效益的重要手段。</li>
-<li>是开拓市场，提高竞争能力的重要保证。</li>
-<li>是开展国际交流，进行国际合作的桥梁。</li>
-</ol>
-<h1 id="第五章"><a href="#第五章" class="headerlink" title="第五章"></a>第五章</h1><h2 id="信息安全的基本要素，五个"><a href="#信息安全的基本要素，五个" class="headerlink" title="信息安全的基本要素，五个"></a>信息安全的基本要素，五个</h2><ul>
-<li>机密性</li>
-<li>完整性</li>
-<li>可用性</li>
-<li>审查性</li>
-<li>可控性</li>
-</ul>
-<h2 id="计算机犯罪的种类和特点"><a href="#计算机犯罪的种类和特点" class="headerlink" title="计算机犯罪的种类和特点"></a>计算机犯罪的种类和特点</h2><h3 id="种类"><a href="#种类" class="headerlink" title="种类"></a>种类</h3><ol>
-<li>数据欺骗</li>
-<li>特洛伊木马术</li>
-<li>香肠术</li>
-<li>逻辑炸弹</li>
-<li>线路截收</li>
-<li>陷阱术</li>
-</ol>
-<h3 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h3><ol>
-<li>作案手段智能化、隐蔽性强</li>
-<li>犯罪侵害的目标较集中</li>
-<li>侦查取证困难，破案难度大，存在较高的犯罪黑数</li>
-<li>犯罪后果严重，社会危害性大</li>
-</ol>
-<h2 id="保障信息安全的措施"><a href="#保障信息安全的措施" class="headerlink" title="保障信息安全的措施"></a>保障信息安全的措施</h2><ol>
-<li>防火墙</li>
-<li>安全检查（身份认证）</li>
-<li>加密</li>
-<li>数字签名</li>
-</ol>
-<h2 id="网络交易风险和规避"><a href="#网络交易风险和规避" class="headerlink" title="网络交易风险和规避"></a>网络交易风险和规避</h2><h3 id="风险"><a href="#风险" class="headerlink" title="风险"></a>风险</h3><ol>
-<li>与因特网相关的风险</li>
-<li>内部网风险</li>
-<li>传输商业交易数据的风险</li>
-<li>存储数据的风险</li>
-</ol>
-<h3 id="规避"><a href="#规避" class="headerlink" title="规避"></a>规避</h3><p>建设综合安全基础设施（PKI）</p>
-<ul>
-<li>认证</li>
-<li>支持密钥管理</li>
-<li>数据完整性与不可否认服务</li>
-<li>数据保密性服务</li>
-<li>公证服务</li>
-</ul>
-<h2 id="信息安全的讨论题"><a href="#信息安全的讨论题" class="headerlink" title="信息安全的讨论题"></a>信息安全的讨论题</h2><ul>
-<li>如何防止计算机犯罪？</li>
-<li>在电子商务交易中，如何规避安全风险？（以实例说明）</li>
-<li>结合专业实际，谈谈自身设计数据库的安全如何保证。</li>
-<li>现实生活中的信息安全如何保证？</li>
-</ul>
-<h1 id="第六章"><a href="#第六章" class="headerlink" title="第六章"></a>第六章</h1><h2 id="信息系统的概念"><a href="#信息系统的概念" class="headerlink" title="信息系统的概念"></a>信息系统的概念</h2><p>广义：各种处理信息的系统，包括人体本身和各种人造系统。<br>狭义：基于计算机的系统，是人、规程、数据库、硬件和软件等各种设备、工具的有机集合，突出的是计算机和通信等技术的应用。<br>第三种理解：把负有信息采集、组织、加工、传递和服务职责的信息资源管理机构和各种基于计算机的处理信息的系统统称为信息系统。</p>
-<h2 id="信息资源布局如何理解、网络环境中信息资源布局和面临问题"><a href="#信息资源布局如何理解、网络环境中信息资源布局和面临问题" class="headerlink" title="信息资源布局如何理解、网络环境中信息资源布局和面临问题"></a>信息资源布局如何理解、网络环境中信息资源布局和面临问题</h2><h3 id="信息资源布局"><a href="#信息资源布局" class="headerlink" title="信息资源布局"></a>信息资源布局</h3><p>信息资源的布局指信息资源在时间、空间和数量三个方面的有效配置。</p>
-<h3 id="网络环境中的信息资源布局"><a href="#网络环境中的信息资源布局" class="headerlink" title="网络环境中的信息资源布局"></a>网络环境中的信息资源布局</h3><ul>
-<li>在全球信息资源网络中定位<br>要成为全球信息网络中的一份子，有自己独特的数据库，不但是网络信息资源的使用者，同时也是网络信息资源的提供者。</li>
-<li>在全国信息资源网络中定位<br>科学技术、社会科学、经济三大系统应突破封闭自守的现状，联合合作，建立相应的数据库，进而形成网络。</li>
-</ul>
-<h3 id="面临问题"><a href="#面临问题" class="headerlink" title="面临问题"></a>面临问题</h3><ul>
-<li>信息安全问题</li>
-<li>国家主权问题</li>
-<li>知识产权问题</li>
-<li>语言障碍问题</li>
-</ul>
-<h2 id="网络环境下信息资源的组织方式"><a href="#网络环境下信息资源的组织方式" class="headerlink" title="网络环境下信息资源的组织方式"></a>网络环境下信息资源的组织方式</h2><ul>
-<li>文件方式</li>
-<li>数据库方式</li>
-<li>主题树方式</li>
-<li>超媒体方式</li>
-</ul>
-<h2 id="搜索引擎分类"><a href="#搜索引擎分类" class="headerlink" title="搜索引擎分类"></a>搜索引擎分类</h2><ul>
-<li>一般搜索引擎</li>
-<li>元搜索引擎</li>
-<li>专用引擎</li>
-</ul>
-<h2 id="网络环境中信息资源管理面临的挑战和注意的问题"><a href="#网络环境中信息资源管理面临的挑战和注意的问题" class="headerlink" title="网络环境中信息资源管理面临的挑战和注意的问题"></a>网络环境中信息资源管理面临的挑战和注意的问题</h2><ol>
-<li>网络信息资源具有大数量、多类型、多媒体、非规范、跨时间、跨地域、跨行业、多语种等特点，文本、数据、图形、图像、声频、视频等多种类型，信息资源管理对象的复杂性和多样性空前增加。</li>
-<li>网络的增长和网上信息资源的动态快速增加很大程度上是用户驱动的，但缺乏有效的统一管理机制，信息安全和信息质量让人忧虑。</li>
-<li>信息分布和构成缺乏结构和组织，信息源分散无序且更新和消亡无法预测，因此增大了信息资源管理的难度。</li>
-<li>信息发布有很大的自由性和任意性，出现了种族歧视、不健康信息的扩散。</li>
-<li>正式出版物和非正式信息交流交织在一起，打破了传统信息交流的格局，对学术交流环境产生了影响。</li>
-<li>信息流动跨越了国境和疆界，极大促进了人类信息资源的共享，也带来一些问题，如文化冲突、信息威慑等，对信息资源管理中的人文层面提出了新的要求。</li>
-</ol>
-<h1 id="第七章"><a href="#第七章" class="headerlink" title="第七章"></a>第七章</h1><h2 id="信息市场、政策、法规的概念"><a href="#信息市场、政策、法规的概念" class="headerlink" title="信息市场、政策、法规的概念"></a>信息市场、政策、法规的概念</h2><h3 id="信息市场"><a href="#信息市场" class="headerlink" title="信息市场"></a>信息市场</h3><p>广义：指信息交换关系的总和，其中包括信息商品交易的场所和信息商品的交换、流通或信息贸易。<br>狭义：仅视为信息商品交易的场所。</p>
-<h3 id="信息政策"><a href="#信息政策" class="headerlink" title="信息政策"></a>信息政策</h3><p>与信息的创造、存储、处理、传播和利用有关的所有公共法律、规章和计划，具有复杂性和动态性，会随着环境的变化不断改变和进行调整。</p>
-<h3 id="信息法规"><a href="#信息法规" class="headerlink" title="信息法规"></a>信息法规</h3><p>信息法规是指对信息活动中的重要问题进行调控的法律措施，这些措施涉及信息系统、处理信息的组织和对信息负有责任的个人等。</p>
-<h2 id="罗兰信息要素说，三个方面"><a href="#罗兰信息要素说，三个方面" class="headerlink" title="罗兰信息要素说，三个方面"></a>罗兰信息要素说，三个方面</h2><ol>
-<li><p>基础政策<br>应用于整个社会，直接或间接影响信息部门（如税法、劳动法、教育政策等）</p>
-</li>
-<li><p>水平信息政策<br>应用于整个信息部门，直接或间接影响信息部门（如数据保护政策、信息自由政策、隐私政策等）</p>
-</li>
-<li><p>垂直信息政策<br>应用于特定信息社会，适合特定应用领域（如地理信息政策、公共图书管服务政策等）</p>
-</li>
-</ol>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2015年06月19日 首次更新完成</li>
-<li>2015年06月23日 补充了网络安全第五点</li>
-</ul>
-
+                <a class="" href="/2015/06/19/information-manage-review/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2015/06/19/information-manage-review/">信息资源管理复习</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2015年6月19日 - 16时06分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2015/06/19/information-manage-review/"
-                                            title="信息资源管理复习">https://xuanwo.org/2015/06/19/information-manage-review/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/复习/"> #复习 </a>
-                    
-                        <a href="/tags/Information/"> #Information </a>
-                    
-                </div>
             
         </div>
 
@@ -716,7 +250,8 @@
         </div>
         <h2><a href="/2015/06/12/database-review/">数据库系统概论复习</a></h2>
         
-            <h1 id="绪论"><a href="#绪论" class="headerlink" title="绪论"></a>绪论</h1><h2 id="数据库系统概述"><a href="#数据库系统概述" class="headerlink" title="数据库系统概述"></a>数据库系统概述</h2><p>数据（Data）： 描述事物的符号记录称为数据。<br>记录： 计算机中表示和存储数据的一种格式或一种方法。<br>数据库（DataBase，简称DB）： 数据库是长期存储在计算机内、有组织的、可共享的大量数据的集合。<br>特点：</p>
+            
+                <h1 id="绪论"><a href="#绪论" class="headerlink" title="绪论"></a>绪论</h1><h2 id="数据库系统概述"><a href="#数据库系统概述" class="headerlink" title="数据库系统概述"></a>数据库系统概述</h2><p>数据（Data）： 描述事物的符号记录称为数据。<br>记录： 计算机中表示和存储数据的一种格式或一种方法。<br>数据库（DataBase，简称DB）： 数据库是长期存储在计算机内、有组织的、可共享的大量数据的集合。<br>特点：</p>
 <ul>
 <li>数据按一定的数据模型组织、描述和存储</li>
 <li>可为各种用户共享</li>
@@ -724,355 +259,11 @@
 <li>数据独立性较高</li>
 <li>易扩展</li>
 </ul>
-<a id="more"></a>
-<p>数据库管理系统（DataBase Management System，DBMS）：位于用户与操作系统之间的一层数据管理软件，它为用户或应用程序提供访问DB的方法，包括DB的建立、查询、更新及各种数据控制。<br>主要功能如下：</p>
-<ul>
-<li>数据定义功能</li>
-<li>数据组织、存储和管理</li>
-<li>数据操纵功能</li>
-<li>数据库的事务管理和运行管理</li>
-<li>数据库的建立和维护功能</li>
-<li>其他功能</li>
-</ul>
-<p>数据库系统（DataBase System， DBS）：DBS是实现有组织地、动态地存储大量关联数据、方便多用户访问的计算机硬件、软件和数据资源组成的系统，即它是采用数据库技术的计算机系统。<br>组成：<br>计算机硬件、数据库、数据库管理系统、应用软件、数据库管理员</p>
-<p>数据库技术：是研究数据库的结构、存储、设计、管理和使用的一门软件学科。</p>
-<h2 id="数据模型"><a href="#数据模型" class="headerlink" title="数据模型"></a>数据模型</h2><p>模型： 现实世界特征的模拟和抽象<br>数据模型定义：能表示实体类型及实体间联系的模型<br>要求：</p>
-<ul>
-<li>能比较真实的模拟现实世界</li>
-<li>容易为人所理解</li>
-<li>便于在计算机上实现</li>
-</ul>
-<h3 id="概念数据模型"><a href="#概念数据模型" class="headerlink" title="概念数据模型"></a>概念数据模型</h3><p>按用户观点对数据建模，是对现实世界的第一层抽象，如ER图。主要用于数据库设计，是数据模型建立的基础。</p>
-<p>实体：客观存在并可相互区别的事物。<br>属性：实体所具有的某一特性称为属性。用属性来刻画实体。<br>码：唯一标识实体的属性集，如学号。<br>域：属性的取值范围称为该属性的域。<br>实体型：具有相同性质的实体必然具有共同的特征和性质。<br>实体集：同型实体的集合。<br>联系：可分为一对一，一对多，多对多。</p>
-<h3 id="逻辑数据模型"><a href="#逻辑数据模型" class="headerlink" title="逻辑数据模型"></a>逻辑数据模型</h3><p>直接面向数据库的逻辑结构，是对现实世界的第二层抽象。可分为：网状、层次、关系、面对对象等；也可分为模糊、时态、空间、时空、概率、粗糙、分形等。组成包括：数据结构、数据操作、数据的约束条件。</p>
-<p><strong>层次数据模型：</strong><br>层次数据模型对应数据结构中的树形结构：</p>
-<ul>
-<li>有且只有一个称为根的结点</li>
-<li>当结点数大于1时，除根节点外的结点可以分为M个互相不相交的有限集，其中每一个集合又是一棵数。</li>
-</ul>
-<p>数据操纵：查询、插入、删除和修改<br>数据约束条件：</p>
-<ul>
-<li>进行插入操作时，如果没有相应的双亲结点值，不能插入子女结点值。</li>
-<li>进行删除操作时，如果删除双亲结点值，则相应的子女结点值也被删除。</li>
-<li>进行修改操作时，应修改所有相应记录，以保证数据的一致性。</li>
-</ul>
-<p><strong>网状数据模型：</strong><br>针对数据结构中的图</p>
-<p><strong>面向对象的数据模型：</strong><br>最关键的两个概念：<br>对象：现实世界中实体的模型化<br>类：对象类型和对这个对象模型进行的操作方法</p>
-<p><img src="/imgs/learn/four-data-modal.png" alt="四种数据模型的比较"></p>
-<h2 id="数据库系统结构"><a href="#数据库系统结构" class="headerlink" title="数据库系统结构"></a>数据库系统结构</h2><p>数据库系统的三级模式结构</p>
-<ul>
-<li>外模式/模式映像</li>
-<li>内模式/模式映像</li>
-</ul>
-<h2 id="数据库系统的组成"><a href="#数据库系统的组成" class="headerlink" title="数据库系统的组成"></a>数据库系统的组成</h2><h3 id="硬件平台及数据库"><a href="#硬件平台及数据库" class="headerlink" title="硬件平台及数据库"></a>硬件平台及数据库</h3><h3 id="软件"><a href="#软件" class="headerlink" title="软件"></a>软件</h3><h3 id="人员"><a href="#人员" class="headerlink" title="人员"></a>人员</h3><ol>
-<li>数据库管理员</li>
-<li>系统分析员和数据库设计人员</li>
-<li>应用程序员</li>
-<li>用户</li>
-</ol>
-<h1 id="关系型数据库理论"><a href="#关系型数据库理论" class="headerlink" title="关系型数据库理论"></a>关系型数据库理论</h1><p><img src="/imgs/learn/relate-database-theory.png" alt="关系数据库理论概述"></p>
-<h2 id="关系模型概述"><a href="#关系模型概述" class="headerlink" title="关系模型概述"></a>关系模型概述</h2><p><img src="/imgs/learn/relate-database-modal.png" alt="关系模型概述"></p>
-<h2 id="关系数据结构"><a href="#关系数据结构" class="headerlink" title="关系数据结构"></a>关系数据结构</h2><p>域：是一组具有相同数据类型的值的集合<br>域的笛卡儿积：给定一组域D1，D2，…，Dn，其笛卡尔积为：<br><img src="/imgs/learn/cartesian-product.png" alt="笛卡儿积"></p>
-<h3 id="关系"><a href="#关系" class="headerlink" title="关系"></a>关系</h3><p>关系：D1×D2×…×Dn的子集叫做在域D1，D2，…，Dn上的关系，记做：R(D1，D2，…，Dn)。</p>
-<blockquote>
-<p>关系是笛卡尔积的有一定意义、有限的子集。<br>关系也是一个二维表，表的每一行对应一个元组，表的每一列对应一个域。<br>对每列起一个唯一的名字，称为属性。<br>n元关系有n个属性。<br>当n=1时，称该关系为单元关系；<br>当n=2时，称该关系为二元关系。<br>若关系中的某一属性组的值能够唯一地标识一个元组，则称该属性组为候选码。<br>若一个关系有多个候选码，则选定其中一个作为主码。<br>候选码的诸属性称为主属性。不包含在任何候选码中的属性称为非主属性或非码属性。</p>
-</blockquote>
-<p>关系的性质：</p>
-<ul>
-<li>同质的列</li>
-<li>不同属性应该有不同的名称</li>
-<li>属性是无序的</li>
-<li>元组不能重复</li>
-<li>元组无序</li>
-<li>分量是原子（即每一个分量都必须是不可分的数据项）</li>
-</ul>
-<h3 id="关系模式"><a href="#关系模式" class="headerlink" title="关系模式"></a>关系模式</h3><p>在数据库中要区分型和值，型是指关系模式，值是指关系。</p>
-<p>关系：<br>一张二维表格，其中每一行为一元组，每一列为一属性。</p>
-<p>关系模式：<br>关系的描述称为关系模式。它可以形式化的表示为：<br>R(U, D, dom, F)<br>其中：<br>R：关系名<br>U：组成该关系的属性集合<br>D：属性来自的域<br>dom：属性向域的映象集合<br>F：属性间数据依赖关系集合</p>
-<p>关系模式与关系的关系：</p>
-<ul>
-<li>关系模式是静态的，稳定的</li>
-<li>关系是动态地，随时间不断变化的</li>
-<li>关系是关系模式在某一时刻的状态和内容</li>
-</ul>
-<h2 id="关系的完整性"><a href="#关系的完整性" class="headerlink" title="关系的完整性"></a>关系的完整性</h2><p>关系模型的完整性规则是对关系的某种约束条件。</p>
-<h3 id="关系的三类完整性约束"><a href="#关系的三类完整性约束" class="headerlink" title="关系的三类完整性约束"></a>关系的三类完整性约束</h3><ul>
-<li>实体完整性</li>
-<li>参照完整性</li>
-<li>用户定义的完整性</li>
-</ul>
-<h3 id="实体完整性"><a href="#实体完整性" class="headerlink" title="实体完整性"></a>实体完整性</h3><p>若属性A是基本关系R的主属性，则属性A不能取空值。</p>
-<h3 id="参照完整性"><a href="#参照完整性" class="headerlink" title="参照完整性"></a>参照完整性</h3><blockquote>
-<p>外码<br>设F市基本关系R的一个或一组属性，但不是关系R的码。Ks是基本关系S的主码。如果F与Ks相对应，则称D是R的外码。<br>并称基本关系R为参照关系，基本关系S为被参照关系或目标关系。<br><em>关系R和S不一定是不同的关系。</em></p>
-</blockquote>
-<p>若属性（或属性组）F是基本关系R的外码，它与基本关系S的主码Ks相对应（基本关系R和S不一定是不同的关系），则对于R中每个元组在F上的值必须为：</p>
-<ul>
-<li>或者取空值（F的每个属性值均为空值）</li>
-<li>或者等于S中某个元组的主码值</li>
-</ul>
-<h3 id="用户定义的完整性"><a href="#用户定义的完整性" class="headerlink" title="用户定义的完整性"></a>用户定义的完整性</h3><p>针对某一具体关系数据库的约束条件</p>
-<h2 id="关系代数"><a href="#关系代数" class="headerlink" title="关系代数"></a>关系代数</h2><p>关系代数是一种抽象的查询语言，它用作对关系的运算来表达查询。<br><img src="/imgs/learn/relate-cal.png" alt="关系代数运算符"></p>
-<h3 id="传统的集合运算"><a href="#传统的集合运算" class="headerlink" title="传统的集合运算"></a>传统的集合运算</h3><ul>
-<li>并</li>
-<li>差</li>
-<li>交</li>
-<li>笛卡儿积</li>
-</ul>
-<h3 id="专门的关系演算"><a href="#专门的关系演算" class="headerlink" title="专门的关系演算"></a>专门的关系演算</h3><p><strong>选择</strong><br>从关系R中选取使得逻辑表达式F为真的元组，这是从行的角度进行的运算。<br><strong>投影</strong><br>从关系R中选取若干属性列组成新的关系，这是从列的角度进行的运算。<br><em>需要消除重复行，因此有可能导致某些元组被取消。</em><br><strong>连接</strong><br>从两个关系的笛卡尔积中选取属性间满足一定条件的元组</p>
-<ul>
-<li>等值连接：要求选取的A，B属性组的值相等</li>
-<li>自然连接：特殊的等值连接，要求把重复属性列去掉</li>
-</ul>
-<p>如果把舍弃的元组也保存在结果关系中，而在其他的属性上填空值（NULL），那么这种连接叫做外连接。<br>如果只保留左边关系中要舍弃的部分，叫做左外连接；<br>如果只保留右边关系中要舍弃的部分，叫做右外连接。</p>
-<p><strong>除</strong><br><img src="/imgs/learn/divide.png" alt="关系运算-除"></p>
-<h1 id="SQL数据语言"><a href="#SQL数据语言" class="headerlink" title="SQL数据语言"></a>SQL数据语言</h1><h2 id="SQL概述"><a href="#SQL概述" class="headerlink" title="SQL概述"></a>SQL概述</h2><h3 id="产生与发展"><a href="#产生与发展" class="headerlink" title="产生与发展"></a>产生与发展</h3><ul>
-<li>1974年由Boyce和Chamberlin提出</li>
-<li>1975-1979年，IBM的System R上实现</li>
-<li>1986年，ANSI通过SQL标准</li>
-<li>后来相继提出SQL-89与SQL-92标准</li>
-<li>目前，大多数数据库均采用SQL作为共同的数据存取和标准接口</li>
-</ul>
-<h3 id="SQL的特点"><a href="#SQL的特点" class="headerlink" title="SQL的特点"></a>SQL的特点</h3><ul>
-<li>综合统一</li>
-<li>高度非过程化</li>
-<li>面向集合的操作方式</li>
-<li>一种语法结构两种方式</li>
-<li>语言简洁，易学易用</li>
-</ul>
-<h3 id="SQL基本概念"><a href="#SQL基本概念" class="headerlink" title="SQL基本概念"></a>SQL基本概念</h3><p>SQL支持关系数据库三级模式结构，其中：</p>
-<ul>
-<li>外模式——视图和部分基本表（不能独立存在）</li>
-<li>模式——基本表（独立存在，关系-基本表-存储文件一一对应）</li>
-<li>内模式——存储文件（存储文件的逻辑结构组成了关系数据库的内模式）</li>
-</ul>
-<h3 id="SQL对象"><a href="#SQL对象" class="headerlink" title="SQL对象"></a>SQL对象</h3><p>SQL对象包括数据库、表、视图、属性名等，这些对象名符合一定规则：</p>
-<blockquote>
-<p>SQL SERVER 1-30字符<br>ACCESS 64字符<br>ORACLE 限制为8个字符</p>
-<p>应以字母开头，其他字符可以使字母、数字、下划线</p>
-</blockquote>
-<h3 id="SQL语句"><a href="#SQL语句" class="headerlink" title="SQL语句"></a>SQL语句</h3><ol>
-<li>尖括号”&lt;&gt;”中的内容为实际意义</li>
-<li>中括号”[]”中的内容为任选项</li>
-<li>[,…]意思是等等</li>
-<li>大括号”{}”与竖线”|”标明此处为选择项，在所列举的各项中仅需选择一项。</li>
-<li>SQL中的数据项（包括列项、表和视图）分隔符为”,”；其字符串常数的定界符用单引号”‘“表示。</li>
-</ol>
-<h2 id="数据定义"><a href="#数据定义" class="headerlink" title="数据定义"></a>数据定义</h2><p><img src="/imgs/learn/SQL-data-define.png" alt="SQL的数据定义语句"></p>
-<h3 id="数据库的创建与删除"><a href="#数据库的创建与删除" class="headerlink" title="数据库的创建与删除"></a>数据库的创建与删除</h3><p>创建数据库</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE DATABASE &lt;数据库名&gt;;</span><br><span class="line">CREATE DATABASE Mydb;</span><br></pre></td></tr></table></figure>
-<p>删除数据库</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DROP DATABASE &lt;数据库名&gt; [,&lt;数据库名&gt;] [,...];</span><br><span class="line">DROP DATABASE Mydb;</span><br></pre></td></tr></table></figure>
-<h3 id="表的创建与删除"><a href="#表的创建与删除" class="headerlink" title="表的创建与删除"></a>表的创建与删除</h3><p>创建基本表</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE &lt;表名&gt;</span><br><span class="line">    (&lt;列名&gt; &lt;数据类型&gt; [&lt;列级完整性约束条件&gt;] [&lt;列名&gt; &lt;数据类型&gt; [ &lt;列级完整性约束条件&gt; ] [,...] ] [,&lt;表级完整性约束条件&gt;] [,..]);</span><br></pre></td></tr></table></figure>
-<p><img src="/imgs/learn/main-type.png" alt="主要数据类型"></p>
-<p>约束条件：</p>
-<ul>
-<li>列级完整性约束条件——只能用于列</li>
-<li>表级完整性约束条件——只能够用于一张中的多列</li>
-</ul>
-<p>SQL完整性约束条件</p>
-<ul>
-<li>NOT NULL或NULL，列级，是否允许为空</li>
-<li>UNIQUE，列级，唯一性约束</li>
-<li>DEFAULT，列级，默认值约束</li>
-<li>CHECK，列级，检验约束，为插入列中的数据指定约束条件</li>
-<li>PRIMARY KEY，表级，主键约束，使得主键的数值在每一行中各不相同，不能为空</li>
-<li>FOREIGN KEY，表级，外键约束，是参照完整性约束</li>
-</ul>
-<p>举例<br>创建<code>学生表：Student(sno, sname, sdate, ssex, sdept)</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Create Table Student(</span><br><span class="line">    sno char(5) not null unique,</span><br><span class="line">    sdate date,</span><br><span class="line">    ssex char(2) default &apos;男&apos;,</span><br><span class="line">    sdept char(2)</span><br><span class="line">    Constraint C1 Check (ssex In (&apos;男&apos;, &apos;女&apos;)));</span><br></pre></td></tr></table></figure>
-<p>删除基本表</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP TABLE &lt;表名&gt;;</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP TABLE Student;</span><br></pre></td></tr></table></figure>
-<h3 id="表结构的修改"><a href="#表结构的修改" class="headerlink" title="表结构的修改"></a>表结构的修改</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE &lt;表名&gt;</span><br><span class="line">    [ADD ( &lt;新列名&gt; &lt;数据类型&gt; [&lt;完整性约束条件&gt;][,...])]</span><br><span class="line">    [DROP &lt;完整性约束名&gt;]</span><br><span class="line">    [MODIFY ( &lt;列名&gt; &lt;数据类型&gt; [,...])];</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<blockquote>
-<p>在Student表中增加‘籍贯native_place’列，数据类型为字符型</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Alter Table Student</span><br><span class="line">    Add native_place Varchar(50);</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>删除Student表中学生姓名必须取唯一值的约束条件</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Alter Table Student</span><br><span class="line">    Drop unique(sname);</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>修改Student表中sname列的数据类型为定长字符型</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Alter Table Student</span><br><span class="line">    Modify sname char(8) unique;</span><br></pre></td></tr></table></figure>
-<h3 id="建立和删除索引"><a href="#建立和删除索引" class="headerlink" title="建立和删除索引"></a>建立和删除索引</h3><p>建立索引</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE [UNIQUE] [CLUSTER] INDEX  &lt;索引名&gt;</span><br><span class="line">    ON &lt;表名&gt; (&lt;列名&gt; [&lt;次序&gt;] [, &lt;列名&gt; [&lt;次序&gt;] ] [,…]);</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Create unique Index stusno_ind</span><br><span class="line">    On Student (sno ASC);</span><br></pre></td></tr></table></figure>
-<p>删除索引</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP INDEX &lt;索引名&gt;;</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP INDEX Stusno_Ind;</span><br></pre></td></tr></table></figure>
-<h2 id="数据查询"><a href="#数据查询" class="headerlink" title="数据查询"></a>数据查询</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SELECT [ALL|DISTINCT] &lt;目标列表达式&gt; [,&lt;目标列表达式&gt;] [,…]</span><br><span class="line">[INTO &lt;新表名&gt;]</span><br><span class="line">FROM &lt;表名/视图名&gt; [,&lt;表名/视图名&gt;] [,…]</span><br><span class="line">[WHERE &lt;条件表达式&gt;]</span><br><span class="line">[GROUP BY &lt;列名1&gt;] [HAVING &lt;条件表达式&gt;]]</span><br><span class="line">[ORDER BY &lt;列名2&gt; [ASC|DESC]];</span><br></pre></td></tr></table></figure>
-<h3 id="目标列表达式"><a href="#目标列表达式" class="headerlink" title="目标列表达式"></a>目标列表达式</h3><p>目标列表达式是一个逗号分隔的表达式列表</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[&lt;表名&gt;.]&lt;属性列名表达式&gt; [, [&lt;表名&gt;.] &lt;属性列名表达式&gt;] [, …]</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//查询单表中全体学生的学号与姓名</span><br><span class="line">SELECT sno, sname FROM Student;</span><br><span class="line">//查询单表中的全体学生</span><br><span class="line">SELECT * FROM Student;</span><br></pre></td></tr></table></figure>
-<p>集函数</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;集函数&gt; ( [ DISTINCT | ALL ] * )</span><br><span class="line">//集函数：SUM、AVG、COUNT、MAX、MIN</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT DISTINCT sname, Year(GetDate())-Year(sdate) AS age FROM Student;</span><br></pre></td></tr></table></figure>
-<h3 id="条件表达式"><a href="#条件表达式" class="headerlink" title="条件表达式"></a>条件表达式</h3><p><img src="/imgs/learn/where.png" alt="条件表达式"><br>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//从Student表中，查询男同学</span><br><span class="line">SELECT * FROM Student WHERE ssex=&apos;男&apos;;</span><br><span class="line">//从Student表中，查询出生日期在1980年和1990年之间的学生</span><br><span class="line">SELECT * FROM Student WHERE sdate BETWEEN &apos;1980-01-01&apos; AND &apos;1990-12-31&apos;;</span><br></pre></td></tr></table></figure>
-<p>通配符</p>
-<blockquote>
-<p>%：百分号，代表任意长度的字符串<br>a%b:ab,acb,addb<br>_：下划线，代表单个字符<br>a_b: acb,adb, afb</p>
-<p>[ ]：表示中括号里面的任意一个字符<br>A[BCDE]表示第一个字符为A，第二个字符为B,C,D,E中的任意一个<br>[^ ]：表示不在中括号里面的任意一个字符<br>A[^BCDE]表示第一个字符为A，第二个字符为不为B,C,D,E的任意一个字符</p>
-</blockquote>
-<h2 id="数据操纵"><a href="#数据操纵" class="headerlink" title="数据操纵"></a>数据操纵</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">数据插入——INSERT——向数据库中插入新纪录</span><br><span class="line">数据修改——UPDATE——修改数据库中的某记录</span><br><span class="line">数据删除——DELETE——删除数据库中的某记录</span><br></pre></td></tr></table></figure>
-<h3 id="数据插入"><a href="#数据插入" class="headerlink" title="数据插入"></a>数据插入</h3><p>插入元组</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">INSERT</span><br><span class="line">INTO &lt;表名&gt; [( &lt;字段1&gt;[, &lt;字段2&gt;] [,…])]</span><br><span class="line">VALUES (&lt;常量1&gt; [, &lt;常量2&gt;] [,…]);</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//将一条新学生记录（所有字段都有值）插入到表中</span><br><span class="line">Insert Into S</span><br><span class="line">Values (‘95020’,‘陈东’,‘男’,‘IS’,’18’);</span><br><span class="line">将一条学生记录（部分字段有值）插入表中</span><br><span class="line">Insert Into S(Sno,Sname)</span><br><span class="line">Values (‘95020’,‘陈东’);</span><br></pre></td></tr></table></figure>
-<p>插入子查询<br>子查询不仅可以嵌套在SELECT语句中，也可以嵌套在INSERT语句中，用于生成要插入的批量数据。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">INSERT</span><br><span class="line">INTO &lt;表名&gt; [( &lt;字段1&gt;[, &lt;字段2&gt;] [,…])]</span><br><span class="line">子查询;</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Insert Into Deptage(Sdept, Avgage)</span><br><span class="line">    Select Sdept, AVG(Sage)</span><br><span class="line">    From S  Group By Sdept;</span><br></pre></td></tr></table></figure>
-<h3 id="数据修改"><a href="#数据修改" class="headerlink" title="数据修改"></a>数据修改</h3><p>一般格式</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UPDATE &lt;表名&gt;</span><br><span class="line">SET  &lt;字段名1&gt;＝&lt;表达式1&gt;[, &lt;字段2&gt;= &lt;表达式2&gt;] [,…]]</span><br><span class="line">[WHERE &lt;条件表达式&gt;];</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">//修改某一元组的值：如将学生95001的年龄改为22岁</span><br><span class="line">Update S</span><br><span class="line">Set Sage=22</span><br><span class="line">Where Sno=&apos;95001&apos;;</span><br><span class="line">//修改多个元组的值：如将所有学生的年龄加一岁</span><br><span class="line">Update S</span><br><span class="line">Set Sage= Sage+1;</span><br><span class="line">//带子查询的修改语句：将信息管理系的所有学生成绩置零</span><br><span class="line">Update SC</span><br><span class="line">Set Grade=0</span><br><span class="line">Where &apos;IS&apos;=</span><br><span class="line">    (Select Sdept</span><br><span class="line">    From S</span><br><span class="line">    Where S.Sno=SC.Sno);</span><br></pre></td></tr></table></figure>
-<h3 id="删除数据"><a href="#删除数据" class="headerlink" title="删除数据"></a>删除数据</h3><p>一般格式</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DELETE</span><br><span class="line">FROM  &lt;表名&gt;</span><br><span class="line">[WHERE &lt;条件表达式&gt;];</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">//删除某一元组：如删除学号为95001的学生记录</span><br><span class="line">Delete</span><br><span class="line">From S</span><br><span class="line">Where Sno=&apos;95001&apos;;</span><br><span class="line">//将S表清空</span><br><span class="line">Delete</span><br><span class="line">From S;</span><br><span class="line">//带查询的删除语句：如删除信息系所有学生的选课记录</span><br><span class="line">Delete</span><br><span class="line">From SC</span><br><span class="line">Where &apos;IS&apos;=</span><br><span class="line">    (Select Sdept</span><br><span class="line">    From S</span><br><span class="line">    Where S.Sno=SC.Sno);</span><br></pre></td></tr></table></figure>
-<h2 id="数据控制"><a href="#数据控制" class="headerlink" title="数据控制"></a>数据控制</h2><p>共享程度与安全性问题的冲突<br>数据控制功能：</p>
-<ul>
-<li>事务管理功能</li>
-<li>数据保护功能</li>
-</ul>
-<p>授予权限<br>一般格式</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">GRANT  &lt;权限&gt; [,&lt;权限&gt;][,…]</span><br><span class="line">    [ON  &lt;对象类型&gt; &lt;对象名称&gt;]</span><br><span class="line">    TO  &lt;用户&gt; [, &lt;用户&gt;] [,…]</span><br><span class="line">    [WITH  GRANT OPTION];</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//把查询S表的权限授权给用户U1</span><br><span class="line">GRANT  SELECT</span><br><span class="line">ON  TABLE  S</span><br><span class="line">TO U1;</span><br><span class="line">//把查询S表和C表的全部权限授权给用户U1和U2</span><br><span class="line">GRANT ALL PRIVILEGES</span><br><span class="line">ON TABLE S, C</span><br><span class="line">TO U1, U2;</span><br></pre></td></tr></table></figure>
-<p>收回权限<br>一般格式</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">REVOKE  &lt;权限&gt; [,&lt;权限&gt;][,…]</span><br><span class="line">    [ON  &lt;对象类型&gt; &lt;对象名称&gt;]</span><br><span class="line">    FROM  &lt;用户&gt; [, &lt;用户&gt;] [,…]</span><br></pre></td></tr></table></figure>
-<p>举例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//把用户U1修改学号的权限收回</span><br><span class="line">REVOKE UPDATE(Sno)</span><br><span class="line">ON TABLE S</span><br><span class="line">FROM U1;</span><br><span class="line">//收回所有用户对表SC的查询权限</span><br><span class="line">REVOKE SELECT</span><br><span class="line">ON TABLE SC</span><br><span class="line">FROM PUBLIC;</span><br></pre></td></tr></table></figure>
-<h1 id="关系数据库设计"><a href="#关系数据库设计" class="headerlink" title="关系数据库设计"></a>关系数据库设计</h1><h2 id="关系数据库设计理论"><a href="#关系数据库设计理论" class="headerlink" title="关系数据库设计理论"></a>关系数据库设计理论</h2><h3 id="关系模式-1"><a href="#关系模式-1" class="headerlink" title="关系模式"></a>关系模式</h3><p><code>R(U , F)</code><br>当且仅当U上的一个关系r满足F时，r称为关系模式R(U , F)的一个关系</p>
-<h3 id="函数依赖定义"><a href="#函数依赖定义" class="headerlink" title="函数依赖定义"></a>函数依赖定义</h3><p>定义：<br>设R（U）是属性集U上的关系模式。X，Y是U上的子集。<br>若R（U）的任意一个可能的关系r，r中不可能存在两个元组在X上的属性值相等而在Y上的属性值不等，则称：<br>X函数依赖确定Y或Y函数依赖确定于X，记做<code>X-&gt;Y</code>。</p>
-<p>术语：<br><img src="/imgs/learn/func-define.png" alt="函数依赖术语"></p>
-<h3 id="第一范式（1NF）"><a href="#第一范式（1NF）" class="headerlink" title="第一范式（1NF）"></a>第一范式（1NF）</h3><p>每一个分量必须是不可分的数据项。<br>存在问题：<br>数据冗余；插入异常；删除异常。</p>
-<h3 id="第二范式（2NF）"><a href="#第二范式（2NF）" class="headerlink" title="第二范式（2NF）"></a>第二范式（2NF）</h3><p>在第一范式的基础上，每一个非主属性完全函数依赖于码。<br>存在问题：<br>插入异常；删除异常；修改复杂。</p>
-<h3 id="第三范式（3NF）"><a href="#第三范式（3NF）" class="headerlink" title="第三范式（3NF）"></a>第三范式（3NF）</h3><p>若关系R（U）的每个非主属性都不部分依赖于也不于传递于码，则称R（U）满足第三范式。</p>
-<h3 id="BCNF"><a href="#BCNF" class="headerlink" title="BCNF"></a>BCNF</h3><ul>
-<li>所有非主属性对每一个码都是完全函数依赖</li>
-<li>所有的主属性对每一个不包含它的码，是完全函数依赖</li>
-<li>没有任何属性完全依赖于非码的任何一组属性</li>
-</ul>
-<h3 id="多值依赖"><a href="#多值依赖" class="headerlink" title="多值依赖"></a>多值依赖</h3><p><img src="/imgs/learn/MVD.png" alt="多值依赖"></p>
-<h3 id="第四范式（4NF）"><a href="#第四范式（4NF）" class="headerlink" title="第四范式（4NF）"></a>第四范式（4NF）</h3><p>关系模式R<u,f>符合第一范式，对于R的每一个非平凡多值依赖，X都含有码，则称关系模式R符合第四范式</u,f></p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><img src="/imgs/learn/func-depand-conclusion.png" alt="函数依赖总结"></p>
-<h2 id="关系数据库设计的步骤"><a href="#关系数据库设计的步骤" class="headerlink" title="关系数据库设计的步骤"></a>关系数据库设计的步骤</h2><ul>
-<li>需求分析</li>
-<li>概念结构设计</li>
-<li>逻辑结构设计</li>
-<li>数据库物理设计</li>
-<li>数据库实施</li>
-<li>数据库运行和维护</li>
-</ul>
-<h3 id="需求分析"><a href="#需求分析" class="headerlink" title="需求分析"></a>需求分析</h3><ol>
-<li>业务流程分析</li>
-<li>数据流程分析</li>
-<li>画出ER图</li>
-</ol>
-<h3 id="概念结构设计"><a href="#概念结构设计" class="headerlink" title="概念结构设计"></a>概念结构设计</h3><p>特点：</p>
-<ul>
-<li>能真实、充分地反映现实世界，包括事物与事物之间的联系</li>
-<li>易于理解，从而可以用它和不熟悉计算机的用户交换意见</li>
-<li>易于更改</li>
-<li>易于向关系、网状、层次等数据模型转换</li>
-</ul>
-<p>设计方法：</p>
-<ul>
-<li>自顶向下</li>
-<li>自底向上</li>
-<li>逐步扩张：核心概念结构，向外扩张</li>
-<li>混合策略：自顶向下和自底向上相结合</li>
-</ul>
-<p>数据抽象：</p>
-<ul>
-<li>分类</li>
-<li>聚集</li>
-<li>概括</li>
-</ul>
-<p>任务：<br>ER图变为数据库逻辑结构</p>
-<p>转换原则：<br>实体及其属性的转换：<br>一个实体型转换为一个关系模式。<br>实体的属性就是关系的属性，实体的码就是关系的码。</p>
-<p>1:1<br>可以转换为一个独立模式，也可以与任意一段的对应的关系模式合并<br>1:n<br>可以转换为一个独立模式，可以与N端对应的关系模式合并<br>m:n<br>转换为一个独立模式</p>
-<p>设计用户子模式——视图</p>
-<h3 id="数据库的物理设计"><a href="#数据库的物理设计" class="headerlink" title="数据库的物理设计"></a>数据库的物理设计</h3><ul>
-<li>存取方法</li>
-<li>存取结构</li>
-</ul>
-<h3 id="实施与维护阶段"><a href="#实施与维护阶段" class="headerlink" title="实施与维护阶段"></a>实施与维护阶段</h3><ul>
-<li>定义数据库的结构</li>
-<li>数据装载/编写程序</li>
-<li>数据库软件试运行</li>
-</ul>
-<h1 id="数据库安全保护"><a href="#数据库安全保护" class="headerlink" title="数据库安全保护"></a>数据库安全保护</h1><h2 id="信息安全综述"><a href="#信息安全综述" class="headerlink" title="信息安全综述"></a>信息安全综述</h2><p>安全：免于危险的质量和状态<br>信息安全：是对信息、系统以及使用、存储和传输信息的硬件的保护<br>数据库安全：是指保护数据库以防止不合法的使用所造成的数据泄露、更改或破坏<br>访问：一个主题或对象使用、操作、修改或者影响另一个主题或对象的能力<br>资产：被保护的机构资源<br>安全蓝本：对机构里新的安全措施的实施计划<br>漏洞：系统内的弱点或错误，或者是使信息暴露给攻击或破坏的保护性机制</p>
-<h2 id="数据库安全性控制"><a href="#数据库安全性控制" class="headerlink" title="数据库安全性控制"></a>数据库安全性控制</h2><p>计算机系统的安全模型<br><img src="/imgs/learn/safe-modal.png" alt="计算机系统的安全模型"></p>
-<h3 id="用户标识和鉴别"><a href="#用户标识和鉴别" class="headerlink" title="用户标识和鉴别"></a>用户标识和鉴别</h3><p>用户标识和鉴别是系统提供的最外层安全保护措施<br>举例：校园网登录</p>
-<h3 id="存取控制"><a href="#存取控制" class="headerlink" title="存取控制"></a>存取控制</h3><p>数据库安全性主要是存取控制机制</p>
-<ol>
-<li>定义用户权限</li>
-<li>合法用户权限检查</li>
-</ol>
-<h3 id="审计"><a href="#审计" class="headerlink" title="审计"></a>审计</h3><p>把用户对数据库的所有操作自动记录下来放入审计日志</p>
-<h3 id="数据加密"><a href="#数据加密" class="headerlink" title="数据加密"></a>数据加密</h3><p>高度敏感性数据，需要采用数据加密技术</p>
-<h2 id="统计数据库安全性"><a href="#统计数据库安全性" class="headerlink" title="统计数据库安全性"></a>统计数据库安全性</h2><p>在统计数据库中存在着特殊的安全性问题，需要注意。</p>
-<h2 id="SQL-SERVER系统安全性"><a href="#SQL-SERVER系统安全性" class="headerlink" title="SQL SERVER系统安全性"></a>SQL SERVER系统安全性</h2><p>简要介绍，略过</p>
-<h1 id="版权信息"><a href="#版权信息" class="headerlink" title="版权信息"></a>版权信息</h1><p>大部分内容来自于中国地质大学（北京）安海忠老师的授课PPT以及王珊，萨师煊所著的《数据库系统概论》（第四版），可在非商用-署名前提下自由分发。</p>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2015年06月12日 完成初稿</li>
-<li>2015年06月14日 修复了一些格式错误</li>
-</ul>
-
+                <a class="" href="/2015/06/12/database-review/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2015/06/12/database-review/">数据库系统概论复习</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2015年6月12日 - 14时06分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2015/06/12/database-review/"
-                                            title="数据库系统概论复习">https://xuanwo.org/2015/06/12/database-review/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Database/"> #Database </a>
-                    
-                        <a href="/tags/复习/"> #复习 </a>
-                    
-                </div>
             
         </div>
 
@@ -1184,8 +375,6 @@
                         
                             <li><a href="/tags/Information/">Information</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
                             <li><a href="/tags/项目/">项目</a></li>
                         
                             <li><a href="/tags/Python/">Python</a></li>
@@ -1196,15 +385,17 @@
                         
                             <li><a href="/tags/JavaScript/">JavaScript</a></li>
                         
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
                             <li><a href="/tags/实习/">实习</a></li>
                         
                             <li><a href="/tags/QingCloud/">QingCloud</a></li>
                         
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
                             <li><a href="/tags/Work/">Work</a></li>
                         
                             <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/Hardware/">Hardware</a></li>
                         

@@ -63,7 +63,6 @@
             <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
             <ul class="submenu-list"><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2016/">2016</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2015/">2015</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2014/">2014</a></li></ul>
         </li>
-        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
     </ul>
 </div>
 <div id="wrap">
@@ -115,69 +114,13 @@
         </div>
         <h2><a href="/2016/02/28/wechat-remove/">微信群重复人员识别</a></h2>
         
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>由于微信的限制，人数超过一百以后，只有邀请才能加入。所以，如果想要组织大型的在线活动，就只有建立很多个分群。然而分群的问题在于，会有很多人重复加群，挤占了本来就缺乏的空间。所以需要找到一个可行的办法，清除两个群中的重复人员。</p>
-<a id="more"></a>
-<h1 id="可行的方法"><a href="#可行的方法" class="headerlink" title="可行的方法"></a>可行的方法</h1><p>在微信网页版中，通过点击群名称右侧的向下箭头，可以打开一个有所有人昵称的面板，通过审查工具可以得到对应的代码，右击选择<code>Edit As HTML</code>，全选复制，保存到<code>a.txt</code>中，然后执行</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat a.txt | grep -o <span class="string">"\"&gt;.*&lt;/p&gt;"</span> &gt; fen.txt</span><br></pre></td></tr></table></figure>
-<p>我们便可以将所有人的名字都输出到<code>fen.txt</code>中，尽管还有着一些<code>&lt;</code>，<code>&gt;</code>的符号，但是已经不影响识别了，故不再做处理。</p>
-<p>对两个群分别如此操作之后，我们得到了两个群的成员名单。<br>然后执行如下Python代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">with open(&apos;fen.txt&apos;, &apos;r&apos;) as f:</span><br><span class="line">    fen = f.readlines()</span><br><span class="line">    f.close()</span><br><span class="line">with open(&apos;main.txt&apos;, &apos;r&apos;) as f:</span><br><span class="line">    main = f.readlines()</span><br><span class="line">    f.close()</span><br><span class="line"></span><br><span class="line">for i in main:</span><br><span class="line">    for j in fen:</span><br><span class="line">        if i == j:</span><br><span class="line">            print(i)</span><br></pre></td></tr></table></figure>
-<p>得到的输出就是两个群中重复的成员，然后一一删除即可。</p>
-<h1 id="方案反思"><a href="#方案反思" class="headerlink" title="方案反思"></a>方案反思</h1><h2 id="存在的缺陷"><a href="#存在的缺陷" class="headerlink" title="存在的缺陷"></a>存在的缺陷</h2><ul>
-<li>自动化程度较低</li>
-<li>如果存在用户同名的话，会导致删除错误的用户。</li>
-</ul>
-<h2 id="可能的改进"><a href="#可能的改进" class="headerlink" title="可能的改进"></a>可能的改进</h2><ul>
-<li>获取资料不需要手动点击审查元素，通过jQuery的text()函数也可以实现。</li>
-<li>最后实现删除的过程可以进一步优化，通过模拟用户点击的脚本实现（存在隐私泄漏风险）。</li>
-<li>可以获取用户的UUID，以避免重名现象。</li>
-</ul>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
-<li>2016年02月28日  首次发布</li>
-</ul>
-
+            
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>由于微信的限制，人数超过一百以后，只有邀请才能加入。所以，如果想要组织大型的在线活动，就只有建立很多个分群。然而分群的问题在于，会有很多人重复加群，挤占了本来就缺乏的空间。所以需要找到一个可行的办法，清除两个群中的重复人员。</p>
+                <a class="" href="/2016/02/28/wechat-remove/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/02/28/wechat-remove/">微信群重复人员识别</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年2月28日 - 10时02分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/02/28/wechat-remove/"
-                                            title="微信群重复人员识别">https://xuanwo.org/2016/02/28/wechat-remove/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Software/"> #Software </a>
-                    
-                        <a href="/tags/微信/"> #微信 </a>
-                    
-                </div>
             
         </div>
 
@@ -289,8 +232,6 @@
                         
                             <li><a href="/tags/Information/">Information</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
                             <li><a href="/tags/项目/">项目</a></li>
                         
                             <li><a href="/tags/Python/">Python</a></li>
@@ -301,15 +242,17 @@
                         
                             <li><a href="/tags/JavaScript/">JavaScript</a></li>
                         
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
                             <li><a href="/tags/实习/">实习</a></li>
                         
                             <li><a href="/tags/QingCloud/">QingCloud</a></li>
                         
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
                             <li><a href="/tags/Work/">Work</a></li>
                         
                             <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/Hardware/">Hardware</a></li>
                         

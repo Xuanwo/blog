@@ -63,7 +63,6 @@
             <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
             <ul class="submenu-list"><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2016/">2016</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2015/">2015</a></li><li class="submenu-list-item"><a class="submenu-list-link" href="/archives/2014/">2014</a></li></ul>
         </li>
-        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
     </ul>
 </div>
 <div id="wrap">
@@ -115,66 +114,13 @@
         </div>
         <h2><a href="/2016/02/26/debug-for-hexo-1775/">记一次debug的经历及反思</a></h2>
         
-            <h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p><a href="https://github.com/hexojs/hexo/issues/1775" target="_blank" rel="external">hexojs/hexo #1775</a><br>BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。</p>
-<a id="more"></a>
-<h2 id="经过"><a href="#经过" class="headerlink" title="经过"></a>经过</h2><p>收到反馈之后，我在我的测试环境中也复现了这个bug。一开始还怀疑是主题的问题，专门测试了next主题，结果发现也存在这样的问题，于是就排除了主题方面的bug。<br>首先我们可以初步判断这个url生成出现了问题，参考landscape主题中此处的代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;% for (var i in theme.menu)&#123; %&gt;</span><br><span class="line">    &lt;a class=&quot;main-nav-link&quot; href=&quot;&lt;%- url_for(theme.menu[i]) %&gt;&quot;&gt;&lt;%= i %&gt;&lt;/a&gt;</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
-<p>这里调用了一个<code>url_for</code>函数来生成超链接，代码如下（去除了与本BUG无关的部分）：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">function urlForHelper(path, options) &#123;</span><br><span class="line">  path = path || &apos;/&apos;;</span><br><span class="line">  </span><br><span class="line">  if (path[0] === &apos;#&apos; || path.substring(0, 2) === &apos;//&apos;) &#123;</span><br><span class="line">    return path;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  var config = this.config;</span><br><span class="line">  var root = config.root;</span><br><span class="line">  var data = url.parse(path);</span><br><span class="line"></span><br><span class="line">  // Exit if this is an external path</span><br><span class="line">  if (data.protocol) &#123;</span><br><span class="line">    return path;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // Prepend root path</span><br><span class="line">  path = root + path;</span><br><span class="line"></span><br><span class="line">  return path.replace(/\/&#123;2,&#125;/g, &apos;/&apos;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>直觉告诉我，这个问题很有可能就是这个函数写搓了。</p>
-<p>然而我仔细研究了一下，发现<code>url_for</code>的逻辑并没有什么问题。而且根据我脑补的代码执行情况来看，应该生成一个正确的链接才对，但是<code>config.root</code>偏偏就丢了。<br>真的是非常奇怪，一时之间，我完全懵逼展开了，不明白到底发生了什么。</p>
-<h2 id="转折"><a href="#转折" class="headerlink" title="转折"></a>转折</h2><p>后来我跟我的朋友聊天的时候提到这个bug，结果他告诉我，这个<code>url_for</code>写搓了，我点点头，应该就是这样。然后他说，一个判断都没有中，直接返回自身了，还贴了一张图。图中的代码大致如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">function urlForHelper(path, options)&#123;</span><br><span class="line">  /* jshint validthis: true */</span><br><span class="line">  path = path || &apos;/&apos;;</span><br><span class="line"></span><br><span class="line">  var config = this.config;</span><br><span class="line">  var root = config.root;</span><br><span class="line">  var data = url.parse(path);</span><br><span class="line"></span><br><span class="line">  // Exit if this is an external path</span><br><span class="line">  if (data.protocol || path.substring(0, 2) === &apos;//&apos;)&#123;</span><br><span class="line">    return path;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // Prepend root path</span><br><span class="line">  if (path[0] !== &apos;/&apos;)&#123;</span><br><span class="line">    return root + path;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  return path;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>看到图我立马懵逼了，连忙说，不对啊，你这个不是最新版本的代码。他被我这气场吓到，弱弱回复，我是刚安装的hexo…。<br>我顿时明白自己错在哪里了，npm源里面的稳定版还是3.1.1，但是我们github库中的代码已经是3.2beta了。使用最新的代码测试以后，发现这个bug已经不存在了。<br>也就是说，我花一个下午的时间，对着最新版的代码找一个已经被fix的bug…</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这一次的事情非常乌龙，事后想想觉得自己真的太傻逼了。<br>吃一堑长一智，以后做debug工作的时候一定要分清楚线上和线下的代码，首先就要明确出问题的是哪个版本，然后再开展相应的分析。<br>除此以外，还跟我不重视流程有关系。尽管我总是让人提供各种version信息，但是我却总是在分析问题的时候忽略这些信息，没有把这些关键的信息加入到自己的分析过程中。<br>总结起来就是，too young ，姿势水平还有待提高。</p>
-<h2 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h2><ul>
-<li>2016年02月26日 初次发布</li>
-</ul>
-
+            
+                <h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p><a href="https://github.com/hexojs/hexo/issues/1775">hexojs/hexo #1775</a><br>BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。</p>
+                <a class="" href="/2016/02/26/debug-for-hexo-1775/">Read more</a>
+            
         
         <div class="post-footer">
             
-                <div id="eof" class="print-invisible">
-                    <hr class="eof">
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/dachui.jpg" title="微信扫一扫，获取新文章推送" class="fancybox" style="display:block" ;><img
-                                alt="微信扫一扫，获取新文章推送" style="display:inline-block;" src="/imgs/dachui.jpg"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，获取新文章推送
-          </span>
-                </div>
-                <div style="float:left;width:50%;text-align:center;margin-bottom:40px;">
-                    <a href="/imgs/wechat.png" title="微信扫一扫，请博主喝咖啡" class="fancybox" style="display:block;"><img
-                                alt="微信扫一扫，请博主喝咖啡" style="display:inline-block;" src="/imgs/wechat.png"></a>
-          <span class="caption" style="color: #999;display: inline-block;font-size: .9em;text-align: center;">
-              微信扫一扫，请博主喝咖啡
-          </span>
-                </div>
-                <div class="copyright" style="clear:both;">
-                    <p><span>本文标题:</span><a href="/2016/02/26/debug-for-hexo-1775/">记一次debug的经历及反思</a></p>
-                    <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
-                    <p><span>发布时间:</span>2016年2月26日 - 12时02分</p>
-                    <p><span>最后更新:</span>2016年6月21日 - 17时06分</p>
-                    <p><span>原始链接:</span><a href="/2016/02/26/debug-for-hexo-1775/"
-                                            title="记一次debug的经历及反思">https://xuanwo.org/2016/02/26/debug-for-hexo-1775/</a></p>
-                    <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
-                                                                                   href="http://creativecommons.org/licenses/by-nc/4.0/"
-                                                                                   title="Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)">Attribution-NonCommercial
-                            4.0</a></p>
-                    <p><span>转载请保留以上信息。</span></p>
-                </div>
-            
-            
-                <div class="post-tags">
-                    
-                        <a href="/tags/Hexo/"> #Hexo </a>
-                    
-                        <a href="/tags/Software/"> #Software </a>
-                    
-                        <a href="/tags/Nodejs/"> #Nodejs </a>
-                    
-                </div>
             
         </div>
 
@@ -286,8 +232,6 @@
                         
                             <li><a href="/tags/Information/">Information</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
                             <li><a href="/tags/项目/">项目</a></li>
                         
                             <li><a href="/tags/Python/">Python</a></li>
@@ -298,15 +242,17 @@
                         
                             <li><a href="/tags/JavaScript/">JavaScript</a></li>
                         
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
                             <li><a href="/tags/实习/">实习</a></li>
                         
                             <li><a href="/tags/QingCloud/">QingCloud</a></li>
                         
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
                             <li><a href="/tags/Work/">Work</a></li>
                         
                             <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/Hardware/">Hardware</a></li>
                         
