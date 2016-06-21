@@ -19,8 +19,8 @@
                 {% endfor %}
             {% endif %}
             <span>
-            <a href="{{ url_for(post.path) }}#comments">
-              <span data-disqus-identifier="{{ post.path }}"></span>
+            <a href="{{ url_for(post.path) }}#disqus_thread" data-disqus-identifier="{{ post.path }}">
+              <span class="disqus-comment-count" data-disqus-identifier="{{ post.path }}"></span>
             </a>
           </span>
         </div>
