@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
             {% for post in page.posts %}
-                {{ post_template.render(post) }}
+                {{ post_template.render(post, true) }}
             {% endfor %}
             {% include '_partials/pagination.swig' %}
         </div>

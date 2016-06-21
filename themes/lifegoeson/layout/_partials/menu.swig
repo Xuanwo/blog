@@ -26,6 +26,5 @@
             <a href="#"><i class="fa fa-calendar"></i>Archives <b class="caret"></b></a>
             {{ list_archives({type: "yearly", show_count: false, class: "submenu"} ) }}
         </li>
-        <li><a href="contact.html"><i class="fa fa-envelope"></i>Contact</a></li>
     </ul>
 </div>
