@@ -1,7 +1,7 @@
 ---
 title: Markdown + Travis CI 构建自己的开源电子书
 date: 2015-8-12 01:31:22
-tags: [Github, CI, 阅读, Markdown]
+tags: [Github, CI, Read, Markdown]
 categories: Opinion
 toc: true
 ---
