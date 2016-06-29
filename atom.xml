@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://xuanwo.org/"/>
-  <updated>2016-06-22T07:25:09.602Z</updated>
+  <updated>2016-06-29T16:29:46.149Z</updated>
   <id>https://xuanwo.org/</id>
   
   <author>
@@ -16,11 +16,88 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>新博客上线&amp;Hexo主题开发入门</title>
+    <link href="https://xuanwo.org/2016/06/29/new-blog-new-life/"/>
+    <id>https://xuanwo.org/2016/06/29/new-blog-new-life/</id>
+    <published>2016-06-29T23:06:00.000Z</published>
+    <updated>2016-06-29T16:29:46.149Z</updated>
+    
+    <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;曾经看过我的博客的同学大概都会发现，我的博客再一次大变样了~&lt;br&gt;这一次的更新其实酝酿了很久，早在刚开始用Hexo的时候就想着要有一个自己的主题。但是那个时候觉得这是一件很难的事情，要懂HTML，CSS，JavaScript，还要懂Swig，Ejs等模板语言，还要懂Hexo的内部原理，于是就一直搁置了。在独立实现了一个&lt;a href=&quot;https://xuanwo.org/2016/06/16/jade_ims/&quot;&gt;完整的项目&lt;/a&gt;之后，我认为自己已经有这样的能力了，于是决定正式开始。&lt;br&gt;在我看来的话，Hexo的使用者大概分为三个层次：第一种用别人的主题，第二种模仿现有的主题，第三种自己独立开发。我原来是第一种，在Next的基础上做了很多改动，这一次进入到了第二个层次。我找了一套自我感觉还不错的模板，然后套用它的CSS设定和页面结构，就成了我现在的主题。&lt;br&gt;利用两天学习和工作的闲暇时间，我大体上完成了这个主题。做得比较糙，很多细节还有待优化，但是我已经急不可耐地想要正式上线了，笑。在未来的话，我希望能把一些配置都能整理出来，优化一下代码，然后开源这个主题，希望大家能够喜欢~&lt;br&gt;庆祝的话已经说的差不多了，下面来讲一讲如何开发一个Hexo主题。&lt;/p&gt;
+&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
+&lt;h1 id=&quot;结构&quot;&gt;&lt;a href=&quot;#结构&quot; class=&quot;headerlink&quot; title=&quot;结构&quot;&gt;&lt;/a&gt;结构&lt;/h1&gt;&lt;h2 id=&quot;主题结构&quot;&gt;&lt;a href=&quot;#主题结构&quot; class=&quot;headerlink&quot; title=&quot;主题结构&quot;&gt;&lt;/a&gt;主题结构&lt;/h2&gt;&lt;p&gt;Hexo主题的结构大体如下：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;├── _config.yml&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;├── languages&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── default.yml&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   └── zh-Hans.yml&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;├── layout&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── achieve.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── category.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── index.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── _layout.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── page.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── _partials&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── post.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   └── tag.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;└── source&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    ├── css&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    ├── fonts&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    ├── img&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    ├── js&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    └── vendors&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;首先有一个&lt;code&gt;_config.yml&lt;/code&gt;负责提供主题级别的配置，可以在&lt;code&gt;layout&lt;/code&gt;中通过&lt;code&gt;theme.xxx&lt;/code&gt;的形式进行调用。&lt;br&gt;然后&lt;code&gt;languages&lt;/code&gt;负责实现博客的i18N功能，如果博客没有多语言的需求，只需要实现一个&lt;code&gt;default.yml&lt;/code&gt;即可。&lt;br&gt;其次是最为重要的&lt;code&gt;layout&lt;/code&gt;文件夹，这个里面主要存放博客的结构，Hexo 引擎会使用指定的渲染引擎将&lt;code&gt;layout&lt;/code&gt;文件渲染成HTML页面。&lt;br&gt;最后是&lt;code&gt;source&lt;/code&gt;，把所有主题需要用到的资源，比如CSS，Fonts，JS等都存放到这个文件夹中。&lt;/p&gt;
+&lt;p&gt;这个主题使用了&lt;a href=&quot;http://paularmstrong.github.io/swig/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;swig&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id=&quot;页面结构&quot;&gt;&lt;a href=&quot;#页面结构&quot; class=&quot;headerlink&quot; title=&quot;页面结构&quot;&gt;&lt;/a&gt;页面结构&lt;/h2&gt;&lt;p&gt;页面结构分为两个维度，一者是我要呈现哪些页面，二者是每个页面上都有哪些内容。&lt;/p&gt;
+&lt;h3 id=&quot;哪些页面？&quot;&gt;&lt;a href=&quot;#哪些页面？&quot; class=&quot;headerlink&quot; title=&quot;哪些页面？&quot;&gt;&lt;/a&gt;哪些页面？&lt;/h3&gt;&lt;p&gt;作为一个博客，主要需要的页面有以下这些：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;主页&lt;/li&gt;
+&lt;li&gt;单页&lt;/li&gt;
+&lt;li&gt;归档页面&lt;/li&gt;
+&lt;li&gt;分类页面&lt;/li&gt;
+&lt;li&gt;标签页面&lt;/li&gt;
+&lt;li&gt;文章页&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&quot;哪些内容？&quot;&gt;&lt;a href=&quot;#哪些内容？&quot; class=&quot;headerlink&quot; title=&quot;哪些内容？&quot;&gt;&lt;/a&gt;哪些内容？&lt;/h3&gt;&lt;p&gt;如果没有什么特别的设计，博客的页面大体上可以分为这几个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;head：头部文件&lt;/li&gt;
+&lt;li&gt;body：主体内容&lt;ul&gt;
+&lt;li&gt;header：题图，导航栏等&lt;/li&gt;
+&lt;li&gt;content： 内容&lt;/li&gt;
+&lt;li&gt;footer：尾部的联系方式等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&quot;实现&quot;&gt;&lt;a href=&quot;#实现&quot; class=&quot;headerlink&quot; title=&quot;实现&quot;&gt;&lt;/a&gt;实现&lt;/h1&gt;&lt;p&gt;前面讲到了 Hexo 的结构，下面来聊一聊具体的实现。&lt;/p&gt;
+&lt;h2 id=&quot;原理&quot;&gt;&lt;a href=&quot;#原理&quot; class=&quot;headerlink&quot; title=&quot;原理&quot;&gt;&lt;/a&gt;原理&lt;/h2&gt;&lt;p&gt;Hexo 渲染的入口是&lt;code&gt;_layout.swig&lt;/code&gt;，所以一个主题至少需要实现一个&lt;code&gt;_layout.swig&lt;/code&gt;。&lt;br&gt;然后Hexo会遍历Hexo目录下&lt;code&gt;source&lt;/code&gt;文件夹中的所有Markdown文件，根据Markdown文件所指定的layout进行渲染，默认类型为&lt;code&gt;post&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&quot;技巧&quot;&gt;&lt;a href=&quot;#技巧&quot; class=&quot;headerlink&quot; title=&quot;技巧&quot;&gt;&lt;/a&gt;技巧&lt;/h2&gt;&lt;h3 id=&quot;layout-swig结构&quot;&gt;&lt;a href=&quot;#layout-swig结构&quot; class=&quot;headerlink&quot; title=&quot;_layout.swig结构&quot;&gt;&lt;/a&gt;_layout.swig结构&lt;/h3&gt;&lt;p&gt;整体的结构基本如下：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;!doctype html&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;head&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;% include &amp;apos;_partials/head.swig&amp;apos; %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;title&amp;gt;&amp;#123;% block title %&amp;#125;&amp;#123;% endblock %&amp;#125;&amp;lt;/title&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;/head&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;body id=&amp;quot;home&amp;quot;&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;% include &amp;apos;_partials/menu.swig&amp;apos; %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;div id=&amp;quot;wrap&amp;quot;&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#123;% include &amp;apos;_partials/nav.swig&amp;apos; %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#123;% include &amp;apos;_partials/header.swig&amp;apos; %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;lt;div id=&amp;quot;start&amp;quot; class=&amp;quot;container content&amp;quot;&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            &amp;#123;% block content %&amp;#125;&amp;#123;% endblock %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;lt;/div&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#123;% include &amp;apos;_partials/footer.swig&amp;apos; %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;/div&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h3 id=&quot;实现文章渲染&quot;&gt;&lt;a href=&quot;#实现文章渲染&quot; class=&quot;headerlink&quot; title=&quot;实现文章渲染&quot;&gt;&lt;/a&gt;实现文章渲染&lt;/h3&gt;&lt;p&gt;这个地方主要是借鉴了NexT主题的设计，实现了一个swig的宏来生成对应的文章。这个宏主要有两个参数，第一个是post对象，第二个是是否为主页。如果是主页就只显示简略的内容，如果不是就输出全文。&lt;/p&gt;
+&lt;p&gt;判断的部分实现如下：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;% if is_index %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;% if post.excerpt %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#123;&amp;#123; post.excerpt &amp;#125;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;lt;a class=&amp;quot;&amp;quot; href=&amp;quot;&amp;#123;&amp;#123; url_for(post.path) &amp;#125;&amp;#125;&amp;quot;&amp;gt;Read more&amp;lt;/a&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;% endif %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;% else %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;&amp;#123; post.content &amp;#125;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;% endif %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;用到的post页的参数可以&lt;a href=&quot;https://hexo.io/zh-cn/docs/variables.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;我翻译的中文文档&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&quot;分页插件&quot;&gt;&lt;a href=&quot;#分页插件&quot; class=&quot;headerlink&quot; title=&quot;分页插件&quot;&gt;&lt;/a&gt;分页插件&lt;/h3&gt;&lt;p&gt;Hexo 自己实现了一个分页插件，直接使用paginator函数即可。&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;% if page.prev or page.next %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;nav class=&amp;quot;pagination&amp;quot;&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#123;&amp;#123; paginator(&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            prev_text: &amp;apos;&amp;lt;i class=&amp;quot;fa fa-angle-left&amp;quot;&amp;gt;&amp;lt;/i&amp;gt;&amp;apos;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            next_text: &amp;apos;&amp;lt;i class=&amp;quot;fa fa-angle-right&amp;quot;&amp;gt;&amp;lt;/i&amp;gt;&amp;apos;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            mid_size: 1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#125;) &amp;#125;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;/nav&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;% endif %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h3 id=&quot;评论系统&quot;&gt;&lt;a href=&quot;#评论系统&quot; class=&quot;headerlink&quot; title=&quot;评论系统&quot;&gt;&lt;/a&gt;评论系统&lt;/h3&gt;&lt;p&gt;对于Hexo来说，评论系统就是调用一个第三方的JS。所以只需要在合适的位置插入代码即可。&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;div id=&amp;quot;disqus_thread&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;script&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    var disqus_config = function () &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        this.page.url = &amp;apos;&amp;#123;&amp;#123; page.permalink &amp;#125;&amp;#125;&amp;apos;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        this.page.identifier = &amp;apos;&amp;#123;&amp;#123; page.path &amp;#125;&amp;#125;&amp;apos;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    (function () &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        var d = document, s = d.createElement(&amp;apos;script&amp;apos;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        s.src = &amp;apos;//abc.disqus.com/embed.js&amp;apos;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        s.setAttribute(&amp;apos;data-timestamp&amp;apos;, +new Date());&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        (d.head || d.body).appendChild(s);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;)();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h1 id=&quot;需要注意的坑&quot;&gt;&lt;a href=&quot;#需要注意的坑&quot; class=&quot;headerlink&quot; title=&quot;需要注意的坑&quot;&gt;&lt;/a&gt;需要注意的坑&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;page.posts&lt;/code&gt;是按照时间排序的，但是&lt;code&gt;site.posts&lt;/code&gt;是无序的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&quot;参考资料&quot;&gt;&lt;a href=&quot;#参考资料&quot; class=&quot;headerlink&quot; title=&quot;参考资料&quot;&gt;&lt;/a&gt;参考资料&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://hexo.io/zh-cn/docs/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Hexo 官方中文文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&quot;更新日志&quot;&gt;&lt;a href=&quot;#更新日志&quot; class=&quot;headerlink&quot; title=&quot;更新日志&quot;&gt;&lt;/a&gt;更新日志&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;2016年06月30日 首次发布&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;曾经看过我的博客的同学大概都会发现，我的博客再一次大变样了~&lt;br&gt;这一次的更新其实酝酿了很久，早在刚开始用Hexo的时候就想着要有一个自己的主题。但是那个时候觉得这是一件很难的事情，要懂HTML，CSS，JavaScript，还要懂Swig，Ejs等模板语言，还要懂Hexo的内部原理，于是就一直搁置了。在独立实现了一个&lt;a href=&quot;https://xuanwo.org/2016/06/16/jade_ims/&quot;&gt;完整的项目&lt;/a&gt;之后，我认为自己已经有这样的能力了，于是决定正式开始。&lt;br&gt;在我看来的话，Hexo的使用者大概分为三个层次：第一种用别人的主题，第二种模仿现有的主题，第三种自己独立开发。我原来是第一种，在Next的基础上做了很多改动，这一次进入到了第二个层次。我找了一套自我感觉还不错的模板，然后套用它的CSS设定和页面结构，就成了我现在的主题。&lt;br&gt;利用两天学习和工作的闲暇时间，我大体上完成了这个主题。做得比较糙，很多细节还有待优化，但是我已经急不可耐地想要正式上线了，笑。在未来的话，我希望能把一些配置都能整理出来，优化一下代码，然后开源这个主题，希望大家能够喜欢~&lt;br&gt;庆祝的话已经说的差不多了，下面来讲一讲如何开发一个Hexo主题。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Develop" scheme="https://xuanwo.org/categories/Develop/"/>
+    
+    
+      <category term="Hexo" scheme="https://xuanwo.org/tags/Hexo/"/>
+    
+      <category term="Blog" scheme="https://xuanwo.org/tags/Blog/"/>
+    
+      <category term="Nodejs" scheme="https://xuanwo.org/tags/Nodejs/"/>
+    
+      <category term="HTML" scheme="https://xuanwo.org/tags/HTML/"/>
+    
+      <category term="JavaSrcipt" scheme="https://xuanwo.org/tags/JavaSrcipt/"/>
+    
+  </entry>
+  
+  <entry>
     <title>马可波罗珠宝进销存系统开发手记</title>
     <link href="https://xuanwo.org/2016/06/16/jade_ims/"/>
     <id>https://xuanwo.org/2016/06/16/jade_ims/</id>
     <published>2016-06-16T22:00:00.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;p&gt;&lt;img src=&quot;/imgs/develop/jade-ims-index.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
 &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;这个项目从我们这个学期开了&lt;strong&gt;系统分析与设计&lt;/strong&gt;这门课之后就开始了，首次创建这个项目是在3月26号，实际上真正的开发时间集中在6月上旬。差不多用两个星期的闲暇时间时间完成了这个简单的进销存系统。这个系统基于Flask框架，使用SQLite3数据库，前端则是使用Bootstrap框架，实现了包括客户，库存，销售，进货等管理子系统。说是管理，其实也就是简单的增加和删除而已。&lt;br&gt;前人经常说，不要重复造轮子。既然有类似于Odoo这样强大的ERP系统珠玉在前，我为什么要再自己造一个功能简单，甚至根本不会有人用的轮子呢？从前我确实是这么想的，但是稍微有一点工作经验之后发现再造轮子的原因有两条：&lt;/p&gt;
@@ -95,7 +172,7 @@
     <link href="https://xuanwo.org/2016/06/03/owncloud-on-qingcloud/"/>
     <id>https://xuanwo.org/2016/06/03/owncloud-on-qingcloud/</id>
     <published>2016-06-03T08:00:00.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.153Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;因为实在不满意百度云的一些缺陷，我们最终决定部署一套团队内部使用的云存储平台，用于团队协作及资料长期存储。希望能够达到如下目标：&lt;/p&gt;
 &lt;ul&gt;
@@ -250,7 +327,7 @@
     <link href="https://xuanwo.org/2016/05/29/learn-from-qingchat/"/>
     <id>https://xuanwo.org/2016/05/29/learn-from-qingchat/</id>
     <published>2016-05-29T20:57:00.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;之前的一段时间一直在从事&lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Qingchat&lt;/a&gt;的相关开发工作，这个项目是一个基于Mojo-Weixin提供的Rest API开发的一个微信机器人，承担了十余个群，上千人的微信直播活动。秉承着ACM训练出来的“暴力加乱搞”风格，我花了大概一个星期的课余时间，搞出了一个可用的版本。期间也迭代了很多次，既欣慰于Coding的力量，也苦恼于当初设计的不完善带来的种种问题。在这个项目即将大规模重构的前夕，我总结一下开发Qingchat的过程中的经验教训，希望自己能成为一个更好更聪明的Coder。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -287,7 +364,7 @@
     <link href="https://xuanwo.org/2016/05/09/msp430g2553-bellring/"/>
     <id>https://xuanwo.org/2016/05/09/msp430g2553-bellring/</id>
     <published>2016-05-09T08:42:00.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;我萌萌哒的妹纸是一个代码苦手，完全无法理解 C 语言，所以每一次到单片机上机需要交作业的时候都是愁眉苦脸的样子。而我又总是因为自己确实不懂单片机里面的种种奇怪定义（中断，串口，P1.x 之类），所以也一直没有什么好办法去帮她。这一次的作业对编码能力要求较高，但是涉及到的硬件比较少，于是决定以此为契机，开始我的嵌入式开发之旅。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -322,7 +399,7 @@
 &lt;p&gt;综上，这个系统所需要的全部内容就已经实现了。可以看到我做了很多将对硬件的操作抽象化的处理，其实这一点非常重要。因为对于我来说，嵌入式开发最大的难题在于，我不知道里面种种变量的含义，不知道如何操作具体的硬件。将硬件操作抽象化处理之后，我就可以很方便地开展我的后续开发。&lt;/p&gt;
 &lt;h1 id=&quot;问题&quot;&gt;&lt;a href=&quot;#问题&quot; class=&quot;headerlink&quot; title=&quot;问题&quot;&gt;&lt;/a&gt;问题&lt;/h1&gt;&lt;p&gt;实现就不再赘述了，想必读者一定都比我强，下面聊一聊遇到的问题以及 debug 的经历。&lt;/p&gt;
 &lt;h2 id=&quot;串口配置&quot;&gt;&lt;a href=&quot;#串口配置&quot; class=&quot;headerlink&quot; title=&quot;串口配置&quot;&gt;&lt;/a&gt;串口配置&lt;/h2&gt;&lt;p&gt;串口的收和发其实是分开的，这里用到了两个变量： UCA0TXBUF ， UCA0RXBUF 。从字面意思上可以看出，前一个用于发送，后一个用于接收（相对于开发者来说）。发送和接收其实就是给这两个值赋值的过程，看起来这两个变量在接受到值之后会将这个值传给别的变量，所以只要不断的将值赋给它就行，我们写了这样的函数：&lt;/p&gt;
-&lt;figure class=&quot;highlight c&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;29&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;#&lt;span class=&quot;meta-keyword&quot;&gt;pragma&lt;/span&gt; vector=USCIAB0RX_VECTOR &lt;span class=&quot;comment&quot;&gt;//中断服务函数&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;__&lt;span class=&quot;function&quot;&gt;interrupt &lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;uart&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    rec = UCA0RXBUF;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;//读取到缓冲区&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    strtmp[&lt;span class=&quot;built_in&quot;&gt;strlen&lt;/span&gt;++] = rec;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    strtmp[&lt;span class=&quot;built_in&quot;&gt;strlen&lt;/span&gt;] = &lt;span class=&quot;string&quot;&gt;&#39;\0&#39;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;//切换模式&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    mode = strtmp[&lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;];&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//发送字符&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Send_Char&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; ch)&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;while&lt;/span&gt; (!(IFG2 &amp;amp; UCA0TXIFG));&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    UCA0TXBUF = ch;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//发送字符串&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Send_Str&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; *p)&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; i;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    i = &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;while&lt;/span&gt; (*(p + i) != &lt;span class=&quot;string&quot;&gt;&#39;\0&#39;&lt;/span&gt;) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;while&lt;/span&gt; (!(IFG2 &amp;amp; UCA0TXIFG));&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        UCA0TXBUF = *(p + i);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        i++;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Send_Char(&lt;span class=&quot;number&quot;&gt;0x0d&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Send_Char(&lt;span class=&quot;number&quot;&gt;0x0a&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;figure class=&quot;highlight c&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;29&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;#&lt;span class=&quot;meta-keyword&quot;&gt;pragma&lt;/span&gt; vector=USCIAB0RX_VECTOR &lt;span class=&quot;comment&quot;&gt;//中断服务函数&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;number&quot;&gt;__&lt;/span&gt;&lt;span class=&quot;function&quot;&gt;interrupt &lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;uart&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    rec = UCA0RXBUF;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;//读取到缓冲区&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    strtmp[&lt;span class=&quot;built_in&quot;&gt;strlen&lt;/span&gt;++] = rec;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    strtmp[&lt;span class=&quot;built_in&quot;&gt;strlen&lt;/span&gt;] = &lt;span class=&quot;string&quot;&gt;&#39;\0&#39;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;//切换模式&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    mode = strtmp[&lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;];&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//发送字符&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Send_Char&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; ch)&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;while&lt;/span&gt; (!(IFG2 &amp;amp; UCA0TXIFG));&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    UCA0TXBUF = ch;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//发送字符串&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Send_Str&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; *p)&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; i;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    i = &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;while&lt;/span&gt; (*(p + i) != &lt;span class=&quot;string&quot;&gt;&#39;\0&#39;&lt;/span&gt;) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;while&lt;/span&gt; (!(IFG2 &amp;amp; UCA0TXIFG));&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        UCA0TXBUF = *(p + i);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        i++;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Send_Char(&lt;span class=&quot;number&quot;&gt;0x0d&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Send_Char(&lt;span class=&quot;number&quot;&gt;0x0a&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
 &lt;p&gt;uart 貌似是一个内置的中断函数，用来处理串口的接收，只要将变量 UCA0RXBUF 的值存储起来即可；后面的 Send_Str 就非常好理解了，将值发送给 UCA0TXBUF ，从而实现串口的输出。&lt;/p&gt;
 &lt;p&gt;思路如此清晰，但是测试的时候却遇到了问题，我们的输出是空的，转为16进制显示后，全都是0x00。这个问题调试了很久，拿着原来的代码逐行比对之后发现，出了这样的问题：&lt;/p&gt;
 &lt;figure class=&quot;highlight c&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;- UCA0BR0 = &lt;span class=&quot;number&quot;&gt;130&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;- UCA0BR1 = &lt;span class=&quot;number&quot;&gt;6&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;+ UCA0BR0 = &lt;span class=&quot;number&quot;&gt;104&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;+ UCA0BR1 = &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
@@ -364,7 +441,7 @@
     <link href="https://xuanwo.org/2016/04/13/gitlab-install-intro/"/>
     <id>https://xuanwo.org/2016/04/13/gitlab-install-intro/</id>
     <published>2016-04-13T23:20:00.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;h1 id=&quot;起因&quot;&gt;&lt;a href=&quot;#起因&quot; class=&quot;headerlink&quot; title=&quot;起因&quot;&gt;&lt;/a&gt;起因&lt;/h1&gt;&lt;p&gt;在跟网络中心的老师沟通成立镜像站的相关事宜的时候，意外地接下来搭建一套校内的 Git 服务的任务。&lt;br&gt;&lt;a href=&quot;https://imnerd.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;@怡红公子&lt;/a&gt; 曾经搭建过一套类似的服务，但由于服务器端没有开启 VT 虚拟化导致不能安装 64 位的操作系统，再加上 Gitlab 不提供 32 位的安装包，所以长期以来怡红公子一直都是自行编译并配置 Gitlab 。考虑到后续维护的方便，我们决定趁着这个机会使用另一台支持安装 64 位操作系统的服务器，一劳永逸地解决这个问题。&lt;br&gt;我们的服务器环境是 &lt;strong&gt;CentOS 7.2 64bit&lt;/strong&gt; ，以下所有操作均以此为基准。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -472,7 +549,7 @@
     <link href="https://xuanwo.org/2016/04/04/docopt-intro/"/>
     <id>https://xuanwo.org/2016/04/04/docopt-intro/</id>
     <published>2016-04-04T21:39:00.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;code&gt;Qingchat&lt;/code&gt;&lt;/a&gt; 使用的命令行参数解释器是 &lt;a href=&quot;http://docopt.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;code&gt;docopt&lt;/code&gt;&lt;/a&gt;，用下来感觉非常棒，所以决定介绍一下这个库。（&lt;em&gt;奉劝各位看官，珍爱生命，远离argparse。&lt;/em&gt;）&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -542,7 +619,7 @@
     <link href="https://xuanwo.org/2016/04/01/qingchat-intro/"/>
     <id>https://xuanwo.org/2016/04/01/qingchat-intro/</id>
     <published>2016-04-01T22:03:00.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.153Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;在我之前写过的一篇文章中，我曾经探索过类似的问题：&lt;a href=&quot;https://xuanwo.org/2016/02/28/wechat-remove/&quot;&gt;微信群重复人员识别&lt;/a&gt;。当初我就提出过能否自动获取相关数据，但因为种种原因的限制不了了之了。后来发现了&lt;a href=&quot;https://github.com/sjdy521/Mojo-Weixin&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Mojo-Weixin&lt;/a&gt;这个库之后，我决定在这个的基础上实现一个微信多群直播的工具——Qingchat。（&lt;em&gt;尽管在刚刚实现完不久，微信就更新了转发到多个群的功能，Sad。&lt;/em&gt;）探索的成果如下： &lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Qingchat&lt;/a&gt;，目前仅支持 python3 ，欢迎各位看官提 issues ，交 code ，或者拍砖。&lt;br&gt;接下来我会先介绍一下 Qingchat 的原理，然后介绍 Qingchat 的使用，最后展望一下 Qingchat 未来的发展方向。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -645,7 +722,7 @@
     <link href="https://xuanwo.org/2016/03/13/gout/"/>
     <id>https://xuanwo.org/2016/03/13/gout/</id>
     <published>2016-03-13T13:44:00.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;p&gt;其实我很想写出获奖感言的感觉，但是痛风发作的时候真的好疼啊。。。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -682,7 +759,7 @@
     <link href="https://xuanwo.org/2016/03/12/neovim-slow-upgrade/"/>
     <id>https://xuanwo.org/2016/03/12/neovim-slow-upgrade/</id>
     <published>2016-03-12T11:00:00.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;一直都非常羡慕那些能把vim用得非常溜的人，但是自己总是不情愿去学，总是觉得vim的操作方式非常反人类，难度曲线太陡，不适合我。真正让我下定决心去学的，是因为系统切换到Ubuntu Gnome之后发现，Sublime Text 3 不能原生支持中文输入。同时我也发现，如果我不上来就折腾spf13这样的东西的话，其实vim非常好懂。于是，Neovim的慢速升级攻略就这样诞生了。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -746,7 +823,7 @@
     <link href="https://xuanwo.org/2016/02/28/wechat-remove/"/>
     <id>https://xuanwo.org/2016/02/28/wechat-remove/</id>
     <published>2016-02-28T10:05:00.000Z</published>
-    <updated>2016-06-22T07:25:09.606Z</updated>
+    <updated>2016-06-29T16:29:46.153Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;由于微信的限制，人数超过一百以后，只有邀请才能加入。所以，如果想要组织大型的在线活动，就只有建立很多个分群。然而分群的问题在于，会有很多人重复加群，挤占了本来就缺乏的空间。所以需要找到一个可行的办法，清除两个群中的重复人员。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -790,7 +867,7 @@
     <link href="https://xuanwo.org/2016/02/26/debug-for-hexo-1775/"/>
     <id>https://xuanwo.org/2016/02/26/debug-for-hexo-1775/</id>
     <published>2016-02-26T12:54:00.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;h2 id=&quot;起因&quot;&gt;&lt;a href=&quot;#起因&quot; class=&quot;headerlink&quot; title=&quot;起因&quot;&gt;&lt;/a&gt;起因&lt;/h2&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/hexojs/hexo/issues/1775&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;hexojs/hexo #1775&lt;/a&gt;&lt;br&gt;BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -831,7 +908,7 @@
     <link href="https://xuanwo.org/2016/02/17/ipv6-in-cugb/"/>
     <id>https://xuanwo.org/2016/02/17/ipv6-in-cugb/</id>
     <published>2016-02-17T18:59:02.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;p&gt;主旨只有两条：开源，节流&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -918,7 +995,7 @@
     <link href="https://xuanwo.org/2016/02/15/chocolatey-intro/"/>
     <id>https://xuanwo.org/2016/02/15/chocolatey-intro/</id>
     <published>2016-02-15T20:15:46.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://chocolatey.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Chocolatey&lt;/a&gt;是一个基于Nuget的Windows包管理工具，截止到我更新此文章的时候，一共有3.7k多个独立包。本文旨在介绍Chocolatey这一工具的安装和用法，希望能有更多人享受到该工具的便利之处。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -983,7 +1060,7 @@
     <link href="https://xuanwo.org/2016/02/04/unlock-your-smart-tv/"/>
     <id>https://xuanwo.org/2016/02/04/unlock-your-smart-tv/</id>
     <published>2016-02-04T23:12:52.000Z</published>
-    <updated>2016-06-22T07:25:09.606Z</updated>
+    <updated>2016-06-29T16:29:46.153Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;现在很多人都买了智能电视，但是出于种种你懂得原因，厂商通常都不允许用户自行安装自己想要的APP，比如腾讯视频，优酷视频之类的。本教程旨在突破这些限制，彻底解放智能电视的全部潜力。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1072,7 +1149,7 @@
     <link href="https://xuanwo.org/2016/01/13/how-to-differ-invalid-link/"/>
     <id>https://xuanwo.org/2016/01/13/how-to-differ-invalid-link/</id>
     <published>2016-01-13T01:18:51.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;前两天我的朋友圈被微信公开课活动的链接+截图刷屏，随后一大帮“业内人士”站出来说这个是盗号连接，只要点开，微信钱包和支付宝就会被盗。作为半个业内人士，我不能忍了，决定跟大家谈一谈如何识别真假链接。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1146,7 +1223,7 @@
     <link href="https://xuanwo.org/2016/01/03/vs-oracle-11g/"/>
     <id>https://xuanwo.org/2016/01/03/vs-oracle-11g/</id>
     <published>2016-01-03T15:31:32.000Z</published>
-    <updated>2016-06-22T07:25:09.606Z</updated>
+    <updated>2016-06-29T16:29:46.153Z</updated>
     
     <content type="html">&lt;h1 id=&quot;开发环境&quot;&gt;&lt;a href=&quot;#开发环境&quot; class=&quot;headerlink&quot; title=&quot;开发环境&quot;&gt;&lt;/a&gt;开发环境&lt;/h1&gt;&lt;p&gt;宿主机：Win10 + VS2015 + ODP.Net for VS2015&lt;br&gt;虚拟机：Win7 + Oracle 11g + 桥接&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1211,7 +1288,7 @@
     <link href="https://xuanwo.org/2015/12/23/best-pdf-read-solution/"/>
     <id>https://xuanwo.org/2015/12/23/best-pdf-read-solution/</id>
     <published>2015-12-23T16:15:20.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;最近因为学习需要，要大量阅读纯文字的PDF文档。然后我惊讶地发现市场上居然没有哪家提供一套完整可用的跨平台PDF阅读解决方案，于是我在尝试了市面几乎所有叫得上名字的各类阅读器之后，形成了一套自己的跨平台PDF阅读解决方案。本文记录了这套方案的详细内容，希望会有所益处。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1268,7 +1345,7 @@
     <link href="https://xuanwo.org/2015/12/18/online-video-download-solution/"/>
     <id>https://xuanwo.org/2015/12/18/online-video-download-solution/</id>
     <published>2015-12-18T12:49:49.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
+    <updated>2016-06-29T16:29:46.149Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;因为学习需要，产生了一个这样的需求：要从Youtube上批量下载视频。自然，出于方便使用的角度来看，音画不能分离，最好带有对应的字幕。一番搜罗之后，我找到了基于Python的开源产品： &lt;a href=&quot;https://rg3.github.io/youtube-dl/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;youtube-dl&lt;/a&gt;&lt;/p&gt;
 &lt;blockquote&gt;
@@ -1324,7 +1401,7 @@
     <link href="https://xuanwo.org/2015/11/27/surf-with-poweroff/"/>
     <id>https://xuanwo.org/2015/11/27/surf-with-poweroff/</id>
     <published>2015-11-27T01:34:33.000Z</published>
-    <updated>2016-06-22T07:25:09.606Z</updated>
+    <updated>2016-06-29T16:29:46.153Z</updated>
     
     <content type="html">&lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;前两天我对我们宿舍的路由器进行了小小的改造，使得我们在断电之后也能照常上网。原理非常简单：就是使用充电宝来给路由器供电——因为我们墙上的网口是不会断电的，所以只要解决了路由器没有电的问题，就可以解决断网问题。路由器要求的输入电压为5V，电流为0.3A，恰好跟我们常用的充电宝是一致的，淘宝买一根USB转DV线成功解决问题。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1357,86 +1434,6 @@
     
     
       <category term="Hardware" scheme="https://xuanwo.org/tags/Hardware/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>文本转换神器——Pandoc</title>
-    <link href="https://xuanwo.org/2015/11/14/pandoc/"/>
-    <id>https://xuanwo.org/2015/11/14/pandoc/</id>
-    <published>2015-11-14T14:29:18.000Z</published>
-    <updated>2016-06-22T07:25:09.602Z</updated>
-    
-    <content type="html">&lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;Pandoc是一个用haskell编写的文本转换工具，小巧迅速且支持格式广泛，堪称文本转换应用的瑞士军刀。&lt;/p&gt;
-&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
-&lt;h1 id=&quot;支持格式&quot;&gt;&lt;a href=&quot;#支持格式&quot; class=&quot;headerlink&quot; title=&quot;支持格式&quot;&gt;&lt;/a&gt;支持格式&lt;/h1&gt;&lt;h2 id=&quot;输入&quot;&gt;&lt;a href=&quot;#输入&quot; class=&quot;headerlink&quot; title=&quot;输入&quot;&gt;&lt;/a&gt;输入&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;http://daringfireball.net/projects/markdown/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;markdown&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://docutils.sourceforge.net/docs/ref/rst/introduction.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;reStructuredText&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://redcloth.org/textile&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;textile&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.w3.org/TR/html40/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;HTML&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.docbook.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;DocBook&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.latex-project.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;LaTeX&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.mediawiki.org/wiki/Help:Formatting&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;MediaWiki markup&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://twiki.org/cgi-bin/view/TWiki/TextFormattingRules&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;TWiki markup&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://dev.opml.org/spec2.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;OPML&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Emacs &lt;a href=&quot;http://orgmode.org&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Org-Mode&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://txt2tags.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Txt2Tags&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Microsoft Word &lt;a href=&quot;http://www.microsoft.com/interop/openup/openxml/default.aspx&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;docx&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;LibreOffice &lt;a href=&quot;http://en.wikipedia.org/wiki/OpenDocument&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;ODT&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/EPUB&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;EPUB&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.haskell.org/haddock/doc/html/ch03s08.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Haddock markup&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;输出&quot;&gt;&lt;a href=&quot;#输出&quot; class=&quot;headerlink&quot; title=&quot;输出&quot;&gt;&lt;/a&gt;输出&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;HTML格式: XHTML, HTML5, 和 HTML slide shows using&lt;br&gt;&lt;a href=&quot;http://www.w3.org/Talks/Tools/Slidy&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Slidy&lt;/a&gt;,&lt;br&gt;&lt;a href=&quot;http://lab.hakim.se/reveal-js/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;reveal.js&lt;/a&gt;,&lt;br&gt;&lt;a href=&quot;http://goessner.net/articles/slideous/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Slideous&lt;/a&gt;,&lt;br&gt;&lt;a href=&quot;http://meyerweb.com/eric/tools/s5/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;S5&lt;/a&gt;, 或&lt;br&gt;&lt;a href=&quot;http://paulrouget.com/dzslides/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;DZSlides&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;字处理格式: Microsoft Word&lt;br&gt;&lt;a href=&quot;http://www.microsoft.com/interop/openup/openxml/default.aspx&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;docx&lt;/a&gt;,&lt;br&gt;OpenOffice/LibreOffice&lt;br&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/OpenDocument&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;ODT&lt;/a&gt;, &lt;a href=&quot;http://opendocument.xml.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;OpenDocument&lt;br&gt;XML&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;电子书: &lt;a href=&quot;http://en.wikipedia.org/wiki/EPUB&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;EPUB&lt;/a&gt; version 2或3,&lt;br&gt;&lt;a href=&quot;http://www.fictionbook.org/index.php/Eng:XML_Schema_Fictionbook_2.1&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;FictionBook2&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;文档格式: &lt;a href=&quot;http://www.docbook.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;DocBook&lt;/a&gt;, &lt;a href=&quot;http://www.gnu.org/software/texinfo/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;GNU&lt;br&gt;TexInfo&lt;/a&gt;, &lt;a href=&quot;http://www.gnu.org/software/groff/groff.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Groff&lt;br&gt;man&lt;/a&gt; pages, &lt;a href=&quot;http://www.haskell.org/haddock/doc/html/ch03s08.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Haddock&lt;br&gt;markup&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;页面布局格式: &lt;a href=&quot;https://www.adobe.com/content/dam/Adobe/en/devnet/indesign/cs55-docs/IDML/idml-specification.pdf&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;InDesign&lt;br&gt;ICML&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;大纲格式: &lt;a href=&quot;http://dev.opml.org/spec2.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;OPML&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;TeX 格式: &lt;a href=&quot;http://www.latex-project.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;LaTeX&lt;/a&gt;,&lt;br&gt;&lt;a href=&quot;http://www.pragma-ade.nl/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;ConTeXt&lt;/a&gt;, LaTeX Beamer slides&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Portable_Document_Format&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;PDF&lt;/a&gt; via&lt;br&gt;LaTeX&lt;/li&gt;
-&lt;li&gt;轻量级标记格式:&lt;br&gt;&lt;a href=&quot;http://daringfireball.net/projects/markdown/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Markdown&lt;/a&gt; (including&lt;br&gt;&lt;a href=&quot;http://commonmark.org&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;CommonMark&lt;/a&gt;),&lt;br&gt;&lt;a href=&quot;http://docutils.sourceforge.net/docs/ref/rst/introduction.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;reStructuredText&lt;/a&gt;,&lt;br&gt;&lt;a href=&quot;http://www.methods.co.nz/asciidoc/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;AsciiDoc&lt;/a&gt;, &lt;a href=&quot;http://www.mediawiki.org/wiki/Help:Formatting&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;MediaWiki&lt;br&gt;markup&lt;/a&gt;, &lt;a href=&quot;https://www.dokuwiki.org/wiki:syntax&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;DokuWiki&lt;br&gt;markup&lt;/a&gt;, Emacs&lt;br&gt;&lt;a href=&quot;http://orgmode.org&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Org-Mode&lt;/a&gt;,&lt;br&gt;&lt;a href=&quot;http://redcloth.org/textile&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Textile&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;自定义格式: custom writers can be written in&lt;br&gt;&lt;a href=&quot;http://www.lua.org&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;lua&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&quot;安装&quot;&gt;&lt;a href=&quot;#安装&quot; class=&quot;headerlink&quot; title=&quot;安装&quot;&gt;&lt;/a&gt;安装&lt;/h1&gt;&lt;h2 id=&quot;安装Pandoc&quot;&gt;&lt;a href=&quot;#安装Pandoc&quot; class=&quot;headerlink&quot; title=&quot;安装Pandoc&quot;&gt;&lt;/a&gt;安装Pandoc&lt;/h2&gt;&lt;p&gt;在&lt;a href=&quot;https://github.com/jgm/pandoc/releases&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;此页面&lt;/a&gt;上寻找对应平台的二进制安装包&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;Windows平台需要将Pandoc加入Path目录才能在cmd环境中调用&lt;/em&gt;&lt;/p&gt;
-&lt;h2 id=&quot;安装Tex支持（可选，用于编译Tex并输出PDF）&quot;&gt;&lt;a href=&quot;#安装Tex支持（可选，用于编译Tex并输出PDF）&quot; class=&quot;headerlink&quot; title=&quot;安装Tex支持（可选，用于编译Tex并输出PDF）&quot;&gt;&lt;/a&gt;安装Tex支持（可选，用于编译Tex并输出PDF）&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;Windows平台建议&lt;a href=&quot;http://miktex.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;MiKTeX&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;MacOS平台建议&lt;a href=&quot;http://www.tug.org/mactex/morepackages.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;BasicTeX&lt;/a&gt;并使用&lt;code&gt;tlmgr&lt;/code&gt;工具安装需要的包&lt;/li&gt;
-&lt;li&gt;Linux平台建议&lt;a href=&quot;http://www.tug.org/texlive/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Tex Live&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&quot;使用&quot;&gt;&lt;a href=&quot;#使用&quot; class=&quot;headerlink&quot; title=&quot;使用&quot;&gt;&lt;/a&gt;使用&lt;/h1&gt;&lt;p&gt;&lt;em&gt;你可以使用在线的&lt;a href=&quot;http://pandoc.org/try/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;DEMO&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;pandoc x.html -o x.md&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;pandoc -f html -t markdown http://www.fsf.org&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;-f&lt;/code&gt;参数用于指定源文件格式&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;-t&lt;/code&gt;参数用于指定输出文件格式&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;-o&lt;/code&gt;参数用于指定输出文件&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;em&gt;如果不使用&lt;code&gt;-f&lt;/code&gt;和&lt;code&gt;-t&lt;/code&gt;参数，pandoc将会根据输入文件以及&lt;code&gt;-o&lt;/code&gt;指定的输出文件格式来确定转换的格式类型&lt;/em&gt;&lt;/p&gt;
-&lt;h1 id=&quot;注意事项&quot;&gt;&lt;a href=&quot;#注意事项&quot; class=&quot;headerlink&quot; title=&quot;注意事项&quot;&gt;&lt;/a&gt;注意事项&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;Pandoc不支持&lt;code&gt;.doc&lt;/code&gt;格式，如果需要进行转换，则需要先将&lt;code&gt;.doc&lt;/code&gt;转换为&lt;code&gt;.docx&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&quot;引用资源&quot;&gt;&lt;a href=&quot;#引用资源&quot; class=&quot;headerlink&quot; title=&quot;引用资源&quot;&gt;&lt;/a&gt;引用资源&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;http://pandoc.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Pandoc官网 &lt;em&gt;需要梯子&lt;/em&gt; &lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://pandoc.org/README.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Pandoc User Guide&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://yanping.me/cn/blog/2012/03/13/pandoc/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;黑魔法利器pandoc&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.yangzhiping.com/tech/pandoc.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Markdown写作进阶：Pandoc入门浅谈&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&quot;更新日志&quot;&gt;&lt;a href=&quot;#更新日志&quot; class=&quot;headerlink&quot; title=&quot;更新日志&quot;&gt;&lt;/a&gt;更新日志&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;2015年11月14日 完成初步使用&lt;/li&gt;
-&lt;/ul&gt;
-</content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;Pandoc是一个用haskell编写的文本转换工具，小巧迅速且支持格式广泛，堪称文本转换应用的瑞士军刀。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="Opinion" scheme="https://xuanwo.org/categories/Opinion/"/>
-    
-    
-      <category term="Software" scheme="https://xuanwo.org/tags/Software/"/>
     
   </entry>
   
