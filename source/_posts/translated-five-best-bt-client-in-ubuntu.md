@@ -1,7 +1,7 @@
 ---
 title: 译-Ubuntu下五个最好的BT客户端
 date: 2015-9-1 10:54:20
-tags: [Ubuntu, 翻译]
+tags: [Linux, 翻译]
 categories: Opinion
 toc: true
 ---
