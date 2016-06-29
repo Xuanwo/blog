@@ -74,9 +74,6 @@
                 </div>
             {% endif %}
         </div>
-
     </article>
-
-
 {% endmacro %}
 

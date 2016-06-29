@@ -66,6 +66,8 @@
 <script type="text/javascript">
     $("img").addClass("img-responsive");
 </script>
+<script type="text/javascript" src="/dist/js/highlight.pack.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
 <script id="dsq-count-scr" src="//only0god.disqus.com/count.js" async></script>
 <script>
     (function (i, s, o, g, r, a, m) {
