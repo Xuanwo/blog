@@ -116,7 +116,7 @@
             <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>曾经看过我的博客的同学大概都会发现，我的博客再一次大变样了~<br>这一次的更新其实酝酿了很久，早在刚开始用Hexo的时候就想着要有一个自己的主题。但是那个时候觉得这是一件很难的事情，要懂HTML，CSS，JavaScript，还要懂Swig，Ejs等模板语言，还要懂Hexo的内部原理，于是就一直搁置了。在独立实现了一个<a href="https://xuanwo.org/2016/06/16/jade_ims/">完整的项目</a>之后，我认为自己已经有这样的能力了，于是决定正式开始。<br>在我看来的话，Hexo的使用者大概分为三个层次：第一种用别人的主题，第二种模仿现有的主题，第三种自己独立开发。我原来是第一种，在Next的基础上做了很多改动，这一次进入到了第二个层次。我找了一套自我感觉还不错的模板，然后套用它的CSS设定和页面结构，就成了我现在的主题。<br>利用两天学习和工作的闲暇时间，我大体上完成了这个主题。做得比较糙，很多细节还有待优化，但是我已经急不可耐地想要正式上线了，笑。在未来的话，我希望能把一些配置都能整理出来，优化一下代码，然后开源这个主题，希望大家能够喜欢~<br>庆祝的话已经说的差不多了，下面来讲一讲如何开发一个Hexo主题。</p>
 <a id="more"></a>
 <h1 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h1><h2 id="主题结构"><a href="#主题结构" class="headerlink" title="主题结构"></a>主题结构</h2><p>Hexo主题的结构大体如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── _config.yml</span><br><span class="line">├── languages</span><br><span class="line">│   ├── default.yml</span><br><span class="line">│   └── zh-Hans.yml</span><br><span class="line">├── layout</span><br><span class="line">│   ├── achieve.swig</span><br><span class="line">│   ├── category.swig</span><br><span class="line">│   ├── index.swig</span><br><span class="line">│   ├── _layout.swig</span><br><span class="line">│   ├── page.swig</span><br><span class="line">│   ├── _partials</span><br><span class="line">│   ├── post.swig</span><br><span class="line">│   └── tag.swig</span><br><span class="line">└── source</span><br><span class="line">    ├── css</span><br><span class="line">    ├── fonts</span><br><span class="line">    ├── img</span><br><span class="line">    ├── js</span><br><span class="line">    └── vendors</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── _config.yml</span><br><span class="line">├── languages</span><br><span class="line">│   ├── default.yml</span><br><span class="line">│   └── zh-Hans.yml</span><br><span class="line">├── layout</span><br><span class="line">│   ├── achieve.swig</span><br><span class="line">│   ├── category.swig</span><br><span class="line">│   ├── index.swig</span><br><span class="line">│   ├── _layout.swig</span><br><span class="line">│   ├── page.swig</span><br><span class="line">│   ├── _partials</span><br><span class="line">│   ├── post.swig</span><br><span class="line">│   └── tag.swig</span><br><span class="line">└── <span class="built_in">source</span></span><br><span class="line">    ├── css</span><br><span class="line">    ├── fonts</span><br><span class="line">    ├── img</span><br><span class="line">    ├── js</span><br><span class="line">    └── vendors</span><br></pre></td></tr></table></figure>
 <p>首先有一个<code>_config.yml</code>负责提供主题级别的配置，可以在<code>layout</code>中通过<code>theme.xxx</code>的形式进行调用。<br>然后<code>languages</code>负责实现博客的i18N功能，如果博客没有多语言的需求，只需要实现一个<code>default.yml</code>即可。<br>其次是最为重要的<code>layout</code>文件夹，这个里面主要存放博客的结构，Hexo 引擎会使用指定的渲染引擎将<code>layout</code>文件渲染成HTML页面。<br>最后是<code>source</code>，把所有主题需要用到的资源，比如CSS，Fonts，JS等都存放到这个文件夹中。</p>
 <p>这个主题使用了<a href="http://paularmstrong.github.io/swig/" target="_blank" rel="external">swig</a>。</p>
 <h2 id="页面结构"><a href="#页面结构" class="headerlink" title="页面结构"></a>页面结构</h2><p>页面结构分为两个维度，一者是我要呈现哪些页面，二者是每个页面上都有哪些内容。</p>
@@ -303,11 +303,11 @@
                         
                             <li><a href="/tags/Software/">Software</a></li>
                         
+                            <li><a href="/tags/C/">C</a></li>
+                        
                             <li><a href="/tags/Windows/">Windows</a></li>
                         
                             <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
                         
                             <li><a href="/tags/Database/">Database</a></li>
                         
@@ -345,11 +345,11 @@
                         
                             <li><a href="/tags/QingCloud/">QingCloud</a></li>
                         
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
                             <li><a href="/tags/Work/">Work</a></li>
                         
                             <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/Hardware/">Hardware</a></li>
                         
