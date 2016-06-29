@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="/dist/css/animate.min.css">
 <link rel="stylesheet" href="/dist/css/style.css">
 <link rel="stylesheet" href="/dist/css/font-awesome.min.css">
-<link rel="stylesheet" href="/dist/css/solarized-light.css">
+<link rel="stylesheet" href="/dist/css/prism.css">
 <!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
 <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
@@ -116,32 +116,32 @@
         
             <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>基于Socket.io有很多特别强大的应用，socket.io官方提供的一个<a href="http://socket.io/demos/computer/" target="_blank" rel="external">虚拟计算机Demo</a>就非常赞。通过将使用Qemu虚拟取出来的PC界面转发至Socket.io的端口，然后对Canvas不断地进行绘制，形成了近似与远程操控的体验。我们<a href="http://xuanwo.org/2015/06/30/together-project/">Together项目</a>用到了这个库，但由于这个库发布于很久之前，再加上相关文档过少，导致部署起来极为困难。所以我完成了这篇文章，希望能让后来人少走一些弯路。<br><a id="more"></a><br><em>下文基于Ubuntu 14.04 x64，其他系统请自行转换相应命令，谢谢~</em></p>
 <h1 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h1><h2 id="安装nodejs"><a href="#安装nodejs" class="headerlink" title="安装nodejs"></a>安装nodejs</h2><p>使用APT安装</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get -y install nodejs-legacy</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo apt-get -y install nodejs-legacy</span><br></pre></td></tr></table></figure>
 <p>或使用nvm来管理不同版本的nodejs</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh | bash</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh | bash</span><br></pre></td></tr></table></figure>
 <p><em>Canvas库在Debian系的OS上会有些诡异的行为，所以需要格外的做一些处理，感谢<a href="https://github.com/computernewb" target="_blank" rel="external">@computernewb</a>的<a href="https://github.com/kevin-roark/socket.io-computer/issues/11#issuecomment-118790681" target="_blank" rel="external">回复</a></em></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ln -s /usr/bin/nodejs /usr/sbin/node</span><br></pre></td></tr></table></figure>
-<h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get -y install libcairo2-dev libpango1.0-dev libgif-dev build-essential g++</span><br></pre></td></tr></table></figure>
-<h2 id="安装libjpeg9和libjpeg9-dev"><a href="#安装libjpeg9和libjpeg9-dev" class="headerlink" title="安装libjpeg9和libjpeg9-dev"></a>安装libjpeg9和libjpeg9-dev</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9_9a-2_amd64.deb</span><br><span class="line">dpkg -i libjpeg9_9a-2_amd64.deb</span><br><span class="line">wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9-dev_9a-2_amd64.deb</span><br><span class="line">dpkg -i libjpeg9-dev_9a-2_amd64.deb</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo ln -s /usr/bin/nodejs /usr/sbin/node</span><br></pre></td></tr></table></figure>
+<h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo apt-get -y install libcairo2-dev libpango1.0-dev libgif-dev build-essential g++</span><br></pre></td></tr></table></figure>
+<h2 id="安装libjpeg9和libjpeg9-dev"><a href="#安装libjpeg9和libjpeg9-dev" class="headerlink" title="安装libjpeg9和libjpeg9-dev"></a>安装libjpeg9和libjpeg9-dev</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9_9a-2_amd64.deb</span><br><span class="line">dpkg -i libjpeg9_9a-2_amd64.deb</span><br><span class="line">wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9-dev_9a-2_amd64.deb</span><br><span class="line">dpkg -i libjpeg9-dev_9a-2_amd64.deb</span><br></pre></td></tr></table></figure>
 <h1 id="处理WinXp镜像"><a href="#处理WinXp镜像" class="headerlink" title="处理WinXp镜像"></a>处理WinXp镜像</h1><h2 id="下载XP镜像"><a href="#下载XP镜像" class="headerlink" title="下载XP镜像"></a>下载XP镜像</h2><h3 id="下载后使用网盘中转"><a href="#下载后使用网盘中转" class="headerlink" title="下载后使用网盘中转"></a>下载后使用网盘中转</h3><p>在<a href="http://msdn.itellyou.cn/" target="_blank" rel="external">I Tell You</a>上下载纯净的XP镜像。（如果使用盗版的镜像，VPS可能会因为违反其Tos而封号）<br>比如，WinXP的中文简体专业版：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ed2k://|file|CN_WINXP_PRO_ISO.img|530186240|7855069CE4216615D761654E2B75A4F7|/</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ed2k://|file|CN_WINXP_PRO_ISO.img|530186240|7855069CE4216615D761654E2B75A4F7|/</span><br></pre></td></tr></table></figure>
 <h3 id="使用sftp上传"><a href="#使用sftp上传" class="headerlink" title="使用sftp上传"></a>使用sftp上传</h3><p>可以使用类似于FileZilla这样的FTP工具直接上传，大部分国内的网盘到国外的速度都不理想= =，百度云还会出现断流，而好用的国外网盘都被墙，本身就需要翻墙上传。所以还不如直接使用sftp传到服务器上。</p>
 <h2 id="格式转换"><a href="#格式转换" class="headerlink" title="格式转换"></a>格式转换</h2><p><a href="http://msdn.itellyou.cn/" target="_blank" rel="external">I Tell You</a>上下载下来的是img镜像文件，然而我们需要的是ISO，所以还需要进行转换。将img转换为iso，我们需要<code>ccd2iso</code>。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install ccd2iso</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo apt-get install ccd2iso</span><br></pre></td></tr></table></figure>
 <p>使用方法：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ccd2iso &lt;.img filename&gt; &lt;.iso filename&gt;</span><br></pre></td></tr></table></figure>
-<h1 id="socket-io-computer配置"><a href="#socket-io-computer配置" class="headerlink" title="socket.io-computer配置"></a>socket.io-computer配置</h1><h2 id="安装依赖-1"><a href="#安装依赖-1" class="headerlink" title="安装依赖"></a>安装依赖</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get -y install qemu redis-server</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ccd2iso &lt;.img filename&gt; &lt;.iso filename&gt;</span><br></pre></td></tr></table></figure>
+<h1 id="socket-io-computer配置"><a href="#socket-io-computer配置" class="headerlink" title="socket.io-computer配置"></a>socket.io-computer配置</h1><h2 id="安装依赖-1"><a href="#安装依赖-1" class="headerlink" title="安装依赖"></a>安装依赖</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo apt-get -y install qemu redis-server</span><br></pre></td></tr></table></figure>
 <h2 id="虚拟机配置"><a href="#虚拟机配置" class="headerlink" title="虚拟机配置"></a>虚拟机配置</h2><p>生成一个光盘镜像文件用来加载ISO</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 winxp.img 10G</span><br></pre></td></tr></table></figure>
-<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><h3 id="启动Web服务器"><a href="#启动Web服务器" class="headerlink" title="启动Web服务器"></a>启动Web服务器</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node app.js</span><br></pre></td></tr></table></figure>
-<h3 id="启动IO服务器"><a href="#启动IO服务器" class="headerlink" title="启动IO服务器"></a>启动IO服务器</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node io.js</span><br></pre></td></tr></table></figure>
-<h3 id="生成qemu实例"><a href="#生成qemu实例" class="headerlink" title="生成qemu实例"></a>生成qemu实例</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">COMPUTER_ISO=winxp.iso COMPUTER_IMG=winxp.img node qemu.js</span><br></pre></td></tr></table></figure>
-<h3 id="启动虚拟机"><a href="#启动虚拟机" class="headerlink" title="启动虚拟机"></a>启动虚拟机</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">COMPUTER_IMG=winxp.img node emu-runner.js</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">qemu-img create -f qcow2 winxp.img 10G</span><br></pre></td></tr></table></figure>
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><h3 id="启动Web服务器"><a href="#启动Web服务器" class="headerlink" title="启动Web服务器"></a>启动Web服务器</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">node app.js</span><br></pre></td></tr></table></figure>
+<h3 id="启动IO服务器"><a href="#启动IO服务器" class="headerlink" title="启动IO服务器"></a>启动IO服务器</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">node io.js</span><br></pre></td></tr></table></figure>
+<h3 id="生成qemu实例"><a href="#生成qemu实例" class="headerlink" title="生成qemu实例"></a>生成qemu实例</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">COMPUTER_ISO=winxp.iso COMPUTER_IMG=winxp.img node qemu.js</span><br></pre></td></tr></table></figure>
+<h3 id="启动虚拟机"><a href="#启动虚拟机" class="headerlink" title="启动虚拟机"></a>启动虚拟机</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">COMPUTER_IMG=winxp.img node emu-runner.js</span><br></pre></td></tr></table></figure>
 <h1 id="运行-1"><a href="#运行-1" class="headerlink" title="运行"></a>运行</h1><p>访问<code>http://localhost:5000</code></p>
 <h1 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h1><h2 id="若搭建在服务器上，使用IP访问"><a href="#若搭建在服务器上，使用IP访问" class="headerlink" title="若搭建在服务器上，使用IP访问"></a>若搭建在服务器上，使用IP访问</h2><p>需要修改</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var url = process.env.COMPUTER_IO_URL || &apos;http://localhost:6001&apos;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var url = process.env.COMPUTER_IO_URL || &apos;http://localhost:6001&apos;;</span><br></pre></td></tr></table></figure>
 <p>为</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var url = process.env.COMPUTER_IO_URL || &apos;http://your IP address:6001&apos;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var url = process.env.COMPUTER_IO_URL || &apos;http://your IP address:6001&apos;;</span><br></pre></td></tr></table></figure>
 <p>否则无法正常连接</p>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2015年07月06日 完成主体框架</li>
@@ -396,8 +396,7 @@
 <script type="text/javascript">
     $("img").addClass("img-responsive");
 </script>
-<script type="text/javascript" src="/dist/js/highlight.pack.min.js"></script>
-<script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript" src="/dist/js/prism.js"></script>
 <script id="dsq-count-scr" src="//only0god.disqus.com/count.js" async></script>
 <script>
     (function (i, s, o, g, r, a, m) {
