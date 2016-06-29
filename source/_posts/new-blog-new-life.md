@@ -22,7 +22,7 @@ toc: true
 
 Hexo主题的结构大体如下：
 
-```
+```bash
 .
 ├── _config.yml
 ├── languages
@@ -92,7 +92,7 @@ Hexo 渲染的入口是`_layout.swig`，所以一个主题至少需要实现一�
 
 整体的结构基本如下：
 
-```
+```swig
 <!doctype html>
 <html>
 <head>
@@ -119,7 +119,7 @@ Hexo 渲染的入口是`_layout.swig`，所以一个主题至少需要实现一�
 
 判断的部分实现如下：
 
-```
+```swig
 {% if is_index %}
     {% if post.excerpt %}
         {{ post.excerpt }}
@@ -136,7 +136,7 @@ Hexo 渲染的入口是`_layout.swig`，所以一个主题至少需要实现一�
 
 Hexo 自己实现了一个分页插件，直接使用paginator函数即可。
 
-```
+```swig
 {% if page.prev or page.next %}
     <nav class="pagination">
         {{ paginator({
@@ -152,7 +152,7 @@ Hexo 自己实现了一个分页插件，直接使用paginator函数即可。
 
 对于Hexo来说，评论系统就是调用一个第三方的JS。所以只需要在合适的位置插入代码即可。
 
-```
+```swig
 <div id="disqus_thread"></div>
 <script>
     var disqus_config = function () {
