@@ -63,6 +63,7 @@
 <script type="text/javascript" src="/dist/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/dist/js/wow.min.js"></script>
 <script type="text/javascript" src="/dist/js/custom.js"></script>
+<script type="text/javascript" src="/dist/js/prism.js"></script>
 <script type="text/javascript">
     $("img").addClass("img-responsive");
 </script>
