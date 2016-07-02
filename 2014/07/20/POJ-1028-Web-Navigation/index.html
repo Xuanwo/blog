@@ -119,61 +119,8 @@
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>这是一道STL里面的栈的运用的一个模板题。构建两个栈，一个存放forward，一个存放backward，然后后再建立一个string类用于存放浏览器当前的页面。题目不难，但是要理解你现在的操作对栈影响是什么，先后顺序一点都不能错。</p>
 <a id="more"></a>
 <h1 id="新技能get"><a href="#新技能get" class="headerlink" title="新技能get"></a>新技能get</h1><p>std::stack中几个常用的操作<br>|stack<int> example; |建立一个int型的栈                                 |<br>|example.push(a);    |将a的值放在example栈的最顶端                      |<br>|example.top();      |获取example栈当前最顶端的值，此处它的返回值为a的值|<br>|example.pop();      |将example栈最顶端的值丢弃                         |<br>|example.empty();    |判断example栈是否为空，是的话返回1，不是的话返回0 |</int></p>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include &lt;iostream&gt;
-#include &lt;stack&gt;
-#include &lt;string&gt;
-using namespace std;
-
-stack&lt;string&gt; forward;
-stack&lt;string&gt; backward;
-string order, tmp, now;
-
-int main(int argc, char const *argv[])
-{
-    now = &quot;http://www.acm.org/&quot;;
-    while (cin &gt;&gt; order &amp;&amp; order.compare(&quot;QUIT&quot;))
-    {
-        if (!order.compare(&quot;VISIT&quot;))
-        {
-            backward.push(now);
-            cin &gt;&gt; now;
-            cout &lt;&lt; now &lt;&lt; endl;
-            while (!forward.empty()) forward.pop();
-        }
-        else if (!order.compare(&quot;BACK&quot;))
-        {
-            if (!backward.empty())
-            {
-                forward.push(now);
-                now = backward.top();
-                backward.pop();
-                cout &lt;&lt; now &lt;&lt; endl;
-            }
-            else
-            {
-                cout &lt;&lt; &quot;Ignored\n&quot;;
-                continue;
-            }
-        }
-        else if (!order.compare(&quot;FORWARD&quot;))
-        {
-            if (!forward.empty())
-            {
-                backward.push(now);
-                now = forward.top();
-                forward.pop();
-                cout &lt;&lt; now &lt;&lt; endl;
-            }
-            else
-            {
-                cout &lt;&lt; &quot;Ignored\n&quot;;
-                continue;
-            }
-        }
-    }
-    return 0;
-}
-</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;stack&gt;</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">stack&lt;string&gt; forward;</span><br><span class="line">stack&lt;string&gt; backward;</span><br><span class="line">string order, tmp, now;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    now = &quot;http://www.acm.org/&quot;;</span><br><span class="line">    while (cin &gt;&gt; order &amp;&amp; order.compare(&quot;QUIT&quot;))</span><br><span class="line">    &#123;</span><br><span class="line">        if (!order.compare(&quot;VISIT&quot;))</span><br><span class="line">        &#123;</span><br><span class="line">            backward.push(now);</span><br><span class="line">            cin &gt;&gt; now;</span><br><span class="line">            cout &lt;&lt; now &lt;&lt; endl;</span><br><span class="line">            while (!forward.empty()) forward.pop();</span><br><span class="line">        &#125;</span><br><span class="line">        else if (!order.compare(&quot;BACK&quot;))</span><br><span class="line">        &#123;</span><br><span class="line">            if (!backward.empty())</span><br><span class="line">            &#123;</span><br><span class="line">                forward.push(now);</span><br><span class="line">                now = backward.top();</span><br><span class="line">                backward.pop();</span><br><span class="line">                cout &lt;&lt; now &lt;&lt; endl;</span><br><span class="line">            &#125;</span><br><span class="line">            else</span><br><span class="line">            &#123;</span><br><span class="line">                cout &lt;&lt; &quot;Ignored\n&quot;;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        else if (!order.compare(&quot;FORWARD&quot;))</span><br><span class="line">        &#123;</span><br><span class="line">            if (!forward.empty())</span><br><span class="line">            &#123;</span><br><span class="line">                backward.push(now);</span><br><span class="line">                now = forward.top();</span><br><span class="line">                forward.pop();</span><br><span class="line">                cout &lt;&lt; now &lt;&lt; endl;</span><br><span class="line">            &#125;</span><br><span class="line">            else</span><br><span class="line">            &#123;</span><br><span class="line">                cout &lt;&lt; &quot;Ignored\n&quot;;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月20日 已AC。</li>
 </ul>
 

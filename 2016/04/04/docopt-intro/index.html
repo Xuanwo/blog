@@ -118,58 +118,18 @@
 <a id="more"></a>
 <h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>docopt 本质上是在 Python 中引入了一种针对命令行参数的形式语言，在代码的最开头使用<code>&quot;&quot;&quot;</code>文档注释的形式写出符合要求的文档，就会自动生成对应的parse，体验非常赞。</p>
 <h1 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h1><h2 id="样例"><a href="#样例" class="headerlink" title="样例"></a>样例</h2><p>docopt的使用非常简单，以Qingchat为例，你只需要在代码最开头加入：</p>
-<pre><code class="python">&quot;&quot;&quot;Qingchat CLI
-
-Usage:
-  qingchat config ip &lt;ip&gt;
-  qingchat config port &lt;port&gt;
-  qingchat config login
-  qingchat group list
-  qingchat group choose &lt;group_name&gt;...
-  qingchat group clean
-  qingchat group send -t &lt;content&gt;
-  qingchat group send -i &lt;media&gt;
-  qingchat group send -f &lt;file&gt; [&lt;delaytime&gt;]
-
-Options:
-  -h --help     Show this screen.
-  -v --version     Show version.
-&quot;&quot;&quot;
-</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">"""Qingchat CLI</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  qingchat config ip &lt;ip&gt;</span><br><span class="line">  qingchat config port &lt;port&gt;</span><br><span class="line">  qingchat config login</span><br><span class="line">  qingchat group list</span><br><span class="line">  qingchat group choose &lt;group_name&gt;...</span><br><span class="line">  qingchat group clean</span><br><span class="line">  qingchat group send -t &lt;content&gt;</span><br><span class="line">  qingchat group send -i &lt;media&gt;</span><br><span class="line">  qingchat group send -f &lt;file&gt; [&lt;delaytime&gt;]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  -h --help     Show this screen.</span><br><span class="line">  -v --version     Show version.</span><br><span class="line">"""</span></span><br></pre></td></tr></table></figure>
 <p>然后在执行代码中加入：</p>
-<pre><code class="python">arguments = docopt(__doc__, version=&#39;Qingchat 0.3.2&#39;)
-</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">arguments = docopt(__doc__, version=<span class="string">'Qingchat 0.3.2'</span>)</span><br></pre></td></tr></table></figure>
 <p>就会在你的程序中导入一个<code>arguments</code>字典，这个字典中的内容形如：</p>
-<pre><code class="python">{
-    &#39;-f&#39;: False,
-    &#39;-i&#39;: False,
-    &#39;-t&#39;: False,
-    &#39;&lt;content&gt;&#39;: None,
-    &#39;&lt;file&gt;&#39;: None,
-    &#39;&lt;group_name&gt;&#39;: [],
-    &#39;&lt;ip&gt;&#39;: &#39;127.0.0.1&#39;,
-    &#39;&lt;media&gt;&#39;: None,
-    &#39;&lt;port&gt;&#39;: None,
-    &#39;choose&#39;: False,
-    &#39;clean&#39;: False,
-    &#39;config&#39;: True,
-    &#39;group&#39;: False,
-    &#39;ip&#39;: True,
-    &#39;list&#39;: False,
-    &#39;login&#39;: False,
-    &#39;port&#39;: False,
-    &#39;send&#39;: False
-}
-</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">'-f'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'-i'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'-t'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'&lt;content&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'&lt;file&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'&lt;group_name&gt;'</span>: [],</span><br><span class="line">    <span class="string">'&lt;ip&gt;'</span>: <span class="string">'127.0.0.1'</span>,</span><br><span class="line">    <span class="string">'&lt;media&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'&lt;port&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'choose'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'clean'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'config'</span>: <span class="keyword">True</span>,</span><br><span class="line">    <span class="string">'group'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'ip'</span>: <span class="keyword">True</span>,</span><br><span class="line">    <span class="string">'list'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'login'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'port'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'send'</span>: <span class="keyword">False</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这样应该就能很容易看出来，我们在文档中写的每一个短语，都被转化为一个对应的类型。只要直接调用<code>arguments[&#39;xxx&#39;]</code>就可以判断或者使用对应的值，从而实现对应的功能。</p>
 <h2 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h2><p>前面我们举了一个例子，下面我们来详细介绍一下如何完成一个符合 <code>docopt</code> 要求的注释文档。</p>
 <h3 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h3><p>所有出现在<code>usage:</code>（区分大小写）和一个空行之间的文本都会被识别为一个命令组合，<code>usage</code>后的第一个字母将会被识别为这个程序的名字，所有命令组合的每一个部分（空格分隔）都会成为字典中的一个key。</p>
 <h4 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h4><p>形如 <code>&lt;argument&gt;</code> 或者 <code>ARGUMENT</code> 的文本将会被识别为参数。<br>在转化后的字典中的取值为 <code>True</code> 或者 <code>False</code> 。</p>
-<pre><code class="python">Usage: my_program &lt;host&gt; &lt;port&gt;
-</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program &lt;host&gt; &lt;port&gt;</span><br></pre></td></tr></table></figure>
 <h4 id="选项"><a href="#选项" class="headerlink" title="选项"></a>选项</h4><p>形如 <code>-o</code> 或者 <code>--option</code> 的文本将会被识别为选项。<br>在转化后的字典中的取值为 <code>True</code> 或者 <code>False</code> 。</p>
-<pre><code class="python">Usage: my_program -f &lt;file&gt;
-</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program -f &lt;file&gt;</span><br></pre></td></tr></table></figure>
 <p>Tips:</p>
 <ul>
 <li>短选项可以组合起来，比如<code>-abc</code>等价于<code>-a -b -c</code></li>
@@ -179,21 +139,16 @@ Options:
 <h4 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h4><p>其他不满足 <code>--options</code> 或者 <code>&lt;arguments&gt;</code> 的文本将会被识别为（子）命令。<br>在转化后的字典中取值为 <code>True</code> 或者 <code>False</code>。</p>
 <h4 id="可选项"><a href="#可选项" class="headerlink" title="可选项"></a>可选项</h4><p>形如 <code>[optional elements]</code> 的文本是可选项。<br><code>elements</code>包括上述的三种类型：参数，选项以及命令。</p>
 <p>在相同或者不同的括号中都是一样的：</p>
-<pre><code class="python">Usage: my_program [command --option &lt;argument&gt;]
-</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program [command --option &lt;argument&gt;]</span><br></pre></td></tr></table></figure>
 <p>等价于</p>
-<pre><code class="python">Usage: my_program [command] [--option] [&lt;argument&gt;]
-</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program [command] [--option] [&lt;argument&gt;]</span><br></pre></td></tr></table></figure>
 <h4 id="必填项"><a href="#必填项" class="headerlink" title="必填项"></a>必填项</h4><p>形如 <code>(required elements)</code> 的文本是必填项。<br>上述三种元素默认都是必填项，<code>()</code>符号用在一些比较特殊的情形下，比如：</p>
-<pre><code class="python">Usage: my_program (--either-this &lt;and-that&gt; | &lt;or-this&gt;)
-</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program (--either-this &lt;<span class="keyword">and</span>-that&gt; | &lt;<span class="keyword">or</span>-this&gt;)</span><br></pre></td></tr></table></figure>
 <h4 id="选择项"><a href="#选择项" class="headerlink" title="选择项"></a>选择项</h4><p>形如 <code>element|another</code> 的文本是选择项，你可以从中选择一个值。</p>
-<pre><code class="python">Usage: my_program go (--up | --down | --left | --right)
-</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program go (--up | --down | --left | --right)</span><br></pre></td></tr></table></figure>
 <h4 id="列表项"><a href="#列表项" class="headerlink" title="列表项"></a>列表项</h4><p>形如 <code>element...</code> 的文本是列表项，你可以输入多个参数。</p>
 <p>比如说：</p>
-<pre><code class="python">Usage: my_program open &lt;file&gt;...
-</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program open &lt;file&gt;...</span><br></pre></td></tr></table></figure>
 <p>然后你可以通过<code>arguments[&#39;&lt;file&gt;&#39;]</code> 来访问这个列表。</p>
 <h3 id="Option"><a href="#Option" class="headerlink" title="Option"></a>Option</h3><p><code>Option</code> 部分用于指定某些特殊情形，比如：</p>
 <ul>

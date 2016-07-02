@@ -118,67 +118,8 @@
 <p><a href="http://codevs.cn/problem/1475/" target="_blank" rel="external">http://codevs.cn/problem/1475/</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>跟上一道题差不多- -，也是简单的写了一个循环，然后使用累积法计算十进制的值。不过有一个小小的坑，就是’A’字符的ANSI值不是’9’+1，而是’9’+7。为了省的麻烦，我还是采用了-‘A’+10这样的方法。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
-#include &lt;cstdio&gt;
-#include &lt;cstdlib&gt;
-#include &lt;cstring&gt;
-#include &lt;cmath&gt;
-#include &lt;ctime&gt;
-#include &lt;iostream&gt;
-#include &lt;algorithm&gt;
-#include &lt;string&gt;
-#include &lt;vector&gt;
-#include &lt;deque&gt;
-#include &lt;list&gt;
-#include &lt;set&gt;
-#include &lt;map&gt;
-#include &lt;stack&gt;
-#include &lt;queue&gt;
-#include &lt;numeric&gt;
-#include &lt;iomanip&gt;
-#include &lt;bitset&gt;
-#include &lt;sstream&gt;
-#include &lt;fstream&gt;
-#define debug puts(&quot;-----&quot;)
-#define pi (acos(-1.0))
-#define eps (1e-8)
-#define inf (1&lt;&lt;28)
-#define ll long long int
-using namespace std;
-
-#define MAXN 16
-
-int n,m;
-char num[MAXN]= {&#39;0&#39;,&#39;1&#39;,&#39;2&#39;,&#39;3&#39;,&#39;4&#39;,&#39;5&#39;,&#39;6&#39;,&#39;7&#39;,&#39;8&#39;,&#39;9&#39;,&#39;A&#39;,&#39;B&#39;,&#39;C&#39;,&#39;D&#39;,&#39;E&#39;,&#39;F&#39;};
-char str[MAXN];
-
-void init()
-{
-    memset(str,0,sizeof(str));
-    scanf(&quot;%s%d&quot;, str,&amp;m);
-    n=0;
-}
-
-void solve(char str[],int m)
-{
-    int i=0,len=strlen(str);
-    for(i=0; i&lt;len; i++)
-    {
-        if(str[i]&lt;=&#39;9&#39;)
-            n+=(str[i]-&#39;0&#39;)*pow(m,len-i-1);
-        else
-            n+=(str[i]-&#39;A&#39;+10)*pow(m,len-i-1);
-    }
-}
-
-int main(int argc, char const *argv[])
-{
-    init();
-    solve(str,m);
-    printf(&quot;%d\n&quot;, n);
-    return 0;
-}
-</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstdlib&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">#include &lt;ctime&gt;</span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">#include &lt;vector&gt;</span><br><span class="line">#include &lt;deque&gt;</span><br><span class="line">#include &lt;list&gt;</span><br><span class="line">#include &lt;set&gt;</span><br><span class="line">#include &lt;map&gt;</span><br><span class="line">#include &lt;stack&gt;</span><br><span class="line">#include &lt;queue&gt;</span><br><span class="line">#include &lt;numeric&gt;</span><br><span class="line">#include &lt;iomanip&gt;</span><br><span class="line">#include &lt;bitset&gt;</span><br><span class="line">#include &lt;sstream&gt;</span><br><span class="line">#include &lt;fstream&gt;</span><br><span class="line">#define debug puts(&quot;-----&quot;)</span><br><span class="line">#define pi (acos(-1.0))</span><br><span class="line">#define eps (1e-8)</span><br><span class="line">#define inf (1&lt;&lt;28)</span><br><span class="line">#define ll long long int</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">#define MAXN 16</span><br><span class="line"></span><br><span class="line">int n,m;</span><br><span class="line">char num[MAXN]= &#123;&apos;0&apos;,&apos;1&apos;,&apos;2&apos;,&apos;3&apos;,&apos;4&apos;,&apos;5&apos;,&apos;6&apos;,&apos;7&apos;,&apos;8&apos;,&apos;9&apos;,&apos;A&apos;,&apos;B&apos;,&apos;C&apos;,&apos;D&apos;,&apos;E&apos;,&apos;F&apos;&#125;;</span><br><span class="line">char str[MAXN];</span><br><span class="line"></span><br><span class="line">void init()</span><br><span class="line">&#123;</span><br><span class="line">    memset(str,0,sizeof(str));</span><br><span class="line">    scanf(&quot;%s%d&quot;, str,&amp;m);</span><br><span class="line">    n=0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void solve(char str[],int m)</span><br><span class="line">&#123;</span><br><span class="line">    int i=0,len=strlen(str);</span><br><span class="line">    for(i=0; i&lt;len; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        if(str[i]&lt;=&apos;9&apos;)</span><br><span class="line">            n+=(str[i]-&apos;0&apos;)*pow(m,len-i-1);</span><br><span class="line">        else</span><br><span class="line">            n+=(str[i]-&apos;A&apos;+10)*pow(m,len-i-1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    init();</span><br><span class="line">    solve(str,m);</span><br><span class="line">    printf(&quot;%d\n&quot;, n);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年10月20日 已AC。</li>
 </ul>
 

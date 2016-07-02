@@ -118,87 +118,8 @@
 <p><a href="http://poj.org/problem?id=1190" target="_blank" rel="external">http://poj.org/problem?id=1190</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>这道题是学长推荐的DFS练习题，一开始没有想明白，为什么这道题是DFS。多次推导之后发现，这道题确实需要用到深度搜索。每次都先确定第一层蛋糕的体积数，然后减去得到剩余的蛋糕体积，如此循坏，最后要保证最后的体积和等于给定的N。因为半径是递增的，所以可以去掉很大一部分无效的搜索。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
-#include &lt;cstdio&gt;
-#include &lt;cmath&gt;
-using namespace std;
-
-int N, S, M;
-int end, min;
-
-int dfs(int v, int m, int lastr, int lasth)
-{
-    if (m == 0)
-    {
-        if (v &gt; 0 || v &lt; 0)
-            return 0;
-        else
-        {
-            end = 1;
-            if (min &lt; S)
-                S = min;
-            return 0;
-        }
-    }
-    int i, t = 0, j, k, temp;
-    for (i = 1; i &lt;= m; i++)
-        t += i * i * i;
-    if (v &lt; t)
-        return 0;
-    t -= m * m * m;
-    int maxr, maxh;
-    maxr = (int)sqrt((v - t) * 1.0 / m) &lt; lastr ? (int)sqrt((v - t) * 1.0 / m) : lastr;
-    for (i = maxr; i &gt;= m; i--)
-    {
-        maxh = (v - t) / (i * i) &lt; lasth ? (v - t) / (i * i) : lasth;
-        for (j = maxh; j &gt;= m; j--)
-        {
-            temp = 0;
-            for (k = 0; k &lt;= m - 1; k++)
-                temp += (i - k) * (i - k) * (j - k);
-            if (v &gt; temp)
-                break;
-            int tempv = v - i * i * j;
-            if (m == M)
-            {
-                if (i * i &lt; S)
-                    min = i * i;
-                else
-                {
-                    tempv = v;
-                    continue;
-                }
-            }
-            min += 2 * i * j;
-            if (min &gt; S)
-            {
-                tempv = v;
-                min -= 2 * i * j;
-                continue;
-            }
-            dfs(tempv, m - 1, i - 1, j - 1);
-            min -= 2 * i * j;
-        }
-    }
-    return 0;
-}
-
-
-int main(int argc, char const *argv[])
-{
-    while (scanf(&quot;%d%d&quot;, &amp;N, &amp;M) == 2)
-    {
-        int t = 0;
-        end = 0;
-        S = 100000;
-        dfs(N, M, 1000, 1000);
-        if (!end)
-            S = 0;
-        printf(&quot;%d\n&quot;, S);
-    }
-    return 0;
-}
-</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int N, S, M;</span><br><span class="line">int end, min;</span><br><span class="line"></span><br><span class="line">int dfs(int v, int m, int lastr, int lasth)</span><br><span class="line">&#123;</span><br><span class="line">    if (m == 0)</span><br><span class="line">    &#123;</span><br><span class="line">        if (v &gt; 0 || v &lt; 0)</span><br><span class="line">            return 0;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            end = 1;</span><br><span class="line">            if (min &lt; S)</span><br><span class="line">                S = min;</span><br><span class="line">            return 0;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    int i, t = 0, j, k, temp;</span><br><span class="line">    for (i = 1; i &lt;= m; i++)</span><br><span class="line">        t += i * i * i;</span><br><span class="line">    if (v &lt; t)</span><br><span class="line">        return 0;</span><br><span class="line">    t -= m * m * m;</span><br><span class="line">    int maxr, maxh;</span><br><span class="line">    maxr = (int)sqrt((v - t) * 1.0 / m) &lt; lastr ? (int)sqrt((v - t) * 1.0 / m) : lastr;</span><br><span class="line">    for (i = maxr; i &gt;= m; i--)</span><br><span class="line">    &#123;</span><br><span class="line">        maxh = (v - t) / (i * i) &lt; lasth ? (v - t) / (i * i) : lasth;</span><br><span class="line">        for (j = maxh; j &gt;= m; j--)</span><br><span class="line">        &#123;</span><br><span class="line">            temp = 0;</span><br><span class="line">            for (k = 0; k &lt;= m - 1; k++)</span><br><span class="line">                temp += (i - k) * (i - k) * (j - k);</span><br><span class="line">            if (v &gt; temp)</span><br><span class="line">                break;</span><br><span class="line">            int tempv = v - i * i * j;</span><br><span class="line">            if (m == M)</span><br><span class="line">            &#123;</span><br><span class="line">                if (i * i &lt; S)</span><br><span class="line">                    min = i * i;</span><br><span class="line">                else</span><br><span class="line">                &#123;</span><br><span class="line">                    tempv = v;</span><br><span class="line">                    continue;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            min += 2 * i * j;</span><br><span class="line">            if (min &gt; S)</span><br><span class="line">            &#123;</span><br><span class="line">                tempv = v;</span><br><span class="line">                min -= 2 * i * j;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            dfs(tempv, m - 1, i - 1, j - 1);</span><br><span class="line">            min -= 2 * i * j;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    while (scanf(&quot;%d%d&quot;, &amp;N, &amp;M) == 2)</span><br><span class="line">    &#123;</span><br><span class="line">        int t = 0;</span><br><span class="line">        end = 0;</span><br><span class="line">        S = 100000;</span><br><span class="line">        dfs(N, M, 1000, 1000);</span><br><span class="line">        if (!end)</span><br><span class="line">            S = 0;</span><br><span class="line">        printf(&quot;%d\n&quot;, S);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月12日 已AC。</li>
 </ul>
 

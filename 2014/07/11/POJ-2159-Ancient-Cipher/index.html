@@ -118,40 +118,8 @@
 <p><a href="http://poj.org/problem?id=2159" target="_blank" rel="external">http://poj.org/problem?id=2159</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>一开始的理解是按照题目的意思，先进行一次置换加密再进行一次排列加密。置换只要按照规律一个一个替换就OK，排列加密则用到了<code>next_permutation</code>函数。两重for循环，模拟出去全部的加密方法。Coding出来之后提交，WA。然后才开始审视另外的可能性：谁说置换就一定要按照规律来？事实上，的确如此，按照题意，只需要明文和密文字符形成唯一映射就OK。如果还是按照原来的思路，这道水题还真的不水。其实，在加密过程中，有一样东西是不变的，就是各个字符（对应）出现的频率。这样想的话，就简单了，只要统计出每个字符出现的概率，sort排序后，判断两个数组是否完全一致就好～</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include &lt;iostream&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-using namespace std;
-
-int main()
-{
-    int i;
-    int cipher[26], clear[26];
-    memset(cipher, 0, sizeof(cipher));
-    memset(clear, 0, sizeof(clear));
-    string in, out;
-    cin &gt;&gt; in;
-    for (i = 0; i &lt; in.length(); i++)
-    {
-        cipher[in[i] - &#39;A&#39;]++;
-    }
-    cin &gt;&gt; out;
-    for (i = 0; i &lt; out.length(); i++)
-    {
-        clear[out[i] - &#39;A&#39;]++;
-    }
-    sort(cipher, cipher + 26);
-    sort(clear, clear + 26);
-    for (i = 0; i &lt; 26; i++)
-        if (cipher[i] != clear[i])
-        {
-            cout &lt;&lt; &quot;NO&quot; &lt;&lt; endl;
-            return 0;
-        }
-    cout &lt;&lt; &quot;YES&quot; &lt;&lt; endl;
-    return 0;
-}
-</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    int i;</span><br><span class="line">    int cipher[26], clear[26];</span><br><span class="line">    memset(cipher, 0, sizeof(cipher));</span><br><span class="line">    memset(clear, 0, sizeof(clear));</span><br><span class="line">    string in, out;</span><br><span class="line">    cin &gt;&gt; in;</span><br><span class="line">    for (i = 0; i &lt; in.length(); i++)</span><br><span class="line">    &#123;</span><br><span class="line">        cipher[in[i] - &apos;A&apos;]++;</span><br><span class="line">    &#125;</span><br><span class="line">    cin &gt;&gt; out;</span><br><span class="line">    for (i = 0; i &lt; out.length(); i++)</span><br><span class="line">    &#123;</span><br><span class="line">        clear[out[i] - &apos;A&apos;]++;</span><br><span class="line">    &#125;</span><br><span class="line">    sort(cipher, cipher + 26);</span><br><span class="line">    sort(clear, clear + 26);</span><br><span class="line">    for (i = 0; i &lt; 26; i++)</span><br><span class="line">        if (cipher[i] != clear[i])</span><br><span class="line">        &#123;</span><br><span class="line">            cout &lt;&lt; &quot;NO&quot; &lt;&lt; endl;</span><br><span class="line">            return 0;</span><br><span class="line">        &#125;</span><br><span class="line">    cout &lt;&lt; &quot;YES&quot; &lt;&lt; endl;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月11日 已AC。</li>
 </ul>
 

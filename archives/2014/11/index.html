@@ -399,11 +399,8 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://codeforces.com/contest/15/problem/E">http://codeforces.com/contest/15/problem/E</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>数学渣，这道题无从下手= =。为了方便能自己看出一些东西来，我打了前两项的表去CF提交，幸运地得到了n=6的解，结果是1354。这个结果印证了昨晚比赛时候我的一些想法，因为<code>10=(2^2+1)*2</code>，<code>74=(6^2+1)*2</code>，<code>1354=(26^2+1)*2</code>。也就是说，最后的结果一定是某一个数的平方加上一再乘二的结果。这样，这个问题就转化成了，如何找到那个数。我们可以看到，这个数组成的数列是<code>2 6 26</code>。考虑到最后的取模，这个数一定是指数级别的，要不然增长速度太慢了，作为一个未来的码农，想到的第一个数列就是2 4 8。乍一看感觉跟<code>2 6 26</code>扯不上关系，不过再观察一下，<code>2 6 26</code>向前递减之后可以得到另外一个衍生数列，也就是<code>2 4 20</code>。第一个反应就是<code>20=4*5</code>，但是对不上啊，4怎么处理？小脑一动，对啊，4=4*1。1和5跟原数列有什么关系呢？可以看到，<code>1=4-3</code>，<code>5=8-3</code>。<br>写到这里，脑子里面已经是一团浆糊了，我来列成表格梳理一下。</p>
-<pre><code>a  c  b
-2  4  2
-4  4  6
-8  20 26
-</code></pre><p>这样可以看出，a=pow(2,i)，c就等于c*(a-3)，明显，b=b+c。于是我就得到了最后的公式。<br>以上，是通过偷鸡往后再推了一项得到的题解，在实际的比赛中，一方面题目不会再给你下一项（CF倒是可以用这种方法骗答案），另一方面，真的比赛中思路也不会这么清晰。所以还是要学习正规的组合数学+DP的做法，在我学会之前，还是先挖一个坑吧= =。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a  c  b</span><br><span class="line">2  4  2</span><br><span class="line">4  4  6</span><br><span class="line">8  20 26</span><br></pre></td></tr></table></figure>
+<p>这样可以看出，a=pow(2,i)，c就等于c*(a-3)，明显，b=b+c。于是我就得到了最后的公式。<br>以上，是通过偷鸡往后再推了一项得到的题解，在实际的比赛中，一方面题目不会再给你下一项（CF倒是可以用这种方法骗答案），另一方面，真的比赛中思路也不会这么清晰。所以还是要学习正规的组合数学+DP的做法，在我学会之前，还是先挖一个坑吧= =。</p>
                 <a class="" href="/2014/11/23/CF-15E/">Read more</a>
             
         
@@ -994,9 +991,8 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4093">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4093</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>给出n个定点，要求计算出连接这些点的最短闭合路径。<br>使用dp[i][j]来保存从i到1再从1到j的最短距离。然后可以得到这样两条递推公式：</p>
-<pre><code>dp[i][i-1]=min(dp[i][i-1],dp[i-1][j]+dis(i,j));
-dp[i][j]=dp[i-1][j]+dis(i,i-1);
-</code></pre><p>最后的结果就是遍历一遍dp[n][i]+dis(n,i)，找到最小值。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">dp[i][i-1]=min(dp[i][i-1],dp[i-1][j]+dis(i,j));</span><br><span class="line">dp[i][j]=dp[i-1][j]+dis(i,i-1);</span><br></pre></td></tr></table></figure>
+<p>最后的结果就是遍历一遍dp[n][i]+dis(n,i)，找到最小值。</p>
                 <a class="" href="/2014/11/16/UVa-1347-Tour/">Read more</a>
             
         
@@ -2173,59 +2169,8 @@ dp[i][j]=dp[i-1][j]+dis(i,i-1);
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=113&amp;page=show_problem&amp;problem=655">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=113&amp;page=show_problem&amp;problem=655</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>比赛的时候读懂了题意，但是没有拿出来敲，因为感觉自己应该是敲不出来的。实际上，这是一道小白书上提到过的题目，也就是最大值最小化问题。<br><img src="/imgs/exercise/UVa-714.jpg" alt="算法竞赛入门经典P151"><br>使用一个pos数组来保存是否在此分段，然后使用二分最小值来确定pos的取值。<br>实际上我还不是能够非常具体地描述中间二分的过程，不妨在二分的循环当中打印pos数组的值来找一找感觉。</p>
-<pre><code>Input:
-1
-9 3
-100 200 300 400 500 600 700 800 900
-
-Output:
-0 0 0 0 0 1 0 0 0
-0 0 0 0 0 1 0 0 0
-0 0 0 0 0 0 1 0 0
-0 0 0 1 0 0 1 0 0
-0 0 0 1 0 0 1 0 0
-0 0 0 0 0 0 0 1 0
-0 0 0 0 0 0 1 1 0
-0 0 0 0 1 0 1 1 0
-0 1 0 0 1 0 1 1 0
-0 1 0 0 1 0 1 1 0
-0 0 0 0 0 0 0 1 0
-0 0 0 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 0 0 0 0 0 1 0
-0 0 0 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 0 0 0 1 0
-0 0 0 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 0 0 0 0 0 1 0
-0 0 0 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 1 0 1 0 0
-
-100 200 300 400 500 / 600 700 / 800 900
-</code></pre><p>除去最后一行是答案，不去考虑之外，我们可以看到这是一个在中央取值，然后不断向右靠拢的过程。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Input:</span><br><span class="line">1</span><br><span class="line">9 3</span><br><span class="line">100 200 300 400 500 600 700 800 900</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">0 0 0 0 0 1 0 0 0</span><br><span class="line">0 0 0 0 0 1 0 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 1 0 0 1 0 0</span><br><span class="line">0 0 0 1 0 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 0 1 1 0</span><br><span class="line">0 0 0 0 1 0 1 1 0</span><br><span class="line">0 1 0 0 1 0 1 1 0</span><br><span class="line">0 1 0 0 1 0 1 1 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line"></span><br><span class="line">100 200 300 400 500 / 600 700 / 800 900</span><br></pre></td></tr></table></figure>
+<p>除去最后一行是答案，不去考虑之外，我们可以看到这是一个在中央取值，然后不断向右靠拢的过程。</p>
                 <a class="" href="/2014/11/04/UVa-714-Copying-Books/">Read more</a>
             
         

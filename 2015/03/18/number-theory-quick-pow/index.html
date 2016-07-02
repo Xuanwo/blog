@@ -114,138 +114,22 @@
         </div>
         <h2><a href="/2015/03/18/number-theory-quick-pow/">数论——快速幂</a></h2>
         
-            <h1 id="原始代码"><a href="#原始代码" class="headerlink" title="原始代码"></a>原始代码</h1><pre><code>int Pow(int A, int n)
-{
-    if (n == 0) return 1;
-    int rslt = 1;
-    for (int i = 0; i &lt; n; ++i)
-    {
-        rslt *= A;
-    }
-    return rslt;
-}
-</code></pre><a id="more"></a>
+            <h1 id="原始代码"><a href="#原始代码" class="headerlink" title="原始代码"></a>原始代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int Pow(int A, int n)</span><br><span class="line">&#123;</span><br><span class="line">    if (n == 0) return 1;</span><br><span class="line">    int rslt = 1;</span><br><span class="line">    for (int i = 0; i &lt; n; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        rslt *= A;</span><br><span class="line">    &#125;</span><br><span class="line">    return rslt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
 <p>很简单的算法，复杂度为O(n)，但是当n特别大的时候，可能会出现以下两个问题：</p>
 <ul>
 <li>爆int，我们无法使用int来存储我们最后的结果。</li>
 <li>计算量上升极快，即使是O(n)的复杂度也无法满足我们的需要。</li>
 </ul>
 <h1 id="二分优化"><a href="#二分优化" class="headerlink" title="二分优化"></a>二分优化</h1><p>快速幂的思想非常简单，就是二分法：</p>
-<pre><code>对于一般的解法：
-A^8 = A * A * A * A * A * A * A * A
-总共需要7次乘法运算；
-
-将其平均分解：
-A^8 = (A * A * A * A) * (A * A * A * A) = (A * A * A * A) ^ 2
-这样我们就只需要4次乘法运算了；
-
-我们还可以将其再分解：
-A^6 = [(A * A) * (A * A)] ^ 2 = [(A * A) ^ 2] ^ 2
-这样就将乘法运算的次数减少为了3次。
-</code></pre><p>当然，进行这样的分解需要满足一个前提：进行快速幂运算的数据类型必须是满足结合律的。然后，我们可以看出，这种二分解法将原本n次的运算降低为<code>logn / log2</code>次。在这样的思想指导下，我们可以得出一个O(logn)的优化算法：</p>
-<pre><code>int qPow(int A, int n)
-{
-    if (n == 0) return 1;
-    int rslt = 1;
-
-    while (n)
-    {
-        if (n &amp; 1) //如果n为奇数
-        {
-            rslt *= A;
-        }
-        A *= A;
-        n &gt;&gt;= 1;
-    }
-    return rslt;
-}
-</code></pre><h1 id="矩阵快速幂"><a href="#矩阵快速幂" class="headerlink" title="矩阵快速幂"></a>矩阵快速幂</h1><p>矩阵和整数的快速幂运算算法在代数上应该是等价的，矩阵也具备快速幂运算所必需的条件：结合律。因此，我们在前面得出的结论也能应用到矩阵当中。<br>首先，我们需要实现一个矩阵类，重载一些运算符：</p>
-<pre><code>class Matrix
-{
-public:
-    int N; // 矩阵维数
-    int** m; // 存储矩阵的二维数组
-
-    Matrix(int n = 2)
-    {
-        m = new int*[n];
-        for (int i=0; i &lt; n; ++i)
-        {
-            m[i] = new int[n];
-        }
-        N = n;
-        clear();
-    }
-
-// 将矩阵清空为零矩阵
-    void clear()
-    {
-        for (int i=0; i &lt; N; ++i)
-        {
-            memset(m[i], 0, sizeof(int) * N);
-        }
-    }
-
-// 将矩阵设定为单位矩阵
-    void unit()
-    {
-        clear();
-        for (int i=0; i &lt; N; ++i)
-        {
-            m[i][i] = 1;
-        }
-    }
-
-// 矩阵的赋值
-    Matrix operator= (Matrix &amp;othr)
-    {
-        Matrix(othr.N);
-        for (int i=0; i &lt; othr.N; ++i)
-        {
-            for (int j=0; j &lt; othr.N; ++j)
-            {
-                m[i][j] = othr.m[i][j];
-            }
-        }
-        return *this;
-    }
-
-// 矩阵的乘法
-//!假设所有因子均为同阶方阵
-    Matrix operator* (Matrix &amp;othr)
-    {
-        Matrix rslt(othr.N);
-        for (int i=0; i &lt; othr.N; ++i)
-        {
-            for (int j=0; j &lt; othr.N; ++j)
-            {
-                for (int k=0; k &lt; othr.N; ++k)
-                {
-                    rslt.m[i][j] += m[i][k] * othr.m[k][j];
-                }
-            }
-        }
-        return rslt;
-    }
-};
-</code></pre><p>有了矩阵类，我们下面再依样画瓢地实现一遍快速幂运算：</p>
-<pre><code>Matrix qMPow(Matrix &amp;A, int n)
-{
-    Matrix rslt(A.N);
-    rslt.unit();
-    if (n == 0) return rslt;
-    while (n)
-    {
-        if (n &amp; 1) // 若幂为奇数
-        {
-            rslt = rslt * A;
-        }
-        A = A * A;
-        n &gt;&gt;= 1; // 右位移等价于除以2
-    }
-    return rslt;
-}
-</code></pre><h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">对于一般的解法：</span><br><span class="line">A^8 = A * A * A * A * A * A * A * A</span><br><span class="line">总共需要7次乘法运算；</span><br><span class="line"></span><br><span class="line">将其平均分解：</span><br><span class="line">A^8 = (A * A * A * A) * (A * A * A * A) = (A * A * A * A) ^ 2</span><br><span class="line">这样我们就只需要4次乘法运算了；</span><br><span class="line"></span><br><span class="line">我们还可以将其再分解：</span><br><span class="line">A^6 = [(A * A) * (A * A)] ^ 2 = [(A * A) ^ 2] ^ 2</span><br><span class="line">这样就将乘法运算的次数减少为了3次。</span><br></pre></td></tr></table></figure>
+<p>当然，进行这样的分解需要满足一个前提：进行快速幂运算的数据类型必须是满足结合律的。然后，我们可以看出，这种二分解法将原本n次的运算降低为<code>logn / log2</code>次。在这样的思想指导下，我们可以得出一个O(logn)的优化算法：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int qPow(int A, int n)</span><br><span class="line">&#123;</span><br><span class="line">    if (n == 0) return 1;</span><br><span class="line">    int rslt = 1;</span><br><span class="line"></span><br><span class="line">    while (n)</span><br><span class="line">    &#123;</span><br><span class="line">        if (n &amp; 1) //如果n为奇数</span><br><span class="line">        &#123;</span><br><span class="line">            rslt *= A;</span><br><span class="line">        &#125;</span><br><span class="line">        A *= A;</span><br><span class="line">        n &gt;&gt;= 1;</span><br><span class="line">    &#125;</span><br><span class="line">    return rslt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="矩阵快速幂"><a href="#矩阵快速幂" class="headerlink" title="矩阵快速幂"></a>矩阵快速幂</h1><p>矩阵和整数的快速幂运算算法在代数上应该是等价的，矩阵也具备快速幂运算所必需的条件：结合律。因此，我们在前面得出的结论也能应用到矩阵当中。<br>首先，我们需要实现一个矩阵类，重载一些运算符：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class Matrix</span><br><span class="line">&#123;</span><br><span class="line">public:</span><br><span class="line">    int N; // 矩阵维数</span><br><span class="line">    int** m; // 存储矩阵的二维数组</span><br><span class="line"></span><br><span class="line">    Matrix(int n = 2)</span><br><span class="line">    &#123;</span><br><span class="line">        m = new int*[n];</span><br><span class="line">        for (int i=0; i &lt; n; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            m[i] = new int[n];</span><br><span class="line">        &#125;</span><br><span class="line">        N = n;</span><br><span class="line">        clear();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">// 将矩阵清空为零矩阵</span><br><span class="line">    void clear()</span><br><span class="line">    &#123;</span><br><span class="line">        for (int i=0; i &lt; N; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            memset(m[i], 0, sizeof(int) * N);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">// 将矩阵设定为单位矩阵</span><br><span class="line">    void unit()</span><br><span class="line">    &#123;</span><br><span class="line">        clear();</span><br><span class="line">        for (int i=0; i &lt; N; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            m[i][i] = 1;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">// 矩阵的赋值</span><br><span class="line">    Matrix operator= (Matrix &amp;othr)</span><br><span class="line">    &#123;</span><br><span class="line">        Matrix(othr.N);</span><br><span class="line">        for (int i=0; i &lt; othr.N; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            for (int j=0; j &lt; othr.N; ++j)</span><br><span class="line">            &#123;</span><br><span class="line">                m[i][j] = othr.m[i][j];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return *this;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">// 矩阵的乘法</span><br><span class="line">//!假设所有因子均为同阶方阵</span><br><span class="line">    Matrix operator* (Matrix &amp;othr)</span><br><span class="line">    &#123;</span><br><span class="line">        Matrix rslt(othr.N);</span><br><span class="line">        for (int i=0; i &lt; othr.N; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            for (int j=0; j &lt; othr.N; ++j)</span><br><span class="line">            &#123;</span><br><span class="line">                for (int k=0; k &lt; othr.N; ++k)</span><br><span class="line">                &#123;</span><br><span class="line">                    rslt.m[i][j] += m[i][k] * othr.m[k][j];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return rslt;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>有了矩阵类，我们下面再依样画瓢地实现一遍快速幂运算：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Matrix qMPow(Matrix &amp;A, int n)</span><br><span class="line">&#123;</span><br><span class="line">    Matrix rslt(A.N);</span><br><span class="line">    rslt.unit();</span><br><span class="line">    if (n == 0) return rslt;</span><br><span class="line">    while (n)</span><br><span class="line">    &#123;</span><br><span class="line">        if (n &amp; 1) // 若幂为奇数</span><br><span class="line">        &#123;</span><br><span class="line">            rslt = rslt * A;</span><br><span class="line">        &#125;</span><br><span class="line">        A = A * A;</span><br><span class="line">        n &gt;&gt;= 1; // 右位移等价于除以2</span><br><span class="line">    &#125;</span><br><span class="line">    return rslt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><ul>
 <li><a href="http://blueve.me/archives/660" target="_blank" rel="external">快速幂运算</a></li>
 </ul>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>

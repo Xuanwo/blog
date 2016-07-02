@@ -117,57 +117,8 @@
             <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=1014" target="_blank" rel="external">http://poj.org/problem?id=1014</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>我的思路非常直接，直接当成一道数学题来解。于是把所有的数都mod2，得到了一个二进制串，然后以这个为基础，开始寻找特例，结果挂的很惨。比如<code>0 3 2 0 0 0</code>，这种情况是在mod2的时候直接就舍去的。说明我这种方法本质上有着缺陷。网上的大牛们大多采用了多重背包的方法，但是有一个人在discuss中提出了mod60的方法。实际上，这个是mod2思路的进一步延伸，也就是解决了<code>0 3 2 0 0 0</code>这种类型的特例。然后再不断的用sum去减，判断最后能都减至0，实质上是用了DFS。<br><a id="more"></a></p>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
-#include &lt;cstdio&gt;
-using namespace std;
-
-int num[6] = {0};
-int value[6] = {1, 2, 3, 4, 5, 6};
-int mod[6] = {60, 30, 20, 15, 12, 10};
-int t = 0;
-int cp[6] = {0};
-
-int divide(int a)
-{
-    if (a == 0) return 1;
-    for (int i = 5; i &gt;= 0; --i)
-    {
-        if (cp[i] &amp;&amp; a &gt;= value[i])
-        {
-            cp[i]--;
-            if (divide(a - value[i]) == 1) return 1;
-            cp[i]++;
-        }
-    }
-    return 0;
-}
-
-int main(int argc, char const *argv[])
-{
-    while (true)
-    {
-        int sum = 0;
-        for (int i = 0; i &lt; 6; ++i)
-        {
-            scanf(&quot;%d&quot;, &amp;num[i]);
-            num[i] = num[i] % mod[i];
-            sum += value[i] * num[i];
-            cp[i] = num[i];
-        }
-        if (!sum) break;
-        printf(&quot;Collection #%d:\n&quot;, ++t);
-        if (sum % 2 != 0) printf(&quot;Can&#39;t be divided.\n&quot;);
-        else
-        {
-            sum = sum / 2;
-            if (divide(sum)) printf(&quot;Can be divided.\n&quot;);
-            else printf(&quot;Can&#39;t be divided.\n&quot;);
-        }
-        printf(&quot;\n&quot;);
-    }
-    return 0;
-}
-</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int num[6] = &#123;0&#125;;</span><br><span class="line">int value[6] = &#123;1, 2, 3, 4, 5, 6&#125;;</span><br><span class="line">int mod[6] = &#123;60, 30, 20, 15, 12, 10&#125;;</span><br><span class="line">int t = 0;</span><br><span class="line">int cp[6] = &#123;0&#125;;</span><br><span class="line"></span><br><span class="line">int divide(int a)</span><br><span class="line">&#123;</span><br><span class="line">    if (a == 0) return 1;</span><br><span class="line">    for (int i = 5; i &gt;= 0; --i)</span><br><span class="line">    &#123;</span><br><span class="line">        if (cp[i] &amp;&amp; a &gt;= value[i])</span><br><span class="line">        &#123;</span><br><span class="line">            cp[i]--;</span><br><span class="line">            if (divide(a - value[i]) == 1) return 1;</span><br><span class="line">            cp[i]++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    while (true)</span><br><span class="line">    &#123;</span><br><span class="line">        int sum = 0;</span><br><span class="line">        for (int i = 0; i &lt; 6; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            scanf(&quot;%d&quot;, &amp;num[i]);</span><br><span class="line">            num[i] = num[i] % mod[i];</span><br><span class="line">            sum += value[i] * num[i];</span><br><span class="line">            cp[i] = num[i];</span><br><span class="line">        &#125;</span><br><span class="line">        if (!sum) break;</span><br><span class="line">        printf(&quot;Collection #%d:\n&quot;, ++t);</span><br><span class="line">        if (sum % 2 != 0) printf(&quot;Can&apos;t be divided.\n&quot;);</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            sum = sum / 2;</span><br><span class="line">            if (divide(sum)) printf(&quot;Can be divided.\n&quot;);</span><br><span class="line">            else printf(&quot;Can&apos;t be divided.\n&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月16日 已AC。</li>
 </ul>
 

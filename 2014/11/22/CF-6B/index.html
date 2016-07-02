@@ -118,53 +118,8 @@
 <p><a href="http://codeforces.com/problemset/problem/6/B" target="_blank" rel="external">http://codeforces.com/problemset/problem/6/B</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>总统的办公室里面坐着他的副手，然后每个人都会有一张办公桌（长短不一，但每个人都有自己的颜色）。然后告诉你每个人的办公桌都是长方形，给定一个描述办公室布局的图，要你求出这个办公室里面总统的副手有几个。<br>一开始我想得太多，觉得应该用DFS来暴力搜索，只要判断总统办公桌的四周即可。后来发现这种方法是不可行，决定采用STL里面的pair+set来做。思路很简单，既然已经告诉我办公桌都是长方形的，那么，我只要找到总统办公桌所占的区域，然后直接遍历这块区域外围的一圈即可。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
-#define MAXN 100+10
-
-char c,road[MAXN][MAXN];
-int n,m;
-pair&lt;int,int&gt; lt(-1,-1);
-    pair&lt;int,int&gt; rb(-1,-1);
-    set&lt;char&gt; ans;
-
- void init()
- {
-     scanf(&quot;%d %d %c&quot;, &amp;n,&amp;m,&amp;c);
-     for(int i=0;i&lt;n;i++)
-     {
-         scanf(&quot;%s&quot;, road[i]);
-     }
- }
-
-int main(int argc, char const *argv[])
-{
-    init();
-
-    for(int i=0;i&lt;n;i++)
-    {
-        for(int j=0;j&lt;m;j++)
-        {
-            if(road[i][j]==c)
-            {
-                rb=pair&lt;int,int&gt;(i,j);
-                if(lt.first&lt;0)  lt=pair&lt;int,int&gt;(i,j);
-            }
-        }
-    }
-    for(int i=lt.first;i&lt;=rb.first;i++)
-    {
-        for(int j=lt.second;j&lt;=rb.second;j++)
-        {
-            if(i&gt;0&amp;&amp;road[i-1][j]!=c&amp;&amp;road[i-1][j]!=&#39;.&#39;) ans.insert(road[i-1][j]);
-            if(i&lt;n-1&amp;&amp;road[i+1][j]!=c&amp;&amp;road[i+1][j]!=&#39;.&#39;)   ans.insert(road[i+1][j]);
-            if(j&gt;0&amp;&amp;road[i][j-1]!=c&amp;&amp;road[i][j-1]!=&#39;.&#39;) ans.insert(road[i][j-1]);
-            if(j&lt;m-1&amp;&amp;road[i][j+1]!=c&amp;&amp;road[i][j+1]!=&#39;.&#39;)   ans.insert(road[i][j+1]);
-        }
-    }
-    printf(&quot;%d&quot;, ans.size());
-    return 0;
-}
-</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#define MAXN 100+10</span><br><span class="line"></span><br><span class="line">char c,road[MAXN][MAXN];</span><br><span class="line">int n,m;</span><br><span class="line">pair&lt;int,int&gt; lt(-1,-1);</span><br><span class="line">    pair&lt;int,int&gt; rb(-1,-1);</span><br><span class="line">    set&lt;char&gt; ans;</span><br><span class="line"></span><br><span class="line"> void init()</span><br><span class="line"> &#123;</span><br><span class="line">     scanf(&quot;%d %d %c&quot;, &amp;n,&amp;m,&amp;c);</span><br><span class="line">     for(int i=0;i&lt;n;i++)</span><br><span class="line">     &#123;</span><br><span class="line">         scanf(&quot;%s&quot;, road[i]);</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    init();</span><br><span class="line"></span><br><span class="line">    for(int i=0;i&lt;n;i++)</span><br><span class="line">    &#123;</span><br><span class="line">        for(int j=0;j&lt;m;j++)</span><br><span class="line">        &#123;</span><br><span class="line">            if(road[i][j]==c)</span><br><span class="line">            &#123;</span><br><span class="line">                rb=pair&lt;int,int&gt;(i,j);</span><br><span class="line">                if(lt.first&lt;0)  lt=pair&lt;int,int&gt;(i,j);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    for(int i=lt.first;i&lt;=rb.first;i++)</span><br><span class="line">    &#123;</span><br><span class="line">        for(int j=lt.second;j&lt;=rb.second;j++)</span><br><span class="line">        &#123;</span><br><span class="line">            if(i&gt;0&amp;&amp;road[i-1][j]!=c&amp;&amp;road[i-1][j]!=&apos;.&apos;) ans.insert(road[i-1][j]);</span><br><span class="line">            if(i&lt;n-1&amp;&amp;road[i+1][j]!=c&amp;&amp;road[i+1][j]!=&apos;.&apos;)   ans.insert(road[i+1][j]);</span><br><span class="line">            if(j&gt;0&amp;&amp;road[i][j-1]!=c&amp;&amp;road[i][j-1]!=&apos;.&apos;) ans.insert(road[i][j-1]);</span><br><span class="line">            if(j&lt;m-1&amp;&amp;road[i][j+1]!=c&amp;&amp;road[i][j+1]!=&apos;.&apos;)   ans.insert(road[i][j+1]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    printf(&quot;%d&quot;, ans.size());</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年11月22日 已AC。</li>
 </ul>
 

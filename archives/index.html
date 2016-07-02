@@ -1969,17 +1969,7 @@
         <h2><a href="/2015/03/18/number-theory-quick-pow/">数论——快速幂</a></h2>
         
             
-                <h1 id="原始代码"><a href="#原始代码" class="headerlink" title="原始代码"></a>原始代码</h1><pre><code>int Pow(int A, int n)
-{
-    if (n == 0) return 1;
-    int rslt = 1;
-    for (int i = 0; i &lt; n; ++i)
-    {
-        rslt *= A;
-    }
-    return rslt;
-}
-</code></pre>
+                <h1 id="原始代码"><a href="#原始代码" class="headerlink" title="原始代码"></a>原始代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int Pow(int A, int n)</span><br><span class="line">&#123;</span><br><span class="line">    if (n == 0) return 1;</span><br><span class="line">    int rslt = 1;</span><br><span class="line">    for (int i = 0; i &lt; n; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        rslt *= A;</span><br><span class="line">    &#125;</span><br><span class="line">    return rslt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
                 <a class="" href="/2015/03/18/number-theory-quick-pow/">Read more</a>
             
         
@@ -2018,18 +2008,7 @@
         
             
                 <h1 id="暴力瞎搞求素数"><a href="#暴力瞎搞求素数" class="headerlink" title="暴力瞎搞求素数"></a>暴力瞎搞求素数</h1><p>首先，我们需要个判断是否为素数的算法：</p>
-<pre><code>bool IsPrime(unsigned n)  //此处n是一个大于2的整数
-{
-    for (unsigned i = 2; i &lt; n / 2 + 1; ++i)
-    {
-        if (n % i == 0)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-</code></pre>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bool IsPrime(unsigned n)  //此处n是一个大于2的整数</span><br><span class="line">&#123;</span><br><span class="line">    for (unsigned i = 2; i &lt; n / 2 + 1; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        if (n % i == 0)</span><br><span class="line">        &#123;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
                 <a class="" href="/2015/03/18/number-theory-sieve-method-to-find-primes/">Read more</a>
             
         
@@ -2670,11 +2649,8 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://codeforces.com/contest/15/problem/E">http://codeforces.com/contest/15/problem/E</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>数学渣，这道题无从下手= =。为了方便能自己看出一些东西来，我打了前两项的表去CF提交，幸运地得到了n=6的解，结果是1354。这个结果印证了昨晚比赛时候我的一些想法，因为<code>10=(2^2+1)*2</code>，<code>74=(6^2+1)*2</code>，<code>1354=(26^2+1)*2</code>。也就是说，最后的结果一定是某一个数的平方加上一再乘二的结果。这样，这个问题就转化成了，如何找到那个数。我们可以看到，这个数组成的数列是<code>2 6 26</code>。考虑到最后的取模，这个数一定是指数级别的，要不然增长速度太慢了，作为一个未来的码农，想到的第一个数列就是2 4 8。乍一看感觉跟<code>2 6 26</code>扯不上关系，不过再观察一下，<code>2 6 26</code>向前递减之后可以得到另外一个衍生数列，也就是<code>2 4 20</code>。第一个反应就是<code>20=4*5</code>，但是对不上啊，4怎么处理？小脑一动，对啊，4=4*1。1和5跟原数列有什么关系呢？可以看到，<code>1=4-3</code>，<code>5=8-3</code>。<br>写到这里，脑子里面已经是一团浆糊了，我来列成表格梳理一下。</p>
-<pre><code>a  c  b
-2  4  2
-4  4  6
-8  20 26
-</code></pre><p>这样可以看出，a=pow(2,i)，c就等于c*(a-3)，明显，b=b+c。于是我就得到了最后的公式。<br>以上，是通过偷鸡往后再推了一项得到的题解，在实际的比赛中，一方面题目不会再给你下一项（CF倒是可以用这种方法骗答案），另一方面，真的比赛中思路也不会这么清晰。所以还是要学习正规的组合数学+DP的做法，在我学会之前，还是先挖一个坑吧= =。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a  c  b</span><br><span class="line">2  4  2</span><br><span class="line">4  4  6</span><br><span class="line">8  20 26</span><br></pre></td></tr></table></figure>
+<p>这样可以看出，a=pow(2,i)，c就等于c*(a-3)，明显，b=b+c。于是我就得到了最后的公式。<br>以上，是通过偷鸡往后再推了一项得到的题解，在实际的比赛中，一方面题目不会再给你下一项（CF倒是可以用这种方法骗答案），另一方面，真的比赛中思路也不会这么清晰。所以还是要学习正规的组合数学+DP的做法，在我学会之前，还是先挖一个坑吧= =。</p>
                 <a class="" href="/2014/11/23/CF-15E/">Read more</a>
             
         
@@ -3265,9 +3241,8 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4093">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4093</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>给出n个定点，要求计算出连接这些点的最短闭合路径。<br>使用dp[i][j]来保存从i到1再从1到j的最短距离。然后可以得到这样两条递推公式：</p>
-<pre><code>dp[i][i-1]=min(dp[i][i-1],dp[i-1][j]+dis(i,j));
-dp[i][j]=dp[i-1][j]+dis(i,i-1);
-</code></pre><p>最后的结果就是遍历一遍dp[n][i]+dis(n,i)，找到最小值。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">dp[i][i-1]=min(dp[i][i-1],dp[i-1][j]+dis(i,j));</span><br><span class="line">dp[i][j]=dp[i-1][j]+dis(i,i-1);</span><br></pre></td></tr></table></figure>
+<p>最后的结果就是遍历一遍dp[n][i]+dis(n,i)，找到最小值。</p>
                 <a class="" href="/2014/11/16/UVa-1347-Tour/">Read more</a>
             
         
@@ -4444,59 +4419,8 @@ dp[i][j]=dp[i-1][j]+dis(i,i-1);
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=113&amp;page=show_problem&amp;problem=655">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=113&amp;page=show_problem&amp;problem=655</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>比赛的时候读懂了题意，但是没有拿出来敲，因为感觉自己应该是敲不出来的。实际上，这是一道小白书上提到过的题目，也就是最大值最小化问题。<br><img src="/imgs/exercise/UVa-714.jpg" alt="算法竞赛入门经典P151"><br>使用一个pos数组来保存是否在此分段，然后使用二分最小值来确定pos的取值。<br>实际上我还不是能够非常具体地描述中间二分的过程，不妨在二分的循环当中打印pos数组的值来找一找感觉。</p>
-<pre><code>Input:
-1
-9 3
-100 200 300 400 500 600 700 800 900
-
-Output:
-0 0 0 0 0 1 0 0 0
-0 0 0 0 0 1 0 0 0
-0 0 0 0 0 0 1 0 0
-0 0 0 1 0 0 1 0 0
-0 0 0 1 0 0 1 0 0
-0 0 0 0 0 0 0 1 0
-0 0 0 0 0 0 1 1 0
-0 0 0 0 1 0 1 1 0
-0 1 0 0 1 0 1 1 0
-0 1 0 0 1 0 1 1 0
-0 0 0 0 0 0 0 1 0
-0 0 0 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 0 0 0 0 0 1 0
-0 0 0 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 0 0 0 1 0
-0 0 0 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 0 0 0 0 0 1 0
-0 0 0 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 1 0 0 1 0 1 0
-0 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 1 0 0
-0 0 0 0 1 0 1 0 0
-
-100 200 300 400 500 / 600 700 / 800 900
-</code></pre><p>除去最后一行是答案，不去考虑之外，我们可以看到这是一个在中央取值，然后不断向右靠拢的过程。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Input:</span><br><span class="line">1</span><br><span class="line">9 3</span><br><span class="line">100 200 300 400 500 600 700 800 900</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">0 0 0 0 0 1 0 0 0</span><br><span class="line">0 0 0 0 0 1 0 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 1 0 0 1 0 0</span><br><span class="line">0 0 0 1 0 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 0 1 1 0</span><br><span class="line">0 0 0 0 1 0 1 1 0</span><br><span class="line">0 1 0 0 1 0 1 1 0</span><br><span class="line">0 1 0 0 1 0 1 1 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line"></span><br><span class="line">100 200 300 400 500 / 600 700 / 800 900</span><br></pre></td></tr></table></figure>
+<p>除去最后一行是答案，不去考虑之外，我们可以看到这是一个在中央取值，然后不断向右靠拢的过程。</p>
                 <a class="" href="/2014/11/04/UVa-714-Copying-Books/">Read more</a>
             
         
@@ -5745,8 +5669,8 @@ Output:
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://codeforces.com/contest/2/problem/A">http://codeforces.com/contest/2/problem/A</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>真尼玛给俄式英语跪了= =，游戏规则中最关键的地方各种看不懂。</p>
-<pre><code>If score is negative, this means that the player has lost in the round.`
-</code></pre><p>这句话一直看不懂，是不是只要为负就能直接出局？还是就算暂时是负的也是没有关系的，只要最后大于最后的M就可以？直到看到CF的多组样例之后才明白，应该是后面一种。<br>除了这个之外，好好地学习了一下STL中的map，vector和迭代器，感觉好厉害！涨姿势了。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">If score is negative, this means that the player has lost in the round.`</span><br></pre></td></tr></table></figure>
+<p>这句话一直看不懂，是不是只要为负就能直接出局？还是就算暂时是负的也是没有关系的，只要最后大于最后的M就可以？直到看到CF的多组样例之后才明白，应该是后面一种。<br>除了这个之外，好好地学习了一下STL中的map，vector和迭代器，感觉好厉害！涨姿势了。</p>
                 <a class="" href="/2014/10/22/CF-2A/">Read more</a>
             
         
@@ -8323,15 +8247,8 @@ Output:
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=3083">http://poj.org/problem?id=3083</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>最开始的代码程序直接报错，反复调试之后，发现我陷入了无限的循环之中。因为先写的左转优先的代码，面对这样的数据时：</p>
-<pre><code>########
-#......#
-#.####.#
-#.####.#
-#.####.#
-#.####.#
-#...#..#  //此行倒数第二和第三的`.`会使得左转优先策略陷入无限循环
-#S#E####
-</code></pre><p>因此，仅仅是写DFS是不够的，我还需要对当前的朝向再进行判断。<br>除了这个之外，就是一个BFS了，最短路径用DFS不太合适。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">########</span><br><span class="line">#......#</span><br><span class="line">#.####.#</span><br><span class="line">#.####.#</span><br><span class="line">#.####.#</span><br><span class="line">#.####.#</span><br><span class="line">#...#..#  //此行倒数第二和第三的`.`会使得左转优先策略陷入无限循环</span><br><span class="line">#S#E####</span><br></pre></td></tr></table></figure>
+<p>因此，仅仅是写DFS是不够的，我还需要对当前的朝向再进行判断。<br>除了这个之外，就是一个BFS了，最短路径用DFS不太合适。</p>
                 <a class="" href="/2014/08/19/POJ-3083-Children-of-the-Candy-Corn/">Read more</a>
             
         
@@ -9978,14 +9895,8 @@ Output:
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=2231">http://poj.org/problem?id=2231</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>打表找规律，排序之后发现：</p>
-<pre><code>1     2     3     4     5
-
-0     1     2     3     4
-1     0     1     2     3
-2     1     0     1     2
-3     2     1     0     1
-4     3     2     1     0
-</code></pre><p>把下面矩阵的所有数字相加就是所求的结果。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1     2     3     4     5</span><br><span class="line"></span><br><span class="line">0     1     2     3     4</span><br><span class="line">1     0     1     2     3</span><br><span class="line">2     1     0     1     2</span><br><span class="line">3     2     1     0     1</span><br><span class="line">4     3     2     1     0</span><br></pre></td></tr></table></figure>
+<p>把下面矩阵的所有数字相加就是所求的结果。</p>
                 <a class="" href="/2014/08/16/POJ-2231-Moo-Volume/">Read more</a>
             
         
@@ -11030,13 +10941,7 @@ Output:
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=1458">http://poj.org/problem?id=1458</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>DP的基础题，求最长子序列（LCS）。<br>状态转移方程伪代码如下：</p>
-<pre><code>if (i == 0 || j == 0)
-    dp[i,j] = 0
-else if (X[i] == Y[j])
-    dp[i,j] = dp[i-1,j-1] + 1
-else
-    dp[i,j] = max(dp[i-1,j], dp[i,j-1])
-</code></pre>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if (i == 0 || j == 0)</span><br><span class="line">    dp[i,j] = 0</span><br><span class="line">else if (X[i] == Y[j])</span><br><span class="line">    dp[i,j] = dp[i-1,j-1] + 1</span><br><span class="line">else</span><br><span class="line">    dp[i,j] = max(dp[i-1,j], dp[i,j-1])</span><br></pre></td></tr></table></figure>
                 <a class="" href="/2014/08/12/POJ-1458-Common-Subsequence/">Read more</a>
             
         
@@ -11357,11 +11262,8 @@ else
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=1159">http://poj.org/problem?id=1159</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>最关键的公式是：</p>
-<pre><code>if (str[i] == str[j])
-    DP[k][j] = DP[1 - k][j - 1];
-else
-    DP[k][j] = min(DP[1 - k][j], DP[k][j - 1]) + 1;
-</code></pre><p>注意到k空间的循环利用，节省了空间，感谢大牛提供的思路。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if (str[i] == str[j])</span><br><span class="line">    DP[k][j] = DP[1 - k][j - 1];</span><br><span class="line">else</span><br><span class="line">    DP[k][j] = min(DP[1 - k][j], DP[k][j - 1]) + 1;</span><br></pre></td></tr></table></figure>
+<p>注意到k空间的循环利用，节省了空间，感谢大牛提供的思路。</p>
                 <a class="" href="/2014/08/12/POJ-1159-Palindrome/">Read more</a>
             
         
@@ -11761,14 +11663,8 @@ else
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=2039">http://poj.org/problem?id=2039</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>找规律的题目。<br>首先看一下加密的方式：<br>原文为<code>theresonoplacelikehomeonasnowynightx</code>，分成N列来写，没有写满的用x填充，写成如下队列：</p>
-<pre><code>t o i o y
-h p k n n
-e l e a i
-r a h s g
-e c o n h
-s e m o t
-n l e w x
-</code></pre><p>对于奇数行，从左向后书写，对于偶数行，从右向左书写，得到密文：<br><code>toioynnkpheleaigshareconhtomesnlewx</code><br>显然，解密的方式就是原样还原回去。<br>一共进行N次读入，对于第i次读取，用j定位行数。<br>如果j为偶数，输出<code>N*j+i</code>；<br>如果j为奇数，输出<code>N*(j+1)-1-i</code>。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">t o i o y</span><br><span class="line">h p k n n</span><br><span class="line">e l e a i</span><br><span class="line">r a h s g</span><br><span class="line">e c o n h</span><br><span class="line">s e m o t</span><br><span class="line">n l e w x</span><br></pre></td></tr></table></figure>
+<p>对于奇数行，从左向后书写，对于偶数行，从右向左书写，得到密文：<br><code>toioynnkpheleaigshareconhtomesnlewx</code><br>显然，解密的方式就是原样还原回去。<br>一共进行N次读入，对于第i次读取，用j定位行数。<br>如果j为偶数，输出<code>N*j+i</code>；<br>如果j为奇数，输出<code>N*(j+1)-1-i</code>。</p>
                 <a class="" href="/2014/08/06/POJ-2039-To-and-Fro/">Read more</a>
             
         
@@ -14986,11 +14882,8 @@ n l e w x
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=3194">http://poj.org/problem?id=3194</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>本以为只要逐个判断每一个数是否有相邻即可，事实上，少考虑了一种情况。<br>比如下面给出的这种：</p>
-<pre><code>2211
-1111
-1111
-1122
-</code></pre><p>根据我原来的思路这种也是good，但其实并不是如此。当然，这个例子并不完备，但用于指出原来思路的漏洞已经够了。正确的思路应当是使用DFS来寻找是否存在独立的区块。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2211</span><br><span class="line">1111</span><br><span class="line">1111</span><br><span class="line">1122</span><br></pre></td></tr></table></figure>
+<p>根据我原来的思路这种也是good，但其实并不是如此。当然，这个例子并不完备，但用于指出原来思路的漏洞已经够了。正确的思路应当是使用DFS来寻找是否存在独立的区块。</p>
                 <a class="" href="/2014/07/12/POJ-3194-Equidivisions/">Read more</a>
             
         

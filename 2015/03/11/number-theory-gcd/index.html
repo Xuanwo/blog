@@ -125,45 +125,13 @@
 </ul>
 <p>在数学中，尤其是高等数学的环论中，最大公约数有一个更加巧妙的定义：a和b的最大公约数g是a和b的线性和中（绝对值）最小的一个，即所有形如ua + vb（其中u和v是整数）的数中（绝对值）最小的数。所有ua + vb都是g的整数倍（ua + vb = mg，其中m是整数）。</p>
 <h2 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h2><p>例如，计算a = 1071和b = 462的最大公约数的过程如下：从1071中不断减去462直到小于462（可以减2次，即商q0 = 2），余数是147：<br>1071 = 2 × 462 + 147.<br>然后从462中不断减去147直到小于147（可以减3次，即q1 = 3），余数是21：<br>462 = 3 × 147 + 21.<br>再从147中不断减去21直到小于21（可以减7次，即q2 = 7），没有余数：<br>147 = 7 × 21 + 0.<br>此时，余数是0，所以1071和462的最大公约数是21。</p>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><h3 id="递归"><a href="#递归" class="headerlink" title="递归"></a>递归</h3><pre><code>int Gcd(int a, int b)
-{
-    if(b == 0)
-        return a;
-    return Gcd(b, a % b);
-}
-</code></pre><h3 id="迭代"><a href="#迭代" class="headerlink" title="迭代"></a>迭代</h3><pre><code>int Gcd(int a, int b)
-{
-    while(b != 0)
-    {
-        int r = b;
-        b = a % b;
-        a = r;
-    }
-    return a;
-}
-</code></pre><h1 id="扩展欧几里得算法"><a href="#扩展欧几里得算法" class="headerlink" title="扩展欧几里得算法"></a>扩展欧几里得算法</h1><h2 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h2><p>扩展欧几里德算法是用来在已知a, b求解一组p，q使得<code>p*a+q*b=Gcd(a,b)</code>(根据数论中的相关定理解一定存在，不展开叙述)。扩展欧几里德常用在求解模线性方程及方程组中。</p>
-<h2 id="算法-1"><a href="#算法-1" class="headerlink" title="算法"></a>算法</h2><pre><code>int exGcd(int a, int b, int &amp;x, int &amp;y)
-{
-    if(b == 0)
-    {
-        x = 1;
-        y = 0;
-        return a;
-    }
-    int r = exGcd(b, a % b, x, y);
-    int t = x;
-    x = y;
-    y = t - a / b * y;
-
-    return r;
-}
-</code></pre><h2 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h2><p>把这个实现和Gcd的递归实现相比，发现多了下面的x,y赋值过程，这就是扩展欧几里德算法的精髓。<br>可以这样思考:<br>对于<code>a&#39; =b</code> , <code>b&#39; =a%b</code> 而言，我们求得x, y使得<code>a&#39; x+b&#39; y=Gcd(a&#39;, b&#39;)</code><br>由于<code>b&#39; = a % b = a - a / b * b</code><br>那么可以得到:</p>
-<pre><code>a&#39; x + b&#39; y = Gcd(a&#39; , b&#39;)
-===&gt;
-bx + (a - a/b *b)y = Gcd(a&#39; , b&#39;) = Gcd(a, b)  //注意到这里的/是C语言中的出发
-===&gt;
-ay + b(x- a/b *y) = Gcd(a, b)
-</code></pre><p>因此对于a和b而言，他们的相对应的p，q分别是 y和(x-a/b*y)</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><h3 id="递归"><a href="#递归" class="headerlink" title="递归"></a>递归</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int Gcd(int a, int b)</span><br><span class="line">&#123;</span><br><span class="line">    if(b == 0)</span><br><span class="line">        return a;</span><br><span class="line">    return Gcd(b, a % b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="迭代"><a href="#迭代" class="headerlink" title="迭代"></a>迭代</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int Gcd(int a, int b)</span><br><span class="line">&#123;</span><br><span class="line">    while(b != 0)</span><br><span class="line">    &#123;</span><br><span class="line">        int r = b;</span><br><span class="line">        b = a % b;</span><br><span class="line">        a = r;</span><br><span class="line">    &#125;</span><br><span class="line">    return a;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="扩展欧几里得算法"><a href="#扩展欧几里得算法" class="headerlink" title="扩展欧几里得算法"></a>扩展欧几里得算法</h1><h2 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h2><p>扩展欧几里德算法是用来在已知a, b求解一组p，q使得<code>p*a+q*b=Gcd(a,b)</code>(根据数论中的相关定理解一定存在，不展开叙述)。扩展欧几里德常用在求解模线性方程及方程组中。</p>
+<h2 id="算法-1"><a href="#算法-1" class="headerlink" title="算法"></a>算法</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int exGcd(int a, int b, int &amp;x, int &amp;y)</span><br><span class="line">&#123;</span><br><span class="line">    if(b == 0)</span><br><span class="line">    &#123;</span><br><span class="line">        x = 1;</span><br><span class="line">        y = 0;</span><br><span class="line">        return a;</span><br><span class="line">    &#125;</span><br><span class="line">    int r = exGcd(b, a % b, x, y);</span><br><span class="line">    int t = x;</span><br><span class="line">    x = y;</span><br><span class="line">    y = t - a / b * y;</span><br><span class="line"></span><br><span class="line">    return r;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h2><p>把这个实现和Gcd的递归实现相比，发现多了下面的x,y赋值过程，这就是扩展欧几里德算法的精髓。<br>可以这样思考:<br>对于<code>a&#39; =b</code> , <code>b&#39; =a%b</code> 而言，我们求得x, y使得<code>a&#39; x+b&#39; y=Gcd(a&#39;, b&#39;)</code><br>由于<code>b&#39; = a % b = a - a / b * b</code><br>那么可以得到:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a&apos; x + b&apos; y = Gcd(a&apos; , b&apos;)</span><br><span class="line">===&gt;</span><br><span class="line">bx + (a - a/b *b)y = Gcd(a&apos; , b&apos;) = Gcd(a, b)  //注意到这里的/是C语言中的出发</span><br><span class="line">===&gt;</span><br><span class="line">ay + b(x- a/b *y) = Gcd(a, b)</span><br></pre></td></tr></table></figure>
+<p>因此对于a和b而言，他们的相对应的p，q分别是 y和(x-a/b*y)</p>
 <h1 id="Stein算法"><a href="#Stein算法" class="headerlink" title="Stein算法"></a>Stein算法</h1><h2 id="介绍-2"><a href="#介绍-2" class="headerlink" title="介绍"></a>介绍</h2><p>Stein算法由J. Stein 1961年提出，这个方法也是计算两个数的最大公约数。和欧几里德算法 算法不同的是，Stein算法只有整数的移位和加减法，因此对于大素数Stein将更有优势。</p>
 <h2 id="描述"><a href="#描述" class="headerlink" title="描述"></a>描述</h2><p>注意到如下结论：</p>
 <ol>
@@ -176,16 +144,8 @@ ay + b(x- a/b *y) = Gcd(a, b)
 <li>如果An和Bn都不是偶数，则An+1=|An-Bn|&gt;&gt;1，Bn+1=min(An,Bn)，Cn+1=Cn</li>
 <li>n加1，转1</li>
 </ol>
-<h2 id="算法-2"><a href="#算法-2" class="headerlink" title="算法"></a>算法</h2><pre><code>int Gcd(int a, int b)
-{
-    if(a == 0) return b;
-    if(b == 0) return a;
-    if(a % 2 == 0 &amp;&amp; b % 2 == 0) return 2 * gcd(a &gt;&gt; 1, b &gt;&gt; 1);
-    else if(a % 2 == 0)  return gcd(a &gt;&gt; 1, b);
-    else if(b % 2 == 0) return gcd(a, b &gt;&gt; 1);
-    else return gcd(abs(a - b), Min(a, b));
-}
-</code></pre><h1 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h1><ul>
+<h2 id="算法-2"><a href="#算法-2" class="headerlink" title="算法"></a>算法</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int Gcd(int a, int b)</span><br><span class="line">&#123;</span><br><span class="line">    if(a == 0) return b;</span><br><span class="line">    if(b == 0) return a;</span><br><span class="line">    if(a % 2 == 0 &amp;&amp; b % 2 == 0) return 2 * gcd(a &gt;&gt; 1, b &gt;&gt; 1);</span><br><span class="line">    else if(a % 2 == 0)  return gcd(a &gt;&gt; 1, b);</span><br><span class="line">    else if(b % 2 == 0) return gcd(a, b &gt;&gt; 1);</span><br><span class="line">    else return gcd(abs(a - b), Min(a, b));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h1><ul>
 <li><strong>求解不定方程</strong></li>
 </ul>
 <p>对于不定整数方程pa+qb=c，若 c mod Gcd(p, q)=0,则该方程存在整数解，否则不存在整数解。<br>上面已经列出找一个整数解的方法，在找到p <em> a+q </em> b = Gcd(p, q)的一组解p0,q0后，p <em> a+q </em> b = Gcd(p, q)的其他整数解满足：</p>

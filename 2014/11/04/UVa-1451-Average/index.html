@@ -118,63 +118,8 @@
 <p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=24&amp;page=show_problem&amp;problem=4197" target="_blank" rel="external">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=24&amp;page=show_problem&amp;problem=4197</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>这道题被康逗逗怒拿了FB，默默地去看题，结果完全看不出什么头绪。题意扯到了DNA神马的，其实完全不重要。实际上就是给你一个由0和1组成的串，叫你求出一段长度至少为L的连续子序列，使得这个子序列的平均数最小。如果出现多解，则要求取长度小而且起点小的那个序列。<br>感觉像是一个DP的题目，但是对如何高效地求出这个最优解没有什么思路。后来在题解中看到了一篇论文<a href="http://pan.baidu.com/s/1pJJS1Ij" target="_blank" rel="external">《浅谈数形结合思想在信息学竞赛中的应用》</a>。首先，我们可以将目标图形化，取每一个数的序号为X上的变量，取0和1为高度，则可以得出任意两点之间的斜率为<code>(sum[j]-sum[i])*1.0/(j-i)</code>。然后开始维护一个曲线，保证这个斜率上的每一段曲线都是斜率最大的。<br>在一个for循环中，设最后的节点是i，i~(L,n)。然后开始寻找这个曲线中满足&gt;L要求的最大斜率。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
-#define MAXN 100000+10
-
-int t,n,L;
-char str[MAXN];
-int sum[MAXN], qu[MAXN];
-double ans;
-int i;
-
-double getK(int i, int j)
-{
-    return (sum[j]-sum[i])*1.0/(j-i);
-}
-
-int main(int argc, char const *argv[])
-{
-    scanf(&quot;%d&quot;, &amp;t);
-    while(t--)
-    {
-        scanf(&quot;%d %d%s&quot;, &amp;n, &amp;L, str+1);
-        memset(sum,0,sizeof(int)*(n+5));
-        memset(qu,0,sizeof(int)*(n+5));
-        for(i=1; i&lt;=n; ++i)
-            sum[i]=sum[i-1]+str[i]-&#39;0&#39;;
-        int len=L;
-        ans=getK(0,L);
-        int st=0,ed=L;
-        int front=0,rear=-1;
-        for(i=L; i&lt;=n; ++i)
-        {
-            int temp=i-L;
-            while(front&lt;rear&amp;&amp;getK(qu[rear],temp)&lt;=getK(qu[rear-1], qu[rear]))
-                rear--;
-            qu[++rear]=temp;
-            while(front&lt;rear&amp;&amp;getK(qu[front],i)&lt;=getK(qu[front+1],i))
-                front++;
-            double t=getK(qu[front],i);
-            if(t==ans&amp;&amp;len&gt;i-qu[front])
-            {
-                len=i-qu[front];
-                st=qu[front];
-                ed=i;
-            }
-            else if(t&gt;ans)
-            {
-                ans=t;
-                len=i-qu[front];
-                st=qu[front];
-                ed=i;
-            }
-            cout&lt;&lt;debug&lt;&lt;getK(qu[front], i)&lt;&lt;endl;
-        }
-        printf(&quot;%d %d\n&quot;, st+1,ed);
-    }
-    return 0;
-}
-</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#define MAXN 100000+10</span><br><span class="line"></span><br><span class="line">int t,n,L;</span><br><span class="line">char str[MAXN];</span><br><span class="line">int sum[MAXN], qu[MAXN];</span><br><span class="line">double ans;</span><br><span class="line">int i;</span><br><span class="line"></span><br><span class="line">double getK(int i, int j)</span><br><span class="line">&#123;</span><br><span class="line">    return (sum[j]-sum[i])*1.0/(j-i);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    scanf(&quot;%d&quot;, &amp;t);</span><br><span class="line">    while(t--)</span><br><span class="line">    &#123;</span><br><span class="line">        scanf(&quot;%d %d%s&quot;, &amp;n, &amp;L, str+1);</span><br><span class="line">        memset(sum,0,sizeof(int)*(n+5));</span><br><span class="line">        memset(qu,0,sizeof(int)*(n+5));</span><br><span class="line">        for(i=1; i&lt;=n; ++i)</span><br><span class="line">            sum[i]=sum[i-1]+str[i]-&apos;0&apos;;</span><br><span class="line">        int len=L;</span><br><span class="line">        ans=getK(0,L);</span><br><span class="line">        int st=0,ed=L;</span><br><span class="line">        int front=0,rear=-1;</span><br><span class="line">        for(i=L; i&lt;=n; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            int temp=i-L;</span><br><span class="line">            while(front&lt;rear&amp;&amp;getK(qu[rear],temp)&lt;=getK(qu[rear-1], qu[rear]))</span><br><span class="line">                rear--;</span><br><span class="line">            qu[++rear]=temp;</span><br><span class="line">            while(front&lt;rear&amp;&amp;getK(qu[front],i)&lt;=getK(qu[front+1],i))</span><br><span class="line">                front++;</span><br><span class="line">            double t=getK(qu[front],i);</span><br><span class="line">            if(t==ans&amp;&amp;len&gt;i-qu[front])</span><br><span class="line">            &#123;</span><br><span class="line">                len=i-qu[front];</span><br><span class="line">                st=qu[front];</span><br><span class="line">                ed=i;</span><br><span class="line">            &#125;</span><br><span class="line">            else if(t&gt;ans)</span><br><span class="line">            &#123;</span><br><span class="line">                ans=t;</span><br><span class="line">                len=i-qu[front];</span><br><span class="line">                st=qu[front];</span><br><span class="line">                ed=i;</span><br><span class="line">            &#125;</span><br><span class="line">            cout&lt;&lt;debug&lt;&lt;getK(qu[front], i)&lt;&lt;endl;</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;%d %d\n&quot;, st+1,ed);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年11月4日 已AC。</li>
 </ul>
 

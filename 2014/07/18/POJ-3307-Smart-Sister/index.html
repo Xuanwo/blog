@@ -118,52 +118,8 @@
 <p><a href="http://poj.org/problem?id=3307" target="_blank" rel="external">http://poj.org/problem?id=3307</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>如果一个数可以通过其他数的各数字位相乘得到，则说这个数具有<code>productivity property</code>。要求求出第i个具有这种性质的数。我们考虑1～9这些数字，显然，我们只要考虑1，2，3，5，7这四个质因数，因为别的数都能通过他们来得到，于是可以得到代码。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include &lt;iostream&gt;
-#include &lt;cstdio&gt;
-#define MAX 80000
-using namespace std;
-__int64 s[MAX];
-__int64 d2[MAX];
-__int64 d3[MAX];
-__int64 d5[MAX];
-__int64 d7[MAX];
-
-void init()
-{
-    int i;
-    int pos2, pos3, pos5, pos7;
-    __int64 a, b;
-    s[1] = 1;
-    pos2 = pos3 = pos5 = pos7 = 1;
-    for (i = 1; i &lt; MAX - 1; i++)
-    {
-        d2[i] = s[i] * 2;
-        d3[i] = s[i] * 3;
-        d5[i] = s[i] * 5;
-        d7[i] = s[i] * 7;
-        while (d2[pos2] &lt;= s[i])pos2++;
-        while (d3[pos3] &lt;= s[i])pos3++;
-        while (d5[pos5] &lt;= s[i])pos5++;
-        while (d7[pos7] &lt;= s[i])pos7++;
-        a = d2[pos2] &lt; d3[pos3] ? d2[pos2] : d3[pos3];
-        b = d5[pos5] &lt; d7[pos7] ? d5[pos5] : d7[pos7];
-        s[i + 1] = a &lt; b ? a : b;
-    }
-}
-
-int main(int argc, char const *argv[])
-{
-    int k, n;
-    scanf(&quot;%d&quot;, &amp;k);
-    init();
-    while (k--)
-    {
-        scanf(&quot;%d&quot;, &amp;n);
-        printf(&quot;%I64d\n&quot;, s[n]);
-    }
-    return 0;
-}
-</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#define MAX 80000</span><br><span class="line">using namespace std;</span><br><span class="line">__int64 s[MAX];</span><br><span class="line">__int64 d2[MAX];</span><br><span class="line">__int64 d3[MAX];</span><br><span class="line">__int64 d5[MAX];</span><br><span class="line">__int64 d7[MAX];</span><br><span class="line"></span><br><span class="line">void init()</span><br><span class="line">&#123;</span><br><span class="line">    int i;</span><br><span class="line">    int pos2, pos3, pos5, pos7;</span><br><span class="line">    __int64 a, b;</span><br><span class="line">    s[1] = 1;</span><br><span class="line">    pos2 = pos3 = pos5 = pos7 = 1;</span><br><span class="line">    for (i = 1; i &lt; MAX - 1; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        d2[i] = s[i] * 2;</span><br><span class="line">        d3[i] = s[i] * 3;</span><br><span class="line">        d5[i] = s[i] * 5;</span><br><span class="line">        d7[i] = s[i] * 7;</span><br><span class="line">        while (d2[pos2] &lt;= s[i])pos2++;</span><br><span class="line">        while (d3[pos3] &lt;= s[i])pos3++;</span><br><span class="line">        while (d5[pos5] &lt;= s[i])pos5++;</span><br><span class="line">        while (d7[pos7] &lt;= s[i])pos7++;</span><br><span class="line">        a = d2[pos2] &lt; d3[pos3] ? d2[pos2] : d3[pos3];</span><br><span class="line">        b = d5[pos5] &lt; d7[pos7] ? d5[pos5] : d7[pos7];</span><br><span class="line">        s[i + 1] = a &lt; b ? a : b;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    int k, n;</span><br><span class="line">    scanf(&quot;%d&quot;, &amp;k);</span><br><span class="line">    init();</span><br><span class="line">    while (k--)</span><br><span class="line">    &#123;</span><br><span class="line">        scanf(&quot;%d&quot;, &amp;n);</span><br><span class="line">        printf(&quot;%I64d\n&quot;, s[n]);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月18日 已AC。</li>
 </ul>
 

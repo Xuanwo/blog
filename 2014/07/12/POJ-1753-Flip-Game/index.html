@@ -119,83 +119,8 @@
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>我一开始的思路是错误的，企图通过正面的方法来找出从当前情况达到全白和全黑的方法，多次尝试之后，发现很难找到一条通用的方法，只能找出几个比较简单的特例。后来才明白过来，应当从全黑或者全白的情况出发，再来判断给定的图是不是其中的一个子集。因为是一个4X4的格子，不难看出，总共的情况只有2^16种。只要一一枚举即可。最后的步数就是这颗树的深度，使用DFS即可实现。</p>
 <a id="more"></a>
 <h1 id="新技能get"><a href="#新技能get" class="headerlink" title="新技能get"></a>新技能get</h1><p>深度优先搜索<code>DFS</code><br>对每一个可能的分支路径深入到不能再深入为止，而且每个节点只能访问一次。</p>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include&lt;iostream&gt;
-using namespace std;
-
-bool chess[6][6]={false};
-bool flag;
-int step;
-int r[]={-1,1,0,0,0};
-int c[]={0,0,-1,1,0};
-
-bool judge_all(void)
-{
-    int i,j;
-    for(i=1;i&lt;5;i++)
-        for(j=1;j&lt;5;j++)
-            if(chess[i][j]!=chess[1][1])
-                return false;
-    return true;
-}
-
-void flip(int row,int col)
-{
-    int i;
-    for(i=0;i&lt;5;i++)
-        chess[row+r[i]][col+c[i]]=!chess[row+r[i]][col+c[i]];
-    return;
-}
-
-void dfs(int row,int col,int deep)
-{
-    if(deep==step)
-    {
-        flag=judge_all();
-        return;
-    }
-
-    if(flag||row==5)return;
-
-    flip(row,col);
-    if(col&lt;4)
-        dfs(row,col+1,deep+1);
-    else
-        dfs(row+1,1,deep+1);
-
-    flip(row,col);
-    if(col&lt;4)
-        dfs(row,col+1,deep);
-    else
-        dfs(row+1,1,deep);
-
-    return;
-}
-
-int main(void)
-{
-    char temp;
-    int i,j;
-    for(i=1;i&lt;5;i++)
-        for(j=1;j&lt;5;j++)
-        {
-            cin&gt;&gt;temp;
-            if(temp==&#39;b&#39;)
-                chess[i][j]=true;
-        }
-
-    for(step=0;step&lt;=16;step++)
-    {
-        dfs(1,1,0);
-        if(flag)break;
-    }
-
-    if(flag)
-        cout&lt;&lt;step&lt;&lt;endl;
-    else
-        cout&lt;&lt;&quot;Impossible&quot;&lt;&lt;endl;
-    return 0;
-}
-</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include&lt;iostream&gt;</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">bool chess[6][6]=&#123;false&#125;;</span><br><span class="line">bool flag;</span><br><span class="line">int step;</span><br><span class="line">int r[]=&#123;-1,1,0,0,0&#125;;</span><br><span class="line">int c[]=&#123;0,0,-1,1,0&#125;;</span><br><span class="line"></span><br><span class="line">bool judge_all(void)</span><br><span class="line">&#123;</span><br><span class="line">    int i,j;</span><br><span class="line">    for(i=1;i&lt;5;i++)</span><br><span class="line">        for(j=1;j&lt;5;j++)</span><br><span class="line">            if(chess[i][j]!=chess[1][1])</span><br><span class="line">                return false;</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void flip(int row,int col)</span><br><span class="line">&#123;</span><br><span class="line">    int i;</span><br><span class="line">    for(i=0;i&lt;5;i++)</span><br><span class="line">        chess[row+r[i]][col+c[i]]=!chess[row+r[i]][col+c[i]];</span><br><span class="line">    return;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void dfs(int row,int col,int deep)</span><br><span class="line">&#123;</span><br><span class="line">    if(deep==step)</span><br><span class="line">    &#123;</span><br><span class="line">        flag=judge_all();</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if(flag||row==5)return;</span><br><span class="line"></span><br><span class="line">    flip(row,col);</span><br><span class="line">    if(col&lt;4)</span><br><span class="line">        dfs(row,col+1,deep+1);</span><br><span class="line">    else</span><br><span class="line">        dfs(row+1,1,deep+1);</span><br><span class="line"></span><br><span class="line">    flip(row,col);</span><br><span class="line">    if(col&lt;4)</span><br><span class="line">        dfs(row,col+1,deep);</span><br><span class="line">    else</span><br><span class="line">        dfs(row+1,1,deep);</span><br><span class="line"></span><br><span class="line">    return;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(void)</span><br><span class="line">&#123;</span><br><span class="line">    char temp;</span><br><span class="line">    int i,j;</span><br><span class="line">    for(i=1;i&lt;5;i++)</span><br><span class="line">        for(j=1;j&lt;5;j++)</span><br><span class="line">        &#123;</span><br><span class="line">            cin&gt;&gt;temp;</span><br><span class="line">            if(temp==&apos;b&apos;)</span><br><span class="line">                chess[i][j]=true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    for(step=0;step&lt;=16;step++)</span><br><span class="line">    &#123;</span><br><span class="line">        dfs(1,1,0);</span><br><span class="line">        if(flag)break;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if(flag)</span><br><span class="line">        cout&lt;&lt;step&lt;&lt;endl;</span><br><span class="line">    else</span><br><span class="line">        cout&lt;&lt;&quot;Impossible&quot;&lt;&lt;endl;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月12日 已AC。</li>
 </ul>
 

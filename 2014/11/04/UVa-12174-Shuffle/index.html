@@ -120,67 +120,8 @@
 <p>&gt;<br>使用一个音乐播放器，采用随机播放。随机播放的原理时先随机产生一个1~n的排列，然后就按这个排列顺序播放歌曲。播放完这序列的所有歌曲以后，再次随机生成一个1～n的排列，再继续播放。然后，现在给你一个播放历史记录，但是这个记录是不完整的，因为当它开始记录的时候，有些歌可能已经播放过了但是没有记录到。现在给你一段历史记录和播放器中歌的个数，问历史记录中的第一首歌是某个随机列表的第几首，总共有多少可能？</p>
 <p>整个算法可以分成两段，首先处理min(s,n)中的部分，这部分出现的歌曲都放入一个sames容器，以bool数组ok[i]来记录从标号i开始的歌曲是不是都不相同。然后依次枚举第一首歌是第x首，先检查前s-x是不是都不相同，然后从x开始，依次判断x，x+s，x+2s等等是不是符合条件。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
-#define MAXN 100000+10
-
-map&lt;int,int&gt; cnt;
-set&lt;int&gt; sames;
-bool no[MAXN];
-int t,s,n;
-int a[MAXN];
-
-int main(int argc, char const *argv[])
-{
-    scanf(&quot;%d&quot;, &amp;t);
-    while(t--)
-    {
-        memset(no,0,sizeof(no));
-        cnt.clear(),sames.clear();
-        scanf(&quot;%d%d&quot;, &amp;s,&amp;n);
-        for(int i=0; i&lt;n; ++i)    scanf(&quot;%d&quot;, a+i);
-        int idx=-1;
-        for(int i=0; i&lt;min(s,n); ++i)
-        {
-            if(cnt[a[i]]&gt;0)
-            {
-                idx=i;
-                break;
-            }
-            cnt[a[i]]++;
-        }
-        if(idx==-1)
-        {
-            printf(&quot;%d\n&quot;, s);
-            continue;
-        }
-        for(int i=idx; i&lt;min(s,n); ++i)
-        {
-            if(cnt[a[i]]&gt;0) sames.insert(a[i]);
-            cnt[a[i]]++;
-        }
-        for(int i=0; i&lt;n; ++i)
-        {
-            if(sames.size())    no[i]=1;
-            if(i+s&lt;n)
-            {
-                if(cnt[a[i+s]]&gt;0)   sames.insert(a[i+s]);
-                cnt[a[i+s]]++;
-            }
-            if(cnt[a[i]]==2)    sames.erase(a[i]);
-            cnt[a[i]]--;
-        }
-        int ans=0;
-        for(int i=0; i&lt;idx; ++i)
-        {
-            bool can=1;
-            for(int j=i+1; j&lt;n; j+=s) can&amp;=!no[j];
-            ans+=can;
-        }
-        printf(&quot;%d\n&quot;,ans);
-    }
-    return 0;
-}
-</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#define MAXN 100000+10</span><br><span class="line"></span><br><span class="line">map&lt;int,int&gt; cnt;</span><br><span class="line">set&lt;int&gt; sames;</span><br><span class="line">bool no[MAXN];</span><br><span class="line">int t,s,n;</span><br><span class="line">int a[MAXN];</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    scanf(&quot;%d&quot;, &amp;t);</span><br><span class="line">    while(t--)</span><br><span class="line">    &#123;</span><br><span class="line">        memset(no,0,sizeof(no));</span><br><span class="line">        cnt.clear(),sames.clear();</span><br><span class="line">        scanf(&quot;%d%d&quot;, &amp;s,&amp;n);</span><br><span class="line">        for(int i=0; i&lt;n; ++i)    scanf(&quot;%d&quot;, a+i);</span><br><span class="line">        int idx=-1;</span><br><span class="line">        for(int i=0; i&lt;min(s,n); ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            if(cnt[a[i]]&gt;0)</span><br><span class="line">            &#123;</span><br><span class="line">                idx=i;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">            cnt[a[i]]++;</span><br><span class="line">        &#125;</span><br><span class="line">        if(idx==-1)</span><br><span class="line">        &#123;</span><br><span class="line">            printf(&quot;%d\n&quot;, s);</span><br><span class="line">            continue;</span><br><span class="line">        &#125;</span><br><span class="line">        for(int i=idx; i&lt;min(s,n); ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            if(cnt[a[i]]&gt;0) sames.insert(a[i]);</span><br><span class="line">            cnt[a[i]]++;</span><br><span class="line">        &#125;</span><br><span class="line">        for(int i=0; i&lt;n; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            if(sames.size())    no[i]=1;</span><br><span class="line">            if(i+s&lt;n)</span><br><span class="line">            &#123;</span><br><span class="line">                if(cnt[a[i+s]]&gt;0)   sames.insert(a[i+s]);</span><br><span class="line">                cnt[a[i+s]]++;</span><br><span class="line">            &#125;</span><br><span class="line">            if(cnt[a[i]]==2)    sames.erase(a[i]);</span><br><span class="line">            cnt[a[i]]--;</span><br><span class="line">        &#125;</span><br><span class="line">        int ans=0;</span><br><span class="line">        for(int i=0; i&lt;idx; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            bool can=1;</span><br><span class="line">            for(int j=i+1; j&lt;n; j+=s) can&amp;=!no[j];</span><br><span class="line">            ans+=can;</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;%d\n&quot;,ans);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年11月4日 UVa挂了= =。</li>
 <li>2014年11月5日 已AC。</li>
 </ul>
