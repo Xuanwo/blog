@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -117,11 +117,52 @@
             <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=2039" target="_blank" rel="external">http://poj.org/problem?id=2039</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>找规律的题目。<br>首先看一下加密的方式：<br>原文为<code>theresonoplacelikehomeonasnowynightx</code>，分成N列来写，没有写满的用x填充，写成如下队列：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">t o i o y</span><br><span class="line">h p k n n</span><br><span class="line">e l e a i</span><br><span class="line">r a h s g</span><br><span class="line">e c o n h</span><br><span class="line">s e m o t</span><br><span class="line">n l e w x</span><br></pre></td></tr></table></figure>
-<p>对于奇数行，从左向后书写，对于偶数行，从右向左书写，得到密文：<br><code>toioynnkpheleaigshareconhtomesnlewx</code><br>显然，解密的方式就是原样还原回去。<br>一共进行N次读入，对于第i次读取，用j定位行数。<br>如果j为偶数，输出<code>N*j+i</code>；<br>如果j为奇数，输出<code>N*(j+1)-1-i</code>。</p>
+<pre><code>t o i o y
+h p k n n
+e l e a i
+r a h s g
+e c o n h
+s e m o t
+n l e w x
+</code></pre><p>对于奇数行，从左向后书写，对于偶数行，从右向左书写，得到密文：<br><code>toioynnkpheleaigshareconhtomesnlewx</code><br>显然，解密的方式就是原样还原回去。<br>一共进行N次读入，对于第i次读取，用j定位行数。<br>如果j为偶数，输出<code>N*j+i</code>；<br>如果j为奇数，输出<code>N*(j+1)-1-i</code>。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstdlib&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line"></span><br><span class="line">char str[210];</span><br><span class="line">int N;</span><br><span class="line">int i, j;</span><br><span class="line">int len, M;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    while (scanf(&quot;%d&quot;, &amp;N), N != 0)</span><br><span class="line">    &#123;</span><br><span class="line">        getchar();</span><br><span class="line">        gets(str);</span><br><span class="line">        len = strlen(str);</span><br><span class="line">        M = (int)((double)N / (double)len + 0.999999);</span><br><span class="line">        for (i = 0; i &lt; N; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            for (j = 0; j * N &lt; len; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                if (j % 2 == 0)</span><br><span class="line">                &#123;</span><br><span class="line">                    printf(&quot;%c&quot;, str[N * j + i]);</span><br><span class="line">                &#125;</span><br><span class="line">                else if (j % 2 == 1)</span><br><span class="line">                &#123;</span><br><span class="line">                    printf(&quot;%c&quot;, str[N * (j + 1) - 1 - i]);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+
+char str[210];
+int N;
+int i, j;
+int len, M;
+
+int main(int argc, char const *argv[])
+{
+    while (scanf(&quot;%d&quot;, &amp;N), N != 0)
+    {
+        getchar();
+        gets(str);
+        len = strlen(str);
+        M = (int)((double)N / (double)len + 0.999999);
+        for (i = 0; i &lt; N; i++)
+        {
+            for (j = 0; j * N &lt; len; j++)
+            {
+                if (j % 2 == 0)
+                {
+                    printf(&quot;%c&quot;, str[N * j + i]);
+                }
+                else if (j % 2 == 1)
+                {
+                    printf(&quot;%c&quot;, str[N * (j + 1) - 1 - i]);
+                }
+            }
+        }
+        printf(&quot;\n&quot;);
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月06日 已AC。</li>
 </ul>
 
@@ -149,7 +190,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/06/POJ-2039-To-and-Fro/">POJ 2039 To and Fro</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月6日 - 14时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/06/POJ-2039-To-and-Fro/"
                                             title="POJ 2039 To and Fro">https://xuanwo.org/2014/08/06/POJ-2039-To-and-Fro/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -256,11 +297,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -119,10 +119,185 @@
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>这道题拖了很久很久，一直没有搞定，对DP以及背包问题的理解，一直处在一个瓶颈之中，特别烦躁。<br>知道今天在比赛群里面问了学长，才发现是空间优化的问题，二维的记忆化数组会直接超出容量限制。想通了这一点后，优化就变得简单了。只要另外定义一个新的数组f[MAXN]，从M-&gt;w[i]进行循环，最后的f[m]就是所要求的结果。</p>
 <a id="more"></a>
 <h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><p><strong>挂在空间占用上的代码</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstdlib&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">#include &lt;ctime&gt;</span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">#include &lt;vector&gt;</span><br><span class="line">#include &lt;deque&gt;</span><br><span class="line">#include &lt;list&gt;</span><br><span class="line">#include &lt;set&gt;</span><br><span class="line">#include &lt;map&gt;</span><br><span class="line">#include &lt;stack&gt;</span><br><span class="line">#include &lt;queue&gt;</span><br><span class="line">#include &lt;numeric&gt;</span><br><span class="line">#include &lt;iomanip&gt;</span><br><span class="line">#include &lt;bitset&gt;</span><br><span class="line">#include &lt;sstream&gt;</span><br><span class="line">#include &lt;fstream&gt;</span><br><span class="line">#define debug puts(&quot;-----&quot;)</span><br><span class="line">#define pi (acos(-1.0))</span><br><span class="line">#define eps (1e-8)</span><br><span class="line">#define inf (1&lt;&lt;28)</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">#define MAXN 3403</span><br><span class="line">#define MAXW 12881</span><br><span class="line"></span><br><span class="line">int n, m;</span><br><span class="line">int w[MAXN], d[MAXN];</span><br><span class="line">int dp[MAXN][MAXW];</span><br><span class="line"></span><br><span class="line">void init()</span><br><span class="line">&#123;</span><br><span class="line">    memset(w, 0, sizeof(w));</span><br><span class="line">    memset(d, 0, sizeof(d));</span><br><span class="line">    memset(dp, 0, sizeof(dp));</span><br><span class="line">    cin &gt;&gt; n &gt;&gt; m;</span><br><span class="line">    for (int i = 0; i &lt; n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        cin &gt;&gt; w[i] &gt;&gt; d[i];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//不作任何优化的搜索，TLE</span><br><span class="line">/*</span><br><span class="line">int rec(int i, int j)</span><br><span class="line">&#123;</span><br><span class="line">    int res;</span><br><span class="line">    if (i == n)</span><br><span class="line">    &#123;</span><br><span class="line">        res = 0;</span><br><span class="line">    &#125;</span><br><span class="line">    else if (j &lt; w[i])</span><br><span class="line">    &#123;</span><br><span class="line">        res = rec(i + 1, j);</span><br><span class="line">    &#125;</span><br><span class="line">    else</span><br><span class="line">    &#123;</span><br><span class="line">        res = max(rec(i + 1, j), rec(i + 1, j - w[i]) + d[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    return res;</span><br><span class="line">&#125;</span><br><span class="line">**/</span><br><span class="line"></span><br><span class="line">//采用记忆化搜索，出现WA，TLE，MLE，然后我一怒之下还交了一发CE= =，不知道错在哪里。</span><br><span class="line">/*</span><br><span class="line">int rec(int i, int j)</span><br><span class="line">&#123;</span><br><span class="line">    if (dp[i][j] &gt;= 0)     return dp[i][j];</span><br><span class="line">    int res;</span><br><span class="line">    if (i == n)</span><br><span class="line">    &#123;</span><br><span class="line">        res = 0;</span><br><span class="line">    &#125;</span><br><span class="line">    else if (j &lt; w[i])</span><br><span class="line">    &#123;</span><br><span class="line">        res = rec(i + 1, j);</span><br><span class="line">    &#125;</span><br><span class="line">    else</span><br><span class="line">    &#123;</span><br><span class="line">        res = max(rec(i + 1, j), rec(i + 1, j - w[i]) + d[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    return dp[i][j] = res;</span><br><span class="line">&#125;</span><br><span class="line">**/</span><br><span class="line"></span><br><span class="line">void solve()</span><br><span class="line">&#123;</span><br><span class="line">    for (int i = n - 1; i &gt;= 0; i--)</span><br><span class="line">    &#123;</span><br><span class="line">        for (int j = 0; j &lt;= m; j++)</span><br><span class="line">        &#123;</span><br><span class="line">            if (j &lt; w[i])</span><br><span class="line">            &#123;</span><br><span class="line">                dp[i][j] = dp[i + 1][j];</span><br><span class="line">            &#125;</span><br><span class="line">            else</span><br><span class="line">            &#123;</span><br><span class="line">                dp[i][j] = max(dp[i + 1][j], dp[i + 1][j - w[i]] + d[i]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    init();</span><br><span class="line">    solve();</span><br><span class="line">    printf(&quot;%d\n&quot;, dp[0][m]);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><strong>修改之后成功AC的代码</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstdlib&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">#include &lt;ctime&gt;</span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">#include &lt;vector&gt;</span><br><span class="line">#include &lt;deque&gt;</span><br><span class="line">#include &lt;list&gt;</span><br><span class="line">#include &lt;set&gt;</span><br><span class="line">#include &lt;map&gt;</span><br><span class="line">#include &lt;stack&gt;</span><br><span class="line">#include &lt;queue&gt;</span><br><span class="line">#include &lt;numeric&gt;</span><br><span class="line">#include &lt;iomanip&gt;</span><br><span class="line">#include &lt;bitset&gt;</span><br><span class="line">#include &lt;sstream&gt;</span><br><span class="line">#include &lt;fstream&gt;</span><br><span class="line">#define debug puts(&quot;-----&quot;)</span><br><span class="line">#define pi (acos(-1.0))</span><br><span class="line">#define eps (1e-8)</span><br><span class="line">#define inf (1&lt;&lt;28)</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">#define MAXN 20000</span><br><span class="line"></span><br><span class="line">int n, m;</span><br><span class="line">int w[MAXN], d[MAXN];</span><br><span class="line">int dp[MAXN];</span><br><span class="line"></span><br><span class="line">void init()</span><br><span class="line">&#123;</span><br><span class="line">    memset(w, 0, sizeof(w));</span><br><span class="line">    memset(d, 0, sizeof(d));</span><br><span class="line">    memset(dp, 0, sizeof(dp));</span><br><span class="line">    cin &gt;&gt; n &gt;&gt; m;</span><br><span class="line">    for (int i = 0; i &lt; n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        cin &gt;&gt; w[i] &gt;&gt; d[i];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void solve()</span><br><span class="line">&#123;</span><br><span class="line">    for (int i = 0; i &lt; n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        for (int j = m; j &gt;= w[i]; j--)</span><br><span class="line">        &#123;</span><br><span class="line">            dp[j] = max(dp[j], dp[j - w[i]] + d[i]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    init();</span><br><span class="line">    solve();</span><br><span class="line">    printf(&quot;%d\n&quot;, dp[m]);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<pre><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+#include &lt;cmath&gt;
+#include &lt;ctime&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;deque&gt;
+#include &lt;list&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+#include &lt;stack&gt;
+#include &lt;queue&gt;
+#include &lt;numeric&gt;
+#include &lt;iomanip&gt;
+#include &lt;bitset&gt;
+#include &lt;sstream&gt;
+#include &lt;fstream&gt;
+#define debug puts(&quot;-----&quot;)
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1&lt;&lt;28)
+using namespace std;
+
+#define MAXN 3403
+#define MAXW 12881
+
+int n, m;
+int w[MAXN], d[MAXN];
+int dp[MAXN][MAXW];
+
+void init()
+{
+    memset(w, 0, sizeof(w));
+    memset(d, 0, sizeof(d));
+    memset(dp, 0, sizeof(dp));
+    cin &gt;&gt; n &gt;&gt; m;
+    for (int i = 0; i &lt; n; i++)
+    {
+        cin &gt;&gt; w[i] &gt;&gt; d[i];
+    }
+}
+
+//不作任何优化的搜索，TLE
+/*
+int rec(int i, int j)
+{
+    int res;
+    if (i == n)
+    {
+        res = 0;
+    }
+    else if (j &lt; w[i])
+    {
+        res = rec(i + 1, j);
+    }
+    else
+    {
+        res = max(rec(i + 1, j), rec(i + 1, j - w[i]) + d[i]);
+    }
+    return res;
+}
+**/
+
+//采用记忆化搜索，出现WA，TLE，MLE，然后我一怒之下还交了一发CE= =，不知道错在哪里。
+/*
+int rec(int i, int j)
+{
+    if (dp[i][j] &gt;= 0)     return dp[i][j];
+    int res;
+    if (i == n)
+    {
+        res = 0;
+    }
+    else if (j &lt; w[i])
+    {
+        res = rec(i + 1, j);
+    }
+    else
+    {
+        res = max(rec(i + 1, j), rec(i + 1, j - w[i]) + d[i]);
+    }
+    return dp[i][j] = res;
+}
+**/
+
+void solve()
+{
+    for (int i = n - 1; i &gt;= 0; i--)
+    {
+        for (int j = 0; j &lt;= m; j++)
+        {
+            if (j &lt; w[i])
+            {
+                dp[i][j] = dp[i + 1][j];
+            }
+            else
+            {
+                dp[i][j] = max(dp[i + 1][j], dp[i + 1][j - w[i]] + d[i]);
+            }
+        }
+    }
+}
+
+int main(int argc, char const *argv[])
+{
+    init();
+    solve();
+    printf(&quot;%d\n&quot;, dp[0][m]);
+    return 0;
+}
+</code></pre><p><strong>修改之后成功AC的代码</strong></p>
+<pre><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+#include &lt;cmath&gt;
+#include &lt;ctime&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;deque&gt;
+#include &lt;list&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+#include &lt;stack&gt;
+#include &lt;queue&gt;
+#include &lt;numeric&gt;
+#include &lt;iomanip&gt;
+#include &lt;bitset&gt;
+#include &lt;sstream&gt;
+#include &lt;fstream&gt;
+#define debug puts(&quot;-----&quot;)
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1&lt;&lt;28)
+using namespace std;
+
+#define MAXN 20000
+
+int n, m;
+int w[MAXN], d[MAXN];
+int dp[MAXN];
+
+void init()
+{
+    memset(w, 0, sizeof(w));
+    memset(d, 0, sizeof(d));
+    memset(dp, 0, sizeof(dp));
+    cin &gt;&gt; n &gt;&gt; m;
+    for (int i = 0; i &lt; n; i++)
+    {
+        cin &gt;&gt; w[i] &gt;&gt; d[i];
+    }
+}
+
+void solve()
+{
+    for (int i = 0; i &lt; n; i++)
+    {
+        for (int j = m; j &gt;= w[i]; j--)
+        {
+            dp[j] = max(dp[j], dp[j - w[i]] + d[i]);
+        }
+    }
+}
+
+int main(int argc, char const *argv[])
+{
+    init();
+    solve();
+    printf(&quot;%d\n&quot;, dp[m]);
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年10月05日 已AC。</li>
 </ul>
 
@@ -150,7 +325,7 @@
                     <p><span>本文标题:</span><a href="/2014/10/05/POJ-3624-Charm-Bracelet/">POJ 3624 Charm Bracelet</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年10月5日 - 10时10分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/10/05/POJ-3624-Charm-Bracelet/"
                                             title="POJ 3624 Charm Bracelet">https://xuanwo.org/2014/10/05/POJ-3624-Charm-Bracelet/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -257,11 +432,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

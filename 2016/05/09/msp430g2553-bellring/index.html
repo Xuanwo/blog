@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -147,18 +147,54 @@
 <p>综上，这个系统所需要的全部内容就已经实现了。可以看到我做了很多将对硬件的操作抽象化的处理，其实这一点非常重要。因为对于我来说，嵌入式开发最大的难题在于，我不知道里面种种变量的含义，不知道如何操作具体的硬件。将硬件操作抽象化处理之后，我就可以很方便地开展我的后续开发。</p>
 <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>实现就不再赘述了，想必读者一定都比我强，下面聊一聊遇到的问题以及 debug 的经历。</p>
 <h2 id="串口配置"><a href="#串口配置" class="headerlink" title="串口配置"></a>串口配置</h2><p>串口的收和发其实是分开的，这里用到了两个变量： UCA0TXBUF ， UCA0RXBUF 。从字面意思上可以看出，前一个用于发送，后一个用于接收（相对于开发者来说）。发送和接收其实就是给这两个值赋值的过程，看起来这两个变量在接受到值之后会将这个值传给别的变量，所以只要不断的将值赋给它就行，我们写了这样的函数：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> vector=USCIAB0RX_VECTOR <span class="comment">//中断服务函数</span></span></span><br><span class="line"></span><br><span class="line"><span class="number">__</span><span class="function">interrupt <span class="keyword">void</span> <span class="title">uart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    rec = UCA0RXBUF;</span><br><span class="line">    <span class="comment">//读取到缓冲区</span></span><br><span class="line">    strtmp[<span class="built_in">strlen</span>++] = rec;</span><br><span class="line">    strtmp[<span class="built_in">strlen</span>] = <span class="string">'\0'</span>;</span><br><span class="line">    <span class="comment">//切换模式</span></span><br><span class="line">    mode = strtmp[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//发送字符</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Send_Char</span><span class="params">(<span class="keyword">char</span> ch)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (!(IFG2 &amp; UCA0TXIFG));</span><br><span class="line">    UCA0TXBUF = ch;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//发送字符串</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Send_Str</span><span class="params">(<span class="keyword">char</span> *p)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> i;</span><br><span class="line">    i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (*(p + i) != <span class="string">'\0'</span>) &#123;</span><br><span class="line">        <span class="keyword">while</span> (!(IFG2 &amp; UCA0TXIFG));</span><br><span class="line">        UCA0TXBUF = *(p + i);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    Send_Char(<span class="number">0x0d</span>);</span><br><span class="line">    Send_Char(<span class="number">0x0a</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="c">#pragma vector=USCIAB0RX_VECTOR //中断服务函数
+
+__interrupt void uart() {
+    rec = UCA0RXBUF;
+    //读取到缓冲区
+    strtmp[strlen++] = rec;
+    strtmp[strlen] = &#39;\0&#39;;
+    //切换模式
+    mode = strtmp[0];
+}
+
+//发送字符
+void Send_Char(char ch) {
+    while (!(IFG2 &amp; UCA0TXIFG));
+    UCA0TXBUF = ch;
+}
+
+//发送字符串
+void Send_Str(char *p) {
+    unsigned char i;
+    i = 0;
+    while (*(p + i) != &#39;\0&#39;) {
+        while (!(IFG2 &amp; UCA0TXIFG));
+        UCA0TXBUF = *(p + i);
+        i++;
+    }
+    Send_Char(0x0d);
+    Send_Char(0x0a);
+}
+</code></pre>
 <p>uart 貌似是一个内置的中断函数，用来处理串口的接收，只要将变量 UCA0RXBUF 的值存储起来即可；后面的 Send_Str 就非常好理解了，将值发送给 UCA0TXBUF ，从而实现串口的输出。</p>
 <p>思路如此清晰，但是测试的时候却遇到了问题，我们的输出是空的，转为16进制显示后，全都是0x00。这个问题调试了很久，拿着原来的代码逐行比对之后发现，出了这样的问题：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">- UCA0BR0 = <span class="number">130</span>;</span><br><span class="line">- UCA0BR1 = <span class="number">6</span>;</span><br><span class="line">+ UCA0BR0 = <span class="number">104</span>;</span><br><span class="line">+ UCA0BR1 = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<pre><code class="c">- UCA0BR0 = 130;
+- UCA0BR1 = 6;
++ UCA0BR0 = 104;
++ UCA0BR1 = 0;
+</code></pre>
 <p>Google 一下才明白，原来 UCA0BR0 和 UCA0BR1 是由系统的时钟速度和波特率决定的值，如果设置错误就会导致串口发送失败。具体的值可以参考<a href="http://www.ti.com/lit/ug/slau144j/slau144j.pdf" target="_blank" rel="external">用户手册</a>， Ctrl＋F 搜索 <code>Table 15-4. Commonly Used Baud Rates</code> 即可。</p>
 <h2 id="串口输出异常"><a href="#串口输出异常" class="headerlink" title="串口输出异常"></a>串口输出异常</h2><p>前面提到我们直接使用三个变量保存当前时间，在输出时做进一步处理，转为字符串的过程中，我们进行了这样的操作：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">Time[<span class="number">0</span>] = hour / <span class="number">10</span> + <span class="string">'0'</span>;</span><br></pre></td></tr></table></figure>
+<pre><code class="c">Time[0] = hour / 10 + &#39;0&#39;;
+</code></pre>
 <p>但有趣的事情是，在初始化之后，我们得到的输出是这样的： <code>0/:0/:0/</code> 。随手输出了一下 <code>/</code> 的 ASCII 码，发现它刚好比 <code>0</code> 小一。</p>
 <p>难道说，存储器中的默认值不是 0 吗？ Google 一下之后发现，还真的不是 0 。 MSP430G2553 中的 Flash 存储器在默认状态下的值全为 1 ，然后写入时只能将 1 置为 0 ，所以每一次写入数据都需要先清空再写入。那么问题来了，为什么全为 1 会导致最后输出的结果小 1 呢？我来简单的阐述一下我的理解：</p>
 <p>假设这个存储器只有 8 位，也就是说，现在的值为 <code>11111111</code> ，然后我加上一个 <code>1</code> ，于是我们得到：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  11111111</span><br><span class="line">+        1</span><br><span class="line"> 100000000</span><br></pre></td></tr></table></figure>
-<p>显然，我们最后的结果已经移除了，此时会产生截断，也就是说，存储器现在的数据变成了 <code>00000000</code> ，也就是 <code>0</code>，跟我们期望的结果 <code>1</code> 刚好相差一。</p>
+<pre><code>  11111111
++        1
+ 100000000
+</code></pre><p>显然，我们最后的结果已经移除了，此时会产生截断，也就是说，存储器现在的数据变成了 <code>00000000</code> ，也就是 <code>0</code>，跟我们期望的结果 <code>1</code> 刚好相差一。</p>
 <p>当然，实际的情况要比我上面的举例要复杂的多，不过我想已经足够我们认识到这个 BUG 的本质，就不再多说啦。</p>
 <h2 id="Flash-存储器未清空"><a href="#Flash-存储器未清空" class="headerlink" title="Flash 存储器未清空"></a>Flash 存储器未清空</h2><p>在测试中，我们发现每一次烧录程序之后， Flash 存储器不会清空，依然会从上一次我们保存的时间开始计时。我觉得这是正确的行为，没有在意，但是我妹纸和她的队友告诉我她们在完成上一个作业的时候每次都是会清空的。我对着这次和上次的代码研究了很久，认为代码里面根本就没有清空 Flash 存储器的操作，如果有的话，掉电保存这项功能根本无从谈起。我妹纸她们也同意我的分析，但是她们的实践确实证明了每次都会清空 Flash 存储区。</p>
 <p>这个问题也困扰了很久，直到第二天，用别人的电脑重新烧录了一遍程序，发现他们的是会正常清空的。所以说，问题在于 CCS 的版本：我妹纸使用的 CCS 版本是 6.1 ，而<br>他们用的版本是 5.1.1 ，也就是说，不同版本的 CCS 在烧录程序期间的不同行为导致了这次错误。我们换用了 5.1.1 之后，成功解决了这个问题。</p>
@@ -192,7 +228,7 @@
                     <p><span>本文标题:</span><a href="/2016/05/09/msp430g2553-bellring/">基于MSP430G2553的打铃系统开发手记</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2016年5月9日 - 08时05分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2016/05/09/msp430g2553-bellring/"
                                             title="基于MSP430G2553的打铃系统开发手记">https://xuanwo.org/2016/05/09/msp430g2553-bellring/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -307,11 +343,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

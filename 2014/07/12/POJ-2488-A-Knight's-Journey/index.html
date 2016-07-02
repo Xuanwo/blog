@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -119,8 +119,113 @@
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>一开始没看懂，看了几遍之后才明白。是给定一个p*q的棋盘，要求计算出是否存在可能性使得骑士走遍整个棋盘，并要求按照字典序排列。这个字典序真的是要我的命，直接导致挂了很多次，还傻傻地去群里面问这道题是不是Special Judge= =。</p>
 <a id="more"></a>
 <h1 id="新技能get"><a href="#新技能get" class="headerlink" title="新技能get"></a>新技能get</h1><p>字典序 <code>lexicographically</code></p>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">typedef class</span><br><span class="line">&#123;</span><br><span class="line">    public:</span><br><span class="line">        int row;</span><br><span class="line">        char col;</span><br><span class="line">&#125;location;</span><br><span class="line"></span><br><span class="line">int p,q;</span><br><span class="line"></span><br><span class="line">bool chess[&apos;Z&apos;+1][27];</span><br><span class="line"></span><br><span class="line">int x,y;</span><br><span class="line">void path(int i,int j,int num)</span><br><span class="line">&#123;</span><br><span class="line">    switch(num)</span><br><span class="line">    &#123;</span><br><span class="line">        case 1: &#123;x=i-1; y=j-2; break;&#125;</span><br><span class="line">        case 2: &#123;x=i+1; y=j-2; break;&#125;</span><br><span class="line">        case 3: &#123;x=i-2; y=j-1; break;&#125;</span><br><span class="line">        case 4: &#123;x=i+2; y=j-1; break;&#125;</span><br><span class="line">        case 5: &#123;x=i-2; y=j+1; break;&#125;</span><br><span class="line">        case 6: &#123;x=i+2; y=j+1; break;&#125;</span><br><span class="line">        case 7: &#123;x=i-1; y=j+2; break;&#125;</span><br><span class="line">        case 8: &#123;x=i+1; y=j+2; break;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">bool DFS(location* way,int i,int j,int step)</span><br><span class="line">&#123;</span><br><span class="line">    chess[i][j]=true;</span><br><span class="line">    way[step].row=i;</span><br><span class="line">    way[step].col=j;</span><br><span class="line">    if(step==way[0].row)</span><br><span class="line">        return true;</span><br><span class="line"></span><br><span class="line">    for(int k=1;k&lt;=8;k++)</span><br><span class="line">    &#123;</span><br><span class="line">        path(i,j,k);</span><br><span class="line">        int ii=x,jj=y;</span><br><span class="line">        if(!chess[ii][jj] &amp;&amp; ii&gt;=1 &amp;&amp; ii&lt;=p &amp;&amp; jj&gt;=&apos;A&apos; &amp;&amp; jj&lt;=&apos;A&apos;+q-1)</span><br><span class="line">            if(DFS(way,ii,jj,step+1))</span><br><span class="line">                return true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    chess[i][j]=false;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    int test;</span><br><span class="line">    cin&gt;&gt;test;</span><br><span class="line">    int t=1;</span><br><span class="line">    while(t&lt;=test)</span><br><span class="line">    &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        memset(chess,false,sizeof(chess));</span><br><span class="line"></span><br><span class="line">        cin&gt;&gt;p&gt;&gt;q;</span><br><span class="line">        if(p==1 &amp;&amp; q==1)</span><br><span class="line">        &#123;</span><br><span class="line">            cout&lt;&lt;&quot;Scenario #&quot;&lt;&lt;t++&lt;&lt;&apos;:&apos;&lt;&lt;endl;</span><br><span class="line">            cout&lt;&lt;&quot;A1&quot;&lt;&lt;endl&lt;&lt;endl;</span><br><span class="line">            continue;</span><br><span class="line">        &#125;</span><br><span class="line">        if(p*q&gt;26 || p&gt;=9 || q&gt;=9 || p&lt;=2 || q&lt;=2)</span><br><span class="line">        &#123;</span><br><span class="line">            cout&lt;&lt;&quot;Scenario #&quot;&lt;&lt;t++&lt;&lt;&apos;:&apos;&lt;&lt;endl;</span><br><span class="line">            cout&lt;&lt;&quot;impossible&quot;&lt;&lt;endl&lt;&lt;endl;</span><br><span class="line">            continue;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        location* way=new location[p*q+1];</span><br><span class="line">        way[0].row=p*q;</span><br><span class="line">        bool flag=false;</span><br><span class="line">        for(int j=&apos;A&apos;;j&lt;=&apos;A&apos;+q-1;j++)</span><br><span class="line">        &#123;</span><br><span class="line">            for(int i=1;i&lt;=p;i++)</span><br><span class="line">                if(DFS(way,i,j,1))</span><br><span class="line">                &#123;</span><br><span class="line">                    cout&lt;&lt;&quot;Scenario #&quot;&lt;&lt;t++&lt;&lt;&apos;:&apos;&lt;&lt;endl;</span><br><span class="line"></span><br><span class="line">                    for(int k=1;k&lt;=way[0].row;k++)</span><br><span class="line">                        cout&lt;&lt;way[k].col&lt;&lt;way[k].row;</span><br><span class="line">                    cout&lt;&lt;endl&lt;&lt;endl;</span><br><span class="line">                    flag=true;</span><br><span class="line">                    break;</span><br><span class="line">                &#125;</span><br><span class="line">                if(flag)</span><br><span class="line">                    break;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if(!flag)</span><br><span class="line">        &#123;</span><br><span class="line">            cout&lt;&lt;&quot;Scenario #&quot;&lt;&lt;t++&lt;&lt;&apos;:&apos;&lt;&lt;endl;</span><br><span class="line">            cout&lt;&lt;&quot;impossible&quot;&lt;&lt;endl&lt;&lt;endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+using namespace std;
+
+typedef class
+{
+    public:
+        int row;
+        char col;
+}location;
+
+int p,q;
+
+bool chess[&#39;Z&#39;+1][27];
+
+int x,y;
+void path(int i,int j,int num)
+{
+    switch(num)
+    {
+        case 1: {x=i-1; y=j-2; break;}
+        case 2: {x=i+1; y=j-2; break;}
+        case 3: {x=i-2; y=j-1; break;}
+        case 4: {x=i+2; y=j-1; break;}
+        case 5: {x=i-2; y=j+1; break;}
+        case 6: {x=i+2; y=j+1; break;}
+        case 7: {x=i-1; y=j+2; break;}
+        case 8: {x=i+1; y=j+2; break;}
+    }
+    return;
+}
+
+bool DFS(location* way,int i,int j,int step)
+{
+    chess[i][j]=true;
+    way[step].row=i;
+    way[step].col=j;
+    if(step==way[0].row)
+        return true;
+
+    for(int k=1;k&lt;=8;k++)
+    {
+        path(i,j,k);
+        int ii=x,jj=y;
+        if(!chess[ii][jj] &amp;&amp; ii&gt;=1 &amp;&amp; ii&lt;=p &amp;&amp; jj&gt;=&#39;A&#39; &amp;&amp; jj&lt;=&#39;A&#39;+q-1)
+            if(DFS(way,ii,jj,step+1))
+                return true;
+    }
+
+    chess[i][j]=false;
+    return false;
+}
+
+int main(int argc, char const *argv[])
+{
+    int test;
+    cin&gt;&gt;test;
+    int t=1;
+    while(t&lt;=test)
+    {
+
+
+        memset(chess,false,sizeof(chess));
+
+        cin&gt;&gt;p&gt;&gt;q;
+        if(p==1 &amp;&amp; q==1)
+        {
+            cout&lt;&lt;&quot;Scenario #&quot;&lt;&lt;t++&lt;&lt;&#39;:&#39;&lt;&lt;endl;
+            cout&lt;&lt;&quot;A1&quot;&lt;&lt;endl&lt;&lt;endl;
+            continue;
+        }
+        if(p*q&gt;26 || p&gt;=9 || q&gt;=9 || p&lt;=2 || q&lt;=2)
+        {
+            cout&lt;&lt;&quot;Scenario #&quot;&lt;&lt;t++&lt;&lt;&#39;:&#39;&lt;&lt;endl;
+            cout&lt;&lt;&quot;impossible&quot;&lt;&lt;endl&lt;&lt;endl;
+            continue;
+        }
+
+        location* way=new location[p*q+1];
+        way[0].row=p*q;
+        bool flag=false;
+        for(int j=&#39;A&#39;;j&lt;=&#39;A&#39;+q-1;j++)
+        {
+            for(int i=1;i&lt;=p;i++)
+                if(DFS(way,i,j,1))
+                {
+                    cout&lt;&lt;&quot;Scenario #&quot;&lt;&lt;t++&lt;&lt;&#39;:&#39;&lt;&lt;endl;
+
+                    for(int k=1;k&lt;=way[0].row;k++)
+                        cout&lt;&lt;way[k].col&lt;&lt;way[k].row;
+                    cout&lt;&lt;endl&lt;&lt;endl;
+                    flag=true;
+                    break;
+                }
+                if(flag)
+                    break;
+        }
+
+        if(!flag)
+        {
+            cout&lt;&lt;&quot;Scenario #&quot;&lt;&lt;t++&lt;&lt;&#39;:&#39;&lt;&lt;endl;
+            cout&lt;&lt;&quot;impossible&quot;&lt;&lt;endl&lt;&lt;endl;
+        }
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月12日 已AC。</li>
 </ul>
 
@@ -148,7 +253,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/12/POJ-2488-A-Knight's-Journey/">POJ 2488 A Knight's Journey</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月12日 - 19时07分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/12/POJ-2488-A-Knight's-Journey/"
                                             title="POJ 2488 A Knight's Journey">https://xuanwo.org/2014/07/12/POJ-2488-A-Knight's-Journey/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -255,11 +360,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

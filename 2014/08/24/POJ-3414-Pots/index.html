@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -118,8 +118,195 @@
 <p><a href="http://poj.org/problem?id=3414" target="_blank" rel="external">http://poj.org/problem?id=3414</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>因为卡一道题然后整整两天没有做题目什么的太不科学了- -。<br>纠结的难点在于，我怎么样把实现操作的路径打印出来。事实上，标记全部的六种状态，然后在bfs的过程中，把每一个状态全都输出到一个数组中去，然后再进行输出。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstdlib&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">#include &lt;ctime&gt;</span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">#include &lt;vector&gt;</span><br><span class="line">#include &lt;deque&gt;</span><br><span class="line">#include &lt;list&gt;</span><br><span class="line">#include &lt;set&gt;</span><br><span class="line">#include &lt;map&gt;</span><br><span class="line">#include &lt;stack&gt;</span><br><span class="line">#include &lt;queue&gt;</span><br><span class="line">#include &lt;numeric&gt;</span><br><span class="line">#include &lt;iomanip&gt;</span><br><span class="line">#include &lt;bitset&gt;</span><br><span class="line">#include &lt;sstream&gt;</span><br><span class="line">#include &lt;fstream&gt;</span><br><span class="line">#define debug puts(&quot;-----&quot;)</span><br><span class="line">#define pi (acos(-1.0))</span><br><span class="line">#define eps (1e-8)</span><br><span class="line">#define inf (1&lt;&lt;28)</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">const int maxn = 110;</span><br><span class="line">int vis[maxn][maxn];</span><br><span class="line">int a, b, c;</span><br><span class="line">int step;</span><br><span class="line">int flag;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">struct Status</span><br><span class="line">&#123;</span><br><span class="line">    int k1, k2;</span><br><span class="line">    int op;</span><br><span class="line">    int step;</span><br><span class="line">    int pre;</span><br><span class="line">&#125; q[maxn *maxn];</span><br><span class="line">int id[maxn *maxn];</span><br><span class="line">int lastIndex;</span><br><span class="line"></span><br><span class="line">void bfs()</span><br><span class="line">&#123;</span><br><span class="line">    Status now, next;</span><br><span class="line"></span><br><span class="line">    int head, tail;</span><br><span class="line">    head = tail = 0;</span><br><span class="line"></span><br><span class="line">    q[tail].k1 = 0; q[tail].k2 = 0;</span><br><span class="line">    q[tail].op = 0; q[tail].step = 0; q[tail].pre = 0;</span><br><span class="line"></span><br><span class="line">    tail++;</span><br><span class="line"></span><br><span class="line">    memset(vis, 0, sizeof(vis));</span><br><span class="line">    vis[0][0] = 1;</span><br><span class="line"></span><br><span class="line">    while (head &lt; tail)</span><br><span class="line">    &#123;</span><br><span class="line">        now = q[head];</span><br><span class="line">        head++;</span><br><span class="line"></span><br><span class="line">        if (now.k1 == c || now.k2 == c)</span><br><span class="line">        &#123;</span><br><span class="line">            flag = 1;</span><br><span class="line">            step = now.step;</span><br><span class="line">            lastIndex = head - 1;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        for (int i = 1; i &lt;= 6; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            if (i == 1)</span><br><span class="line">            &#123;</span><br><span class="line">                next.k1 = a;</span><br><span class="line">                next.k2 = now.k2;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 2)</span><br><span class="line">            &#123;</span><br><span class="line">                next.k1 = now.k1;</span><br><span class="line">                next.k2 = b;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 3)</span><br><span class="line">            &#123;</span><br><span class="line">                next.k1 = 0;</span><br><span class="line">                next.k2 = now.k2;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 4)</span><br><span class="line">            &#123;</span><br><span class="line">                next.k1 = now.k1;</span><br><span class="line">                next.k2 = 0;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 5)</span><br><span class="line">            &#123;</span><br><span class="line">                if (now.k1 + now.k2 &lt;= b)</span><br><span class="line">                &#123;</span><br><span class="line">                    next.k1 = 0;</span><br><span class="line">                    next.k2 = now.k1 + now.k2;</span><br><span class="line">                &#125;</span><br><span class="line">                else</span><br><span class="line">                &#123;</span><br><span class="line">                    next.k1 = now.k1 + now.k2 - b;</span><br><span class="line">                    next.k2 = b;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 6)</span><br><span class="line">            &#123;</span><br><span class="line">                if (now.k1 + now.k2 &lt;= a)</span><br><span class="line">                &#123;</span><br><span class="line">                    next.k1 = now.k1 + now.k2;</span><br><span class="line">                    next.k2 = 0;</span><br><span class="line">                &#125;</span><br><span class="line">                else</span><br><span class="line">                &#123;</span><br><span class="line">                    next.k1 = a;</span><br><span class="line">                    next.k2 = now.k1 + now.k2 - a;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            next.op = i;</span><br><span class="line">            if (!vis[next.k1][next.k2])</span><br><span class="line">            &#123;</span><br><span class="line">                vis[next.k1][next.k2] = 1;</span><br><span class="line">                next.step = now.step + 1;</span><br><span class="line">                next.pre = head - 1;</span><br><span class="line"></span><br><span class="line">                q[tail].k1 = next.k1; q[tail].k2 = next.k2;</span><br><span class="line">                q[tail].op = next.op; q[tail].step = next.step; q[tail].pre = next.pre;</span><br><span class="line">                tail++;</span><br><span class="line"></span><br><span class="line">                if (next.k1 == c || next.k2 == c)</span><br><span class="line">                &#123;</span><br><span class="line">                    flag = 1;</span><br><span class="line">                    step = next.step;</span><br><span class="line">                    lastIndex = tail - 1;</span><br><span class="line">                    return;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    while (scanf(&quot;%d%d%d&quot;, &amp;a, &amp;b, &amp;c) != EOF)</span><br><span class="line">    &#123;</span><br><span class="line">        flag = 0;</span><br><span class="line">        step = 0;</span><br><span class="line"></span><br><span class="line">        bfs();</span><br><span class="line">        if (flag)</span><br><span class="line">        &#123;</span><br><span class="line">            printf(&quot;%d\n&quot;, step);</span><br><span class="line"></span><br><span class="line">            id[step] = lastIndex;</span><br><span class="line">            for (int i = step - 1; i &gt;= 1; i--)</span><br><span class="line">            &#123;</span><br><span class="line">                id[i] = q[id[i + 1]].pre;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            for (int i = 1; i &lt;= step; i++)</span><br><span class="line">            &#123;</span><br><span class="line">                if (q[id[i]].op == 1)</span><br><span class="line">                    printf(&quot;FILL(1)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 2)</span><br><span class="line">                    printf(&quot;FILL(2)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 3)</span><br><span class="line">                    printf(&quot;DROP(1)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 4)</span><br><span class="line">                    printf(&quot;DROP(2)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 5)</span><br><span class="line">                    printf(&quot;POUR(1,2)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 6)</span><br><span class="line">                    printf(&quot;POUR(2,1)\n&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        else printf(&quot;impossible\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+#include &lt;cmath&gt;
+#include &lt;ctime&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;deque&gt;
+#include &lt;list&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+#include &lt;stack&gt;
+#include &lt;queue&gt;
+#include &lt;numeric&gt;
+#include &lt;iomanip&gt;
+#include &lt;bitset&gt;
+#include &lt;sstream&gt;
+#include &lt;fstream&gt;
+#define debug puts(&quot;-----&quot;)
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1&lt;&lt;28)
+using namespace std;
+
+const int maxn = 110;
+int vis[maxn][maxn];
+int a, b, c;
+int step;
+int flag;
+
+
+struct Status
+{
+    int k1, k2;
+    int op;
+    int step;
+    int pre;
+} q[maxn *maxn];
+int id[maxn *maxn];
+int lastIndex;
+
+void bfs()
+{
+    Status now, next;
+
+    int head, tail;
+    head = tail = 0;
+
+    q[tail].k1 = 0; q[tail].k2 = 0;
+    q[tail].op = 0; q[tail].step = 0; q[tail].pre = 0;
+
+    tail++;
+
+    memset(vis, 0, sizeof(vis));
+    vis[0][0] = 1;
+
+    while (head &lt; tail)
+    {
+        now = q[head];
+        head++;
+
+        if (now.k1 == c || now.k2 == c)
+        {
+            flag = 1;
+            step = now.step;
+            lastIndex = head - 1;
+        }
+
+        for (int i = 1; i &lt;= 6; i++)
+        {
+            if (i == 1)
+            {
+                next.k1 = a;
+                next.k2 = now.k2;
+            }
+            else if (i == 2)
+            {
+                next.k1 = now.k1;
+                next.k2 = b;
+            }
+            else if (i == 3)
+            {
+                next.k1 = 0;
+                next.k2 = now.k2;
+            }
+            else if (i == 4)
+            {
+                next.k1 = now.k1;
+                next.k2 = 0;
+            }
+            else if (i == 5)
+            {
+                if (now.k1 + now.k2 &lt;= b)
+                {
+                    next.k1 = 0;
+                    next.k2 = now.k1 + now.k2;
+                }
+                else
+                {
+                    next.k1 = now.k1 + now.k2 - b;
+                    next.k2 = b;
+                }
+            }
+            else if (i == 6)
+            {
+                if (now.k1 + now.k2 &lt;= a)
+                {
+                    next.k1 = now.k1 + now.k2;
+                    next.k2 = 0;
+                }
+                else
+                {
+                    next.k1 = a;
+                    next.k2 = now.k1 + now.k2 - a;
+                }
+            }
+
+            next.op = i;
+            if (!vis[next.k1][next.k2])
+            {
+                vis[next.k1][next.k2] = 1;
+                next.step = now.step + 1;
+                next.pre = head - 1;
+
+                q[tail].k1 = next.k1; q[tail].k2 = next.k2;
+                q[tail].op = next.op; q[tail].step = next.step; q[tail].pre = next.pre;
+                tail++;
+
+                if (next.k1 == c || next.k2 == c)
+                {
+                    flag = 1;
+                    step = next.step;
+                    lastIndex = tail - 1;
+                    return;
+                }
+            }
+        }
+    }
+
+
+}
+
+int main(int argc, char const *argv[])
+{
+    while (scanf(&quot;%d%d%d&quot;, &amp;a, &amp;b, &amp;c) != EOF)
+    {
+        flag = 0;
+        step = 0;
+
+        bfs();
+        if (flag)
+        {
+            printf(&quot;%d\n&quot;, step);
+
+            id[step] = lastIndex;
+            for (int i = step - 1; i &gt;= 1; i--)
+            {
+                id[i] = q[id[i + 1]].pre;
+            }
+
+            for (int i = 1; i &lt;= step; i++)
+            {
+                if (q[id[i]].op == 1)
+                    printf(&quot;FILL(1)\n&quot;);
+
+                else if (q[id[i]].op == 2)
+                    printf(&quot;FILL(2)\n&quot;);
+
+                else if (q[id[i]].op == 3)
+                    printf(&quot;DROP(1)\n&quot;);
+
+                else if (q[id[i]].op == 4)
+                    printf(&quot;DROP(2)\n&quot;);
+
+                else if (q[id[i]].op == 5)
+                    printf(&quot;POUR(1,2)\n&quot;);
+
+                else if (q[id[i]].op == 6)
+                    printf(&quot;POUR(2,1)\n&quot;);
+            }
+        }
+        else printf(&quot;impossible\n&quot;);
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月24日 已AC。</li>
 </ul>
 
@@ -147,7 +334,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/24/POJ-3414-Pots/">POJ 3414 Pots</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月24日 - 21时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/24/POJ-3414-Pots/"
                                             title="POJ 3414 Pots">https://xuanwo.org/2014/08/24/POJ-3414-Pots/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -254,11 +441,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

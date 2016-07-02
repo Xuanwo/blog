@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -124,8 +124,52 @@
 </ol>
 <p>只适用于这一道题，POJ上那道棋盘翻转貌似不能通用。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">bool mark[4][4];</span><br><span class="line">char s[4][4];</span><br><span class="line">int i, j, k;</span><br><span class="line">int ci[16], cj[16];</span><br><span class="line">int nas = 0;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    memset(mark, 0, sizeof(mark));</span><br><span class="line">    for (i = 0; i &lt; 4; i++)</span><br><span class="line">        cin &gt;&gt; s[i];</span><br><span class="line">    for (i = 0; i &lt; 4; i++)</span><br><span class="line">        for (j = 0; j &lt; 4; j++)</span><br><span class="line">        &#123;</span><br><span class="line">            char c = s[i][j];</span><br><span class="line">            if (c == &apos;+&apos;)</span><br><span class="line">            &#123;</span><br><span class="line">                mark[i][j] = !mark[i][j];</span><br><span class="line">                for (k = 0; k &lt; 4; k++)</span><br><span class="line">                &#123;</span><br><span class="line">                    mark[i][k] = !mark[i][k];</span><br><span class="line">                    mark[k][j] = !mark[k][j];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    for (i = 0; i &lt; 4; i++)</span><br><span class="line">        for (j = 0; j &lt; 4; j++)</span><br><span class="line">            if (mark[i][j] == true)</span><br><span class="line">            &#123;</span><br><span class="line">                ci[nas] = i + 1;</span><br><span class="line">                cj[nas] = j + 1;</span><br><span class="line">                nas ++;</span><br><span class="line">            &#125;</span><br><span class="line">    printf(&quot;%d\n&quot;, nas);</span><br><span class="line">    for (i = 0; i &lt; nas; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;%d %d\n&quot;, ci[i], cj[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstring&gt;
+using namespace std;
+
+bool mark[4][4];
+char s[4][4];
+int i, j, k;
+int ci[16], cj[16];
+int nas = 0;
+
+int main(int argc, char const *argv[])
+{
+    memset(mark, 0, sizeof(mark));
+    for (i = 0; i &lt; 4; i++)
+        cin &gt;&gt; s[i];
+    for (i = 0; i &lt; 4; i++)
+        for (j = 0; j &lt; 4; j++)
+        {
+            char c = s[i][j];
+            if (c == &#39;+&#39;)
+            {
+                mark[i][j] = !mark[i][j];
+                for (k = 0; k &lt; 4; k++)
+                {
+                    mark[i][k] = !mark[i][k];
+                    mark[k][j] = !mark[k][j];
+                }
+            }
+        }
+    for (i = 0; i &lt; 4; i++)
+        for (j = 0; j &lt; 4; j++)
+            if (mark[i][j] == true)
+            {
+                ci[nas] = i + 1;
+                cj[nas] = j + 1;
+                nas ++;
+            }
+    printf(&quot;%d\n&quot;, nas);
+    for (i = 0; i &lt; nas; i++)
+    {
+        printf(&quot;%d %d\n&quot;, ci[i], cj[i]);
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月23日 已AC。</li>
 </ul>
 
@@ -153,7 +197,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/23/POJ-2965-The-Pilots-Brothers'-refrigerator/">POJ 2965 The Pilots Brothers' refrigerator</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月23日 - 23时07分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/23/POJ-2965-The-Pilots-Brothers'-refrigerator/"
                                             title="POJ 2965 The Pilots Brothers' refrigerator">https://xuanwo.org/2014/07/23/POJ-2965-The-Pilots-Brothers'-refrigerator/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -260,11 +304,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

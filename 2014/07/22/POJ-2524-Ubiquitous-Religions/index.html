@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -118,8 +118,47 @@
 <p><a href="http://poj.org/problem?id=2524" target="_blank" rel="external">http://poj.org/problem?id=2524</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>POJ上最简单的一道关于并查集的题目，没有使用路径压缩，没有进行优化，直接水过。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line"></span><br><span class="line">int f[50005], sum;</span><br><span class="line"></span><br><span class="line">int find(int x)</span><br><span class="line">&#123;</span><br><span class="line">    if (f[x] != x) f[x] = find(f[x]);</span><br><span class="line">    return f[x];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void make(int a, int b)</span><br><span class="line">&#123;</span><br><span class="line">    int f1 = find(a);</span><br><span class="line">    int f2 = find(b);</span><br><span class="line">    if (f1 != f2)</span><br><span class="line">    &#123;</span><br><span class="line">        f[f2] = f1;</span><br><span class="line">        sum--;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    int n, m, p = 1, i;</span><br><span class="line">    while (scanf(&quot;%d%d&quot;, &amp;n, &amp;m) != EOF)</span><br><span class="line">    &#123;</span><br><span class="line">        if (n == 0 &amp;&amp; m == 0)  break;</span><br><span class="line">        for (i = 1; i &lt;= n; i++)    f[i] = i;</span><br><span class="line">        sum = n;</span><br><span class="line">        for (i = 1; i &lt;= m; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            int a, b;</span><br><span class="line">            scanf(&quot;%d%d&quot;, &amp;a, &amp;b);</span><br><span class="line">            make(a, b);</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;Case %d: %d\n&quot;, p++, sum );</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
+#include &lt;cstdio&gt;
+
+int f[50005], sum;
+
+int find(int x)
+{
+    if (f[x] != x) f[x] = find(f[x]);
+    return f[x];
+}
+
+void make(int a, int b)
+{
+    int f1 = find(a);
+    int f2 = find(b);
+    if (f1 != f2)
+    {
+        f[f2] = f1;
+        sum--;
+    }
+}
+
+int main(int argc, char const *argv[])
+{
+    int n, m, p = 1, i;
+    while (scanf(&quot;%d%d&quot;, &amp;n, &amp;m) != EOF)
+    {
+        if (n == 0 &amp;&amp; m == 0)  break;
+        for (i = 1; i &lt;= n; i++)    f[i] = i;
+        sum = n;
+        for (i = 1; i &lt;= m; i++)
+        {
+            int a, b;
+            scanf(&quot;%d%d&quot;, &amp;a, &amp;b);
+            make(a, b);
+        }
+        printf(&quot;Case %d: %d\n&quot;, p++, sum );
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月22日 已AC。</li>
 </ul>
 
@@ -147,7 +186,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/22/POJ-2524-Ubiquitous-Religions/">POJ 2524 Ubiquitous Religions</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月22日 - 03时07分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/22/POJ-2524-Ubiquitous-Religions/"
                                             title="POJ 2524 Ubiquitous Religions">https://xuanwo.org/2014/07/22/POJ-2524-Ubiquitous-Religions/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -254,11 +293,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

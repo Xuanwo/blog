@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -129,19 +129,73 @@
 <p><em>感谢@Ethan和@，他们强有力地向我证明了有师傅带路的好处。</em></p>
 <p>这个问题纯粹是因为一直以来都是一个脚本Boy，没有系统性的学习过软件开发导致的。很显然，按照我原来的代码去产生实例，就会导致循环导入的错误。想要解决这样的问题，就需要使用工厂函数去生成实例，而不是自己去生成它。</p>
 <p>在<code>__init__.py</code>中添加一个<code>create_app()</code>函数，在函数中进行参数配置，初始化和导入蓝图的操作：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">bps = [<span class="string">'jade_ims.views.dashboard:dashboard'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.install:install'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.login:login'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.sale:sale'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.customer:customer'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.purchase.inputbill:inputbill'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.purchase.supplier:supplier'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.stock.enterstockbill:enterstockbill'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.stock.leavestockbill:leavestockbill'</span>,</span><br><span class="line">       <span class="string">'jade_ims.views.stock.stock:stock'</span></span><br><span class="line">       ]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_app</span><span class="params">()</span>:</span></span><br><span class="line">    app = Flask(__name__)</span><br><span class="line">    app.config.from_object(<span class="string">'config'</span>)</span><br><span class="line">    app.config.from_pyfile(<span class="string">'config.py'</span>)</span><br><span class="line"></span><br><span class="line">    db.init_app(app)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> path <span class="keyword">in</span> bps:</span><br><span class="line">        bp = import_string(path)</span><br><span class="line">        app.register_blueprint(bp)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> app</span><br></pre></td></tr></table></figure>
+<pre><code class="python">bps = [&#39;jade_ims.views.dashboard:dashboard&#39;,
+       &#39;jade_ims.views.install:install&#39;,
+       &#39;jade_ims.views.login:login&#39;,
+       &#39;jade_ims.views.sale:sale&#39;,
+       &#39;jade_ims.views.customer:customer&#39;,
+       &#39;jade_ims.views.purchase.inputbill:inputbill&#39;,
+       &#39;jade_ims.views.purchase.supplier:supplier&#39;,
+       &#39;jade_ims.views.stock.enterstockbill:enterstockbill&#39;,
+       &#39;jade_ims.views.stock.leavestockbill:leavestockbill&#39;,
+       &#39;jade_ims.views.stock.stock:stock&#39;
+       ]
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(&#39;config&#39;)
+    app.config.from_pyfile(&#39;config.py&#39;)
+
+    db.init_app(app)
+
+    for path in bps:
+        bp = import_string(path)
+        app.register_blueprint(bp)
+
+    return app
+</code></pre>
 <h3 id="Flask如何优雅地重定向所有未登录用户到登陆界面"><a href="#Flask如何优雅地重定向所有未登录用户到登陆界面" class="headerlink" title="Flask如何优雅地重定向所有未登录用户到登陆界面"></a>Flask如何优雅地重定向所有未登录用户到登陆界面</h3><p><a href="https://segmentfault.com/q/1010000005645821" target="_blank" rel="external">https://segmentfault.com/q/1010000005645821</a></p>
 <p><em>感谢@zwillon和@igaozp</em></p>
 <p>有一个Feature是想要把所有未登录的用户都重定向到登录页面。当时手头上的技术方案主要有两种：第一种是自己包装一个装饰器，并添加在每一个视图函数中；第二种是使用第三方库<code>Flask-Login</code>，在视图函数中添加<code>@login_required</code>。但是感觉姿势都不怎么优雅，因为我需要不断地在视图函数中添加这个装饰器，不太符合DRY(Don’t Repeat Yourself)准则。<br>SF的老司机给了我一个相当优雅的方案——Hook到app的<code>before_request</code>方法。也就是这样来实现：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@app.before_request</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">check_need_login</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 检查登录的逻辑</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+<pre><code class="python">@app.before_request
+def check_need_login():
+    # 检查登录的逻辑
+    pass
+</code></pre>
 <p>我第一次是这样实现的：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@app.before_request</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">check_need_login</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">if</span> <span class="string">'logged_in'</span> <span class="keyword">not</span> <span class="keyword">in</span> session:</span><br><span class="line">        <span class="keyword">return</span> redirect(url_for(<span class="string">'login.user_login'</span>))</span><br></pre></td></tr></table></figure>
+<pre><code class="python">@app.before_request
+def check_need_login():
+    if &#39;logged_in&#39; not in session:
+        return redirect(url_for(&#39;login.user_login&#39;))
+</code></pre>
 <p>这样就带来了一个问题，对于未登录的用户来说，所有页面都会不断地重定向从而导致整个应用崩溃。因此还需要指定在某些情况下停止重定向，所以我们还需要修改一下<code>check_need_login</code>的逻辑：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@app.before_request</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">check_need_login</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">if</span> <span class="string">'logged_in'</span> <span class="keyword">not</span> <span class="keyword">in</span> session <span class="keyword">and</span> request.endpoint <span class="keyword">not</span> <span class="keyword">in</span> (<span class="string">'login.user_login'</span>, <span class="string">'static'</span>):</span><br><span class="line">        <span class="keyword">return</span> redirect(url_for(<span class="string">'login.user_login'</span>))</span><br></pre></td></tr></table></figure>
+<pre><code class="python">@app.before_request
+def check_need_login():
+    if &#39;logged_in&#39; not in session and request.endpoint not in (&#39;login.user_login&#39;, &#39;static&#39;):
+        return redirect(url_for(&#39;login.user_login&#39;))
+</code></pre>
 <p>当<code>session</code>中没有<code>logged_in</code>字段且<code>endpoint</code>不是<code>user_login</code>和<code>static</code>的时候就重定向到登录页面，这样就比较优雅地解决了重定向未登录用户到登陆界面的需求。</p>
 <h3 id="flask-sqlalchemy-插入数据时发生错误后如何处理"><a href="#flask-sqlalchemy-插入数据时发生错误后如何处理" class="headerlink" title="flask_sqlalchemy 插入数据时发生错误后如何处理"></a>flask_sqlalchemy 插入数据时发生错误后如何处理</h3><p><a href="https://segmentfault.com/q/1010000005647431" target="_blank" rel="external">https://segmentfault.com/q/1010000005647431</a></p>
 <p>在实际开发的过程中发现，如果<code>db.session</code>中添加的记录有问题，在commit的时候会出现一个报错。所以我们需要在出错的时候进行一些处理，以保证程序出错之后还能够正常地运行。网友 @学不会编程的永仲 给出的回答是我应该在form中验证数据的正确性。虽然我相信他的理解可能是正确的，但是不太符合我的哲学，我更加倾向于<strong>让它崩溃，然后处理异常</strong>而不是<strong>事先处理好所有的错误</strong>。<br>通过查阅文档，了解到<code>db.session.rollback()</code>这一函数可以在出错是进行回滚，于是最后的实现变成了这样：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@supplier.route('/purchase/supplier/add', methods=['POST'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add_supplier</span><span class="params">()</span>:</span></span><br><span class="line">    form = request.form</span><br><span class="line">    <span class="keyword">if</span> request.method == <span class="string">'POST'</span>:</span><br><span class="line">        print(form)</span><br><span class="line">        supplier = Supplier(form[<span class="string">'supplier_name'</span>],</span><br><span class="line">                            form[<span class="string">'supplier_constract'</span>],</span><br><span class="line">                            form[<span class="string">'supplier_phone'</span>],</span><br><span class="line">                            form[<span class="string">'supplier_address'</span>],</span><br><span class="line">                            form[<span class="string">'supplier_remark'</span>])</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            db.session.add(supplier)</span><br><span class="line">            db.session.commit()</span><br><span class="line">            flash(<span class="string">'供应商添加成功！'</span>, <span class="string">'success'</span>)</span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            db.session.rollback()</span><br><span class="line">            flash(<span class="string">'输入不合法，请重新输入！'</span>, <span class="string">'danger'</span>)</span><br><span class="line">    <span class="keyword">return</span> redirect(url_for(<span class="string">'supplier.list_supplier'</span>))</span><br></pre></td></tr></table></figure>
+<pre><code class="python">@supplier.route(&#39;/purchase/supplier/add&#39;, methods=[&#39;POST&#39;])
+def add_supplier():
+    form = request.form
+    if request.method == &#39;POST&#39;:
+        print(form)
+        supplier = Supplier(form[&#39;supplier_name&#39;],
+                            form[&#39;supplier_constract&#39;],
+                            form[&#39;supplier_phone&#39;],
+                            form[&#39;supplier_address&#39;],
+                            form[&#39;supplier_remark&#39;])
+        try:
+            db.session.add(supplier)
+            db.session.commit()
+            flash(&#39;供应商添加成功！&#39;, &#39;success&#39;)
+        except:
+            db.session.rollback()
+            flash(&#39;输入不合法，请重新输入！&#39;, &#39;danger&#39;)
+    return redirect(url_for(&#39;supplier.list_supplier&#39;))
+</code></pre>
 <h1 id="项目总结"><a href="#项目总结" class="headerlink" title="项目总结"></a>项目总结</h1><p>随着答辩的完成，这个项目进入了尾声。因为很多东西需要去学习，有新的东西需要去探索，所以这个项目也很有可能不会再继续维护了。那么这个项目开源出来的价值在哪里呢？我想，这个项目虽然简单，但它毕竟还算是一个完整的Flask项目，除了<code>flask_sqlalchemy</code>之外没有多余的依赖，非常适合一个跟我一样的Python初学者进行入门学习。如果说有人能够因为这个项目少走一些弯路，少在一些死胡同浪费时间，我想这个项目的价值就已经实现了。如果再往大一点来说，开源的价值也就实现了。<br>如果要我自评的话，我觉得这样的项目应该有60分。之所以给一个及格分，是因为这个项目毕竟实现了需求的大多数功能，也有好好地跑在阿里云的服务器上。丢分的话，大体上是因为这个项目毫无注释，没有安装文档，也没有配置手册，很多东西都是硬编码到了代码中。不仅如此，编程的风格也是相当的不佳，在模板部分缺乏良好的顶层设计，出现了大量的重复代码。这些问题希望自己能在下一个项目中得到一些改善。<br>Anyway，随着这个项目的结束，我的大三生涯也要结束了。接下来是波澜壮阔的实习阶段，希望自己能够在实习的时候多踩一些坑，多走一些弯路，多<br>得到一些来自“长者”的指点。</p>
 <h1 id="参考资源"><a href="#参考资源" class="headerlink" title="参考资源"></a>参考资源</h1><ul>
 <li><a href="http://docs.jinkan.org/docs/flask/" target="_blank" rel="external">Flask 中文文档 <em>文档略有过时，代码以Github上为准</em></a></li>
@@ -176,7 +230,7 @@
                     <p><span>本文标题:</span><a href="/2016/06/16/jade_ims/">马可波罗珠宝进销存系统开发手记</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2016年6月16日 - 22时06分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2016/06/16/jade_ims/"
                                             title="马可波罗珠宝进销存系统开发手记">https://xuanwo.org/2016/06/16/jade_ims/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -299,11 +353,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

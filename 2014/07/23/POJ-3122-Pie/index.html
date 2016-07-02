@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -118,8 +118,54 @@
 <p><a href="http://poj.org/problem?id=3122" target="_blank" rel="external">http://poj.org/problem?id=3122</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>这也是一道水题，二分切之。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;math.h&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int N, F;</span><br><span class="line">double pi = acos(-1.0);</span><br><span class="line">double pie[10032];</span><br><span class="line">double sum, maxp;</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    double l, r, m;</span><br><span class="line">    int i, t, c;</span><br><span class="line"></span><br><span class="line">    scanf(&quot;%d&quot;, &amp;t);</span><br><span class="line">    while (t--)</span><br><span class="line">    &#123;</span><br><span class="line">        scanf(&quot;%d%d&quot;, &amp;N, &amp;F);</span><br><span class="line">        F++;</span><br><span class="line">        maxp = sum = 0;</span><br><span class="line">        for (i = 0; i &lt; N; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            scanf(&quot;%d&quot;, &amp;c);</span><br><span class="line">            pie[i] = c * c * pi;</span><br><span class="line">            maxp = max(maxp, pie[i]);</span><br><span class="line">            sum += pie[i];</span><br><span class="line">        &#125;</span><br><span class="line">        l = maxp / F;</span><br><span class="line">        r = sum / F;</span><br><span class="line">        while (l + 0.00001 &lt; r)</span><br><span class="line">        &#123;</span><br><span class="line">            m = (l + r) / 2;</span><br><span class="line">            c = 0;</span><br><span class="line">            for (i = 0; i &lt; N; i++)</span><br><span class="line">                c += floor(pie[i] / m);</span><br><span class="line">            if (c &lt; F)</span><br><span class="line">                r = m;</span><br><span class="line">            else</span><br><span class="line">                l = m;</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;%.4lf\n&quot;, l);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+#include &lt;algorithm&gt;
+
+using namespace std;
+
+int N, F;
+double pi = acos(-1.0);
+double pie[10032];
+double sum, maxp;
+
+int main()
+{
+    double l, r, m;
+    int i, t, c;
+
+    scanf(&quot;%d&quot;, &amp;t);
+    while (t--)
+    {
+        scanf(&quot;%d%d&quot;, &amp;N, &amp;F);
+        F++;
+        maxp = sum = 0;
+        for (i = 0; i &lt; N; i++)
+        {
+            scanf(&quot;%d&quot;, &amp;c);
+            pie[i] = c * c * pi;
+            maxp = max(maxp, pie[i]);
+            sum += pie[i];
+        }
+        l = maxp / F;
+        r = sum / F;
+        while (l + 0.00001 &lt; r)
+        {
+            m = (l + r) / 2;
+            c = 0;
+            for (i = 0; i &lt; N; i++)
+                c += floor(pie[i] / m);
+            if (c &lt; F)
+                r = m;
+            else
+                l = m;
+        }
+        printf(&quot;%.4lf\n&quot;, l);
+    }
+
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月23日 已AC。</li>
 </ul>
 
@@ -147,7 +193,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/23/POJ-3122-Pie/">POJ 3122 Pie</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月23日 - 23时07分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/23/POJ-3122-Pie/"
                                             title="POJ 3122 Pie">https://xuanwo.org/2014/07/23/POJ-3122-Pie/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -254,11 +300,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

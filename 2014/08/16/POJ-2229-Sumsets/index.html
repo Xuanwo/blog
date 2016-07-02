@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -122,8 +122,54 @@
 <li>没有1，则有dp[n]的另一部分是d[n/2]</li>
 </ol>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstdlib&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">#include &lt;ctime&gt;</span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">#include &lt;vector&gt;</span><br><span class="line">#include &lt;deque&gt;</span><br><span class="line">#include &lt;list&gt;</span><br><span class="line">#include &lt;set&gt;</span><br><span class="line">#include &lt;map&gt;</span><br><span class="line">#include &lt;stack&gt;</span><br><span class="line">#include &lt;queue&gt;</span><br><span class="line">#include &lt;numeric&gt;</span><br><span class="line">#include &lt;iomanip&gt;</span><br><span class="line">#include &lt;bitset&gt;</span><br><span class="line">#include &lt;sstream&gt;</span><br><span class="line">#include &lt;fstream&gt;</span><br><span class="line">#define debug puts(&quot;-----&quot;)</span><br><span class="line">#define pi (acos(-1.0))</span><br><span class="line">#define eps (1e-8)</span><br><span class="line">#define inf (1&lt;&lt;30)</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">const int M = 1000000000;</span><br><span class="line">const int MAXN = 1000010;</span><br><span class="line"></span><br><span class="line">int dp[MAXN];</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    int n;</span><br><span class="line">    scanf(&quot;%d&quot;, &amp;n);</span><br><span class="line">    dp[0] = dp[1] = 1;</span><br><span class="line"></span><br><span class="line">    for (int i = 2; i &lt;= n; ++i)</span><br><span class="line">        if (i &amp; 0x01)</span><br><span class="line">            dp[i] = dp[i - 1];</span><br><span class="line">        else</span><br><span class="line">            dp[i] = (dp[i - 2] + dp[i &gt;&gt; 1]) % M;</span><br><span class="line"></span><br><span class="line">    printf(&quot;%d\n&quot;, dp[n]);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+#include &lt;cmath&gt;
+#include &lt;ctime&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;deque&gt;
+#include &lt;list&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+#include &lt;stack&gt;
+#include &lt;queue&gt;
+#include &lt;numeric&gt;
+#include &lt;iomanip&gt;
+#include &lt;bitset&gt;
+#include &lt;sstream&gt;
+#include &lt;fstream&gt;
+#define debug puts(&quot;-----&quot;)
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1&lt;&lt;30)
+using namespace std;
+
+const int M = 1000000000;
+const int MAXN = 1000010;
+
+int dp[MAXN];
+
+int main(int argc, char const *argv[])
+{
+    int n;
+    scanf(&quot;%d&quot;, &amp;n);
+    dp[0] = dp[1] = 1;
+
+    for (int i = 2; i &lt;= n; ++i)
+        if (i &amp; 0x01)
+            dp[i] = dp[i - 1];
+        else
+            dp[i] = (dp[i - 2] + dp[i &gt;&gt; 1]) % M;
+
+    printf(&quot;%d\n&quot;, dp[n]);
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月16日 已AC。</li>
 </ul>
 
@@ -151,7 +197,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/16/POJ-2229-Sumsets/">POJ 2229 Sumsets</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月16日 - 15时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/16/POJ-2229-Sumsets/"
                                             title="POJ 2229 Sumsets">https://xuanwo.org/2014/08/16/POJ-2229-Sumsets/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -258,11 +304,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

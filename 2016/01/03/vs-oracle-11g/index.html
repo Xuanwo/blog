@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -130,21 +130,54 @@
 <p>ODP.Net默认使用安装目录下的<code>tnsnames.ora</code>，若安装目录在Program Files下，可能会遇到无权限等问题，此时使用管理员权限打开命令行，切换到对应目录并使用notepad编辑。</p>
 </blockquote>
 <p>复制服务器端的tnsnames.ora文件内容，或者自己手动编辑，格式如下：</p>
-<figure class="highlight"><table><tr><td class="code"><pre><span class="line">&lt;数据源别名&gt; =</span><br><span class="line">  (DESCRIPTION =</span><br><span class="line">    (ADDRESS = (PROTOCOL = TCP)(HOST = &lt;主机名或IP&gt;)(PORT = &lt;端口号&gt;))</span><br><span class="line">    (CONNECT_DATA =</span><br><span class="line">      (SERVER = DEDICATED)</span><br><span class="line">      (SERVICE_NAME = &lt;数据库服务名&gt;)</span><br><span class="line">    )</span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
+<pre><code class="sql">&lt;数据源别名&gt; =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = &lt;主机名或IP&gt;)(PORT = &lt;端口号&gt;))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = &lt;数据库服务名&gt;)
+    )
+  )
+</code></pre>
 <h1 id="添加数据库"><a href="#添加数据库" class="headerlink" title="添加数据库"></a>添加数据库</h1><p>打开<code>工具</code>-<code>连接到数据库</code>，数据源修改为<code>Oracle数据库</code>下的<code>ODP.NET,托管驱动程序</code>，然后点击<code>确定</code>，打开<code>添加连接</code>窗口。<br><img src="/imgs/develop/add-database.png" alt="添加连接"><br>填写用户名，密码并选择数据源，然后测试连接，成功的话说明已经连通，点击确定即可。</p>
 <blockquote>
 <p>使用虚拟机搭建数据库的额外Tips<br>根据某网友分析，Oracle的监听器在通过1521端口连接后，会开启另外一个新的随机端口进行数据通讯，因此使用NAT方式虚拟网卡可能会导致连接失败。这种情况下，请使用桥接方式虚拟网卡，并在<code>net manager</code>中将<code>loaclhost</code>修改为虚拟机当前的IP。重启监听服务后，再试。</p>
 </blockquote>
-<h1 id="连接数据库并使用"><a href="#连接数据库并使用" class="headerlink" title="连接数据库并使用"></a>连接数据库并使用</h1><h2 id="连接数据库"><a href="#连接数据库" class="headerlink" title="连接数据库"></a>连接数据库</h2><figure class="highlight vb"><table><tr><td class="code"><pre><span class="line"><span class="keyword">Dim</span> oradb <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"User ID=system;Password=123456;Data Source=lol"</span></span><br><span class="line"><span class="keyword">Dim</span> conn <span class="keyword">As</span> <span class="keyword">New</span> OracleConnection(oradb)</span><br><span class="line">conn.Open()</span><br><span class="line"><span class="keyword">Dim</span> sql <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"create table xxx"</span></span><br><span class="line"><span class="keyword">Dim</span> sqlCom <span class="keyword">As</span> <span class="keyword">New</span> OracleCommand</span><br><span class="line">sqlCom.CommandText = sql</span><br><span class="line">sqlCom.Connection = conn</span><br><span class="line">sqlCom.ExecuteNonQuery()</span><br></pre></td></tr></table></figure>
+<h1 id="连接数据库并使用"><a href="#连接数据库并使用" class="headerlink" title="连接数据库并使用"></a>连接数据库并使用</h1><h2 id="连接数据库"><a href="#连接数据库" class="headerlink" title="连接数据库"></a>连接数据库</h2><pre><code class="vb">Dim oradb As String = &quot;User ID=system;Password=123456;Data Source=lol&quot;
+Dim conn As New OracleConnection(oradb)
+conn.Open()
+Dim sql As String = &quot;create table xxx&quot;
+Dim sqlCom As New OracleCommand
+sqlCom.CommandText = sql
+sqlCom.Connection = conn
+sqlCom.ExecuteNonQuery()
+</code></pre>
 <h2 id="查询数据"><a href="#查询数据" class="headerlink" title="查询数据"></a>查询数据</h2><p>成功配置数据源之后，只需要向界面上拖动<code>DataGridView</code>，并进行相关配置，选择自己需要的表即可。</p>
 <h2 id="插入图片的正确姿势"><a href="#插入图片的正确姿势" class="headerlink" title="插入图片的正确姿势"></a>插入图片的正确姿势</h2><p>图片作为二进制数据无法直接拼凑出SQL命令，我们需要使用<code>OracleCommand</code>自带的<code>Parameters</code>功能。在SQL命令中用<code>:photo</code>来代表一个参量，然后使用</p>
-<figure class="highlight vb"><table><tr><td class="code"><pre><span class="line">sqlCom.Parameters.Add(<span class="string">"photo"</span>, OracleDbType.Blob, imgData.Length)</span><br></pre></td></tr></table></figure>
+<pre><code class="vb">sqlCom.Parameters.Add(&quot;photo&quot;, OracleDbType.Blob, imgData.Length)
+</code></pre>
 <p>来分别指定这个参量的类型和所占空间大小</p>
 <p>最后使用</p>
-<figure class="highlight vb"><table><tr><td class="code"><pre><span class="line">sqlCom.Parameters(<span class="number">0</span>).Value = imgData</span><br></pre></td></tr></table></figure>
+<pre><code class="vb">sqlCom.Parameters(0).Value = imgData
+</code></pre>
 <p>来指定这个参量的值。</p>
 <p>整个插入图片过程的代码如下：</p>
-<figure class="highlight vb"><table><tr><td class="code"><pre><span class="line"><span class="keyword">Dim</span> conn <span class="keyword">As</span> <span class="keyword">New</span> OracleConnection(oradb)</span><br><span class="line"><span class="keyword">Dim</span> imgData(<span class="number">0</span>) <span class="keyword">As</span> <span class="built_in">Byte</span></span><br><span class="line"><span class="keyword">Dim</span> ms <span class="keyword">As</span> <span class="keyword">New</span> System.IO.MemoryStream</span><br><span class="line">PictureBox1.BackgroundImage.Save(ms, PictureBox1.BackgroundImage.RawFormat)</span><br><span class="line"><span class="keyword">ReDim</span> imgData(ms.Length - <span class="number">1</span>)</span><br><span class="line">ms.Read(imgData, <span class="number">0</span>, ms.Length)</span><br><span class="line">ms.Close()</span><br><span class="line">conn.Open()</span><br><span class="line"><span class="keyword">Dim</span> sql <span class="keyword">As</span> <span class="built_in">String</span> = <span class="string">"insert into hero values"</span> &amp; <span class="string">"("</span> &amp; TextBox1.<span class="keyword">Text</span> &amp; <span class="string">":photo"</span> &amp; <span class="string">")"</span></span><br><span class="line"><span class="keyword">Dim</span> sqlCom <span class="keyword">As</span> <span class="keyword">New</span> OracleCommand</span><br><span class="line">sqlCom.CommandText = sql</span><br><span class="line">sqlCom.Connection = conn</span><br><span class="line">sqlCom.Parameters.Add(<span class="string">"photo"</span>, OracleDbType.Blob, imgData.Length)</span><br><span class="line">sqlCom.Parameters(<span class="number">0</span>).Value = imgData</span><br><span class="line">sqlCom.ExecuteNonQuery()</span><br></pre></td></tr></table></figure>
+<pre><code class="vb">Dim conn As New OracleConnection(oradb)
+Dim imgData(0) As Byte
+Dim ms As New System.IO.MemoryStream
+PictureBox1.BackgroundImage.Save(ms, PictureBox1.BackgroundImage.RawFormat)
+ReDim imgData(ms.Length - 1)
+ms.Read(imgData, 0, ms.Length)
+ms.Close()
+conn.Open()
+Dim sql As String = &quot;insert into hero values&quot; &amp; &quot;(&quot; &amp; TextBox1.Text &amp; &quot;:photo&quot; &amp; &quot;)&quot;
+Dim sqlCom As New OracleCommand
+sqlCom.CommandText = sql
+sqlCom.Connection = conn
+sqlCom.Parameters.Add(&quot;photo&quot;, OracleDbType.Blob, imgData.Length)
+sqlCom.Parameters(0).Value = imgData
+sqlCom.ExecuteNonQuery()
+</code></pre>
 <h1 id="常见错误"><a href="#常见错误" class="headerlink" title="常见错误"></a>常见错误</h1><h2 id="column-not-allowed-here"><a href="#column-not-allowed-here" class="headerlink" title="column not allowed here"></a>column not allowed here</h2><p>数据类型不符，检查对应项目数据类型是否正确。</p>
 <h2 id="missing-comma"><a href="#missing-comma" class="headerlink" title="missing comma"></a>missing comma</h2><p>命令格式不对，检查一下自己的SQL命令是否有错误，特别是在有字符串的时候，需要使用<code>&quot;&quot;</code>来代表一个字符串中的<code>&quot;</code>。</p>
 <h2 id="identifier-is-too-long"><a href="#identifier-is-too-long" class="headerlink" title="identifier is too long"></a>identifier is too long</h2><p>标识符过长（不得超过30字符），不是非常明白原因，不过我取消掉insert命令中指定位置的部分之后，这个错误消失了。</p>
@@ -178,7 +211,7 @@
                     <p><span>本文标题:</span><a href="/2016/01/03/vs-oracle-11g/">VS2015连接Oracle数据库</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2016年1月3日 - 15时01分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2016/01/03/vs-oracle-11g/"
                                             title="VS2015连接Oracle数据库">https://xuanwo.org/2016/01/03/vs-oracle-11g/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -295,11 +328,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

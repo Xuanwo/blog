@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -118,8 +118,33 @@
 <p><a href="http://poj.org/problem?id=2080" target="_blank" rel="external">http://poj.org/problem?id=2080</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>完全的模拟题。将给定的天数转化为年月日，注意闰年，大小月。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">char week[7][10] = &#123;&quot;Saturday&quot;, &quot;Sunday&quot;, &quot;Monday&quot;, &quot;Tuesday&quot;, &quot;Wednesday&quot;, &quot;Thursday&quot;, &quot;Friday&quot;&#125;;</span><br><span class="line">int year[2] = &#123;365, 366&#125;;</span><br><span class="line">int month[2][12] = &#123;31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31&#125;;</span><br><span class="line"></span><br><span class="line">int type(int m)</span><br><span class="line">&#123;</span><br><span class="line">    if ((m % 4 == 0 &amp;&amp; m % 100 != 0) || (m % 400 == 0))return 1; else return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    int days, dayofweek;</span><br><span class="line">    int i = 0, j = 0;</span><br><span class="line">    while (scanf(&quot;%d&quot;, &amp;days) &amp;&amp; days != -1)</span><br><span class="line">    &#123;</span><br><span class="line">        dayofweek = days % 7;</span><br><span class="line">        for (i = 2000; days &gt;= year[type(i)]; i++)</span><br><span class="line">            days -= year[type(i)];</span><br><span class="line">        for (j = 0; days &gt;= month[type(i)][j]; j++)</span><br><span class="line">            days -= month[type(i)][j];</span><br><span class="line">        printf(&quot;%d-%02d-%02d %s\n&quot;, i, j + 1, days + 1, week[dayofweek]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include &lt;stdio.h&gt;
+using namespace std;
+
+char week[7][10] = {&quot;Saturday&quot;, &quot;Sunday&quot;, &quot;Monday&quot;, &quot;Tuesday&quot;, &quot;Wednesday&quot;, &quot;Thursday&quot;, &quot;Friday&quot;};
+int year[2] = {365, 366};
+int month[2][12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+int type(int m)
+{
+    if ((m % 4 == 0 &amp;&amp; m % 100 != 0) || (m % 400 == 0))return 1; else return 0;
+}
+
+int main(int argc, char const *argv[])
+{
+    int days, dayofweek;
+    int i = 0, j = 0;
+    while (scanf(&quot;%d&quot;, &amp;days) &amp;&amp; days != -1)
+    {
+        dayofweek = days % 7;
+        for (i = 2000; days &gt;= year[type(i)]; i++)
+            days -= year[type(i)];
+        for (j = 0; days &gt;= month[type(i)][j]; j++)
+            days -= month[type(i)][j];
+        printf(&quot;%d-%02d-%02d %s\n&quot;, i, j + 1, days + 1, week[dayofweek]);
+    }
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月06日 已AC。</li>
 </ul>
 
@@ -147,7 +172,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/06/POJ-2080-Calendar/">POJ 2080 Calendar</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月6日 - 14时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/06/POJ-2080-Calendar/"
                                             title="POJ 2080 Calendar">https://xuanwo.org/2014/08/06/POJ-2080-Calendar/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -254,11 +279,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

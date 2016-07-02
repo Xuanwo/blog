@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -137,19 +137,55 @@
 <p><em>Travis CI十分强大，有想进一步了解Travis CI的同学可以通过<a href="http://docs.travis-ci.com/" target="_blank" rel="external">文档</a>来进一步的学习。</em></p>
 <h3 id="配置Github-Release"><a href="#配置Github-Release" class="headerlink" title="配置Github-Release"></a>配置Github-Release</h3><p>通过前面的操作，我们已经可以通过Travis CI来自动构建我们的PDF文件，但是这个文件并不能上传到Github上来，因为Travis CI默认是不会取得这样的权限的。为了解决这个问题，我们可以使用Github的Release API以及Travis CI的加密。</p>
 <p>首先我们需要一个ruby的环境，如果没有的话可以考虑使用<a href="https://c9.io/" target="_blank" rel="external">Cloud9</a>。<br>安装travis的gem包</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xuanwo@ruby:~/workspace $ gem install travis</span><br><span class="line">Fetching: addressable-2.3.8.gem (100%)</span><br><span class="line">Successfully installed addressable-2.3.8</span><br><span class="line">（中间省略）</span><br><span class="line">Fetching: travis-1.8.0.gem (100%)</span><br><span class="line">Successfully installed travis-1.8.0</span><br><span class="line">18 gems installed</span><br></pre></td></tr></table></figure>
-<p>登陆Travis，需要使用Github的账号和密码。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xuanwo@ruby:~/workspace $ cd OpenSourceBook/</span><br><span class="line">xuanwo@ruby:~/workspace/OpenSourceBook (master) $</span><br><span class="line">xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis login --auto</span><br><span class="line">Shell completion not installed. Would you like to install it now? |y|</span><br><span class="line">We need your GitHub login to identify you.</span><br><span class="line">This information will not be sent to Travis CI, only to api.github.com.</span><br><span class="line">The password will not be displayed.</span><br><span class="line"></span><br><span class="line">Try running with --github-token or --auto if you don&apos;t want to enter your password anyway.</span><br><span class="line"></span><br><span class="line">Username: Xuanwo</span><br><span class="line">Password for Xuanwo: **********</span><br><span class="line">Two-factor authentication code for Xuanwo: 147447</span><br><span class="line">Successfully logged in as Xuanwo!</span><br></pre></td></tr></table></figure>
-<p>使用Travis的Release-Guide生成相应的脚本代码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis setup releases</span><br><span class="line">Detected repository as Xuanwo/OpenSourceBook, is this correct? |yes|</span><br><span class="line">//此处错误表明这个库是新建的，Travis CI还没有同步，手动同步即可。</span><br><span class="line">repository not known to https://api.travis-ci.org/: Xuanwo/OpenSourceBook</span><br><span class="line">xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis setup releases</span><br><span class="line">Username: Xuanwo</span><br><span class="line">Password for Xuanwo: **********</span><br><span class="line">Two-factor authentication code for Xuanwo: 603930</span><br><span class="line">//设定需要上传的文件名</span><br><span class="line">File to Upload: OpenSourceBook.pdf</span><br><span class="line">//设定只从当前库进行上传</span><br><span class="line">Deploy only from Xuanwo/OpenSourceBook? |yes|</span><br><span class="line">//设定进行API key加密（强烈要求）</span><br><span class="line">Encrypt API key? |yes|</span><br></pre></td></tr></table></figure>
-<p>到这里，我们已经实现了一本电子书由Markdown到PDF的自动构建，下面我来具体的讲解一下如何使用。</p>
+<pre><code>xuanwo@ruby:~/workspace $ gem install travis
+Fetching: addressable-2.3.8.gem (100%)
+Successfully installed addressable-2.3.8
+（中间省略）
+Fetching: travis-1.8.0.gem (100%)
+Successfully installed travis-1.8.0
+18 gems installed
+</code></pre><p>登陆Travis，需要使用Github的账号和密码。</p>
+<pre><code>xuanwo@ruby:~/workspace $ cd OpenSourceBook/
+xuanwo@ruby:~/workspace/OpenSourceBook (master) $
+xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis login --auto
+Shell completion not installed. Would you like to install it now? |y|
+We need your GitHub login to identify you.
+This information will not be sent to Travis CI, only to api.github.com.
+The password will not be displayed.
+
+Try running with --github-token or --auto if you don&#39;t want to enter your password anyway.
+
+Username: Xuanwo
+Password for Xuanwo: **********
+Two-factor authentication code for Xuanwo: 147447
+Successfully logged in as Xuanwo!
+</code></pre><p>使用Travis的Release-Guide生成相应的脚本代码</p>
+<pre><code>xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis setup releases
+Detected repository as Xuanwo/OpenSourceBook, is this correct? |yes|
+//此处错误表明这个库是新建的，Travis CI还没有同步，手动同步即可。
+repository not known to https://api.travis-ci.org/: Xuanwo/OpenSourceBook
+xuanwo@ruby:~/workspace/OpenSourceBook (master) $ travis setup releases
+Username: Xuanwo
+Password for Xuanwo: **********
+Two-factor authentication code for Xuanwo: 603930
+//设定需要上传的文件名
+File to Upload: OpenSourceBook.pdf
+//设定只从当前库进行上传
+Deploy only from Xuanwo/OpenSourceBook? |yes|
+//设定进行API key加密（强烈要求）
+Encrypt API key? |yes|
+</code></pre><p>到这里，我们已经实现了一本电子书由Markdown到PDF的自动构建，下面我来具体的讲解一下如何使用。</p>
 <h1 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h1><h2 id="触发Release发布"><a href="#触发Release发布" class="headerlink" title="触发Release发布"></a>触发Release发布</h2><p>由于Github的强制要求，所有发布都必须归属于某一个Tags，所以我们在push的时候，需要带上tags，生成的文件才能够上传到Github上去。具体的操作如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git add --all</span><br><span class="line">git commit -m &quot;update content&quot;</span><br><span class="line">git tag -a v0.0.1 -m &quot;tags content&quot;</span><br><span class="line">git push --tags</span><br><span class="line">git push</span><br></pre></td></tr></table></figure>
-<h2 id="文件结构介绍"><a href="#文件结构介绍" class="headerlink" title="文件结构介绍"></a>文件结构介绍</h2><p>所有的源代码文件都保存在<code>content</code>文件夹下，所有文件都遵循<a href="http://www.jianshu.com/p/q81RER" target="_blank" rel="external">Markdown语法</a>。图片保存在<code>content/img</code>目录下，调用时使用<code>![图片描述](img/pic.png)</code>。<br>每一本书分为前言，内容和目录。其中<code>0-prefaceX-xxx.md</code>表示前言的第X章，<code>1-chapterX-xxx.md</code>表示正文的第X章，<code>2-appendixX-xxx.md</code>表示附录的第X章，都是从1开始的。</p>
+<pre><code>git add --all
+git commit -m &quot;update content&quot;
+git tag -a v0.0.1 -m &quot;tags content&quot;
+git push --tags
+git push
+</code></pre><h2 id="文件结构介绍"><a href="#文件结构介绍" class="headerlink" title="文件结构介绍"></a>文件结构介绍</h2><p>所有的源代码文件都保存在<code>content</code>文件夹下，所有文件都遵循<a href="http://www.jianshu.com/p/q81RER" target="_blank" rel="external">Markdown语法</a>。图片保存在<code>content/img</code>目录下，调用时使用<code>![图片描述](img/pic.png)</code>。<br>每一本书分为前言，内容和目录。其中<code>0-prefaceX-xxx.md</code>表示前言的第X章，<code>1-chapterX-xxx.md</code>表示正文的第X章，<code>2-appendixX-xxx.md</code>表示附录的第X章，都是从1开始的。</p>
 <p><em>目前为止，修改封面还需要修改Tex文件</em></p>
 <h2 id="跳过自动构建"><a href="#跳过自动构建" class="headerlink" title="跳过自动构建"></a>跳过自动构建</h2><p>只是单纯想更新内容，不想生成PDF时，只需要在commit信息中添加<code>[ci skip]</code>即可。比如</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git commit -m &quot;[ci skip] commit message&quot;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<pre><code>git commit -m &quot;[ci skip] commit message&quot;
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2015年08月12日 初步完成教程</li>
 </ul>
 
@@ -177,7 +213,7 @@
                     <p><span>本文标题:</span><a href="/2015/08/12/OpenSourceBook/">Markdown + Travis CI 构建自己的开源电子书</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2015年8月12日 - 01时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2015/08/12/OpenSourceBook/"
                                             title="Markdown + Travis CI 构建自己的开源电子书">https://xuanwo.org/2015/08/12/OpenSourceBook/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -296,11 +332,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

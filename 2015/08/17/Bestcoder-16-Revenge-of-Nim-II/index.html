@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -125,7 +125,82 @@
 <li>在高斯消元的过程中，使用xor来代替先判断再消去，姿势更加优美。</li>
 <li>运用右移再<code>&amp;1</code>的方法获取这一位的二进制值，比循环中<code>/=2</code>优雅多了。</li>
 </ul>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> maxn = <span class="number">1010</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> maxm = <span class="number">65</span>;</span><br><span class="line"><span class="keyword">int</span> t, n;</span><br><span class="line">ll a[maxn];</span><br><span class="line"><span class="keyword">int</span> mat[maxm][maxm];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">rnk</span><span class="params">(<span class="keyword">int</span> mat[][maxm], <span class="keyword">int</span> n, <span class="keyword">int</span> m)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> ret = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, it = <span class="number">0</span>; i &lt; n &amp;&amp; it &lt; m; ++it)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> pos = <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = i; j &lt; n; ++j)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (mat[j][it])</span><br><span class="line">            &#123;</span><br><span class="line">                pos = j;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (pos == <span class="number">-1</span>)   <span class="keyword">continue</span>;</span><br><span class="line">        ++ret;</span><br><span class="line">        <span class="keyword">if</span> (pos != i)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = it; j &lt; m; ++j)</span><br><span class="line">            &#123;</span><br><span class="line">                swap(mat[i][j], mat[pos][j]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; n; ++j)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (i != j &amp;&amp; mat[j][it])</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> k = it; k &lt; m; ++k)</span><br><span class="line">                &#123;</span><br><span class="line">                    mat[j][k] ^= mat[i][k];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        ++i;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>, &amp;t);</span><br><span class="line">    <span class="keyword">while</span> (t--)</span><br><span class="line">    &#123;</span><br><span class="line">        ll sum = <span class="number">0</span>;</span><br><span class="line">        <span class="built_in">memset</span>(mat, <span class="number">0</span>, <span class="keyword">sizeof</span>(mat));</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d"</span>, &amp;n);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">"%I64d"</span>, &amp;a[i]);</span><br><span class="line">            sum ^= a[i];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (sum == <span class="number">0</span> || n &gt; maxm)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"Yes\n"</span>);</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; maxm; ++j)</span><br><span class="line">            &#123;</span><br><span class="line">                mat[i][j] = (a[i] &gt;&gt; j) &amp; <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> ret = rnk(mat, n, maxm);</span><br><span class="line">        <span class="keyword">if</span> (ret &lt; n)  <span class="built_in">printf</span>(<span class="string">"Yes\n"</span>);</span><br><span class="line">        <span class="keyword">else</span> <span class="built_in">printf</span>(<span class="string">"No\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code class="cpp">const int maxn = 1010;
+const int maxm = 65;
+int t, n;
+ll a[maxn];
+int mat[maxm][maxm];
+
+int rnk(int mat[][maxm], int n, int m)
+{
+    int ret = 0;
+    for (int i = 0, it = 0; i &lt; n &amp;&amp; it &lt; m; ++it)
+    {
+        int pos = -1;
+        for (int j = i; j &lt; n; ++j)
+        {
+            if (mat[j][it])
+            {
+                pos = j;
+                break;
+            }
+        }
+        if (pos == -1)   continue;
+        ++ret;
+        if (pos != i)
+        {
+            for (int j = it; j &lt; m; ++j)
+            {
+                swap(mat[i][j], mat[pos][j]);
+            }
+        }
+        for (int j = 0; j &lt; n; ++j)
+        {
+            if (i != j &amp;&amp; mat[j][it])
+            {
+                for (int k = it; k &lt; m; ++k)
+                {
+                    mat[j][k] ^= mat[i][k];
+                }
+            }
+        }
+        ++i;
+    }
+    return ret;
+}
+
+int main()
+{
+    scanf(&quot;%d&quot;, &amp;t);
+    while (t--)
+    {
+        ll sum = 0;
+        memset(mat, 0, sizeof(mat));
+        scanf(&quot;%d&quot;, &amp;n);
+        for (int i = 0; i &lt; n; ++i)
+        {
+            scanf(&quot;%I64d&quot;, &amp;a[i]);
+            sum ^= a[i];
+        }
+        if (sum == 0 || n &gt; maxm)
+        {
+            printf(&quot;Yes\n&quot;);
+            continue;
+        }
+        for (int i = 0; i &lt; n; ++i)
+        {
+            for (int j = 0; j &lt; maxm; ++j)
+            {
+                mat[i][j] = (a[i] &gt;&gt; j) &amp; 1;
+            }
+        }
+        int ret = rnk(mat, n, maxm);
+        if (ret &lt; n)  printf(&quot;Yes\n&quot;);
+        else printf(&quot;No\n&quot;);
+    }
+    return 0;
+}
+</code></pre>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2015年8月17日 已AC</li>
 </ul>
@@ -154,7 +229,7 @@
                     <p><span>本文标题:</span><a href="/2015/08/17/Bestcoder-16-Revenge-of-Nim-II/">Bestcoder Round 16 C Revenge of Nim II</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2015年8月17日 - 02时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2015/08/17/Bestcoder-16-Revenge-of-Nim-II/"
                                             title="Bestcoder Round 16 C Revenge of Nim II">https://xuanwo.org/2015/08/17/Bestcoder-16-Revenge-of-Nim-II/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -261,11 +336,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

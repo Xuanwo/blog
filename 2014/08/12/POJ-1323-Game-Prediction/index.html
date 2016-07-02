@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -118,8 +118,52 @@
 <p><a href="http://poj.org/problem?id=1323" target="_blank" rel="external">http://poj.org/problem?id=1323</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>最优的方法是出一张比你出的牌大的牌中最小的牌，不过没有严格证明= =。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">using namespace std;</span><br><span class="line">const int maxn = 1001;</span><br><span class="line"></span><br><span class="line">int vis[maxn], a[maxn];</span><br><span class="line">int n, m;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    int t = 0;</span><br><span class="line">    while (cin &gt;&gt; n &gt;&gt; m)</span><br><span class="line">    &#123;</span><br><span class="line">        if (m == 0 &amp;&amp; n == 0) break;</span><br><span class="line">        t++;</span><br><span class="line">        memset(vis, 0, sizeof(vis));</span><br><span class="line">        for (int i = 1; i &lt;= m; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            cin &gt;&gt; a[i];</span><br><span class="line">            vis[a[i]] = 1;</span><br><span class="line">        &#125;</span><br><span class="line">        sort(a + 1, a + m + 1);</span><br><span class="line">        bool flag;</span><br><span class="line">        int j = 1;</span><br><span class="line">        int amount = 0;</span><br><span class="line">        for (int i = 1; i &lt;= m; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            flag = false;</span><br><span class="line">            for (; j &lt;= n * m; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                if (!vis[j] &amp;&amp; j &gt; a[i])</span><br><span class="line">                &#123;</span><br><span class="line">                    flag = true;</span><br><span class="line">                    j++;</span><br><span class="line">                    break;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            if (flag) amount++;</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;Case %d: %d\n&quot;, t, m - amount);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;algorithm&gt;
+#include &lt;string.h&gt;
+using namespace std;
+const int maxn = 1001;
+
+int vis[maxn], a[maxn];
+int n, m;
+
+int main(int argc, char const *argv[])
+{
+    int t = 0;
+    while (cin &gt;&gt; n &gt;&gt; m)
+    {
+        if (m == 0 &amp;&amp; n == 0) break;
+        t++;
+        memset(vis, 0, sizeof(vis));
+        for (int i = 1; i &lt;= m; i++)
+        {
+            cin &gt;&gt; a[i];
+            vis[a[i]] = 1;
+        }
+        sort(a + 1, a + m + 1);
+        bool flag;
+        int j = 1;
+        int amount = 0;
+        for (int i = 1; i &lt;= m; i++)
+        {
+            flag = false;
+            for (; j &lt;= n * m; j++)
+            {
+                if (!vis[j] &amp;&amp; j &gt; a[i])
+                {
+                    flag = true;
+                    j++;
+                    break;
+                }
+            }
+            if (flag) amount++;
+        }
+        printf(&quot;Case %d: %d\n&quot;, t, m - amount);
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月12日 已AC。</li>
 </ul>
 
@@ -147,7 +191,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/12/POJ-1323-Game-Prediction/">POJ 1323 Game Prediction</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月12日 - 04时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/12/POJ-1323-Game-Prediction/"
                                             title="POJ 1323 Game Prediction">https://xuanwo.org/2014/08/12/POJ-1323-Game-Prediction/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -254,11 +298,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

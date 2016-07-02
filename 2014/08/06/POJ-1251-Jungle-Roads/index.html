@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -119,9 +119,151 @@
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>同样是练习题，使用了Kruskal算法，对着模板敲的，理解的还不是很透彻。</p>
 <p>补充一个Prim算法的代码，神模板好评，自己对最小生成树的理解有了很大提高。在凌晨时分debug了半天，通过逐行打印，最终确认我错误的原因，没有进行初始化。虽然有点哭笑不得，但是感觉自己花了这三个小时是值得的。以后要避免这样的错误。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><h2 id="Kruskal算法"><a href="#Kruskal算法" class="headerlink" title="Kruskal算法"></a>Kruskal算法</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">using namespace std;</span><br><span class="line">#define MAX 26</span><br><span class="line"></span><br><span class="line">typedef struct</span><br><span class="line">&#123;</span><br><span class="line">    int x, y;</span><br><span class="line">    int w;</span><br><span class="line">&#125; edge;</span><br><span class="line"></span><br><span class="line">edge e[MAX *MAX];</span><br><span class="line">int rank[MAX];</span><br><span class="line">int father[MAX];</span><br><span class="line">int sum;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">bool cmp(const edge a, const edge b)</span><br><span class="line">&#123;</span><br><span class="line">    return a.w &lt; b.w;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">void Make_Set(int x)</span><br><span class="line">&#123;</span><br><span class="line">    father[x] = x;</span><br><span class="line">    rank[x] = 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">int Find_Set(int x)</span><br><span class="line">&#123;</span><br><span class="line">    if (x != father[x])</span><br><span class="line">    &#123;</span><br><span class="line">        father[x] = Find_Set(father[x]);</span><br><span class="line">    &#125;</span><br><span class="line">    return father[x];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">void Union(int x, int y, int w)</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">    if (x == y) return;</span><br><span class="line">    if (rank[x] &gt; rank[y])</span><br><span class="line">    &#123;</span><br><span class="line">        father[y] = x;</span><br><span class="line">    &#125;</span><br><span class="line">    else</span><br><span class="line">    &#123;</span><br><span class="line">        if (rank[x] == rank[y])</span><br><span class="line">        &#123;</span><br><span class="line">            rank[y]++;</span><br><span class="line">        &#125;</span><br><span class="line">        father[x] = y;</span><br><span class="line">    &#125;</span><br><span class="line">    sum += w;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    int i, j, k, m, n, t;</span><br><span class="line">    char ch;</span><br><span class="line">    while (cin &gt;&gt; m &amp;&amp; m != 0)</span><br><span class="line">    &#123;</span><br><span class="line">        k = 0;</span><br><span class="line">        for (i = 0; i &lt; m; i++) Make_Set(i);</span><br><span class="line">        for (i = 0; i &lt; m - 1; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            cin &gt;&gt; ch &gt;&gt; n;</span><br><span class="line">            for (j = 0; j &lt; n; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                cin &gt;&gt; ch &gt;&gt; e[k].w;</span><br><span class="line">                e[k].x = i;</span><br><span class="line">                e[k].y = ch - &apos;A&apos;;</span><br><span class="line">                k++;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        sort(e, e + k, cmp);</span><br><span class="line">        sum = 0;</span><br><span class="line">        for (i = 0; i &lt; k; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            Union(Find_Set(e[i].x), Find_Set(e[i].y), e[i].w);</span><br><span class="line">        &#125;</span><br><span class="line">        cout &lt;&lt; sum &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="Prim算法"><a href="#Prim算法" class="headerlink" title="Prim算法"></a>Prim算法</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">using namespace std;</span><br><span class="line">#define MAXN 200</span><br><span class="line">#define inf 1000000000</span><br><span class="line"></span><br><span class="line">typedef int elem_t;</span><br><span class="line"></span><br><span class="line">elem_t prim(int n, elem_t mat[][MAXN], int *pre)</span><br><span class="line">&#123;</span><br><span class="line">    elem_t min[MAXN], ret = 0;</span><br><span class="line">    int v[MAXN], i, j, k;</span><br><span class="line">    for (i = 0; i &lt; n; i++)</span><br><span class="line">        min[i] = inf, v[i] = 0, pre[i] = -1;</span><br><span class="line">    for (min[j = 0] = 0; j &lt; n; j++)</span><br><span class="line">    &#123;</span><br><span class="line">        for (k = -1, i = 0; i &lt; n; i++)</span><br><span class="line">            if (!v[i] &amp;&amp; (k == -1 || min[i] &lt; min[k]))</span><br><span class="line">                k = i;</span><br><span class="line">        for (v[k] = 1, ret += min[k], i = 0; i &lt; n; i++)</span><br><span class="line">            if (!v[i] &amp;&amp; mat[k][i] &lt; min[i])</span><br><span class="line">                min[i] = mat[pre[i] = k][i];</span><br><span class="line">    &#125;</span><br><span class="line">    return ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    int n, i, j, k, cnt, x, sum;</span><br><span class="line">    char ch;</span><br><span class="line">    int pre[MAXN];</span><br><span class="line">    elem_t mat[MAXN][MAXN];</span><br><span class="line">    while (cin &gt;&gt; n &amp;&amp; n)</span><br><span class="line">    &#123;</span><br><span class="line">        for (i = 0; i &lt; n; i++)</span><br><span class="line">            for (j = 0; j &lt; n; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                mat[i][j] = inf;</span><br><span class="line">                if(i==j)    mat[i][j]=0;</span><br><span class="line">            &#125;</span><br><span class="line">        for (i = 0; i &lt; n - 1; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            cin &gt;&gt; ch &gt;&gt; cnt;</span><br><span class="line">            for (j = 0, k = int(ch - &apos;A&apos;); j &lt;= cnt - 1; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                cin &gt;&gt; ch &gt;&gt; x;</span><br><span class="line">                mat[k][int(ch - &apos;A&apos;)] = x;</span><br><span class="line">                mat[int(ch - &apos;A&apos;)][k] = x;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        sum = prim(n, mat, pre);</span><br><span class="line">        cout&lt;&lt;sum&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><h2 id="Kruskal算法"><a href="#Kruskal算法" class="headerlink" title="Kruskal算法"></a>Kruskal算法</h2><pre><code>#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+#define MAX 26
+
+typedef struct
+{
+    int x, y;
+    int w;
+} edge;
+
+edge e[MAX *MAX];
+int rank[MAX];
+int father[MAX];
+int sum;
+
+
+bool cmp(const edge a, const edge b)
+{
+    return a.w &lt; b.w;
+}
+
+
+void Make_Set(int x)
+{
+    father[x] = x;
+    rank[x] = 0;
+}
+
+
+int Find_Set(int x)
+{
+    if (x != father[x])
+    {
+        father[x] = Find_Set(father[x]);
+    }
+    return father[x];
+}
+
+
+void Union(int x, int y, int w)
+{
+
+    if (x == y) return;
+    if (rank[x] &gt; rank[y])
+    {
+        father[y] = x;
+    }
+    else
+    {
+        if (rank[x] == rank[y])
+        {
+            rank[y]++;
+        }
+        father[x] = y;
+    }
+    sum += w;
+}
+
+int main()
+{
+    int i, j, k, m, n, t;
+    char ch;
+    while (cin &gt;&gt; m &amp;&amp; m != 0)
+    {
+        k = 0;
+        for (i = 0; i &lt; m; i++) Make_Set(i);
+        for (i = 0; i &lt; m - 1; i++)
+        {
+            cin &gt;&gt; ch &gt;&gt; n;
+            for (j = 0; j &lt; n; j++)
+            {
+                cin &gt;&gt; ch &gt;&gt; e[k].w;
+                e[k].x = i;
+                e[k].y = ch - &#39;A&#39;;
+                k++;
+            }
+        }
+        sort(e, e + k, cmp);
+        sum = 0;
+        for (i = 0; i &lt; k; i++)
+        {
+            Union(Find_Set(e[i].x), Find_Set(e[i].y), e[i].w);
+        }
+        cout &lt;&lt; sum &lt;&lt; endl;
+    }
+    return 0;
+}
+</code></pre><h2 id="Prim算法"><a href="#Prim算法" class="headerlink" title="Prim算法"></a>Prim算法</h2><pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;string.h&gt;
+using namespace std;
+#define MAXN 200
+#define inf 1000000000
+
+typedef int elem_t;
+
+elem_t prim(int n, elem_t mat[][MAXN], int *pre)
+{
+    elem_t min[MAXN], ret = 0;
+    int v[MAXN], i, j, k;
+    for (i = 0; i &lt; n; i++)
+        min[i] = inf, v[i] = 0, pre[i] = -1;
+    for (min[j = 0] = 0; j &lt; n; j++)
+    {
+        for (k = -1, i = 0; i &lt; n; i++)
+            if (!v[i] &amp;&amp; (k == -1 || min[i] &lt; min[k]))
+                k = i;
+        for (v[k] = 1, ret += min[k], i = 0; i &lt; n; i++)
+            if (!v[i] &amp;&amp; mat[k][i] &lt; min[i])
+                min[i] = mat[pre[i] = k][i];
+    }
+    return ret;
+}
+
+int main(int argc, char const *argv[])
+{
+    int n, i, j, k, cnt, x, sum;
+    char ch;
+    int pre[MAXN];
+    elem_t mat[MAXN][MAXN];
+    while (cin &gt;&gt; n &amp;&amp; n)
+    {
+        for (i = 0; i &lt; n; i++)
+            for (j = 0; j &lt; n; j++)
+            {
+                mat[i][j] = inf;
+                if(i==j)    mat[i][j]=0;
+            }
+        for (i = 0; i &lt; n - 1; i++)
+        {
+            cin &gt;&gt; ch &gt;&gt; cnt;
+            for (j = 0, k = int(ch - &#39;A&#39;); j &lt;= cnt - 1; j++)
+            {
+                cin &gt;&gt; ch &gt;&gt; x;
+                mat[k][int(ch - &#39;A&#39;)] = x;
+                mat[int(ch - &#39;A&#39;)][k] = x;
+            }
+        }
+        sum = prim(n, mat, pre);
+        cout&lt;&lt;sum&lt;&lt;endl;
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月06日 已AC。</li>
 </ul>
 
@@ -149,7 +291,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/06/POJ-1251-Jungle-Roads/">POJ 1251 Jungle Roads</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月6日 - 22时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/06/POJ-1251-Jungle-Roads/"
                                             title="POJ 1251 Jungle Roads">https://xuanwo.org/2014/08/06/POJ-1251-Jungle-Roads/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -256,11 +398,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

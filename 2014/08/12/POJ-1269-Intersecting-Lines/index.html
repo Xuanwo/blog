@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -118,8 +118,92 @@
 <p><a href="http://poj.org/problem?id=1269" target="_blank" rel="external">http://poj.org/problem?id=1269</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>几何题= =，各种直线方程用起来，代码量有点大。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include&lt;cstdio&gt;</span><br><span class="line">#include&lt;cstring&gt;</span><br><span class="line">#include&lt;cmath&gt;</span><br><span class="line">#include&lt;cstdlib&gt;</span><br><span class="line">#include&lt;iostream&gt;</span><br><span class="line">#include&lt;algorithm&gt;</span><br><span class="line">#include&lt;functional&gt;</span><br><span class="line">using namespace std;</span><br><span class="line">#define eps 1e-8</span><br><span class="line">double sqr(double x)</span><br><span class="line">&#123;</span><br><span class="line">    return x * x;</span><br><span class="line">&#125;</span><br><span class="line">struct P</span><br><span class="line">&#123;</span><br><span class="line">    double x, y;</span><br><span class="line">    P(double _x, double _y): x(_x), y(_y) &#123;&#125;</span><br><span class="line">    P() &#123;&#125;</span><br><span class="line">    double dis()</span><br><span class="line">    &#123;</span><br><span class="line">        return sqrt(sqr(x) + sqr(y));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">struct V</span><br><span class="line">&#123;</span><br><span class="line">    double x, y;</span><br><span class="line">    V(double _x, double _y): x(_x), y(_y) &#123;&#125;</span><br><span class="line">    V(P a, P b): x(b.x - a.x), y(b.y - a.y) &#123;&#125;</span><br><span class="line">    V() &#123;&#125;</span><br><span class="line">    const double dis()</span><br><span class="line">    &#123;</span><br><span class="line">        return sqrt(sqr(x) + sqr(y));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">P operator+(const P a, const V b)</span><br><span class="line">&#123;</span><br><span class="line">    return P(a.x + b.x, a.y + b.y);</span><br><span class="line">&#125;</span><br><span class="line">V operator*(const double a, const V b)</span><br><span class="line">&#123;</span><br><span class="line">    return V(a * b.x, a * b.y);</span><br><span class="line">&#125;</span><br><span class="line">double operator*(const V a, const V b)</span><br><span class="line">&#123;</span><br><span class="line">    return a.x * b.y - b.x * a.y;</span><br><span class="line">&#125;</span><br><span class="line">P jiao_dian(const V a, V b, const V c, const V CD, const P C)</span><br><span class="line">&#123;</span><br><span class="line">    double d;</span><br><span class="line">    d = b.dis();</span><br><span class="line">    double s1 = a * b, s2 = b * c;</span><br><span class="line">    double k = s1 / (s1 + s2);</span><br><span class="line">    return C + k * CD;</span><br><span class="line">&#125;</span><br><span class="line">bool equal(const double a, const double b)</span><br><span class="line">&#123;</span><br><span class="line">    if (abs(a - b) &lt; eps) return 1; return 0;</span><br><span class="line">&#125;</span><br><span class="line">int n;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    cout &lt;&lt; &quot;INTERSECTING LINES OUTPUT&quot; &lt;&lt; endl;</span><br><span class="line">    scanf(&quot;%d&quot;, &amp;n);</span><br><span class="line">    for (int i = 1; i &lt;= n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        double x1, y1, x2, y2, x3, y3, x4, y4;</span><br><span class="line">        scanf(&quot;%lf%lf%lf%lf%lf%lf%lf%lf&quot;, &amp;x1, &amp;y1, &amp;x2, &amp;y2, &amp;x3, &amp;y3, &amp;x4, &amp;y4);</span><br><span class="line">        P A = P(x1, y1), B = P(x2, y2), C = P(x3, y3), D = P(x4, y4);</span><br><span class="line">        V AB = V(A, B), AC = V(A, C), AD = V(A, D), CD = V(C, D);</span><br><span class="line">        if (equal((AB * CD), 0))</span><br><span class="line">        &#123;</span><br><span class="line">            if (equal((AC * AD), 0)) cout &lt;&lt; &quot;LINE\n&quot;;</span><br><span class="line">            else cout &lt;&lt; &quot;NONE\n&quot;;</span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            P p = jiao_dian(AC, AB, AD, CD, C);</span><br><span class="line">            cout.setf(ios::fixed);</span><br><span class="line">            cout.precision(2);</span><br><span class="line">            cout &lt;&lt; &quot;POINT &quot; &lt;&lt; p.x &lt;&lt; &apos; &apos; &lt;&lt; p.y &lt;&lt; endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; &quot;END OF OUTPUT&quot; &lt;&lt; endl;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include&lt;cstdio&gt;
+#include&lt;cstring&gt;
+#include&lt;cmath&gt;
+#include&lt;cstdlib&gt;
+#include&lt;iostream&gt;
+#include&lt;algorithm&gt;
+#include&lt;functional&gt;
+using namespace std;
+#define eps 1e-8
+double sqr(double x)
+{
+    return x * x;
+}
+struct P
+{
+    double x, y;
+    P(double _x, double _y): x(_x), y(_y) {}
+    P() {}
+    double dis()
+    {
+        return sqrt(sqr(x) + sqr(y));
+    }
+};
+struct V
+{
+    double x, y;
+    V(double _x, double _y): x(_x), y(_y) {}
+    V(P a, P b): x(b.x - a.x), y(b.y - a.y) {}
+    V() {}
+    const double dis()
+    {
+        return sqrt(sqr(x) + sqr(y));
+    }
+};
+P operator+(const P a, const V b)
+{
+    return P(a.x + b.x, a.y + b.y);
+}
+V operator*(const double a, const V b)
+{
+    return V(a * b.x, a * b.y);
+}
+double operator*(const V a, const V b)
+{
+    return a.x * b.y - b.x * a.y;
+}
+P jiao_dian(const V a, V b, const V c, const V CD, const P C)
+{
+    double d;
+    d = b.dis();
+    double s1 = a * b, s2 = b * c;
+    double k = s1 / (s1 + s2);
+    return C + k * CD;
+}
+bool equal(const double a, const double b)
+{
+    if (abs(a - b) &lt; eps) return 1; return 0;
+}
+int n;
+int main()
+{
+    cout &lt;&lt; &quot;INTERSECTING LINES OUTPUT&quot; &lt;&lt; endl;
+    scanf(&quot;%d&quot;, &amp;n);
+    for (int i = 1; i &lt;= n; i++)
+    {
+        double x1, y1, x2, y2, x3, y3, x4, y4;
+        scanf(&quot;%lf%lf%lf%lf%lf%lf%lf%lf&quot;, &amp;x1, &amp;y1, &amp;x2, &amp;y2, &amp;x3, &amp;y3, &amp;x4, &amp;y4);
+        P A = P(x1, y1), B = P(x2, y2), C = P(x3, y3), D = P(x4, y4);
+        V AB = V(A, B), AC = V(A, C), AD = V(A, D), CD = V(C, D);
+        if (equal((AB * CD), 0))
+        {
+            if (equal((AC * AD), 0)) cout &lt;&lt; &quot;LINE\n&quot;;
+            else cout &lt;&lt; &quot;NONE\n&quot;;
+        }
+        else
+        {
+            P p = jiao_dian(AC, AB, AD, CD, C);
+            cout.setf(ios::fixed);
+            cout.precision(2);
+            cout &lt;&lt; &quot;POINT &quot; &lt;&lt; p.x &lt;&lt; &#39; &#39; &lt;&lt; p.y &lt;&lt; endl;
+        }
+    }
+    cout &lt;&lt; &quot;END OF OUTPUT&quot; &lt;&lt; endl;
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月12日 已AC。</li>
 </ul>
 
@@ -147,7 +231,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/12/POJ-1269-Intersecting-Lines/">POJ 1269 Intersecting Lines</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月12日 - 01时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/12/POJ-1269-Intersecting-Lines/"
                                             title="POJ 1269 Intersecting Lines">https://xuanwo.org/2014/08/12/POJ-1269-Intersecting-Lines/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -254,11 +338,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://xuanwo.org/"/>
-  <updated>2016-07-02T15:56:31.169Z</updated>
+  <updated>2016-07-02T16:03:54.008Z</updated>
   <id>https://xuanwo.org/</id>
   
   <author>
@@ -20,12 +20,32 @@
     <link href="https://xuanwo.org/2016/06/29/new-blog-new-life/"/>
     <id>https://xuanwo.org/2016/06/29/new-blog-new-life/</id>
     <published>2016-06-29T23:06:00.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;曾经看过我的博客的同学大概都会发现，我的博客再一次大变样了~&lt;br&gt;这一次的更新其实酝酿了很久，早在刚开始用Hexo的时候就想着要有一个自己的主题。但是那个时候觉得这是一件很难的事情，要懂HTML，CSS，JavaScript，还要懂Swig，Ejs等模板语言，还要懂Hexo的内部原理，于是就一直搁置了。在独立实现了一个&lt;a href=&quot;https://xuanwo.org/2016/06/16/jade_ims/&quot;&gt;完整的项目&lt;/a&gt;之后，我认为自己已经有这样的能力了，于是决定正式开始。&lt;br&gt;在我看来的话，Hexo的使用者大概分为三个层次：第一种用别人的主题，第二种模仿现有的主题，第三种自己独立开发。我原来是第一种，在Next的基础上做了很多改动，这一次进入到了第二个层次。我找了一套自我感觉还不错的模板，然后套用它的CSS设定和页面结构，就成了我现在的主题。&lt;br&gt;利用两天学习和工作的闲暇时间，我大体上完成了这个主题。做得比较糙，很多细节还有待优化，但是我已经急不可耐地想要正式上线了，笑。在未来的话，我希望能把一些配置都能整理出来，优化一下代码，然后开源这个主题，希望大家能够喜欢~&lt;br&gt;庆祝的话已经说的差不多了，下面来讲一讲如何开发一个Hexo主题。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
 &lt;h1 id=&quot;结构&quot;&gt;&lt;a href=&quot;#结构&quot; class=&quot;headerlink&quot; title=&quot;结构&quot;&gt;&lt;/a&gt;结构&lt;/h1&gt;&lt;h2 id=&quot;主题结构&quot;&gt;&lt;a href=&quot;#主题结构&quot; class=&quot;headerlink&quot; title=&quot;主题结构&quot;&gt;&lt;/a&gt;主题结构&lt;/h2&gt;&lt;p&gt;Hexo主题的结构大体如下：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;├── _config.yml&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;├── languages&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── default.yml&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   └── zh-Hans.yml&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;├── layout&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── achieve.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── category.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── index.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── _layout.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── page.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── _partials&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   ├── post.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;│   └── tag.swig&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;└── &lt;span class=&quot;built_in&quot;&gt;source&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    ├── css&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    ├── fonts&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    ├── img&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    ├── js&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    └── vendors&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;.
+├── _config.yml
+├── languages
+│   ├── default.yml
+│   └── zh-Hans.yml
+├── layout
+│   ├── achieve.swig
+│   ├── category.swig
+│   ├── index.swig
+│   ├── _layout.swig
+│   ├── page.swig
+│   ├── _partials
+│   ├── post.swig
+│   └── tag.swig
+└── source
+    ├── css
+    ├── fonts
+    ├── img
+    ├── js
+    └── vendors
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;首先有一个&lt;code&gt;_config.yml&lt;/code&gt;负责提供主题级别的配置，可以在&lt;code&gt;layout&lt;/code&gt;中通过&lt;code&gt;theme.xxx&lt;/code&gt;的形式进行调用。&lt;br&gt;然后&lt;code&gt;languages&lt;/code&gt;负责实现博客的i18N功能，如果博客没有多语言的需求，只需要实现一个&lt;code&gt;default.yml&lt;/code&gt;即可。&lt;br&gt;其次是最为重要的&lt;code&gt;layout&lt;/code&gt;文件夹，这个里面主要存放博客的结构，Hexo 引擎会使用指定的渲染引擎将&lt;code&gt;layout&lt;/code&gt;文件渲染成HTML页面。&lt;br&gt;最后是&lt;code&gt;source&lt;/code&gt;，把所有主题需要用到的资源，比如CSS，Fonts，JS等都存放到这个文件夹中。&lt;/p&gt;
 &lt;p&gt;这个主题使用了&lt;a href=&quot;http://paularmstrong.github.io/swig/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;swig&lt;/a&gt;。&lt;/p&gt;
 &lt;h2 id=&quot;页面结构&quot;&gt;&lt;a href=&quot;#页面结构&quot; class=&quot;headerlink&quot; title=&quot;页面结构&quot;&gt;&lt;/a&gt;页面结构&lt;/h2&gt;&lt;p&gt;页面结构分为两个维度，一者是我要呈现哪些页面，二者是每个页面上都有哪些内容。&lt;/p&gt;
@@ -51,15 +71,63 @@
 &lt;h1 id=&quot;实现&quot;&gt;&lt;a href=&quot;#实现&quot; class=&quot;headerlink&quot; title=&quot;实现&quot;&gt;&lt;/a&gt;实现&lt;/h1&gt;&lt;p&gt;前面讲到了 Hexo 的结构，下面来聊一聊具体的实现。&lt;/p&gt;
 &lt;h2 id=&quot;原理&quot;&gt;&lt;a href=&quot;#原理&quot; class=&quot;headerlink&quot; title=&quot;原理&quot;&gt;&lt;/a&gt;原理&lt;/h2&gt;&lt;p&gt;Hexo 渲染的入口是&lt;code&gt;_layout.swig&lt;/code&gt;，所以一个主题至少需要实现一个&lt;code&gt;_layout.swig&lt;/code&gt;。&lt;br&gt;然后Hexo会遍历Hexo目录下&lt;code&gt;source&lt;/code&gt;文件夹中的所有Markdown文件，根据Markdown文件所指定的layout进行渲染，默认类型为&lt;code&gt;post&lt;/code&gt;。&lt;/p&gt;
 &lt;h2 id=&quot;技巧&quot;&gt;&lt;a href=&quot;#技巧&quot; class=&quot;headerlink&quot; title=&quot;技巧&quot;&gt;&lt;/a&gt;技巧&lt;/h2&gt;&lt;h3 id=&quot;layout-swig结构&quot;&gt;&lt;a href=&quot;#layout-swig结构&quot; class=&quot;headerlink&quot; title=&quot;_layout.swig结构&quot;&gt;&lt;/a&gt;_layout.swig结构&lt;/h3&gt;&lt;p&gt;整体的结构基本如下：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;!doctype html&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;head&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;% include &amp;apos;_partials/head.swig&amp;apos; %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;title&amp;gt;&amp;#123;% block title %&amp;#125;&amp;#123;% endblock %&amp;#125;&amp;lt;/title&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;/head&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;body id=&amp;quot;home&amp;quot;&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;% include &amp;apos;_partials/menu.swig&amp;apos; %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;div id=&amp;quot;wrap&amp;quot;&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#123;% include &amp;apos;_partials/nav.swig&amp;apos; %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#123;% include &amp;apos;_partials/header.swig&amp;apos; %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;lt;div id=&amp;quot;start&amp;quot; class=&amp;quot;container content&amp;quot;&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            &amp;#123;% block content %&amp;#125;&amp;#123;% endblock %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;lt;/div&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#123;% include &amp;apos;_partials/footer.swig&amp;apos; %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;/div&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;swig&quot;&gt;&amp;lt;!doctype html&amp;gt;
+&amp;lt;html&amp;gt;
+&amp;lt;head&amp;gt;
+    {% include &#39;_partials/head.swig&#39; %}
+    &amp;lt;title&amp;gt;{% block title %}{% endblock %}
+
+&lt;body id=&quot;home&quot;&gt;
+    {% include &#39;_partials/menu.swig&#39; %}
+    &lt;div id=&quot;wrap&quot;&gt;
+        {% include &#39;_partials/nav.swig&#39; %}
+        {% include &#39;_partials/header.swig&#39; %}
+        &lt;div id=&quot;start&quot; class=&quot;container content&quot;&gt;
+            {% block content %}{% endblock %}
+        &amp;lt;/div&amp;gt;
+        {% include &#39;_partials/footer.swig&#39; %}
+    &amp;lt;/div&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/div&gt;&lt;/div&gt;&lt;/body&gt;&lt;/code&gt;&lt;/pre&gt;
 &lt;h3 id=&quot;实现文章渲染&quot;&gt;&lt;a href=&quot;#实现文章渲染&quot; class=&quot;headerlink&quot; title=&quot;实现文章渲染&quot;&gt;&lt;/a&gt;实现文章渲染&lt;/h3&gt;&lt;p&gt;这个地方主要是借鉴了NexT主题的设计，实现了一个swig的宏来生成对应的文章。这个宏主要有两个参数，第一个是post对象，第二个是是否为主页。如果是主页就只显示简略的内容，如果不是就输出全文。&lt;/p&gt;
 &lt;p&gt;判断的部分实现如下：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;% if is_index %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;% if post.excerpt %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#123;&amp;#123; post.excerpt &amp;#125;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;lt;a class=&amp;quot;&amp;quot; href=&amp;quot;&amp;#123;&amp;#123; url_for(post.path) &amp;#125;&amp;#125;&amp;quot;&amp;gt;Read more&amp;lt;/a&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;% endif %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;% else %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;&amp;#123; post.content &amp;#125;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;% endif %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;swig&quot;&gt;{% if is_index %}
+    {% if post.excerpt %}
+        {{ post.excerpt }}
+        &lt;a class=&quot;&quot; href=&quot;{{ url_for(post.path) }}&quot;&gt;Read more&lt;/a&gt;
+    {% endif %}
+{% else %}
+    {{ post.content }}
+{% endif %}
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;用到的post页的参数可以&lt;a href=&quot;https://hexo.io/zh-cn/docs/variables.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;我翻译的中文文档&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id=&quot;分页插件&quot;&gt;&lt;a href=&quot;#分页插件&quot; class=&quot;headerlink&quot; title=&quot;分页插件&quot;&gt;&lt;/a&gt;分页插件&lt;/h3&gt;&lt;p&gt;Hexo 自己实现了一个分页插件，直接使用paginator函数即可。&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;% if page.prev or page.next %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;nav class=&amp;quot;pagination&amp;quot;&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#123;&amp;#123; paginator(&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            prev_text: &amp;apos;&amp;lt;i class=&amp;quot;fa fa-angle-left&amp;quot;&amp;gt;&amp;lt;/i&amp;gt;&amp;apos;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            next_text: &amp;apos;&amp;lt;i class=&amp;quot;fa fa-angle-right&amp;quot;&amp;gt;&amp;lt;/i&amp;gt;&amp;apos;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            mid_size: 1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#125;) &amp;#125;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;/nav&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;% endif %&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;swig&quot;&gt;{% if page.prev or page.next %}
+    &lt;nav class=&quot;pagination&quot;&gt;
+        {{ paginator({
+            prev_text: &#39;&lt;i class=&quot;fa fa-angle-left&quot;&gt;&lt;/i&gt;&#39;,
+            next_text: &#39;&lt;i class=&quot;fa fa-angle-right&quot;&gt;&lt;/i&gt;&#39;,
+            mid_size: 1
+        }) }}
+    &lt;/nav&gt;
+{% endif %}
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h3 id=&quot;评论系统&quot;&gt;&lt;a href=&quot;#评论系统&quot; class=&quot;headerlink&quot; title=&quot;评论系统&quot;&gt;&lt;/a&gt;评论系统&lt;/h3&gt;&lt;p&gt;对于Hexo来说，评论系统就是调用一个第三方的JS。所以只需要在合适的位置插入代码即可。&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;div id=&amp;quot;disqus_thread&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;script&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    var disqus_config = function () &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        this.page.url = &amp;apos;&amp;#123;&amp;#123; page.permalink &amp;#125;&amp;#125;&amp;apos;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        this.page.identifier = &amp;apos;&amp;#123;&amp;#123; page.path &amp;#125;&amp;#125;&amp;apos;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    (function () &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        var d = document, s = d.createElement(&amp;apos;script&amp;apos;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        s.src = &amp;apos;//abc.disqus.com/embed.js&amp;apos;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        s.setAttribute(&amp;apos;data-timestamp&amp;apos;, +new Date());&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        (d.head || d.body).appendChild(s);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;)();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;swig&quot;&gt;&amp;lt;div id=&amp;quot;disqus_thread&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;script&amp;gt;
+    var disqus_config = function () {
+        this.page.url = &amp;#39;{{ page.permalink }}&amp;#39;;
+        this.page.identifier = &amp;#39;{{ page.path }}&amp;#39;;
+    };
+    (function () {
+        var d = document, s = d.createElement(&amp;#39;script&amp;#39;);
+        s.src = &amp;#39;//abc.disqus.com/embed.js&amp;#39;;
+        s.setAttribute(&amp;#39;data-timestamp&amp;#39;, +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+&amp;lt;/script&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h1 id=&quot;需要注意的坑&quot;&gt;&lt;a href=&quot;#需要注意的坑&quot; class=&quot;headerlink&quot; title=&quot;需要注意的坑&quot;&gt;&lt;/a&gt;需要注意的坑&lt;/h1&gt;&lt;ul&gt;
 &lt;li&gt;&lt;code&gt;page.posts&lt;/code&gt;是按照时间排序的，但是&lt;code&gt;site.posts&lt;/code&gt;是无序的。&lt;/li&gt;
 &lt;/ul&gt;
@@ -97,7 +165,7 @@
     <link href="https://xuanwo.org/2016/06/16/jade_ims/"/>
     <id>https://xuanwo.org/2016/06/16/jade_ims/</id>
     <published>2016-06-16T22:00:00.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;p&gt;&lt;img src=&quot;/imgs/develop/jade-ims-index.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
 &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;这个项目从我们这个学期开了&lt;strong&gt;系统分析与设计&lt;/strong&gt;这门课之后就开始了，首次创建这个项目是在3月26号，实际上真正的开发时间集中在6月上旬。差不多用两个星期的闲暇时间时间完成了这个简单的进销存系统。这个系统基于Flask框架，使用SQLite3数据库，前端则是使用Bootstrap框架，实现了包括客户，库存，销售，进货等管理子系统。说是管理，其实也就是简单的增加和删除而已。&lt;br&gt;前人经常说，不要重复造轮子。既然有类似于Odoo这样强大的ERP系统珠玉在前，我为什么要再自己造一个功能简单，甚至根本不会有人用的轮子呢？从前我确实是这么想的，但是稍微有一点工作经验之后发现再造轮子的原因有两条：&lt;/p&gt;
@@ -114,19 +182,73 @@
 &lt;p&gt;&lt;em&gt;感谢@Ethan和@，他们强有力地向我证明了有师傅带路的好处。&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;这个问题纯粹是因为一直以来都是一个脚本Boy，没有系统性的学习过软件开发导致的。很显然，按照我原来的代码去产生实例，就会导致循环导入的错误。想要解决这样的问题，就需要使用工厂函数去生成实例，而不是自己去生成它。&lt;/p&gt;
 &lt;p&gt;在&lt;code&gt;__init__.py&lt;/code&gt;中添加一个&lt;code&gt;create_app()&lt;/code&gt;函数，在函数中进行参数配置，初始化和导入蓝图的操作：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;bps = [&lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.dashboard:dashboard&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.install:install&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.login:login&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.sale:sale&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.customer:customer&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.purchase.inputbill:inputbill&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.purchase.supplier:supplier&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.stock.enterstockbill:enterstockbill&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.stock.leavestockbill:leavestockbill&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       &lt;span class=&quot;string&quot;&gt;&#39;jade_ims.views.stock.stock:stock&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;       ]&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;create_app&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    app = Flask(__name__)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    app.config.from_object(&lt;span class=&quot;string&quot;&gt;&#39;config&#39;&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    app.config.from_pyfile(&lt;span class=&quot;string&quot;&gt;&#39;config.py&#39;&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    db.init_app(app)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;for&lt;/span&gt; path &lt;span class=&quot;keyword&quot;&gt;in&lt;/span&gt; bps:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        bp = import_string(path)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        app.register_blueprint(bp)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; app&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;bps = [&amp;#39;jade_ims.views.dashboard:dashboard&amp;#39;,
+       &amp;#39;jade_ims.views.install:install&amp;#39;,
+       &amp;#39;jade_ims.views.login:login&amp;#39;,
+       &amp;#39;jade_ims.views.sale:sale&amp;#39;,
+       &amp;#39;jade_ims.views.customer:customer&amp;#39;,
+       &amp;#39;jade_ims.views.purchase.inputbill:inputbill&amp;#39;,
+       &amp;#39;jade_ims.views.purchase.supplier:supplier&amp;#39;,
+       &amp;#39;jade_ims.views.stock.enterstockbill:enterstockbill&amp;#39;,
+       &amp;#39;jade_ims.views.stock.leavestockbill:leavestockbill&amp;#39;,
+       &amp;#39;jade_ims.views.stock.stock:stock&amp;#39;
+       ]
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(&amp;#39;config&amp;#39;)
+    app.config.from_pyfile(&amp;#39;config.py&amp;#39;)
+
+    db.init_app(app)
+
+    for path in bps:
+        bp = import_string(path)
+        app.register_blueprint(bp)
+
+    return app
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h3 id=&quot;Flask如何优雅地重定向所有未登录用户到登陆界面&quot;&gt;&lt;a href=&quot;#Flask如何优雅地重定向所有未登录用户到登陆界面&quot; class=&quot;headerlink&quot; title=&quot;Flask如何优雅地重定向所有未登录用户到登陆界面&quot;&gt;&lt;/a&gt;Flask如何优雅地重定向所有未登录用户到登陆界面&lt;/h3&gt;&lt;p&gt;&lt;a href=&quot;https://segmentfault.com/q/1010000005645821&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://segmentfault.com/q/1010000005645821&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;感谢@zwillon和@igaozp&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;有一个Feature是想要把所有未登录的用户都重定向到登录页面。当时手头上的技术方案主要有两种：第一种是自己包装一个装饰器，并添加在每一个视图函数中；第二种是使用第三方库&lt;code&gt;Flask-Login&lt;/code&gt;，在视图函数中添加&lt;code&gt;@login_required&lt;/code&gt;。但是感觉姿势都不怎么优雅，因为我需要不断地在视图函数中添加这个装饰器，不太符合DRY(Don’t Repeat Yourself)准则。&lt;br&gt;SF的老司机给了我一个相当优雅的方案——Hook到app的&lt;code&gt;before_request&lt;/code&gt;方法。也就是这样来实现：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@app.before_request&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;check_need_login&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;# 检查登录的逻辑&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;pass&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;@app.before_request
+def check_need_login():
+    # 检查登录的逻辑
+    pass
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;我第一次是这样实现的：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@app.before_request&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;check_need_login&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&#39;logged_in&#39;&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;in&lt;/span&gt; session:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; redirect(url_for(&lt;span class=&quot;string&quot;&gt;&#39;login.user_login&#39;&lt;/span&gt;))&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;@app.before_request
+def check_need_login():
+    if &amp;#39;logged_in&amp;#39; not in session:
+        return redirect(url_for(&amp;#39;login.user_login&amp;#39;))
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;这样就带来了一个问题，对于未登录的用户来说，所有页面都会不断地重定向从而导致整个应用崩溃。因此还需要指定在某些情况下停止重定向，所以我们还需要修改一下&lt;code&gt;check_need_login&lt;/code&gt;的逻辑：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@app.before_request&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;check_need_login&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&#39;logged_in&#39;&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;in&lt;/span&gt; session &lt;span class=&quot;keyword&quot;&gt;and&lt;/span&gt; request.endpoint &lt;span class=&quot;keyword&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;in&lt;/span&gt; (&lt;span class=&quot;string&quot;&gt;&#39;login.user_login&#39;&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&#39;static&#39;&lt;/span&gt;):&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; redirect(url_for(&lt;span class=&quot;string&quot;&gt;&#39;login.user_login&#39;&lt;/span&gt;))&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;@app.before_request
+def check_need_login():
+    if &amp;#39;logged_in&amp;#39; not in session and request.endpoint not in (&amp;#39;login.user_login&amp;#39;, &amp;#39;static&amp;#39;):
+        return redirect(url_for(&amp;#39;login.user_login&amp;#39;))
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;当&lt;code&gt;session&lt;/code&gt;中没有&lt;code&gt;logged_in&lt;/code&gt;字段且&lt;code&gt;endpoint&lt;/code&gt;不是&lt;code&gt;user_login&lt;/code&gt;和&lt;code&gt;static&lt;/code&gt;的时候就重定向到登录页面，这样就比较优雅地解决了重定向未登录用户到登陆界面的需求。&lt;/p&gt;
 &lt;h3 id=&quot;flask-sqlalchemy-插入数据时发生错误后如何处理&quot;&gt;&lt;a href=&quot;#flask-sqlalchemy-插入数据时发生错误后如何处理&quot; class=&quot;headerlink&quot; title=&quot;flask_sqlalchemy 插入数据时发生错误后如何处理&quot;&gt;&lt;/a&gt;flask_sqlalchemy 插入数据时发生错误后如何处理&lt;/h3&gt;&lt;p&gt;&lt;a href=&quot;https://segmentfault.com/q/1010000005647431&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://segmentfault.com/q/1010000005647431&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;在实际开发的过程中发现，如果&lt;code&gt;db.session&lt;/code&gt;中添加的记录有问题，在commit的时候会出现一个报错。所以我们需要在出错的时候进行一些处理，以保证程序出错之后还能够正常地运行。网友 @学不会编程的永仲 给出的回答是我应该在form中验证数据的正确性。虽然我相信他的理解可能是正确的，但是不太符合我的哲学，我更加倾向于&lt;strong&gt;让它崩溃，然后处理异常&lt;/strong&gt;而不是&lt;strong&gt;事先处理好所有的错误&lt;/strong&gt;。&lt;br&gt;通过查阅文档，了解到&lt;code&gt;db.session.rollback()&lt;/code&gt;这一函数可以在出错是进行回滚，于是最后的实现变成了这样：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@supplier.route(&#39;/purchase/supplier/add&#39;, methods=[&#39;POST&#39;])&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;add_supplier&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;:&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    form = request.form&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; request.method == &lt;span class=&quot;string&quot;&gt;&#39;POST&#39;&lt;/span&gt;:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        print(form)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        supplier = Supplier(form[&lt;span class=&quot;string&quot;&gt;&#39;supplier_name&#39;&lt;/span&gt;],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;                            form[&lt;span class=&quot;string&quot;&gt;&#39;supplier_constract&#39;&lt;/span&gt;],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;                            form[&lt;span class=&quot;string&quot;&gt;&#39;supplier_phone&#39;&lt;/span&gt;],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;                            form[&lt;span class=&quot;string&quot;&gt;&#39;supplier_address&#39;&lt;/span&gt;],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;                            form[&lt;span class=&quot;string&quot;&gt;&#39;supplier_remark&#39;&lt;/span&gt;])&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;try&lt;/span&gt;:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            db.session.add(supplier)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            db.session.commit()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            flash(&lt;span class=&quot;string&quot;&gt;&#39;供应商添加成功！&#39;&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&#39;success&#39;&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;except&lt;/span&gt;:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            db.session.rollback()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            flash(&lt;span class=&quot;string&quot;&gt;&#39;输入不合法，请重新输入！&#39;&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&#39;danger&#39;&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; redirect(url_for(&lt;span class=&quot;string&quot;&gt;&#39;supplier.list_supplier&#39;&lt;/span&gt;))&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;@supplier.route(&amp;#39;/purchase/supplier/add&amp;#39;, methods=[&amp;#39;POST&amp;#39;])
+def add_supplier():
+    form = request.form
+    if request.method == &amp;#39;POST&amp;#39;:
+        print(form)
+        supplier = Supplier(form[&amp;#39;supplier_name&amp;#39;],
+                            form[&amp;#39;supplier_constract&amp;#39;],
+                            form[&amp;#39;supplier_phone&amp;#39;],
+                            form[&amp;#39;supplier_address&amp;#39;],
+                            form[&amp;#39;supplier_remark&amp;#39;])
+        try:
+            db.session.add(supplier)
+            db.session.commit()
+            flash(&amp;#39;供应商添加成功！&amp;#39;, &amp;#39;success&amp;#39;)
+        except:
+            db.session.rollback()
+            flash(&amp;#39;输入不合法，请重新输入！&amp;#39;, &amp;#39;danger&amp;#39;)
+    return redirect(url_for(&amp;#39;supplier.list_supplier&amp;#39;))
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h1 id=&quot;项目总结&quot;&gt;&lt;a href=&quot;#项目总结&quot; class=&quot;headerlink&quot; title=&quot;项目总结&quot;&gt;&lt;/a&gt;项目总结&lt;/h1&gt;&lt;p&gt;随着答辩的完成，这个项目进入了尾声。因为很多东西需要去学习，有新的东西需要去探索，所以这个项目也很有可能不会再继续维护了。那么这个项目开源出来的价值在哪里呢？我想，这个项目虽然简单，但它毕竟还算是一个完整的Flask项目，除了&lt;code&gt;flask_sqlalchemy&lt;/code&gt;之外没有多余的依赖，非常适合一个跟我一样的Python初学者进行入门学习。如果说有人能够因为这个项目少走一些弯路，少在一些死胡同浪费时间，我想这个项目的价值就已经实现了。如果再往大一点来说，开源的价值也就实现了。&lt;br&gt;如果要我自评的话，我觉得这样的项目应该有60分。之所以给一个及格分，是因为这个项目毕竟实现了需求的大多数功能，也有好好地跑在阿里云的服务器上。丢分的话，大体上是因为这个项目毫无注释，没有安装文档，也没有配置手册，很多东西都是硬编码到了代码中。不仅如此，编程的风格也是相当的不佳，在模板部分缺乏良好的顶层设计，出现了大量的重复代码。这些问题希望自己能在下一个项目中得到一些改善。&lt;br&gt;Anyway，随着这个项目的结束，我的大三生涯也要结束了。接下来是波澜壮阔的实习阶段，希望自己能够在实习的时候多踩一些坑，多走一些弯路，多&lt;br&gt;得到一些来自“长者”的指点。&lt;/p&gt;
 &lt;h1 id=&quot;参考资源&quot;&gt;&lt;a href=&quot;#参考资源&quot; class=&quot;headerlink&quot; title=&quot;参考资源&quot;&gt;&lt;/a&gt;参考资源&lt;/h1&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href=&quot;http://docs.jinkan.org/docs/flask/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Flask 中文文档 &lt;em&gt;文档略有过时，代码以Github上为准&lt;/em&gt;&lt;/a&gt;&lt;/li&gt;
@@ -172,7 +294,7 @@
     <link href="https://xuanwo.org/2016/06/03/owncloud-on-qingcloud/"/>
     <id>https://xuanwo.org/2016/06/03/owncloud-on-qingcloud/</id>
     <published>2016-06-03T08:00:00.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;因为实在不满意百度云的一些缺陷，我们最终决定部署一套团队内部使用的云存储平台，用于团队协作及资料长期存储。希望能够达到如下目标：&lt;/p&gt;
 &lt;ul&gt;
@@ -207,16 +329,22 @@
 &lt;p&gt;&lt;img src=&quot;/imgs/opinion/qingcloud-owncloud-3.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
 &lt;p&gt;我们看到青云在右边提供了常用端口的配置，选择http即可。&lt;/p&gt;
 &lt;h2 id=&quot;安装OwnCloud&quot;&gt;&lt;a href=&quot;#安装OwnCloud&quot; class=&quot;headerlink&quot; title=&quot;安装OwnCloud&quot;&gt;&lt;/a&gt;安装OwnCloud&lt;/h2&gt;&lt;p&gt;OwnCloud为CentOS平台提供了二进制的包，没有特殊需求的话，直接使用即可。&lt;br&gt;首先添加OwnCloud官方的Key文件：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;rpm --import https://download.owncloud.org/download/repositories/stable/CentOS_7/repodata/repomd.xml.key&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;rpm --import https://download.owncloud.org/download/repositories/stable/CentOS_7/repodata/repomd.xml.key
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后添加OwnCloud的repo：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;wget http://download.owncloud.org/download/repositories/stable/CentOS_7/ce:stable.repo -O /etc/yum.repos.d/ce:stable.repo&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;wget http://download.owncloud.org/download/repositories/stable/CentOS_7/ce:stable.repo -O /etc/yum.repos.d/ce:stable.repo
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;更新repo之后开始安装：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;yum clean expire-cache&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;yum install owncloud&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;yum clean expire-cache
+yum install owncloud
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;yum将会自动处理依赖，如果速度不佳的话，可以直接将包下载到本地：&lt;a href=&quot;http://download.owncloud.org/download/repositories/stable/CentOS_7/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;直接下载&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id=&quot;启用httpd，并测试是否安装正确&quot;&gt;&lt;a href=&quot;#启用httpd，并测试是否安装正确&quot; class=&quot;headerlink&quot; title=&quot;启用httpd，并测试是否安装正确&quot;&gt;&lt;/a&gt;启用httpd，并测试是否安装正确&lt;/h2&gt;&lt;p&gt;OwnCloud默认使用Apache作为Web服务器，上一步已经安装了Apache，接下来需要启用它：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;systemctl start httpd&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;systemctl start httpd
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;如需要开机自行启动，可以输入：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;systemctl &lt;span class=&quot;built_in&quot;&gt;enable&lt;/span&gt; httpd&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;systemctl enable httpd
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后在浏览器中访问：&lt;code&gt;http://&amp;lt;your ip&amp;gt;/owncloud&lt;/code&gt;，如果出现OwnCloud的安装界面，说明已经配置成功了。&lt;/p&gt;
 &lt;h2 id=&quot;使用LVM管理分区，实现空间动态扩容&quot;&gt;&lt;a href=&quot;#使用LVM管理分区，实现空间动态扩容&quot; class=&quot;headerlink&quot; title=&quot;使用LVM管理分区，实现空间动态扩容&quot;&gt;&lt;/a&gt;使用LVM管理分区，实现空间动态扩容&lt;/h2&gt;&lt;p&gt;OwnCloud在安装的时候只能选择一个目录，为了能够实现空间的动态扩容，需要使用LVM创建一个逻辑分区并挂载到指定的数据目录下。&lt;/p&gt;
 &lt;p&gt;首先在青云QingCloud的控制台中创建一块硬盘，然后挂载到主机中。之后，就能够通过&lt;code&gt;/dev/sdb&lt;/code&gt;等形式来访问这块硬盘。&lt;/p&gt;
@@ -225,34 +353,75 @@
 &lt;/blockquote&gt;
 &lt;p&gt;接下来需要在CentOS下使用LVM来配置分区，实现分区的动态扩容。&lt;/p&gt;
 &lt;h3 id=&quot;安装LVM工具&quot;&gt;&lt;a href=&quot;#安装LVM工具&quot; class=&quot;headerlink&quot; title=&quot;安装LVM工具&quot;&gt;&lt;/a&gt;安装LVM工具&lt;/h3&gt;&lt;p&gt;青云QingCloud提供的CentOS 7.2默认映像是没有LVM工具的，所以首先需要安装它：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;yum install lvm2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;yum install lvm2
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h3 id=&quot;创建物理卷（PV）&quot;&gt;&lt;a href=&quot;#创建物理卷（PV）&quot; class=&quot;headerlink&quot; title=&quot;创建物理卷（PV）&quot;&gt;&lt;/a&gt;创建物理卷（PV）&lt;/h3&gt;&lt;p&gt;首先检测能够被作为物理卷的设备：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;lvmdiskscan&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;lvmdiskscan
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后在指定设备上创建物理卷，所有需要用到的设备都需要执行如下命令：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;pvcreate /dev/sdb&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;pvcreate /dev/sdb
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后查看已经创建好的物理卷：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;pvdisplay&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;pvdisplay
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;输出大概如下：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;--- Physical volume ---&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; PV Name               /dev/sdb&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; PV Size               1000.00 GiB / not usable 4.00 MiB&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Allocatable           yes&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; PE Size               4.00 MiB&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Total PE              255999&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Free PE               255999&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Allocated PE          0&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; PV UUID               EHIeTJ-WBPv-rQkQ-LnuI-0IWE-SM4z-bMPAWx&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;--- Physical volume ---
+ PV Name               /dev/sdb
+ PV Size               1000.00 GiB / not usable 4.00 MiB
+ Allocatable           yes
+ PE Size               4.00 MiB
+ Total PE              255999
+ Free PE               255999
+ Allocated PE          0
+ PV UUID               EHIeTJ-WBPv-rQkQ-LnuI-0IWE-SM4z-bMPAWx
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h3 id=&quot;创建卷组（VG）&quot;&gt;&lt;a href=&quot;#创建卷组（VG）&quot; class=&quot;headerlink&quot; title=&quot;创建卷组（VG）&quot;&gt;&lt;/a&gt;创建卷组（VG）&lt;/h3&gt;&lt;p&gt;物理卷创建完毕后，需要创建一个卷组来实现物理卷的统一管理：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;vgcreate owncloud-vg /dev/sdb /dev/sdc /dev/sdd&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;vgcreate owncloud-vg /dev/sdb /dev/sdc /dev/sdd
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;后续如果需要扩展的话，可以使用如下命令：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;vgextend owncloud-vg /dev/sde&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;vgextend owncloud-vg /dev/sde
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;同样地，使用&lt;code&gt;vgdisplay&lt;/code&gt;来查看创建好的卷组：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;--- Volume group ---&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; VG Name               owncloud-vg&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Format                lvm2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Metadata Areas        1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Metadata Sequence No  2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; VG Access             &lt;span class=&quot;built_in&quot;&gt;read&lt;/span&gt;/write&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; VG Status             resizable&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; MAX LV                0&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Cur LV                1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Open LV               1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Max PV                0&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Cur PV                1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Act PV                1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; VG Size               1000.00 GiB&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; PE Size               4.00 MiB&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Total PE              255999&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Alloc PE / Size       230400 / 900.00 GiB&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; Free  PE / Size       25599 / 100.00 GiB&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; VG UUID               xCCtSR-QFcZ-StcI-HM7O-KDAz-PvMC-EgYcSV&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;--- Volume group ---
+ VG Name               owncloud-vg
+ Format                lvm2
+ Metadata Areas        1
+ Metadata Sequence No  2
+ VG Access             read/write
+ VG Status             resizable
+ MAX LV                0
+ Cur LV                1
+ Open LV               1
+ Max PV                0
+ Cur PV                1
+ Act PV                1
+ VG Size               1000.00 GiB
+ PE Size               4.00 MiB
+ Total PE              255999
+ Alloc PE / Size       230400 / 900.00 GiB
+ Free  PE / Size       25599 / 100.00 GiB
+ VG UUID               xCCtSR-QFcZ-StcI-HM7O-KDAz-PvMC-EgYcSV
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h3 id=&quot;创建逻辑卷（LV）&quot;&gt;&lt;a href=&quot;#创建逻辑卷（LV）&quot; class=&quot;headerlink&quot; title=&quot;创建逻辑卷（LV）&quot;&gt;&lt;/a&gt;创建逻辑卷（LV）&lt;/h3&gt;&lt;p&gt;然后就可以开始创建逻辑卷了：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;lvcreate -L 900G owncloud-vg -n owncloud-data&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;lvcreate -L 900G owncloud-vg -n owncloud-data
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;创建完毕后，就可以通过&lt;code&gt;/dev/mapper/owncloud--vg-owncloud--data&lt;/code&gt;或者&lt;code&gt;/dev/owncloud-vg/owncloud-data&lt;/code&gt;来访问这个设备了。&lt;/p&gt;
 &lt;p&gt;如果需要扩大逻辑卷，可以使用：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;lvextend -L 1000G /dev/owncloud-vg/owncloud-data&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;lvextend -L 1000G /dev/owncloud-vg/owncloud-data
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;确认扩展成功后，再更新文件系统：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;resize2fs /dev/owncloud-vg/owncloud-data&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;resize2fs /dev/owncloud-vg/owncloud-data
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h3 id=&quot;创建文件系统并挂载&quot;&gt;&lt;a href=&quot;#创建文件系统并挂载&quot; class=&quot;headerlink&quot; title=&quot;创建文件系统并挂载&quot;&gt;&lt;/a&gt;创建文件系统并挂载&lt;/h3&gt;&lt;p&gt;在逻辑卷上创建一个ext4分区：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;mkfs.ext4 /dev/mapper/owncloud--vg-owncloud--data&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;mkfs.ext4 /dev/mapper/owncloud--vg-owncloud--data
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后将分区挂载到期望的目录下，比如&lt;code&gt;/data&lt;/code&gt;&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;mount /dev/mapper/owncloud--vg-owncloud--data /data&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;mount /dev/mapper/owncloud--vg-owncloud--data /data
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h2 id=&quot;修改文件夹权限&quot;&gt;&lt;a href=&quot;#修改文件夹权限&quot; class=&quot;headerlink&quot; title=&quot;修改文件夹权限&quot;&gt;&lt;/a&gt;修改文件夹权限&lt;/h2&gt;&lt;p&gt;为了OwnCloud能够正确读写数据分区，需要修改&lt;code&gt;/data&lt;/code&gt;的所有者和权限：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;chown -R apache:apache /data&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;chmod 775 /data -R&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;chown -R apache:apache /data
+chmod 775 /data -R
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h2 id=&quot;网页安装OwnCloud&quot;&gt;&lt;a href=&quot;#网页安装OwnCloud&quot; class=&quot;headerlink&quot; title=&quot;网页安装OwnCloud&quot;&gt;&lt;/a&gt;网页安装OwnCloud&lt;/h2&gt;&lt;p&gt;全部配置完毕后，可以开始在网页进行OwnCloud安装了。&lt;/p&gt;
 &lt;p&gt;管理员帐号： 自定义&lt;br&gt;管理员密码： 自定义&lt;br&gt;数据路径：&lt;code&gt;/data&lt;/code&gt;&lt;br&gt;数据库用户：&lt;code&gt;root&lt;/code&gt;&lt;br&gt;数据库密码：&lt;code&gt;&amp;lt;your password&amp;gt;&lt;/code&gt;&lt;br&gt;数据库名称自定义，比如：&lt;code&gt;owncloud&lt;/code&gt;&lt;br&gt;数据库地址：&lt;code&gt;&amp;lt;your rdb ip&amp;gt;&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
@@ -327,7 +496,7 @@
     <link href="https://xuanwo.org/2016/05/29/learn-from-qingchat/"/>
     <id>https://xuanwo.org/2016/05/29/learn-from-qingchat/</id>
     <published>2016-05-29T20:57:00.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;之前的一段时间一直在从事&lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Qingchat&lt;/a&gt;的相关开发工作，这个项目是一个基于Mojo-Weixin提供的Rest API开发的一个微信机器人，承担了十余个群，上千人的微信直播活动。秉承着ACM训练出来的“暴力加乱搞”风格，我花了大概一个星期的课余时间，搞出了一个可用的版本。期间也迭代了很多次，既欣慰于Coding的力量，也苦恼于当初设计的不完善带来的种种问题。在这个项目即将大规模重构的前夕，我总结一下开发Qingchat的过程中的经验教训，希望自己能成为一个更好更聪明的Coder。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -364,7 +533,7 @@
     <link href="https://xuanwo.org/2016/05/09/msp430g2553-bellring/"/>
     <id>https://xuanwo.org/2016/05/09/msp430g2553-bellring/</id>
     <published>2016-05-09T08:42:00.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;我萌萌哒的妹纸是一个代码苦手，完全无法理解 C 语言，所以每一次到单片机上机需要交作业的时候都是愁眉苦脸的样子。而我又总是因为自己确实不懂单片机里面的种种奇怪定义（中断，串口，P1.x 之类），所以也一直没有什么好办法去帮她。这一次的作业对编码能力要求较高，但是涉及到的硬件比较少，于是决定以此为契机，开始我的嵌入式开发之旅。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -399,18 +568,54 @@
 &lt;p&gt;综上，这个系统所需要的全部内容就已经实现了。可以看到我做了很多将对硬件的操作抽象化的处理，其实这一点非常重要。因为对于我来说，嵌入式开发最大的难题在于，我不知道里面种种变量的含义，不知道如何操作具体的硬件。将硬件操作抽象化处理之后，我就可以很方便地开展我的后续开发。&lt;/p&gt;
 &lt;h1 id=&quot;问题&quot;&gt;&lt;a href=&quot;#问题&quot; class=&quot;headerlink&quot; title=&quot;问题&quot;&gt;&lt;/a&gt;问题&lt;/h1&gt;&lt;p&gt;实现就不再赘述了，想必读者一定都比我强，下面聊一聊遇到的问题以及 debug 的经历。&lt;/p&gt;
 &lt;h2 id=&quot;串口配置&quot;&gt;&lt;a href=&quot;#串口配置&quot; class=&quot;headerlink&quot; title=&quot;串口配置&quot;&gt;&lt;/a&gt;串口配置&lt;/h2&gt;&lt;p&gt;串口的收和发其实是分开的，这里用到了两个变量： UCA0TXBUF ， UCA0RXBUF 。从字面意思上可以看出，前一个用于发送，后一个用于接收（相对于开发者来说）。发送和接收其实就是给这两个值赋值的过程，看起来这两个变量在接受到值之后会将这个值传给别的变量，所以只要不断的将值赋给它就行，我们写了这样的函数：&lt;/p&gt;
-&lt;figure class=&quot;highlight c&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;#&lt;span class=&quot;meta-keyword&quot;&gt;pragma&lt;/span&gt; vector=USCIAB0RX_VECTOR &lt;span class=&quot;comment&quot;&gt;//中断服务函数&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;number&quot;&gt;__&lt;/span&gt;&lt;span class=&quot;function&quot;&gt;interrupt &lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;uart&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    rec = UCA0RXBUF;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;//读取到缓冲区&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    strtmp[&lt;span class=&quot;built_in&quot;&gt;strlen&lt;/span&gt;++] = rec;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    strtmp[&lt;span class=&quot;built_in&quot;&gt;strlen&lt;/span&gt;] = &lt;span class=&quot;string&quot;&gt;&#39;\0&#39;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;//切换模式&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    mode = strtmp[&lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;];&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//发送字符&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Send_Char&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; ch)&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;while&lt;/span&gt; (!(IFG2 &amp;amp; UCA0TXIFG));&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    UCA0TXBUF = ch;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//发送字符串&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Send_Str&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; *p)&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; i;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    i = &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;while&lt;/span&gt; (*(p + i) != &lt;span class=&quot;string&quot;&gt;&#39;\0&#39;&lt;/span&gt;) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;while&lt;/span&gt; (!(IFG2 &amp;amp; UCA0TXIFG));&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        UCA0TXBUF = *(p + i);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        i++;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Send_Char(&lt;span class=&quot;number&quot;&gt;0x0d&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Send_Char(&lt;span class=&quot;number&quot;&gt;0x0a&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;c&quot;&gt;#pragma vector=USCIAB0RX_VECTOR //中断服务函数
+
+__interrupt void uart() {
+    rec = UCA0RXBUF;
+    //读取到缓冲区
+    strtmp[strlen++] = rec;
+    strtmp[strlen] = &amp;#39;\0&amp;#39;;
+    //切换模式
+    mode = strtmp[0];
+}
+
+//发送字符
+void Send_Char(char ch) {
+    while (!(IFG2 &amp;amp; UCA0TXIFG));
+    UCA0TXBUF = ch;
+}
+
+//发送字符串
+void Send_Str(char *p) {
+    unsigned char i;
+    i = 0;
+    while (*(p + i) != &amp;#39;\0&amp;#39;) {
+        while (!(IFG2 &amp;amp; UCA0TXIFG));
+        UCA0TXBUF = *(p + i);
+        i++;
+    }
+    Send_Char(0x0d);
+    Send_Char(0x0a);
+}
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;uart 貌似是一个内置的中断函数，用来处理串口的接收，只要将变量 UCA0RXBUF 的值存储起来即可；后面的 Send_Str 就非常好理解了，将值发送给 UCA0TXBUF ，从而实现串口的输出。&lt;/p&gt;
 &lt;p&gt;思路如此清晰，但是测试的时候却遇到了问题，我们的输出是空的，转为16进制显示后，全都是0x00。这个问题调试了很久，拿着原来的代码逐行比对之后发现，出了这样的问题：&lt;/p&gt;
-&lt;figure class=&quot;highlight c&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;- UCA0BR0 = &lt;span class=&quot;number&quot;&gt;130&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;- UCA0BR1 = &lt;span class=&quot;number&quot;&gt;6&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;+ UCA0BR0 = &lt;span class=&quot;number&quot;&gt;104&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;+ UCA0BR1 = &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;c&quot;&gt;- UCA0BR0 = 130;
+- UCA0BR1 = 6;
++ UCA0BR0 = 104;
++ UCA0BR1 = 0;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Google 一下才明白，原来 UCA0BR0 和 UCA0BR1 是由系统的时钟速度和波特率决定的值，如果设置错误就会导致串口发送失败。具体的值可以参考&lt;a href=&quot;http://www.ti.com/lit/ug/slau144j/slau144j.pdf&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;用户手册&lt;/a&gt;， Ctrl＋F 搜索 &lt;code&gt;Table 15-4. Commonly Used Baud Rates&lt;/code&gt; 即可。&lt;/p&gt;
 &lt;h2 id=&quot;串口输出异常&quot;&gt;&lt;a href=&quot;#串口输出异常&quot; class=&quot;headerlink&quot; title=&quot;串口输出异常&quot;&gt;&lt;/a&gt;串口输出异常&lt;/h2&gt;&lt;p&gt;前面提到我们直接使用三个变量保存当前时间，在输出时做进一步处理，转为字符串的过程中，我们进行了这样的操作：&lt;/p&gt;
-&lt;figure class=&quot;highlight c&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Time[&lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;] = hour / &lt;span class=&quot;number&quot;&gt;10&lt;/span&gt; + &lt;span class=&quot;string&quot;&gt;&#39;0&#39;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;c&quot;&gt;Time[0] = hour / 10 + &amp;#39;0&amp;#39;;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;但有趣的事情是，在初始化之后，我们得到的输出是这样的： &lt;code&gt;0/:0/:0/&lt;/code&gt; 。随手输出了一下 &lt;code&gt;/&lt;/code&gt; 的 ASCII 码，发现它刚好比 &lt;code&gt;0&lt;/code&gt; 小一。&lt;/p&gt;
 &lt;p&gt;难道说，存储器中的默认值不是 0 吗？ Google 一下之后发现，还真的不是 0 。 MSP430G2553 中的 Flash 存储器在默认状态下的值全为 1 ，然后写入时只能将 1 置为 0 ，所以每一次写入数据都需要先清空再写入。那么问题来了，为什么全为 1 会导致最后输出的结果小 1 呢？我来简单的阐述一下我的理解：&lt;/p&gt;
 &lt;p&gt;假设这个存储器只有 8 位，也就是说，现在的值为 &lt;code&gt;11111111&lt;/code&gt; ，然后我加上一个 &lt;code&gt;1&lt;/code&gt; ，于是我们得到：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;  11111111&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;+        1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; 100000000&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;显然，我们最后的结果已经移除了，此时会产生截断，也就是说，存储器现在的数据变成了 &lt;code&gt;00000000&lt;/code&gt; ，也就是 &lt;code&gt;0&lt;/code&gt;，跟我们期望的结果 &lt;code&gt;1&lt;/code&gt; 刚好相差一。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;  11111111
++        1
+ 100000000
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;显然，我们最后的结果已经移除了，此时会产生截断，也就是说，存储器现在的数据变成了 &lt;code&gt;00000000&lt;/code&gt; ，也就是 &lt;code&gt;0&lt;/code&gt;，跟我们期望的结果 &lt;code&gt;1&lt;/code&gt; 刚好相差一。&lt;/p&gt;
 &lt;p&gt;当然，实际的情况要比我上面的举例要复杂的多，不过我想已经足够我们认识到这个 BUG 的本质，就不再多说啦。&lt;/p&gt;
 &lt;h2 id=&quot;Flash-存储器未清空&quot;&gt;&lt;a href=&quot;#Flash-存储器未清空&quot; class=&quot;headerlink&quot; title=&quot;Flash 存储器未清空&quot;&gt;&lt;/a&gt;Flash 存储器未清空&lt;/h2&gt;&lt;p&gt;在测试中，我们发现每一次烧录程序之后， Flash 存储器不会清空，依然会从上一次我们保存的时间开始计时。我觉得这是正确的行为，没有在意，但是我妹纸和她的队友告诉我她们在完成上一个作业的时候每次都是会清空的。我对着这次和上次的代码研究了很久，认为代码里面根本就没有清空 Flash 存储器的操作，如果有的话，掉电保存这项功能根本无从谈起。我妹纸她们也同意我的分析，但是她们的实践确实证明了每次都会清空 Flash 存储区。&lt;/p&gt;
 &lt;p&gt;这个问题也困扰了很久，直到第二天，用别人的电脑重新烧录了一遍程序，发现他们的是会正常清空的。所以说，问题在于 CCS 的版本：我妹纸使用的 CCS 版本是 6.1 ，而&lt;br&gt;他们用的版本是 5.1.1 ，也就是说，不同版本的 CCS 在烧录程序期间的不同行为导致了这次错误。我们换用了 5.1.1 之后，成功解决了这个问题。&lt;/p&gt;
@@ -441,78 +646,127 @@
     <link href="https://xuanwo.org/2016/04/13/gitlab-install-intro/"/>
     <id>https://xuanwo.org/2016/04/13/gitlab-install-intro/</id>
     <published>2016-04-13T23:20:00.000Z</published>
-    <updated>2016-07-02T15:56:31.165Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;h1 id=&quot;起因&quot;&gt;&lt;a href=&quot;#起因&quot; class=&quot;headerlink&quot; title=&quot;起因&quot;&gt;&lt;/a&gt;起因&lt;/h1&gt;&lt;p&gt;在跟网络中心的老师沟通成立镜像站的相关事宜的时候，意外地接下来搭建一套校内的 Git 服务的任务。&lt;br&gt;&lt;a href=&quot;https://imnerd.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;@怡红公子&lt;/a&gt; 曾经搭建过一套类似的服务，但由于服务器端没有开启 VT 虚拟化导致不能安装 64 位的操作系统，再加上 Gitlab 不提供 32 位的安装包，所以长期以来怡红公子一直都是自行编译并配置 Gitlab 。考虑到后续维护的方便，我们决定趁着这个机会使用另一台支持安装 64 位操作系统的服务器，一劳永逸地解决这个问题。&lt;br&gt;我们的服务器环境是 &lt;strong&gt;CentOS 7.2 64bit&lt;/strong&gt; ，以下所有操作均以此为基准。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
 &lt;h1 id=&quot;Gitlab-安装&quot;&gt;&lt;a href=&quot;#Gitlab-安装&quot; class=&quot;headerlink&quot; title=&quot;Gitlab 安装&quot;&gt;&lt;/a&gt;Gitlab 安装&lt;/h1&gt;&lt;p&gt;推荐使用 &lt;a href=&quot;https://about.gitlab.com/downloads&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Install a GitLab CE Omnibus package&lt;/a&gt; 安装 ，其他发行版可以点选对应版本，不再赘述。&lt;/p&gt;
 &lt;h2 id=&quot;安装和配置依赖&quot;&gt;&lt;a href=&quot;#安装和配置依赖&quot; class=&quot;headerlink&quot; title=&quot;安装和配置依赖&quot;&gt;&lt;/a&gt;安装和配置依赖&lt;/h2&gt;&lt;p&gt;如果需要安装 Postfix 来发送邮件，则需要在安装过程中选择 &lt;code&gt;Internet Site&lt;/code&gt;。你也可以使用 Sendmail 之类的第三方发信服务或者使用自行配制的 SMTP 服务器。&lt;br&gt;除此以外，下列命令将会在防火墙中打开 HTTP(80) 和 SSH(22) 对应端口。&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo yum install curl policycoreutils openssh-server openssh-clients&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo systemctl &lt;span class=&quot;built_in&quot;&gt;enable&lt;/span&gt; sshd&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo systemctl start sshd&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo yum install postfix&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo systemctl &lt;span class=&quot;built_in&quot;&gt;enable&lt;/span&gt; postfix&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo systemctl start postfix&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo firewall-cmd --permanent --add-service=http&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo systemctl reload firewalld&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h2 id=&quot;添加-Gitlab-源并安装&quot;&gt;&lt;a href=&quot;#添加-Gitlab-源并安装&quot; class=&quot;headerlink&quot; title=&quot;添加 Gitlab 源并安装&quot;&gt;&lt;/a&gt;添加 Gitlab 源并安装&lt;/h2&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;curl &lt;span class=&quot;_&quot;&gt;-s&lt;/span&gt;S https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo yum install gitlab-ce&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo yum install curl policycoreutils openssh-server openssh-clients
+sudo systemctl enable sshd
+sudo systemctl start sshd
+sudo yum install postfix
+sudo systemctl enable postfix
+sudo systemctl start postfix
+sudo firewall-cmd --permanent --add-service=http
+sudo systemctl reload firewalld
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&quot;添加-Gitlab-源并安装&quot;&gt;&lt;a href=&quot;#添加-Gitlab-源并安装&quot; class=&quot;headerlink&quot; title=&quot;添加 Gitlab 源并安装&quot;&gt;&lt;/a&gt;添加 Gitlab 源并安装&lt;/h2&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash
+sudo yum install gitlab-ce
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;这个脚本会在源中添加 Gitlab-CE ，并自动执行&lt;code&gt;yum makecache&lt;/code&gt;，然后安装&lt;code&gt;gitlab-ce&lt;/code&gt;。由于源在国外，可能速度较慢，也可以手动添加来自 清华tuna 的源： &lt;a href=&quot;https://mirrors.tuna.tsinghua.edu.cn/help/gitlab-ce/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://mirrors.tuna.tsinghua.edu.cn/help/gitlab-ce/&lt;/a&gt; ， 链接中为各发行版下的教程，感谢 清华tuna 提供镜像。&lt;/p&gt;
 &lt;h2 id=&quot;配置并启动-Gitlab&quot;&gt;&lt;a href=&quot;#配置并启动-Gitlab&quot; class=&quot;headerlink&quot; title=&quot;配置并启动 Gitlab&quot;&gt;&lt;/a&gt;配置并启动 Gitlab&lt;/h2&gt;&lt;p&gt;此时已经可以启动服务了：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl reconfigure&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo gitlab-ctl reconfigure
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;进行一长串复杂的启动流程之后， gitlab 就已经可以通过 &lt;code&gt;localhost&lt;/code&gt; 进行访问了。&lt;/p&gt;
 &lt;h1 id=&quot;Gitlab-配置&quot;&gt;&lt;a href=&quot;#Gitlab-配置&quot; class=&quot;headerlink&quot; title=&quot;Gitlab 配置&quot;&gt;&lt;/a&gt;Gitlab 配置&lt;/h1&gt;&lt;h2 id=&quot;修改域名&quot;&gt;&lt;a href=&quot;#修改域名&quot; class=&quot;headerlink&quot; title=&quot;修改域名&quot;&gt;&lt;/a&gt;修改域名&lt;/h2&gt;&lt;p&gt;默认的配置文件保存在 &lt;code&gt;/etc/gitlab/gitlab.rb&lt;/code&gt; ，执行：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo vim /etc/gitlab/gitlab.rb&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo vim /etc/gitlab/gitlab.rb
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;打开文件，并修改：&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;external_url &lt;span class=&quot;string&quot;&gt;&#39;http://your.domain&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;external_url &amp;#39;http://your.domain&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;再次执行&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl reconfigure&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo gitlab-ctl reconfigure
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;即可。&lt;/p&gt;
 &lt;p&gt;有一定概率出现 502 错误，刷新浏览器或者再次更新配置即可。&lt;/p&gt;
 &lt;h2 id=&quot;Gitlab-汉化&quot;&gt;&lt;a href=&quot;#Gitlab-汉化&quot; class=&quot;headerlink&quot; title=&quot;Gitlab 汉化&quot;&gt;&lt;/a&gt;Gitlab 汉化&lt;/h2&gt;&lt;p&gt;由于服务对象是广大师生，为了降低新手上手的难度，所有进行汉化也是非常有必要的。好在国内有人已经进行了这方面的工作，我们只需要共享其成果即可（欢迎向&lt;a href=&quot;https://gitlab.com/larryli/gitlab&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;原项目&lt;/a&gt;提交高质量翻译）。&lt;/p&gt;
 &lt;p&gt;首先确认版本：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo cat /opt/gitlab/embedded/service/gitlab-rails/VERSION&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo cat /opt/gitlab/embedded/service/gitlab-rails/VERSION
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;并确认当前汉化版本的 VERSION 是否相同，当前最新的汉化版本为 8.6 。&lt;br&gt;如果安装版本小于当前汉化版本，请先升级。如果安装版本大于当前汉化版本，请在本项目中提交新的 issue。&lt;br&gt;如果版本相同，首先在本地 clone 仓库。&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# GitLab.com 仓库&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;git &lt;span class=&quot;built_in&quot;&gt;clone&lt;/span&gt; https://gitlab.com/larryli/gitlab.git&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# 或 Coding.net 镜像&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;git &lt;span class=&quot;built_in&quot;&gt;clone&lt;/span&gt; https://git.coding.net/larryli/gitlab.git&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;# GitLab.com 仓库
+git clone https://gitlab.com/larryli/gitlab.git
+
+# 或 Coding.net 镜像
+git clone https://git.coding.net/larryli/gitlab.git
+&lt;/code&gt;&lt;/pre&gt;
 &lt;blockquote&gt;
 &lt;p&gt;根据我的测试， Coding.net 的镜像不完整，clone 之后无法 checkout&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;然后比较汉化分支和原分支，导出 patch 用的 diff 文件。&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# 8.1 版本的汉化补丁&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;git diff origin/8-6-stable..8-6-zh &amp;gt; ../8.6.diff&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;# 8.1 版本的汉化补丁
+git diff origin/8-6-stable..8-6-zh &amp;gt; ../8.6.diff
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后上传 &lt;code&gt;8.6.diff&lt;/code&gt; 文件到服务器。&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# 停止 gitlab&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl stop&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo patch &lt;span class=&quot;_&quot;&gt;-d&lt;/span&gt; /opt/gitlab/embedded/service/gitlab-rails -p1 &amp;lt; 8.6.diff&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;# 停止 gitlab
+sudo gitlab-ctl stop
+sudo patch -d /opt/gitlab/embedded/service/gitlab-rails -p1 &amp;lt; 8.6.diff
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;确定没有 .rej 文件，重启 GitLab 即可。&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl start&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo gitlab-ctl start
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;如果汉化中出现问题，请重新安装 GitLab（&lt;strong&gt;注意备份数据&lt;/strong&gt;）。&lt;/p&gt;
-&lt;h1 id=&quot;Gitlab-运维&quot;&gt;&lt;a href=&quot;#Gitlab-运维&quot; class=&quot;headerlink&quot; title=&quot;Gitlab 运维&quot;&gt;&lt;/a&gt;Gitlab 运维&lt;/h1&gt;&lt;h2 id=&quot;管理&quot;&gt;&lt;a href=&quot;#管理&quot; class=&quot;headerlink&quot; title=&quot;管理&quot;&gt;&lt;/a&gt;管理&lt;/h2&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# 启动所有 gitlab 组件：&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl start&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# 停止所有 gitlab 组件：&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl stop&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# 重启所有 gitlab 组件：&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl restart&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h2 id=&quot;备份&quot;&gt;&lt;a href=&quot;#备份&quot; class=&quot;headerlink&quot; title=&quot;备份&quot;&gt;&lt;/a&gt;备份&lt;/h2&gt;&lt;p&gt;备份GitLab repositories and GitLab metadata&lt;br&gt;在 crontab 中加入如下命令：&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;0 2 * * * /usr/bin/gitlab-rake gitlab:backup:create&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
-&lt;h2 id=&quot;恢复&quot;&gt;&lt;a href=&quot;#恢复&quot; class=&quot;headerlink&quot; title=&quot;恢复&quot;&gt;&lt;/a&gt;恢复&lt;/h2&gt;&lt;p&gt;首先进入备份 gitlab 的目录，这个目录是配置文件中的&lt;code&gt;gitlab_rails[&amp;#39;backup_path&amp;#39;]&lt;/code&gt;，默认为&lt;code&gt;/var/opt/gitlab/backups&lt;/code&gt;。&lt;/p&gt;
+&lt;h1 id=&quot;Gitlab-运维&quot;&gt;&lt;a href=&quot;#Gitlab-运维&quot; class=&quot;headerlink&quot; title=&quot;Gitlab 运维&quot;&gt;&lt;/a&gt;Gitlab 运维&lt;/h1&gt;&lt;h2 id=&quot;管理&quot;&gt;&lt;a href=&quot;#管理&quot; class=&quot;headerlink&quot; title=&quot;管理&quot;&gt;&lt;/a&gt;管理&lt;/h2&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;# 启动所有 gitlab 组件：
+sudo gitlab-ctl start
+
+# 停止所有 gitlab 组件：
+sudo gitlab-ctl stop
+
+# 重启所有 gitlab 组件：
+sudo gitlab-ctl restart
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&quot;备份&quot;&gt;&lt;a href=&quot;#备份&quot; class=&quot;headerlink&quot; title=&quot;备份&quot;&gt;&lt;/a&gt;备份&lt;/h2&gt;&lt;p&gt;备份GitLab repositories and GitLab metadata&lt;br&gt;在 crontab 中加入如下命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;0 2 * * * /usr/bin/gitlab-rake gitlab:backup:create
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&quot;恢复&quot;&gt;&lt;a href=&quot;#恢复&quot; class=&quot;headerlink&quot; title=&quot;恢复&quot;&gt;&lt;/a&gt;恢复&lt;/h2&gt;&lt;p&gt;首先进入备份 gitlab 的目录，这个目录是配置文件中的&lt;code&gt;gitlab_rails[&amp;#39;backup_path&amp;#39;]&lt;/code&gt;，默认为&lt;code&gt;/var/opt/gitlab/backups&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;然后停止 unicorn 和 sidekiq ，保证数据库没有新的连接，不会有写数据情况。&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl stop unicorn&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# ok: down: unicorn: 0s, normally up&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl stop sidekiq&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# ok: down: sidekiq: 0s, normally up&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo gitlab-ctl stop unicorn
+# ok: down: unicorn: 0s, normally up
+sudo gitlab-ctl stop sidekiq
+# ok: down: sidekiq: 0s, normally up
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后恢复数据，1406691018为备份文件的时间戳&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;gitlab-rake gitlab:backup:restore BACKUP=1406691018&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;gitlab-rake gitlab:backup:restore BACKUP=1406691018
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h2 id=&quot;修改数据存储地址&quot;&gt;&lt;a href=&quot;#修改数据存储地址&quot; class=&quot;headerlink&quot; title=&quot;修改数据存储地址&quot;&gt;&lt;/a&gt;修改数据存储地址&lt;/h2&gt;&lt;p&gt;默认情况下，gitlab 将数据存储在&lt;code&gt;/var/opt/gitlab/git-data&lt;/code&gt;目录下，受限于分区情况&amp;amp;方便管理，我们需要将数据迁移到别的目录下。&lt;/p&gt;
 &lt;h3 id=&quot;无需数据迁移&quot;&gt;&lt;a href=&quot;#无需数据迁移&quot; class=&quot;headerlink&quot; title=&quot;无需数据迁移&quot;&gt;&lt;/a&gt;无需数据迁移&lt;/h3&gt;&lt;p&gt;如果还没有投入使用，则可以直接在配置文件中添加：&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;git_data_dir &lt;span class=&quot;string&quot;&gt;&quot;/path/to/git-data&quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;git_data_dir &amp;quot;/path/to/git-data&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后执行：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl reconfigure&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo gitlab-ctl reconfigure
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;就可以生效了。&lt;/p&gt;
 &lt;h3 id=&quot;进行数据迁移&quot;&gt;&lt;a href=&quot;#进行数据迁移&quot; class=&quot;headerlink&quot; title=&quot;进行数据迁移&quot;&gt;&lt;/a&gt;进行数据迁移&lt;/h3&gt;&lt;p&gt;如果已经有数据了，则需要进行迁移。&lt;/p&gt;
 &lt;p&gt;首先需要暂停服务，避免用户在迁移期间读写数据：&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl stop&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;sudo gitlab-ctl stop
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后使用rsync数据进行迁移：&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;注意前一个地址不需要&lt;code&gt;/&lt;/code&gt;，后一个地址需要&lt;code&gt;/&lt;/code&gt;，且只需要迁移&lt;code&gt;repositories&lt;/code&gt;目录即可&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo rsync -av /var/opt/gitlab/git-data/repositories /path/to/git-data/&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo rsync -av /var/opt/gitlab/git-data/repositories /path/to/git-data/
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后运行配置工具以更新并重启服务：&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;官网文档是先更新配置再启动服务，但我在使用中发现先更新配置会提示无法连接上服务器，出现这种问题时可以先启动服务再更新配置。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl reconfigure&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl start&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo gitlab-ctl reconfigure
+sudo gitlab-ctl start
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;最后不要忘了在网页端确认数据的地址是否正确。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;关于权限问题&lt;br&gt;在使用中，我一开始创建了一个&lt;code&gt;gitlabhq&lt;/code&gt;用户并创建了一个文件夹，然后修改地址，服务正常启动后提示500。&lt;br&gt;后来使用&lt;code&gt;root&lt;/code&gt;账户在&lt;code&gt;/home&lt;/code&gt;下直接创建文件夹解决了这个问题。&lt;br&gt;如果有遇到类似问题的，可以尝试用&lt;code&gt;root&lt;/code&gt;创建目录。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h2 id=&quot;监听IPv6&quot;&gt;&lt;a href=&quot;#监听IPv6&quot; class=&quot;headerlink&quot; title=&quot;监听IPv6&quot;&gt;&lt;/a&gt;监听IPv6&lt;/h2&gt;&lt;p&gt;教育网拥有得天独厚的IPv6资源，所以为我们的gitlab服务添加IPv6支持很有必要。&lt;/p&gt;
 &lt;p&gt;修改&lt;code&gt;/etc/gitlab/gitlab.rb&lt;/code&gt;文件中的：&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# nginx[&#39;listen_addresses&#39;] = [&#39;*&#39;]&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;# nginx[&amp;#39;listen_addresses&amp;#39;] = [&amp;#39;*&amp;#39;]
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;为&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;nginx[&lt;span class=&quot;string&quot;&gt;&#39;listen_addresses&#39;&lt;/span&gt;] = [&lt;span class=&quot;string&quot;&gt;&#39;*&#39;&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&#39;[::]&#39;&lt;/span&gt;]&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;nginx[&amp;#39;listen_addresses&amp;#39;] = [&amp;#39;*&amp;#39;, &amp;#39;[::]&amp;#39;]
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后执行&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo gitlab-ctl reconfigure&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo gitlab-ctl reconfigure
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后就可以通过IPv6访问了。&lt;/p&gt;
 &lt;h1 id=&quot;参考资料&quot;&gt;&lt;a href=&quot;#参考资料&quot; class=&quot;headerlink&quot; title=&quot;参考资料&quot;&gt;&lt;/a&gt;参考资料&lt;/h1&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href=&quot;https://about.gitlab.com/downloads/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Gitlab 下载&lt;/a&gt;&lt;/li&gt;
@@ -549,24 +803,64 @@
     <link href="https://xuanwo.org/2016/04/04/docopt-intro/"/>
     <id>https://xuanwo.org/2016/04/04/docopt-intro/</id>
     <published>2016-04-04T21:39:00.000Z</published>
-    <updated>2016-07-02T15:56:31.165Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;code&gt;Qingchat&lt;/code&gt;&lt;/a&gt; 使用的命令行参数解释器是 &lt;a href=&quot;http://docopt.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;code&gt;docopt&lt;/code&gt;&lt;/a&gt;，用下来感觉非常棒，所以决定介绍一下这个库。（&lt;em&gt;奉劝各位看官，珍爱生命，远离argparse。&lt;/em&gt;）&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
 &lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;docopt 本质上是在 Python 中引入了一种针对命令行参数的形式语言，在代码的最开头使用&lt;code&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/code&gt;文档注释的形式写出符合要求的文档，就会自动生成对应的parse，体验非常赞。&lt;/p&gt;
 &lt;h1 id=&quot;用法&quot;&gt;&lt;a href=&quot;#用法&quot; class=&quot;headerlink&quot; title=&quot;用法&quot;&gt;&lt;/a&gt;用法&lt;/h1&gt;&lt;h2 id=&quot;样例&quot;&gt;&lt;a href=&quot;#样例&quot; class=&quot;headerlink&quot; title=&quot;样例&quot;&gt;&lt;/a&gt;样例&lt;/h2&gt;&lt;p&gt;docopt的使用非常简单，以Qingchat为例，你只需要在代码最开头加入：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;string&quot;&gt;&quot;&quot;&quot;Qingchat CLI&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;Usage:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  qingchat config ip &amp;lt;ip&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  qingchat config port &amp;lt;port&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  qingchat config login&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  qingchat group list&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  qingchat group choose &amp;lt;group_name&amp;gt;...&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  qingchat group clean&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  qingchat group send -t &amp;lt;content&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  qingchat group send -i &amp;lt;media&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  qingchat group send -f &amp;lt;file&amp;gt; [&amp;lt;delaytime&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;Options:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  -h --help     Show this screen.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  -v --version     Show version.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&quot;&quot;&quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&amp;quot;&amp;quot;&amp;quot;Qingchat CLI
+
+Usage:
+  qingchat config ip &amp;lt;ip&amp;gt;
+  qingchat config port &amp;lt;port&amp;gt;
+  qingchat config login
+  qingchat group list
+  qingchat group choose &amp;lt;group_name&amp;gt;...
+  qingchat group clean
+  qingchat group send -t &amp;lt;content&amp;gt;
+  qingchat group send -i &amp;lt;media&amp;gt;
+  qingchat group send -f &amp;lt;file&amp;gt; [&amp;lt;delaytime&amp;gt;]
+
+Options:
+  -h --help     Show this screen.
+  -v --version     Show version.
+&amp;quot;&amp;quot;&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后在执行代码中加入：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;arguments = docopt(__doc__, version=&lt;span class=&quot;string&quot;&gt;&#39;Qingchat 0.3.2&#39;&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;arguments = docopt(__doc__, version=&amp;#39;Qingchat 0.3.2&amp;#39;)
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;就会在你的程序中导入一个&lt;code&gt;arguments&lt;/code&gt;字典，这个字典中的内容形如：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;-f&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;-i&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;-t&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;&amp;lt;content&amp;gt;&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;&amp;lt;file&amp;gt;&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;&amp;lt;group_name&amp;gt;&#39;&lt;/span&gt;: [],&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;&amp;lt;ip&amp;gt;&#39;&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&#39;127.0.0.1&#39;&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;&amp;lt;media&amp;gt;&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;&amp;lt;port&amp;gt;&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;None&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;choose&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;clean&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;config&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;True&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;group&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;ip&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;True&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;list&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;login&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;port&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&#39;send&#39;&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;False&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;{
+    &amp;#39;-f&amp;#39;: False,
+    &amp;#39;-i&amp;#39;: False,
+    &amp;#39;-t&amp;#39;: False,
+    &amp;#39;&amp;lt;content&amp;gt;&amp;#39;: None,
+    &amp;#39;&amp;lt;file&amp;gt;&amp;#39;: None,
+    &amp;#39;&amp;lt;group_name&amp;gt;&amp;#39;: [],
+    &amp;#39;&amp;lt;ip&amp;gt;&amp;#39;: &amp;#39;127.0.0.1&amp;#39;,
+    &amp;#39;&amp;lt;media&amp;gt;&amp;#39;: None,
+    &amp;#39;&amp;lt;port&amp;gt;&amp;#39;: None,
+    &amp;#39;choose&amp;#39;: False,
+    &amp;#39;clean&amp;#39;: False,
+    &amp;#39;config&amp;#39;: True,
+    &amp;#39;group&amp;#39;: False,
+    &amp;#39;ip&amp;#39;: True,
+    &amp;#39;list&amp;#39;: False,
+    &amp;#39;login&amp;#39;: False,
+    &amp;#39;port&amp;#39;: False,
+    &amp;#39;send&amp;#39;: False
+}
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;这样应该就能很容易看出来，我们在文档中写的每一个短语，都被转化为一个对应的类型。只要直接调用&lt;code&gt;arguments[&amp;#39;xxx&amp;#39;]&lt;/code&gt;就可以判断或者使用对应的值，从而实现对应的功能。&lt;/p&gt;
 &lt;h2 id=&quot;详解&quot;&gt;&lt;a href=&quot;#详解&quot; class=&quot;headerlink&quot; title=&quot;详解&quot;&gt;&lt;/a&gt;详解&lt;/h2&gt;&lt;p&gt;前面我们举了一个例子，下面我们来详细介绍一下如何完成一个符合 &lt;code&gt;docopt&lt;/code&gt; 要求的注释文档。&lt;/p&gt;
 &lt;h3 id=&quot;Usage&quot;&gt;&lt;a href=&quot;#Usage&quot; class=&quot;headerlink&quot; title=&quot;Usage&quot;&gt;&lt;/a&gt;Usage&lt;/h3&gt;&lt;p&gt;所有出现在&lt;code&gt;usage:&lt;/code&gt;（区分大小写）和一个空行之间的文本都会被识别为一个命令组合，&lt;code&gt;usage&lt;/code&gt;后的第一个字母将会被识别为这个程序的名字，所有命令组合的每一个部分（空格分隔）都会成为字典中的一个key。&lt;/p&gt;
 &lt;h4 id=&quot;参数&quot;&gt;&lt;a href=&quot;#参数&quot; class=&quot;headerlink&quot; title=&quot;参数&quot;&gt;&lt;/a&gt;参数&lt;/h4&gt;&lt;p&gt;形如 &lt;code&gt;&amp;lt;argument&amp;gt;&lt;/code&gt; 或者 &lt;code&gt;ARGUMENT&lt;/code&gt; 的文本将会被识别为参数。&lt;br&gt;在转化后的字典中的取值为 &lt;code&gt;True&lt;/code&gt; 或者 &lt;code&gt;False&lt;/code&gt; 。&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Usage: my_program &amp;lt;host&amp;gt; &amp;lt;port&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;Usage: my_program &amp;lt;host&amp;gt; &amp;lt;port&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&quot;选项&quot;&gt;&lt;a href=&quot;#选项&quot; class=&quot;headerlink&quot; title=&quot;选项&quot;&gt;&lt;/a&gt;选项&lt;/h4&gt;&lt;p&gt;形如 &lt;code&gt;-o&lt;/code&gt; 或者 &lt;code&gt;--option&lt;/code&gt; 的文本将会被识别为选项。&lt;br&gt;在转化后的字典中的取值为 &lt;code&gt;True&lt;/code&gt; 或者 &lt;code&gt;False&lt;/code&gt; 。&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Usage: my_program -f &amp;lt;file&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;Usage: my_program -f &amp;lt;file&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Tips:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;短选项可以组合起来，比如&lt;code&gt;-abc&lt;/code&gt;等价于&lt;code&gt;-a -b -c&lt;/code&gt;&lt;/li&gt;
@@ -576,16 +870,21 @@
 &lt;h4 id=&quot;命令&quot;&gt;&lt;a href=&quot;#命令&quot; class=&quot;headerlink&quot; title=&quot;命令&quot;&gt;&lt;/a&gt;命令&lt;/h4&gt;&lt;p&gt;其他不满足 &lt;code&gt;--options&lt;/code&gt; 或者 &lt;code&gt;&amp;lt;arguments&amp;gt;&lt;/code&gt; 的文本将会被识别为（子）命令。&lt;br&gt;在转化后的字典中取值为 &lt;code&gt;True&lt;/code&gt; 或者 &lt;code&gt;False&lt;/code&gt;。&lt;/p&gt;
 &lt;h4 id=&quot;可选项&quot;&gt;&lt;a href=&quot;#可选项&quot; class=&quot;headerlink&quot; title=&quot;可选项&quot;&gt;&lt;/a&gt;可选项&lt;/h4&gt;&lt;p&gt;形如 &lt;code&gt;[optional elements]&lt;/code&gt; 的文本是可选项。&lt;br&gt;&lt;code&gt;elements&lt;/code&gt;包括上述的三种类型：参数，选项以及命令。&lt;/p&gt;
 &lt;p&gt;在相同或者不同的括号中都是一样的：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Usage: my_program [command --option &amp;lt;argument&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;Usage: my_program [command --option &amp;lt;argument&amp;gt;]
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;等价于&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Usage: my_program [command] [--option] [&amp;lt;argument&amp;gt;]&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;Usage: my_program [command] [--option] [&amp;lt;argument&amp;gt;]
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&quot;必填项&quot;&gt;&lt;a href=&quot;#必填项&quot; class=&quot;headerlink&quot; title=&quot;必填项&quot;&gt;&lt;/a&gt;必填项&lt;/h4&gt;&lt;p&gt;形如 &lt;code&gt;(required elements)&lt;/code&gt; 的文本是必填项。&lt;br&gt;上述三种元素默认都是必填项，&lt;code&gt;()&lt;/code&gt;符号用在一些比较特殊的情形下，比如：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Usage: my_program (--either-this &amp;lt;&lt;span class=&quot;keyword&quot;&gt;and&lt;/span&gt;-that&amp;gt; | &amp;lt;&lt;span class=&quot;keyword&quot;&gt;or&lt;/span&gt;-this&amp;gt;)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;Usage: my_program (--either-this &amp;lt;and-that&amp;gt; | &amp;lt;or-this&amp;gt;)
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&quot;选择项&quot;&gt;&lt;a href=&quot;#选择项&quot; class=&quot;headerlink&quot; title=&quot;选择项&quot;&gt;&lt;/a&gt;选择项&lt;/h4&gt;&lt;p&gt;形如 &lt;code&gt;element|another&lt;/code&gt; 的文本是选择项，你可以从中选择一个值。&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Usage: my_program go (--up | --down | --left | --right)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;Usage: my_program go (--up | --down | --left | --right)
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&quot;列表项&quot;&gt;&lt;a href=&quot;#列表项&quot; class=&quot;headerlink&quot; title=&quot;列表项&quot;&gt;&lt;/a&gt;列表项&lt;/h4&gt;&lt;p&gt;形如 &lt;code&gt;element...&lt;/code&gt; 的文本是列表项，你可以输入多个参数。&lt;/p&gt;
 &lt;p&gt;比如说：&lt;/p&gt;
-&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Usage: my_program open &amp;lt;file&amp;gt;...&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;Usage: my_program open &amp;lt;file&amp;gt;...
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后你可以通过&lt;code&gt;arguments[&amp;#39;&amp;lt;file&amp;gt;&amp;#39;]&lt;/code&gt; 来访问这个列表。&lt;/p&gt;
 &lt;h3 id=&quot;Option&quot;&gt;&lt;a href=&quot;#Option&quot; class=&quot;headerlink&quot; title=&quot;Option&quot;&gt;&lt;/a&gt;Option&lt;/h3&gt;&lt;p&gt;&lt;code&gt;Option&lt;/code&gt; 部分用于指定某些特殊情形，比如：&lt;/p&gt;
 &lt;ul&gt;
@@ -619,7 +918,7 @@
     <link href="https://xuanwo.org/2016/04/01/qingchat-intro/"/>
     <id>https://xuanwo.org/2016/04/01/qingchat-intro/</id>
     <published>2016-04-01T22:03:00.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;在我之前写过的一篇文章中，我曾经探索过类似的问题：&lt;a href=&quot;https://xuanwo.org/2016/02/28/wechat-remove/&quot;&gt;微信群重复人员识别&lt;/a&gt;。当初我就提出过能否自动获取相关数据，但因为种种原因的限制不了了之了。后来发现了&lt;a href=&quot;https://github.com/sjdy521/Mojo-Weixin&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Mojo-Weixin&lt;/a&gt;这个库之后，我决定在这个的基础上实现一个微信多群直播的工具——Qingchat。（&lt;em&gt;尽管在刚刚实现完不久，微信就更新了转发到多个群的功能，Sad。&lt;/em&gt;）探索的成果如下： &lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Qingchat&lt;/a&gt;，目前仅支持 python3 ，欢迎各位看官提 issues ，交 code ，或者拍砖。&lt;br&gt;接下来我会先介绍一下 Qingchat 的原理，然后介绍 Qingchat 的使用，最后展望一下 Qingchat 未来的发展方向。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -652,43 +951,79 @@
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h3 id=&quot;安装-Mojo-Weixin-模块&quot;&gt;&lt;a href=&quot;#安装-Mojo-Weixin-模块&quot; class=&quot;headerlink&quot; title=&quot;安装 Mojo::Weixin 模块&quot;&gt;&lt;/a&gt;安装 Mojo::Weixin 模块&lt;/h3&gt;&lt;p&gt;首先需要安装 cpanm 工具：&lt;br&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;cpan -i App::cpanminus&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;h3 id=&quot;安装-Mojo-Weixin-模块&quot;&gt;&lt;a href=&quot;#安装-Mojo-Weixin-模块&quot; class=&quot;headerlink&quot; title=&quot;安装 Mojo::Weixin 模块&quot;&gt;&lt;/a&gt;安装 Mojo::Weixin 模块&lt;/h3&gt;&lt;p&gt;首先需要安装 cpanm 工具：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;cpan -i App::cpanminus
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后通过 cpanm 工具安装 Mojo::Weixin&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;cpanm Mojo::Weixin&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;cpanm Mojo::Weixin
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h3 id=&quot;运行&quot;&gt;&lt;a href=&quot;#运行&quot; class=&quot;headerlink&quot; title=&quot;运行&quot;&gt;&lt;/a&gt;运行&lt;/h3&gt;&lt;p&gt;将如下代码使用utf－8编码保存为源码文件：&lt;/p&gt;
-&lt;figure class=&quot;highlight perl&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;#!/usr/bin/env perl&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;use&lt;/span&gt; Mojo::Weixin;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;my&lt;/span&gt; ($host,$port,$post_api);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;$host = &lt;span class=&quot;string&quot;&gt;&quot;0.0.0.0&quot;&lt;/span&gt;; &lt;span class=&quot;comment&quot;&gt;#发送消息接口监听地址，修改为自己希望监听的地址&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;$port = &lt;span class=&quot;number&quot;&gt;3000&lt;/span&gt;;      &lt;span class=&quot;comment&quot;&gt;#发送消息接口监听端口，修改为自己希望监听的端口&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;#$post_api = &#39;http://xxxx&#39;;  #接收到的消息上报接口，如果不需要接收消息上报，可以删除或注释此行&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;my&lt;/span&gt; $client = Mojo::Weixin-&amp;gt;new(&lt;span class=&quot;string&quot;&gt;log_level=&amp;gt;&lt;/span&gt;&lt;span class=&quot;string&quot;&gt;&quot;info&quot;&lt;/span&gt;,&lt;span class=&quot;string&quot;&gt;ua_debug=&amp;gt;&lt;/span&gt;&lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;,&lt;span class=&quot;string&quot;&gt;qrcode_path=&amp;gt;&lt;/span&gt;&lt;span class=&quot;string&quot;&gt;&quot;qrcode.jpg&quot;&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;$client-&amp;gt;login();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;$client-&amp;gt;load(&lt;span class=&quot;string&quot;&gt;&quot;ShowMsg&quot;&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;$client-&amp;gt;load(&lt;span class=&quot;string&quot;&gt;&quot;Openwx&quot;&lt;/span&gt;,&lt;span class=&quot;string&quot;&gt;data=&amp;gt;&lt;/span&gt;&amp;#123;&lt;span class=&quot;string&quot;&gt;listen=&amp;gt;&lt;/span&gt;[&amp;#123;&lt;span class=&quot;string&quot;&gt;host=&amp;gt;&lt;/span&gt;$host,&lt;span class=&quot;string&quot;&gt;port=&amp;gt;&lt;/span&gt;$port&amp;#125;], &lt;span class=&quot;string&quot;&gt;post_api=&amp;gt;&lt;/span&gt;$post_api&amp;#125;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;$client-&amp;gt;run();&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;perl&quot;&gt;#!/usr/bin/env perl
+use Mojo::Weixin;
+my ($host,$port,$post_api);
+
+$host = &amp;quot;0.0.0.0&amp;quot;; #发送消息接口监听地址，修改为自己希望监听的地址
+$port = 3000;      #发送消息接口监听端口，修改为自己希望监听的端口
+#$post_api = &amp;#39;http://xxxx&amp;#39;;  #接收到的消息上报接口，如果不需要接收消息上报，可以删除或注释此行
+
+my $client = Mojo::Weixin-&amp;gt;new(log_level=&amp;gt;&amp;quot;info&amp;quot;,ua_debug=&amp;gt;0,qrcode_path=&amp;gt;&amp;quot;qrcode.jpg&amp;quot;);
+$client-&amp;gt;login();
+$client-&amp;gt;load(&amp;quot;ShowMsg&amp;quot;);
+$client-&amp;gt;load(&amp;quot;Openwx&amp;quot;,data=&amp;gt;{listen=&amp;gt;[{host=&amp;gt;$host,port=&amp;gt;$port}], post_api=&amp;gt;$post_api});
+$client-&amp;gt;run();
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;上述代码保存为 &lt;code&gt;test.pl&lt;/code&gt; ， 并通过 perl 来运行：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;perl test.pl&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;perl test.pl
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;然后就会产生一个监听 3000 端口的 http 服务器。&lt;/p&gt;
 &lt;p&gt;未竟事宜可以参考&lt;a href=&quot;https://github.com/sjdy521/Mojo-Weixin/blob/master/README.md&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;此处&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id=&quot;配置Nginx&quot;&gt;&lt;a href=&quot;#配置Nginx&quot; class=&quot;headerlink&quot; title=&quot;配置Nginx&quot;&gt;&lt;/a&gt;配置Nginx&lt;/h3&gt;&lt;p&gt;为了方便调用二维码，还需要配置一个 Web 服务器。安装Nginx，在配置文件中添加：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;server &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    listen 80 default_server;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    listen [::]:80 default_server ipv6only=on;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    root /path/to/your/qrcode; # &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;最终，能在浏览器中以 &lt;code&gt;http://xxx.xxx.xxx.xxx/qrcode.jpg&lt;/code&gt; 的形式访问到二维码即配置成功。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;server {
+    listen 80 default_server;
+    listen [::]:80 default_server ipv6only=on;
+
+    root /path/to/your/qrcode; # 
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;最终，能在浏览器中以 &lt;code&gt;http://xxx.xxx.xxx.xxx/qrcode.jpg&lt;/code&gt; 的形式访问到二维码即配置成功。&lt;/p&gt;
 &lt;h2 id=&quot;安装Qingchat&quot;&gt;&lt;a href=&quot;#安装Qingchat&quot; class=&quot;headerlink&quot; title=&quot;安装Qingchat&quot;&gt;&lt;/a&gt;安装Qingchat&lt;/h2&gt;&lt;h3 id=&quot;pip&quot;&gt;&lt;a href=&quot;#pip&quot; class=&quot;headerlink&quot; title=&quot;pip&quot;&gt;&lt;/a&gt;pip&lt;/h3&gt;&lt;p&gt;Qingchat已经上传到了pypi，只需要使用pip进行安装即可：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;pip install qingchat&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;pip install qingchat
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h3 id=&quot;源码&quot;&gt;&lt;a href=&quot;#源码&quot; class=&quot;headerlink&quot; title=&quot;源码&quot;&gt;&lt;/a&gt;源码&lt;/h3&gt;&lt;p&gt;Qingchat最新开发版代码位于： &lt;a href=&quot;https://github.com/Xuanwo/qingchat/tree/dev&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://github.com/Xuanwo/qingchat/tree/dev&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;你可以使用&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;pip install &lt;span class=&quot;_&quot;&gt;-e&lt;/span&gt; git+https://github.com/Xuanwo/qingchat/tree/dev&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;pip install -e git+https://github.com/Xuanwo/qingchat/tree/dev
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;或&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;git &lt;span class=&quot;built_in&quot;&gt;clone&lt;/span&gt; https://github.com/Xuanwo/qingchat/tree/dev&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;cd&lt;/span&gt; qingchat&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;python setup.py install&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;git clone https://github.com/Xuanwo/qingchat/tree/dev
+cd qingchat
+python setup.py install
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;以进行安装。&lt;/p&gt;
 &lt;h2 id=&quot;使用&quot;&gt;&lt;a href=&quot;#使用&quot; class=&quot;headerlink&quot; title=&quot;使用&quot;&gt;&lt;/a&gt;使用&lt;/h2&gt;&lt;p&gt;Qingchat 的使用非常简单：&lt;/p&gt;
 &lt;h3 id=&quot;配置-1&quot;&gt;&lt;a href=&quot;#配置-1&quot; class=&quot;headerlink&quot; title=&quot;配置&quot;&gt;&lt;/a&gt;配置&lt;/h3&gt;&lt;p&gt;通过如下命令配置后端服务器的 ip 地址和端口：&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;qingchat config ip &amp;lt;ip&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;qingchat config port &amp;lt;port&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;qingchat config ip &amp;lt;ip&amp;gt;
+qingchat config port &amp;lt;port&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;配置文件默认会保存在&lt;code&gt;~/.config/qingchat/config.yml&lt;/code&gt;。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Win下可能需要设置&lt;code&gt;HOME&lt;/code&gt;环境变量才能正常运行&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id=&quot;登陆&quot;&gt;&lt;a href=&quot;#登陆&quot; class=&quot;headerlink&quot; title=&quot;登陆&quot;&gt;&lt;/a&gt;登陆&lt;/h3&gt;&lt;p&gt;配置完毕后，执行&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;qingchat config login&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;qingchat config login
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;就会自动弹出一个二维码，使用微信扫描并登录后即可。如果出现问题，请再次执行此命令。&lt;/p&gt;
-&lt;h3 id=&quot;群发消息&quot;&gt;&lt;a href=&quot;#群发消息&quot; class=&quot;headerlink&quot; title=&quot;群发消息&quot;&gt;&lt;/a&gt;群发消息&lt;/h3&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;qingchat group list&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h3 id=&quot;群发消息&quot;&gt;&lt;a href=&quot;#群发消息&quot; class=&quot;headerlink&quot; title=&quot;群发消息&quot;&gt;&lt;/a&gt;群发消息&lt;/h3&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;qingchat group list
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;此命令可以列出你保存到通讯录中的所有群组。&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;qingchat group choose &amp;lt;group_name&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;qingchat group choose &amp;lt;group_name&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;此命令可以将指定群组加入列表，支持正则&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;qingchat group clean&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;qingchat group clean
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;此命令可以清除列表&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;qingchat group send -t &amp;lt;content&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;qingchat group send -i &amp;lt;media&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;qingchat group send &lt;span class=&quot;_&quot;&gt;-f&lt;/span&gt; &amp;lt;file&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;qingchat group send -t &amp;lt;content&amp;gt;
+qingchat group send -i &amp;lt;media&amp;gt;
+qingchat group send -f &amp;lt;file&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;-t&lt;/code&gt; 参数用于发送文本信息&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;-i&lt;/code&gt; 参数用于发送媒体信息，图片会直接显示，其他类型将以文件形式传输&lt;/li&gt;
@@ -722,7 +1057,7 @@
     <link href="https://xuanwo.org/2016/03/13/gout/"/>
     <id>https://xuanwo.org/2016/03/13/gout/</id>
     <published>2016-03-13T13:44:00.000Z</published>
-    <updated>2016-07-02T15:56:31.165Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;p&gt;其实我很想写出获奖感言的感觉，但是痛风发作的时候真的好疼啊。。。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -759,13 +1094,15 @@
     <link href="https://xuanwo.org/2016/03/12/neovim-slow-upgrade/"/>
     <id>https://xuanwo.org/2016/03/12/neovim-slow-upgrade/</id>
     <published>2016-03-12T11:00:00.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;一直都非常羡慕那些能把vim用得非常溜的人，但是自己总是不情愿去学，总是觉得vim的操作方式非常反人类，难度曲线太陡，不适合我。真正让我下定决心去学的，是因为系统切换到Ubuntu Gnome之后发现，Sublime Text 3 不能原生支持中文输入。同时我也发现，如果我不上来就折腾spf13这样的东西的话，其实vim非常好懂。于是，Neovim的慢速升级攻略就这样诞生了。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
 &lt;h1 id=&quot;安装&quot;&gt;&lt;a href=&quot;#安装&quot; class=&quot;headerlink&quot; title=&quot;安装&quot;&gt;&lt;/a&gt;安装&lt;/h1&gt;&lt;p&gt;安装可以参考&lt;a href=&quot;https://github.com/neovim/neovim/wiki/Installing-Neovim&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;此处&lt;/a&gt;&lt;br&gt;如果是Ubuntu 的话，则可以执行如下代码：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo add-apt-repository ppa:neovim-ppa/unstable&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo apt-get update&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo apt-get install neovim&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h1 id=&quot;Neovim常用操作&quot;&gt;&lt;a href=&quot;#Neovim常用操作&quot; class=&quot;headerlink&quot; title=&quot;Neovim常用操作&quot;&gt;&lt;/a&gt;Neovim常用操作&lt;/h1&gt;&lt;h2 id=&quot;初步&quot;&gt;&lt;a href=&quot;#初步&quot; class=&quot;headerlink&quot; title=&quot;初步&quot;&gt;&lt;/a&gt;初步&lt;/h2&gt;&lt;h3 id=&quot;光标移动&quot;&gt;&lt;a href=&quot;#光标移动&quot; class=&quot;headerlink&quot; title=&quot;光标移动&quot;&gt;&lt;/a&gt;光标移动&lt;/h3&gt;&lt;p&gt;&lt;code&gt;gg&lt;/code&gt; 移动到文件开头&lt;br&gt;&lt;code&gt;G&lt;/code&gt; 移动到文件末尾&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo add-apt-repository ppa:neovim-ppa/unstable
+sudo apt-get update
+sudo apt-get install neovim
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&quot;Neovim常用操作&quot;&gt;&lt;a href=&quot;#Neovim常用操作&quot; class=&quot;headerlink&quot; title=&quot;Neovim常用操作&quot;&gt;&lt;/a&gt;Neovim常用操作&lt;/h1&gt;&lt;h2 id=&quot;初步&quot;&gt;&lt;a href=&quot;#初步&quot; class=&quot;headerlink&quot; title=&quot;初步&quot;&gt;&lt;/a&gt;初步&lt;/h2&gt;&lt;h3 id=&quot;光标移动&quot;&gt;&lt;a href=&quot;#光标移动&quot; class=&quot;headerlink&quot; title=&quot;光标移动&quot;&gt;&lt;/a&gt;光标移动&lt;/h3&gt;&lt;p&gt;&lt;code&gt;gg&lt;/code&gt; 移动到文件开头&lt;br&gt;&lt;code&gt;G&lt;/code&gt; 移动到文件末尾&lt;/p&gt;
 &lt;h3 id=&quot;文件操作相关&quot;&gt;&lt;a href=&quot;#文件操作相关&quot; class=&quot;headerlink&quot; title=&quot;文件操作相关&quot;&gt;&lt;/a&gt;文件操作相关&lt;/h3&gt;&lt;p&gt;&lt;code&gt;:w &amp;lt;filename&amp;gt;&lt;/code&gt; 按照&lt;filename&gt;保存文件&lt;br&gt;&lt;code&gt;:wq&lt;/code&gt; 保存并退出&lt;br&gt;&lt;code&gt;:q!&lt;/code&gt; 退出不保存&lt;br&gt;&lt;code&gt;:e&lt;/code&gt; 打开新的文件并关闭当前文件，使用Tab可以补全&lt;/filename&gt;&lt;/p&gt;
 &lt;h3 id=&quot;文件编辑相关&quot;&gt;&lt;a href=&quot;#文件编辑相关&quot; class=&quot;headerlink&quot; title=&quot;文件编辑相关&quot;&gt;&lt;/a&gt;文件编辑相关&lt;/h3&gt;&lt;p&gt;&lt;code&gt;dd&lt;/code&gt; 删除当前行&lt;br&gt;&lt;code&gt;y&lt;/code&gt; 复制&lt;br&gt;&lt;code&gt;yy&lt;/code&gt; 复制当前行&lt;br&gt;&lt;code&gt;yG&lt;/code&gt; 复制光标以上全部行&lt;br&gt;&lt;code&gt;ygg&lt;/code&gt; 复制光标以下全部行&lt;br&gt;&lt;code&gt;p&lt;/code&gt; 粘贴&lt;br&gt;&lt;code&gt;u&lt;/code&gt; 撤销&lt;/p&gt;
 &lt;h2 id=&quot;入门&quot;&gt;&lt;a href=&quot;#入门&quot; class=&quot;headerlink&quot; title=&quot;入门&quot;&gt;&lt;/a&gt;入门&lt;/h2&gt;&lt;h3 id=&quot;使用内置终端&quot;&gt;&lt;a href=&quot;#使用内置终端&quot; class=&quot;headerlink&quot; title=&quot;使用内置终端&quot;&gt;&lt;/a&gt;使用内置终端&lt;/h3&gt;&lt;p&gt;&lt;code&gt;:terminal&lt;/code&gt; 打开终端，输入exit并使用&lt;code&gt;esc&lt;/code&gt;或&lt;code&gt;enter&lt;/code&gt;即可退出&lt;/p&gt;
@@ -783,19 +1120,24 @@
 &lt;p&gt;安装此插件后启动nvim会报错，自行编译后错误消失，不知道具体的原因。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id=&quot;Smarter-tab-line&quot;&gt;&lt;a href=&quot;#Smarter-tab-line&quot; class=&quot;headerlink&quot; title=&quot;Smarter tab line&quot;&gt;&lt;/a&gt;Smarter tab line&lt;/h3&gt;&lt;p&gt;在&lt;code&gt;init.vim&lt;/code&gt;中加入&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;apos; 开启tabline功能&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;let g:airline#extensions#tabline#enabled = 1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;apos; 设置tabline分隔符&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;let g:airline#extensions#tabline#left_sep = &amp;apos; &amp;apos;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;let g:airline#extensions#tabline#left_alt_sep = &amp;apos;|&amp;apos;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;支持的一些快捷操作命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;#39; 开启tabline功能
+let g:airline#extensions#tabline#enabled = 1
+&amp;#39; 设置tabline分隔符
+let g:airline#extensions#tabline#left_sep = &amp;#39; &amp;#39;
+let g:airline#extensions#tabline#left_alt_sep = &amp;#39;|&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;支持的一些快捷操作命令：&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;:bn&lt;/code&gt;: 跳转下一个buffer&lt;br&gt;&lt;code&gt;:bp&lt;/code&gt;: 往上一个buffer&lt;br&gt;&lt;code&gt;:b&amp;lt;n&amp;gt;&lt;/code&gt;: 跳往第n个buffer&lt;br&gt;&lt;code&gt;:bd&lt;/code&gt;: 关掉目前buffer&lt;/p&gt;
 &lt;h3 id=&quot;vim-airline-themes&quot;&gt;&lt;a href=&quot;#vim-airline-themes&quot; class=&quot;headerlink&quot; title=&quot;vim-airline-themes&quot;&gt;&lt;/a&gt;vim-airline-themes&lt;/h3&gt;&lt;p&gt;个人比较偏爱&lt;code&gt;solarized&lt;/code&gt;的暗色皮肤，所以需要使用这个库来安装airline配套的皮肤。&lt;br&gt;在&lt;code&gt;init.vim&lt;/code&gt;中添加&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Plug &amp;apos;vim-airline/vim-airline-themes&amp;apos;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;然后修改：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;let g:airline_theme=&amp;quot;solarized&amp;quot;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;即可&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Plug &amp;#39;vim-airline/vim-airline-themes&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;然后修改：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;let g:airline_theme=&amp;quot;solarized&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;即可&lt;/p&gt;
 &lt;h2 id=&quot;vim-colors-solarized&quot;&gt;&lt;a href=&quot;#vim-colors-solarized&quot; class=&quot;headerlink&quot; title=&quot;vim-colors-solarized&quot;&gt;&lt;/a&gt;vim-colors-solarized&lt;/h2&gt;&lt;p&gt;顾名思义，这是&lt;code&gt;solarized for vim&lt;/code&gt;。&lt;br&gt;在&lt;code&gt;init.vim&lt;/code&gt;中添加&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Plug &amp;apos;altercation/vim-colors-solarized&amp;apos;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;然后修改：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;set background=dark&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;colorscheme solarized&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;即可&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Plug &amp;#39;altercation/vim-colors-solarized&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;然后修改：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;set background=dark
+colorscheme solarized
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;即可&lt;/p&gt;
 &lt;h1 id=&quot;更新日志&quot;&gt;&lt;a href=&quot;#更新日志&quot; class=&quot;headerlink&quot; title=&quot;更新日志&quot;&gt;&lt;/a&gt;更新日志&lt;/h1&gt;&lt;ul&gt;
 &lt;li&gt;2016年03月12日 首次发布&lt;/li&gt;
 &lt;li&gt;2016年03月15日 增加air-line相关内容&lt;/li&gt;
@@ -823,16 +1165,27 @@
     <link href="https://xuanwo.org/2016/02/28/wechat-remove/"/>
     <id>https://xuanwo.org/2016/02/28/wechat-remove/</id>
     <published>2016-02-28T10:05:00.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.012Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;由于微信的限制，人数超过一百以后，只有邀请才能加入。所以，如果想要组织大型的在线活动，就只有建立很多个分群。然而分群的问题在于，会有很多人重复加群，挤占了本来就缺乏的空间。所以需要找到一个可行的办法，清除两个群中的重复人员。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
 &lt;h1 id=&quot;可行的方法&quot;&gt;&lt;a href=&quot;#可行的方法&quot; class=&quot;headerlink&quot; title=&quot;可行的方法&quot;&gt;&lt;/a&gt;可行的方法&lt;/h1&gt;&lt;p&gt;在微信网页版中，通过点击群名称右侧的向下箭头，可以打开一个有所有人昵称的面板，通过审查工具可以得到对应的代码，右击选择&lt;code&gt;Edit As HTML&lt;/code&gt;，全选复制，保存到&lt;code&gt;a.txt&lt;/code&gt;中，然后执行&lt;/p&gt;
-&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;cat a.txt | grep -o &lt;span class=&quot;string&quot;&gt;&quot;\&quot;&amp;gt;.*&amp;lt;/p&amp;gt;&quot;&lt;/span&gt; &amp;gt; fen.txt&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;cat a.txt | grep -o &amp;quot;\&amp;quot;&amp;gt;.*&amp;lt;/p&amp;gt;&amp;quot; &amp;gt; fen.txt
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;我们便可以将所有人的名字都输出到&lt;code&gt;fen.txt&lt;/code&gt;中，尽管还有着一些&lt;code&gt;&amp;lt;&lt;/code&gt;，&lt;code&gt;&amp;gt;&lt;/code&gt;的符号，但是已经不影响识别了，故不再做处理。&lt;/p&gt;
 &lt;p&gt;对两个群分别如此操作之后，我们得到了两个群的成员名单。&lt;br&gt;然后执行如下Python代码：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;with open(&amp;apos;fen.txt&amp;apos;, &amp;apos;r&amp;apos;) as f:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    fen = f.readlines()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    f.close()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;with open(&amp;apos;main.txt&amp;apos;, &amp;apos;r&amp;apos;) as f:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    main = f.readlines()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    f.close()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;for i in main:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    for j in fen:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        if i == j:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            print(i)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;得到的输出就是两个群中重复的成员，然后一一删除即可。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;with open(&amp;#39;fen.txt&amp;#39;, &amp;#39;r&amp;#39;) as f:
+    fen = f.readlines()
+    f.close()
+with open(&amp;#39;main.txt&amp;#39;, &amp;#39;r&amp;#39;) as f:
+    main = f.readlines()
+    f.close()
+
+for i in main:
+    for j in fen:
+        if i == j:
+            print(i)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;得到的输出就是两个群中重复的成员，然后一一删除即可。&lt;/p&gt;
 &lt;h1 id=&quot;方案反思&quot;&gt;&lt;a href=&quot;#方案反思&quot; class=&quot;headerlink&quot; title=&quot;方案反思&quot;&gt;&lt;/a&gt;方案反思&lt;/h1&gt;&lt;h2 id=&quot;存在的缺陷&quot;&gt;&lt;a href=&quot;#存在的缺陷&quot; class=&quot;headerlink&quot; title=&quot;存在的缺陷&quot;&gt;&lt;/a&gt;存在的缺陷&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;自动化程度较低&lt;/li&gt;
 &lt;li&gt;如果存在用户同名的话，会导致删除错误的用户。&lt;/li&gt;
@@ -867,18 +1220,62 @@
     <link href="https://xuanwo.org/2016/02/26/debug-for-hexo-1775/"/>
     <id>https://xuanwo.org/2016/02/26/debug-for-hexo-1775/</id>
     <published>2016-02-26T12:54:00.000Z</published>
-    <updated>2016-07-02T15:56:31.165Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;h2 id=&quot;起因&quot;&gt;&lt;a href=&quot;#起因&quot; class=&quot;headerlink&quot; title=&quot;起因&quot;&gt;&lt;/a&gt;起因&lt;/h2&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/hexojs/hexo/issues/1775&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;hexojs/hexo #1775&lt;/a&gt;&lt;br&gt;BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
 &lt;h2 id=&quot;经过&quot;&gt;&lt;a href=&quot;#经过&quot; class=&quot;headerlink&quot; title=&quot;经过&quot;&gt;&lt;/a&gt;经过&lt;/h2&gt;&lt;p&gt;收到反馈之后，我在我的测试环境中也复现了这个bug。一开始还怀疑是主题的问题，专门测试了next主题，结果发现也存在这样的问题，于是就排除了主题方面的bug。&lt;br&gt;首先我们可以初步判断这个url生成出现了问题，参考landscape主题中此处的代码：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;% for (var i in theme.menu)&amp;#123; %&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;a class=&amp;quot;main-nav-link&amp;quot; href=&amp;quot;&amp;lt;%- url_for(theme.menu[i]) %&amp;gt;&amp;quot;&amp;gt;&amp;lt;%= i %&amp;gt;&amp;lt;/a&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;% &amp;#125; %&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;ejs&quot;&gt;&amp;lt;% for (var i in theme.menu){ %&amp;gt;
+    &amp;lt;a class=&amp;quot;main-nav-link&amp;quot; href=&amp;quot;&amp;lt;%- url_for(theme.menu[i]) %&amp;gt;&amp;quot;&amp;gt;&amp;lt;%= i %&amp;gt;&amp;lt;/a&amp;gt;
+&amp;lt;% } %&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;这里调用了一个&lt;code&gt;url_for&lt;/code&gt;函数来生成超链接，代码如下（去除了与本BUG无关的部分）：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;function urlForHelper(path, options) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  path = path || &amp;apos;/&amp;apos;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  if (path[0] === &amp;apos;#&amp;apos; || path.substring(0, 2) === &amp;apos;//&amp;apos;) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    return path;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  var config = this.config;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  var root = config.root;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  var data = url.parse(path);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  // Exit if this is an external path&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  if (data.protocol) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    return path;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  // Prepend root path&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  path = root + path;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  return path.replace(/\/&amp;#123;2,&amp;#125;/g, &amp;apos;/&amp;apos;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;nodejs&quot;&gt;function urlForHelper(path, options) {
+  path = path || &amp;#39;/&amp;#39;;
+
+  if (path[0] === &amp;#39;#&amp;#39; || path.substring(0, 2) === &amp;#39;//&amp;#39;) {
+    return path;
+  }
+
+  var config = this.config;
+  var root = config.root;
+  var data = url.parse(path);
+
+  // Exit if this is an external path
+  if (data.protocol) {
+    return path;
+  }
+
+  // Prepend root path
+  path = root + path;
+
+  return path.replace(/\/{2,}/g, &amp;#39;/&amp;#39;);
+}
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;直觉告诉我，这个问题很有可能就是这个函数写搓了。&lt;/p&gt;
 &lt;p&gt;然而我仔细研究了一下，发现&lt;code&gt;url_for&lt;/code&gt;的逻辑并没有什么问题。而且根据我脑补的代码执行情况来看，应该生成一个正确的链接才对，但是&lt;code&gt;config.root&lt;/code&gt;偏偏就丢了。&lt;br&gt;真的是非常奇怪，一时之间，我完全懵逼展开了，不明白到底发生了什么。&lt;/p&gt;
 &lt;h2 id=&quot;转折&quot;&gt;&lt;a href=&quot;#转折&quot; class=&quot;headerlink&quot; title=&quot;转折&quot;&gt;&lt;/a&gt;转折&lt;/h2&gt;&lt;p&gt;后来我跟我的朋友聊天的时候提到这个bug，结果他告诉我，这个&lt;code&gt;url_for&lt;/code&gt;写搓了，我点点头，应该就是这样。然后他说，一个判断都没有中，直接返回自身了，还贴了一张图。图中的代码大致如下：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;function urlForHelper(path, options)&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  /* jshint validthis: true */&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  path = path || &amp;apos;/&amp;apos;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  var config = this.config;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  var root = config.root;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  var data = url.parse(path);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  // Exit if this is an external path&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  if (data.protocol || path.substring(0, 2) === &amp;apos;//&amp;apos;)&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    return path;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  // Prepend root path&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  if (path[0] !== &amp;apos;/&amp;apos;)&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    return root + path;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  return path;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;nodejs&quot;&gt;function urlForHelper(path, options){
+  /* jshint validthis: true */
+  path = path || &amp;#39;/&amp;#39;;
+
+  var config = this.config;
+  var root = config.root;
+  var data = url.parse(path);
+
+  // Exit if this is an external path
+  if (data.protocol || path.substring(0, 2) === &amp;#39;//&amp;#39;){
+    return path;
+  }
+
+  // Prepend root path
+  if (path[0] !== &amp;#39;/&amp;#39;){
+    return root + path;
+  }
+
+  return path;
+}
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;看到图我立马懵逼了，连忙说，不对啊，你这个不是最新版本的代码。他被我这气场吓到，弱弱回复，我是刚安装的hexo…。&lt;br&gt;我顿时明白自己错在哪里了，npm源里面的稳定版还是3.1.1，但是我们github库中的代码已经是3.2beta了。使用最新的代码测试以后，发现这个bug已经不存在了。&lt;br&gt;也就是说，我花一个下午的时间，对着最新版的代码找一个已经被fix的bug…&lt;/p&gt;
 &lt;h2 id=&quot;总结&quot;&gt;&lt;a href=&quot;#总结&quot; class=&quot;headerlink&quot; title=&quot;总结&quot;&gt;&lt;/a&gt;总结&lt;/h2&gt;&lt;p&gt;这一次的事情非常乌龙，事后想想觉得自己真的太傻逼了。&lt;br&gt;吃一堑长一智，以后做debug工作的时候一定要分清楚线上和线下的代码，首先就要明确出问题的是哪个版本，然后再开展相应的分析。&lt;br&gt;除此以外，还跟我不重视流程有关系。尽管我总是让人提供各种version信息，但是我却总是在分析问题的时候忽略这些信息，没有把这些关键的信息加入到自己的分析过程中。&lt;br&gt;总结起来就是，too young ，姿势水平还有待提高。&lt;/p&gt;
 &lt;h2 id=&quot;更新日志&quot;&gt;&lt;a href=&quot;#更新日志&quot; class=&quot;headerlink&quot; title=&quot;更新日志&quot;&gt;&lt;/a&gt;更新日志&lt;/h2&gt;&lt;ul&gt;
@@ -908,7 +1305,7 @@
     <link href="https://xuanwo.org/2016/02/17/ipv6-in-cugb/"/>
     <id>https://xuanwo.org/2016/02/17/ipv6-in-cugb/</id>
     <published>2016-02-17T18:59:02.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;p&gt;主旨只有两条：开源，节流&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -995,40 +1392,107 @@
     <link href="https://xuanwo.org/2016/02/15/chocolatey-intro/"/>
     <id>https://xuanwo.org/2016/02/15/chocolatey-intro/</id>
     <published>2016-02-15T20:15:46.000Z</published>
-    <updated>2016-07-02T15:56:31.165Z</updated>
+    <updated>2016-07-02T16:03:54.000Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://chocolatey.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Chocolatey&lt;/a&gt;是一个基于Nuget的Windows包管理工具，截止到我更新此文章的时候，一共有3.7k多个独立包。本文旨在介绍Chocolatey这一工具的安装和用法，希望能有更多人享受到该工具的便利之处。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
-&lt;h1 id=&quot;安装chocolatey&quot;&gt;&lt;a href=&quot;#安装chocolatey&quot; class=&quot;headerlink&quot; title=&quot;安装chocolatey&quot;&gt;&lt;/a&gt;安装chocolatey&lt;/h1&gt;&lt;h2 id=&quot;CMD&quot;&gt;&lt;a href=&quot;#CMD&quot; class=&quot;headerlink&quot; title=&quot;CMD&quot;&gt;&lt;/a&gt;CMD&lt;/h2&gt;&lt;p&gt;打开一个具有管理员权限的命令行窗口，执行如下命令：&lt;br&gt;&lt;figure class=&quot;highlight powershell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;@powershell -NoProfile -ExecutionPolicy Bypass -Command &lt;span class=&quot;string&quot;&gt;&quot;iex ((new-object net.webclient).DownloadString(&#39;https://chocolatey.org/install.ps1&#39;))&quot;&lt;/span&gt; &amp;amp;&amp;amp; SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
-&lt;h2 id=&quot;PowerShell&quot;&gt;&lt;a href=&quot;#PowerShell&quot; class=&quot;headerlink&quot; title=&quot;PowerShell&quot;&gt;&lt;/a&gt;PowerShell&lt;/h2&gt;&lt;p&gt;打开一个具有管理员权限的PowerShell窗口，执行如下命令：&lt;br&gt;&lt;figure class=&quot;highlight powershell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;iex ((&lt;span class=&quot;built_in&quot;&gt;new-object&lt;/span&gt; net.webclient).DownloadString(&lt;span class=&quot;string&quot;&gt;&#39;https://chocolatey.org/install.ps1&#39;&lt;/span&gt;))&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;h1 id=&quot;安装chocolatey&quot;&gt;&lt;a href=&quot;#安装chocolatey&quot; class=&quot;headerlink&quot; title=&quot;安装chocolatey&quot;&gt;&lt;/a&gt;安装chocolatey&lt;/h1&gt;&lt;h2 id=&quot;CMD&quot;&gt;&lt;a href=&quot;#CMD&quot; class=&quot;headerlink&quot; title=&quot;CMD&quot;&gt;&lt;/a&gt;CMD&lt;/h2&gt;&lt;p&gt;打开一个具有管理员权限的命令行窗口，执行如下命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;PowerShell&quot;&gt;@powershell -NoProfile -ExecutionPolicy Bypass -Command &amp;quot;iex ((new-object net.webclient).DownloadString(&amp;#39;https://chocolatey.org/install.ps1&amp;#39;))&amp;quot; &amp;amp;&amp;amp; SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&quot;PowerShell&quot;&gt;&lt;a href=&quot;#PowerShell&quot; class=&quot;headerlink&quot; title=&quot;PowerShell&quot;&gt;&lt;/a&gt;PowerShell&lt;/h2&gt;&lt;p&gt;打开一个具有管理员权限的PowerShell窗口，执行如下命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;PowerShell&quot;&gt;iex ((new-object net.webclient).DownloadString(&amp;#39;https://chocolatey.org/install.ps1&amp;#39;))
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h1 id=&quot;使用chocolatey&quot;&gt;&lt;a href=&quot;#使用chocolatey&quot; class=&quot;headerlink&quot; title=&quot;使用chocolatey&quot;&gt;&lt;/a&gt;使用chocolatey&lt;/h1&gt;&lt;h2 id=&quot;安装包&quot;&gt;&lt;a href=&quot;#安装包&quot; class=&quot;headerlink&quot; title=&quot;安装包&quot;&gt;&lt;/a&gt;安装包&lt;/h2&gt;&lt;p&gt;安装包十分的容易，只需要打开管理员权限的命令行即可：&lt;/p&gt;
-&lt;figure class=&quot;highlight powershell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;choco install &amp;lt;package&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;PowerShell&quot;&gt;choco install &amp;lt;package&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h2 id=&quot;卸载包&quot;&gt;&lt;a href=&quot;#卸载包&quot; class=&quot;headerlink&quot; title=&quot;卸载包&quot;&gt;&lt;/a&gt;卸载包&lt;/h2&gt;&lt;p&gt;卸载也同样十分简单，打开管理员权限命令行，执行：&lt;/p&gt;
-&lt;figure class=&quot;highlight powershell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;choco uninstall &amp;lt;package&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;PowerShell&quot;&gt;choco uninstall &amp;lt;package&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h2 id=&quot;更新包&quot;&gt;&lt;a href=&quot;#更新包&quot; class=&quot;headerlink&quot; title=&quot;更新包&quot;&gt;&lt;/a&gt;更新包&lt;/h2&gt;&lt;p&gt;更新包则需要使用如下命令：&lt;/p&gt;
-&lt;figure class=&quot;highlight powershell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;choco upgrade &amp;lt;package&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;PowerShell&quot;&gt;choco upgrade &amp;lt;package&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h1 id=&quot;为chocolatey做贡献&quot;&gt;&lt;a href=&quot;#为chocolatey做贡献&quot; class=&quot;headerlink&quot; title=&quot;为chocolatey做贡献&quot;&gt;&lt;/a&gt;为chocolatey做贡献&lt;/h1&gt;&lt;p&gt;Chocolatey的一个特点就是社区化的环境，每一个人都可以向它提交自己喜爱的包。因为Chocolatey总是从官方下载所需要的包，所以避免了授权等问题。当然，本来收费的软件，同样需要收费，比如JetBrains系列的产品。&lt;/p&gt;
 &lt;h2 id=&quot;注册APIKey&quot;&gt;&lt;a href=&quot;#注册APIKey&quot; class=&quot;headerlink&quot; title=&quot;注册APIKey&quot;&gt;&lt;/a&gt;注册APIKey&lt;/h2&gt;&lt;p&gt;提交包则会略为复杂一点，首先你需要在&lt;a href=&quot;https://chocolatey.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://chocolatey.org/&lt;/a&gt; 注册一个账号，并获取跟你账户绑定的唯一APIKey。然后在命令行中执行如下命令：&lt;/p&gt;
-&lt;figure class=&quot;highlight powershell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;choco apikey -k &amp;lt;your key here&amp;gt; -s https://chocolatey.org&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;PowerShell&quot;&gt;choco apikey -k &amp;lt;your key here&amp;gt; -s https://chocolatey.org
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h2 id=&quot;新建软件包&quot;&gt;&lt;a href=&quot;#新建软件包&quot; class=&quot;headerlink&quot; title=&quot;新建软件包&quot;&gt;&lt;/a&gt;新建软件包&lt;/h2&gt;&lt;p&gt;在命令行中运行&lt;/p&gt;
-&lt;figure class=&quot;highlight powershell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;choco new &amp;lt;package name here&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# 为方便理解，此处使用test做包名&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;PowerShell&quot;&gt;choco new &amp;lt;package name here&amp;gt;
+# 为方便理解，此处使用test做包名
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;则当前目录下就会自动生成一个名为&lt;code&gt;test&lt;/code&gt;的文件夹，目录结构如下：&lt;/p&gt;
-&lt;figure class=&quot;highlight powershell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;test.nuspec&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;tools&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  |--chocolateyinstall.ps1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  |--chocolateyuninstall.ps1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  |--ReadMe.md&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;PowerShell&quot;&gt;test.nuspec
+tools
+  |--chocolateyinstall.ps1
+  |--chocolateyuninstall.ps1
+  |--ReadMe.md
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h2 id=&quot;完善信息&quot;&gt;&lt;a href=&quot;#完善信息&quot; class=&quot;headerlink&quot; title=&quot;完善信息&quot;&gt;&lt;/a&gt;完善信息&lt;/h2&gt;&lt;h3 id=&quot;修改test-nuspec&quot;&gt;&lt;a href=&quot;#修改test-nuspec&quot; class=&quot;headerlink&quot; title=&quot;修改test.nuspec&quot;&gt;&lt;/a&gt;修改test.nuspec&lt;/h3&gt;&lt;p&gt;自动生成的描述文件在需要填写的位置都有大写英文注释，只需要按照要求一一填写即可，下面我列举一份已经通过审核的Datagrip的描述文件作为参考：&lt;/p&gt;
-&lt;figure class=&quot;highlight xml&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;&amp;lt;!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. --&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;package&lt;/span&gt; &lt;span class=&quot;attr&quot;&gt;xmlns&lt;/span&gt;=&lt;span class=&quot;string&quot;&gt;&quot;http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;metadata&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;&amp;lt;!-- Read this before publishing packages to chocolatey.org: https://github.com/chocolatey/chocolatey/wiki/CreatePackages --&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;id&lt;/span&gt;&amp;gt;&lt;/span&gt;datagrip&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;id&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;title&lt;/span&gt;&amp;gt;&lt;/span&gt;DataGrip&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;title&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;version&lt;/span&gt;&amp;gt;&lt;/span&gt;1.0.1&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;version&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;authors&lt;/span&gt;&amp;gt;&lt;/span&gt;JetBrains&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;authors&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;owners&lt;/span&gt;&amp;gt;&lt;/span&gt;Xuanwo&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;owners&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;summary&lt;/span&gt;&amp;gt;&lt;/span&gt;Your Swiss Army Knife for Databases and SQL&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;summary&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;description&lt;/span&gt;&amp;gt;&lt;/span&gt;## Intelligent query console&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;Allows you to execute queries in different modes and provides local history that keeps track of all your activity and protects you from losing your work.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;......(省略)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;description&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;projectUrl&lt;/span&gt;&amp;gt;&lt;/span&gt;https://www.jetbrains.com/datagrip/&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;projectUrl&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;packageSourceUrl&lt;/span&gt;&amp;gt;&lt;/span&gt;https://github.com/Xuanwo/datagrip-chocolatey-package&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;packageSourceUrl&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;&amp;lt;!--&amp;lt;projectSourceUrl&amp;gt;&amp;lt;/projectSourceUrl&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;docsUrl&amp;gt;&amp;lt;/docsUrl&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;mailingListUrl&amp;gt;&amp;lt;/mailingListUrl&amp;gt;--&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;bugTrackerUrl&lt;/span&gt;&amp;gt;&lt;/span&gt;https://youtrack.jetbrains.com/issues/DBE&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;bugTrackerUrl&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;tags&lt;/span&gt;&amp;gt;&lt;/span&gt;datagrip admin jetbrains trial 30days&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;tags&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;copyright&lt;/span&gt;&amp;gt;&lt;/span&gt;Commercial&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;copyright&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;&amp;lt;!--&amp;lt;licenseUrl&amp;gt;&amp;lt;/licenseUrl&amp;gt;--&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;requireLicenseAcceptance&lt;/span&gt;&amp;gt;&lt;/span&gt;false&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;requireLicenseAcceptance&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;&amp;lt;!--&amp;lt;iconUrl&amp;gt;http://cdn.rawgit.com/__REPLACE_YOUR_REPO__/master/icons/datagrip.png&amp;lt;/iconUrl&amp;gt;--&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;&amp;lt;!--&amp;lt;dependencies&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      &amp;lt;dependency id=&quot;&quot; version=&quot;__VERSION__&quot; /&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      &amp;lt;dependency id=&quot;&quot; /&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;lt;/dependencies&amp;gt;--&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;releaseNotes&lt;/span&gt;&amp;gt;&lt;/span&gt;https://confluence.jetbrains.com/display/DBE/DataGrip+1.0.1+Release+Notes&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;releaseNotes&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;&amp;lt;!--&amp;lt;provides&amp;gt;&amp;lt;/provides&amp;gt;--&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;metadata&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;files&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;file&lt;/span&gt; &lt;span class=&quot;attr&quot;&gt;src&lt;/span&gt;=&lt;span class=&quot;string&quot;&gt;&quot;tools\**&quot;&lt;/span&gt; &lt;span class=&quot;attr&quot;&gt;target&lt;/span&gt;=&lt;span class=&quot;string&quot;&gt;&quot;tools&quot;&lt;/span&gt; /&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;files&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;package&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;XML&quot;&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;utf-8&amp;quot;?&amp;gt;
+&amp;lt;!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. --&amp;gt;
+&amp;lt;package xmlns=&amp;quot;http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd&amp;quot;&amp;gt;
+  &amp;lt;metadata&amp;gt;
+    &amp;lt;!-- Read this before publishing packages to chocolatey.org: https://github.com/chocolatey/chocolatey/wiki/CreatePackages --&amp;gt;
+    &amp;lt;id&amp;gt;datagrip&amp;lt;/id&amp;gt;
+    &amp;lt;title&amp;gt;DataGrip&amp;lt;/title&amp;gt;
+    &amp;lt;version&amp;gt;1.0.1&amp;lt;/version&amp;gt;
+    &amp;lt;authors&amp;gt;JetBrains&amp;lt;/authors&amp;gt;
+    &amp;lt;owners&amp;gt;Xuanwo&amp;lt;/owners&amp;gt;
+    &amp;lt;summary&amp;gt;Your Swiss Army Knife for Databases and SQL&amp;lt;/summary&amp;gt;
+    &amp;lt;description&amp;gt;## Intelligent query console
+Allows you to execute queries in different modes and provides local history that keeps track of all your activity and protects you from losing your work.
+......(省略)
+&amp;lt;/description&amp;gt;
+    &amp;lt;projectUrl&amp;gt;https://www.jetbrains.com/datagrip/&amp;lt;/projectUrl&amp;gt;
+    &amp;lt;packageSourceUrl&amp;gt;https://github.com/Xuanwo/datagrip-chocolatey-package&amp;lt;/packageSourceUrl&amp;gt;
+    &amp;lt;!--&amp;lt;projectSourceUrl&amp;gt;&amp;lt;/projectSourceUrl&amp;gt;
+    &amp;lt;docsUrl&amp;gt;&amp;lt;/docsUrl&amp;gt;
+    &amp;lt;mailingListUrl&amp;gt;&amp;lt;/mailingListUrl&amp;gt;--&amp;gt;
+    &amp;lt;bugTrackerUrl&amp;gt;https://youtrack.jetbrains.com/issues/DBE&amp;lt;/bugTrackerUrl&amp;gt;
+    &amp;lt;tags&amp;gt;datagrip admin jetbrains trial 30days&amp;lt;/tags&amp;gt;
+    &amp;lt;copyright&amp;gt;Commercial&amp;lt;/copyright&amp;gt;
+    &amp;lt;!--&amp;lt;licenseUrl&amp;gt;&amp;lt;/licenseUrl&amp;gt;--&amp;gt;
+    &amp;lt;requireLicenseAcceptance&amp;gt;false&amp;lt;/requireLicenseAcceptance&amp;gt;
+    &amp;lt;!--&amp;lt;iconUrl&amp;gt;http://cdn.rawgit.com/__REPLACE_YOUR_REPO__/master/icons/datagrip.png&amp;lt;/iconUrl&amp;gt;--&amp;gt;
+    &amp;lt;!--&amp;lt;dependencies&amp;gt;
+      &amp;lt;dependency id=&amp;quot;&amp;quot; version=&amp;quot;__VERSION__&amp;quot; /&amp;gt;
+      &amp;lt;dependency id=&amp;quot;&amp;quot; /&amp;gt;
+    &amp;lt;/dependencies&amp;gt;--&amp;gt;
+    &amp;lt;releaseNotes&amp;gt;https://confluence.jetbrains.com/display/DBE/DataGrip+1.0.1+Release+Notes&amp;lt;/releaseNotes&amp;gt;
+    &amp;lt;!--&amp;lt;provides&amp;gt;&amp;lt;/provides&amp;gt;--&amp;gt;
+  &amp;lt;/metadata&amp;gt;
+  &amp;lt;files&amp;gt;
+    &amp;lt;file src=&amp;quot;tools\**&amp;quot; target=&amp;quot;tools&amp;quot; /&amp;gt;
+  &amp;lt;/files&amp;gt;
+&amp;lt;/package&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;有一个比较坑的地方是&lt;code&gt;&amp;lt;description&amp;gt;&lt;/code&gt;部分是支持Markdown的，内容直接顶着括号写就OK，不用另起一行，也不用自己加缩进。&lt;/p&gt;
 &lt;h3 id=&quot;补充chocolateyinstall-ps1&quot;&gt;&lt;a href=&quot;#补充chocolateyinstall-ps1&quot; class=&quot;headerlink&quot; title=&quot;补充chocolateyinstall.ps1&quot;&gt;&lt;/a&gt;补充chocolateyinstall.ps1&lt;/h3&gt;&lt;blockquote&gt;
 &lt;p&gt;&lt;code&gt;chocolateyuninstall&lt;/code&gt;可以没有，但是一定要有&lt;code&gt;chocolateyinstall&lt;/code&gt;脚本。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;chocolateyinstall.ps1&lt;/code&gt;如果点击&lt;code&gt;编辑&lt;/code&gt;打开的话，会自动调用&lt;code&gt;Windows Powershell ISE&lt;/code&gt;编辑器。&lt;/p&gt;
 &lt;p&gt;下面同样列举一份已经填写完成的样例：&lt;/p&gt;
-&lt;figure class=&quot;highlight powershell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;variable&quot;&gt;$packageName&lt;/span&gt;= &lt;span class=&quot;string&quot;&gt;&#39;datagrip&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;variable&quot;&gt;$installerType&lt;/span&gt; = &lt;span class=&quot;string&quot;&gt;&#39;EXE&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;variable&quot;&gt;$toolsDir&lt;/span&gt;   = &lt;span class=&quot;string&quot;&gt;&quot;$(Split-Path -parent &lt;span class=&quot;variable&quot;&gt;$MyInvocation&lt;/span&gt;.MyCommand.Definition)&quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;variable&quot;&gt;$url&lt;/span&gt;        = &lt;span class=&quot;string&quot;&gt;&#39;https://download.jetbrains.com/datagrip/datagrip-1.0.1.exe&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;variable&quot;&gt;$silentArgs&lt;/span&gt; = &lt;span class=&quot;string&quot;&gt;&#39;/S&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;variable&quot;&gt;$validExitCodes&lt;/span&gt; = @(&lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;Install-ChocolateyPackage &lt;span class=&quot;string&quot;&gt;&quot;&lt;span class=&quot;variable&quot;&gt;$packageName&lt;/span&gt;&quot;&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&quot;&lt;span class=&quot;variable&quot;&gt;$installerType&lt;/span&gt;&quot;&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&quot;&lt;span class=&quot;variable&quot;&gt;$silentArgs&lt;/span&gt;&quot;&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&quot;&lt;span class=&quot;variable&quot;&gt;$url&lt;/span&gt;&quot;&lt;/span&gt;  -validExitCodes &lt;span class=&quot;variable&quot;&gt;$validExitCodes&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;PowerShell&quot;&gt;$packageName= &amp;#39;datagrip&amp;#39;
+$installerType = &amp;#39;EXE&amp;#39;
+$toolsDir   = &amp;quot;$(Split-Path -parent $MyInvocation.MyCommand.Definition)&amp;quot;
+$url        = &amp;#39;https://download.jetbrains.com/datagrip/datagrip-1.0.1.exe&amp;#39;
+$silentArgs = &amp;#39;/S&amp;#39;
+$validExitCodes = @(0)
+
+Install-ChocolateyPackage &amp;quot;$packageName&amp;quot; &amp;quot;$installerType&amp;quot; &amp;quot;$silentArgs&amp;quot; &amp;quot;$url&amp;quot;  -validExitCodes $validExitCodes
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;需要注意的是，填写完毕之后，一定要在Powershell中运行下列代码以删除所有的注释文字：&lt;/p&gt;
-&lt;figure class=&quot;highlight powershell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;variable&quot;&gt;$f&lt;/span&gt;=&lt;span class=&quot;string&quot;&gt;&#39;c:\path\to\thisFile.ps1&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;gc &lt;span class=&quot;variable&quot;&gt;$f&lt;/span&gt; | ? &amp;#123;&lt;span class=&quot;variable&quot;&gt;$_&lt;/span&gt; &lt;span class=&quot;nomarkup&quot;&gt;-notmatch&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&quot;^\s*#&quot;&lt;/span&gt;&amp;#125; | % &amp;#123;&lt;span class=&quot;variable&quot;&gt;$_&lt;/span&gt; &lt;span class=&quot;nomarkup&quot;&gt;-replace&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&#39;(^.*?)\s*?[^``]#.*&#39;&lt;/span&gt;,&lt;span class=&quot;string&quot;&gt;&#39;$1&#39;&lt;/span&gt;&amp;#125; | &lt;span class=&quot;built_in&quot;&gt;Out-File&lt;/span&gt; &lt;span class=&quot;variable&quot;&gt;$f&lt;/span&gt;+&lt;span class=&quot;string&quot;&gt;&quot;.~&quot;&lt;/span&gt; -en utf8; mv -fo &lt;span class=&quot;variable&quot;&gt;$f&lt;/span&gt;+&lt;span class=&quot;string&quot;&gt;&quot;.~&quot;&lt;/span&gt; &lt;span class=&quot;variable&quot;&gt;$f&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;PowerShell&quot;&gt;$f=&amp;#39;c:\path\to\thisFile.ps1&amp;#39;
+gc $f | ? {$_ -notmatch &amp;quot;^\s*#&amp;quot;} | % {$_ -replace &amp;#39;(^.*?)\s*?[^``]#.*&amp;#39;,&amp;#39;$1&amp;#39;} | Out-File $f+&amp;quot;.~&amp;quot; -en utf8; mv -fo $f+&amp;quot;.~&amp;quot; $f
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h3 id=&quot;打包上传&quot;&gt;&lt;a href=&quot;#打包上传&quot; class=&quot;headerlink&quot; title=&quot;打包上传&quot;&gt;&lt;/a&gt;打包上传&lt;/h3&gt;&lt;p&gt;所有的信息填写完成后，在&lt;code&gt;test.nuspec&lt;/code&gt;所在目录下执行&lt;code&gt;choco pack&lt;/code&gt;就会自动进行打包。&lt;br&gt;如果有重要的信息没有填写，choco将会报错，并红字提示：&lt;/p&gt;
-&lt;figure class=&quot;highlight powershell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;LicenseUrl cannot be empty.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;ProjectUrl cannot be empty.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;PackageSourceUrl cannot be empty.&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;PowerShell&quot;&gt;LicenseUrl cannot be empty.
+ProjectUrl cannot be empty.
+PackageSourceUrl cannot be empty.
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;如果没有问题，则会有如下提示：&lt;/p&gt;
-&lt;figure class=&quot;highlight powershell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Attempting to build package from &lt;span class=&quot;string&quot;&gt;&#39;datagrip.nuspec&#39;&lt;/span&gt;.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;Successfully created package &lt;span class=&quot;string&quot;&gt;&#39;datagrip.1.0.1.nupkg&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;PowerShell&quot;&gt;Attempting to build package from &amp;#39;datagrip.nuspec&amp;#39;.
+Successfully created package &amp;#39;datagrip.1.0.1.nupkg&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;之后执行 &lt;code&gt;choco push datagrip.1.0.1.nupkg&lt;/code&gt;即可将包上传至Chocolatey，通过管理员的审核之后，就会出现在软件列表中供人们下载了。&lt;/p&gt;
 &lt;h1 id=&quot;参考资料&quot;&gt;&lt;a href=&quot;#参考资料&quot; class=&quot;headerlink&quot; title=&quot;参考资料&quot;&gt;&lt;/a&gt;参考资料&lt;/h1&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href=&quot;https://chocolatey.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Chocolatey 官方网站&lt;/a&gt;&lt;/li&gt;
@@ -1060,7 +1524,7 @@
     <link href="https://xuanwo.org/2016/02/04/unlock-your-smart-tv/"/>
     <id>https://xuanwo.org/2016/02/04/unlock-your-smart-tv/</id>
     <published>2016-02-04T23:12:52.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.012Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;现在很多人都买了智能电视，但是出于种种你懂得原因，厂商通常都不允许用户自行安装自己想要的APP，比如腾讯视频，优酷视频之类的。本教程旨在突破这些限制，彻底解放智能电视的全部潜力。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1149,7 +1613,7 @@
     <link href="https://xuanwo.org/2016/01/13/how-to-differ-invalid-link/"/>
     <id>https://xuanwo.org/2016/01/13/how-to-differ-invalid-link/</id>
     <published>2016-01-13T01:18:51.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;前两天我的朋友圈被微信公开课活动的链接+截图刷屏，随后一大帮“业内人士”站出来说这个是盗号连接，只要点开，微信钱包和支付宝就会被盗。作为半个业内人士，我不能忍了，决定跟大家谈一谈如何识别真假链接。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1162,8 +1626,8 @@
 &lt;li&gt;&lt;code&gt;.com&lt;/code&gt;是顶级域名后缀&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h1 id=&quot;链接是什么？&quot;&gt;&lt;a href=&quot;#链接是什么？&quot; class=&quot;headerlink&quot; title=&quot;链接是什么？&quot;&gt;&lt;/a&gt;链接是什么？&lt;/h1&gt;&lt;p&gt;然后我们来介绍一下&lt;code&gt;链接&lt;/code&gt;，也就是URL，全称为&lt;code&gt;统一资源定位符&lt;/code&gt;，我们也称它们为&lt;code&gt;网址&lt;/code&gt;。链接的标准格式一般如下：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;协议类型://服务器地址（必要时需加上端口号）/路径/文件名&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;ul&gt;
+&lt;pre&gt;&lt;code&gt;协议类型://服务器地址（必要时需加上端口号）/路径/文件名
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
 &lt;li&gt;协议类型：常用的有http，https，ftp等&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
@@ -1176,8 +1640,8 @@
 &lt;li&gt;查询：GET模式的表单参数，以“?”字元为起点，每个参数以“&amp;amp;”隔开，再以“=”分开参数名称与资料，通常以UTF8的URL编码，避开字元冲突的问题&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h1 id=&quot;如何分析一个链接？&quot;&gt;&lt;a href=&quot;#如何分析一个链接？&quot; class=&quot;headerlink&quot; title=&quot;如何分析一个链接？&quot;&gt;&lt;/a&gt;如何分析一个链接？&lt;/h1&gt;&lt;p&gt;比如说我们这次微信公开课活动的链接：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;https://support.weixin.qq.com/cgi-bin/xxxxxxxx&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;对于用户而言，有用的信息如下：协议采用https协议，域名为&lt;code&gt;support.weixin.qq.com&lt;/code&gt;。&lt;br&gt;采用https协议意味着你的信息是受到保护的，即使你使用了公共的wifi，同一wifi下的可能存在着的黑客也无法窥探你的私人信息。域名&lt;code&gt;support.weixin.qq.com&lt;/code&gt;传递了如下信息，这个网页是归属于&lt;code&gt;qq.com&lt;/code&gt;的，这从源头上保证了这一网页的安全性（如果腾讯没有内鬼的话）。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;https://support.weixin.qq.com/cgi-bin/xxxxxxxx
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;对于用户而言，有用的信息如下：协议采用https协议，域名为&lt;code&gt;support.weixin.qq.com&lt;/code&gt;。&lt;br&gt;采用https协议意味着你的信息是受到保护的，即使你使用了公共的wifi，同一wifi下的可能存在着的黑客也无法窥探你的私人信息。域名&lt;code&gt;support.weixin.qq.com&lt;/code&gt;传递了如下信息，这个网页是归属于&lt;code&gt;qq.com&lt;/code&gt;的，这从源头上保证了这一网页的安全性（如果腾讯没有内鬼的话）。&lt;/p&gt;
 &lt;p&gt;下面我们来看看一个假的链接是怎么样的：&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;亲爱的淘宝用户您好，恭喜您在本次活动中获得特等奖iPhone6s一部，请登陆 &lt;a href=&quot;http://www.taoba0.com&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://www.taoba0.com&lt;/a&gt; 领取您的奖品。&lt;/p&gt;
@@ -1223,7 +1687,7 @@
     <link href="https://xuanwo.org/2016/01/03/vs-oracle-11g/"/>
     <id>https://xuanwo.org/2016/01/03/vs-oracle-11g/</id>
     <published>2016-01-03T15:31:32.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.012Z</updated>
     
     <content type="html">&lt;h1 id=&quot;开发环境&quot;&gt;&lt;a href=&quot;#开发环境&quot; class=&quot;headerlink&quot; title=&quot;开发环境&quot;&gt;&lt;/a&gt;开发环境&lt;/h1&gt;&lt;p&gt;宿主机：Win10 + VS2015 + ODP.Net for VS2015&lt;br&gt;虚拟机：Win7 + Oracle 11g + 桥接&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1241,21 +1705,54 @@
 &lt;p&gt;ODP.Net默认使用安装目录下的&lt;code&gt;tnsnames.ora&lt;/code&gt;，若安装目录在Program Files下，可能会遇到无权限等问题，此时使用管理员权限打开命令行，切换到对应目录并使用notepad编辑。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;复制服务器端的tnsnames.ora文件内容，或者自己手动编辑，格式如下：&lt;/p&gt;
-&lt;figure class=&quot;highlight&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&amp;lt;数据源别名&amp;gt; =&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  (DESCRIPTION =&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    (ADDRESS = (PROTOCOL = TCP)(HOST = &amp;lt;主机名或IP&amp;gt;)(PORT = &amp;lt;端口号&amp;gt;))&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    (CONNECT_DATA =&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      (SERVER = DEDICATED)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      (SERVICE_NAME = &amp;lt;数据库服务名&amp;gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    )&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  )&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;sql&quot;&gt;&amp;lt;数据源别名&amp;gt; =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = &amp;lt;主机名或IP&amp;gt;)(PORT = &amp;lt;端口号&amp;gt;))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = &amp;lt;数据库服务名&amp;gt;)
+    )
+  )
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h1 id=&quot;添加数据库&quot;&gt;&lt;a href=&quot;#添加数据库&quot; class=&quot;headerlink&quot; title=&quot;添加数据库&quot;&gt;&lt;/a&gt;添加数据库&lt;/h1&gt;&lt;p&gt;打开&lt;code&gt;工具&lt;/code&gt;-&lt;code&gt;连接到数据库&lt;/code&gt;，数据源修改为&lt;code&gt;Oracle数据库&lt;/code&gt;下的&lt;code&gt;ODP.NET,托管驱动程序&lt;/code&gt;，然后点击&lt;code&gt;确定&lt;/code&gt;，打开&lt;code&gt;添加连接&lt;/code&gt;窗口。&lt;br&gt;&lt;img src=&quot;/imgs/develop/add-database.png&quot; alt=&quot;添加连接&quot;&gt;&lt;br&gt;填写用户名，密码并选择数据源，然后测试连接，成功的话说明已经连通，点击确定即可。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;使用虚拟机搭建数据库的额外Tips&lt;br&gt;根据某网友分析，Oracle的监听器在通过1521端口连接后，会开启另外一个新的随机端口进行数据通讯，因此使用NAT方式虚拟网卡可能会导致连接失败。这种情况下，请使用桥接方式虚拟网卡，并在&lt;code&gt;net manager&lt;/code&gt;中将&lt;code&gt;loaclhost&lt;/code&gt;修改为虚拟机当前的IP。重启监听服务后，再试。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h1 id=&quot;连接数据库并使用&quot;&gt;&lt;a href=&quot;#连接数据库并使用&quot; class=&quot;headerlink&quot; title=&quot;连接数据库并使用&quot;&gt;&lt;/a&gt;连接数据库并使用&lt;/h1&gt;&lt;h2 id=&quot;连接数据库&quot;&gt;&lt;a href=&quot;#连接数据库&quot; class=&quot;headerlink&quot; title=&quot;连接数据库&quot;&gt;&lt;/a&gt;连接数据库&lt;/h2&gt;&lt;figure class=&quot;highlight vb&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;Dim&lt;/span&gt; oradb &lt;span class=&quot;keyword&quot;&gt;As&lt;/span&gt; &lt;span class=&quot;built_in&quot;&gt;String&lt;/span&gt; = &lt;span class=&quot;string&quot;&gt;&quot;User ID=system;Password=123456;Data Source=lol&quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;Dim&lt;/span&gt; conn &lt;span class=&quot;keyword&quot;&gt;As&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;New&lt;/span&gt; OracleConnection(oradb)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;conn.Open()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;Dim&lt;/span&gt; sql &lt;span class=&quot;keyword&quot;&gt;As&lt;/span&gt; &lt;span class=&quot;built_in&quot;&gt;String&lt;/span&gt; = &lt;span class=&quot;string&quot;&gt;&quot;create table xxx&quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;Dim&lt;/span&gt; sqlCom &lt;span class=&quot;keyword&quot;&gt;As&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;New&lt;/span&gt; OracleCommand&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sqlCom.CommandText = sql&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sqlCom.Connection = conn&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sqlCom.ExecuteNonQuery()&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h1 id=&quot;连接数据库并使用&quot;&gt;&lt;a href=&quot;#连接数据库并使用&quot; class=&quot;headerlink&quot; title=&quot;连接数据库并使用&quot;&gt;&lt;/a&gt;连接数据库并使用&lt;/h1&gt;&lt;h2 id=&quot;连接数据库&quot;&gt;&lt;a href=&quot;#连接数据库&quot; class=&quot;headerlink&quot; title=&quot;连接数据库&quot;&gt;&lt;/a&gt;连接数据库&lt;/h2&gt;&lt;pre&gt;&lt;code class=&quot;vb&quot;&gt;Dim oradb As String = &amp;quot;User ID=system;Password=123456;Data Source=lol&amp;quot;
+Dim conn As New OracleConnection(oradb)
+conn.Open()
+Dim sql As String = &amp;quot;create table xxx&amp;quot;
+Dim sqlCom As New OracleCommand
+sqlCom.CommandText = sql
+sqlCom.Connection = conn
+sqlCom.ExecuteNonQuery()
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h2 id=&quot;查询数据&quot;&gt;&lt;a href=&quot;#查询数据&quot; class=&quot;headerlink&quot; title=&quot;查询数据&quot;&gt;&lt;/a&gt;查询数据&lt;/h2&gt;&lt;p&gt;成功配置数据源之后，只需要向界面上拖动&lt;code&gt;DataGridView&lt;/code&gt;，并进行相关配置，选择自己需要的表即可。&lt;/p&gt;
 &lt;h2 id=&quot;插入图片的正确姿势&quot;&gt;&lt;a href=&quot;#插入图片的正确姿势&quot; class=&quot;headerlink&quot; title=&quot;插入图片的正确姿势&quot;&gt;&lt;/a&gt;插入图片的正确姿势&lt;/h2&gt;&lt;p&gt;图片作为二进制数据无法直接拼凑出SQL命令，我们需要使用&lt;code&gt;OracleCommand&lt;/code&gt;自带的&lt;code&gt;Parameters&lt;/code&gt;功能。在SQL命令中用&lt;code&gt;:photo&lt;/code&gt;来代表一个参量，然后使用&lt;/p&gt;
-&lt;figure class=&quot;highlight vb&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sqlCom.Parameters.Add(&lt;span class=&quot;string&quot;&gt;&quot;photo&quot;&lt;/span&gt;, OracleDbType.Blob, imgData.Length)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;vb&quot;&gt;sqlCom.Parameters.Add(&amp;quot;photo&amp;quot;, OracleDbType.Blob, imgData.Length)
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;来分别指定这个参量的类型和所占空间大小&lt;/p&gt;
 &lt;p&gt;最后使用&lt;/p&gt;
-&lt;figure class=&quot;highlight vb&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sqlCom.Parameters(&lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;).Value = imgData&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;vb&quot;&gt;sqlCom.Parameters(0).Value = imgData
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;来指定这个参量的值。&lt;/p&gt;
 &lt;p&gt;整个插入图片过程的代码如下：&lt;/p&gt;
-&lt;figure class=&quot;highlight vb&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;Dim&lt;/span&gt; conn &lt;span class=&quot;keyword&quot;&gt;As&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;New&lt;/span&gt; OracleConnection(oradb)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;Dim&lt;/span&gt; imgData(&lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;) &lt;span class=&quot;keyword&quot;&gt;As&lt;/span&gt; &lt;span class=&quot;built_in&quot;&gt;Byte&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;Dim&lt;/span&gt; ms &lt;span class=&quot;keyword&quot;&gt;As&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;New&lt;/span&gt; System.IO.MemoryStream&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;PictureBox1.BackgroundImage.Save(ms, PictureBox1.BackgroundImage.RawFormat)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;ReDim&lt;/span&gt; imgData(ms.Length - &lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;ms.Read(imgData, &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;, ms.Length)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;ms.Close()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;conn.Open()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;Dim&lt;/span&gt; sql &lt;span class=&quot;keyword&quot;&gt;As&lt;/span&gt; &lt;span class=&quot;built_in&quot;&gt;String&lt;/span&gt; = &lt;span class=&quot;string&quot;&gt;&quot;insert into hero values&quot;&lt;/span&gt; &amp;amp; &lt;span class=&quot;string&quot;&gt;&quot;(&quot;&lt;/span&gt; &amp;amp; TextBox1.&lt;span class=&quot;keyword&quot;&gt;Text&lt;/span&gt; &amp;amp; &lt;span class=&quot;string&quot;&gt;&quot;:photo&quot;&lt;/span&gt; &amp;amp; &lt;span class=&quot;string&quot;&gt;&quot;)&quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;Dim&lt;/span&gt; sqlCom &lt;span class=&quot;keyword&quot;&gt;As&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;New&lt;/span&gt; OracleCommand&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sqlCom.CommandText = sql&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sqlCom.Connection = conn&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sqlCom.Parameters.Add(&lt;span class=&quot;string&quot;&gt;&quot;photo&quot;&lt;/span&gt;, OracleDbType.Blob, imgData.Length)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sqlCom.Parameters(&lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;).Value = imgData&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sqlCom.ExecuteNonQuery()&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code class=&quot;vb&quot;&gt;Dim conn As New OracleConnection(oradb)
+Dim imgData(0) As Byte
+Dim ms As New System.IO.MemoryStream
+PictureBox1.BackgroundImage.Save(ms, PictureBox1.BackgroundImage.RawFormat)
+ReDim imgData(ms.Length - 1)
+ms.Read(imgData, 0, ms.Length)
+ms.Close()
+conn.Open()
+Dim sql As String = &amp;quot;insert into hero values&amp;quot; &amp;amp; &amp;quot;(&amp;quot; &amp;amp; TextBox1.Text &amp;amp; &amp;quot;:photo&amp;quot; &amp;amp; &amp;quot;)&amp;quot;
+Dim sqlCom As New OracleCommand
+sqlCom.CommandText = sql
+sqlCom.Connection = conn
+sqlCom.Parameters.Add(&amp;quot;photo&amp;quot;, OracleDbType.Blob, imgData.Length)
+sqlCom.Parameters(0).Value = imgData
+sqlCom.ExecuteNonQuery()
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h1 id=&quot;常见错误&quot;&gt;&lt;a href=&quot;#常见错误&quot; class=&quot;headerlink&quot; title=&quot;常见错误&quot;&gt;&lt;/a&gt;常见错误&lt;/h1&gt;&lt;h2 id=&quot;column-not-allowed-here&quot;&gt;&lt;a href=&quot;#column-not-allowed-here&quot; class=&quot;headerlink&quot; title=&quot;column not allowed here&quot;&gt;&lt;/a&gt;column not allowed here&lt;/h2&gt;&lt;p&gt;数据类型不符，检查对应项目数据类型是否正确。&lt;/p&gt;
 &lt;h2 id=&quot;missing-comma&quot;&gt;&lt;a href=&quot;#missing-comma&quot; class=&quot;headerlink&quot; title=&quot;missing comma&quot;&gt;&lt;/a&gt;missing comma&lt;/h2&gt;&lt;p&gt;命令格式不对，检查一下自己的SQL命令是否有错误，特别是在有字符串的时候，需要使用&lt;code&gt;&amp;quot;&amp;quot;&lt;/code&gt;来代表一个字符串中的&lt;code&gt;&amp;quot;&lt;/code&gt;。&lt;/p&gt;
 &lt;h2 id=&quot;identifier-is-too-long&quot;&gt;&lt;a href=&quot;#identifier-is-too-long&quot; class=&quot;headerlink&quot; title=&quot;identifier is too long&quot;&gt;&lt;/a&gt;identifier is too long&lt;/h2&gt;&lt;p&gt;标识符过长（不得超过30字符），不是非常明白原因，不过我取消掉insert命令中指定位置的部分之后，这个错误消失了。&lt;/p&gt;
@@ -1288,7 +1785,7 @@
     <link href="https://xuanwo.org/2015/12/23/best-pdf-read-solution/"/>
     <id>https://xuanwo.org/2015/12/23/best-pdf-read-solution/</id>
     <published>2015-12-23T16:15:20.000Z</published>
-    <updated>2016-07-02T15:56:31.165Z</updated>
+    <updated>2016-07-02T16:03:54.000Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;最近因为学习需要，要大量阅读纯文字的PDF文档。然后我惊讶地发现市场上居然没有哪家提供一套完整可用的跨平台PDF阅读解决方案，于是我在尝试了市面几乎所有叫得上名字的各类阅读器之后，形成了一套自己的跨平台PDF阅读解决方案。本文记录了这套方案的详细内容，希望会有所益处。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1345,7 +1842,7 @@
     <link href="https://xuanwo.org/2015/12/18/online-video-download-solution/"/>
     <id>https://xuanwo.org/2015/12/18/online-video-download-solution/</id>
     <published>2015-12-18T12:49:49.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.008Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;因为学习需要，产生了一个这样的需求：要从Youtube上批量下载视频。自然，出于方便使用的角度来看，音画不能分离，最好带有对应的字幕。一番搜罗之后，我找到了基于Python的开源产品： &lt;a href=&quot;https://rg3.github.io/youtube-dl/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;youtube-dl&lt;/a&gt;&lt;/p&gt;
 &lt;blockquote&gt;
@@ -1357,19 +1854,42 @@
 &lt;/blockquote&gt;
 &lt;h2 id=&quot;Windows&quot;&gt;&lt;a href=&quot;#Windows&quot; class=&quot;headerlink&quot; title=&quot;Windows&quot;&gt;&lt;/a&gt;Windows&lt;/h2&gt;&lt;p&gt;Windows用户可以使用已经打包好的可执行程序：&lt;a href=&quot;https://yt-dl.org/downloads/2015.12.13/youtube-dl.exe&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;下载链接&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id=&quot;UNIX-like&quot;&gt;&lt;a href=&quot;#UNIX-like&quot; class=&quot;headerlink&quot; title=&quot;UNIX like&quot;&gt;&lt;/a&gt;UNIX like&lt;/h2&gt;&lt;p&gt;类UNIX系统的用户可以使用curl或者wget来获取可执行文件&lt;/p&gt;
-&lt;h3 id=&quot;curl&quot;&gt;&lt;a href=&quot;#curl&quot; class=&quot;headerlink&quot; title=&quot;curl&quot;&gt;&lt;/a&gt;curl&lt;/h3&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo curl https://yt-dl.org/downloads/2015.12.13/youtube-dl -o /usr/&lt;span class=&quot;built_in&quot;&gt;local&lt;/span&gt;/bin/youtube-dl&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo chmod a+rx /usr/&lt;span class=&quot;built_in&quot;&gt;local&lt;/span&gt;/bin/youtube-dl&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h3 id=&quot;wget&quot;&gt;&lt;a href=&quot;#wget&quot; class=&quot;headerlink&quot; title=&quot;wget&quot;&gt;&lt;/a&gt;wget&lt;/h3&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo wget https://yt-dl.org/downloads/2015.12.13/youtube-dl -O /usr/&lt;span class=&quot;built_in&quot;&gt;local&lt;/span&gt;/bin/youtube-dl&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo chmod a+rx /usr/&lt;span class=&quot;built_in&quot;&gt;local&lt;/span&gt;/bin/youtube-dl&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h2 id=&quot;Homebrew&quot;&gt;&lt;a href=&quot;#Homebrew&quot; class=&quot;headerlink&quot; title=&quot;Homebrew&quot;&gt;&lt;/a&gt;Homebrew&lt;/h2&gt;&lt;p&gt;Homebrew用户可以使用如下命令进行安装：&lt;br&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;brew install youtube-dl&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
-&lt;h2 id=&quot;pip&quot;&gt;&lt;a href=&quot;#pip&quot; class=&quot;headerlink&quot; title=&quot;pip&quot;&gt;&lt;/a&gt;pip&lt;/h2&gt;&lt;p&gt;同样的，你也可以使用pip来安装它。&lt;br&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo pip install --upgrade youtube_dl&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;h3 id=&quot;curl&quot;&gt;&lt;a href=&quot;#curl&quot; class=&quot;headerlink&quot; title=&quot;curl&quot;&gt;&lt;/a&gt;curl&lt;/h3&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo curl https://yt-dl.org/downloads/2015.12.13/youtube-dl -o /usr/local/bin/youtube-dl
+sudo chmod a+rx /usr/local/bin/youtube-dl
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&quot;wget&quot;&gt;&lt;a href=&quot;#wget&quot; class=&quot;headerlink&quot; title=&quot;wget&quot;&gt;&lt;/a&gt;wget&lt;/h3&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo wget https://yt-dl.org/downloads/2015.12.13/youtube-dl -O /usr/local/bin/youtube-dl
+sudo chmod a+rx /usr/local/bin/youtube-dl
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&quot;Homebrew&quot;&gt;&lt;a href=&quot;#Homebrew&quot; class=&quot;headerlink&quot; title=&quot;Homebrew&quot;&gt;&lt;/a&gt;Homebrew&lt;/h2&gt;&lt;p&gt;Homebrew用户可以使用如下命令进行安装：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;brew install youtube-dl
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&quot;pip&quot;&gt;&lt;a href=&quot;#pip&quot; class=&quot;headerlink&quot; title=&quot;pip&quot;&gt;&lt;/a&gt;pip&lt;/h2&gt;&lt;p&gt;同样的，你也可以使用pip来安装它。&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo pip install --upgrade youtube_dl
+&lt;/code&gt;&lt;/pre&gt;
 &lt;h2 id=&quot;Source&quot;&gt;&lt;a href=&quot;#Source&quot; class=&quot;headerlink&quot; title=&quot;Source&quot;&gt;&lt;/a&gt;Source&lt;/h2&gt;&lt;p&gt;自然，你可以选择下载源代码以及docs，链接&lt;a href=&quot;https://yt-dl.org/downloads/2015.12.13/youtube-dl-2015.12.13.tar.gz&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;见此&lt;/a&gt;&lt;/p&gt;
-&lt;h1 id=&quot;使用&quot;&gt;&lt;a href=&quot;#使用&quot; class=&quot;headerlink&quot; title=&quot;使用&quot;&gt;&lt;/a&gt;使用&lt;/h1&gt;&lt;h2 id=&quot;简易&quot;&gt;&lt;a href=&quot;#简易&quot; class=&quot;headerlink&quot; title=&quot;简易&quot;&gt;&lt;/a&gt;简易&lt;/h2&gt;&lt;p&gt;最简单的方式就是直接加上视频链接地址就可以自动下载到当前文件夹：&lt;br&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;youtube-dl.exe url&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
-&lt;h2 id=&quot;使用代理&quot;&gt;&lt;a href=&quot;#使用代理&quot; class=&quot;headerlink&quot; title=&quot;使用代理&quot;&gt;&lt;/a&gt;使用代理&lt;/h2&gt;&lt;p&gt;以常见的ss代理为例：&lt;br&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;youtube-dl.exe url --proxy http://127.0.0.1:1080&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;h1 id=&quot;使用&quot;&gt;&lt;a href=&quot;#使用&quot; class=&quot;headerlink&quot; title=&quot;使用&quot;&gt;&lt;/a&gt;使用&lt;/h1&gt;&lt;h2 id=&quot;简易&quot;&gt;&lt;a href=&quot;#简易&quot; class=&quot;headerlink&quot; title=&quot;简易&quot;&gt;&lt;/a&gt;简易&lt;/h2&gt;&lt;p&gt;最简单的方式就是直接加上视频链接地址就可以自动下载到当前文件夹：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;youtube-dl.exe url
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&quot;使用代理&quot;&gt;&lt;a href=&quot;#使用代理&quot; class=&quot;headerlink&quot; title=&quot;使用代理&quot;&gt;&lt;/a&gt;使用代理&lt;/h2&gt;&lt;p&gt;以常见的ss代理为例：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;youtube-dl.exe url --proxy http://127.0.0.1:1080
+&lt;/code&gt;&lt;/pre&gt;
 &lt;blockquote&gt;
 &lt;p&gt;有一个坑点在于这个参数只支持HTTP/HTTPS代理，所以本地跑SS的话，需要在前面加上一个HTTP的前缀，否则代理不会正常工作。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id=&quot;下载列表&quot;&gt;&lt;a href=&quot;#下载列表&quot; class=&quot;headerlink&quot; title=&quot;下载列表&quot;&gt;&lt;/a&gt;下载列表&lt;/h2&gt;&lt;p&gt;以Youtube Playlist为例：&lt;br&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;youtube-dl.exe --yes-playlist https://www.youtube.com/playlist?list=PLZlv_N0_O1gZg3dTMetmsfm_s4lb4-Tg0 --proxy http://127.0.0.1:1080&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
-&lt;h2 id=&quot;下载字幕&quot;&gt;&lt;a href=&quot;#下载字幕&quot; class=&quot;headerlink&quot; title=&quot;下载字幕&quot;&gt;&lt;/a&gt;下载字幕&lt;/h2&gt;&lt;p&gt;以Youtube Playlist为例，自动生成字幕并指定下载中文和英文字幕：&lt;br&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;youtube-dl.exe --yes-playlist https://www.youtube.com/playlist?list=PLZlv_N0_O1gZg3dTMetmsfm_s4lb4-Tg0 --proxy http://127.0.0.1:1080 --write-auto-sub --sub-lang en,cn&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
-&lt;p&gt;字幕相关设定：&lt;br&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;--write-sub                      写字幕文件&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;--write-auto-sub                 写入自动生成的字幕文件 (YouTube only)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;--all-subs                       下载所有可提供的字幕&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;--list-subs                      列出当前视频支持的所有字幕&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;--sub-format FORMAT              指定字幕格式，比如 &lt;span class=&quot;string&quot;&gt;&quot;srt&quot;&lt;/span&gt; 或者 &lt;span class=&quot;string&quot;&gt;&quot;ass/srt/best&quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;--sub-lang LANGS                 指定字幕语言，用`,`分隔, 使用 IETF 语言标记，比如 &lt;span class=&quot;string&quot;&gt;&#39;en,pt&#39;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;h2 id=&quot;下载列表&quot;&gt;&lt;a href=&quot;#下载列表&quot; class=&quot;headerlink&quot; title=&quot;下载列表&quot;&gt;&lt;/a&gt;下载列表&lt;/h2&gt;&lt;p&gt;以Youtube Playlist为例：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;youtube-dl.exe --yes-playlist https://www.youtube.com/playlist?list=PLZlv_N0_O1gZg3dTMetmsfm_s4lb4-Tg0 --proxy http://127.0.0.1:1080
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&quot;下载字幕&quot;&gt;&lt;a href=&quot;#下载字幕&quot; class=&quot;headerlink&quot; title=&quot;下载字幕&quot;&gt;&lt;/a&gt;下载字幕&lt;/h2&gt;&lt;p&gt;以Youtube Playlist为例，自动生成字幕并指定下载中文和英文字幕：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;youtube-dl.exe --yes-playlist https://www.youtube.com/playlist?list=PLZlv_N0_O1gZg3dTMetmsfm_s4lb4-Tg0 --proxy http://127.0.0.1:1080 --write-auto-sub --sub-lang en,cn
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;字幕相关设定：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;--write-sub                      写字幕文件
+--write-auto-sub                 写入自动生成的字幕文件 (YouTube only)
+--all-subs                       下载所有可提供的字幕
+--list-subs                      列出当前视频支持的所有字幕
+--sub-format FORMAT              指定字幕格式，比如 &amp;quot;srt&amp;quot; 或者 &amp;quot;ass/srt/best&amp;quot;
+--sub-lang LANGS                 指定字幕语言，用`,`分隔, 使用 IETF 语言标记，比如 &amp;#39;en,pt&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;blockquote&gt;
 &lt;p&gt;IETF语言标记参见&lt;a href=&quot;http://www.ietf.org/assignments/language-subtag-registry/language-subtag-registry&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;此处&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -1401,13 +1921,19 @@
     <link href="https://xuanwo.org/2015/11/27/surf-with-poweroff/"/>
     <id>https://xuanwo.org/2015/11/27/surf-with-poweroff/</id>
     <published>2015-11-27T01:34:33.000Z</published>
-    <updated>2016-07-02T15:56:31.169Z</updated>
+    <updated>2016-07-02T16:03:54.012Z</updated>
     
     <content type="html">&lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;前两天我对我们宿舍的路由器进行了小小的改造，使得我们在断电之后也能照常上网。原理非常简单：就是使用充电宝来给路由器供电——因为我们墙上的网口是不会断电的，所以只要解决了路由器没有电的问题，就可以解决断网问题。路由器要求的输入电压为5V，电流为0.3A，恰好跟我们常用的充电宝是一致的，淘宝买一根USB转DV线成功解决问题。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
 &lt;h1 id=&quot;供电方案&quot;&gt;&lt;a href=&quot;#供电方案&quot; class=&quot;headerlink&quot; title=&quot;供电方案&quot;&gt;&lt;/a&gt;供电方案&lt;/h1&gt;&lt;p&gt;我们宿舍现在的路由器供电方案是这样的：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;充电器（A型USB接口）&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        ||&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;充电宝（Micro B型USB接口）&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    |内部电路|&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;充电宝（A型USB接口）&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        ||&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;路由器（DV接口）&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h1 id=&quot;达成效果&quot;&gt;&lt;a href=&quot;#达成效果&quot; class=&quot;headerlink&quot; title=&quot;达成效果&quot;&gt;&lt;/a&gt;达成效果&lt;/h1&gt;&lt;p&gt;现在达成的效果是：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;充电器（A型USB接口）
+        ||
+充电宝（Micro B型USB接口）
+    |内部电路|
+充电宝（A型USB接口）
+        ||
+路由器（DV接口）
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&quot;达成效果&quot;&gt;&lt;a href=&quot;#达成效果&quot; class=&quot;headerlink&quot; title=&quot;达成效果&quot;&gt;&lt;/a&gt;达成效果&lt;/h1&gt;&lt;p&gt;现在达成的效果是：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;白天：充电器给充电宝充电，充电宝起到了稳流的作用&lt;/li&gt;
 &lt;li&gt;晚上：充电宝为路由器供电&lt;/li&gt;

@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -118,8 +118,38 @@
 <p><a href="http://codeforces.com/problemset/problem/15/C" target="_blank" rel="external">http://codeforces.com/problemset/problem/15/C</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>有n个矿场，第i个矿场有mi辆矿车，第一辆矿车有xi颗石头，第二辆xi+1颗，如此递推，直到第mi辆有mi+xi-1颗。然后有两个人轮流取石头（金矿？），他们可以选择任意一个矿场任意一辆矿车取走任意非0数量的石头，直到第一个不能再取的人认输。<br>实际上，这就是一个裸的Nim博弈问题，只要直接运用结论就能完成解答。但是问题在于，数据太多，导致每一个全都异或起来的话耗时太长。所以需要采用一些手段处理一下。我们需要用到两个结论：第一，从1异或到n的答案存在着这样一个特性：n%4==1时，答案为1；n%4==2时，答案为x+1；n%4==3时，答案为0；n%4==4时，答案为x。第二，从x异或到y的值等于nim(x-1)^nim(y)。<br>经过上述的处理，最后的结果就出来了~</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#define MAXN 100000+10</span><br><span class="line"></span><br><span class="line">ll n,x,m,ans=0;</span><br><span class="line"></span><br><span class="line">ll nim(ll x)</span><br><span class="line">&#123;</span><br><span class="line">    ll tmp=x%4;</span><br><span class="line">    if(tmp==1)</span><br><span class="line">        return 1;</span><br><span class="line">    else if(tmp==2)</span><br><span class="line">        return x+1;</span><br><span class="line">    else if(tmp==3)</span><br><span class="line">        return 0;</span><br><span class="line">    else</span><br><span class="line">        return x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    scanf(&quot;%I64d&quot;, &amp;n);</span><br><span class="line">    while(n--)</span><br><span class="line">    &#123;</span><br><span class="line">        scanf(&quot;%I64d %I64d&quot;, &amp;x, &amp;m);</span><br><span class="line">        m=nim(m+x-1);</span><br><span class="line">        x=nim(x-1);</span><br><span class="line">        ans^=x^m;</span><br><span class="line">    &#125;</span><br><span class="line">    ans?puts(&quot;tolik&quot;):puts(&quot;bolik&quot;);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
+#define MAXN 100000+10
+
+ll n,x,m,ans=0;
+
+ll nim(ll x)
+{
+    ll tmp=x%4;
+    if(tmp==1)
+        return 1;
+    else if(tmp==2)
+        return x+1;
+    else if(tmp==3)
+        return 0;
+    else
+        return x;
+}
+
+int main(int argc, char const *argv[])
+{
+    scanf(&quot;%I64d&quot;, &amp;n);
+    while(n--)
+    {
+        scanf(&quot;%I64d %I64d&quot;, &amp;x, &amp;m);
+        m=nim(m+x-1);
+        x=nim(x-1);
+        ans^=x^m;
+    }
+    ans?puts(&quot;tolik&quot;):puts(&quot;bolik&quot;);
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年11月26日 已AC。</li>
 </ul>
 
@@ -147,7 +177,7 @@
                     <p><span>本文标题:</span><a href="/2014/11/26/CF-15C/">Codeforces Beta Round 15 C Industrial Nim</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年11月26日 - 14时11分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/11/26/CF-15C/"
                                             title="Codeforces Beta Round 15 C Industrial Nim">https://xuanwo.org/2014/11/26/CF-15C/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -254,11 +284,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

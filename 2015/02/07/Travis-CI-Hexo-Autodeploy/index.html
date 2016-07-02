@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -140,38 +140,88 @@
 <p><em>感谢Hexo作者<a href="http://zespia.tw/" target="_blank" rel="external">tommy351</a>提供的操作流程，原文可见于<a href="http://zespia.tw/blog/2015/01/21/continuous-deployment-to-github-with-travis/" target="_blank" rel="external">用 Travis CI 自動部署網站到 GitHub</a></em></p>
 <h2 id="生成SSH-Key"><a href="#生成SSH-Key" class="headerlink" title="生成SSH Key"></a>生成SSH Key</h2><p>参见<a href="http://xuanwo.org/2015/02/07/generate-a-ssh-key/">使用Github SSH Key以免去Hexo部署时输入密码</a><br>需要注意的是，这个SSH key不应成为你账号的全局SSH key<em>（因为这样Travis CI就获得了你所有代码库的提交权限，这是不正确的）</em>，而应该添加至<a href="https://github.com/username/ropename/settings/keys" target="_blank" rel="external">https://github.com/username/ropename/settings/keys</a> ，这样，你就控制了Travis CI的权限。</p>
 <h2 id="加密私钥"><a href="#加密私钥" class="headerlink" title="加密私钥"></a>加密私钥</h2><p>下面的操作需要事先配置好gem环境，如果没有可以尝试使用<a href="http://xuanwo.org/2014/08/07/Cloud9/">强大且配置项丰富的在线IDE应用——Cloud9</a>。</p>
-<h3 id="安装Travis-CI的命令行工具"><a href="#安装Travis-CI的命令行工具" class="headerlink" title="安装Travis CI的命令行工具"></a>安装Travis CI的命令行工具</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">gem install travis</span><br></pre></td></tr></table></figure>
-<h3 id="登陆Travis-CI"><a href="#登陆Travis-CI" class="headerlink" title="登陆Travis CI"></a>登陆Travis CI</h3><p>需要输入Github账号和密码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">travis login --auto</span><br></pre></td></tr></table></figure>
-<h3 id="加密私钥并上传至Travis"><a href="#加密私钥并上传至Travis" class="headerlink" title="加密私钥并上传至Travis"></a>加密私钥并上传至Travis</h3><p>正确生成后你会得到两个文件，一个叫<code>ssh_key</code>，一个叫<code>ssh_key.pub</code>。刚才我们将<code>ssh_key.pub</code>添加到了github，下面我们要加密<code>ssh_key</code>这个私钥并且上传到Travis。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">travis encrypt-file ssh_key --add</span><br></pre></td></tr></table></figure>
-<p>然后Travis的客户端会自动检测当前目录中的git信息，并且添加到<code>.travis.yml</code>中去。在进行此步操作前，目录下要先存在<code>.travis.yml</code>文件，否则会报错。</p>
+<h3 id="安装Travis-CI的命令行工具"><a href="#安装Travis-CI的命令行工具" class="headerlink" title="安装Travis CI的命令行工具"></a>安装Travis CI的命令行工具</h3><pre><code>gem install travis
+</code></pre><h3 id="登陆Travis-CI"><a href="#登陆Travis-CI" class="headerlink" title="登陆Travis CI"></a>登陆Travis CI</h3><p>需要输入Github账号和密码</p>
+<pre><code>travis login --auto
+</code></pre><h3 id="加密私钥并上传至Travis"><a href="#加密私钥并上传至Travis" class="headerlink" title="加密私钥并上传至Travis"></a>加密私钥并上传至Travis</h3><p>正确生成后你会得到两个文件，一个叫<code>ssh_key</code>，一个叫<code>ssh_key.pub</code>。刚才我们将<code>ssh_key.pub</code>添加到了github，下面我们要加密<code>ssh_key</code>这个私钥并且上传到Travis。</p>
+<pre><code>travis encrypt-file ssh_key --add
+</code></pre><p>然后Travis的客户端会自动检测当前目录中的git信息，并且添加到<code>.travis.yml</code>中去。在进行此步操作前，目录下要先存在<code>.travis.yml</code>文件，否则会报错。</p>
 <h3 id="指定SSH设置"><a href="#指定SSH设置" class="headerlink" title="指定SSH设置"></a>指定SSH设置</h3><p>在当前目录下新建文件<code>ssh_config</code>，内容为</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  User git</span><br><span class="line">  StrictHostKeyChecking no</span><br><span class="line">  IdentityFile ~/.ssh/id_rsa</span><br><span class="line">  IdentitiesOnly yes</span><br></pre></td></tr></table></figure>
-<p>然后指定openssl解密后的生成位置，修改Travis自动插入的解密指令(不要照抄，注意修改密钥)</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">- openssl aes-256-cbc -K $encrypted_xxxxxxxxxx_key -iv $encrypted_xxxxxxxxxx_iv</span><br><span class="line">  -in travis.enc -out ~/.ssh/id_rsa -d</span><br></pre></td></tr></table></figure>
-<h3 id="修改目录权限"><a href="#修改目录权限" class="headerlink" title="修改目录权限"></a>修改目录权限</h3><p>紧跟那条解密指令，换行输入：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">- chmod 600 ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
-<p>注意yml格式，短杠后面的空格不能省略。</p>
+<pre><code>Host github.com
+  User git
+  StrictHostKeyChecking no
+  IdentityFile ~/.ssh/id_rsa
+  IdentitiesOnly yes
+</code></pre><p>然后指定openssl解密后的生成位置，修改Travis自动插入的解密指令(不要照抄，注意修改密钥)</p>
+<pre><code>- openssl aes-256-cbc -K $encrypted_xxxxxxxxxx_key -iv $encrypted_xxxxxxxxxx_iv
+  -in travis.enc -out ~/.ssh/id_rsa -d
+</code></pre><h3 id="修改目录权限"><a href="#修改目录权限" class="headerlink" title="修改目录权限"></a>修改目录权限</h3><p>紧跟那条解密指令，换行输入：</p>
+<pre><code>- chmod 600 ~/.ssh/id_rsa
+</code></pre><p>注意yml格式，短杠后面的空格不能省略。</p>
 <h3 id="将密钥加入系统"><a href="#将密钥加入系统" class="headerlink" title="将密钥加入系统"></a>将密钥加入系统</h3><p>紧跟上一步操作，换行输入：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">- eval $(ssh-agent)</span><br><span class="line">- ssh-add ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
-<h3 id="修改git信息"><a href="#修改git信息" class="headerlink" title="修改git信息"></a>修改git信息</h3><p>将之前创建的ssh_config复制到Travis的虚拟机中去，输入：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">- cp ssh_config ~/.ssh/config</span><br></pre></td></tr></table></figure>
-<p>然后指定git使用者信息：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">- git config --global user.name &quot;username&quot;</span><br><span class="line">- git config --global user.email username@example.com</span><br></pre></td></tr></table></figure>
-<h2 id="Build配置"><a href="#Build配置" class="headerlink" title="Build配置"></a>Build配置</h2><p>之前的所有操作都只是为了让Travis CI拥有push权限，下面我们开始进入到真正的Build配置当中。<br>之前我们用到了一个名为<code>.travis.yml</code>的文件，跟build有关的所有设置都在这个文件里面，下面的操作都在这个文件当中进行。</p>
+<pre><code>- eval $(ssh-agent)
+- ssh-add ~/.ssh/id_rsa
+</code></pre><h3 id="修改git信息"><a href="#修改git信息" class="headerlink" title="修改git信息"></a>修改git信息</h3><p>将之前创建的ssh_config复制到Travis的虚拟机中去，输入：</p>
+<pre><code>- cp ssh_config ~/.ssh/config
+</code></pre><p>然后指定git使用者信息：</p>
+<pre><code>- git config --global user.name &quot;username&quot;
+- git config --global user.email username@example.com
+</code></pre><h2 id="Build配置"><a href="#Build配置" class="headerlink" title="Build配置"></a>Build配置</h2><p>之前的所有操作都只是为了让Travis CI拥有push权限，下面我们开始进入到真正的Build配置当中。<br>之前我们用到了一个名为<code>.travis.yml</code>的文件，跟build有关的所有设置都在这个文件里面，下面的操作都在这个文件当中进行。</p>
 <h3 id="指定环境"><a href="#指定环境" class="headerlink" title="指定环境"></a>指定环境</h3><p>在文件中添加如下代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">language: node_js</span><br><span class="line"></span><br><span class="line">node_js:</span><br><span class="line">- &apos;0.10&apos;   //指定使用node.js最新的稳定版0.10</span><br></pre></td></tr></table></figure>
-<h3 id="指定分支"><a href="#指定分支" class="headerlink" title="指定分支"></a>指定分支</h3><p>在文件中添加如下代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">branches:</span><br><span class="line">  only:</span><br><span class="line">  - blog    //这个分支应当使用自己的源文件分支</span><br></pre></td></tr></table></figure>
-<p>差点忘了讲- -，本方案只适用于用github来托管自己自己的hexo目录的用户。这里的分支应该使用包含有.md文档的那个分支。</p>
+<pre><code>language: node_js
+
+node_js:
+- &#39;0.10&#39;   //指定使用node.js最新的稳定版0.10
+</code></pre><h3 id="指定分支"><a href="#指定分支" class="headerlink" title="指定分支"></a>指定分支</h3><p>在文件中添加如下代码：</p>
+<pre><code>branches:
+  only:
+  - blog    //这个分支应当使用自己的源文件分支
+</code></pre><p>差点忘了讲- -，本方案只适用于用github来托管自己自己的hexo目录的用户。这里的分支应该使用包含有.md文档的那个分支。</p>
 <h3 id="Hexo配置"><a href="#Hexo配置" class="headerlink" title="Hexo配置"></a>Hexo配置</h3><p>首先在虚拟机中安装Hexo：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">install:</span><br><span class="line">- npm install hexo-cli -g</span><br><span class="line">- npm install hexo --save</span><br><span class="line">- npm install</span><br></pre></td></tr></table></figure>
-<p>然后执行Hexo的渲染操作</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">script:</span><br><span class="line">- hexo clean   //分开写，方便调试可能出现的错误</span><br><span class="line">- hexo d</span><br><span class="line">- hexo g</span><br></pre></td></tr></table></figure>
-<p>到这里，你的Travis CI的持续集成已经配置完毕了，最后的<code>.travis.yml</code>文件内容可以参考如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">branches:</span><br><span class="line">  only:</span><br><span class="line">  - blog</span><br><span class="line"></span><br><span class="line">language: node_js</span><br><span class="line"></span><br><span class="line">sudo: false</span><br><span class="line"></span><br><span class="line">node_js:</span><br><span class="line">- &apos;0.12&apos;</span><br><span class="line"></span><br><span class="line">before_install:</span><br><span class="line">- openssl aes-256-cbc -K $encrypted_xxxxxxxxx_key -iv $encrypted_xxxxxxx_iv</span><br><span class="line">  -in doc/travis.enc -out ~/.ssh/id_rsa -d</span><br><span class="line">- chmod 600 ~/.ssh/id_rsa</span><br><span class="line">- eval $(ssh-agent)</span><br><span class="line">- ssh-add ~/.ssh/id_rsa</span><br><span class="line">- cp doc/ssh_config ~/.ssh/config</span><br><span class="line">- git config --global user.name &quot;yourname&quot;</span><br><span class="line">- git config --global user.email youremail</span><br><span class="line">- git clone -b master git@github.com:yourname/yourrepo.git .deploy_git</span><br><span class="line"></span><br><span class="line">install:</span><br><span class="line">- npm install hexo-cli -g</span><br><span class="line">- npm install</span><br><span class="line">- npm install hexo-generator-feed --save</span><br><span class="line">- npm install hexo-generator-sitemap --save</span><br><span class="line">- npm install hexo-deployer-git --save</span><br><span class="line"></span><br><span class="line">script:</span><br><span class="line">- hexo clean</span><br><span class="line">- hexo g</span><br><span class="line">- hexo d</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<pre><code>install:
+- npm install hexo-cli -g
+- npm install hexo --save
+- npm install
+</code></pre><p>然后执行Hexo的渲染操作</p>
+<pre><code>script:
+- hexo clean   //分开写，方便调试可能出现的错误
+- hexo d
+- hexo g
+</code></pre><p>到这里，你的Travis CI的持续集成已经配置完毕了，最后的<code>.travis.yml</code>文件内容可以参考如下：</p>
+<pre><code>branches:
+  only:
+  - blog
+
+language: node_js
+
+sudo: false
+
+node_js:
+- &#39;0.12&#39;
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_xxxxxxxxx_key -iv $encrypted_xxxxxxx_iv
+  -in doc/travis.enc -out ~/.ssh/id_rsa -d
+- chmod 600 ~/.ssh/id_rsa
+- eval $(ssh-agent)
+- ssh-add ~/.ssh/id_rsa
+- cp doc/ssh_config ~/.ssh/config
+- git config --global user.name &quot;yourname&quot;
+- git config --global user.email youremail
+- git clone -b master git@github.com:yourname/yourrepo.git .deploy_git
+
+install:
+- npm install hexo-cli -g
+- npm install
+- npm install hexo-generator-feed --save
+- npm install hexo-generator-sitemap --save
+- npm install hexo-deployer-git --save
+
+script:
+- hexo clean
+- hexo g
+- hexo d
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2015年02月07日 首次发布，感谢Tommy351</li>
 <li>2015年02月16日 跟随Hexo版本更新，修改了相关代码。</li>
 <li>2015年03月22日 Hexo3.0稳定版发布，修改相关代码，并修复部分显示问题。</li>
@@ -203,7 +253,7 @@
                     <p><span>本文标题:</span><a href="/2015/02/07/Travis-CI-Hexo-Autodeploy/">使用Travis CI自动部署Hexo</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2015年2月7日 - 14时02分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2015/02/07/Travis-CI-Hexo-Autodeploy/"
                                             title="使用Travis CI自动部署Hexo">https://xuanwo.org/2015/02/07/Travis-CI-Hexo-Autodeploy/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -320,11 +370,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

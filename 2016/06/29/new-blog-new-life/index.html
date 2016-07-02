@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -117,7 +117,27 @@
             <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>曾经看过我的博客的同学大概都会发现，我的博客再一次大变样了~<br>这一次的更新其实酝酿了很久，早在刚开始用Hexo的时候就想着要有一个自己的主题。但是那个时候觉得这是一件很难的事情，要懂HTML，CSS，JavaScript，还要懂Swig，Ejs等模板语言，还要懂Hexo的内部原理，于是就一直搁置了。在独立实现了一个<a href="https://xuanwo.org/2016/06/16/jade_ims/">完整的项目</a>之后，我认为自己已经有这样的能力了，于是决定正式开始。<br>在我看来的话，Hexo的使用者大概分为三个层次：第一种用别人的主题，第二种模仿现有的主题，第三种自己独立开发。我原来是第一种，在Next的基础上做了很多改动，这一次进入到了第二个层次。我找了一套自我感觉还不错的模板，然后套用它的CSS设定和页面结构，就成了我现在的主题。<br>利用两天学习和工作的闲暇时间，我大体上完成了这个主题。做得比较糙，很多细节还有待优化，但是我已经急不可耐地想要正式上线了，笑。在未来的话，我希望能把一些配置都能整理出来，优化一下代码，然后开源这个主题，希望大家能够喜欢~<br>庆祝的话已经说的差不多了，下面来讲一讲如何开发一个Hexo主题。</p>
 <a id="more"></a>
 <h1 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h1><h2 id="主题结构"><a href="#主题结构" class="headerlink" title="主题结构"></a>主题结构</h2><p>Hexo主题的结构大体如下：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">.</span><br><span class="line">├── _config.yml</span><br><span class="line">├── languages</span><br><span class="line">│   ├── default.yml</span><br><span class="line">│   └── zh-Hans.yml</span><br><span class="line">├── layout</span><br><span class="line">│   ├── achieve.swig</span><br><span class="line">│   ├── category.swig</span><br><span class="line">│   ├── index.swig</span><br><span class="line">│   ├── _layout.swig</span><br><span class="line">│   ├── page.swig</span><br><span class="line">│   ├── _partials</span><br><span class="line">│   ├── post.swig</span><br><span class="line">│   └── tag.swig</span><br><span class="line">└── <span class="built_in">source</span></span><br><span class="line">    ├── css</span><br><span class="line">    ├── fonts</span><br><span class="line">    ├── img</span><br><span class="line">    ├── js</span><br><span class="line">    └── vendors</span><br></pre></td></tr></table></figure>
+<pre><code class="bash">.
+├── _config.yml
+├── languages
+│   ├── default.yml
+│   └── zh-Hans.yml
+├── layout
+│   ├── achieve.swig
+│   ├── category.swig
+│   ├── index.swig
+│   ├── _layout.swig
+│   ├── page.swig
+│   ├── _partials
+│   ├── post.swig
+│   └── tag.swig
+└── source
+    ├── css
+    ├── fonts
+    ├── img
+    ├── js
+    └── vendors
+</code></pre>
 <p>首先有一个<code>_config.yml</code>负责提供主题级别的配置，可以在<code>layout</code>中通过<code>theme.xxx</code>的形式进行调用。<br>然后<code>languages</code>负责实现博客的i18N功能，如果博客没有多语言的需求，只需要实现一个<code>default.yml</code>即可。<br>其次是最为重要的<code>layout</code>文件夹，这个里面主要存放博客的结构，Hexo 引擎会使用指定的渲染引擎将<code>layout</code>文件渲染成HTML页面。<br>最后是<code>source</code>，把所有主题需要用到的资源，比如CSS，Fonts，JS等都存放到这个文件夹中。</p>
 <p>这个主题使用了<a href="http://paularmstrong.github.io/swig/" target="_blank" rel="external">swig</a>。</p>
 <h2 id="页面结构"><a href="#页面结构" class="headerlink" title="页面结构"></a>页面结构</h2><p>页面结构分为两个维度，一者是我要呈现哪些页面，二者是每个页面上都有哪些内容。</p>
@@ -143,15 +163,63 @@
 <h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><p>前面讲到了 Hexo 的结构，下面来聊一聊具体的实现。</p>
 <h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>Hexo 渲染的入口是<code>_layout.swig</code>，所以一个主题至少需要实现一个<code>_layout.swig</code>。<br>然后Hexo会遍历Hexo目录下<code>source</code>文件夹中的所有Markdown文件，根据Markdown文件所指定的layout进行渲染，默认类型为<code>post</code>。</p>
 <h2 id="技巧"><a href="#技巧" class="headerlink" title="技巧"></a>技巧</h2><h3 id="layout-swig结构"><a href="#layout-swig结构" class="headerlink" title="_layout.swig结构"></a>_layout.swig结构</h3><p>整体的结构基本如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!doctype html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &#123;% include &apos;_partials/head.swig&apos; %&#125;</span><br><span class="line">    &lt;title&gt;&#123;% block title %&#125;&#123;% endblock %&#125;&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body id=&quot;home&quot;&gt;</span><br><span class="line">    &#123;% include &apos;_partials/menu.swig&apos; %&#125;</span><br><span class="line">    &lt;div id=&quot;wrap&quot;&gt;</span><br><span class="line">        &#123;% include &apos;_partials/nav.swig&apos; %&#125;</span><br><span class="line">        &#123;% include &apos;_partials/header.swig&apos; %&#125;</span><br><span class="line">        &lt;div id=&quot;start&quot; class=&quot;container content&quot;&gt;</span><br><span class="line">            &#123;% block content %&#125;&#123;% endblock %&#125;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">        &#123;% include &apos;_partials/footer.swig&apos; %&#125;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+<pre><code class="swig">&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    {% include '_partials/head.swig' %}
+    &lt;title&gt;{% block title %}{% endblock %}
+
+<body id="home">
+    {% include '_partials/menu.swig' %}
+    <div id="wrap">
+        {% include '_partials/nav.swig' %}
+        {% include '_partials/header.swig' %}
+        <div id="start" class="container content">
+            {% block content %}{% endblock %}
+        &lt;/div&gt;
+        {% include '_partials/footer.swig' %}
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</div></div></body></code></pre>
 <h3 id="实现文章渲染"><a href="#实现文章渲染" class="headerlink" title="实现文章渲染"></a>实现文章渲染</h3><p>这个地方主要是借鉴了NexT主题的设计，实现了一个swig的宏来生成对应的文章。这个宏主要有两个参数，第一个是post对象，第二个是是否为主页。如果是主页就只显示简略的内容，如果不是就输出全文。</p>
 <p>判断的部分实现如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;% if is_index %&#125;</span><br><span class="line">    &#123;% if post.excerpt %&#125;</span><br><span class="line">        &#123;&#123; post.excerpt &#125;&#125;</span><br><span class="line">        &lt;a class=&quot;&quot; href=&quot;&#123;&#123; url_for(post.path) &#125;&#125;&quot;&gt;Read more&lt;/a&gt;</span><br><span class="line">    &#123;% endif %&#125;</span><br><span class="line">&#123;% else %&#125;</span><br><span class="line">    &#123;&#123; post.content &#125;&#125;</span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="swig">{% if is_index %}
+    {% if post.excerpt %}
+        {{ post.excerpt }}
+        <a class="" href="{{ url_for(post.path) }}">Read more</a>
+    {% endif %}
+{% else %}
+    {{ post.content }}
+{% endif %}
+</code></pre>
 <p>用到的post页的参数可以<a href="https://hexo.io/zh-cn/docs/variables.html" target="_blank" rel="external">我翻译的中文文档</a></p>
 <h3 id="分页插件"><a href="#分页插件" class="headerlink" title="分页插件"></a>分页插件</h3><p>Hexo 自己实现了一个分页插件，直接使用paginator函数即可。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;% if page.prev or page.next %&#125;</span><br><span class="line">    &lt;nav class=&quot;pagination&quot;&gt;</span><br><span class="line">        &#123;&#123; paginator(&#123;</span><br><span class="line">            prev_text: &apos;&lt;i class=&quot;fa fa-angle-left&quot;&gt;&lt;/i&gt;&apos;,</span><br><span class="line">            next_text: &apos;&lt;i class=&quot;fa fa-angle-right&quot;&gt;&lt;/i&gt;&apos;,</span><br><span class="line">            mid_size: 1</span><br><span class="line">        &#125;) &#125;&#125;</span><br><span class="line">    &lt;/nav&gt;</span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="swig">{% if page.prev or page.next %}
+    <nav class="pagination">
+        {{ paginator({
+            prev_text: '<i class="fa fa-angle-left"></i>',
+            next_text: '<i class="fa fa-angle-right"></i>',
+            mid_size: 1
+        }) }}
+    </nav>
+{% endif %}
+</code></pre>
 <h3 id="评论系统"><a href="#评论系统" class="headerlink" title="评论系统"></a>评论系统</h3><p>对于Hexo来说，评论系统就是调用一个第三方的JS。所以只需要在合适的位置插入代码即可。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;div id=&quot;disqus_thread&quot;&gt;&lt;/div&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">    var disqus_config = function () &#123;</span><br><span class="line">        this.page.url = &apos;&#123;&#123; page.permalink &#125;&#125;&apos;;</span><br><span class="line">        this.page.identifier = &apos;&#123;&#123; page.path &#125;&#125;&apos;;</span><br><span class="line">    &#125;;</span><br><span class="line">    (function () &#123;</span><br><span class="line">        var d = document, s = d.createElement(&apos;script&apos;);</span><br><span class="line">        s.src = &apos;//abc.disqus.com/embed.js&apos;;</span><br><span class="line">        s.setAttribute(&apos;data-timestamp&apos;, +new Date());</span><br><span class="line">        (d.head || d.body).appendChild(s);</span><br><span class="line">    &#125;)();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<pre><code class="swig">&lt;div id=&quot;disqus_thread&quot;&gt;&lt;/div&gt;
+&lt;script&gt;
+    var disqus_config = function () {
+        this.page.url = &#39;{{ page.permalink }}&#39;;
+        this.page.identifier = &#39;{{ page.path }}&#39;;
+    };
+    (function () {
+        var d = document, s = d.createElement(&#39;script&#39;);
+        s.src = &#39;//abc.disqus.com/embed.js&#39;;
+        s.setAttribute(&#39;data-timestamp&#39;, +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+&lt;/script&gt;
+</code></pre>
 <h1 id="需要注意的坑"><a href="#需要注意的坑" class="headerlink" title="需要注意的坑"></a>需要注意的坑</h1><ul>
 <li><code>page.posts</code>是按照时间排序的，但是<code>site.posts</code>是无序的。</li>
 </ul>
@@ -186,7 +254,7 @@
                     <p><span>本文标题:</span><a href="/2016/06/29/new-blog-new-life/">新博客上线&Hexo主题开发入门</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2016年6月29日 - 23时06分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2016/06/29/new-blog-new-life/"
                                             title="新博客上线&Hexo主题开发入门">https://xuanwo.org/2016/06/29/new-blog-new-life/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -307,11 +375,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

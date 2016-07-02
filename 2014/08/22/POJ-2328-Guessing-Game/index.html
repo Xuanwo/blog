@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -118,8 +118,105 @@
 <p><a href="http://poj.org/problem?id=2328" target="_blank" rel="external">http://poj.org/problem?id=2328</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>猜数字游戏，还是比较熟悉的模型。<br>先确定一个正确数字，另一个人猜数字，然后回答猜测数字比正确数字是太高、太低还是正确。现在题中给定猜测的过程，让我们用程序验证这个猜测过程中，回答是否正确。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstdlib&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">#include &lt;ctime&gt;</span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">#include &lt;vector&gt;</span><br><span class="line">#include &lt;deque&gt;</span><br><span class="line">#include &lt;list&gt;</span><br><span class="line">#include &lt;set&gt;</span><br><span class="line">#include &lt;map&gt;</span><br><span class="line">#include &lt;stack&gt;</span><br><span class="line">#include &lt;queue&gt;</span><br><span class="line">#include &lt;numeric&gt;</span><br><span class="line">#include &lt;iomanip&gt;</span><br><span class="line">#include &lt;bitset&gt;</span><br><span class="line">#include &lt;sstream&gt;</span><br><span class="line">#include &lt;fstream&gt;</span><br><span class="line">#define debug puts(&quot;-----&quot;)</span><br><span class="line">#define pi (acos(-1.0))</span><br><span class="line">#define eps (1e-8)</span><br><span class="line">#define inf (1&lt;&lt;28)</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">char str[3][20] = &#123;&quot;too high&quot;, &quot;too low&quot;, &quot;right on&quot;&#125;;</span><br><span class="line">int answer[1100];</span><br><span class="line">int getnum[1100];</span><br><span class="line"></span><br><span class="line">int getanswer(char ans[])</span><br><span class="line">&#123;</span><br><span class="line">    if (strcmp(str[0], ans) == 0)</span><br><span class="line">    &#123;</span><br><span class="line">        return 1;</span><br><span class="line">    &#125;</span><br><span class="line">    else if (strcmp(str[1], ans) == 0)</span><br><span class="line">    &#123;</span><br><span class="line">        return -1;</span><br><span class="line">    &#125;</span><br><span class="line">    else if (strcmp(str[2], ans) == 0)</span><br><span class="line">    &#123;</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    char tmp[20];</span><br><span class="line">    int num, rightnum;</span><br><span class="line">    int i, j;</span><br><span class="line">    int flag;</span><br><span class="line"></span><br><span class="line">    while (scanf(&quot;%d&quot;, &amp;num), num != 0)</span><br><span class="line">    &#123;</span><br><span class="line">        getchar();</span><br><span class="line">        gets(tmp);</span><br><span class="line">        answer[0] = getanswer(tmp);</span><br><span class="line">        getnum[0] = num;</span><br><span class="line">        for (i = 0; answer[i] != 0; )</span><br><span class="line">        &#123;</span><br><span class="line">            i++;</span><br><span class="line">            scanf(&quot;%d&quot;, &amp;num);</span><br><span class="line">            getchar();</span><br><span class="line">            gets(tmp);</span><br><span class="line">            answer[i] = getanswer(tmp);</span><br><span class="line">            getnum[i] = num;</span><br><span class="line">        &#125;</span><br><span class="line">        rightnum = getnum[i];</span><br><span class="line">        i++;</span><br><span class="line">        for (flag = 1, j = 0; j &lt; i - 1; j++)</span><br><span class="line">        &#123;</span><br><span class="line">            if (getnum[j] - rightnum &gt; 0 &amp;&amp; answer[j] == 1 )</span><br><span class="line">            &#123;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (getnum[j] - rightnum &lt; 0 &amp;&amp; answer[j] == -1)</span><br><span class="line">            &#123;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            else</span><br><span class="line">            &#123;</span><br><span class="line">                flag = 0;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        if (flag)</span><br><span class="line">        &#123;</span><br><span class="line">            printf(&quot;Stan may be honest\n&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        else if (flag == 0)</span><br><span class="line">        &#123;</span><br><span class="line">            printf(&quot;Stan is dishonest\n&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+#include &lt;cmath&gt;
+#include &lt;ctime&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;deque&gt;
+#include &lt;list&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+#include &lt;stack&gt;
+#include &lt;queue&gt;
+#include &lt;numeric&gt;
+#include &lt;iomanip&gt;
+#include &lt;bitset&gt;
+#include &lt;sstream&gt;
+#include &lt;fstream&gt;
+#define debug puts(&quot;-----&quot;)
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1&lt;&lt;28)
+using namespace std;
+
+char str[3][20] = {&quot;too high&quot;, &quot;too low&quot;, &quot;right on&quot;};
+int answer[1100];
+int getnum[1100];
+
+int getanswer(char ans[])
+{
+    if (strcmp(str[0], ans) == 0)
+    {
+        return 1;
+    }
+    else if (strcmp(str[1], ans) == 0)
+    {
+        return -1;
+    }
+    else if (strcmp(str[2], ans) == 0)
+    {
+        return 0;
+    }
+}
+
+int main(int argc, char const *argv[])
+{
+    char tmp[20];
+    int num, rightnum;
+    int i, j;
+    int flag;
+
+    while (scanf(&quot;%d&quot;, &amp;num), num != 0)
+    {
+        getchar();
+        gets(tmp);
+        answer[0] = getanswer(tmp);
+        getnum[0] = num;
+        for (i = 0; answer[i] != 0; )
+        {
+            i++;
+            scanf(&quot;%d&quot;, &amp;num);
+            getchar();
+            gets(tmp);
+            answer[i] = getanswer(tmp);
+            getnum[i] = num;
+        }
+        rightnum = getnum[i];
+        i++;
+        for (flag = 1, j = 0; j &lt; i - 1; j++)
+        {
+            if (getnum[j] - rightnum &gt; 0 &amp;&amp; answer[j] == 1 )
+            {
+                continue;
+            }
+            else if (getnum[j] - rightnum &lt; 0 &amp;&amp; answer[j] == -1)
+            {
+                continue;
+            }
+            else
+            {
+                flag = 0;
+                break;
+            }
+        }
+        if (flag)
+        {
+            printf(&quot;Stan may be honest\n&quot;);
+        }
+        else if (flag == 0)
+        {
+            printf(&quot;Stan is dishonest\n&quot;);
+        }
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月22日 已AC。</li>
 </ul>
 
@@ -147,7 +244,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/22/POJ-2328-Guessing-Game/">POJ 2328 Guessing Game</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月22日 - 22时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/22/POJ-2328-Guessing-Game/"
                                             title="POJ 2328 Guessing Game">https://xuanwo.org/2014/08/22/POJ-2328-Guessing-Game/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -254,11 +351,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

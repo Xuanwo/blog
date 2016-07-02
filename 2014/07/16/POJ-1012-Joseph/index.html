@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -118,8 +118,50 @@
 <p><a href="http://poj.org/problem?id=1012" target="_blank" rel="external">http://poj.org/problem?id=1012</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>用模拟的方法貌似会超时。直接打了一个表，求出0到14之间每一种k的值对应的m值，再根据输入输出就OK。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int r[14];</span><br><span class="line">int i, j, k;</span><br><span class="line"></span><br><span class="line">bool solve(int k, int i)</span><br><span class="line">&#123;</span><br><span class="line">    int n = k * 2, m = i, x = 0;</span><br><span class="line">    while (n &gt; k)</span><br><span class="line">    &#123;</span><br><span class="line">        x = (x + m - 1) % n;</span><br><span class="line">        if (x &lt; k) return false;</span><br><span class="line">        n--;</span><br><span class="line">    &#125;</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    for (k = 1; k &lt; 14; k++)</span><br><span class="line">    &#123;</span><br><span class="line">        for (i = k + 1;; i += k + 1)</span><br><span class="line">        &#123;</span><br><span class="line">            if (solve(k, i))</span><br><span class="line">            &#123;</span><br><span class="line">                r[k] = i;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (solve(k, i + 1))</span><br><span class="line">            &#123;</span><br><span class="line">                r[k] = i + 1;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    while (cin &gt;&gt; k, k)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; r[k] &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int r[14];
+int i, j, k;
+
+bool solve(int k, int i)
+{
+    int n = k * 2, m = i, x = 0;
+    while (n &gt; k)
+    {
+        x = (x + m - 1) % n;
+        if (x &lt; k) return false;
+        n--;
+    }
+    return true;
+}
+
+int main()
+{
+    for (k = 1; k &lt; 14; k++)
+    {
+        for (i = k + 1;; i += k + 1)
+        {
+            if (solve(k, i))
+            {
+                r[k] = i;
+                break;
+            }
+            else if (solve(k, i + 1))
+            {
+                r[k] = i + 1;
+                break;
+            }
+        }
+    }
+
+    while (cin &gt;&gt; k, k)
+    {
+        cout &lt;&lt; r[k] &lt;&lt; endl;
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月16日 已AC。</li>
 </ul>
 
@@ -147,7 +189,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/16/POJ-1012-Joseph/">POJ 1012 Joseph</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月16日 - 14时07分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/16/POJ-1012-Joseph/"
                                             title="POJ 1012 Joseph">https://xuanwo.org/2014/07/16/POJ-1012-Joseph/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -254,11 +296,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

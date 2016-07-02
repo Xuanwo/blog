@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -122,8 +122,42 @@
 <blockquote>
 <p>在中国古代劳动人民中，长期流传着“隔墙算”、“剪管术”、“秦王暗点兵”等数学游戏。有一首“孙子歌”，甚至远渡重洋，输入日本：<br>“三人同行七十稀，五树梅花廿一枝，七子团圆正半月，除百零五便得知。”<br>这些饶有趣味的数学游戏，以各种不同形式，介绍世界闻名的“孙子问题”的解法，通俗地反映了中国古代数学一项卓越的成就。“孙子问题”在现代数论中是一个一次同余问题，它最早出现在中国公元四世纪的数学著作《孙子算经》中。《孙子算经》卷下“物不知数”题说：有物不知其数，三个一数余二，五个一数余三，七个一数又余二，问该物总数几何？显然，这相当于求不定方程组N=3x+2,N=5y+3,N=7z+2的正整数解N，或用现代数论符号表示，等价干解下列的一次同余组。<br>《孙子算经》所给答案是N=23。由于孙子问题数据比较简单，这个答数通过试算也可以得到。但是《孙子算经》并不是这样做的。“物不知数”题的术文指出解题的方法多三三数之，取数七十，与余数二相乘；五五数之，取数二十一，与余数三相乘；七七数之，取数十五，与余数二相乘。将诸乘积相加，然后减去一百零五的倍数。列成算式就是：<br>N=70×2+21×3+15×2－2×105。<br>这里105是模数3、5、7的最小公倍数，容易看出，《孙子算经》给出的是符合条件的最小正整数。对于一般余数的情形，《孙子算经》术文指出，只要把上述算法中的余数2、3、2分别换成新的余数就行了。以R1、R2、R3表示这些余数，那么《孙子算经》相当于给出公式<br>N=70×R1+21×R2+15×R3－P×105（p是整数）。<br>孙子算法的关键，在于70、21和15这三个数的确定。后来流传的《孙子歌》中所说“七十稀”、“廿一枝”和“正半月”，就是暗指这三个关键的数字。《孙子算经》没有说明这三个数的来历。实际上，它们具有如下特性：<br>也就是说，这三个数可以从最小公倍数M=3×5×7=105中各约去模数3、5、7后，再分别乘以整数2、1、1而得到。假令k1=2，K2=1，K3=1，那么整数Ki（i=1，2，3）的选取使所得到的三数70、21、15被相应模数相除的时候余数都是1。由此出发，立即可以推出，在余数是R1、R2、R3的情况下的情况。<br>应用上述推理，可以完全类似地把孙子算法推广到一般情形：设有一数N，分别被两两互素的几个数a1、a2、……an相除得余数R1、R2、……Rn，即<br>N≡Ri（mod ai）（i=1、2、……n），<br>只需求出一组数K，使满足<br>1（mod ai）（i=1、2、……n），<br>那么适合已给一次同余组的最小正数解是<br>（P是整数，M=a1×a2×……×an），<br>这就是现代数论中著名的剩余定理。如上所说，它的基本形式已经包含在《孙子算经》“物不知数”题的解法之中。不过《孙子算经》没有明确地表述这个一般的定理。</p>
 </blockquote>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">#define P 23</span><br><span class="line">#define E 28</span><br><span class="line">#define I 33</span><br><span class="line">#define C 21252</span><br><span class="line"></span><br><span class="line">int main(void)</span><br><span class="line">&#123;</span><br><span class="line">    int p, e, i, d;</span><br><span class="line">    int x;</span><br><span class="line"></span><br><span class="line">    int flag = 1;</span><br><span class="line">    while (scanf(&quot;%d %d %d %d&quot;, &amp;p, &amp;e, &amp;i, &amp;d)&amp;&amp;p&gt;=0)</span><br><span class="line">    &#123;</span><br><span class="line">        p %= P;</span><br><span class="line">        e %= E;</span><br><span class="line">        i %= I;</span><br><span class="line">        x = i;</span><br><span class="line"></span><br><span class="line">        while (!((x - p) % P == 0 &amp;&amp; (x - e) % E == 0))</span><br><span class="line">        &#123;</span><br><span class="line">            x += I;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        x -= d;</span><br><span class="line">        if (x &lt;= 0) x += C;</span><br><span class="line">        printf(&quot;Case %d: the next triple peak occurs in %d days.\n&quot;, flag, x);</span><br><span class="line">        flag++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include &lt;stdio.h&gt;
+
+using namespace std;
+
+#define P 23
+#define E 28
+#define I 33
+#define C 21252
+
+int main(void)
+{
+    int p, e, i, d;
+    int x;
+
+    int flag = 1;
+    while (scanf(&quot;%d %d %d %d&quot;, &amp;p, &amp;e, &amp;i, &amp;d)&amp;&amp;p&gt;=0)
+    {
+        p %= P;
+        e %= E;
+        i %= I;
+        x = i;
+
+        while (!((x - p) % P == 0 &amp;&amp; (x - e) % E == 0))
+        {
+            x += I;
+        }
+
+        x -= d;
+        if (x &lt;= 0) x += C;
+        printf(&quot;Case %d: the next triple peak occurs in %d days.\n&quot;, flag, x);
+        flag++;
+    }
+
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月06日 已AC，完成中国剩余定理资料引用。</li>
 </ul>
 
@@ -151,7 +185,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/06/POJ-1006-Biorhythms/">POJ 1006 Biorhythms</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月6日 - 19时07分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/06/POJ-1006-Biorhythms/"
                                             title="POJ 1006 Biorhythms">https://xuanwo.org/2014/07/06/POJ-1006-Biorhythms/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -258,11 +292,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -118,8 +118,55 @@
 <p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2395" target="_blank" rel="external">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2395</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>变量多的题目确实头疼，我来稍微捋一下。<br>题目中给出n中灯泡，不同的灯泡要用不同的电源，相同的灯泡可以使用相同的电源。然后每种灯泡有着四种参数，电压v，电源费用k，每个灯泡的费用c，所需要的该种灯泡的数量l。小脑一动就能明白，每次更换只会采用同一种灯泡，因为不同中灯泡的话要买两种电源，一定不是最优解。<br>这样的话，按照电压进行排序之后，可以得到递推公式：<br><code>dp[i]=min(dp[i], dp[j]+(sum[i]-sum[j])*s[i].c+s[i].k)</code><br>其中sum[i]=sum[i-1]+s[i].l;</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#define MAXN 1000+10</span><br><span class="line"></span><br><span class="line">struct node</span><br><span class="line">&#123;</span><br><span class="line">    int v,k,c,l;</span><br><span class="line">&#125;s[MAXN];</span><br><span class="line"></span><br><span class="line">int n,sum[MAXN],dp[MAXN];</span><br><span class="line"></span><br><span class="line">bool cmp(node a, node b)</span><br><span class="line">&#123;</span><br><span class="line">    return a.v&lt;b.v;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void init()</span><br><span class="line">&#123;</span><br><span class="line">    memset(sum,0,sizeof(sum));</span><br><span class="line">    memset(dp,0,sizeof(dp));</span><br><span class="line">    for(int i=1;i&lt;=n;i++)</span><br><span class="line">    &#123;</span><br><span class="line">        scanf(&quot;%d%d%d%d&quot;, &amp;s[i].v,&amp;s[i].k,&amp;s[i].c,&amp;s[i].l);</span><br><span class="line">    &#125;</span><br><span class="line">    sort(s+1,s+n+1,cmp);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    while(~scanf(&quot;%d&quot;, &amp;n)&amp;&amp;n)</span><br><span class="line">    &#123;</span><br><span class="line">        init();</span><br><span class="line">        for(int i=1;i&lt;=n;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            sum[i]+=sum[i-1]+s[i].l;</span><br><span class="line">        &#125;</span><br><span class="line">        dp[1]=s[1].k+s[1].c*s[1].l;</span><br><span class="line">        for(int i=2;i&lt;=n;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            dp[i]=inf;</span><br><span class="line">            for(int j=0;j&lt;i;j++)</span><br><span class="line">            &#123;</span><br><span class="line">                dp[i]=min(dp[i], dp[j]+(sum[i]-sum[j])*s[i].c+s[i].k);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;%d\n&quot;, dp[n]);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
+#define MAXN 1000+10
+
+struct node
+{
+    int v,k,c,l;
+}s[MAXN];
+
+int n,sum[MAXN],dp[MAXN];
+
+bool cmp(node a, node b)
+{
+    return a.v&lt;b.v;
+}
+
+void init()
+{
+    memset(sum,0,sizeof(sum));
+    memset(dp,0,sizeof(dp));
+    for(int i=1;i&lt;=n;i++)
+    {
+        scanf(&quot;%d%d%d%d&quot;, &amp;s[i].v,&amp;s[i].k,&amp;s[i].c,&amp;s[i].l);
+    }
+    sort(s+1,s+n+1,cmp);
+}
+
+int main(int argc, char const *argv[])
+{
+    while(~scanf(&quot;%d&quot;, &amp;n)&amp;&amp;n)
+    {
+        init();
+        for(int i=1;i&lt;=n;i++)
+        {
+            sum[i]+=sum[i-1]+s[i].l;
+        }
+        dp[1]=s[1].k+s[1].c*s[1].l;
+        for(int i=2;i&lt;=n;i++)
+        {
+            dp[i]=inf;
+            for(int j=0;j&lt;i;j++)
+            {
+                dp[i]=min(dp[i], dp[j]+(sum[i]-sum[j])*s[i].c+s[i].k);
+            }
+        }
+        printf(&quot;%d\n&quot;, dp[n]);
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年11月16日 已AC。</li>
 </ul>
 
@@ -147,7 +194,7 @@
                     <p><span>本文标题:</span><a href="/2014/11/16/UVa-11400-Lighting-System-Design/">UVa 11400 Lighting System Design</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年11月16日 - 16时11分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/11/16/UVa-11400-Lighting-System-Design/"
                                             title="UVa 11400 Lighting System Design">https://xuanwo.org/2014/11/16/UVa-11400-Lighting-System-Design/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -254,11 +301,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

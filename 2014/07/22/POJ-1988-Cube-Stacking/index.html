@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -118,8 +118,64 @@
 <p><a href="http://poj.org/problem?id=1988" target="_blank" rel="external">http://poj.org/problem?id=1988</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>这道题也想了很久。问题主要出在堆叠得过程中，我只考虑了根节点的变化，而没有去更新位于同一个根节点下的方块的高度变化。发现问题之后，试图寻找到一种有效得递归方法，但是失败了。无奈之后，决定再开一个deep数组来保存当前节点到根节点之间的深度差。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">using namespace std;</span><br><span class="line">#define N 30010</span><br><span class="line"></span><br><span class="line">int pre[N], son[N], deep[N];</span><br><span class="line"></span><br><span class="line">int find(int x)</span><br><span class="line">&#123;</span><br><span class="line">    int temp;</span><br><span class="line">    if (x == pre[x])</span><br><span class="line">        return x;</span><br><span class="line">    temp = pre[x];</span><br><span class="line">    pre[x] = find(temp);</span><br><span class="line">    deep[x] += deep[temp];</span><br><span class="line">    return pre[x];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    int p;</span><br><span class="line">    char ope;</span><br><span class="line">    int a, b;</span><br><span class="line">    int query;</span><br><span class="line">    int root1, root2;</span><br><span class="line">    scanf(&quot;%d&quot;, &amp;p);</span><br><span class="line">    for (int i = 1; i &lt; N; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        pre[i] = i;</span><br><span class="line">        son[i] = 1;</span><br><span class="line">        deep[i] = 0;</span><br><span class="line">    &#125;</span><br><span class="line">    for (int i = 0; i &lt; p; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        scanf(&quot;%*c%c&quot;, &amp;ope);</span><br><span class="line">        if (ope == &apos;M&apos;)</span><br><span class="line">        &#123;</span><br><span class="line">            scanf(&quot;%d%d&quot;, &amp;a, &amp;b);</span><br><span class="line">            root1 = find(a);</span><br><span class="line">            root2 = find(b);</span><br><span class="line">            if (root1 != root2)</span><br><span class="line">            &#123;</span><br><span class="line">                pre[root2] = root1;</span><br><span class="line">                deep[root2] = son[root1];</span><br><span class="line">                son[root1] += son[root2];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            scanf(&quot;%d&quot;, &amp;query);</span><br><span class="line">            printf(&quot;%d\n&quot;, son[find(query)] - deep[query] - 1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
+#include &lt;cstdio&gt;
+#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+using namespace std;
+#define N 30010
+
+int pre[N], son[N], deep[N];
+
+int find(int x)
+{
+    int temp;
+    if (x == pre[x])
+        return x;
+    temp = pre[x];
+    pre[x] = find(temp);
+    deep[x] += deep[temp];
+    return pre[x];
+}
+
+int main(int argc, char const *argv[])
+{
+    int p;
+    char ope;
+    int a, b;
+    int query;
+    int root1, root2;
+    scanf(&quot;%d&quot;, &amp;p);
+    for (int i = 1; i &lt; N; ++i)
+    {
+        pre[i] = i;
+        son[i] = 1;
+        deep[i] = 0;
+    }
+    for (int i = 0; i &lt; p; ++i)
+    {
+        scanf(&quot;%*c%c&quot;, &amp;ope);
+        if (ope == &#39;M&#39;)
+        {
+            scanf(&quot;%d%d&quot;, &amp;a, &amp;b);
+            root1 = find(a);
+            root2 = find(b);
+            if (root1 != root2)
+            {
+                pre[root2] = root1;
+                deep[root2] = son[root1];
+                son[root1] += son[root2];
+            }
+        }
+        else
+        {
+            scanf(&quot;%d&quot;, &amp;query);
+            printf(&quot;%d\n&quot;, son[find(query)] - deep[query] - 1);
+        }
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月22日 已AC。</li>
 </ul>
 
@@ -147,7 +203,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/22/POJ-1988-Cube-Stacking/">POJ 1988 Cube Stacking</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月22日 - 16时07分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/22/POJ-1988-Cube-Stacking/"
                                             title="POJ 1988 Cube Stacking">https://xuanwo.org/2014/07/22/POJ-1988-Cube-Stacking/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -254,11 +310,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -121,8 +121,74 @@
 <p>&gt;<br>Input and Output<br>为了能给节目主持人提供无限量的问题字串，要求你来写一个程序执行生成运算。程序从输入中读取多行数据，每行包括两个整数n和L（即按此顺序给出），其中n &gt; 0，L的范围是1 ≤ L ≤ 26。根据这些输入，程序要按照字母表升序打印出第n个“hard”字串（由字母表中的前L个字母构成），并在接下来的一行打印这个串的长度。按照上述规则，第一个串应该是“A”。对于给定的n和L，你可以认为第n个“hard”串是一定存在的。<br>比方说，当L = 3时，头7个“hard”字串为：<br>A<br>AB<br>ABA<br>ABAC<br>ABACA<br>ABACAB<br>ABACABA<br>字串可能很长，因此要将它们分成4个字为一组，中间用空格隔开。如果超过16组，则换一行，再接着输出第17组。<br>ABAC ABA<br>7<br>输入由一行两个零表示结束。你的程序可以限定最大的字串长度为80。</p>
 <p>回溯搜索，还用到了string的一些比较方便的函数。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstdlib&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">#include &lt;ctime&gt;</span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">#include &lt;vector&gt;</span><br><span class="line">#include &lt;deque&gt;</span><br><span class="line">#include &lt;list&gt;</span><br><span class="line">#include &lt;set&gt;</span><br><span class="line">#include &lt;map&gt;</span><br><span class="line">#include &lt;stack&gt;</span><br><span class="line">#include &lt;queue&gt;</span><br><span class="line">#include &lt;numeric&gt;</span><br><span class="line">#include &lt;iomanip&gt;</span><br><span class="line">#include &lt;bitset&gt;</span><br><span class="line">#include &lt;sstream&gt;</span><br><span class="line">#include &lt;fstream&gt;</span><br><span class="line">#define debug &quot;output for debug\n&quot;</span><br><span class="line">#define pi (acos(-1.0))</span><br><span class="line">#define eps (1e-8)</span><br><span class="line">#define inf (1&lt;&lt;28)</span><br><span class="line">#define ll long long int</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">void Sequence(string &amp;str, int &amp;n, int L)</span><br><span class="line">&#123;</span><br><span class="line">    int nLen = str.length(), nHalf = (str.length() + 1) / 2;</span><br><span class="line">    for (char i = &apos;A&apos;, iEnd = L + &apos;A&apos;, m = 1; i &lt; iEnd; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        str.push_back(i);</span><br><span class="line">        for (m = 1; m &lt;= nHalf; ++m)</span><br><span class="line">        &#123;</span><br><span class="line">            if (equal(str.end() - m, str.end(), str.end() - m * 2))</span><br><span class="line">            &#123;</span><br><span class="line">                m = 0;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        if (m != 0)</span><br><span class="line">        &#123;</span><br><span class="line">            if (--n == 0) return;</span><br><span class="line">            Sequence(str, n, L);</span><br><span class="line">            if (n == 0) return;</span><br><span class="line">        &#125;</span><br><span class="line">        str.erase(nLen);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    for (int n, L; cin &gt;&gt; n &gt;&gt; L &amp;&amp; n != 0; )</span><br><span class="line">    &#123;</span><br><span class="line">        string str;</span><br><span class="line">        Sequence(str, n, L);</span><br><span class="line">        int nLen = str.length();</span><br><span class="line">        for (size_t i = 4; i &lt; str.length(); i += 5)</span><br><span class="line">        &#123;</span><br><span class="line">            str.insert(str.begin() + i, i == 79 ? &apos;\n&apos; : &apos; &apos;);</span><br><span class="line">        &#125;</span><br><span class="line">        cout &lt;&lt; str &lt;&lt; &apos;\n&apos; &lt;&lt; nLen &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+#include &lt;cmath&gt;
+#include &lt;ctime&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;deque&gt;
+#include &lt;list&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+#include &lt;stack&gt;
+#include &lt;queue&gt;
+#include &lt;numeric&gt;
+#include &lt;iomanip&gt;
+#include &lt;bitset&gt;
+#include &lt;sstream&gt;
+#include &lt;fstream&gt;
+#define debug &quot;output for debug\n&quot;
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1&lt;&lt;28)
+#define ll long long int
+using namespace std;
+
+void Sequence(string &amp;str, int &amp;n, int L)
+{
+    int nLen = str.length(), nHalf = (str.length() + 1) / 2;
+    for (char i = &#39;A&#39;, iEnd = L + &#39;A&#39;, m = 1; i &lt; iEnd; ++i)
+    {
+        str.push_back(i);
+        for (m = 1; m &lt;= nHalf; ++m)
+        {
+            if (equal(str.end() - m, str.end(), str.end() - m * 2))
+            {
+                m = 0;
+                break;
+            }
+        }
+        if (m != 0)
+        {
+            if (--n == 0) return;
+            Sequence(str, n, L);
+            if (n == 0) return;
+        }
+        str.erase(nLen);
+    }
+}
+
+int main(int argc, char const *argv[])
+{
+    for (int n, L; cin &gt;&gt; n &gt;&gt; L &amp;&amp; n != 0; )
+    {
+        string str;
+        Sequence(str, n, L);
+        int nLen = str.length();
+        for (size_t i = 4; i &lt; str.length(); i += 5)
+        {
+            str.insert(str.begin() + i, i == 79 ? &#39;\n&#39; : &#39; &#39;);
+        }
+        cout &lt;&lt; str &lt;&lt; &#39;\n&#39; &lt;&lt; nLen &lt;&lt; endl;
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年11月2日 已AC。</li>
 </ul>
 
@@ -150,7 +216,7 @@
                     <p><span>本文标题:</span><a href="/2014/11/02/UVa-129-Krypton-Factor/">UVa 129 Krypton Factor</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年11月2日 - 14时11分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/11/02/UVa-129-Krypton-Factor/"
                                             title="UVa 129 Krypton Factor">https://xuanwo.org/2014/11/02/UVa-129-Krypton-Factor/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -257,11 +323,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         

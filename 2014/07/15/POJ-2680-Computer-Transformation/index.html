@@ -46,11 +46,11 @@
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
@@ -118,8 +118,55 @@
 <p><a href="http://poj.org/problem?id=3048" target="_blank" rel="external">http://poj.org/problem?id=3048</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>数学规律并不难，很容易推出f[n]=f[n-1]+f[n-2]*2。但是2^1000次方，必须使用一定的手段来处理这个超大的数据。这里使用了一种比较简单的技巧，数组模拟。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int dig[1010][1010];</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    dig[1][0] = 0;</span><br><span class="line">    dig[2][0] = 1;</span><br><span class="line"></span><br><span class="line">    for (int i = 3; i &lt;= 1000; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        for (int j = 0; j &lt; 1000; j++)</span><br><span class="line">        &#123;</span><br><span class="line">            dig[i][j] += dig[i - 2][j] * 2 + dig[i - 1][j];</span><br><span class="line">            if (dig[i][j] &gt; 9)</span><br><span class="line">            &#123;</span><br><span class="line">                dig[i][j + 1] = dig[i][j] / 10;</span><br><span class="line">                dig[i][j] %= 10;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    int n;</span><br><span class="line">    while ( cin &gt;&gt; n)</span><br><span class="line">    &#123;</span><br><span class="line">        if ( n == 1) cout &lt;&lt; &quot;0&quot; &lt;&lt; endl;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            bool flag = true;</span><br><span class="line">            for (int i = 999; i &gt;= 0; i--)</span><br><span class="line">            &#123;</span><br><span class="line">                if ( dig[n][i] &amp;&amp; flag)</span><br><span class="line">                &#123;</span><br><span class="line">                    flag = false;</span><br><span class="line">                &#125;</span><br><span class="line">                if (!flag)</span><br><span class="line">                    cout &lt;&lt; dig[n][i] ;</span><br><span class="line">            &#125;</span><br><span class="line">            cout &lt;&lt; endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><pre><code>#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+#include &lt;cstdio&gt;
+#include &lt;cmath&gt;
+
+using namespace std;
+
+int dig[1010][1010];
+
+int main(int argc, char const *argv[])
+{
+    dig[1][0] = 0;
+    dig[2][0] = 1;
+
+    for (int i = 3; i &lt;= 1000; i++)
+    {
+        for (int j = 0; j &lt; 1000; j++)
+        {
+            dig[i][j] += dig[i - 2][j] * 2 + dig[i - 1][j];
+            if (dig[i][j] &gt; 9)
+            {
+                dig[i][j + 1] = dig[i][j] / 10;
+                dig[i][j] %= 10;
+            }
+        }
+    }
+
+    int n;
+    while ( cin &gt;&gt; n)
+    {
+        if ( n == 1) cout &lt;&lt; &quot;0&quot; &lt;&lt; endl;
+        else
+        {
+            bool flag = true;
+            for (int i = 999; i &gt;= 0; i--)
+            {
+                if ( dig[n][i] &amp;&amp; flag)
+                {
+                    flag = false;
+                }
+                if (!flag)
+                    cout &lt;&lt; dig[n][i] ;
+            }
+            cout &lt;&lt; endl;
+        }
+    }
+    return 0;
+}
+</code></pre><h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月15日 已AC。</li>
 </ul>
 
@@ -147,7 +194,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/15/POJ-2680-Computer-Transformation/">POJ 2680 Computer Transformation</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月15日 - 19时07分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 16时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/15/POJ-2680-Computer-Transformation/"
                                             title="POJ 2680 Computer Transformation">https://xuanwo.org/2014/07/15/POJ-2680-Computer-Transformation/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -254,11 +301,11 @@
                         
                             <li><a href="/tags/C/">C</a></li>
                         
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
                             <li><a href="/tags/Database/">Database</a></li>
                         
                             <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         
