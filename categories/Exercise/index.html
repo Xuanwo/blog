@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -598,7 +598,7 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://codeforces.com/contest/15/problem/E">http://codeforces.com/contest/15/problem/E</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>数学渣，这道题无从下手= =。为了方便能自己看出一些东西来，我打了前两项的表去CF提交，幸运地得到了n=6的解，结果是1354。这个结果印证了昨晚比赛时候我的一些想法，因为<code>10=(2^2+1)*2</code>，<code>74=(6^2+1)*2</code>，<code>1354=(26^2+1)*2</code>。也就是说，最后的结果一定是某一个数的平方加上一再乘二的结果。这样，这个问题就转化成了，如何找到那个数。我们可以看到，这个数组成的数列是<code>2 6 26</code>。考虑到最后的取模，这个数一定是指数级别的，要不然增长速度太慢了，作为一个未来的码农，想到的第一个数列就是2 4 8。乍一看感觉跟<code>2 6 26</code>扯不上关系，不过再观察一下，<code>2 6 26</code>向前递减之后可以得到另外一个衍生数列，也就是<code>2 4 20</code>。第一个反应就是<code>20=4*5</code>，但是对不上啊，4怎么处理？小脑一动，对啊，4=4*1。1和5跟原数列有什么关系呢？可以看到，<code>1=4-3</code>，<code>5=8-3</code>。<br>写到这里，脑子里面已经是一团浆糊了，我来列成表格梳理一下。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a  c  b&#10;2  4  2&#10;4  4  6&#10;8  20 26</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a  c  b</span><br><span class="line">2  4  2</span><br><span class="line">4  4  6</span><br><span class="line">8  20 26</span><br></pre></td></tr></table></figure>
 <p>这样可以看出，a=pow(2,i)，c就等于c*(a-3)，明显，b=b+c。于是我就得到了最后的公式。<br>以上，是通过偷鸡往后再推了一项得到的题解，在实际的比赛中，一方面题目不会再给你下一项（CF倒是可以用这种方法骗答案），另一方面，真的比赛中思路也不会这么清晰。所以还是要学习正规的组合数学+DP的做法，在我学会之前，还是先挖一个坑吧= =。</p>
                 <a class="" href="/2014/11/23/CF-15E/">Read more</a>
             
@@ -1190,7 +1190,7 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4093">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4093</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>给出n个定点，要求计算出连接这些点的最短闭合路径。<br>使用dp[i][j]来保存从i到1再从1到j的最短距离。然后可以得到这样两条递推公式：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">dp[i][i-1]=min(dp[i][i-1],dp[i-1][j]+dis(i,j));&#10;dp[i][j]=dp[i-1][j]+dis(i,i-1);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">dp[i][i-1]=min(dp[i][i-1],dp[i-1][j]+dis(i,j));</span><br><span class="line">dp[i][j]=dp[i-1][j]+dis(i,i-1);</span><br></pre></td></tr></table></figure>
 <p>最后的结果就是遍历一遍dp[n][i]+dis(n,i)，找到最小值。</p>
                 <a class="" href="/2014/11/16/UVa-1347-Tour/">Read more</a>
             
@@ -2368,7 +2368,7 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=113&amp;page=show_problem&amp;problem=655">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=113&amp;page=show_problem&amp;problem=655</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>比赛的时候读懂了题意，但是没有拿出来敲，因为感觉自己应该是敲不出来的。实际上，这是一道小白书上提到过的题目，也就是最大值最小化问题。<br><img src="/imgs/exercise/UVa-714.jpg" alt="算法竞赛入门经典P151"><br>使用一个pos数组来保存是否在此分段，然后使用二分最小值来确定pos的取值。<br>实际上我还不是能够非常具体地描述中间二分的过程，不妨在二分的循环当中打印pos数组的值来找一找感觉。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Input:&#10;1&#10;9 3&#10;100 200 300 400 500 600 700 800 900&#10;&#10;Output:&#10;0 0 0 0 0 1 0 0 0&#10;0 0 0 0 0 1 0 0 0&#10;0 0 0 0 0 0 1 0 0&#10;0 0 0 1 0 0 1 0 0&#10;0 0 0 1 0 0 1 0 0&#10;0 0 0 0 0 0 0 1 0&#10;0 0 0 0 0 0 1 1 0&#10;0 0 0 0 1 0 1 1 0&#10;0 1 0 0 1 0 1 1 0&#10;0 1 0 0 1 0 1 1 0&#10;0 0 0 0 0 0 0 1 0&#10;0 0 0 0 0 1 0 1 0&#10;0 0 1 0 0 1 0 1 0&#10;0 0 1 0 0 1 0 1 0&#10;0 0 0 0 0 0 0 1 0&#10;0 0 0 0 0 1 0 1 0&#10;0 0 1 0 0 1 0 1 0&#10;0 0 1 0 0 1 0 1 0&#10;0 0 0 0 0 0 1 0 0&#10;0 0 0 0 1 0 1 0 0&#10;0 0 0 0 1 0 1 0 0&#10;0 0 0 0 0 0 1 0 0&#10;0 0 0 0 1 0 1 0 0&#10;0 0 0 0 1 0 1 0 0&#10;0 0 0 0 0 0 1 0 0&#10;0 0 0 0 1 0 1 0 0&#10;0 0 0 0 1 0 1 0 0&#10;0 0 0 0 0 0 0 1 0&#10;0 0 0 0 0 1 0 1 0&#10;0 0 1 0 0 1 0 1 0&#10;0 0 1 0 0 1 0 1 0&#10;0 0 0 0 0 0 0 1 0&#10;0 0 0 0 0 1 0 1 0&#10;0 0 1 0 0 1 0 1 0&#10;0 0 1 0 0 1 0 1 0&#10;0 0 0 0 0 0 1 0 0&#10;0 0 0 0 1 0 1 0 0&#10;0 0 0 0 1 0 1 0 0&#10;0 0 0 0 0 0 1 0 0&#10;0 0 0 0 1 0 1 0 0&#10;0 0 0 0 1 0 1 0 0&#10;0 0 0 0 0 0 1 0 0&#10;0 0 0 0 1 0 1 0 0&#10;0 0 0 0 1 0 1 0 0&#10;&#10;100 200 300 400 500 / 600 700 / 800 900</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Input:</span><br><span class="line">1</span><br><span class="line">9 3</span><br><span class="line">100 200 300 400 500 600 700 800 900</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">0 0 0 0 0 1 0 0 0</span><br><span class="line">0 0 0 0 0 1 0 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 1 0 0 1 0 0</span><br><span class="line">0 0 0 1 0 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 0 1 1 0</span><br><span class="line">0 0 0 0 1 0 1 1 0</span><br><span class="line">0 1 0 0 1 0 1 1 0</span><br><span class="line">0 1 0 0 1 0 1 1 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 0 0 0 0 0 1 0</span><br><span class="line">0 0 0 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 1 0 0 1 0 1 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 0 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line">0 0 0 0 1 0 1 0 0</span><br><span class="line"></span><br><span class="line">100 200 300 400 500 / 600 700 / 800 900</span><br></pre></td></tr></table></figure>
 <p>除去最后一行是答案，不去考虑之外，我们可以看到这是一个在中央取值，然后不断向右靠拢的过程。</p>
                 <a class="" href="/2014/11/04/UVa-714-Copying-Books/">Read more</a>
             
@@ -5862,7 +5862,7 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=3083">http://poj.org/problem?id=3083</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>最开始的代码程序直接报错，反复调试之后，发现我陷入了无限的循环之中。因为先写的左转优先的代码，面对这样的数据时：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">########&#10;#......#&#10;#.####.#&#10;#.####.#&#10;#.####.#&#10;#.####.#&#10;#...#..#  //&#27492;&#34892;&#20498;&#25968;&#31532;&#20108;&#21644;&#31532;&#19977;&#30340;`.`&#20250;&#20351;&#24471;&#24038;&#36716;&#20248;&#20808;&#31574;&#30053;&#38519;&#20837;&#26080;&#38480;&#24490;&#29615;&#10;#S#E####</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">########</span><br><span class="line">#......#</span><br><span class="line">#.####.#</span><br><span class="line">#.####.#</span><br><span class="line">#.####.#</span><br><span class="line">#.####.#</span><br><span class="line">#...#..#  //此行倒数第二和第三的`.`会使得左转优先策略陷入无限循环</span><br><span class="line">#S#E####</span><br></pre></td></tr></table></figure>
 <p>因此，仅仅是写DFS是不够的，我还需要对当前的朝向再进行判断。<br>除了这个之外，就是一个BFS了，最短路径用DFS不太合适。</p>
                 <a class="" href="/2014/08/19/POJ-3083-Children-of-the-Candy-Corn/">Read more</a>
             
@@ -7510,7 +7510,7 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=2231">http://poj.org/problem?id=2231</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>打表找规律，排序之后发现：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1     2     3     4     5&#10;&#10;0     1     2     3     4&#10;1     0     1     2     3&#10;2     1     0     1     2&#10;3     2     1     0     1&#10;4     3     2     1     0</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1     2     3     4     5</span><br><span class="line"></span><br><span class="line">0     1     2     3     4</span><br><span class="line">1     0     1     2     3</span><br><span class="line">2     1     0     1     2</span><br><span class="line">3     2     1     0     1</span><br><span class="line">4     3     2     1     0</span><br></pre></td></tr></table></figure>
 <p>把下面矩阵的所有数字相加就是所求的结果。</p>
                 <a class="" href="/2014/08/16/POJ-2231-Moo-Volume/">Read more</a>
             
@@ -8517,7 +8517,7 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=1458">http://poj.org/problem?id=1458</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>DP的基础题，求最长子序列（LCS）。<br>状态转移方程伪代码如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if (i == 0 || j == 0)&#10;&#9;dp[i,j] = 0&#10;else if (X[i] == Y[j])&#10;&#9;dp[i,j] = dp[i-1,j-1] + 1&#10;else&#10;&#9;dp[i,j] = max(dp[i-1,j], dp[i,j-1])</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if (i == 0 || j == 0)</span><br><span class="line">    dp[i,j] = 0</span><br><span class="line">else if (X[i] == Y[j])</span><br><span class="line">    dp[i,j] = dp[i-1,j-1] + 1</span><br><span class="line">else</span><br><span class="line">    dp[i,j] = max(dp[i-1,j], dp[i,j-1])</span><br></pre></td></tr></table></figure>
                 <a class="" href="/2014/08/12/POJ-1458-Common-Subsequence/">Read more</a>
             
         
@@ -8838,7 +8838,7 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=1159">http://poj.org/problem?id=1159</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>最关键的公式是：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if (str[i] == str[j])&#10;    DP[k][j] = DP[1 - k][j - 1];&#10;else&#10;    DP[k][j] = min(DP[1 - k][j], DP[k][j - 1]) + 1;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if (str[i] == str[j])</span><br><span class="line">    DP[k][j] = DP[1 - k][j - 1];</span><br><span class="line">else</span><br><span class="line">    DP[k][j] = min(DP[1 - k][j], DP[k][j - 1]) + 1;</span><br></pre></td></tr></table></figure>
 <p>注意到k空间的循环利用，节省了空间，感谢大牛提供的思路。</p>
                 <a class="" href="/2014/08/12/POJ-1159-Palindrome/">Read more</a>
             
@@ -9201,7 +9201,7 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=2039">http://poj.org/problem?id=2039</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>找规律的题目。<br>首先看一下加密的方式：<br>原文为<code>theresonoplacelikehomeonasnowynightx</code>，分成N列来写，没有写满的用x填充，写成如下队列：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">t o i o y&#10;h p k n n&#10;e l e a i&#10;r a h s g&#10;e c o n h&#10;s e m o t&#10;n l e w x</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">t o i o y</span><br><span class="line">h p k n n</span><br><span class="line">e l e a i</span><br><span class="line">r a h s g</span><br><span class="line">e c o n h</span><br><span class="line">s e m o t</span><br><span class="line">n l e w x</span><br></pre></td></tr></table></figure>
 <p>对于奇数行，从左向后书写，对于偶数行，从右向左书写，得到密文：<br><code>toioynnkpheleaigshareconhtomesnlewx</code><br>显然，解密的方式就是原样还原回去。<br>一共进行N次读入，对于第i次读取，用j定位行数。<br>如果j为偶数，输出<code>N*j+i</code>；<br>如果j为奇数，输出<code>N*(j+1)-1-i</code>。</p>
                 <a class="" href="/2014/08/06/POJ-2039-To-and-Fro/">Read more</a>
             
@@ -12290,18 +12290,18 @@
                 
             
             <span>
-            <a href="/2014/07/13/POJ-1657-Distance-on-Chessboard/#disqus_thread" data-disqus-identifier="2014/07/13/POJ-1657-Distance-on-Chessboard/">
-              <span class="disqus-comment-count" data-disqus-identifier="2014/07/13/POJ-1657-Distance-on-Chessboard/"></span>
+            <a href="/2014/07/13/POJ-1017-Packets/#disqus_thread" data-disqus-identifier="2014/07/13/POJ-1017-Packets/">
+              <span class="disqus-comment-count" data-disqus-identifier="2014/07/13/POJ-1017-Packets/"></span>
             </a>
           </span>
         </div>
-        <h2><a href="/2014/07/13/POJ-1657-Distance-on-Chessboard/">POJ 1657 Distance on Chessboard</a></h2>
+        <h2><a href="/2014/07/13/POJ-1017-Packets/">POJ 1017 Packets</a></h2>
         
             
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
-<p><a href="http://poj.org/problem?id=1657">http://poj.org/problem?id=1657</a></p>
-<h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>再一次脑洞大开了= =，居然还写了一个<code>normalize</code>函数用来区分是不是可行的走法，其实只要通过<code>abs(x-y)%2!=0</code>即可实现判断斜的方向上是否可以行走了。恩，这是程序设计实践导引上的例题，加上中文，没有什么好讲的。不过需要注意位置没有发生改变时的特殊情况。</p>
-                <a class="" href="/2014/07/13/POJ-1657-Distance-on-Chessboard/">Read more</a>
+<p><a href="http://poj.org/problem?id=1017">http://poj.org/problem?id=1017</a></p>
+<h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>在COJ上有一道一模一样的题目，当时做的时候没有做出来，因为没有考虑好剩余空间的利用。6<em>6和1</em>1的情况最为简单，但是其余的情况就分情况考虑了，特别是对于3<em>3这种情况而言，因为一个箱子正好可以装4个3</em>3的产品。</p>
+                <a class="" href="/2014/07/13/POJ-1017-Packets/">Read more</a>
             
         
         <div class="post-footer">
@@ -12330,18 +12330,18 @@
                 
             
             <span>
-            <a href="/2014/07/13/POJ-1017-Packets/#disqus_thread" data-disqus-identifier="2014/07/13/POJ-1017-Packets/">
-              <span class="disqus-comment-count" data-disqus-identifier="2014/07/13/POJ-1017-Packets/"></span>
+            <a href="/2014/07/13/POJ-1657-Distance-on-Chessboard/#disqus_thread" data-disqus-identifier="2014/07/13/POJ-1657-Distance-on-Chessboard/">
+              <span class="disqus-comment-count" data-disqus-identifier="2014/07/13/POJ-1657-Distance-on-Chessboard/"></span>
             </a>
           </span>
         </div>
-        <h2><a href="/2014/07/13/POJ-1017-Packets/">POJ 1017 Packets</a></h2>
+        <h2><a href="/2014/07/13/POJ-1657-Distance-on-Chessboard/">POJ 1657 Distance on Chessboard</a></h2>
         
             
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
-<p><a href="http://poj.org/problem?id=1017">http://poj.org/problem?id=1017</a></p>
-<h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>在COJ上有一道一模一样的题目，当时做的时候没有做出来，因为没有考虑好剩余空间的利用。6<em>6和1</em>1的情况最为简单，但是其余的情况就分情况考虑了，特别是对于3<em>3这种情况而言，因为一个箱子正好可以装4个3</em>3的产品。</p>
-                <a class="" href="/2014/07/13/POJ-1017-Packets/">Read more</a>
+<p><a href="http://poj.org/problem?id=1657">http://poj.org/problem?id=1657</a></p>
+<h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>再一次脑洞大开了= =，居然还写了一个<code>normalize</code>函数用来区分是不是可行的走法，其实只要通过<code>abs(x-y)%2!=0</code>即可实现判断斜的方向上是否可以行走了。恩，这是程序设计实践导引上的例题，加上中文，没有什么好讲的。不过需要注意位置没有发生改变时的特殊情况。</p>
+                <a class="" href="/2014/07/13/POJ-1657-Distance-on-Chessboard/">Read more</a>
             
         
         <div class="post-footer">
@@ -12381,7 +12381,7 @@
                 <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=3194">http://poj.org/problem?id=3194</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>本以为只要逐个判断每一个数是否有相邻即可，事实上，少考虑了一种情况。<br>比如下面给出的这种：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2211&#10;1111&#10;1111&#10;1122</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2211</span><br><span class="line">1111</span><br><span class="line">1111</span><br><span class="line">1122</span><br></pre></td></tr></table></figure>
 <p>根据我原来的思路这种也是good，但其实并不是如此。当然，这个例子并不完备，但用于指出原来思路的漏洞已经够了。正确的思路应当是使用DFS来寻找是否存在独立的区块。</p>
                 <a class="" href="/2014/07/12/POJ-3194-Equidivisions/">Read more</a>
             
@@ -13158,114 +13158,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -13273,6 +13165,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

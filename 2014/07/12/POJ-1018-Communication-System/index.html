@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -118,7 +118,7 @@
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>题意比较清晰，就是找出最大的B/sum(P)，要求网络设备的性价比最高。采用枚举的方法，把所有情况都列出来，然后有些明显不需要考虑的情况，可以直接舍去。</p>
 <a id="more"></a>
 <h1 id="新技能get"><a href="#新技能get" class="headerlink" title="新技能get"></a>新技能get</h1><p><code>Sublime-Text</code>在C++模式下输入main+回车可以直接完成符合C++11的代码，点个赞</p>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &#60;iostream&#62;&#10;#include &#60;algorithm&#62;&#10;#include &#60;iomanip&#62;&#10;#include &#60;cstring&#62;&#10;using namespace std;&#10;&#10;class info&#10;&#123;&#10;public:&#10;    int B;&#10;    double P;&#10;    int id;&#10;&#125;;&#10;&#10;int cmp(const void* a,const void* b)&#10;&#123;&#10;    info* x=(info*)a;&#10;    info* y=(info*)b;&#10;&#10;    if((x-&#62;B)==(y-&#62;B))&#10;    &#123;&#10;        if((x-&#62;P)==(y-&#62;P))&#10;            return (x-&#62;id)-(y-&#62;id);&#10;&#10;        return (x-&#62;P)-(y-&#62;P);&#10;    &#125;&#10;&#10;    return (x-&#62;B)-(y-&#62;B);&#10;&#125;&#10;&#10;double max(double a,double b)&#10;&#123;&#10;    return a&#62;b?a:b;&#10;&#125;&#10;&#10;int main(int argc, char const *argv[], int i, int j)&#10;&#123;&#10;    int test;&#10;    cin&#62;&#62;test;&#10;    for(int t=1;t&#60;=test;t++)&#10;    &#123;&#10;        int n;&#10;        int m=0;&#10;        cin&#62;&#62;n;&#10;&#10;        int* MaxB=new int[n+1];&#10;        info* dev=new info[100*100+1];&#10;&#10;        int pd=0;&#10;&#10;&#10;&#10;&#10;        for(i=1;i&#60;=n;i++)&#10;        &#123;&#10;            int mi;&#10;            cin&#62;&#62;mi;&#10;            m+=mi;&#10;&#10;            MaxB[i]=-1;&#10;            for(j=1;j&#60;=mi;j++)&#10;            &#123;&#10;                pd++;&#10;                cin&#62;&#62;dev[pd].B&#62;&#62;dev[pd].P;&#10;                dev[pd].id=i;&#10;&#10;                MaxB[i]=max(MaxB[i],dev[pd].B);&#10;            &#125;&#10;        &#125;&#10;&#10;&#10;&#10;        qsort(dev,m+1,sizeof(info),cmp);&#10;&#10;&#10;&#10;        bool flag=false;&#10;        double ans=0;&#10;        for(i=1;i&#60;=m-(n-1);i++)&#10;        &#123;&#10;            bool* vist=new bool[n+1];&#10;            memset(vist,false,sizeof(bool)*(n+1));&#10;&#10;            vist[ dev[i].id ]=true;&#10;            double price=dev[i].P;&#10;            int count=1;&#10;&#10;            for(j=i+1;j&#60;=m;j++)&#10;            &#123;&#10;                if(vist[ dev[j].id ])&#10;                    continue;&#10;&#10;                if(dev[i].B &#62; MaxB[ dev[j].id ])&#10;                &#123;&#10;                    flag=true;&#10;                    break;&#10;                &#125;&#10;&#10;                vist[ dev[j].id ]=true;&#10;                price+=dev[j].P;&#10;                count++;&#10;            &#125;&#10;            if(flag || count&#60;n)&#10;                break;&#10;&#10;            ans=max(ans,(dev[i].B/price));&#10;        &#125;&#10;&#10;        cout&#60;&#60;fixed&#60;&#60;setprecision(3)&#60;&#60;ans&#60;&#60;endl;&#10;&#10;        delete MaxB;&#10;        delete dev;&#10;    &#125;&#10;    return 0;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;iomanip&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">class info</span><br><span class="line">&#123;</span><br><span class="line">public:</span><br><span class="line">    int B;</span><br><span class="line">    double P;</span><br><span class="line">    int id;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">int cmp(const void* a,const void* b)</span><br><span class="line">&#123;</span><br><span class="line">    info* x=(info*)a;</span><br><span class="line">    info* y=(info*)b;</span><br><span class="line"></span><br><span class="line">    if((x-&gt;B)==(y-&gt;B))</span><br><span class="line">    &#123;</span><br><span class="line">        if((x-&gt;P)==(y-&gt;P))</span><br><span class="line">            return (x-&gt;id)-(y-&gt;id);</span><br><span class="line"></span><br><span class="line">        return (x-&gt;P)-(y-&gt;P);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return (x-&gt;B)-(y-&gt;B);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">double max(double a,double b)</span><br><span class="line">&#123;</span><br><span class="line">    return a&gt;b?a:b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[], int i, int j)</span><br><span class="line">&#123;</span><br><span class="line">    int test;</span><br><span class="line">    cin&gt;&gt;test;</span><br><span class="line">    for(int t=1;t&lt;=test;t++)</span><br><span class="line">    &#123;</span><br><span class="line">        int n;</span><br><span class="line">        int m=0;</span><br><span class="line">        cin&gt;&gt;n;</span><br><span class="line"></span><br><span class="line">        int* MaxB=new int[n+1];</span><br><span class="line">        info* dev=new info[100*100+1];</span><br><span class="line"></span><br><span class="line">        int pd=0;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        for(i=1;i&lt;=n;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            int mi;</span><br><span class="line">            cin&gt;&gt;mi;</span><br><span class="line">            m+=mi;</span><br><span class="line"></span><br><span class="line">            MaxB[i]=-1;</span><br><span class="line">            for(j=1;j&lt;=mi;j++)</span><br><span class="line">            &#123;</span><br><span class="line">                pd++;</span><br><span class="line">                cin&gt;&gt;dev[pd].B&gt;&gt;dev[pd].P;</span><br><span class="line">                dev[pd].id=i;</span><br><span class="line"></span><br><span class="line">                MaxB[i]=max(MaxB[i],dev[pd].B);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        qsort(dev,m+1,sizeof(info),cmp);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        bool flag=false;</span><br><span class="line">        double ans=0;</span><br><span class="line">        for(i=1;i&lt;=m-(n-1);i++)</span><br><span class="line">        &#123;</span><br><span class="line">            bool* vist=new bool[n+1];</span><br><span class="line">            memset(vist,false,sizeof(bool)*(n+1));</span><br><span class="line"></span><br><span class="line">            vist[ dev[i].id ]=true;</span><br><span class="line">            double price=dev[i].P;</span><br><span class="line">            int count=1;</span><br><span class="line"></span><br><span class="line">            for(j=i+1;j&lt;=m;j++)</span><br><span class="line">            &#123;</span><br><span class="line">                if(vist[ dev[j].id ])</span><br><span class="line">                    continue;</span><br><span class="line"></span><br><span class="line">                if(dev[i].B &gt; MaxB[ dev[j].id ])</span><br><span class="line">                &#123;</span><br><span class="line">                    flag=true;</span><br><span class="line">                    break;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                vist[ dev[j].id ]=true;</span><br><span class="line">                price+=dev[j].P;</span><br><span class="line">                count++;</span><br><span class="line">            &#125;</span><br><span class="line">            if(flag || count&lt;n)</span><br><span class="line">                break;</span><br><span class="line"></span><br><span class="line">            ans=max(ans,(dev[i].B/price));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        cout&lt;&lt;fixed&lt;&lt;setprecision(3)&lt;&lt;ans&lt;&lt;endl;</span><br><span class="line"></span><br><span class="line">        delete MaxB;</span><br><span class="line">        delete dev;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月12日 已AC。</li>
 </ul>
@@ -147,7 +147,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/12/POJ-1018-Communication-System/">POJ 1018 Communication System</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月12日 - 13时07分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/12/POJ-1018-Communication-System/"
                                             title="POJ 1018 Communication System">https://xuanwo.org/2014/07/12/POJ-1018-Communication-System/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -218,114 +218,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -333,6 +225,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -117,7 +117,7 @@
 <p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=465" target="_blank" rel="external">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=465</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>一开始写了一个特别暴力的程序，吃饭之前让它一直跑，但是一直到我吃完饭回来还在跑14- -，默然泪。<br>然后推倒重来，开始用回朔法重写。实际上，我并不需要把所有的排列完全生成出来再进行判断，通过回朔法，我可以在生成排列的同时进行判断。这里也运用了深搜的思想，实际上是一个n*n的矩阵，我要找出满足表达式<code>i+A[cur-1]</code>为指数的那条路径。<br>搞定了主要的算法，下面就是一些细节的处理。首先，我不需要每一次都调用isPrime函数，因为n&lt;=16，也就是可能出现的最大和是小于32的，我可以在预处理中先判断好是否为质数再拿来用。其次，事先必须指定A[0]=1，vis[1]=1，同时dfs()是从1开始的，注意数组的下标。最后，是输出的处理：每一行末尾的空格，每组数据之间的空行，不要多也不要少，虽然琐碎但是却会决定你能否AC。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;#include &#60;cstdio&#62;&#10;#include &#60;cstdlib&#62;&#10;#include &#60;cstring&#62;&#10;#include &#60;cmath&#62;&#10;#include &#60;ctime&#62;&#10;#include &#60;iostream&#62;&#10;#include &#60;algorithm&#62;&#10;#include &#60;string&#62;&#10;#include &#60;vector&#62;&#10;#include &#60;deque&#62;&#10;#include &#60;list&#62;&#10;#include &#60;set&#62;&#10;#include &#60;map&#62;&#10;#include &#60;stack&#62;&#10;#include &#60;queue&#62;&#10;#include &#60;numeric&#62;&#10;#include &#60;iomanip&#62;&#10;#include &#60;bitset&#62;&#10;#include &#60;sstream&#62;&#10;#include &#60;fstream&#62;&#10;#define debug &#34;output for debug\n&#34;&#10;#define pi (acos(-1.0))&#10;#define eps (1e-8)&#10;#define inf (1&#60;&#60;28)&#10;#define ll long long int&#10;using namespace std;&#10;&#10;#define MAXN 50&#10;&#10;int n,flag=0;&#10;int A[MAXN],isp[MAXN],vis[MAXN];&#10;&#10;bool isPrime(int x)&#10;&#123;&#10;    for(int j=2; j&#60;=(int)sqrt(x); j++)&#10;    &#123;&#10;        if(x%j==0)  return false;&#10;    &#125;&#10;    return true;&#10;&#125;&#10;&#10;void dfs(int cur)&#10;&#123;&#10;    if(cur==n &#38;&#38; isp[A[0]+A[n-1]])&#10;    &#123;&#10;        for(int i=0; i&#60;n; i++)&#10;        &#123;&#10;            printf(&#34;%d&#34;, A[i]);&#10;            if(i!=n-1)  printf(&#34;%c&#34;, &#39; &#39;);&#10;        &#125;&#10;        printf(&#34;\n&#34;);&#10;    &#125;&#10;    else&#10;        for(int i=2; i&#60;=n; i++)&#10;        &#123;&#10;            if((!vis[i]&#38;&#38;isp[i+A[cur-1]]))&#10;            &#123;&#10;                A[cur]=i;&#10;                vis[i]=1;&#10;                dfs(cur+1);&#10;                vis[i]=0;&#10;            &#125;&#10;        &#125;&#10;&#125;&#10;&#10;int main(int argc, char const *argv[])&#10;&#123;&#10;&#10;    for(int i=1; i&#60;100; i++)&#10;    &#123;&#10;        if(isPrime(i))  isp[i]=i;&#10;        else isp[i]=0;&#10;    &#125;&#10;    while(~scanf(&#34;%d&#34;, &#38;n))&#10;    &#123;&#10;        flag++;&#10;        if(flag&#62;1)&#10;            printf(&#34;\n&#34;);&#10;        printf(&#34;Case %d:\n&#34;, flag);&#10;        memset(vis,0,sizeof(vis));&#10;        A[0]=1;&#10;        vis[1]=1;&#10;        dfs(1);&#10;    &#125;&#10;    return 0;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstdlib&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">#include &lt;ctime&gt;</span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">#include &lt;vector&gt;</span><br><span class="line">#include &lt;deque&gt;</span><br><span class="line">#include &lt;list&gt;</span><br><span class="line">#include &lt;set&gt;</span><br><span class="line">#include &lt;map&gt;</span><br><span class="line">#include &lt;stack&gt;</span><br><span class="line">#include &lt;queue&gt;</span><br><span class="line">#include &lt;numeric&gt;</span><br><span class="line">#include &lt;iomanip&gt;</span><br><span class="line">#include &lt;bitset&gt;</span><br><span class="line">#include &lt;sstream&gt;</span><br><span class="line">#include &lt;fstream&gt;</span><br><span class="line">#define debug &quot;output for debug\n&quot;</span><br><span class="line">#define pi (acos(-1.0))</span><br><span class="line">#define eps (1e-8)</span><br><span class="line">#define inf (1&lt;&lt;28)</span><br><span class="line">#define ll long long int</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">#define MAXN 50</span><br><span class="line"></span><br><span class="line">int n,flag=0;</span><br><span class="line">int A[MAXN],isp[MAXN],vis[MAXN];</span><br><span class="line"></span><br><span class="line">bool isPrime(int x)</span><br><span class="line">&#123;</span><br><span class="line">    for(int j=2; j&lt;=(int)sqrt(x); j++)</span><br><span class="line">    &#123;</span><br><span class="line">        if(x%j==0)  return false;</span><br><span class="line">    &#125;</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void dfs(int cur)</span><br><span class="line">&#123;</span><br><span class="line">    if(cur==n &amp;&amp; isp[A[0]+A[n-1]])</span><br><span class="line">    &#123;</span><br><span class="line">        for(int i=0; i&lt;n; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            printf(&quot;%d&quot;, A[i]);</span><br><span class="line">            if(i!=n-1)  printf(&quot;%c&quot;, &apos; &apos;);</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    else</span><br><span class="line">        for(int i=2; i&lt;=n; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            if((!vis[i]&amp;&amp;isp[i+A[cur-1]]))</span><br><span class="line">            &#123;</span><br><span class="line">                A[cur]=i;</span><br><span class="line">                vis[i]=1;</span><br><span class="line">                dfs(cur+1);</span><br><span class="line">                vis[i]=0;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">    for(int i=1; i&lt;100; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        if(isPrime(i))  isp[i]=i;</span><br><span class="line">        else isp[i]=0;</span><br><span class="line">    &#125;</span><br><span class="line">    while(~scanf(&quot;%d&quot;, &amp;n))</span><br><span class="line">    &#123;</span><br><span class="line">        flag++;</span><br><span class="line">        if(flag&gt;1)</span><br><span class="line">            printf(&quot;\n&quot;);</span><br><span class="line">        printf(&quot;Case %d:\n&quot;, flag);</span><br><span class="line">        memset(vis,0,sizeof(vis));</span><br><span class="line">        A[0]=1;</span><br><span class="line">        vis[1]=1;</span><br><span class="line">        dfs(1);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年11月2日 已AC。</li>
 </ul>
@@ -146,7 +146,7 @@
                     <p><span>本文标题:</span><a href="/2014/11/02/UVa-524-Prime-Ring-Problem/">UVa 524 Prime Ring Problem</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年11月2日 - 13时11分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2014/11/02/UVa-524-Prime-Ring-Problem/"
                                             title="UVa 524 Prime Ring Problem">https://xuanwo.org/2014/11/02/UVa-524-Prime-Ring-Problem/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -217,114 +217,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -332,6 +224,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

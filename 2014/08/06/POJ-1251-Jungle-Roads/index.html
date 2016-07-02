@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -118,8 +118,8 @@
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>同样是练习题，使用了Kruskal算法，对着模板敲的，理解的还不是很透彻。</p>
 <p>补充一个Prim算法的代码，神模板好评，自己对最小生成树的理解有了很大提高。在凌晨时分debug了半天，通过逐行打印，最终确认我错误的原因，没有进行初始化。虽然有点哭笑不得，但是感觉自己花了这三个小时是值得的。以后要避免这样的错误。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><h2 id="Kruskal算法"><a href="#Kruskal算法" class="headerlink" title="Kruskal算法"></a>Kruskal算法</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &#60;iostream&#62;&#10;#include &#60;algorithm&#62;&#10;using namespace std;&#10;#define MAX 26&#10;&#10;typedef struct&#10;&#123;&#10;    int x, y;&#10;    int w;&#10;&#125; edge;&#10;&#10;edge e[MAX *MAX];&#10;int rank[MAX];&#10;int father[MAX];&#10;int sum;&#10;&#10;&#10;bool cmp(const edge a, const edge b)&#10;&#123;&#10;    return a.w &#60; b.w;&#10;&#125;&#10;&#10;&#10;void Make_Set(int x)&#10;&#123;&#10;    father[x] = x;&#10;    rank[x] = 0;&#10;&#125;&#10;&#10;&#10;int Find_Set(int x)&#10;&#123;&#10;    if (x != father[x])&#10;    &#123;&#10;        father[x] = Find_Set(father[x]);&#10;    &#125;&#10;    return father[x];&#10;&#125;&#10;&#10;&#10;void Union(int x, int y, int w)&#10;&#123;&#10;&#10;    if (x == y) return;&#10;    if (rank[x] &#62; rank[y])&#10;    &#123;&#10;        father[y] = x;&#10;    &#125;&#10;    else&#10;    &#123;&#10;        if (rank[x] == rank[y])&#10;        &#123;&#10;            rank[y]++;&#10;        &#125;&#10;        father[x] = y;&#10;    &#125;&#10;    sum += w;&#10;&#125;&#10;&#10;int main()&#10;&#123;&#10;    int i, j, k, m, n, t;&#10;    char ch;&#10;    while (cin &#62;&#62; m &#38;&#38; m != 0)&#10;    &#123;&#10;        k = 0;&#10;        for (i = 0; i &#60; m; i++) Make_Set(i);&#10;        for (i = 0; i &#60; m - 1; i++)&#10;        &#123;&#10;            cin &#62;&#62; ch &#62;&#62; n;&#10;            for (j = 0; j &#60; n; j++)&#10;            &#123;&#10;                cin &#62;&#62; ch &#62;&#62; e[k].w;&#10;                e[k].x = i;&#10;                e[k].y = ch - &#39;A&#39;;&#10;                k++;&#10;            &#125;&#10;        &#125;&#10;        sort(e, e + k, cmp);&#10;        sum = 0;&#10;        for (i = 0; i &#60; k; i++)&#10;        &#123;&#10;            Union(Find_Set(e[i].x), Find_Set(e[i].y), e[i].w);&#10;        &#125;&#10;        cout &#60;&#60; sum &#60;&#60; endl;&#10;    &#125;&#10;    return 0;&#10;&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="Prim算法"><a href="#Prim算法" class="headerlink" title="Prim算法"></a>Prim算法</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &#60;iostream&#62;&#10;#include &#60;cstdio&#62;&#10;#include &#60;string.h&#62;&#10;using namespace std;&#10;#define MAXN 200&#10;#define inf 1000000000&#10;&#10;typedef int elem_t;&#10;&#10;elem_t prim(int n, elem_t mat[][MAXN], int *pre)&#10;&#123;&#10;    elem_t min[MAXN], ret = 0;&#10;    int v[MAXN], i, j, k;&#10;    for (i = 0; i &#60; n; i++)&#10;        min[i] = inf, v[i] = 0, pre[i] = -1;&#10;    for (min[j = 0] = 0; j &#60; n; j++)&#10;    &#123;&#10;        for (k = -1, i = 0; i &#60; n; i++)&#10;            if (!v[i] &#38;&#38; (k == -1 || min[i] &#60; min[k]))&#10;                k = i;&#10;        for (v[k] = 1, ret += min[k], i = 0; i &#60; n; i++)&#10;            if (!v[i] &#38;&#38; mat[k][i] &#60; min[i])&#10;                min[i] = mat[pre[i] = k][i];&#10;    &#125;&#10;    return ret;&#10;&#125;&#10;&#10;int main(int argc, char const *argv[])&#10;&#123;&#10;    int n, i, j, k, cnt, x, sum;&#10;    char ch;&#10;    int pre[MAXN];&#10;    elem_t mat[MAXN][MAXN];&#10;    while (cin &#62;&#62; n &#38;&#38; n)&#10;    &#123;&#10;        for (i = 0; i &#60; n; i++)&#10;            for (j = 0; j &#60; n; j++)&#10;            &#123;&#10;                mat[i][j] = inf;&#10;                if(i==j)    mat[i][j]=0;&#10;            &#125;&#10;        for (i = 0; i &#60; n - 1; i++)&#10;        &#123;&#10;            cin &#62;&#62; ch &#62;&#62; cnt;&#10;            for (j = 0, k = int(ch - &#39;A&#39;); j &#60;= cnt - 1; j++)&#10;            &#123;&#10;                cin &#62;&#62; ch &#62;&#62; x;&#10;                mat[k][int(ch - &#39;A&#39;)] = x;&#10;                mat[int(ch - &#39;A&#39;)][k] = x;&#10;            &#125;&#10;        &#125;&#10;        sum = prim(n, mat, pre);&#10;        cout&#60;&#60;sum&#60;&#60;endl;&#10;    &#125;&#10;    return 0;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><h2 id="Kruskal算法"><a href="#Kruskal算法" class="headerlink" title="Kruskal算法"></a>Kruskal算法</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">using namespace std;</span><br><span class="line">#define MAX 26</span><br><span class="line"></span><br><span class="line">typedef struct</span><br><span class="line">&#123;</span><br><span class="line">    int x, y;</span><br><span class="line">    int w;</span><br><span class="line">&#125; edge;</span><br><span class="line"></span><br><span class="line">edge e[MAX *MAX];</span><br><span class="line">int rank[MAX];</span><br><span class="line">int father[MAX];</span><br><span class="line">int sum;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">bool cmp(const edge a, const edge b)</span><br><span class="line">&#123;</span><br><span class="line">    return a.w &lt; b.w;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">void Make_Set(int x)</span><br><span class="line">&#123;</span><br><span class="line">    father[x] = x;</span><br><span class="line">    rank[x] = 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">int Find_Set(int x)</span><br><span class="line">&#123;</span><br><span class="line">    if (x != father[x])</span><br><span class="line">    &#123;</span><br><span class="line">        father[x] = Find_Set(father[x]);</span><br><span class="line">    &#125;</span><br><span class="line">    return father[x];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">void Union(int x, int y, int w)</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">    if (x == y) return;</span><br><span class="line">    if (rank[x] &gt; rank[y])</span><br><span class="line">    &#123;</span><br><span class="line">        father[y] = x;</span><br><span class="line">    &#125;</span><br><span class="line">    else</span><br><span class="line">    &#123;</span><br><span class="line">        if (rank[x] == rank[y])</span><br><span class="line">        &#123;</span><br><span class="line">            rank[y]++;</span><br><span class="line">        &#125;</span><br><span class="line">        father[x] = y;</span><br><span class="line">    &#125;</span><br><span class="line">    sum += w;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    int i, j, k, m, n, t;</span><br><span class="line">    char ch;</span><br><span class="line">    while (cin &gt;&gt; m &amp;&amp; m != 0)</span><br><span class="line">    &#123;</span><br><span class="line">        k = 0;</span><br><span class="line">        for (i = 0; i &lt; m; i++) Make_Set(i);</span><br><span class="line">        for (i = 0; i &lt; m - 1; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            cin &gt;&gt; ch &gt;&gt; n;</span><br><span class="line">            for (j = 0; j &lt; n; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                cin &gt;&gt; ch &gt;&gt; e[k].w;</span><br><span class="line">                e[k].x = i;</span><br><span class="line">                e[k].y = ch - &apos;A&apos;;</span><br><span class="line">                k++;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        sort(e, e + k, cmp);</span><br><span class="line">        sum = 0;</span><br><span class="line">        for (i = 0; i &lt; k; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            Union(Find_Set(e[i].x), Find_Set(e[i].y), e[i].w);</span><br><span class="line">        &#125;</span><br><span class="line">        cout &lt;&lt; sum &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Prim算法"><a href="#Prim算法" class="headerlink" title="Prim算法"></a>Prim算法</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">using namespace std;</span><br><span class="line">#define MAXN 200</span><br><span class="line">#define inf 1000000000</span><br><span class="line"></span><br><span class="line">typedef int elem_t;</span><br><span class="line"></span><br><span class="line">elem_t prim(int n, elem_t mat[][MAXN], int *pre)</span><br><span class="line">&#123;</span><br><span class="line">    elem_t min[MAXN], ret = 0;</span><br><span class="line">    int v[MAXN], i, j, k;</span><br><span class="line">    for (i = 0; i &lt; n; i++)</span><br><span class="line">        min[i] = inf, v[i] = 0, pre[i] = -1;</span><br><span class="line">    for (min[j = 0] = 0; j &lt; n; j++)</span><br><span class="line">    &#123;</span><br><span class="line">        for (k = -1, i = 0; i &lt; n; i++)</span><br><span class="line">            if (!v[i] &amp;&amp; (k == -1 || min[i] &lt; min[k]))</span><br><span class="line">                k = i;</span><br><span class="line">        for (v[k] = 1, ret += min[k], i = 0; i &lt; n; i++)</span><br><span class="line">            if (!v[i] &amp;&amp; mat[k][i] &lt; min[i])</span><br><span class="line">                min[i] = mat[pre[i] = k][i];</span><br><span class="line">    &#125;</span><br><span class="line">    return ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    int n, i, j, k, cnt, x, sum;</span><br><span class="line">    char ch;</span><br><span class="line">    int pre[MAXN];</span><br><span class="line">    elem_t mat[MAXN][MAXN];</span><br><span class="line">    while (cin &gt;&gt; n &amp;&amp; n)</span><br><span class="line">    &#123;</span><br><span class="line">        for (i = 0; i &lt; n; i++)</span><br><span class="line">            for (j = 0; j &lt; n; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                mat[i][j] = inf;</span><br><span class="line">                if(i==j)    mat[i][j]=0;</span><br><span class="line">            &#125;</span><br><span class="line">        for (i = 0; i &lt; n - 1; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            cin &gt;&gt; ch &gt;&gt; cnt;</span><br><span class="line">            for (j = 0, k = int(ch - &apos;A&apos;); j &lt;= cnt - 1; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                cin &gt;&gt; ch &gt;&gt; x;</span><br><span class="line">                mat[k][int(ch - &apos;A&apos;)] = x;</span><br><span class="line">                mat[int(ch - &apos;A&apos;)][k] = x;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        sum = prim(n, mat, pre);</span><br><span class="line">        cout&lt;&lt;sum&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月06日 已AC。</li>
 </ul>
@@ -148,7 +148,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/06/POJ-1251-Jungle-Roads/">POJ 1251 Jungle Roads</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月6日 - 22时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/06/POJ-1251-Jungle-Roads/"
                                             title="POJ 1251 Jungle Roads">https://xuanwo.org/2014/08/06/POJ-1251-Jungle-Roads/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -219,114 +219,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -334,6 +226,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

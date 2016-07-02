@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -117,7 +117,7 @@
 <p><a href="http://poj.org/problem?id=3414" target="_blank" rel="external">http://poj.org/problem?id=3414</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>因为卡一道题然后整整两天没有做题目什么的太不科学了- -。<br>纠结的难点在于，我怎么样把实现操作的路径打印出来。事实上，标记全部的六种状态，然后在bfs的过程中，把每一个状态全都输出到一个数组中去，然后再进行输出。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;#include &#60;cstdio&#62;&#10;#include &#60;cstdlib&#62;&#10;#include &#60;cstring&#62;&#10;#include &#60;cmath&#62;&#10;#include &#60;ctime&#62;&#10;#include &#60;iostream&#62;&#10;#include &#60;algorithm&#62;&#10;#include &#60;string&#62;&#10;#include &#60;vector&#62;&#10;#include &#60;deque&#62;&#10;#include &#60;list&#62;&#10;#include &#60;set&#62;&#10;#include &#60;map&#62;&#10;#include &#60;stack&#62;&#10;#include &#60;queue&#62;&#10;#include &#60;numeric&#62;&#10;#include &#60;iomanip&#62;&#10;#include &#60;bitset&#62;&#10;#include &#60;sstream&#62;&#10;#include &#60;fstream&#62;&#10;#define debug puts(&#34;-----&#34;)&#10;#define pi (acos(-1.0))&#10;#define eps (1e-8)&#10;#define inf (1&#60;&#60;28)&#10;using namespace std;&#10;&#10;const int maxn = 110;&#10;int vis[maxn][maxn];&#10;int a, b, c;&#10;int step;&#10;int flag;&#10;&#10;&#10;struct Status&#10;&#123;&#10;    int k1, k2;&#10;    int op;&#10;    int step;&#10;    int pre;&#10;&#125; q[maxn *maxn];&#10;int id[maxn *maxn];&#10;int lastIndex;&#10;&#10;void bfs()&#10;&#123;&#10;    Status now, next;&#10;&#10;    int head, tail;&#10;    head = tail = 0;&#10;&#10;    q[tail].k1 = 0; q[tail].k2 = 0;&#10;    q[tail].op = 0; q[tail].step = 0; q[tail].pre = 0;&#10;&#10;    tail++;&#10;&#10;    memset(vis, 0, sizeof(vis));&#10;    vis[0][0] = 1;&#10;&#10;    while (head &#60; tail)&#10;    &#123;&#10;        now = q[head];&#10;        head++;&#10;&#10;        if (now.k1 == c || now.k2 == c)&#10;        &#123;&#10;            flag = 1;&#10;            step = now.step;&#10;            lastIndex = head - 1;&#10;        &#125;&#10;&#10;        for (int i = 1; i &#60;= 6; i++)&#10;        &#123;&#10;            if (i == 1)&#10;            &#123;&#10;                next.k1 = a;&#10;                next.k2 = now.k2;&#10;            &#125;&#10;            else if (i == 2)&#10;            &#123;&#10;                next.k1 = now.k1;&#10;                next.k2 = b;&#10;            &#125;&#10;            else if (i == 3)&#10;            &#123;&#10;                next.k1 = 0;&#10;                next.k2 = now.k2;&#10;            &#125;&#10;            else if (i == 4)&#10;            &#123;&#10;                next.k1 = now.k1;&#10;                next.k2 = 0;&#10;            &#125;&#10;            else if (i == 5)&#10;            &#123;&#10;                if (now.k1 + now.k2 &#60;= b)&#10;                &#123;&#10;                    next.k1 = 0;&#10;                    next.k2 = now.k1 + now.k2;&#10;                &#125;&#10;                else&#10;                &#123;&#10;                    next.k1 = now.k1 + now.k2 - b;&#10;                    next.k2 = b;&#10;                &#125;&#10;            &#125;&#10;            else if (i == 6)&#10;            &#123;&#10;                if (now.k1 + now.k2 &#60;= a)&#10;                &#123;&#10;                    next.k1 = now.k1 + now.k2;&#10;                    next.k2 = 0;&#10;                &#125;&#10;                else&#10;                &#123;&#10;                    next.k1 = a;&#10;                    next.k2 = now.k1 + now.k2 - a;&#10;                &#125;&#10;            &#125;&#10;&#10;            next.op = i;&#10;            if (!vis[next.k1][next.k2])&#10;            &#123;&#10;                vis[next.k1][next.k2] = 1;&#10;                next.step = now.step + 1;&#10;                next.pre = head - 1;&#10;&#10;                q[tail].k1 = next.k1; q[tail].k2 = next.k2;&#10;                q[tail].op = next.op; q[tail].step = next.step; q[tail].pre = next.pre;&#10;                tail++;&#10;&#10;                if (next.k1 == c || next.k2 == c)&#10;                &#123;&#10;                    flag = 1;&#10;                    step = next.step;&#10;                    lastIndex = tail - 1;&#10;                    return;&#10;                &#125;&#10;            &#125;&#10;        &#125;&#10;    &#125;&#10;&#10;&#10;&#125;&#10;&#10;int main(int argc, char const *argv[])&#10;&#123;&#10;    while (scanf(&#34;%d%d%d&#34;, &#38;a, &#38;b, &#38;c) != EOF)&#10;    &#123;&#10;        flag = 0;&#10;        step = 0;&#10;&#10;        bfs();&#10;        if (flag)&#10;        &#123;&#10;            printf(&#34;%d\n&#34;, step);&#10;&#10;            id[step] = lastIndex;&#10;            for (int i = step - 1; i &#62;= 1; i--)&#10;            &#123;&#10;                id[i] = q[id[i + 1]].pre;&#10;            &#125;&#10;&#10;            for (int i = 1; i &#60;= step; i++)&#10;            &#123;&#10;                if (q[id[i]].op == 1)&#10;                    printf(&#34;FILL(1)\n&#34;);&#10;&#10;                else if (q[id[i]].op == 2)&#10;                    printf(&#34;FILL(2)\n&#34;);&#10;&#10;                else if (q[id[i]].op == 3)&#10;                    printf(&#34;DROP(1)\n&#34;);&#10;&#10;                else if (q[id[i]].op == 4)&#10;                    printf(&#34;DROP(2)\n&#34;);&#10;&#10;                else if (q[id[i]].op == 5)&#10;                    printf(&#34;POUR(1,2)\n&#34;);&#10;&#10;                else if (q[id[i]].op == 6)&#10;                    printf(&#34;POUR(2,1)\n&#34;);&#10;            &#125;&#10;        &#125;&#10;        else printf(&#34;impossible\n&#34;);&#10;    &#125;&#10;    return 0;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstdlib&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">#include &lt;ctime&gt;</span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">#include &lt;vector&gt;</span><br><span class="line">#include &lt;deque&gt;</span><br><span class="line">#include &lt;list&gt;</span><br><span class="line">#include &lt;set&gt;</span><br><span class="line">#include &lt;map&gt;</span><br><span class="line">#include &lt;stack&gt;</span><br><span class="line">#include &lt;queue&gt;</span><br><span class="line">#include &lt;numeric&gt;</span><br><span class="line">#include &lt;iomanip&gt;</span><br><span class="line">#include &lt;bitset&gt;</span><br><span class="line">#include &lt;sstream&gt;</span><br><span class="line">#include &lt;fstream&gt;</span><br><span class="line">#define debug puts(&quot;-----&quot;)</span><br><span class="line">#define pi (acos(-1.0))</span><br><span class="line">#define eps (1e-8)</span><br><span class="line">#define inf (1&lt;&lt;28)</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">const int maxn = 110;</span><br><span class="line">int vis[maxn][maxn];</span><br><span class="line">int a, b, c;</span><br><span class="line">int step;</span><br><span class="line">int flag;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">struct Status</span><br><span class="line">&#123;</span><br><span class="line">    int k1, k2;</span><br><span class="line">    int op;</span><br><span class="line">    int step;</span><br><span class="line">    int pre;</span><br><span class="line">&#125; q[maxn *maxn];</span><br><span class="line">int id[maxn *maxn];</span><br><span class="line">int lastIndex;</span><br><span class="line"></span><br><span class="line">void bfs()</span><br><span class="line">&#123;</span><br><span class="line">    Status now, next;</span><br><span class="line"></span><br><span class="line">    int head, tail;</span><br><span class="line">    head = tail = 0;</span><br><span class="line"></span><br><span class="line">    q[tail].k1 = 0; q[tail].k2 = 0;</span><br><span class="line">    q[tail].op = 0; q[tail].step = 0; q[tail].pre = 0;</span><br><span class="line"></span><br><span class="line">    tail++;</span><br><span class="line"></span><br><span class="line">    memset(vis, 0, sizeof(vis));</span><br><span class="line">    vis[0][0] = 1;</span><br><span class="line"></span><br><span class="line">    while (head &lt; tail)</span><br><span class="line">    &#123;</span><br><span class="line">        now = q[head];</span><br><span class="line">        head++;</span><br><span class="line"></span><br><span class="line">        if (now.k1 == c || now.k2 == c)</span><br><span class="line">        &#123;</span><br><span class="line">            flag = 1;</span><br><span class="line">            step = now.step;</span><br><span class="line">            lastIndex = head - 1;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        for (int i = 1; i &lt;= 6; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            if (i == 1)</span><br><span class="line">            &#123;</span><br><span class="line">                next.k1 = a;</span><br><span class="line">                next.k2 = now.k2;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 2)</span><br><span class="line">            &#123;</span><br><span class="line">                next.k1 = now.k1;</span><br><span class="line">                next.k2 = b;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 3)</span><br><span class="line">            &#123;</span><br><span class="line">                next.k1 = 0;</span><br><span class="line">                next.k2 = now.k2;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 4)</span><br><span class="line">            &#123;</span><br><span class="line">                next.k1 = now.k1;</span><br><span class="line">                next.k2 = 0;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 5)</span><br><span class="line">            &#123;</span><br><span class="line">                if (now.k1 + now.k2 &lt;= b)</span><br><span class="line">                &#123;</span><br><span class="line">                    next.k1 = 0;</span><br><span class="line">                    next.k2 = now.k1 + now.k2;</span><br><span class="line">                &#125;</span><br><span class="line">                else</span><br><span class="line">                &#123;</span><br><span class="line">                    next.k1 = now.k1 + now.k2 - b;</span><br><span class="line">                    next.k2 = b;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 6)</span><br><span class="line">            &#123;</span><br><span class="line">                if (now.k1 + now.k2 &lt;= a)</span><br><span class="line">                &#123;</span><br><span class="line">                    next.k1 = now.k1 + now.k2;</span><br><span class="line">                    next.k2 = 0;</span><br><span class="line">                &#125;</span><br><span class="line">                else</span><br><span class="line">                &#123;</span><br><span class="line">                    next.k1 = a;</span><br><span class="line">                    next.k2 = now.k1 + now.k2 - a;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            next.op = i;</span><br><span class="line">            if (!vis[next.k1][next.k2])</span><br><span class="line">            &#123;</span><br><span class="line">                vis[next.k1][next.k2] = 1;</span><br><span class="line">                next.step = now.step + 1;</span><br><span class="line">                next.pre = head - 1;</span><br><span class="line"></span><br><span class="line">                q[tail].k1 = next.k1; q[tail].k2 = next.k2;</span><br><span class="line">                q[tail].op = next.op; q[tail].step = next.step; q[tail].pre = next.pre;</span><br><span class="line">                tail++;</span><br><span class="line"></span><br><span class="line">                if (next.k1 == c || next.k2 == c)</span><br><span class="line">                &#123;</span><br><span class="line">                    flag = 1;</span><br><span class="line">                    step = next.step;</span><br><span class="line">                    lastIndex = tail - 1;</span><br><span class="line">                    return;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    while (scanf(&quot;%d%d%d&quot;, &amp;a, &amp;b, &amp;c) != EOF)</span><br><span class="line">    &#123;</span><br><span class="line">        flag = 0;</span><br><span class="line">        step = 0;</span><br><span class="line"></span><br><span class="line">        bfs();</span><br><span class="line">        if (flag)</span><br><span class="line">        &#123;</span><br><span class="line">            printf(&quot;%d\n&quot;, step);</span><br><span class="line"></span><br><span class="line">            id[step] = lastIndex;</span><br><span class="line">            for (int i = step - 1; i &gt;= 1; i--)</span><br><span class="line">            &#123;</span><br><span class="line">                id[i] = q[id[i + 1]].pre;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            for (int i = 1; i &lt;= step; i++)</span><br><span class="line">            &#123;</span><br><span class="line">                if (q[id[i]].op == 1)</span><br><span class="line">                    printf(&quot;FILL(1)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 2)</span><br><span class="line">                    printf(&quot;FILL(2)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 3)</span><br><span class="line">                    printf(&quot;DROP(1)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 4)</span><br><span class="line">                    printf(&quot;DROP(2)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 5)</span><br><span class="line">                    printf(&quot;POUR(1,2)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 6)</span><br><span class="line">                    printf(&quot;POUR(2,1)\n&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        else printf(&quot;impossible\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月24日 已AC。</li>
 </ul>
@@ -146,7 +146,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/24/POJ-3414-Pots/">POJ 3414 Pots</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月24日 - 21时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/24/POJ-3414-Pots/"
                                             title="POJ 3414 Pots">https://xuanwo.org/2014/08/24/POJ-3414-Pots/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -217,114 +217,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -332,6 +224,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

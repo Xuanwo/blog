@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -116,22 +116,22 @@
             <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>自从买了VPS之后，我的人生就多了一个需要思考的问题——我的VPS还能用来干嘛？然后想到Github有一个Webhook的功能，可以在每一次提交之后发送一个POST到指定的URL。那么，只要找一个办法获取这个POST，再执行指定的命令，可以实现Hexo的自动发布功能了。从此以后，不管在哪里，我只要修改我的md文件，push之后我的服务器就能自动进行编译并且部署了。</p>
 <a id="more"></a>
 <h1 id="配置Nginx"><a href="#配置Nginx" class="headerlink" title="配置Nginx"></a>配置Nginx</h1><h2 id="安装Nginx"><a href="#安装Nginx" class="headerlink" title="安装Nginx"></a>安装Nginx</h2><p>使用apt-get程序来安装nginx</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;apt-get update&#10;apt-get install nginx</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">apt-get update</span><br><span class="line">apt-get install nginx</span><br></pre></td></tr></table></figure>
 <p>在浏览器中访问<a href="http://your-ip-address" target="_blank" rel="external">http://your-ip-address</a> or domain/， 如果看到<code>Welcome to nginx!</code>字样，说明Nginx已经安装成功了。</p>
 <h2 id="配置Nginx-1"><a href="#配置Nginx-1" class="headerlink" title="配置Nginx"></a>配置Nginx</h2><p>修改<code>/etc/nginx/sites-available/default</code>文件，在<code>serve</code>的框里面的空行中输入：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;location /update &#123;&#10;proxy_pass http://127.0.0.1:1111;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">location /update &#123;</span><br><span class="line">proxy_pass http://127.0.0.1:1111;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这样设置之后<code>http://your-ip-address or domain/update</code>访问就会被重定向到1111端口。</p>
 <h2 id="重启Nginx"><a href="#重启Nginx" class="headerlink" title="重启Nginx"></a>重启Nginx</h2><p>输入：<br><code>/etc/init.d/nginx restart</code></p>
 <h1 id="配置Git"><a href="#配置Git" class="headerlink" title="配置Git"></a>配置Git</h1><h2 id="安装Git"><a href="#安装Git" class="headerlink" title="安装Git"></a>安装Git</h2><p>输入：<br><code>apt-get install git</code></p>
 <h2 id="下载自己的代码库"><a href="#下载自己的代码库" class="headerlink" title="下载自己的代码库"></a>下载自己的代码库</h2><p>输入：<br><code>git clone yourgit yourdir</code></p>
 <h1 id="配置Python"><a href="#配置Python" class="headerlink" title="配置Python"></a>配置Python</h1><h2 id="安装Python环境"><a href="#安装Python环境" class="headerlink" title="安装Python环境"></a>安装Python环境</h2><p>输入：<br><code>apt-get install python-pip</code><br>然后系统会自动完成相关的配置。</p>
 <h2 id="编辑Python文件"><a href="#编辑Python文件" class="headerlink" title="编辑Python文件"></a>编辑Python文件</h2><p>输入：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;cd ~/yourdir&#10;vi hook.py</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">cd ~/yourdir</span><br><span class="line">vi hook.py</span><br></pre></td></tr></table></figure>
 <p>在打开的vim界面中，点击一下<code>i</code>，进入insert模式，然后粘贴以下代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;#!/usr/bin/env python3&#10;#-*- coding:utf-8 -*-&#10;# start a python service and watch the nginx request dog&#10;&#10;from http.server import HTTPServer,CGIHTTPRequestHandler&#10;from threading import Thread,RLock&#10;import subprocess&#10;import logging&#10;import sys&#10;import os.path&#10;&#10;&#10;_PWD=os.path.abspath(os.path.dirname(__file__))&#10;def execute_cmd(args,cwd=None,timeout=30):&#10;    if isinstance(args,str): args = [args]&#10;    try:&#10;        with subprocess.Popen(args,stdout=subprocess.PIPE,cwd=cwd) as proc:&#10;            try:&#10;                output,unused_err = proc.communicate(timeout=timeout)&#10;            except:&#10;                proc.kill()&#10;                raise&#10;            retcode = proc.poll()&#10;            if retcode:&#10;                raise subprocess.CalledProcessError(retcode, proc.args, output=output)&#10;            return output.decode(&#39;utf-8&#39;,&#39;ignore&#39;) if output else &#39;&#39;&#10;    except Exception as ex:&#10;        logging.error(&#39;EXECUTE_CMD_ERROR: %s&#39;,&#39; &#39;.join(str(x) for x in args))&#10;        raise ex&#10;&#10;class HttpHandler(CGIHTTPRequestHandler):&#10;    _lock = RLock()&#10;    _counter = 0&#10;    _building = False&#10;&#10;    def build(self):&#10;        with HttpHandler._lock:&#10;            if HttpHandler._counter == 0 or HttpHandler._building:&#10;                return&#10;        HttpHandler._counter = 0&#10;        HttpHandler._building = True&#10;        logging.info(&#34;BUILDING NOW...&#34;)&#10;        try:&#10;            resp = execute_cmd(os.path.join(_PWD,&#39;build.sh&#39;),cwd=_PWD,timeout=600)&#10;            logging.info(resp)&#10;        finally:&#10;            HttpHandler._building = False&#10;            self.build()&#10;&#10;    def do_GET(self):&#10;        self.do_POST()&#10;    def do_POST(self):&#10;        self.send_response(200,&#39;OK&#39;)&#10;        self.end_headers()&#10;        self.wfile.write(b&#39;OK&#39;)&#10;        self.wfile.flush()&#10;        with HttpHandler._lock:&#10;            HttpHandler._counter += 1&#10;        Thread(target=self.build).start()&#10;&#10;if __name__ == &#39;__main__&#39;:&#10;    logging.basicConfig(format=&#39;%(asctime)s %(levelname)s: %(message)s&#39;,level=logging.INFO)&#10;&#10;    port = int(sys.argv[1]) if len(sys.argv) &#62; 1 else 1111&#10;    logging.info(&#39;starting the server at 127.0.0.1:%s&#39;,port)&#10;    httpd = HTTPServer((&#39;127.0.0.1&#39;,port),HttpHandler)&#10;    httpd.serve_forever()</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#!/usr/bin/env python3</span><br><span class="line">#-*- coding:utf-8 -*-</span><br><span class="line"># start a python service and watch the nginx request dog</span><br><span class="line"></span><br><span class="line">from http.server import HTTPServer,CGIHTTPRequestHandler</span><br><span class="line">from threading import Thread,RLock</span><br><span class="line">import subprocess</span><br><span class="line">import logging</span><br><span class="line">import sys</span><br><span class="line">import os.path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">_PWD=os.path.abspath(os.path.dirname(__file__))</span><br><span class="line">def execute_cmd(args,cwd=None,timeout=30):</span><br><span class="line">    if isinstance(args,str): args = [args]</span><br><span class="line">    try:</span><br><span class="line">        with subprocess.Popen(args,stdout=subprocess.PIPE,cwd=cwd) as proc:</span><br><span class="line">            try:</span><br><span class="line">                output,unused_err = proc.communicate(timeout=timeout)</span><br><span class="line">            except:</span><br><span class="line">                proc.kill()</span><br><span class="line">                raise</span><br><span class="line">            retcode = proc.poll()</span><br><span class="line">            if retcode:</span><br><span class="line">                raise subprocess.CalledProcessError(retcode, proc.args, output=output)</span><br><span class="line">            return output.decode(&apos;utf-8&apos;,&apos;ignore&apos;) if output else &apos;&apos;</span><br><span class="line">    except Exception as ex:</span><br><span class="line">        logging.error(&apos;EXECUTE_CMD_ERROR: %s&apos;,&apos; &apos;.join(str(x) for x in args))</span><br><span class="line">        raise ex</span><br><span class="line"></span><br><span class="line">class HttpHandler(CGIHTTPRequestHandler):</span><br><span class="line">    _lock = RLock()</span><br><span class="line">    _counter = 0</span><br><span class="line">    _building = False</span><br><span class="line"></span><br><span class="line">    def build(self):</span><br><span class="line">        with HttpHandler._lock:</span><br><span class="line">            if HttpHandler._counter == 0 or HttpHandler._building:</span><br><span class="line">                return</span><br><span class="line">        HttpHandler._counter = 0</span><br><span class="line">        HttpHandler._building = True</span><br><span class="line">        logging.info(&quot;BUILDING NOW...&quot;)</span><br><span class="line">        try:</span><br><span class="line">            resp = execute_cmd(os.path.join(_PWD,&apos;build.sh&apos;),cwd=_PWD,timeout=600)</span><br><span class="line">            logging.info(resp)</span><br><span class="line">        finally:</span><br><span class="line">            HttpHandler._building = False</span><br><span class="line">            self.build()</span><br><span class="line"></span><br><span class="line">    def do_GET(self):</span><br><span class="line">        self.do_POST()</span><br><span class="line">    def do_POST(self):</span><br><span class="line">        self.send_response(200,&apos;OK&apos;)</span><br><span class="line">        self.end_headers()</span><br><span class="line">        self.wfile.write(b&apos;OK&apos;)</span><br><span class="line">        self.wfile.flush()</span><br><span class="line">        with HttpHandler._lock:</span><br><span class="line">            HttpHandler._counter += 1</span><br><span class="line">        Thread(target=self.build).start()</span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    logging.basicConfig(format=&apos;%(asctime)s %(levelname)s: %(message)s&apos;,level=logging.INFO)</span><br><span class="line"></span><br><span class="line">    port = int(sys.argv[1]) if len(sys.argv) &gt; 1 else 1111</span><br><span class="line">    logging.info(&apos;starting the server at 127.0.0.1:%s&apos;,port)</span><br><span class="line">    httpd = HTTPServer((&apos;127.0.0.1&apos;,port),HttpHandler)</span><br><span class="line">    httpd.serve_forever()</span><br></pre></td></tr></table></figure>
 <p>编辑完成后，输入<code>:wq</code>退出vi。</p>
 <h1 id="编辑sh文件"><a href="#编辑sh文件" class="headerlink" title="编辑sh文件"></a>编辑sh文件</h1><p>切换到yourdir，然后输入：<br><code>vi build.sh</code><br>在打开的vi界面中，点击<code>i</code>进入编辑模式，然后输入：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;#!/bin/bash&#10;echo &#34;build at `date`&#34;&#10;. ~/.nvm/nvm.sh&#10;nvm use 0.10.36&#10;cd ~/xuanwo&#10;git pull&#10;hexo clean&#10;hexo d -g&#10;echo &#34;built successfully&#34;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash</span><br><span class="line">echo &quot;build at `date`&quot;</span><br><span class="line">. ~/.nvm/nvm.sh</span><br><span class="line">nvm use 0.10.36</span><br><span class="line">cd ~/xuanwo</span><br><span class="line">git pull</span><br><span class="line">hexo clean</span><br><span class="line">hexo d -g</span><br><span class="line">echo &quot;built successfully&quot;</span><br></pre></td></tr></table></figure>
 <p>编辑完成后，输入<code>:wq</code>退出vi。</p>
 <h1 id="后台运行Python脚本进行监视"><a href="#后台运行Python脚本进行监视" class="headerlink" title="后台运行Python脚本进行监视"></a>后台运行Python脚本进行监视</h1><p>运行：<br><code>nohup python3 ~/xuanwo/hook.py &gt;&gt; /tmp/hook.log 2&gt;&amp;1 &amp;</code><br><strong>每次重启VPS后，貌似都需要运行一次</strong></p>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
@@ -162,7 +162,7 @@
                     <p><span>本文标题:</span><a href="/2015/02/05/VPS-Hexo-Autodeploy/">VPS搭配Github Webhook实现Hexo自动发布</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2015年2月5日 - 23时02分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2015/02/05/VPS-Hexo-Autodeploy/"
                                             title="VPS搭配Github Webhook实现Hexo自动发布">https://xuanwo.org/2015/02/05/VPS-Hexo-Autodeploy/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -175,11 +175,11 @@
             
                 <div class="post-tags">
                     
-                        <a href="/tags/Blog/"> #Blog </a>
+                        <a href="/tags/Hexo/"> #Hexo </a>
                     
                         <a href="/tags/Github-Pages/"> #Github-Pages </a>
                     
-                        <a href="/tags/Hexo/"> #Hexo </a>
+                        <a href="/tags/Blog/"> #Blog </a>
                     
                         <a href="/tags/VPS/"> #VPS </a>
                     
@@ -245,114 +245,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -360,6 +252,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

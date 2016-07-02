@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -117,7 +117,7 @@
 <p><a href="http://codeforces.com/problemset/problem/3/B" target="_blank" rel="external">http://codeforces.com/problemset/problem/3/B</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>读懂题略微花了一点时间，主要是生词多，有点吓人= =。有一辆卡车，要装载一些船只，有1和2两种。然后给出n个船的类型和容积，要求给定卡车体积v的情况下，装载的船的最大容积。<br>一开始的想法是理解成一个背包问题，但是给的v太大，用DP处理可能会超时。后来就用简单一点的思路，直接暴力贪心。把两种船分开，分别进行排序。小脑一动就能明白，最优解肯定是选取价值高的，然后枚举选择i只1船，则选择2船只的个数就是min((v - i) / 2, tc)<em>其中tc为2船总个数</em>。<br>输出上有一个trick，就是每个编号之间都有一个空格= =，因此WA一发。。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;#define MAXN 100000+10&#10;&#10;int sum1[MAXN], sum2[MAXN], oc, tc, ans[MAXN];&#10;int n, v, a, b, maxv, c1, c2;&#10;&#10;struct node&#10;&#123;&#10;    int id,val;&#10;&#125; one[MAXN], two[MAXN];&#10;&#10;bool cmp(node x, node y)&#10;&#123;&#10;    return x.val &#62; y.val;&#10;&#125;&#10;&#10;void init()&#10;&#123;&#10;    scanf(&#34;%d%d&#34;, &#38;n, &#38;v);&#10;    oc = tc = 0;&#10;    for(int i=1; i&#60;=n; i++)&#10;    &#123;&#10;        scanf(&#34;%d%d&#34;, &#38;a, &#38;b);&#10;        if(a == 1)&#10;            one[++oc].val = b, one[oc].id = i;&#10;        else&#10;            two[++tc].val = b, two[tc].id = i;&#10;    &#125;&#10;    sort(one+1, one + oc + 1, cmp);&#10;    sort(two+1, two + tc + 1, cmp);&#10;&#125;&#10;&#10;&#10;int main(int argc, char const *argv[])&#10;&#123;&#10;    init();&#10;    sum2[0] = sum1[0] = 0;&#10;    for(int i=1; i&#60;=tc; i++) sum2[i] = sum2[i - 1] + two[i].val;&#10;    for(int i=1; i&#60;=oc; i++) sum1[i] = sum1[i - 1] + one[i].val;&#10;    c1 = -1, c2 = -1, maxv = -1;&#10;    for(int i=0; i&#60;=oc; i++)&#10;    &#123;&#10;        if(i &#62; v)&#10;            break;&#10;        int d = sum1[i] + sum2[min((v - i) / 2, tc)];&#10;        if(d &#62; maxv)&#10;        &#123;&#10;            maxv = d;&#10;            c1 = i;&#10;            c2 = min((v - i) / 2, tc);&#10;        &#125;&#10;    &#125;&#10;    if(maxv == -1)&#10;    &#123;&#10;        printf(&#34;0\n&#34;);&#10;        return 0;&#10;    &#125;&#10;    int cnt = 0;&#10;    printf(&#34;%d\n&#34;, maxv);&#10;    for(int i=1; i&#60;=c1; i++) ans[++cnt] = one[i].id;&#10;    for(int i=1; i&#60;=c2; i++) ans[++cnt] = two[i].id;&#10;    for(int i=1; i&#60;=cnt; i++)&#10;        printf(&#34;%d%c&#34;, ans[i], i == cnt? &#39;\n&#39; : &#39; &#39;);&#10;    return 0;&#10;&#125;&#10;&#10;/*&#10;5 3&#10;1 9&#10;2 9&#10;1 9&#10;2 10&#10;1 6&#10;&#10;24&#10;3 1 5&#10;**/</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#define MAXN 100000+10</span><br><span class="line"></span><br><span class="line">int sum1[MAXN], sum2[MAXN], oc, tc, ans[MAXN];</span><br><span class="line">int n, v, a, b, maxv, c1, c2;</span><br><span class="line"></span><br><span class="line">struct node</span><br><span class="line">&#123;</span><br><span class="line">    int id,val;</span><br><span class="line">&#125; one[MAXN], two[MAXN];</span><br><span class="line"></span><br><span class="line">bool cmp(node x, node y)</span><br><span class="line">&#123;</span><br><span class="line">    return x.val &gt; y.val;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void init()</span><br><span class="line">&#123;</span><br><span class="line">    scanf(&quot;%d%d&quot;, &amp;n, &amp;v);</span><br><span class="line">    oc = tc = 0;</span><br><span class="line">    for(int i=1; i&lt;=n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        scanf(&quot;%d%d&quot;, &amp;a, &amp;b);</span><br><span class="line">        if(a == 1)</span><br><span class="line">            one[++oc].val = b, one[oc].id = i;</span><br><span class="line">        else</span><br><span class="line">            two[++tc].val = b, two[tc].id = i;</span><br><span class="line">    &#125;</span><br><span class="line">    sort(one+1, one + oc + 1, cmp);</span><br><span class="line">    sort(two+1, two + tc + 1, cmp);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    init();</span><br><span class="line">    sum2[0] = sum1[0] = 0;</span><br><span class="line">    for(int i=1; i&lt;=tc; i++) sum2[i] = sum2[i - 1] + two[i].val;</span><br><span class="line">    for(int i=1; i&lt;=oc; i++) sum1[i] = sum1[i - 1] + one[i].val;</span><br><span class="line">    c1 = -1, c2 = -1, maxv = -1;</span><br><span class="line">    for(int i=0; i&lt;=oc; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        if(i &gt; v)</span><br><span class="line">            break;</span><br><span class="line">        int d = sum1[i] + sum2[min((v - i) / 2, tc)];</span><br><span class="line">        if(d &gt; maxv)</span><br><span class="line">        &#123;</span><br><span class="line">            maxv = d;</span><br><span class="line">            c1 = i;</span><br><span class="line">            c2 = min((v - i) / 2, tc);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    if(maxv == -1)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;0\n&quot;);</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">    int cnt = 0;</span><br><span class="line">    printf(&quot;%d\n&quot;, maxv);</span><br><span class="line">    for(int i=1; i&lt;=c1; i++) ans[++cnt] = one[i].id;</span><br><span class="line">    for(int i=1; i&lt;=c2; i++) ans[++cnt] = two[i].id;</span><br><span class="line">    for(int i=1; i&lt;=cnt; i++)</span><br><span class="line">        printf(&quot;%d%c&quot;, ans[i], i == cnt? &apos;\n&apos; : &apos; &apos;);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/*</span><br><span class="line">5 3</span><br><span class="line">1 9</span><br><span class="line">2 9</span><br><span class="line">1 9</span><br><span class="line">2 10</span><br><span class="line">1 6</span><br><span class="line"></span><br><span class="line">24</span><br><span class="line">3 1 5</span><br><span class="line">**/</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年11月7日 已AC。</li>
 </ul>
@@ -146,7 +146,7 @@
                     <p><span>本文标题:</span><a href="/2014/11/07/CF-3B/">Codeforces Beta Round 3 B Lorry</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年11月7日 - 10时11分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2014/11/07/CF-3B/"
                                             title="Codeforces Beta Round 3 B Lorry">https://xuanwo.org/2014/11/07/CF-3B/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -217,114 +217,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -332,6 +224,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

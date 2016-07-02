@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -117,7 +117,7 @@
 <p><a href="http://poj.org/problem?id=1013" target="_blank" rel="external">http://poj.org/problem?id=1013</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>总共有12枚银币，里面有一枚是假货。要求通过三次称量，找出那枚假币，并说出是重了还是轻了。题目中明确指出，三次称量必定能找出那枚假货，使得问题简化了很多。一开始的想法是完全模拟出来，但写到代码的时候感觉过于蛋疼，然后想能不能用一些由计算机来推导的方法。在具体的实现中，发现我很难把问题抽象成计算机可以处理的问题。在一份<a href="http://blog.csdn.net/lyy289065406/article/details/6661421" target="_blank" rel="external">解题报告</a>的启发下，想到了使用一个数值来度量每个银币可能为假币的可能性的方法。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &#60;iostream&#62;&#10;#include &#60;stdlib.h&#62;&#10;using namespace std;&#10;&#10;int main()&#10;&#123;&#10;&#9;int n;&#10;&#9;cin&#62;&#62;n;&#10;&#9;while(n--)&#10;&#9;&#123;&#10;&#9;&#9;char left[3][6],right[3][6],status[3][6];&#10;&#10;&#9;&#9;int time[&#39;L&#39;+1]=&#123;0&#125;;&#10;&#9;&#9;bool zero[&#39;L&#39;+1]=&#123;false&#125;;&#10;&#10;&#9;&#9;for(int k=0;k&#60;3;k++)&#10;&#9;&#9;&#9;cin&#62;&#62;left[k]&#62;&#62;right[k]&#62;&#62;status[k];&#10;&#10;&#9;&#9;for(int i=0;i&#60;3;i++)&#10;&#9;&#9;&#123;&#10;&#9;&#9;&#9;switch(status[i][0])&#10;&#9;&#9;&#9;&#123;&#10;&#9;&#9;&#9;    case &#39;u&#39;:&#10;&#9;&#9;&#9;&#9;&#9;&#123;&#10;&#9;&#9;&#9;&#9;&#9;&#9;for(int j=0;left[i][j];j++)&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#123;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;time[ left[i][j] ]++;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;time[ right[i][j] ]--;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#125;&#10;&#9;&#9;&#9;&#9;&#9;&#9;break;&#10;&#9;&#9;&#9;&#9;&#9;&#125;&#10;&#9;&#9;&#9;&#9;case &#39;d&#39;:&#10;&#9;&#9;&#9;&#9;&#9;&#123;&#10;&#9;&#9;&#9;&#9;&#9;&#9;for(int j=0;left[i][j];j++)&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#123;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;time[ left[i][j] ]--;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;time[ right[i][j] ]++;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#125;&#10;&#9;&#9;&#9;&#9;&#9;&#9;break;&#10;&#9;&#9;&#9;&#9;&#9;&#125;&#10;&#9;&#9;&#9;&#9;case &#39;e&#39;:&#10;&#9;&#9;&#9;&#9;&#9;&#123;&#10;&#9;&#9;&#9;&#9;&#9;&#9;for(int j=0;left[i][j];j++)&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#123;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;zero[ left[i][j] ]=true;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;zero[ right[i][j] ]=true;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#125;&#10;&#9;&#9;&#9;&#9;&#9;&#9;break;&#10;&#9;&#9;&#9;&#9;&#9;&#125;&#10;&#9;&#9;&#9;&#125;&#10;&#9;&#9;&#125;&#10;&#10;&#9;&#9;int max=-1;&#10;&#9;&#9;char alpha;&#10;&#9;&#9;for(int j=&#39;A&#39;;j&#60;=&#39;L&#39;;j++)&#10;&#9;&#9;&#123;&#10;&#9;&#9;&#9;if(zero[j])&#10;&#9;&#9;&#9;&#9;continue;&#10;&#10;&#9;&#9;&#9;if(max&#60;=abs(time[j]))&#10;&#9;&#9;&#9;&#123;&#10;&#9;&#9;&#9;&#9;max=abs(time[j]);&#10;&#9;&#9;&#9;&#9;alpha=j;&#10;&#9;&#9;&#9;&#125;&#10;&#9;&#9;&#125;&#10;&#10;&#9;&#9;cout&#60;&#60;alpha&#60;&#60;&#34; is the counterfeit coin and it is &#34;;&#10;&#9;&#9;if(time[alpha]&#62;0)&#10;&#9;&#9;&#9;cout&#60;&#60;&#34;heavy.&#34;&#60;&#60;endl;&#10;&#9;&#9;else&#10;&#9;&#9;&#9;cout&#60;&#60;&#34;light.&#34;&#60;&#60;endl;&#10;&#9;&#125;&#10;&#9;return 0;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    int n;</span><br><span class="line">    cin&gt;&gt;n;</span><br><span class="line">    while(n--)</span><br><span class="line">    &#123;</span><br><span class="line">        char left[3][6],right[3][6],status[3][6];</span><br><span class="line"></span><br><span class="line">        int time[&apos;L&apos;+1]=&#123;0&#125;;</span><br><span class="line">        bool zero[&apos;L&apos;+1]=&#123;false&#125;;</span><br><span class="line"></span><br><span class="line">        for(int k=0;k&lt;3;k++)</span><br><span class="line">            cin&gt;&gt;left[k]&gt;&gt;right[k]&gt;&gt;status[k];</span><br><span class="line"></span><br><span class="line">        for(int i=0;i&lt;3;i++)</span><br><span class="line">        &#123;</span><br><span class="line">            switch(status[i][0])</span><br><span class="line">            &#123;</span><br><span class="line">                case &apos;u&apos;:</span><br><span class="line">                    &#123;</span><br><span class="line">                        for(int j=0;left[i][j];j++)</span><br><span class="line">                        &#123;</span><br><span class="line">                            time[ left[i][j] ]++;</span><br><span class="line">                            time[ right[i][j] ]--;</span><br><span class="line">                        &#125;</span><br><span class="line">                        break;</span><br><span class="line">                    &#125;</span><br><span class="line">                case &apos;d&apos;:</span><br><span class="line">                    &#123;</span><br><span class="line">                        for(int j=0;left[i][j];j++)</span><br><span class="line">                        &#123;</span><br><span class="line">                            time[ left[i][j] ]--;</span><br><span class="line">                            time[ right[i][j] ]++;</span><br><span class="line">                        &#125;</span><br><span class="line">                        break;</span><br><span class="line">                    &#125;</span><br><span class="line">                case &apos;e&apos;:</span><br><span class="line">                    &#123;</span><br><span class="line">                        for(int j=0;left[i][j];j++)</span><br><span class="line">                        &#123;</span><br><span class="line">                            zero[ left[i][j] ]=true;</span><br><span class="line">                            zero[ right[i][j] ]=true;</span><br><span class="line">                        &#125;</span><br><span class="line">                        break;</span><br><span class="line">                    &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        int max=-1;</span><br><span class="line">        char alpha;</span><br><span class="line">        for(int j=&apos;A&apos;;j&lt;=&apos;L&apos;;j++)</span><br><span class="line">        &#123;</span><br><span class="line">            if(zero[j])</span><br><span class="line">                continue;</span><br><span class="line"></span><br><span class="line">            if(max&lt;=abs(time[j]))</span><br><span class="line">            &#123;</span><br><span class="line">                max=abs(time[j]);</span><br><span class="line">                alpha=j;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        cout&lt;&lt;alpha&lt;&lt;&quot; is the counterfeit coin and it is &quot;;</span><br><span class="line">        if(time[alpha]&gt;0)</span><br><span class="line">            cout&lt;&lt;&quot;heavy.&quot;&lt;&lt;endl;</span><br><span class="line">        else</span><br><span class="line">            cout&lt;&lt;&quot;light.&quot;&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><p>2014年07月10日 已AC(C++下通过，G++下WA)，准备择日修复。</p>
 
         
@@ -144,7 +144,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/10/POJ-1013-Counterfeit-Dollar/">POJ 1013 Counterfeit Dollar</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月10日 - 14时07分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/10/POJ-1013-Counterfeit-Dollar/"
                                             title="POJ 1013 Counterfeit Dollar">https://xuanwo.org/2014/07/10/POJ-1013-Counterfeit-Dollar/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -215,114 +215,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -330,6 +222,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

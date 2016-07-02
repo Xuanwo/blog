@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -117,7 +117,7 @@
 <p><a href="http://codeforces.com/problemset/problem/8/B" target="_blank" rel="external">http://codeforces.com/problemset/problem/8/B</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p><del>在那遥远的地方有位好姑娘 ，人们走过她的帐篷都要留恋的张望</del><br>23333，不逗比了，真正的题解开始。<br>在一个无穷大的平面上，有一个机器人可以自由地上下左右移动。然后在它移动的路径上，你可以给它设置任意个障碍。如果存在一种障碍的设计，使得机器人的移动路径是最短路径，则OK；如果不存在，则存在BUG。<br>这道题写得很逗= =。一开始作死用switch来写，不过在字符的判断上好像写搓了，怎么写都是BUG。后来想到可以用一个vis来标记机器人走过的路径，如果存在一个点被访问过两次，那么这个路径一定不是最短路径。不过这份代码挂了，原因是还存在另外一种可能，比如：<code>URD</code>。也就是说，只要形成一个类似于U的结构，也一定不是最短路径。一时半会儿没想出来什么高效的方案，干脆暴力敲了一个。设一个flag出来，然后每走一个点，就四个方向判断一下是否访问过，如果<code>flag&gt;=2</code>，说明一定是BUG。<br>多亏了CF机子好，居然过了，也是RP好。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;#define MAXN 100+10&#10;&#10;char road[MAXN];&#10;int vis[2*MAXN][2*MAXN];&#10;int x=105,y=105,len;&#10;&#10;bool solve()&#10;&#123;&#10;    for(int i=0; i&#60;len; i++)&#10;    &#123;&#10;        if(road[i]==&#39;L&#39;)&#10;        &#123;&#10;            x-=1;&#10;            if(vis[x][y]==1)    return false;&#10;            int flag=0;&#10;            if(vis[x-1][y]) flag++;&#10;            if(vis[x+1][y]) flag++;&#10;            if(vis[x][y+1]) flag++;&#10;            if(vis[x][y-1]) flag++;&#10;            if(flag&#62;=2) return false;&#10;            vis[x][y]=1;&#10;        &#125;&#10;        else if(road[i]==&#39;U&#39;)&#10;        &#123;&#10;            y+=1;&#10;            if(vis[x][y]==1)    return false;&#10;            int flag=0;&#10;            if(vis[x-1][y]) flag++;&#10;            if(vis[x+1][y]) flag++;&#10;            if(vis[x][y+1]) flag++;&#10;            if(vis[x][y-1]) flag++;&#10;            if(flag&#62;=2) return false;&#10;            vis[x][y]=1;&#10;        &#125;&#10;        else if(road[i]==&#39;R&#39;)&#10;        &#123;&#10;            x+=1;&#10;            if(vis[x][y]==1)    return false;&#10;            int flag=0;&#10;            if(vis[x-1][y]) flag++;&#10;            if(vis[x+1][y]) flag++;&#10;            if(vis[x][y+1]) flag++;&#10;            if(vis[x][y-1]) flag++;&#10;            if(flag&#62;=2) return false;&#10;            vis[x][y]=1;&#10;        &#125;&#10;        else&#10;        &#123;&#10;            y-=1;&#10;            if(vis[x][y]==1)    return false;&#10;            int flag=0;&#10;            if(vis[x-1][y]) flag++;&#10;            if(vis[x+1][y]) flag++;&#10;            if(vis[x][y+1]) flag++;&#10;            if(vis[x][y-1]) flag++;&#10;            if(flag&#62;=2) return false;&#10;            vis[x][y]=1;&#10;        &#125;&#10;    &#125;&#10;    return true;&#10;&#125;&#10;&#10;int main(int argc, char const *argv[])&#10;&#123;&#10;    memset(vis,0,sizeof(vis));&#10;    scanf(&#34;%s&#34;, road);&#10;    len=strlen(road);&#10;    vis[x][y]=1;&#10;    if(solve()) printf(&#34;OK\n&#34;);&#10;    else printf(&#34;BUG\n&#34;);&#10;    return 0;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#define MAXN 100+10</span><br><span class="line"></span><br><span class="line">char road[MAXN];</span><br><span class="line">int vis[2*MAXN][2*MAXN];</span><br><span class="line">int x=105,y=105,len;</span><br><span class="line"></span><br><span class="line">bool solve()</span><br><span class="line">&#123;</span><br><span class="line">    for(int i=0; i&lt;len; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        if(road[i]==&apos;L&apos;)</span><br><span class="line">        &#123;</span><br><span class="line">            x-=1;</span><br><span class="line">            if(vis[x][y]==1)    return false;</span><br><span class="line">            int flag=0;</span><br><span class="line">            if(vis[x-1][y]) flag++;</span><br><span class="line">            if(vis[x+1][y]) flag++;</span><br><span class="line">            if(vis[x][y+1]) flag++;</span><br><span class="line">            if(vis[x][y-1]) flag++;</span><br><span class="line">            if(flag&gt;=2) return false;</span><br><span class="line">            vis[x][y]=1;</span><br><span class="line">        &#125;</span><br><span class="line">        else if(road[i]==&apos;U&apos;)</span><br><span class="line">        &#123;</span><br><span class="line">            y+=1;</span><br><span class="line">            if(vis[x][y]==1)    return false;</span><br><span class="line">            int flag=0;</span><br><span class="line">            if(vis[x-1][y]) flag++;</span><br><span class="line">            if(vis[x+1][y]) flag++;</span><br><span class="line">            if(vis[x][y+1]) flag++;</span><br><span class="line">            if(vis[x][y-1]) flag++;</span><br><span class="line">            if(flag&gt;=2) return false;</span><br><span class="line">            vis[x][y]=1;</span><br><span class="line">        &#125;</span><br><span class="line">        else if(road[i]==&apos;R&apos;)</span><br><span class="line">        &#123;</span><br><span class="line">            x+=1;</span><br><span class="line">            if(vis[x][y]==1)    return false;</span><br><span class="line">            int flag=0;</span><br><span class="line">            if(vis[x-1][y]) flag++;</span><br><span class="line">            if(vis[x+1][y]) flag++;</span><br><span class="line">            if(vis[x][y+1]) flag++;</span><br><span class="line">            if(vis[x][y-1]) flag++;</span><br><span class="line">            if(flag&gt;=2) return false;</span><br><span class="line">            vis[x][y]=1;</span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            y-=1;</span><br><span class="line">            if(vis[x][y]==1)    return false;</span><br><span class="line">            int flag=0;</span><br><span class="line">            if(vis[x-1][y]) flag++;</span><br><span class="line">            if(vis[x+1][y]) flag++;</span><br><span class="line">            if(vis[x][y+1]) flag++;</span><br><span class="line">            if(vis[x][y-1]) flag++;</span><br><span class="line">            if(flag&gt;=2) return false;</span><br><span class="line">            vis[x][y]=1;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    memset(vis,0,sizeof(vis));</span><br><span class="line">    scanf(&quot;%s&quot;, road);</span><br><span class="line">    len=strlen(road);</span><br><span class="line">    vis[x][y]=1;</span><br><span class="line">    if(solve()) printf(&quot;OK\n&quot;);</span><br><span class="line">    else printf(&quot;BUG\n&quot;);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年11月16日 已AC。</li>
 </ul>
@@ -146,7 +146,7 @@
                     <p><span>本文标题:</span><a href="/2014/11/16/CF-8B/">Codeforces Beta Round 8 B Obsession with Robots</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年11月16日 - 11时11分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2014/11/16/CF-8B/"
                                             title="Codeforces Beta Round 8 B Obsession with Robots">https://xuanwo.org/2014/11/16/CF-8B/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -217,114 +217,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -332,6 +224,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

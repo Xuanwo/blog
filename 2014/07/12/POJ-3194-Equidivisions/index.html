@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -116,10 +116,10 @@
             <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>源地址：</p>
 <p><a href="http://poj.org/problem?id=3194" target="_blank" rel="external">http://poj.org/problem?id=3194</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>本以为只要逐个判断每一个数是否有相邻即可，事实上，少考虑了一种情况。<br>比如下面给出的这种：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2211&#10;1111&#10;1111&#10;1122</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2211</span><br><span class="line">1111</span><br><span class="line">1111</span><br><span class="line">1122</span><br></pre></td></tr></table></figure>
 <p>根据我原来的思路这种也是good，但其实并不是如此。当然，这个例子并不完备，但用于指出原来思路的漏洞已经够了。正确的思路应当是使用DFS来寻找是否存在独立的区块。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &#60;iostream&#62;&#10;#include &#60;cstring&#62;&#10;using namespace std;&#10;int N, ans;&#10;int map[101][101];&#10;int visit[101][101];&#10;&#10;int step[4][2] = &#123; &#123;-1, 0&#125;, &#123;0, 1&#125;, &#123;1, 0&#125;, &#123;0, -1&#125; &#125;;&#10;&#10;int color[101];&#10;bool Check(int x, int y)&#10;&#123;&#10;    if (x &#62;= N || x &#60; 0 || y &#62;= N || y &#60; 0)&#10;        return false;&#10;    return true;&#10;&#125;&#10;void DFS(int CurX, int CurY)&#10;&#123;&#10;    ans++;&#10;    visit[CurX][CurY] = 1;&#10;    color[map[CurX][CurY]] = 1;&#10;    for (int i = 0; i &#60; 4; i++)&#10;    &#123;&#10;        int x = CurX+step[i][0];&#10;        int y = CurY+step[i][1];&#10;        if (Check(x, y) == false || visit[x][y] == 1)&#10;            continue;&#10;        if (map[CurX][CurY] == map[x][y] || color[map[x][y]] == 0)&#10;        &#123;&#10;            DFS(x, y);&#10;        &#125;&#10;    &#125;&#10;&#125;&#10;int main()&#10;&#123;&#10;    while (cin&#62;&#62;N &#38;&#38; N !=0)&#10;    &#123;&#10;        int index = 1;&#10;        ans = 0;&#10;        memset(map, 0, sizeof(map));&#10;        memset(visit, 0, sizeof(visit));&#10;        memset(color, 0, sizeof(color));&#10;        for (int i = 0; i &#60; N-1; i++)&#10;        &#123;&#10;            for (int j = 0; j &#60; N; j++)&#10;            &#123;&#10;                int a, b;&#10;                cin&#62;&#62;a&#62;&#62;b;&#10;                map[a-1][b-1] = index;&#10;            &#125;&#10;            index++;&#10;        &#125;&#10;        DFS(0, 0);&#10;        if (ans == N*N)&#10;            cout&#60;&#60;&#34;good&#34;&#60;&#60;endl;&#10;        else&#10;            cout&#60;&#60;&#34;wrong&#34;&#60;&#60;endl;&#10;    &#125;&#10;    return 0;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">using namespace std;</span><br><span class="line">int N, ans;</span><br><span class="line">int map[101][101];</span><br><span class="line">int visit[101][101];</span><br><span class="line"></span><br><span class="line">int step[4][2] = &#123; &#123;-1, 0&#125;, &#123;0, 1&#125;, &#123;1, 0&#125;, &#123;0, -1&#125; &#125;;</span><br><span class="line"></span><br><span class="line">int color[101];</span><br><span class="line">bool Check(int x, int y)</span><br><span class="line">&#123;</span><br><span class="line">    if (x &gt;= N || x &lt; 0 || y &gt;= N || y &lt; 0)</span><br><span class="line">        return false;</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br><span class="line">void DFS(int CurX, int CurY)</span><br><span class="line">&#123;</span><br><span class="line">    ans++;</span><br><span class="line">    visit[CurX][CurY] = 1;</span><br><span class="line">    color[map[CurX][CurY]] = 1;</span><br><span class="line">    for (int i = 0; i &lt; 4; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        int x = CurX+step[i][0];</span><br><span class="line">        int y = CurY+step[i][1];</span><br><span class="line">        if (Check(x, y) == false || visit[x][y] == 1)</span><br><span class="line">            continue;</span><br><span class="line">        if (map[CurX][CurY] == map[x][y] || color[map[x][y]] == 0)</span><br><span class="line">        &#123;</span><br><span class="line">            DFS(x, y);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    while (cin&gt;&gt;N &amp;&amp; N !=0)</span><br><span class="line">    &#123;</span><br><span class="line">        int index = 1;</span><br><span class="line">        ans = 0;</span><br><span class="line">        memset(map, 0, sizeof(map));</span><br><span class="line">        memset(visit, 0, sizeof(visit));</span><br><span class="line">        memset(color, 0, sizeof(color));</span><br><span class="line">        for (int i = 0; i &lt; N-1; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            for (int j = 0; j &lt; N; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                int a, b;</span><br><span class="line">                cin&gt;&gt;a&gt;&gt;b;</span><br><span class="line">                map[a-1][b-1] = index;</span><br><span class="line">            &#125;</span><br><span class="line">            index++;</span><br><span class="line">        &#125;</span><br><span class="line">        DFS(0, 0);</span><br><span class="line">        if (ans == N*N)</span><br><span class="line">            cout&lt;&lt;&quot;good&quot;&lt;&lt;endl;</span><br><span class="line">        else</span><br><span class="line">            cout&lt;&lt;&quot;wrong&quot;&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月12日 已AC。</li>
 </ul>
@@ -148,7 +148,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/12/POJ-3194-Equidivisions/">POJ 3194 Equidivisions</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月12日 - 23时07分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/12/POJ-3194-Equidivisions/"
                                             title="POJ 3194 Equidivisions">https://xuanwo.org/2014/07/12/POJ-3194-Equidivisions/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -219,114 +219,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -334,6 +226,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

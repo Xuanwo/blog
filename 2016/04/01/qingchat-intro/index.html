@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -148,19 +148,19 @@
 <p>然后通过 cpanm 工具安装 Mojo::Weixin</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cpanm Mojo::Weixin</span><br></pre></td></tr></table></figure>
 <h3 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h3><p>将如下代码使用utf－8编码保存为源码文件：</p>
-<figure class="highlight perl"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env perl</span></span><br><span class="line"><span class="keyword">use</span> Mojo::Weixin;</span><br><span class="line"><span class="keyword">my</span> (<span class="variable">$host</span>,<span class="variable">$port</span>,<span class="variable">$post_api</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$host</span> = <span class="string">"0.0.0.0"</span>; <span class="comment">#发送消息接口监听地址，修改为自己希望监听的地址</span></span><br><span class="line"><span class="variable">$port</span> = <span class="number">3000</span>;      <span class="comment">#发送消息接口监听端口，修改为自己希望监听的端口</span></span><br><span class="line"><span class="comment">#$post_api = 'http://xxxx';  #接收到的消息上报接口，如果不需要接收消息上报，可以删除或注释此行</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">my</span> <span class="variable">$client</span> = Mojo::Weixin-&gt;new(<span class="string">log_level=&gt;</span><span class="string">"info"</span>,<span class="string">ua_debug=&gt;</span><span class="number">0</span>,<span class="string">qrcode_path=&gt;</span><span class="string">"qrcode.jpg"</span>);</span><br><span class="line"><span class="variable">$client</span>-&gt;login();</span><br><span class="line"><span class="variable">$client</span>-&gt;load(<span class="string">"ShowMsg"</span>);</span><br><span class="line"><span class="variable">$client</span>-&gt;load(<span class="string">"Openwx"</span>,<span class="string">data=&gt;</span>&#123;<span class="string">listen=&gt;</span>[&#123;<span class="string">host=&gt;</span><span class="variable">$host</span>,<span class="string">port=&gt;</span><span class="variable">$port</span>&#125;], <span class="string">post_api=&gt;</span><span class="variable">$post_api</span>&#125;);</span><br><span class="line"><span class="variable">$client</span>-&gt;run();</span><br></pre></td></tr></table></figure>
+<figure class="highlight perl"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env perl</span></span><br><span class="line"><span class="keyword">use</span> Mojo::Weixin;</span><br><span class="line"><span class="keyword">my</span> ($host,$port,$post_api);</span><br><span class="line"></span><br><span class="line">$host = <span class="string">"0.0.0.0"</span>; <span class="comment">#发送消息接口监听地址，修改为自己希望监听的地址</span></span><br><span class="line">$port = <span class="number">3000</span>;      <span class="comment">#发送消息接口监听端口，修改为自己希望监听的端口</span></span><br><span class="line"><span class="comment">#$post_api = 'http://xxxx';  #接收到的消息上报接口，如果不需要接收消息上报，可以删除或注释此行</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">my</span> $client = Mojo::Weixin-&gt;new(<span class="string">log_level=&gt;</span><span class="string">"info"</span>,<span class="string">ua_debug=&gt;</span><span class="number">0</span>,<span class="string">qrcode_path=&gt;</span><span class="string">"qrcode.jpg"</span>);</span><br><span class="line">$client-&gt;login();</span><br><span class="line">$client-&gt;load(<span class="string">"ShowMsg"</span>);</span><br><span class="line">$client-&gt;load(<span class="string">"Openwx"</span>,<span class="string">data=&gt;</span>&#123;<span class="string">listen=&gt;</span>[&#123;<span class="string">host=&gt;</span>$host,<span class="string">port=&gt;</span>$port&#125;], <span class="string">post_api=&gt;</span>$post_api&#125;);</span><br><span class="line">$client-&gt;run();</span><br></pre></td></tr></table></figure>
 <p>上述代码保存为 <code>test.pl</code> ， 并通过 perl 来运行：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">perl test.pl</span><br></pre></td></tr></table></figure>
 <p>然后就会产生一个监听 3000 端口的 http 服务器。</p>
 <p>未竟事宜可以参考<a href="https://github.com/sjdy521/Mojo-Weixin/blob/master/README.md" target="_blank" rel="external">此处</a></p>
 <h3 id="配置Nginx"><a href="#配置Nginx" class="headerlink" title="配置Nginx"></a>配置Nginx</h3><p>为了方便调用二维码，还需要配置一个 Web 服务器。安装Nginx，在配置文件中添加：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">server &#123;&#10;&#9;listen 80 default_server;&#10;&#9;listen [::]:80 default_server ipv6only=on;&#10;&#10;&#9;root /path/to/your/qrcode; # &#10;&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80 default_server;</span><br><span class="line">    listen [::]:80 default_server ipv6only=on;</span><br><span class="line"></span><br><span class="line">    root /path/to/your/qrcode; # </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>最终，能在浏览器中以 <code>http://xxx.xxx.xxx.xxx/qrcode.jpg</code> 的形式访问到二维码即配置成功。</p>
 <h2 id="安装Qingchat"><a href="#安装Qingchat" class="headerlink" title="安装Qingchat"></a>安装Qingchat</h2><h3 id="pip"><a href="#pip" class="headerlink" title="pip"></a>pip</h3><p>Qingchat已经上传到了pypi，只需要使用pip进行安装即可：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install qingchat</span><br></pre></td></tr></table></figure>
 <h3 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h3><p>Qingchat最新开发版代码位于： <a href="https://github.com/Xuanwo/qingchat/tree/dev" target="_blank" rel="external">https://github.com/Xuanwo/qingchat/tree/dev</a></p>
 <p>你可以使用</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install <span class="operator">-e</span> git+https://github.com/Xuanwo/qingchat/tree/dev</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install <span class="_">-e</span> git+https://github.com/Xuanwo/qingchat/tree/dev</span><br></pre></td></tr></table></figure>
 <p>或</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/Xuanwo/qingchat/tree/dev</span><br><span class="line"><span class="built_in">cd</span> qingchat</span><br><span class="line">python setup.py install</span><br></pre></td></tr></table></figure>
 <p>以进行安装。</p>
@@ -180,7 +180,7 @@
 <p>此命令可以将指定群组加入列表，支持正则</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">qingchat group clean</span><br></pre></td></tr></table></figure>
 <p>此命令可以清除列表</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">qingchat group send -t &lt;content&gt;</span><br><span class="line">qingchat group send -i &lt;media&gt;</span><br><span class="line">qingchat group send <span class="operator">-f</span> &lt;file&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">qingchat group send -t &lt;content&gt;</span><br><span class="line">qingchat group send -i &lt;media&gt;</span><br><span class="line">qingchat group send <span class="_">-f</span> &lt;file&gt;</span><br></pre></td></tr></table></figure>
 <ul>
 <li><code>-t</code> 参数用于发送文本信息</li>
 <li><code>-i</code> 参数用于发送媒体信息，图片会直接显示，其他类型将以文件形式传输</li>
@@ -221,7 +221,7 @@
                     <p><span>本文标题:</span><a href="/2016/04/01/qingchat-intro/">微信多群直播的新探索——Qingchat</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2016年4月1日 - 22时04分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2016/04/01/qingchat-intro/"
                                             title="微信多群直播的新探索——Qingchat">https://xuanwo.org/2016/04/01/qingchat-intro/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -292,114 +292,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -407,6 +299,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

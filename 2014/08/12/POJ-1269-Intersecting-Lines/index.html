@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -117,7 +117,7 @@
 <p><a href="http://poj.org/problem?id=1269" target="_blank" rel="external">http://poj.org/problem?id=1269</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>几何题= =，各种直线方程用起来，代码量有点大。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include&#60;cstdio&#62;&#10;#include&#60;cstring&#62;&#10;#include&#60;cmath&#62;&#10;#include&#60;cstdlib&#62;&#10;#include&#60;iostream&#62;&#10;#include&#60;algorithm&#62;&#10;#include&#60;functional&#62;&#10;using namespace std;&#10;#define eps 1e-8&#10;double sqr(double x)&#10;&#123;&#10;    return x * x;&#10;&#125;&#10;struct P&#10;&#123;&#10;    double x, y;&#10;    P(double _x, double _y): x(_x), y(_y) &#123;&#125;&#10;    P() &#123;&#125;&#10;    double dis()&#10;    &#123;&#10;        return sqrt(sqr(x) + sqr(y));&#10;    &#125;&#10;&#125;;&#10;struct V&#10;&#123;&#10;    double x, y;&#10;    V(double _x, double _y): x(_x), y(_y) &#123;&#125;&#10;    V(P a, P b): x(b.x - a.x), y(b.y - a.y) &#123;&#125;&#10;    V() &#123;&#125;&#10;    const double dis()&#10;    &#123;&#10;        return sqrt(sqr(x) + sqr(y));&#10;    &#125;&#10;&#125;;&#10;P operator+(const P a, const V b)&#10;&#123;&#10;    return P(a.x + b.x, a.y + b.y);&#10;&#125;&#10;V operator*(const double a, const V b)&#10;&#123;&#10;    return V(a * b.x, a * b.y);&#10;&#125;&#10;double operator*(const V a, const V b)&#10;&#123;&#10;    return a.x * b.y - b.x * a.y;&#10;&#125;&#10;P jiao_dian(const V a, V b, const V c, const V CD, const P C)&#10;&#123;&#10;    double d;&#10;    d = b.dis();&#10;    double s1 = a * b, s2 = b * c;&#10;    double k = s1 / (s1 + s2);&#10;    return C + k * CD;&#10;&#125;&#10;bool equal(const double a, const double b)&#10;&#123;&#10;    if (abs(a - b) &#60; eps) return 1; return 0;&#10;&#125;&#10;int n;&#10;int main()&#10;&#123;&#10;    cout &#60;&#60; &#34;INTERSECTING LINES OUTPUT&#34; &#60;&#60; endl;&#10;    scanf(&#34;%d&#34;, &#38;n);&#10;    for (int i = 1; i &#60;= n; i++)&#10;    &#123;&#10;        double x1, y1, x2, y2, x3, y3, x4, y4;&#10;        scanf(&#34;%lf%lf%lf%lf%lf%lf%lf%lf&#34;, &#38;x1, &#38;y1, &#38;x2, &#38;y2, &#38;x3, &#38;y3, &#38;x4, &#38;y4);&#10;        P A = P(x1, y1), B = P(x2, y2), C = P(x3, y3), D = P(x4, y4);&#10;        V AB = V(A, B), AC = V(A, C), AD = V(A, D), CD = V(C, D);&#10;        if (equal((AB * CD), 0))&#10;        &#123;&#10;            if (equal((AC * AD), 0)) cout &#60;&#60; &#34;LINE\n&#34;;&#10;            else cout &#60;&#60; &#34;NONE\n&#34;;&#10;        &#125;&#10;        else&#10;        &#123;&#10;            P p = jiao_dian(AC, AB, AD, CD, C);&#10;            cout.setf(ios::fixed);&#10;            cout.precision(2);&#10;            cout &#60;&#60; &#34;POINT &#34; &#60;&#60; p.x &#60;&#60; &#39; &#39; &#60;&#60; p.y &#60;&#60; endl;&#10;        &#125;&#10;    &#125;&#10;    cout &#60;&#60; &#34;END OF OUTPUT&#34; &#60;&#60; endl;&#10;    return 0;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include&lt;cstdio&gt;</span><br><span class="line">#include&lt;cstring&gt;</span><br><span class="line">#include&lt;cmath&gt;</span><br><span class="line">#include&lt;cstdlib&gt;</span><br><span class="line">#include&lt;iostream&gt;</span><br><span class="line">#include&lt;algorithm&gt;</span><br><span class="line">#include&lt;functional&gt;</span><br><span class="line">using namespace std;</span><br><span class="line">#define eps 1e-8</span><br><span class="line">double sqr(double x)</span><br><span class="line">&#123;</span><br><span class="line">    return x * x;</span><br><span class="line">&#125;</span><br><span class="line">struct P</span><br><span class="line">&#123;</span><br><span class="line">    double x, y;</span><br><span class="line">    P(double _x, double _y): x(_x), y(_y) &#123;&#125;</span><br><span class="line">    P() &#123;&#125;</span><br><span class="line">    double dis()</span><br><span class="line">    &#123;</span><br><span class="line">        return sqrt(sqr(x) + sqr(y));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">struct V</span><br><span class="line">&#123;</span><br><span class="line">    double x, y;</span><br><span class="line">    V(double _x, double _y): x(_x), y(_y) &#123;&#125;</span><br><span class="line">    V(P a, P b): x(b.x - a.x), y(b.y - a.y) &#123;&#125;</span><br><span class="line">    V() &#123;&#125;</span><br><span class="line">    const double dis()</span><br><span class="line">    &#123;</span><br><span class="line">        return sqrt(sqr(x) + sqr(y));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">P operator+(const P a, const V b)</span><br><span class="line">&#123;</span><br><span class="line">    return P(a.x + b.x, a.y + b.y);</span><br><span class="line">&#125;</span><br><span class="line">V operator*(const double a, const V b)</span><br><span class="line">&#123;</span><br><span class="line">    return V(a * b.x, a * b.y);</span><br><span class="line">&#125;</span><br><span class="line">double operator*(const V a, const V b)</span><br><span class="line">&#123;</span><br><span class="line">    return a.x * b.y - b.x * a.y;</span><br><span class="line">&#125;</span><br><span class="line">P jiao_dian(const V a, V b, const V c, const V CD, const P C)</span><br><span class="line">&#123;</span><br><span class="line">    double d;</span><br><span class="line">    d = b.dis();</span><br><span class="line">    double s1 = a * b, s2 = b * c;</span><br><span class="line">    double k = s1 / (s1 + s2);</span><br><span class="line">    return C + k * CD;</span><br><span class="line">&#125;</span><br><span class="line">bool equal(const double a, const double b)</span><br><span class="line">&#123;</span><br><span class="line">    if (abs(a - b) &lt; eps) return 1; return 0;</span><br><span class="line">&#125;</span><br><span class="line">int n;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    cout &lt;&lt; &quot;INTERSECTING LINES OUTPUT&quot; &lt;&lt; endl;</span><br><span class="line">    scanf(&quot;%d&quot;, &amp;n);</span><br><span class="line">    for (int i = 1; i &lt;= n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        double x1, y1, x2, y2, x3, y3, x4, y4;</span><br><span class="line">        scanf(&quot;%lf%lf%lf%lf%lf%lf%lf%lf&quot;, &amp;x1, &amp;y1, &amp;x2, &amp;y2, &amp;x3, &amp;y3, &amp;x4, &amp;y4);</span><br><span class="line">        P A = P(x1, y1), B = P(x2, y2), C = P(x3, y3), D = P(x4, y4);</span><br><span class="line">        V AB = V(A, B), AC = V(A, C), AD = V(A, D), CD = V(C, D);</span><br><span class="line">        if (equal((AB * CD), 0))</span><br><span class="line">        &#123;</span><br><span class="line">            if (equal((AC * AD), 0)) cout &lt;&lt; &quot;LINE\n&quot;;</span><br><span class="line">            else cout &lt;&lt; &quot;NONE\n&quot;;</span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            P p = jiao_dian(AC, AB, AD, CD, C);</span><br><span class="line">            cout.setf(ios::fixed);</span><br><span class="line">            cout.precision(2);</span><br><span class="line">            cout &lt;&lt; &quot;POINT &quot; &lt;&lt; p.x &lt;&lt; &apos; &apos; &lt;&lt; p.y &lt;&lt; endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; &quot;END OF OUTPUT&quot; &lt;&lt; endl;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月12日 已AC。</li>
 </ul>
@@ -146,7 +146,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/12/POJ-1269-Intersecting-Lines/">POJ 1269 Intersecting Lines</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月12日 - 01时08分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/12/POJ-1269-Intersecting-Lines/"
                                             title="POJ 1269 Intersecting Lines">https://xuanwo.org/2014/08/12/POJ-1269-Intersecting-Lines/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -217,114 +217,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -332,6 +224,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

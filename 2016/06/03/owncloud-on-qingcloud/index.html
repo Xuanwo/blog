@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -172,18 +172,18 @@
 <p>然后查看已经创建好的物理卷：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pvdisplay</span><br></pre></td></tr></table></figure>
 <p>输出大概如下：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">--- Physical volume ---</span><br><span class="line"> PV Name               /dev/sdb</span><br><span class="line"> PV Size               <span class="number">1000.00</span> GiB / not usable <span class="number">4.00</span> MiB</span><br><span class="line"> Allocatable           yes</span><br><span class="line"> PE Size               <span class="number">4.00</span> MiB</span><br><span class="line"> Total PE              <span class="number">255999</span></span><br><span class="line"> Free PE               <span class="number">255999</span></span><br><span class="line"> Allocated PE          <span class="number">0</span></span><br><span class="line"> PV UUID               EHIeTJ-WBPv-rQkQ-LnuI-<span class="number">0</span>IWE-SM4z-bMPAWx</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">--- Physical volume ---</span><br><span class="line"> PV Name               /dev/sdb</span><br><span class="line"> PV Size               1000.00 GiB / not usable 4.00 MiB</span><br><span class="line"> Allocatable           yes</span><br><span class="line"> PE Size               4.00 MiB</span><br><span class="line"> Total PE              255999</span><br><span class="line"> Free PE               255999</span><br><span class="line"> Allocated PE          0</span><br><span class="line"> PV UUID               EHIeTJ-WBPv-rQkQ-LnuI-0IWE-SM4z-bMPAWx</span><br></pre></td></tr></table></figure>
 <h3 id="创建卷组（VG）"><a href="#创建卷组（VG）" class="headerlink" title="创建卷组（VG）"></a>创建卷组（VG）</h3><p>物理卷创建完毕后，需要创建一个卷组来实现物理卷的统一管理：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vgcreate owncloud-vg /dev/sdb /dev/sdc /dev/sdd</span><br></pre></td></tr></table></figure>
 <p>后续如果需要扩展的话，可以使用如下命令：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vgextend owncloud-vg /dev/sde</span><br></pre></td></tr></table></figure>
 <p>同样地，使用<code>vgdisplay</code>来查看创建好的卷组：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">--- Volume group ---</span><br><span class="line"> VG Name               owncloud-vg</span><br><span class="line"> Format                lvm2</span><br><span class="line"> Metadata Areas        <span class="number">1</span></span><br><span class="line"> Metadata Sequence No  <span class="number">2</span></span><br><span class="line"> VG Access             <span class="built_in">read</span>/write</span><br><span class="line"> VG Status             resizable</span><br><span class="line"> MAX LV                <span class="number">0</span></span><br><span class="line"> Cur LV                <span class="number">1</span></span><br><span class="line"> Open LV               <span class="number">1</span></span><br><span class="line"> Max PV                <span class="number">0</span></span><br><span class="line"> Cur PV                <span class="number">1</span></span><br><span class="line"> Act PV                <span class="number">1</span></span><br><span class="line"> VG Size               <span class="number">1000.00</span> GiB</span><br><span class="line"> PE Size               <span class="number">4.00</span> MiB</span><br><span class="line"> Total PE              <span class="number">255999</span></span><br><span class="line"> Alloc PE / Size       <span class="number">230400</span> / <span class="number">900.00</span> GiB</span><br><span class="line"> Free  PE / Size       <span class="number">25599</span> / <span class="number">100.00</span> GiB</span><br><span class="line"> VG UUID               xCCtSR-QFcZ-StcI-HM7O-KDAz-PvMC-EgYcSV</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">--- Volume group ---</span><br><span class="line"> VG Name               owncloud-vg</span><br><span class="line"> Format                lvm2</span><br><span class="line"> Metadata Areas        1</span><br><span class="line"> Metadata Sequence No  2</span><br><span class="line"> VG Access             <span class="built_in">read</span>/write</span><br><span class="line"> VG Status             resizable</span><br><span class="line"> MAX LV                0</span><br><span class="line"> Cur LV                1</span><br><span class="line"> Open LV               1</span><br><span class="line"> Max PV                0</span><br><span class="line"> Cur PV                1</span><br><span class="line"> Act PV                1</span><br><span class="line"> VG Size               1000.00 GiB</span><br><span class="line"> PE Size               4.00 MiB</span><br><span class="line"> Total PE              255999</span><br><span class="line"> Alloc PE / Size       230400 / 900.00 GiB</span><br><span class="line"> Free  PE / Size       25599 / 100.00 GiB</span><br><span class="line"> VG UUID               xCCtSR-QFcZ-StcI-HM7O-KDAz-PvMC-EgYcSV</span><br></pre></td></tr></table></figure>
 <h3 id="创建逻辑卷（LV）"><a href="#创建逻辑卷（LV）" class="headerlink" title="创建逻辑卷（LV）"></a>创建逻辑卷（LV）</h3><p>然后就可以开始创建逻辑卷了：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">lvcreate -L <span class="number">900</span>G owncloud-vg -n owncloud-data</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">lvcreate -L 900G owncloud-vg -n owncloud-data</span><br></pre></td></tr></table></figure>
 <p>创建完毕后，就可以通过<code>/dev/mapper/owncloud--vg-owncloud--data</code>或者<code>/dev/owncloud-vg/owncloud-data</code>来访问这个设备了。</p>
 <p>如果需要扩大逻辑卷，可以使用：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">lvextend -L <span class="number">1000</span>G /dev/owncloud-vg/owncloud-data</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">lvextend -L 1000G /dev/owncloud-vg/owncloud-data</span><br></pre></td></tr></table></figure>
 <p>确认扩展成功后，再更新文件系统：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">resize2fs /dev/owncloud-vg/owncloud-data</span><br></pre></td></tr></table></figure>
 <h3 id="创建文件系统并挂载"><a href="#创建文件系统并挂载" class="headerlink" title="创建文件系统并挂载"></a>创建文件系统并挂载</h3><p>在逻辑卷上创建一个ext4分区：</p>
@@ -191,7 +191,7 @@
 <p>然后将分区挂载到期望的目录下，比如<code>/data</code></p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mount /dev/mapper/owncloud--vg-owncloud--data /data</span><br></pre></td></tr></table></figure>
 <h2 id="修改文件夹权限"><a href="#修改文件夹权限" class="headerlink" title="修改文件夹权限"></a>修改文件夹权限</h2><p>为了OwnCloud能够正确读写数据分区，需要修改<code>/data</code>的所有者和权限：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">chown -R apache:apache /data</span><br><span class="line">chmod <span class="number">775</span> /data -R</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">chown -R apache:apache /data</span><br><span class="line">chmod 775 /data -R</span><br></pre></td></tr></table></figure>
 <h2 id="网页安装OwnCloud"><a href="#网页安装OwnCloud" class="headerlink" title="网页安装OwnCloud"></a>网页安装OwnCloud</h2><p>全部配置完毕后，可以开始在网页进行OwnCloud安装了。</p>
 <p>管理员帐号： 自定义<br>管理员密码： 自定义<br>数据路径：<code>/data</code><br>数据库用户：<code>root</code><br>数据库密码：<code>&lt;your password&gt;</code><br>数据库名称自定义，比如：<code>owncloud</code><br>数据库地址：<code>&lt;your rdb ip&gt;</code></p>
 <blockquote>
@@ -258,7 +258,7 @@
                     <p><span>本文标题:</span><a href="/2016/06/03/owncloud-on-qingcloud/">在QingCloud上部署弹性扩容的OwnCloud</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2016年6月3日 - 08时06分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2016/06/03/owncloud-on-qingcloud/"
                                             title="在QingCloud上部署弹性扩容的OwnCloud">https://xuanwo.org/2016/06/03/owncloud-on-qingcloud/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -271,9 +271,9 @@
             
                 <div class="post-tags">
                     
-                        <a href="/tags/QingCloud/"> #QingCloud </a>
-                    
                         <a href="/tags/Software/"> #Software </a>
+                    
+                        <a href="/tags/QingCloud/"> #QingCloud </a>
                     
                         <a href="/tags/Work/"> #Work </a>
                     
@@ -339,114 +339,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -454,6 +346,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>

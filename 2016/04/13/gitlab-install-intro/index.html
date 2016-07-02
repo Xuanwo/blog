@@ -39,23 +39,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
+                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Develop/">Develop <span
-                                    class="badge">12</span></a></li>
-                
                     <li><a href="/categories/Learn/">Learn <span
                                     class="badge">4</span></a></li>
+                
+                    <li><a href="/categories/Develop/">Develop <span
+                                    class="badge">12</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
-                
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -118,7 +118,7 @@
 <h1 id="Gitlab-安装"><a href="#Gitlab-安装" class="headerlink" title="Gitlab 安装"></a>Gitlab 安装</h1><p>推荐使用 <a href="https://about.gitlab.com/downloads" target="_blank" rel="external">Install a GitLab CE Omnibus package</a> 安装 ，其他发行版可以点选对应版本，不再赘述。</p>
 <h2 id="安装和配置依赖"><a href="#安装和配置依赖" class="headerlink" title="安装和配置依赖"></a>安装和配置依赖</h2><p>如果需要安装 Postfix 来发送邮件，则需要在安装过程中选择 <code>Internet Site</code>。你也可以使用 Sendmail 之类的第三方发信服务或者使用自行配制的 SMTP 服务器。<br>除此以外，下列命令将会在防火墙中打开 HTTP(80) 和 SSH(22) 对应端口。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo yum install curl policycoreutils openssh-server openssh-clients</span><br><span class="line">sudo systemctl <span class="built_in">enable</span> sshd</span><br><span class="line">sudo systemctl start sshd</span><br><span class="line">sudo yum install postfix</span><br><span class="line">sudo systemctl <span class="built_in">enable</span> postfix</span><br><span class="line">sudo systemctl start postfix</span><br><span class="line">sudo firewall-cmd --permanent --add-service=http</span><br><span class="line">sudo systemctl reload firewalld</span><br></pre></td></tr></table></figure>
-<h2 id="添加-Gitlab-源并安装"><a href="#添加-Gitlab-源并安装" class="headerlink" title="添加 Gitlab 源并安装"></a>添加 Gitlab 源并安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl <span class="operator">-s</span>S https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash</span><br><span class="line">sudo yum install gitlab-ce</span><br></pre></td></tr></table></figure>
+<h2 id="添加-Gitlab-源并安装"><a href="#添加-Gitlab-源并安装" class="headerlink" title="添加 Gitlab 源并安装"></a>添加 Gitlab 源并安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl <span class="_">-s</span>S https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash</span><br><span class="line">sudo yum install gitlab-ce</span><br></pre></td></tr></table></figure>
 <p>这个脚本会在源中添加 Gitlab-CE ，并自动执行<code>yum makecache</code>，然后安装<code>gitlab-ce</code>。由于源在国外，可能速度较慢，也可以手动添加来自 清华tuna 的源： <a href="https://mirrors.tuna.tsinghua.edu.cn/help/gitlab-ce/" target="_blank" rel="external">https://mirrors.tuna.tsinghua.edu.cn/help/gitlab-ce/</a> ， 链接中为各发行版下的教程，感谢 清华tuna 提供镜像。</p>
 <h2 id="配置并启动-Gitlab"><a href="#配置并启动-Gitlab" class="headerlink" title="配置并启动 Gitlab"></a>配置并启动 Gitlab</h2><p>此时已经可以启动服务了：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo gitlab-ctl reconfigure</span><br></pre></td></tr></table></figure>
@@ -140,9 +140,9 @@
 <p>根据我的测试， Coding.net 的镜像不完整，clone 之后无法 checkout</p>
 </blockquote>
 <p>然后比较汉化分支和原分支，导出 patch 用的 diff 文件。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 8.1 版本的汉化补丁</span></span><br><span class="line">git diff origin/<span class="number">8</span>-<span class="number">6</span>-stable..<span class="number">8</span>-<span class="number">6</span>-zh &gt; ../<span class="number">8.6</span>.diff</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 8.1 版本的汉化补丁</span></span><br><span class="line">git diff origin/8-6-stable..8-6-zh &gt; ../8.6.diff</span><br></pre></td></tr></table></figure>
 <p>然后上传 <code>8.6.diff</code> 文件到服务器。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 停止 gitlab</span></span><br><span class="line">sudo gitlab-ctl stop</span><br><span class="line">sudo patch <span class="operator">-d</span> /opt/gitlab/embedded/service/gitlab-rails -p1 &lt; <span class="number">8.6</span>.diff</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 停止 gitlab</span></span><br><span class="line">sudo gitlab-ctl stop</span><br><span class="line">sudo patch <span class="_">-d</span> /opt/gitlab/embedded/service/gitlab-rails -p1 &lt; 8.6.diff</span><br></pre></td></tr></table></figure>
 <p>确定没有 .rej 文件，重启 GitLab 即可。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo gitlab-ctl start</span><br></pre></td></tr></table></figure>
 <p>如果汉化中出现问题，请重新安装 GitLab（<strong>注意备份数据</strong>）。</p>
@@ -152,7 +152,7 @@
 <p>然后停止 unicorn 和 sidekiq ，保证数据库没有新的连接，不会有写数据情况。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo gitlab-ctl stop unicorn</span><br><span class="line"><span class="comment"># ok: down: unicorn: 0s, normally up</span></span><br><span class="line">sudo gitlab-ctl stop sidekiq</span><br><span class="line"><span class="comment"># ok: down: sidekiq: 0s, normally up</span></span><br></pre></td></tr></table></figure>
 <p>然后恢复数据，1406691018为备份文件的时间戳</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gitlab-rake gitlab:backup:restore BACKUP=<span class="number">1406691018</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gitlab-rake gitlab:backup:restore BACKUP=1406691018</span><br></pre></td></tr></table></figure>
 <h2 id="修改数据存储地址"><a href="#修改数据存储地址" class="headerlink" title="修改数据存储地址"></a>修改数据存储地址</h2><p>默认情况下，gitlab 将数据存储在<code>/var/opt/gitlab/git-data</code>目录下，受限于分区情况&amp;方便管理，我们需要将数据迁移到别的目录下。</p>
 <h3 id="无需数据迁移"><a href="#无需数据迁移" class="headerlink" title="无需数据迁移"></a>无需数据迁移</h3><p>如果还没有投入使用，则可以直接在配置文件中添加：</p>
 <figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">git_data_dir <span class="string">"/path/to/git-data"</span></span><br></pre></td></tr></table></figure>
@@ -220,7 +220,7 @@
                     <p><span>本文标题:</span><a href="/2016/04/13/gitlab-install-intro/">Gitlab部署和汉化以及简单运维</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2016年4月13日 - 23时04分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 15时07分</p>
                     <p><span>原始链接:</span><a href="/2016/04/13/gitlab-install-intro/"
                                             title="Gitlab部署和汉化以及简单运维">https://xuanwo.org/2016/04/13/gitlab-install-intro/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -233,11 +233,11 @@
             
                 <div class="post-tags">
                     
+                        <a href="/tags/运维/"> #运维 </a>
+                    
                         <a href="/tags/CUGBLUG/"> #CUGBLUG </a>
                     
                         <a href="/tags/Gitlab/"> #Gitlab </a>
-                    
-                        <a href="/tags/运维/"> #运维 </a>
                     
                 </div>
             
@@ -301,114 +301,6 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Games/">Games</a></li>
-                        
-                            <li><a href="/tags/Software/">Software</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Database/">Database</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/Windows/">Windows</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/项目/">项目</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/C/">C</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Python/">Python</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/HTML/">HTML</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/python/">python</a></li>
-                        
-                            <li><a href="/tags/qingchat/">qingchat</a></li>
-                        
-                            <li><a href="/tags/Flask/">Flask</a></li>
-                        
-                            <li><a href="/tags/Information/">Information</a></li>
-                        
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
-                        
-                            <li><a href="/tags/复习/">复习</a></li>
-                        
-                            <li><a href="/tags/科普/">科普</a></li>
-                        
-                            <li><a href="/tags/运维/">运维</a></li>
-                        
-                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
-                        
-                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Android/">Android</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
                             <li><a href="/tags/Google/">Google</a></li>
                         
                             <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
@@ -416,6 +308,114 @@
                             <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
                             <li><a href="/tags/PHP/">PHP</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Event/">Event</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/CI/">CI</a></li>
+                        
+                            <li><a href="/tags/Read/">Read</a></li>
+                        
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/Software/">Software</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Android/">Android</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Database/">Database</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/python/">python</a></li>
+                        
+                            <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/运维/">运维</a></li>
+                        
+                            <li><a href="/tags/CUGBLUG/">CUGBLUG</a></li>
+                        
+                            <li><a href="/tags/Gitlab/">Gitlab</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/微信/">微信</a></li>
+                        
+                            <li><a href="/tags/Sports/">Sports</a></li>
+                        
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                     </ul>
                 </div>
