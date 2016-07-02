@@ -40,23 +40,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
-                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Learn/">Learn <span
-                                    class="badge">4</span></a></li>
-                
                     <li><a href="/categories/Develop/">Develop <span
                                     class="badge">12</span></a></li>
+                
+                    <li><a href="/categories/Learn/">Learn <span
+                                    class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
+                
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -118,7 +118,7 @@
 <p><a href="http://poj.org/problem?id=3414" target="_blank" rel="external">http://poj.org/problem?id=3414</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>因为卡一道题然后整整两天没有做题目什么的太不科学了- -。<br>纠结的难点在于，我怎么样把实现操作的路径打印出来。事实上，标记全部的六种状态，然后在bfs的过程中，把每一个状态全都输出到一个数组中去，然后再进行输出。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;cstdio&gt;</span><br><span class="line">#include &lt;cstdlib&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">#include &lt;ctime&gt;</span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;algorithm&gt;</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">#include &lt;vector&gt;</span><br><span class="line">#include &lt;deque&gt;</span><br><span class="line">#include &lt;list&gt;</span><br><span class="line">#include &lt;set&gt;</span><br><span class="line">#include &lt;map&gt;</span><br><span class="line">#include &lt;stack&gt;</span><br><span class="line">#include &lt;queue&gt;</span><br><span class="line">#include &lt;numeric&gt;</span><br><span class="line">#include &lt;iomanip&gt;</span><br><span class="line">#include &lt;bitset&gt;</span><br><span class="line">#include &lt;sstream&gt;</span><br><span class="line">#include &lt;fstream&gt;</span><br><span class="line">#define debug puts(&quot;-----&quot;)</span><br><span class="line">#define pi (acos(-1.0))</span><br><span class="line">#define eps (1e-8)</span><br><span class="line">#define inf (1&lt;&lt;28)</span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">const int maxn = 110;</span><br><span class="line">int vis[maxn][maxn];</span><br><span class="line">int a, b, c;</span><br><span class="line">int step;</span><br><span class="line">int flag;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">struct Status</span><br><span class="line">&#123;</span><br><span class="line">    int k1, k2;</span><br><span class="line">    int op;</span><br><span class="line">    int step;</span><br><span class="line">    int pre;</span><br><span class="line">&#125; q[maxn *maxn];</span><br><span class="line">int id[maxn *maxn];</span><br><span class="line">int lastIndex;</span><br><span class="line"></span><br><span class="line">void bfs()</span><br><span class="line">&#123;</span><br><span class="line">    Status now, next;</span><br><span class="line"></span><br><span class="line">    int head, tail;</span><br><span class="line">    head = tail = 0;</span><br><span class="line"></span><br><span class="line">    q[tail].k1 = 0; q[tail].k2 = 0;</span><br><span class="line">    q[tail].op = 0; q[tail].step = 0; q[tail].pre = 0;</span><br><span class="line"></span><br><span class="line">    tail++;</span><br><span class="line"></span><br><span class="line">    memset(vis, 0, sizeof(vis));</span><br><span class="line">    vis[0][0] = 1;</span><br><span class="line"></span><br><span class="line">    while (head &lt; tail)</span><br><span class="line">    &#123;</span><br><span class="line">        now = q[head];</span><br><span class="line">        head++;</span><br><span class="line"></span><br><span class="line">        if (now.k1 == c || now.k2 == c)</span><br><span class="line">        &#123;</span><br><span class="line">            flag = 1;</span><br><span class="line">            step = now.step;</span><br><span class="line">            lastIndex = head - 1;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        for (int i = 1; i &lt;= 6; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            if (i == 1)</span><br><span class="line">            &#123;</span><br><span class="line">                next.k1 = a;</span><br><span class="line">                next.k2 = now.k2;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 2)</span><br><span class="line">            &#123;</span><br><span class="line">                next.k1 = now.k1;</span><br><span class="line">                next.k2 = b;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 3)</span><br><span class="line">            &#123;</span><br><span class="line">                next.k1 = 0;</span><br><span class="line">                next.k2 = now.k2;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 4)</span><br><span class="line">            &#123;</span><br><span class="line">                next.k1 = now.k1;</span><br><span class="line">                next.k2 = 0;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 5)</span><br><span class="line">            &#123;</span><br><span class="line">                if (now.k1 + now.k2 &lt;= b)</span><br><span class="line">                &#123;</span><br><span class="line">                    next.k1 = 0;</span><br><span class="line">                    next.k2 = now.k1 + now.k2;</span><br><span class="line">                &#125;</span><br><span class="line">                else</span><br><span class="line">                &#123;</span><br><span class="line">                    next.k1 = now.k1 + now.k2 - b;</span><br><span class="line">                    next.k2 = b;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            else if (i == 6)</span><br><span class="line">            &#123;</span><br><span class="line">                if (now.k1 + now.k2 &lt;= a)</span><br><span class="line">                &#123;</span><br><span class="line">                    next.k1 = now.k1 + now.k2;</span><br><span class="line">                    next.k2 = 0;</span><br><span class="line">                &#125;</span><br><span class="line">                else</span><br><span class="line">                &#123;</span><br><span class="line">                    next.k1 = a;</span><br><span class="line">                    next.k2 = now.k1 + now.k2 - a;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            next.op = i;</span><br><span class="line">            if (!vis[next.k1][next.k2])</span><br><span class="line">            &#123;</span><br><span class="line">                vis[next.k1][next.k2] = 1;</span><br><span class="line">                next.step = now.step + 1;</span><br><span class="line">                next.pre = head - 1;</span><br><span class="line"></span><br><span class="line">                q[tail].k1 = next.k1; q[tail].k2 = next.k2;</span><br><span class="line">                q[tail].op = next.op; q[tail].step = next.step; q[tail].pre = next.pre;</span><br><span class="line">                tail++;</span><br><span class="line"></span><br><span class="line">                if (next.k1 == c || next.k2 == c)</span><br><span class="line">                &#123;</span><br><span class="line">                    flag = 1;</span><br><span class="line">                    step = next.step;</span><br><span class="line">                    lastIndex = tail - 1;</span><br><span class="line">                    return;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    while (scanf(&quot;%d%d%d&quot;, &amp;a, &amp;b, &amp;c) != EOF)</span><br><span class="line">    &#123;</span><br><span class="line">        flag = 0;</span><br><span class="line">        step = 0;</span><br><span class="line"></span><br><span class="line">        bfs();</span><br><span class="line">        if (flag)</span><br><span class="line">        &#123;</span><br><span class="line">            printf(&quot;%d\n&quot;, step);</span><br><span class="line"></span><br><span class="line">            id[step] = lastIndex;</span><br><span class="line">            for (int i = step - 1; i &gt;= 1; i--)</span><br><span class="line">            &#123;</span><br><span class="line">                id[i] = q[id[i + 1]].pre;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            for (int i = 1; i &lt;= step; i++)</span><br><span class="line">            &#123;</span><br><span class="line">                if (q[id[i]].op == 1)</span><br><span class="line">                    printf(&quot;FILL(1)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 2)</span><br><span class="line">                    printf(&quot;FILL(2)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 3)</span><br><span class="line">                    printf(&quot;DROP(1)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 4)</span><br><span class="line">                    printf(&quot;DROP(2)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 5)</span><br><span class="line">                    printf(&quot;POUR(1,2)\n&quot;);</span><br><span class="line"></span><br><span class="line">                else if (q[id[i]].op == 6)</span><br><span class="line">                    printf(&quot;POUR(2,1)\n&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        else printf(&quot;impossible\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#include &lt;cstdio&gt;</span></span><br><span class="line"><span class="comment">#include &lt;cstdlib&gt;</span></span><br><span class="line"><span class="comment">#include &lt;cstring&gt;</span></span><br><span class="line"><span class="comment">#include &lt;cmath&gt;</span></span><br><span class="line"><span class="comment">#include &lt;ctime&gt;</span></span><br><span class="line"><span class="comment">#include &lt;iostream&gt;</span></span><br><span class="line"><span class="comment">#include &lt;algorithm&gt;</span></span><br><span class="line"><span class="comment">#include &lt;string&gt;</span></span><br><span class="line"><span class="comment">#include &lt;vector&gt;</span></span><br><span class="line"><span class="comment">#include &lt;deque&gt;</span></span><br><span class="line"><span class="comment">#include &lt;list&gt;</span></span><br><span class="line"><span class="comment">#include &lt;set&gt;</span></span><br><span class="line"><span class="comment">#include &lt;map&gt;</span></span><br><span class="line"><span class="comment">#include &lt;stack&gt;</span></span><br><span class="line"><span class="comment">#include &lt;queue&gt;</span></span><br><span class="line"><span class="comment">#include &lt;numeric&gt;</span></span><br><span class="line"><span class="comment">#include &lt;iomanip&gt;</span></span><br><span class="line"><span class="comment">#include &lt;bitset&gt;</span></span><br><span class="line"><span class="comment">#include &lt;sstream&gt;</span></span><br><span class="line"><span class="comment">#include &lt;fstream&gt;</span></span><br><span class="line"><span class="comment">#define debug puts("-----")</span></span><br><span class="line"><span class="comment">#define pi (acos(-1.0))</span></span><br><span class="line"><span class="comment">#define eps (1e-8)</span></span><br><span class="line"><span class="comment">#define inf (1&lt;&lt;28)</span></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">const <span class="keyword">int</span> maxn = <span class="number">110</span>;</span><br><span class="line"><span class="keyword">int</span> vis[maxn][maxn];</span><br><span class="line"><span class="keyword">int</span> a, b, c;</span><br><span class="line"><span class="keyword">int</span> step;</span><br><span class="line"><span class="keyword">int</span> flag;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">struct Status</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> k1, k2;</span><br><span class="line">    <span class="keyword">int</span> op;</span><br><span class="line">    <span class="keyword">int</span> step;</span><br><span class="line">    <span class="keyword">int</span> pre;</span><br><span class="line">&#125; <span class="string">q[maxn *maxn]</span>;</span><br><span class="line"><span class="keyword">int</span> id[maxn *maxn];</span><br><span class="line"><span class="keyword">int</span> lastIndex;</span><br><span class="line"></span><br><span class="line">void bfs()</span><br><span class="line">&#123;</span><br><span class="line">    Status now, <span class="keyword">next</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> head, tail;</span><br><span class="line">    head = tail = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="string">q[tail]</span>.k1 = <span class="number">0</span>; <span class="string">q[tail]</span>.k2 = <span class="number">0</span>;</span><br><span class="line">    <span class="string">q[tail]</span>.op = <span class="number">0</span>; <span class="string">q[tail]</span>.step = <span class="number">0</span>; <span class="string">q[tail]</span>.pre = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    tail++;</span><br><span class="line"></span><br><span class="line">    memset(vis, <span class="number">0</span>, sizeof(vis));</span><br><span class="line">    vis[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (head &lt; tail)</span><br><span class="line">    &#123;</span><br><span class="line">        now = <span class="string">q[head]</span>;</span><br><span class="line">        head++;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (now.k1 == c || now.k2 == c)</span><br><span class="line">        &#123;</span><br><span class="line">            flag = <span class="number">1</span>;</span><br><span class="line">            step = now.step;</span><br><span class="line">            lastIndex = head - <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= <span class="number">6</span>; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (i == <span class="number">1</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">next</span>.k1 = a;</span><br><span class="line">                <span class="keyword">next</span>.k2 = now.k2;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (i == <span class="number">2</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">next</span>.k1 = now.k1;</span><br><span class="line">                <span class="keyword">next</span>.k2 = b;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (i == <span class="number">3</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">next</span>.k1 = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">next</span>.k2 = now.k2;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (i == <span class="number">4</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">next</span>.k1 = now.k1;</span><br><span class="line">                <span class="keyword">next</span>.k2 = <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (i == <span class="number">5</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (now.k1 + now.k2 &lt;= b)</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">next</span>.k1 = <span class="number">0</span>;</span><br><span class="line">                    <span class="keyword">next</span>.k2 = now.k1 + now.k2;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">next</span>.k1 = now.k1 + now.k2 - b;</span><br><span class="line">                    <span class="keyword">next</span>.k2 = b;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (i == <span class="number">6</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (now.k1 + now.k2 &lt;= a)</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">next</span>.k1 = now.k1 + now.k2;</span><br><span class="line">                    <span class="keyword">next</span>.k2 = <span class="number">0</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">next</span>.k1 = a;</span><br><span class="line">                    <span class="keyword">next</span>.k2 = now.k1 + now.k2 - a;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">next</span>.op = i;</span><br><span class="line">            <span class="keyword">if</span> (!vis[<span class="keyword">next</span>.k1][<span class="keyword">next</span>.k2])</span><br><span class="line">            &#123;</span><br><span class="line">                vis[<span class="keyword">next</span>.k1][<span class="keyword">next</span>.k2] = <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">next</span>.step = now.step + <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">next</span>.pre = head - <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">                <span class="string">q[tail]</span>.k1 = <span class="keyword">next</span>.k1; <span class="string">q[tail]</span>.k2 = <span class="keyword">next</span>.k2;</span><br><span class="line">                <span class="string">q[tail]</span>.op = <span class="keyword">next</span>.op; <span class="string">q[tail]</span>.step = <span class="keyword">next</span>.step; <span class="string">q[tail]</span>.pre = <span class="keyword">next</span>.pre;</span><br><span class="line">                tail++;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (<span class="keyword">next</span>.k1 == c || <span class="keyword">next</span>.k2 == c)</span><br><span class="line">                &#123;</span><br><span class="line">                    flag = <span class="number">1</span>;</span><br><span class="line">                    step = <span class="keyword">next</span>.step;</span><br><span class="line">                    lastIndex = tail - <span class="number">1</span>;</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> main(<span class="keyword">int</span> argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">while</span> (scanf(<span class="string">"<span class="variable">%d</span><span class="variable">%d</span><span class="variable">%d</span>"</span>, &amp;a, &amp;b, &amp;c) != EOF)</span><br><span class="line">    &#123;</span><br><span class="line">        flag = <span class="number">0</span>;</span><br><span class="line">        step = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        bfs();</span><br><span class="line">        <span class="keyword">if</span> (flag)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">printf</span>(<span class="string">"<span class="variable">%d</span>\n"</span>, step);</span><br><span class="line"></span><br><span class="line">            id[step] = lastIndex;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = step - <span class="number">1</span>; i &gt;= <span class="number">1</span>; i--)</span><br><span class="line">            &#123;</span><br><span class="line">                id[i] = <span class="string">q[id[i + 1]</span>].pre;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= step; i++)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (<span class="string">q[id[i]</span>].op == <span class="number">1</span>)</span><br><span class="line">                    <span class="keyword">printf</span>(<span class="string">"FILL(1)\n"</span>);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">q[id[i]</span>].op == <span class="number">2</span>)</span><br><span class="line">                    <span class="keyword">printf</span>(<span class="string">"FILL(2)\n"</span>);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">q[id[i]</span>].op == <span class="number">3</span>)</span><br><span class="line">                    <span class="keyword">printf</span>(<span class="string">"DROP(1)\n"</span>);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">q[id[i]</span>].op == <span class="number">4</span>)</span><br><span class="line">                    <span class="keyword">printf</span>(<span class="string">"DROP(2)\n"</span>);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">q[id[i]</span>].op == <span class="number">5</span>)</span><br><span class="line">                    <span class="keyword">printf</span>(<span class="string">"POUR(1,2)\n"</span>);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">q[id[i]</span>].op == <span class="number">6</span>)</span><br><span class="line">                    <span class="keyword">printf</span>(<span class="string">"POUR(2,1)\n"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">printf</span>(<span class="string">"impossible\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月24日 已AC。</li>
 </ul>
@@ -147,7 +147,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/24/POJ-3414-Pots/">POJ 3414 Pots</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月24日 - 21时08分</p>
-                    <p><span>最后更新:</span>2016年6月29日 - 17时06分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 05时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/24/POJ-3414-Pots/"
                                             title="POJ 3414 Pots">https://xuanwo.org/2014/08/24/POJ-3414-Pots/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -218,51 +218,97 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Google/">Google</a></li>
-                        
-                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
-                        
-                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
-                        
-                            <li><a href="/tags/PHP/">PHP</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                             <li><a href="/tags/Software/">Software</a></li>
                         
-                            <li><a href="/tags/Windows/">Windows</a></li>
+                            <li><a href="/tags/Sports/">Sports</a></li>
                         
-                            <li><a href="/tags/Android/">Android</a></li>
+                            <li><a href="/tags/微信/">微信</a></li>
                         
-                            <li><a href="/tags/C/">C</a></li>
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
                         
                             <li><a href="/tags/Database/">Database</a></li>
                         
-                            <li><a href="/tags/复习/">复习</a></li>
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
                         
                             <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         
                             <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
                         
                             <li><a href="/tags/运维/">运维</a></li>
                         
@@ -270,69 +316,23 @@
                         
                             <li><a href="/tags/Gitlab/">Gitlab</a></li>
                         
-                            <li><a href="/tags/科普/">科普</a></li>
+                            <li><a href="/tags/Read/">Read</a></li>
                         
-                            <li><a href="/tags/Information/">Information</a></li>
+                            <li><a href="/tags/Android/">Android</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                            <li><a href="/tags/CI/">CI</a></li>
                         
-                            <li><a href="/tags/项目/">项目</a></li>
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
                         
-                            <li><a href="/tags/Python/">Python</a></li>
+                            <li><a href="/tags/Event/">Event</a></li>
                         
-                            <li><a href="/tags/Flask/">Flask</a></li>
+                            <li><a href="/tags/Google/">Google</a></li>
                         
-                            <li><a href="/tags/HTML/">HTML</a></li>
+                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
                         
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/Games/">Games</a></li>
+                            <li><a href="/tags/PHP/">PHP</a></li>
                         
                     </ul>
                 </div>

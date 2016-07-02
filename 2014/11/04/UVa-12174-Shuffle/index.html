@@ -40,23 +40,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
-                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Learn/">Learn <span
-                                    class="badge">4</span></a></li>
-                
                     <li><a href="/categories/Develop/">Develop <span
                                     class="badge">12</span></a></li>
+                
+                    <li><a href="/categories/Learn/">Learn <span
+                                    class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
+                
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -120,7 +120,7 @@
 <p>&gt;<br>使用一个音乐播放器，采用随机播放。随机播放的原理时先随机产生一个1~n的排列，然后就按这个排列顺序播放歌曲。播放完这序列的所有歌曲以后，再次随机生成一个1～n的排列，再继续播放。然后，现在给你一个播放历史记录，但是这个记录是不完整的，因为当它开始记录的时候，有些歌可能已经播放过了但是没有记录到。现在给你一段历史记录和播放器中歌的个数，问历史记录中的第一首歌是某个随机列表的第几首，总共有多少可能？</p>
 <p>整个算法可以分成两段，首先处理min(s,n)中的部分，这部分出现的歌曲都放入一个sames容器，以bool数组ok[i]来记录从标号i开始的歌曲是不是都不相同。然后依次枚举第一首歌是第x首，先检查前s-x是不是都不相同，然后从x开始，依次判断x，x+s，x+2s等等是不是符合条件。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#define MAXN 100000+10</span><br><span class="line"></span><br><span class="line">map&lt;int,int&gt; cnt;</span><br><span class="line">set&lt;int&gt; sames;</span><br><span class="line">bool no[MAXN];</span><br><span class="line">int t,s,n;</span><br><span class="line">int a[MAXN];</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    scanf(&quot;%d&quot;, &amp;t);</span><br><span class="line">    while(t--)</span><br><span class="line">    &#123;</span><br><span class="line">        memset(no,0,sizeof(no));</span><br><span class="line">        cnt.clear(),sames.clear();</span><br><span class="line">        scanf(&quot;%d%d&quot;, &amp;s,&amp;n);</span><br><span class="line">        for(int i=0; i&lt;n; ++i)    scanf(&quot;%d&quot;, a+i);</span><br><span class="line">        int idx=-1;</span><br><span class="line">        for(int i=0; i&lt;min(s,n); ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            if(cnt[a[i]]&gt;0)</span><br><span class="line">            &#123;</span><br><span class="line">                idx=i;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">            cnt[a[i]]++;</span><br><span class="line">        &#125;</span><br><span class="line">        if(idx==-1)</span><br><span class="line">        &#123;</span><br><span class="line">            printf(&quot;%d\n&quot;, s);</span><br><span class="line">            continue;</span><br><span class="line">        &#125;</span><br><span class="line">        for(int i=idx; i&lt;min(s,n); ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            if(cnt[a[i]]&gt;0) sames.insert(a[i]);</span><br><span class="line">            cnt[a[i]]++;</span><br><span class="line">        &#125;</span><br><span class="line">        for(int i=0; i&lt;n; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            if(sames.size())    no[i]=1;</span><br><span class="line">            if(i+s&lt;n)</span><br><span class="line">            &#123;</span><br><span class="line">                if(cnt[a[i+s]]&gt;0)   sames.insert(a[i+s]);</span><br><span class="line">                cnt[a[i+s]]++;</span><br><span class="line">            &#125;</span><br><span class="line">            if(cnt[a[i]]==2)    sames.erase(a[i]);</span><br><span class="line">            cnt[a[i]]--;</span><br><span class="line">        &#125;</span><br><span class="line">        int ans=0;</span><br><span class="line">        for(int i=0; i&lt;idx; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            bool can=1;</span><br><span class="line">            for(int j=i+1; j&lt;n; j+=s) can&amp;=!no[j];</span><br><span class="line">            ans+=can;</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;%d\n&quot;,ans);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MAXN <span class="number">100000</span>+<span class="number">10</span></span></span><br><span class="line"></span><br><span class="line"><span class="built_in">map</span>&lt;<span class="keyword">int</span>,<span class="keyword">int</span>&gt; cnt;</span><br><span class="line"><span class="built_in">set</span>&lt;<span class="keyword">int</span>&gt; sames;</span><br><span class="line"><span class="keyword">bool</span> no[MAXN];</span><br><span class="line"><span class="keyword">int</span> t,s,n;</span><br><span class="line"><span class="keyword">int</span> a[MAXN];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> <span class="keyword">const</span> *argv[])</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>, &amp;t);</span><br><span class="line">    <span class="keyword">while</span>(t--)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">memset</span>(no,<span class="number">0</span>,<span class="keyword">sizeof</span>(no));</span><br><span class="line">        cnt.clear(),sames.clear();</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d%d"</span>, &amp;s,&amp;n);</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;n; ++i)    <span class="built_in">scanf</span>(<span class="string">"%d"</span>, a+i);</span><br><span class="line">        <span class="keyword">int</span> idx=-<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;min(s,n); ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>(cnt[a[i]]&gt;<span class="number">0</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                idx=i;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            cnt[a[i]]++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(idx==-<span class="number">1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"%d\n"</span>, s);</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=idx; i&lt;min(s,n); ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>(cnt[a[i]]&gt;<span class="number">0</span>) sames.insert(a[i]);</span><br><span class="line">            cnt[a[i]]++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;n; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>(sames.size())    no[i]=<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span>(i+s&lt;n)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span>(cnt[a[i+s]]&gt;<span class="number">0</span>)   sames.insert(a[i+s]);</span><br><span class="line">                cnt[a[i+s]]++;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span>(cnt[a[i]]==<span class="number">2</span>)    sames.erase(a[i]);</span><br><span class="line">            cnt[a[i]]--;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> ans=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;idx; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">bool</span> can=<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> j=i+<span class="number">1</span>; j&lt;n; j+=s) can&amp;=!no[j];</span><br><span class="line">            ans+=can;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,ans);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年11月4日 UVa挂了= =。</li>
 <li>2014年11月5日 已AC。</li>
@@ -150,7 +150,7 @@
                     <p><span>本文标题:</span><a href="/2014/11/04/UVa-12174-Shuffle/">UVa 12174 Shuffle</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年11月4日 - 22时11分</p>
-                    <p><span>最后更新:</span>2016年6月29日 - 17时06分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 05时07分</p>
                     <p><span>原始链接:</span><a href="/2014/11/04/UVa-12174-Shuffle/"
                                             title="UVa 12174 Shuffle">https://xuanwo.org/2014/11/04/UVa-12174-Shuffle/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -221,51 +221,97 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Google/">Google</a></li>
-                        
-                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
-                        
-                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
-                        
-                            <li><a href="/tags/PHP/">PHP</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                             <li><a href="/tags/Software/">Software</a></li>
                         
-                            <li><a href="/tags/Windows/">Windows</a></li>
+                            <li><a href="/tags/Sports/">Sports</a></li>
                         
-                            <li><a href="/tags/Android/">Android</a></li>
+                            <li><a href="/tags/微信/">微信</a></li>
                         
-                            <li><a href="/tags/C/">C</a></li>
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
                         
                             <li><a href="/tags/Database/">Database</a></li>
                         
-                            <li><a href="/tags/复习/">复习</a></li>
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
                         
                             <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         
                             <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
                         
                             <li><a href="/tags/运维/">运维</a></li>
                         
@@ -273,69 +319,23 @@
                         
                             <li><a href="/tags/Gitlab/">Gitlab</a></li>
                         
-                            <li><a href="/tags/科普/">科普</a></li>
+                            <li><a href="/tags/Read/">Read</a></li>
                         
-                            <li><a href="/tags/Information/">Information</a></li>
+                            <li><a href="/tags/Android/">Android</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                            <li><a href="/tags/CI/">CI</a></li>
                         
-                            <li><a href="/tags/项目/">项目</a></li>
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
                         
-                            <li><a href="/tags/Python/">Python</a></li>
+                            <li><a href="/tags/Event/">Event</a></li>
                         
-                            <li><a href="/tags/Flask/">Flask</a></li>
+                            <li><a href="/tags/Google/">Google</a></li>
                         
-                            <li><a href="/tags/HTML/">HTML</a></li>
+                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
                         
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/Games/">Games</a></li>
+                            <li><a href="/tags/PHP/">PHP</a></li>
                         
                     </ul>
                 </div>

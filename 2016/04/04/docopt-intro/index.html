@@ -40,23 +40,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
-                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Learn/">Learn <span
-                                    class="badge">4</span></a></li>
-                
                     <li><a href="/categories/Develop/">Develop <span
                                     class="badge">12</span></a></li>
+                
+                    <li><a href="/categories/Learn/">Learn <span
+                                    class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
+                
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -118,18 +118,18 @@
 <a id="more"></a>
 <h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>docopt 本质上是在 Python 中引入了一种针对命令行参数的形式语言，在代码的最开头使用<code>&quot;&quot;&quot;</code>文档注释的形式写出符合要求的文档，就会自动生成对应的parse，体验非常赞。</p>
 <h1 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h1><h2 id="样例"><a href="#样例" class="headerlink" title="样例"></a>样例</h2><p>docopt的使用非常简单，以Qingchat为例，你只需要在代码最开头加入：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">"""Qingchat CLI</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  qingchat config ip &lt;ip&gt;</span><br><span class="line">  qingchat config port &lt;port&gt;</span><br><span class="line">  qingchat config login</span><br><span class="line">  qingchat group list</span><br><span class="line">  qingchat group choose &lt;group_name&gt;...</span><br><span class="line">  qingchat group clean</span><br><span class="line">  qingchat group send -t &lt;content&gt;</span><br><span class="line">  qingchat group send -i &lt;media&gt;</span><br><span class="line">  qingchat group send -f &lt;file&gt; [&lt;delaytime&gt;]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  -h --help     Show this screen.</span><br><span class="line">  -v --version     Show version.</span><br><span class="line">"""</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"""Qingchat CLI</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  qingchat config ip &lt;ip&gt;</span><br><span class="line">  qingchat config port &lt;port&gt;</span><br><span class="line">  qingchat config login</span><br><span class="line">  qingchat group list</span><br><span class="line">  qingchat group choose &lt;group_name&gt;...</span><br><span class="line">  qingchat group clean</span><br><span class="line">  qingchat group send -t &lt;content&gt;</span><br><span class="line">  qingchat group send -i &lt;media&gt;</span><br><span class="line">  qingchat group send -f &lt;file&gt; [&lt;delaytime&gt;]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  -h --help     Show this screen.</span><br><span class="line">  -v --version     Show version.</span><br><span class="line">"""</span></span><br></pre></td></tr></table></figure>
 <p>然后在执行代码中加入：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">arguments = docopt(__doc__, version=<span class="string">'Qingchat 0.3.2'</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arguments = docopt(__doc__, version=<span class="string">'Qingchat 0.3.2'</span>)</span><br></pre></td></tr></table></figure>
 <p>就会在你的程序中导入一个<code>arguments</code>字典，这个字典中的内容形如：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">'-f'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'-i'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'-t'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'&lt;content&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'&lt;file&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'&lt;group_name&gt;'</span>: [],</span><br><span class="line">    <span class="string">'&lt;ip&gt;'</span>: <span class="string">'127.0.0.1'</span>,</span><br><span class="line">    <span class="string">'&lt;media&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'&lt;port&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'choose'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'clean'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'config'</span>: <span class="keyword">True</span>,</span><br><span class="line">    <span class="string">'group'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'ip'</span>: <span class="keyword">True</span>,</span><br><span class="line">    <span class="string">'list'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'login'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'port'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'send'</span>: <span class="keyword">False</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">'-f'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'-i'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'-t'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'&lt;content&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'&lt;file&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'&lt;group_name&gt;'</span>: [],</span><br><span class="line">    <span class="string">'&lt;ip&gt;'</span>: <span class="string">'127.0.0.1'</span>,</span><br><span class="line">    <span class="string">'&lt;media&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'&lt;port&gt;'</span>: <span class="keyword">None</span>,</span><br><span class="line">    <span class="string">'choose'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'clean'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'config'</span>: <span class="keyword">True</span>,</span><br><span class="line">    <span class="string">'group'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'ip'</span>: <span class="keyword">True</span>,</span><br><span class="line">    <span class="string">'list'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'login'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'port'</span>: <span class="keyword">False</span>,</span><br><span class="line">    <span class="string">'send'</span>: <span class="keyword">False</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这样应该就能很容易看出来，我们在文档中写的每一个短语，都被转化为一个对应的类型。只要直接调用<code>arguments[&#39;xxx&#39;]</code>就可以判断或者使用对应的值，从而实现对应的功能。</p>
 <h2 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h2><p>前面我们举了一个例子，下面我们来详细介绍一下如何完成一个符合 <code>docopt</code> 要求的注释文档。</p>
 <h3 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h3><p>所有出现在<code>usage:</code>（区分大小写）和一个空行之间的文本都会被识别为一个命令组合，<code>usage</code>后的第一个字母将会被识别为这个程序的名字，所有命令组合的每一个部分（空格分隔）都会成为字典中的一个key。</p>
 <h4 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h4><p>形如 <code>&lt;argument&gt;</code> 或者 <code>ARGUMENT</code> 的文本将会被识别为参数。<br>在转化后的字典中的取值为 <code>True</code> 或者 <code>False</code> 。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program &lt;host&gt; &lt;port&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program &lt;host&gt; &lt;port&gt;</span><br></pre></td></tr></table></figure>
 <h4 id="选项"><a href="#选项" class="headerlink" title="选项"></a>选项</h4><p>形如 <code>-o</code> 或者 <code>--option</code> 的文本将会被识别为选项。<br>在转化后的字典中的取值为 <code>True</code> 或者 <code>False</code> 。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program -f &lt;file&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program -f &lt;file&gt;</span><br></pre></td></tr></table></figure>
 <p>Tips:</p>
 <ul>
 <li>短选项可以组合起来，比如<code>-abc</code>等价于<code>-a -b -c</code></li>
@@ -139,16 +139,16 @@
 <h4 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h4><p>其他不满足 <code>--options</code> 或者 <code>&lt;arguments&gt;</code> 的文本将会被识别为（子）命令。<br>在转化后的字典中取值为 <code>True</code> 或者 <code>False</code>。</p>
 <h4 id="可选项"><a href="#可选项" class="headerlink" title="可选项"></a>可选项</h4><p>形如 <code>[optional elements]</code> 的文本是可选项。<br><code>elements</code>包括上述的三种类型：参数，选项以及命令。</p>
 <p>在相同或者不同的括号中都是一样的：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program [command --option &lt;argument&gt;]</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program [command --option &lt;argument&gt;]</span><br></pre></td></tr></table></figure>
 <p>等价于</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program [command] [--option] [&lt;argument&gt;]</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program [command] [--option] [&lt;argument&gt;]</span><br></pre></td></tr></table></figure>
 <h4 id="必填项"><a href="#必填项" class="headerlink" title="必填项"></a>必填项</h4><p>形如 <code>(required elements)</code> 的文本是必填项。<br>上述三种元素默认都是必填项，<code>()</code>符号用在一些比较特殊的情形下，比如：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program (--either-this &lt;<span class="keyword">and</span>-that&gt; | &lt;<span class="keyword">or</span>-this&gt;)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program (--either-this &lt;<span class="keyword">and</span>-that&gt; | &lt;<span class="keyword">or</span>-this&gt;)</span><br></pre></td></tr></table></figure>
 <h4 id="选择项"><a href="#选择项" class="headerlink" title="选择项"></a>选择项</h4><p>形如 <code>element|another</code> 的文本是选择项，你可以从中选择一个值。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program go (--up | --down | --left | --right)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program go (--up | --down | --left | --right)</span><br></pre></td></tr></table></figure>
 <h4 id="列表项"><a href="#列表项" class="headerlink" title="列表项"></a>列表项</h4><p>形如 <code>element...</code> 的文本是列表项，你可以输入多个参数。</p>
 <p>比如说：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Usage: my_program open &lt;file&gt;...</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Usage: my_program open &lt;file&gt;...</span><br></pre></td></tr></table></figure>
 <p>然后你可以通过<code>arguments[&#39;&lt;file&gt;&#39;]</code> 来访问这个列表。</p>
 <h3 id="Option"><a href="#Option" class="headerlink" title="Option"></a>Option</h3><p><code>Option</code> 部分用于指定某些特殊情形，比如：</p>
 <ul>
@@ -185,7 +185,7 @@
                     <p><span>本文标题:</span><a href="/2016/04/04/docopt-intro/">docopt——好用的Python命令行参数解释器</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2016年4月4日 - 21时04分</p>
-                    <p><span>最后更新:</span>2016年6月29日 - 17时06分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 05时07分</p>
                     <p><span>原始链接:</span><a href="/2016/04/04/docopt-intro/"
                                             title="docopt——好用的Python命令行参数解释器">https://xuanwo.org/2016/04/04/docopt-intro/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -264,51 +264,97 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Google/">Google</a></li>
-                        
-                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
-                        
-                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
-                        
-                            <li><a href="/tags/PHP/">PHP</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                             <li><a href="/tags/Software/">Software</a></li>
                         
-                            <li><a href="/tags/Windows/">Windows</a></li>
+                            <li><a href="/tags/Sports/">Sports</a></li>
                         
-                            <li><a href="/tags/Android/">Android</a></li>
+                            <li><a href="/tags/微信/">微信</a></li>
                         
-                            <li><a href="/tags/C/">C</a></li>
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
                         
                             <li><a href="/tags/Database/">Database</a></li>
                         
-                            <li><a href="/tags/复习/">复习</a></li>
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
                         
                             <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         
                             <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
                         
                             <li><a href="/tags/运维/">运维</a></li>
                         
@@ -316,69 +362,23 @@
                         
                             <li><a href="/tags/Gitlab/">Gitlab</a></li>
                         
-                            <li><a href="/tags/科普/">科普</a></li>
+                            <li><a href="/tags/Read/">Read</a></li>
                         
-                            <li><a href="/tags/Information/">Information</a></li>
+                            <li><a href="/tags/Android/">Android</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                            <li><a href="/tags/CI/">CI</a></li>
                         
-                            <li><a href="/tags/项目/">项目</a></li>
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
                         
-                            <li><a href="/tags/Python/">Python</a></li>
+                            <li><a href="/tags/Event/">Event</a></li>
                         
-                            <li><a href="/tags/Flask/">Flask</a></li>
+                            <li><a href="/tags/Google/">Google</a></li>
                         
-                            <li><a href="/tags/HTML/">HTML</a></li>
+                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
                         
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/Games/">Games</a></li>
+                            <li><a href="/tags/PHP/">PHP</a></li>
                         
                     </ul>
                 </div>

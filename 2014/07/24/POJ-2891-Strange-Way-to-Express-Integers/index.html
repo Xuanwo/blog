@@ -40,23 +40,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
-                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Learn/">Learn <span
-                                    class="badge">4</span></a></li>
-                
                     <li><a href="/categories/Develop/">Develop <span
                                     class="badge">12</span></a></li>
+                
+                    <li><a href="/categories/Learn/">Learn <span
+                                    class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
+                
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -118,7 +118,7 @@
 <p><a href="http://poj.org/problem?id=2891" target="_blank" rel="external">http://poj.org/problem?id=2891</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>做的第一道关于扩展欧几里德方程的题目，还不够。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include  &lt;cstdio&gt;</span><br><span class="line">#include  &lt;iostream&gt;</span><br><span class="line">#include  &lt;cstring&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">typedef long long int big;</span><br><span class="line"></span><br><span class="line">big egcd(big a, big b, big &amp;x, big &amp;y )</span><br><span class="line">&#123;</span><br><span class="line">    big t, ret;</span><br><span class="line">    if (!b)</span><br><span class="line">    &#123;</span><br><span class="line">        x = 1;</span><br><span class="line">        y = 0;</span><br><span class="line">        return a;</span><br><span class="line">    &#125;</span><br><span class="line">    ret = egcd(b, a % b, x, y);</span><br><span class="line">    t = x, x = y, y = t - a / b * y;</span><br><span class="line">    return ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    int k;</span><br><span class="line">    big a1, r1, a2, r2;</span><br><span class="line">    big d, x, y;</span><br><span class="line">    while (scanf(&quot;%d&quot;, &amp;k) != EOF)</span><br><span class="line">    &#123;</span><br><span class="line">        bool flag = false;</span><br><span class="line">        scanf(&quot;%I64d%I64d&quot;, &amp;a1, &amp;r1);</span><br><span class="line">        for (int i = 2; i &lt;= k; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            scanf(&quot;%I64d%I64d&quot;, &amp;a2, &amp;r2);</span><br><span class="line">            if (flag)    continue;</span><br><span class="line">            d = egcd(a1, a2, x, y);</span><br><span class="line">            if ((r2 - r1) % d)   flag = true;</span><br><span class="line">            a2 = a2 / d;</span><br><span class="line">            r1 = ((x * ((r2 - r1) / d) % a2 + a2) % a2) * a1 + r1;</span><br><span class="line">            a1 = a2 * a1;</span><br><span class="line">        &#125;</span><br><span class="line">        if (flag)    printf(&quot;-1\n&quot;);</span><br><span class="line">        else    printf(&quot;%I64d\n&quot;, r1 % a1);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="label">#include</span>  &lt;cstdio&gt;</span><br><span class="line"><span class="label">#include</span>  &lt;iostream&gt;</span><br><span class="line"><span class="label">#include</span>  &lt;cstring&gt;</span><br><span class="line"></span><br><span class="line"><span class="label">using</span> namespace std<span class="comment">;</span></span><br><span class="line"></span><br><span class="line"><span class="label">typedef</span> long long int <span class="keyword">big;</span><br><span class="line"></span></span><br><span class="line"><span class="keyword">big </span>egcd(<span class="keyword">big </span>a, <span class="keyword">big </span><span class="keyword">b, </span><span class="keyword">big </span>&amp;x, <span class="keyword">big </span>&amp;y )</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">big </span>t, ret<span class="comment">;</span></span><br><span class="line">    <span class="preprocessor">if</span> (!<span class="keyword">b)</span><br><span class="line"></span>    &#123;</span><br><span class="line">        x = <span class="number">1</span><span class="comment">;</span></span><br><span class="line">        y = <span class="number">0</span><span class="comment">;</span></span><br><span class="line">        return a<span class="comment">;</span></span><br><span class="line">    &#125;</span><br><span class="line">    ret = egcd(<span class="keyword">b, </span>a % <span class="keyword">b, </span>x, y)<span class="comment">;</span></span><br><span class="line">    t = x, x = y, y = t - a / <span class="keyword">b </span>* y<span class="comment">;</span></span><br><span class="line">    return ret<span class="comment">;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="label">int</span> main()</span><br><span class="line">&#123;</span><br><span class="line">    int k<span class="comment">;</span></span><br><span class="line">    <span class="keyword">big </span><span class="literal">a1</span>, <span class="literal">r1</span>, <span class="literal">a2</span>, <span class="literal">r2</span><span class="comment">;</span></span><br><span class="line">    <span class="keyword">big </span>d, x, y<span class="comment">;</span></span><br><span class="line">    <span class="preprocessor">while</span> (scanf(<span class="string">"%d"</span>, &amp;k) != EOF)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">bool </span>flag = false<span class="comment">;</span></span><br><span class="line">        scanf(<span class="string">"%I64d%I64d"</span>, &amp;<span class="literal">a1</span>, &amp;<span class="literal">r1</span>)<span class="comment">;</span></span><br><span class="line">        for (int i = <span class="number">2</span><span class="comment">; i &lt;= k; ++i)</span></span><br><span class="line">        &#123;</span><br><span class="line">            scanf(<span class="string">"%I64d%I64d"</span>, &amp;<span class="literal">a2</span>, &amp;<span class="literal">r2</span>)<span class="comment">;</span></span><br><span class="line">            <span class="preprocessor">if</span> (flag)    continue<span class="comment">;</span></span><br><span class="line">            d = egcd(<span class="literal">a1</span>, <span class="literal">a2</span>, x, y)<span class="comment">;</span></span><br><span class="line">            <span class="preprocessor">if</span> ((<span class="literal">r2</span> - <span class="literal">r1</span>) % d)   flag = true<span class="comment">;</span></span><br><span class="line">            <span class="literal">a2</span> = <span class="literal">a2</span> / d<span class="comment">;</span></span><br><span class="line">            <span class="literal">r1</span> = ((x * ((<span class="literal">r2</span> - <span class="literal">r1</span>) / d) % <span class="literal">a2</span> + <span class="literal">a2</span>) % <span class="literal">a2</span>) * <span class="literal">a1</span> + <span class="literal">r1</span><span class="comment">;</span></span><br><span class="line">            <span class="literal">a1</span> = <span class="literal">a2</span> * <span class="literal">a1</span><span class="comment">;</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="preprocessor">if</span> (flag)    printf(<span class="string">"-1\n"</span>)<span class="comment">;</span></span><br><span class="line">        <span class="preprocessor">else</span>    printf(<span class="string">"%I64d\n"</span>, <span class="literal">r1</span> % <span class="literal">a1</span>)<span class="comment">;</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    return <span class="number">0</span><span class="comment">;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月24日 已AC。</li>
 </ul>
@@ -147,7 +147,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/24/POJ-2891-Strange-Way-to-Express-Integers/">POJ 2891 Strange Way to Express Integers</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月24日 - 01时07分</p>
-                    <p><span>最后更新:</span>2016年6月29日 - 17时06分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 05时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/24/POJ-2891-Strange-Way-to-Express-Integers/"
                                             title="POJ 2891 Strange Way to Express Integers">https://xuanwo.org/2014/07/24/POJ-2891-Strange-Way-to-Express-Integers/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -218,51 +218,97 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Google/">Google</a></li>
-                        
-                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
-                        
-                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
-                        
-                            <li><a href="/tags/PHP/">PHP</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                             <li><a href="/tags/Software/">Software</a></li>
                         
-                            <li><a href="/tags/Windows/">Windows</a></li>
+                            <li><a href="/tags/Sports/">Sports</a></li>
                         
-                            <li><a href="/tags/Android/">Android</a></li>
+                            <li><a href="/tags/微信/">微信</a></li>
                         
-                            <li><a href="/tags/C/">C</a></li>
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
                         
                             <li><a href="/tags/Database/">Database</a></li>
                         
-                            <li><a href="/tags/复习/">复习</a></li>
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
                         
                             <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         
                             <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
                         
                             <li><a href="/tags/运维/">运维</a></li>
                         
@@ -270,69 +316,23 @@
                         
                             <li><a href="/tags/Gitlab/">Gitlab</a></li>
                         
-                            <li><a href="/tags/科普/">科普</a></li>
+                            <li><a href="/tags/Read/">Read</a></li>
                         
-                            <li><a href="/tags/Information/">Information</a></li>
+                            <li><a href="/tags/Android/">Android</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                            <li><a href="/tags/CI/">CI</a></li>
                         
-                            <li><a href="/tags/项目/">项目</a></li>
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
                         
-                            <li><a href="/tags/Python/">Python</a></li>
+                            <li><a href="/tags/Event/">Event</a></li>
                         
-                            <li><a href="/tags/Flask/">Flask</a></li>
+                            <li><a href="/tags/Google/">Google</a></li>
                         
-                            <li><a href="/tags/HTML/">HTML</a></li>
+                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
                         
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/Games/">Games</a></li>
+                            <li><a href="/tags/PHP/">PHP</a></li>
                         
                     </ul>
                 </div>

@@ -40,23 +40,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
-                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Learn/">Learn <span
-                                    class="badge">4</span></a></li>
-                
                     <li><a href="/categories/Develop/">Develop <span
                                     class="badge">12</span></a></li>
+                
+                    <li><a href="/categories/Learn/">Learn <span
+                                    class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
+                
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -164,7 +164,7 @@
 </tbody>
 </table>
 <h3 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h3><p>我们使用<code>JSON</code>库中的<code>dump</code>以及<code>dumps</code>函数来进行<code>JSON</code>编码。<code>dump</code>和<code>dumps</code>各项参数含义基本一致，唯一区别在于<code>dump</code>函数编码产生一个JSON文件流，而<code>dumps</code>编码产生一个JSON字符串。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">json.dump(obj, fp, skipkeys=<span class="keyword">False</span>, ensure_ascii=<span class="keyword">True</span>, check_circular=<span class="keyword">True</span>, allow_nan=<span class="keyword">True</span>, cls=<span class="keyword">None</span>, indent=<span class="keyword">None</span>, separators=<span class="keyword">None</span>, default=<span class="keyword">None</span>, sort_keys=<span class="keyword">False</span>, **kw)</span><br><span class="line"></span><br><span class="line">json.dumps(obj, skipkeys=<span class="keyword">False</span>, ensure_ascii=<span class="keyword">True</span>, check_circular=<span class="keyword">True</span>, allow_nan=<span class="keyword">True</span>, cls=<span class="keyword">None</span>, indent=<span class="keyword">None</span>, separators=<span class="keyword">None</span>, default=<span class="keyword">None</span>, sort_keys=<span class="keyword">False</span>, **kw)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">json.dump(obj, fp, skipkeys=<span class="keyword">False</span>, ensure_ascii=<span class="keyword">True</span>, check_circular=<span class="keyword">True</span>, allow_nan=<span class="keyword">True</span>, cls=<span class="keyword">None</span>, indent=<span class="keyword">None</span>, separators=<span class="keyword">None</span>, default=<span class="keyword">None</span>, sort_keys=<span class="keyword">False</span>, **kw)</span><br><span class="line"></span><br><span class="line">json.dumps(obj, skipkeys=<span class="keyword">False</span>, ensure_ascii=<span class="keyword">True</span>, check_circular=<span class="keyword">True</span>, allow_nan=<span class="keyword">True</span>, cls=<span class="keyword">None</span>, indent=<span class="keyword">None</span>, separators=<span class="keyword">None</span>, default=<span class="keyword">None</span>, sort_keys=<span class="keyword">False</span>, **kw)</span><br></pre></td></tr></table></figure>
 <ul>
 <li><code>obj</code>：编码对象</li>
 <li><code>fp</code>：指定文件流</li>
@@ -178,7 +178,7 @@
 <li><code>default</code>：若<code>default</code>为空值，则使用自带的<code>default</code>方法；否则使用指定值</li>
 <li><code>sort_keys</code>：若<code>sort_keys</code>为真，则输出将会按照键进行排序</li>
 </ul>
-<h3 id="示范"><a href="#示范" class="headerlink" title="示范"></a>示范</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>json.dumps([<span class="string">'foo'</span>, &#123;<span class="string">'bar'</span>: (<span class="string">'baz'</span>, <span class="keyword">None</span>, <span class="number">1.0</span>, <span class="number">2</span>)&#125;])</span><br><span class="line"><span class="string">'["foo", &#123;"bar": ["baz", null, 1.0, 2]&#125;]'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 排序</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>print(json.dumps(&#123;<span class="string">"c"</span>: <span class="number">0</span>, <span class="string">"b"</span>: <span class="number">0</span>, <span class="string">"a"</span>: <span class="number">0</span>&#125;, sort_keys=<span class="keyword">True</span>))</span><br><span class="line">&#123;<span class="string">"a"</span>: <span class="number">0</span>, <span class="string">"b"</span>: <span class="number">0</span>, <span class="string">"c"</span>: <span class="number">0</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分隔符</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>json.dumps([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,&#123;<span class="string">'4'</span>: <span class="number">5</span>, <span class="string">'6'</span>: <span class="number">7</span>&#125;], separators=(<span class="string">','</span>, <span class="string">':'</span>))</span><br><span class="line"><span class="string">'[1,2,3,&#123;"4":5,"6":7&#125;]'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Unicode输出</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>json.dumps(<span class="string">"\u5317\u4eac"</span>, ensure_ascii=<span class="keyword">False</span>)</span><br><span class="line"><span class="string">'北京'</span></span><br></pre></td></tr></table></figure>
+<h3 id="示范"><a href="#示范" class="headerlink" title="示范"></a>示范</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="prompt">&gt;&gt;&gt; </span><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>json.dumps([<span class="string">'foo'</span>, &#123;<span class="string">'bar'</span>: (<span class="string">'baz'</span>, <span class="keyword">None</span>, <span class="number">1.0</span>, <span class="number">2</span>)&#125;])</span><br><span class="line"><span class="string">'["foo", &#123;"bar": ["baz", null, 1.0, 2]&#125;]'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 排序</span></span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>print(json.dumps(&#123;<span class="string">"c"</span>: <span class="number">0</span>, <span class="string">"b"</span>: <span class="number">0</span>, <span class="string">"a"</span>: <span class="number">0</span>&#125;, sort_keys=<span class="keyword">True</span>))</span><br><span class="line">&#123;<span class="string">"a"</span>: <span class="number">0</span>, <span class="string">"b"</span>: <span class="number">0</span>, <span class="string">"c"</span>: <span class="number">0</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分隔符</span></span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>json.dumps([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,&#123;<span class="string">'4'</span>: <span class="number">5</span>, <span class="string">'6'</span>: <span class="number">7</span>&#125;], separators=(<span class="string">','</span>, <span class="string">':'</span>))</span><br><span class="line"><span class="string">'[1,2,3,&#123;"4":5,"6":7&#125;]'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Unicode输出</span></span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>json.dumps(<span class="string">"\u5317\u4eac"</span>, ensure_ascii=<span class="keyword">False</span>)</span><br><span class="line"><span class="string">'北京'</span></span><br></pre></td></tr></table></figure>
 <h2 id="解码"><a href="#解码" class="headerlink" title="解码"></a>解码</h2><h3 id="对应类型-1"><a href="#对应类型-1" class="headerlink" title="对应类型"></a>对应类型</h3><table>
 <thead>
 <tr>
@@ -222,7 +222,7 @@
 </tbody>
 </table>
 <h3 id="函数-1"><a href="#函数-1" class="headerlink" title="函数"></a>函数</h3><p>我们使用<code>JSON</code>库中的<code>load</code>以及<code>loads</code>函数来进行<code>JSON</code>解码。<code>load</code>和<code>loads</code>各项参数含义基本一致，唯一区别在于<code>load</code>函数用于解码JSON文件流，而<code>loads</code>用于解码JSON字符串。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">json.load(fp, cls=<span class="keyword">None</span>, object_hook=<span class="keyword">None</span>, parse_float=<span class="keyword">None</span>, parse_int=<span class="keyword">None</span>, parse_constant=<span class="keyword">None</span>, object_pairs_hook=<span class="keyword">None</span>, **kw)</span><br><span class="line"></span><br><span class="line">json.loads(s, encoding=<span class="keyword">None</span>, cls=<span class="keyword">None</span>, object_hook=<span class="keyword">None</span>, parse_float=<span class="keyword">None</span>, parse_int=<span class="keyword">None</span>, parse_constant=<span class="keyword">None</span>, object_pairs_hook=<span class="keyword">None</span>, **kw)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">json.load(fp, cls=<span class="keyword">None</span>, object_hook=<span class="keyword">None</span>, parse_float=<span class="keyword">None</span>, parse_int=<span class="keyword">None</span>, parse_constant=<span class="keyword">None</span>, object_pairs_hook=<span class="keyword">None</span>, **kw)</span><br><span class="line"></span><br><span class="line">json.loads(s, encoding=<span class="keyword">None</span>, cls=<span class="keyword">None</span>, object_hook=<span class="keyword">None</span>, parse_float=<span class="keyword">None</span>, parse_int=<span class="keyword">None</span>, parse_constant=<span class="keyword">None</span>, object_pairs_hook=<span class="keyword">None</span>, **kw)</span><br></pre></td></tr></table></figure>
 <ul>
 <li><code>fp</code>：指定文件流</li>
 <li><code>s</code>：指定字符串</li>
@@ -234,7 +234,7 @@
 <li><code>parse_constant</code>若<code>parse_constant</code>为空，则不会处理非法输入；否则抛出异常</li>
 <li><code>object_pairs_hook</code>：若<code>object_pairs_hook</code>为空值，则数组返回解码器<code>dict</code>；否则使用自定义类型返回</li>
 </ul>
-<h3 id="示范-1"><a href="#示范-1" class="headerlink" title="示范"></a>示范</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>json.loads(<span class="string">'["foo", &#123;"bar":["baz", null, 1.0, 2]&#125;]'</span>)</span><br><span class="line">[<span class="string">'foo'</span>, &#123;<span class="string">'bar'</span>: [<span class="string">'baz'</span>, <span class="keyword">None</span>, <span class="number">1.0</span>, <span class="number">2</span>]&#125;]</span><br></pre></td></tr></table></figure>
+<h3 id="示范-1"><a href="#示范-1" class="headerlink" title="示范"></a>示范</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="prompt">&gt;&gt;&gt; </span><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>json.loads(<span class="string">'["foo", &#123;"bar":["baz", null, 1.0, 2]&#125;]'</span>)</span><br><span class="line">[<span class="string">'foo'</span>, &#123;<span class="string">'bar'</span>: [<span class="string">'baz'</span>, <span class="keyword">None</span>, <span class="number">1.0</span>, <span class="number">2</span>]&#125;]</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2015年10月30日 初步完成</li>
 </ul>
@@ -263,7 +263,7 @@
                     <p><span>本文标题:</span><a href="/2015/10/30/python-JSON/">在Python中使用JSON</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2015年10月30日 - 23时10分</p>
-                    <p><span>最后更新:</span>2016年6月29日 - 17时06分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 05时07分</p>
                     <p><span>原始链接:</span><a href="/2015/10/30/python-JSON/"
                                             title="在Python中使用JSON">https://xuanwo.org/2015/10/30/python-JSON/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -276,11 +276,11 @@
             
                 <div class="post-tags">
                     
-                        <a href="/tags/Software/"> #Software </a>
+                        <a href="/tags/JSON/"> #JSON </a>
                     
                         <a href="/tags/Python/"> #Python </a>
                     
-                        <a href="/tags/JSON/"> #JSON </a>
+                        <a href="/tags/Software/"> #Software </a>
                     
                 </div>
             
@@ -344,51 +344,97 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Google/">Google</a></li>
-                        
-                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
-                        
-                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
-                        
-                            <li><a href="/tags/PHP/">PHP</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                             <li><a href="/tags/Software/">Software</a></li>
                         
-                            <li><a href="/tags/Windows/">Windows</a></li>
+                            <li><a href="/tags/Sports/">Sports</a></li>
                         
-                            <li><a href="/tags/Android/">Android</a></li>
+                            <li><a href="/tags/微信/">微信</a></li>
                         
-                            <li><a href="/tags/C/">C</a></li>
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
                         
                             <li><a href="/tags/Database/">Database</a></li>
                         
-                            <li><a href="/tags/复习/">复习</a></li>
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
                         
                             <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         
                             <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
                         
                             <li><a href="/tags/运维/">运维</a></li>
                         
@@ -396,69 +442,23 @@
                         
                             <li><a href="/tags/Gitlab/">Gitlab</a></li>
                         
-                            <li><a href="/tags/科普/">科普</a></li>
+                            <li><a href="/tags/Read/">Read</a></li>
                         
-                            <li><a href="/tags/Information/">Information</a></li>
+                            <li><a href="/tags/Android/">Android</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                            <li><a href="/tags/CI/">CI</a></li>
                         
-                            <li><a href="/tags/项目/">项目</a></li>
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
                         
-                            <li><a href="/tags/Python/">Python</a></li>
+                            <li><a href="/tags/Event/">Event</a></li>
                         
-                            <li><a href="/tags/Flask/">Flask</a></li>
+                            <li><a href="/tags/Google/">Google</a></li>
                         
-                            <li><a href="/tags/HTML/">HTML</a></li>
+                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
                         
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/Games/">Games</a></li>
+                            <li><a href="/tags/PHP/">PHP</a></li>
                         
                     </ul>
                 </div>

@@ -40,23 +40,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
-                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Learn/">Learn <span
-                                    class="badge">4</span></a></li>
-                
                     <li><a href="/categories/Develop/">Develop <span
                                     class="badge">12</span></a></li>
+                
+                    <li><a href="/categories/Learn/">Learn <span
+                                    class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
+                
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -118,7 +118,7 @@
 <p><a href="http://poj.org/problem?id=1269" target="_blank" rel="external">http://poj.org/problem?id=1269</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>几何题= =，各种直线方程用起来，代码量有点大。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include&lt;cstdio&gt;</span><br><span class="line">#include&lt;cstring&gt;</span><br><span class="line">#include&lt;cmath&gt;</span><br><span class="line">#include&lt;cstdlib&gt;</span><br><span class="line">#include&lt;iostream&gt;</span><br><span class="line">#include&lt;algorithm&gt;</span><br><span class="line">#include&lt;functional&gt;</span><br><span class="line">using namespace std;</span><br><span class="line">#define eps 1e-8</span><br><span class="line">double sqr(double x)</span><br><span class="line">&#123;</span><br><span class="line">    return x * x;</span><br><span class="line">&#125;</span><br><span class="line">struct P</span><br><span class="line">&#123;</span><br><span class="line">    double x, y;</span><br><span class="line">    P(double _x, double _y): x(_x), y(_y) &#123;&#125;</span><br><span class="line">    P() &#123;&#125;</span><br><span class="line">    double dis()</span><br><span class="line">    &#123;</span><br><span class="line">        return sqrt(sqr(x) + sqr(y));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">struct V</span><br><span class="line">&#123;</span><br><span class="line">    double x, y;</span><br><span class="line">    V(double _x, double _y): x(_x), y(_y) &#123;&#125;</span><br><span class="line">    V(P a, P b): x(b.x - a.x), y(b.y - a.y) &#123;&#125;</span><br><span class="line">    V() &#123;&#125;</span><br><span class="line">    const double dis()</span><br><span class="line">    &#123;</span><br><span class="line">        return sqrt(sqr(x) + sqr(y));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">P operator+(const P a, const V b)</span><br><span class="line">&#123;</span><br><span class="line">    return P(a.x + b.x, a.y + b.y);</span><br><span class="line">&#125;</span><br><span class="line">V operator*(const double a, const V b)</span><br><span class="line">&#123;</span><br><span class="line">    return V(a * b.x, a * b.y);</span><br><span class="line">&#125;</span><br><span class="line">double operator*(const V a, const V b)</span><br><span class="line">&#123;</span><br><span class="line">    return a.x * b.y - b.x * a.y;</span><br><span class="line">&#125;</span><br><span class="line">P jiao_dian(const V a, V b, const V c, const V CD, const P C)</span><br><span class="line">&#123;</span><br><span class="line">    double d;</span><br><span class="line">    d = b.dis();</span><br><span class="line">    double s1 = a * b, s2 = b * c;</span><br><span class="line">    double k = s1 / (s1 + s2);</span><br><span class="line">    return C + k * CD;</span><br><span class="line">&#125;</span><br><span class="line">bool equal(const double a, const double b)</span><br><span class="line">&#123;</span><br><span class="line">    if (abs(a - b) &lt; eps) return 1; return 0;</span><br><span class="line">&#125;</span><br><span class="line">int n;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    cout &lt;&lt; &quot;INTERSECTING LINES OUTPUT&quot; &lt;&lt; endl;</span><br><span class="line">    scanf(&quot;%d&quot;, &amp;n);</span><br><span class="line">    for (int i = 1; i &lt;= n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        double x1, y1, x2, y2, x3, y3, x4, y4;</span><br><span class="line">        scanf(&quot;%lf%lf%lf%lf%lf%lf%lf%lf&quot;, &amp;x1, &amp;y1, &amp;x2, &amp;y2, &amp;x3, &amp;y3, &amp;x4, &amp;y4);</span><br><span class="line">        P A = P(x1, y1), B = P(x2, y2), C = P(x3, y3), D = P(x4, y4);</span><br><span class="line">        V AB = V(A, B), AC = V(A, C), AD = V(A, D), CD = V(C, D);</span><br><span class="line">        if (equal((AB * CD), 0))</span><br><span class="line">        &#123;</span><br><span class="line">            if (equal((AC * AD), 0)) cout &lt;&lt; &quot;LINE\n&quot;;</span><br><span class="line">            else cout &lt;&lt; &quot;NONE\n&quot;;</span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            P p = jiao_dian(AC, AB, AD, CD, C);</span><br><span class="line">            cout.setf(ios::fixed);</span><br><span class="line">            cout.precision(2);</span><br><span class="line">            cout &lt;&lt; &quot;POINT &quot; &lt;&lt; p.x &lt;&lt; &apos; &apos; &lt;&lt; p.y &lt;&lt; endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; &quot;END OF OUTPUT&quot; &lt;&lt; endl;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span><span class="string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span><span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span><span class="string">&lt;cmath&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span><span class="string">&lt;cstdlib&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span><span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span><span class="string">&lt;functional&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> eps <span class="number">1e-8</span></span></span><br><span class="line"><span class="function"><span class="keyword">double</span> <span class="title">sqr</span><span class="params">(<span class="keyword">double</span> x)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> x * x;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">struct</span> P</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">double</span> x, y;</span><br><span class="line">    P(<span class="keyword">double</span> _x, <span class="keyword">double</span> _y): x(_x), y(_y) &#123;&#125;</span><br><span class="line">    P() &#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">double</span> <span class="title">dis</span><span class="params">()</span></span><br><span class="line">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">sqrt</span>(sqr(x) + sqr(y));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">struct</span> V</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">double</span> x, y;</span><br><span class="line">    V(<span class="keyword">double</span> _x, <span class="keyword">double</span> _y): x(_x), y(_y) &#123;&#125;</span><br><span class="line">    V(P a, P b): x(b.x - a.x), y(b.y - a.y) &#123;&#125;</span><br><span class="line">    V() &#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">const</span> <span class="keyword">double</span> <span class="title">dis</span><span class="params">()</span></span><br><span class="line">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">sqrt</span>(sqr(x) + sqr(y));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">P <span class="keyword">operator</span>+(<span class="keyword">const</span> P a, <span class="keyword">const</span> V b)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> P(a.x + b.x, a.y + b.y);</span><br><span class="line">&#125;</span><br><span class="line">V <span class="keyword">operator</span>*(<span class="keyword">const</span> <span class="keyword">double</span> a, <span class="keyword">const</span> V b)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> V(a * b.x, a * b.y);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">double</span> <span class="keyword">operator</span>*(<span class="keyword">const</span> V a, <span class="keyword">const</span> V b)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> a.x * b.y - b.x * a.y;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function">P <span class="title">jiao_dian</span><span class="params">(<span class="keyword">const</span> V a, V b, <span class="keyword">const</span> V c, <span class="keyword">const</span> V CD, <span class="keyword">const</span> P C)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">double</span> d;</span><br><span class="line">    d = b.dis();</span><br><span class="line">    <span class="keyword">double</span> s1 = a * b, s2 = b * c;</span><br><span class="line">    <span class="keyword">double</span> k = s1 / (s1 + s2);</span><br><span class="line">    <span class="keyword">return</span> C + k * CD;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">equal</span><span class="params">(<span class="keyword">const</span> <span class="keyword">double</span> a, <span class="keyword">const</span> <span class="keyword">double</span> b)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">abs</span>(a - b) &lt; eps) <span class="keyword">return</span> <span class="number">1</span>; <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">int</span> n;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"INTERSECTING LINES OUTPUT"</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>, &amp;n);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">double</span> x1, y1, x2, y2, x3, y3, x4, y4;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%lf%lf%lf%lf%lf%lf%lf%lf"</span>, &amp;x1, &amp;y1, &amp;x2, &amp;y2, &amp;x3, &amp;y3, &amp;x4, &amp;y4);</span><br><span class="line">        P A = P(x1, y1), B = P(x2, y2), C = P(x3, y3), D = P(x4, y4);</span><br><span class="line">        V AB = V(A, B), AC = V(A, C), AD = V(A, D), CD = V(C, D);</span><br><span class="line">        <span class="keyword">if</span> (equal((AB * CD), <span class="number">0</span>))</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (equal((AC * AD), <span class="number">0</span>)) <span class="built_in">cout</span> &lt;&lt; <span class="string">"LINE\n"</span>;</span><br><span class="line">            <span class="keyword">else</span> <span class="built_in">cout</span> &lt;&lt; <span class="string">"NONE\n"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            P p = jiao_dian(AC, AB, AD, CD, C);</span><br><span class="line">            <span class="built_in">cout</span>.setf(ios::fixed);</span><br><span class="line">            <span class="built_in">cout</span>.precision(<span class="number">2</span>);</span><br><span class="line">            <span class="built_in">cout</span> &lt;&lt; <span class="string">"POINT "</span> &lt;&lt; p.x &lt;&lt; <span class="string">' '</span> &lt;&lt; p.y &lt;&lt; endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"END OF OUTPUT"</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年08月12日 已AC。</li>
 </ul>
@@ -147,7 +147,7 @@
                     <p><span>本文标题:</span><a href="/2014/08/12/POJ-1269-Intersecting-Lines/">POJ 1269 Intersecting Lines</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年8月12日 - 01时08分</p>
-                    <p><span>最后更新:</span>2016年6月29日 - 17时06分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 05时07分</p>
                     <p><span>原始链接:</span><a href="/2014/08/12/POJ-1269-Intersecting-Lines/"
                                             title="POJ 1269 Intersecting Lines">https://xuanwo.org/2014/08/12/POJ-1269-Intersecting-Lines/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -218,51 +218,97 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Google/">Google</a></li>
-                        
-                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
-                        
-                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
-                        
-                            <li><a href="/tags/PHP/">PHP</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                             <li><a href="/tags/Software/">Software</a></li>
                         
-                            <li><a href="/tags/Windows/">Windows</a></li>
+                            <li><a href="/tags/Sports/">Sports</a></li>
                         
-                            <li><a href="/tags/Android/">Android</a></li>
+                            <li><a href="/tags/微信/">微信</a></li>
                         
-                            <li><a href="/tags/C/">C</a></li>
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
                         
                             <li><a href="/tags/Database/">Database</a></li>
                         
-                            <li><a href="/tags/复习/">复习</a></li>
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
                         
                             <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         
                             <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
                         
                             <li><a href="/tags/运维/">运维</a></li>
                         
@@ -270,69 +316,23 @@
                         
                             <li><a href="/tags/Gitlab/">Gitlab</a></li>
                         
-                            <li><a href="/tags/科普/">科普</a></li>
+                            <li><a href="/tags/Read/">Read</a></li>
                         
-                            <li><a href="/tags/Information/">Information</a></li>
+                            <li><a href="/tags/Android/">Android</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                            <li><a href="/tags/CI/">CI</a></li>
                         
-                            <li><a href="/tags/项目/">项目</a></li>
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
                         
-                            <li><a href="/tags/Python/">Python</a></li>
+                            <li><a href="/tags/Event/">Event</a></li>
                         
-                            <li><a href="/tags/Flask/">Flask</a></li>
+                            <li><a href="/tags/Google/">Google</a></li>
                         
-                            <li><a href="/tags/HTML/">HTML</a></li>
+                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
                         
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/Games/">Games</a></li>
+                            <li><a href="/tags/PHP/">PHP</a></li>
                         
                     </ul>
                 </div>

@@ -40,23 +40,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
-                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Learn/">Learn <span
-                                    class="badge">4</span></a></li>
-                
                     <li><a href="/categories/Develop/">Develop <span
                                     class="badge">12</span></a></li>
+                
+                    <li><a href="/categories/Learn/">Learn <span
+                                    class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
+                
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -118,7 +118,7 @@
 <p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3466" target="_blank" rel="external">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3466</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>其实题目还是蛮吓人的= =，因为上来就是Line1~7的输入。其实题意不难，有从左到右编号为1~n的车站，有m1辆车从第1站往右开，有m2辆车从第2站往左开。主角在t=0的时候从第1站出发，要在t时刻遇见车站n的一个间谍。要求求出最短的等待时间，没有的话就输出impossible。<br>小脑一动，可以知道，每一次有三个选择：等待，向左，向右。我们可以用dp[t][i]来表示第t时刻在第i个车站，然后用vis[t][i][sta]来表示三种选择。全部预处理一遍之后，dp求解最短时间即可。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#define MAXN 250+10</span><br><span class="line">#define MAXM 70+10</span><br><span class="line"></span><br><span class="line">int vis[MAXN][MAXM][3];</span><br><span class="line">int dp[MAXN][MAXM];</span><br><span class="line">int t[MAXN];</span><br><span class="line">int d1[MAXM],d2[MAXM];</span><br><span class="line">int n,t,m1,m2;</span><br><span class="line">int ca=1;</span><br><span class="line"></span><br><span class="line">void init()</span><br><span class="line">&#123;</span><br><span class="line">    scanf(&quot;%d&quot;,&amp;t);</span><br><span class="line">    for(int i=1; i&lt;n; i++)</span><br><span class="line">        scanf(&quot;%d&quot;,&amp;t[i]);</span><br><span class="line">    scanf(&quot;%d&quot;,&amp;m1);</span><br><span class="line">    for(int i=1; i&lt;=m1; i++)</span><br><span class="line">        scanf(&quot;%d&quot;,&amp;d1[i]);</span><br><span class="line">    scanf(&quot;%d&quot;,&amp;m2);</span><br><span class="line">    for(int i=1; i&lt;=m2; i++)</span><br><span class="line">        scanf(&quot;%d&quot;,&amp;d2[i]);</span><br><span class="line">    memset(vis,0,sizeof vis);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char const *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    while(~scanf(&quot;%d&quot;,&amp;n),n)</span><br><span class="line">    &#123;</span><br><span class="line">        init();</span><br><span class="line">        for(int i=1; i&lt;=m1; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            vis[d1[i]][1][0]=1;</span><br><span class="line">            int temp=d1[i];</span><br><span class="line">            for(int j=1; j&lt;n; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                temp+=t[j];</span><br><span class="line">                if(temp&lt;=t)</span><br><span class="line">                    vis[temp][j+1][0]=1;</span><br><span class="line">                else</span><br><span class="line">                    break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        for(int i=1; i&lt;=m2; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            vis[d2[i]][n][1]=1;</span><br><span class="line">            int temp=d2[i];</span><br><span class="line">            for(int j=n-1; j&gt;=1; j--)</span><br><span class="line">            &#123;</span><br><span class="line">                temp+=t[j];</span><br><span class="line">                if(temp&lt;=t)</span><br><span class="line">                    vis[temp][j][1]=1;</span><br><span class="line">                else</span><br><span class="line">                    break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        for(int i=1; i&lt;n; i++) dp[t][i]=inf;</span><br><span class="line">        dp[t][n]=0;</span><br><span class="line"></span><br><span class="line">        for(int i=t-1; i&gt;=0; i--)</span><br><span class="line">        &#123;</span><br><span class="line">            for(int j=1; j&lt;=n; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                dp[i][j]=dp[i+1][j]+1;</span><br><span class="line">                if(j&lt;n&amp;&amp;vis[i][j][0]&amp;&amp;i+t[j]&lt;=t)</span><br><span class="line">                    dp[i][j]=min(dp[i][j],dp[i+t[j]][j+1]);</span><br><span class="line">                if(j&gt;1&amp;&amp;vis[i][j][1]&amp;&amp;i+t[j-1]&lt;=t)</span><br><span class="line">                    dp[i][j]=min(dp[i][j],dp[i+t[j-1]][j-1]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        printf(&quot;Case Number %d: &quot;,ca++);</span><br><span class="line">        if(dp[0][1]&gt;=inf)</span><br><span class="line">            printf(&quot;impossible\n&quot;);</span><br><span class="line">        else</span><br><span class="line">            printf(&quot;%d\n&quot;,dp[0][1]);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MAXN <span class="number">250</span>+<span class="number">10</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MAXM <span class="number">70</span>+<span class="number">10</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> vis[MAXN][MAXM][<span class="number">3</span>];</span><br><span class="line"><span class="keyword">int</span> dp[MAXN][MAXM];</span><br><span class="line"><span class="keyword">int</span> t[MAXN];</span><br><span class="line"><span class="keyword">int</span> d1[MAXM],d2[MAXM];</span><br><span class="line"><span class="keyword">int</span> n,t,m1,m2;</span><br><span class="line"><span class="keyword">int</span> ca=<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;t);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;n; i++)</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;t[i]);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;m1);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=m1; i++)</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;d1[i]);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;m2);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=m2; i++)</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;d2[i]);</span><br><span class="line">    <span class="built_in">memset</span>(vis,<span class="number">0</span>,<span class="keyword">sizeof</span> vis);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> <span class="keyword">const</span> *argv[])</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(~<span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;n),n)</span><br><span class="line">    &#123;</span><br><span class="line">        init();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=m1; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            vis[d1[i]][<span class="number">1</span>][<span class="number">0</span>]=<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">int</span> temp=d1[i];</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> j=<span class="number">1</span>; j&lt;n; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                temp+=t[j];</span><br><span class="line">                <span class="keyword">if</span>(temp&lt;=t)</span><br><span class="line">                    vis[temp][j+<span class="number">1</span>][<span class="number">0</span>]=<span class="number">1</span>;</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=m2; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            vis[d2[i]][n][<span class="number">1</span>]=<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">int</span> temp=d2[i];</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> j=n-<span class="number">1</span>; j&gt;=<span class="number">1</span>; j--)</span><br><span class="line">            &#123;</span><br><span class="line">                temp+=t[j];</span><br><span class="line">                <span class="keyword">if</span>(temp&lt;=t)</span><br><span class="line">                    vis[temp][j][<span class="number">1</span>]=<span class="number">1</span>;</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;n; i++) dp[t][i]=inf;</span><br><span class="line">        dp[t][n]=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=t-<span class="number">1</span>; i&gt;=<span class="number">0</span>; i--)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> j=<span class="number">1</span>; j&lt;=n; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                dp[i][j]=dp[i+<span class="number">1</span>][j]+<span class="number">1</span>;</span><br><span class="line">                <span class="keyword">if</span>(j&lt;n&amp;&amp;vis[i][j][<span class="number">0</span>]&amp;&amp;i+t[j]&lt;=t)</span><br><span class="line">                    dp[i][j]=min(dp[i][j],dp[i+t[j]][j+<span class="number">1</span>]);</span><br><span class="line">                <span class="keyword">if</span>(j&gt;<span class="number">1</span>&amp;&amp;vis[i][j][<span class="number">1</span>]&amp;&amp;i+t[j-<span class="number">1</span>]&lt;=t)</span><br><span class="line">                    dp[i][j]=min(dp[i][j],dp[i+t[j-<span class="number">1</span>]][j-<span class="number">1</span>]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"Case Number %d: "</span>,ca++);</span><br><span class="line">        <span class="keyword">if</span>(dp[<span class="number">0</span>][<span class="number">1</span>]&gt;=inf)</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"impossible\n"</span>);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,dp[<span class="number">0</span>][<span class="number">1</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年11月15日 已AC。</li>
 </ul>
@@ -147,7 +147,7 @@
                     <p><span>本文标题:</span><a href="/2014/11/15/UVa-1025-A-Spy-in-the-Metro/">UVa 1025 A Spy in the Metro</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年11月15日 - 11时11分</p>
-                    <p><span>最后更新:</span>2016年6月29日 - 17时06分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 05时07分</p>
                     <p><span>原始链接:</span><a href="/2014/11/15/UVa-1025-A-Spy-in-the-Metro/"
                                             title="UVa 1025 A Spy in the Metro">https://xuanwo.org/2014/11/15/UVa-1025-A-Spy-in-the-Metro/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -218,51 +218,97 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Google/">Google</a></li>
-                        
-                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
-                        
-                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
-                        
-                            <li><a href="/tags/PHP/">PHP</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                             <li><a href="/tags/Software/">Software</a></li>
                         
-                            <li><a href="/tags/Windows/">Windows</a></li>
+                            <li><a href="/tags/Sports/">Sports</a></li>
                         
-                            <li><a href="/tags/Android/">Android</a></li>
+                            <li><a href="/tags/微信/">微信</a></li>
                         
-                            <li><a href="/tags/C/">C</a></li>
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
                         
                             <li><a href="/tags/Database/">Database</a></li>
                         
-                            <li><a href="/tags/复习/">复习</a></li>
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
                         
                             <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         
                             <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
                         
                             <li><a href="/tags/运维/">运维</a></li>
                         
@@ -270,69 +316,23 @@
                         
                             <li><a href="/tags/Gitlab/">Gitlab</a></li>
                         
-                            <li><a href="/tags/科普/">科普</a></li>
+                            <li><a href="/tags/Read/">Read</a></li>
                         
-                            <li><a href="/tags/Information/">Information</a></li>
+                            <li><a href="/tags/Android/">Android</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                            <li><a href="/tags/CI/">CI</a></li>
                         
-                            <li><a href="/tags/项目/">项目</a></li>
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
                         
-                            <li><a href="/tags/Python/">Python</a></li>
+                            <li><a href="/tags/Event/">Event</a></li>
                         
-                            <li><a href="/tags/Flask/">Flask</a></li>
+                            <li><a href="/tags/Google/">Google</a></li>
                         
-                            <li><a href="/tags/HTML/">HTML</a></li>
+                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
                         
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/Games/">Games</a></li>
+                            <li><a href="/tags/PHP/">PHP</a></li>
                         
                     </ul>
                 </div>

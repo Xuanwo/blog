@@ -40,23 +40,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
-                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Learn/">Learn <span
-                                    class="badge">4</span></a></li>
-                
                     <li><a href="/categories/Develop/">Develop <span
                                     class="badge">12</span></a></li>
+                
+                    <li><a href="/categories/Learn/">Learn <span
+                                    class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
+                
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -118,7 +118,7 @@
 <p><a href="http://poj.org/problem?id=3299" target="_blank" rel="external">http://poj.org/problem?id=3299</a></p>
 <h1 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h1><p>我的理解有误。主要是看input里面都是给定T，D求H的情况，便以为这道题就是用一下公式。没想到这道题还有其他的两种情况。说明不管在怎样的条件下，看题都是至关重要的一步。还有就是在输入输出上，<code>%s</code>和<code>%c</code>的区别，值得注意。</p>
 <a id="more"></a>
-<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">#include&lt;math.h&gt;</span><br><span class="line"></span><br><span class="line">float getHumidex(float temperature, float dewpoint)</span><br><span class="line">&#123;</span><br><span class="line">    float humidex, h, e;</span><br><span class="line">    e = 6.11 * exp(5417.7530 * ((1 / 273.16) - (1 / (dewpoint + 273.16))));</span><br><span class="line">    h = 0.5555 * (e - 10.0);</span><br><span class="line">    humidex = temperature + h;</span><br><span class="line">    return humidex;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">float getTemperature(float dewpoint, float humidex)</span><br><span class="line">&#123;</span><br><span class="line">    float temperature, h, e;</span><br><span class="line">    e = 6.11 * exp(5417.7530 * ((1 / 273.16) - (1 / (dewpoint + 273.16))));</span><br><span class="line">    h = 0.5555 * (e - 10.0);</span><br><span class="line">    temperature = humidex - h;</span><br><span class="line">    return temperature;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">float getDewpoint(float temperature, float humidex)</span><br><span class="line">&#123;</span><br><span class="line">    float dewpoint, e, h;</span><br><span class="line">    h = humidex - temperature;</span><br><span class="line">    e = h / 0.5555 + 10.0;</span><br><span class="line">    dewpoint = 1 / ((1 / 273.16) - log(e / 6.11) / 5417.7530) - 273.16;</span><br><span class="line">    return dewpoint;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">void calculate(float *temperature, float *dewpoint, float *humidex, int digit)</span><br><span class="line">&#123;</span><br><span class="line">    switch (digit)</span><br><span class="line">    &#123;</span><br><span class="line">    case 3:</span><br><span class="line">        *temperature = getTemperature(*dewpoint, *humidex);</span><br><span class="line">        break;</span><br><span class="line">    case 5:</span><br><span class="line">        *dewpoint = getDewpoint(*temperature, *humidex);</span><br><span class="line">        break;</span><br><span class="line">    case 6:</span><br><span class="line">        *humidex = getHumidex(*temperature, *dewpoint);</span><br><span class="line">        break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    float temperature, dewpoint, humidex, temp;</span><br><span class="line">    char ch[2];</span><br><span class="line">    int count = 0, digit = 0;</span><br><span class="line">    scanf(&quot;%s&quot;, ch);</span><br><span class="line">    while (ch[0] != &apos;E&apos;)</span><br><span class="line">    &#123;</span><br><span class="line">        scanf(&quot;%f&quot;, &amp;temp);</span><br><span class="line">        count = (count + 1) % 2;</span><br><span class="line">        if (ch[0] == &apos;T&apos;)</span><br><span class="line">        &#123;</span><br><span class="line">            temperature = temp;</span><br><span class="line">            digit += 4;</span><br><span class="line">        &#125;</span><br><span class="line">        else if (ch[0] == &apos;D&apos;)</span><br><span class="line">        &#123;</span><br><span class="line">            dewpoint = temp;</span><br><span class="line">            digit += 2;</span><br><span class="line">        &#125;</span><br><span class="line">        else if (ch[0] == &apos;H&apos;)</span><br><span class="line">        &#123;</span><br><span class="line">            humidex = temp;</span><br><span class="line">            digit += 1;</span><br><span class="line">        &#125;</span><br><span class="line">        if (count == 0)</span><br><span class="line">        &#123;</span><br><span class="line">            calculate(&amp;temperature, &amp;dewpoint, &amp;humidex, digit);</span><br><span class="line">            digit = 0;</span><br><span class="line">            printf(&quot;T %.1f D %.1f H %.1f\n&quot;, temperature, dewpoint, humidex);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        scanf(&quot;%s&quot;, ch);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span><span class="string">&lt;math.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">float</span> <span class="title">getHumidex</span><span class="params">(<span class="keyword">float</span> temperature, <span class="keyword">float</span> dewpoint)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">float</span> humidex, h, e;</span><br><span class="line">    e = <span class="number">6.11</span> * <span class="built_in">exp</span>(<span class="number">5417.7530</span> * ((<span class="number">1</span> / <span class="number">273.16</span>) - (<span class="number">1</span> / (dewpoint + <span class="number">273.16</span>))));</span><br><span class="line">    h = <span class="number">0.5555</span> * (e - <span class="number">10.0</span>);</span><br><span class="line">    humidex = temperature + h;</span><br><span class="line">    <span class="keyword">return</span> humidex;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">float</span> <span class="title">getTemperature</span><span class="params">(<span class="keyword">float</span> dewpoint, <span class="keyword">float</span> humidex)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">float</span> temperature, h, e;</span><br><span class="line">    e = <span class="number">6.11</span> * <span class="built_in">exp</span>(<span class="number">5417.7530</span> * ((<span class="number">1</span> / <span class="number">273.16</span>) - (<span class="number">1</span> / (dewpoint + <span class="number">273.16</span>))));</span><br><span class="line">    h = <span class="number">0.5555</span> * (e - <span class="number">10.0</span>);</span><br><span class="line">    temperature = humidex - h;</span><br><span class="line">    <span class="keyword">return</span> temperature;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">float</span> <span class="title">getDewpoint</span><span class="params">(<span class="keyword">float</span> temperature, <span class="keyword">float</span> humidex)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">float</span> dewpoint, e, h;</span><br><span class="line">    h = humidex - temperature;</span><br><span class="line">    e = h / <span class="number">0.5555</span> + <span class="number">10.0</span>;</span><br><span class="line">    dewpoint = <span class="number">1</span> / ((<span class="number">1</span> / <span class="number">273.16</span>) - <span class="built_in">log</span>(e / <span class="number">6.11</span>) / <span class="number">5417.7530</span>) - <span class="number">273.16</span>;</span><br><span class="line">    <span class="keyword">return</span> dewpoint;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">calculate</span><span class="params">(<span class="keyword">float</span> *temperature, <span class="keyword">float</span> *dewpoint, <span class="keyword">float</span> *humidex, <span class="keyword">int</span> digit)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (digit)</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">        *temperature = getTemperature(*dewpoint, *humidex);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">        *dewpoint = getDewpoint(*temperature, *humidex);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">6</span>:</span><br><span class="line">        *humidex = getHumidex(*temperature, *dewpoint);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">float</span> temperature, dewpoint, humidex, temp;</span><br><span class="line">    <span class="keyword">char</span> ch[<span class="number">2</span>];</span><br><span class="line">    <span class="keyword">int</span> count = <span class="number">0</span>, digit = <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%s"</span>, ch);</span><br><span class="line">    <span class="keyword">while</span> (ch[<span class="number">0</span>] != <span class="string">'E'</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%f"</span>, &amp;temp);</span><br><span class="line">        count = (count + <span class="number">1</span>) % <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> (ch[<span class="number">0</span>] == <span class="string">'T'</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            temperature = temp;</span><br><span class="line">            digit += <span class="number">4</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (ch[<span class="number">0</span>] == <span class="string">'D'</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            dewpoint = temp;</span><br><span class="line">            digit += <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (ch[<span class="number">0</span>] == <span class="string">'H'</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            humidex = temp;</span><br><span class="line">            digit += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (count == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            calculate(&amp;temperature, &amp;dewpoint, &amp;humidex, digit);</span><br><span class="line">            digit = <span class="number">0</span>;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"T %.1f D %.1f H %.1f\n"</span>, temperature, dewpoint, humidex);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">"%s"</span>, ch);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2014年07月10日 已AC。</li>
 </ul>
@@ -147,7 +147,7 @@
                     <p><span>本文标题:</span><a href="/2014/07/10/POJ-3299-Humidex/">POJ 3299 Humidex</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2014年7月10日 - 23时07分</p>
-                    <p><span>最后更新:</span>2016年6月29日 - 17时06分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 05时07分</p>
                     <p><span>原始链接:</span><a href="/2014/07/10/POJ-3299-Humidex/"
                                             title="POJ 3299 Humidex">https://xuanwo.org/2014/07/10/POJ-3299-Humidex/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -218,51 +218,97 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Google/">Google</a></li>
-                        
-                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
-                        
-                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
-                        
-                            <li><a href="/tags/PHP/">PHP</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                             <li><a href="/tags/Software/">Software</a></li>
                         
-                            <li><a href="/tags/Windows/">Windows</a></li>
+                            <li><a href="/tags/Sports/">Sports</a></li>
                         
-                            <li><a href="/tags/Android/">Android</a></li>
+                            <li><a href="/tags/微信/">微信</a></li>
                         
-                            <li><a href="/tags/C/">C</a></li>
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
                         
                             <li><a href="/tags/Database/">Database</a></li>
                         
-                            <li><a href="/tags/复习/">复习</a></li>
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
                         
                             <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         
                             <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
                         
                             <li><a href="/tags/运维/">运维</a></li>
                         
@@ -270,69 +316,23 @@
                         
                             <li><a href="/tags/Gitlab/">Gitlab</a></li>
                         
-                            <li><a href="/tags/科普/">科普</a></li>
+                            <li><a href="/tags/Read/">Read</a></li>
                         
-                            <li><a href="/tags/Information/">Information</a></li>
+                            <li><a href="/tags/Android/">Android</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                            <li><a href="/tags/CI/">CI</a></li>
                         
-                            <li><a href="/tags/项目/">项目</a></li>
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
                         
-                            <li><a href="/tags/Python/">Python</a></li>
+                            <li><a href="/tags/Event/">Event</a></li>
                         
-                            <li><a href="/tags/Flask/">Flask</a></li>
+                            <li><a href="/tags/Google/">Google</a></li>
                         
-                            <li><a href="/tags/HTML/">HTML</a></li>
+                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
                         
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/Games/">Games</a></li>
+                            <li><a href="/tags/PHP/">PHP</a></li>
                         
                     </ul>
                 </div>

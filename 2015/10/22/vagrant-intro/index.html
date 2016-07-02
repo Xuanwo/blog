@@ -40,23 +40,23 @@
                     <li><a href="/categories/Opinion/">Opinion <span
                                     class="badge">41</span></a></li>
                 
-                    <li><a href="/categories/Exercise/">Exercise <span
-                                    class="badge">323</span></a></li>
-                
                     <li><a href="/categories/Daily/">Daily <span
                                     class="badge">8</span></a></li>
                 
-                    <li><a href="/categories/Learn/">Learn <span
-                                    class="badge">4</span></a></li>
-                
                     <li><a href="/categories/Develop/">Develop <span
                                     class="badge">12</span></a></li>
+                
+                    <li><a href="/categories/Learn/">Learn <span
+                                    class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Summary/">Summary <span
                                     class="badge">4</span></a></li>
                 
                     <li><a href="/categories/Operate/">Operate <span
                                     class="badge">1</span></a></li>
+                
+                    <li><a href="/categories/Exercise/">Exercise <span
+                                    class="badge">323</span></a></li>
                 
             </ul>
         </li>
@@ -120,7 +120,7 @@
 <h1 id="Vagrant介绍"><a href="#Vagrant介绍" class="headerlink" title="Vagrant介绍"></a>Vagrant介绍</h1><p><a href="https://www.vagrantup.com/" target="_blank" rel="external">Vagrant</a>是一款用来构建虚拟开发环境的工具。对于团队开发而言，可以用来构建一致的开发环境；而对于个人开发而言，则可以方便地搭建不冲突不互相影响的各种开发环境。</p>
 <h1 id="Vagrant配置"><a href="#Vagrant配置" class="headerlink" title="Vagrant配置"></a>Vagrant配置</h1><h2 id="安装Vagrant"><a href="#安装Vagrant" class="headerlink" title="安装Vagrant"></a>安装Vagrant</h2><p>在<a href="https://www.vagrantup.com/downloads.html" target="_blank" rel="external">此处下载Vagrant</a>。<br>Vagrant主要以二进制安装包形式分发，覆盖了Windows，Mac OS X，DEB以及RPM。均不支持的平台可以自行编译安装，此处不再赘述。</p>
 <h2 id="安装Provider"><a href="#安装Provider" class="headerlink" title="安装Provider"></a>安装Provider</h2><p>Vagrant在本地主要支持两种：VirtualBox ，VMware。我推荐使用小巧且开源的<a href="https://www.virtualbox.org/wiki/Downloads" target="_blank" rel="external">VirtualBox</a>，下载好对应的安装包之后直接安装即可。</p>
-<h2 id="配置Path"><a href="#配置Path" class="headerlink" title="配置Path"></a>配置Path</h2><p>在Windows上使用还需要自行配置Path，否则Vagrant无法调用VirtualBox。<br>在Path中添加Vagrant以及VirtualBox的可执行文件路径即可<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">C:\HashiCorp\Vagrant\bin;C:\Program Files\Oracle\VirtualBox</span><br></pre></td></tr></table></figure></p>
+<h2 id="配置Path"><a href="#配置Path" class="headerlink" title="配置Path"></a>配置Path</h2><p>在Windows上使用还需要自行配置Path，否则Vagrant无法调用VirtualBox。<br>在Path中添加Vagrant以及VirtualBox的可执行文件路径即可<br><figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:<span class="command">\HashiCorp</span><span class="command">\Vagrant</span><span class="command">\bin</span>;C:<span class="command">\Program</span> Files<span class="command">\Oracle</span><span class="command">\VirtualBox</span></span><br></pre></td></tr></table></figure></p>
 <h1 id="Vagrant初步"><a href="#Vagrant初步" class="headerlink" title="Vagrant初步"></a>Vagrant初步</h1><h2 id="添加box"><a href="#添加box" class="headerlink" title="添加box"></a>添加box</h2><blockquote>
 <p>box介绍<br>在Vagrant中，box是一个打包好了的Vagrant环境，包括特定的系统配置和软件参数。一个box可以在任何支持Vagrant的平台和系统上运行，可以跨平台地提供一致的系统环境，这正是Vagrant的有用之处。</p>
 </blockquote>
@@ -130,7 +130,7 @@
 <p>此处使用ubuntu 15.04作为演示，更多的box可以在<a href="https://atlas.hashicorp.com/search" target="_blank" rel="external">此处</a>下载</p>
 </blockquote>
 <h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><p>经过初始化操作后，就可以使用<code>vagrant up</code>启动自己的虚拟机了。<br>默认的情况下，可以使用<code>127.0.0.1:2222</code>来连接虚拟机，你可以非常方便地使用自己喜欢的ssh工具来进行操作。<br>存放着<code>vagrantfile</code>的文件夹会以<code>/vagrant</code>的形式挂载到虚拟机中，你可以毫无障碍的在主机和虚拟机之间传递文件，比如将代码放在此文件夹下，虚拟机就可以直接进行编译并执行，非常酷炫。</p>
-<h1 id="Vagrant进阶"><a href="#Vagrant进阶" class="headerlink" title="Vagrant进阶"></a>Vagrant进阶</h1><h2 id="修改虚拟机默认内存大小"><a href="#修改虚拟机默认内存大小" class="headerlink" title="修改虚拟机默认内存大小"></a>修改虚拟机默认内存大小</h2><p>VirtualBox的默认内存大小为512MB，在编译某些软件时会因为内存过小导致错误。<br>可以修改<code>Vagrantfile</code>来改变这个参数：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">config.vm.provider &quot;virtualbox&quot; do |vb|</span><br><span class="line">#   # Display the VirtualBox GUI when booting the machine</span><br><span class="line">#   vb.gui = true</span><br><span class="line">#</span><br><span class="line">#   # Customize the amount of memory on the VM:</span><br><span class="line">   vb.memory = &quot;2048&quot;</span><br><span class="line">end</span><br></pre></td></tr></table></figure></p>
+<h1 id="Vagrant进阶"><a href="#Vagrant进阶" class="headerlink" title="Vagrant进阶"></a>Vagrant进阶</h1><h2 id="修改虚拟机默认内存大小"><a href="#修改虚拟机默认内存大小" class="headerlink" title="修改虚拟机默认内存大小"></a>修改虚拟机默认内存大小</h2><p>VirtualBox的默认内存大小为512MB，在编译某些软件时会因为内存过小导致错误。<br>可以修改<code>Vagrantfile</code>来改变这个参数：<br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">config.vm.provider <span class="string">"virtualbox"</span> <span class="keyword">do</span> |vb|</span><br><span class="line"><span class="comment">#   # Display the VirtualBox GUI when booting the machine</span></span><br><span class="line"><span class="comment">#   vb.gui = true</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#   # Customize the amount of memory on the VM:</span></span><br><span class="line">   vb.memory = <span class="string">"2048"</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure></p>
 <p>修改时需要注意，如果要启用<code>vb.memory</code>这一选项，需要同时取消上面<code>config</code>以及下面的<code>end</code>之前的注释，否则vagrant执行时会因为配置文件格式错误而报错。</p>
 <h1 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h1><ul>
 <li>2015年10月22日 初步完成</li>
@@ -160,7 +160,7 @@
                     <p><span>本文标题:</span><a href="/2015/10/22/vagrant-intro/">Vagrant——构建虚拟开发环境的新思路</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2015年10月22日 - 09时10分</p>
-                    <p><span>最后更新:</span>2016年6月29日 - 17时06分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 05时07分</p>
                     <p><span>原始链接:</span><a href="/2015/10/22/vagrant-intro/"
                                             title="Vagrant——构建虚拟开发环境的新思路">https://xuanwo.org/2015/10/22/vagrant-intro/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
@@ -173,9 +173,9 @@
             
                 <div class="post-tags">
                     
-                        <a href="/tags/Software/"> #Software </a>
-                    
                         <a href="/tags/Develop/"> #Develop </a>
+                    
+                        <a href="/tags/Software/"> #Software </a>
                     
                 </div>
             
@@ -239,51 +239,97 @@
                     <h3>Tags</h3>
                     <ul class="tags">
                         
-                            <li><a href="/tags/Google/">Google</a></li>
-                        
-                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
-                        
-                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
-                        
-                            <li><a href="/tags/PHP/">PHP</a></li>
-                        
-                            <li><a href="/tags/Web/">Web</a></li>
-                        
-                            <li><a href="/tags/Event/">Event</a></li>
-                        
-                            <li><a href="/tags/Github/">Github</a></li>
-                        
-                            <li><a href="/tags/CI/">CI</a></li>
-                        
-                            <li><a href="/tags/Read/">Read</a></li>
-                        
-                            <li><a href="/tags/Markdown/">Markdown</a></li>
-                        
-                            <li><a href="/tags/Hexo/">Hexo</a></li>
-                        
-                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
-                        
-                            <li><a href="/tags/Blog/">Blog</a></li>
-                        
-                            <li><a href="/tags/VPS/">VPS</a></li>
+                            <li><a href="/tags/Games/">Games</a></li>
                         
                             <li><a href="/tags/Software/">Software</a></li>
                         
-                            <li><a href="/tags/Windows/">Windows</a></li>
+                            <li><a href="/tags/Sports/">Sports</a></li>
                         
-                            <li><a href="/tags/Android/">Android</a></li>
+                            <li><a href="/tags/微信/">微信</a></li>
                         
-                            <li><a href="/tags/C/">C</a></li>
+                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
+                        
+                            <li><a href="/tags/Work/">Work</a></li>
+                        
+                            <li><a href="/tags/爬虫/">爬虫</a></li>
                         
                             <li><a href="/tags/Database/">Database</a></li>
                         
-                            <li><a href="/tags/复习/">复习</a></li>
+                            <li><a href="/tags/Oracle/">Oracle</a></li>
+                        
+                            <li><a href="/tags/VB/">VB</a></li>
+                        
+                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
+                        
+                            <li><a href="/tags/Mac/">Mac</a></li>
+                        
+                            <li><a href="/tags/Develop/">Develop</a></li>
+                        
+                            <li><a href="/tags/Blog/">Blog</a></li>
+                        
+                            <li><a href="/tags/Windows/">Windows</a></li>
+                        
+                            <li><a href="/tags/Github-Pages/">Github-Pages</a></li>
+                        
+                            <li><a href="/tags/Wiki/">Wiki</a></li>
+                        
+                            <li><a href="/tags/Web/">Web</a></li>
+                        
+                            <li><a href="/tags/Linux/">Linux</a></li>
+                        
+                            <li><a href="/tags/翻译/">翻译</a></li>
+                        
+                            <li><a href="/tags/实习/">实习</a></li>
+                        
+                            <li><a href="/tags/项目/">项目</a></li>
+                        
+                            <li><a href="/tags/Together/">Together</a></li>
+                        
+                            <li><a href="/tags/协作/">协作</a></li>
+                        
+                            <li><a href="/tags/Hardware/">Hardware</a></li>
+                        
+                            <li><a href="/tags/C/">C</a></li>
+                        
+                            <li><a href="/tags/Github/">Github</a></li>
+                        
+                            <li><a href="/tags/SSH/">SSH</a></li>
+                        
+                            <li><a href="/tags/VPS/">VPS</a></li>
+                        
+                            <li><a href="/tags/字符串/">字符串</a></li>
+                        
+                            <li><a href="/tags/Python/">Python</a></li>
+                        
+                            <li><a href="/tags/JSON/">JSON</a></li>
+                        
+                            <li><a href="/tags/HTML/">HTML</a></li>
+                        
+                            <li><a href="/tags/Video/">Video</a></li>
+                        
+                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                        
+                            <li><a href="/tags/Hexo/">Hexo</a></li>
                         
                             <li><a href="/tags/Nodejs/">Nodejs</a></li>
+                        
+                            <li><a href="/tags/vim/">vim</a></li>
+                        
+                            <li><a href="/tags/单片机/">单片机</a></li>
                         
                             <li><a href="/tags/python/">python</a></li>
                         
                             <li><a href="/tags/qingchat/">qingchat</a></li>
+                        
+                            <li><a href="/tags/Flask/">Flask</a></li>
+                        
+                            <li><a href="/tags/Information/">Information</a></li>
+                        
+                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                        
+                            <li><a href="/tags/复习/">复习</a></li>
+                        
+                            <li><a href="/tags/科普/">科普</a></li>
                         
                             <li><a href="/tags/运维/">运维</a></li>
                         
@@ -291,69 +337,23 @@
                         
                             <li><a href="/tags/Gitlab/">Gitlab</a></li>
                         
-                            <li><a href="/tags/科普/">科普</a></li>
+                            <li><a href="/tags/Read/">Read</a></li>
                         
-                            <li><a href="/tags/Information/">Information</a></li>
+                            <li><a href="/tags/Android/">Android</a></li>
                         
-                            <li><a href="/tags/CUGB/">CUGB</a></li>
+                            <li><a href="/tags/CI/">CI</a></li>
                         
-                            <li><a href="/tags/项目/">项目</a></li>
+                            <li><a href="/tags/Markdown/">Markdown</a></li>
                         
-                            <li><a href="/tags/Python/">Python</a></li>
+                            <li><a href="/tags/Event/">Event</a></li>
                         
-                            <li><a href="/tags/Flask/">Flask</a></li>
+                            <li><a href="/tags/Google/">Google</a></li>
                         
-                            <li><a href="/tags/HTML/">HTML</a></li>
+                            <li><a href="/tags/CloudFlare/">CloudFlare</a></li>
                         
-                            <li><a href="/tags/JavaScript/">JavaScript</a></li>
+                            <li><a href="/tags/FuckWall/">FuckWall</a></li>
                         
-                            <li><a href="/tags/实习/">实习</a></li>
-                        
-                            <li><a href="/tags/QingCloud/">QingCloud</a></li>
-                        
-                            <li><a href="/tags/单片机/">单片机</a></li>
-                        
-                            <li><a href="/tags/Work/">Work</a></li>
-                        
-                            <li><a href="/tags/爬虫/">爬虫</a></li>
-                        
-                            <li><a href="/tags/Hardware/">Hardware</a></li>
-                        
-                            <li><a href="/tags/vim/">vim</a></li>
-                        
-                            <li><a href="/tags/Video/">Video</a></li>
-                        
-                            <li><a href="/tags/JSON/">JSON</a></li>
-                        
-                            <li><a href="/tags/字符串/">字符串</a></li>
-                        
-                            <li><a href="/tags/Linux/">Linux</a></li>
-                        
-                            <li><a href="/tags/SSH/">SSH</a></li>
-                        
-                            <li><a href="/tags/Together/">Together</a></li>
-                        
-                            <li><a href="/tags/虚拟化/">虚拟化</a></li>
-                        
-                            <li><a href="/tags/协作/">协作</a></li>
-                        
-                            <li><a href="/tags/翻译/">翻译</a></li>
-                        
-                            <li><a href="/tags/Wiki/">Wiki</a></li>
-                        
-                            <li><a href="/tags/Develop/">Develop</a></li>
-                        
-                            <li><a href="/tags/Mac/">Mac</a></li>
-                        
-                            <li><a href="/tags/Oracle/">Oracle</a></li>
-                        
-                            <li><a href="/tags/VB/">VB</a></li>
-                        
-                            <li><a href="/tags/微信/">微信</a></li>
-                        
-                            <li><a href="/tags/Sports/">Sports</a></li>
-                        
-                            <li><a href="/tags/Games/">Games</a></li>
+                            <li><a href="/tags/PHP/">PHP</a></li>
                         
                     </ul>
                 </div>
