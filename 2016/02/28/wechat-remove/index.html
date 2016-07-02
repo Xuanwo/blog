@@ -116,10 +116,10 @@
             <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>由于微信的限制，人数超过一百以后，只有邀请才能加入。所以，如果想要组织大型的在线活动，就只有建立很多个分群。然而分群的问题在于，会有很多人重复加群，挤占了本来就缺乏的空间。所以需要找到一个可行的办法，清除两个群中的重复人员。</p>
 <a id="more"></a>
 <h1 id="可行的方法"><a href="#可行的方法" class="headerlink" title="可行的方法"></a>可行的方法</h1><p>在微信网页版中，通过点击群名称右侧的向下箭头，可以打开一个有所有人昵称的面板，通过审查工具可以得到对应的代码，右击选择<code>Edit As HTML</code>，全选复制，保存到<code>a.txt</code>中，然后执行</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat a.txt | grep -o <span class="string">"\"&gt;.*&lt;/p&gt;"</span> &gt; fen.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat a.txt | grep -o <span class="string">"\"&gt;.*&lt;/p&gt;"</span> &gt; fen.txt</span><br></pre></td></tr></table></figure>
 <p>我们便可以将所有人的名字都输出到<code>fen.txt</code>中，尽管还有着一些<code>&lt;</code>，<code>&gt;</code>的符号，但是已经不影响识别了，故不再做处理。</p>
 <p>对两个群分别如此操作之后，我们得到了两个群的成员名单。<br>然后执行如下Python代码：</p>
-<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">with <span class="function"><span class="title">open</span><span class="params">(<span class="string">'fen.txt'</span>, <span class="string">'r'</span>)</span></span> as f:</span><br><span class="line">    fen = f.<span class="function"><span class="title">readlines</span><span class="params">()</span></span></span><br><span class="line">    f.<span class="function"><span class="title">close</span><span class="params">()</span></span></span><br><span class="line">with <span class="function"><span class="title">open</span><span class="params">(<span class="string">'main.txt'</span>, <span class="string">'r'</span>)</span></span> as f:</span><br><span class="line">    main = f.<span class="function"><span class="title">readlines</span><span class="params">()</span></span></span><br><span class="line">    f.<span class="function"><span class="title">close</span><span class="params">()</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> <span class="tag">i</span> <span class="keyword">in</span> main:</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> fen:</span><br><span class="line">        <span class="keyword">if</span> <span class="tag">i</span> == j:</span><br><span class="line">            <span class="function"><span class="title">print</span><span class="params">(i)</span></span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">with open(&#39;fen.txt&#39;, &#39;r&#39;) as f:&#10;    fen = f.readlines()&#10;    f.close()&#10;with open(&#39;main.txt&#39;, &#39;r&#39;) as f:&#10;    main = f.readlines()&#10;    f.close()&#10;&#10;for i in main:&#10;    for j in fen:&#10;        if i == j:&#10;            print(i)</span><br></pre></td></tr></table></figure>
 <p>得到的输出就是两个群中重复的成员，然后一一删除即可。</p>
 <h1 id="方案反思"><a href="#方案反思" class="headerlink" title="方案反思"></a>方案反思</h1><h2 id="存在的缺陷"><a href="#存在的缺陷" class="headerlink" title="存在的缺陷"></a>存在的缺陷</h2><ul>
 <li>自动化程度较低</li>
@@ -158,7 +158,7 @@
                     <p><span>本文标题:</span><a href="/2016/02/28/wechat-remove/">微信群重复人员识别</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2016年2月28日 - 10时02分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 05时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
                     <p><span>原始链接:</span><a href="/2016/02/28/wechat-remove/"
                                             title="微信群重复人员识别">https://xuanwo.org/2016/02/28/wechat-remove/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"

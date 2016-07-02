@@ -129,15 +129,15 @@
 <p>也就是说，一旦putty因为超时产生了SIGHUP信号，那么会连带着当前终端正在运行的程序全部终止。所以，只要避免SIGHUP信号的产生，就可以规避这个问题。</p>
 <h1 id="Screen"><a href="#Screen" class="headerlink" title="Screen"></a>Screen</h1><p>简单来说，Screen是一个可以在多个进程之间多路复用一个物理终端的窗口管理器。Screen中有会话的概念，用户可以在一个screen会话中创建多个screen窗口，在每一个screen窗口中就像操作一个真实的telnet/SSH连接窗口那样。</p>
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>很多发行版会预装Screen，如果没有（比如Ubuntu），则需要自行安装，以Ubuntu为例：</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">sudo apt-<span class="keyword">get</span> install screen</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;sudo apt-get install screen</span><br></pre></td></tr></table></figure>
 <h2 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h2><h3 id="直接创建"><a href="#直接创建" class="headerlink" title="直接创建"></a>直接创建</h3><p>直接在命令行下输入</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">screen</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;screen</span><br></pre></td></tr></table></figure>
 <p>之后你会看到几页字，按回车跳过之后，你就来到了一个shell的全屏窗口。你可以执行任意shell程序，就像在ssh窗口中那样。在该窗口中键入exit退出该窗口，如果这是该screen会话的唯一窗口，该screen会话退出，否则screen自动切换到前一个窗口。</p>
 <h3 id="快捷键创建新窗口"><a href="#快捷键创建新窗口" class="headerlink" title="快捷键创建新窗口"></a>快捷键创建新窗口</h3><p>在已经激活的Screen会话下，使用快捷键<code>Ctrl+A</code>然后点击<code>C</code>，screen 在该会话内生成一个新的窗口并切换到该窗口。</p>
 <h2 id="暂时中断"><a href="#暂时中断" class="headerlink" title="暂时中断"></a>暂时中断</h2><p>screen还有更高级的功能。你可以不中断screen窗口中程序的运行而暂时断开（detach）screen会话，并在随后时间重新连接（attach）该会话，重新控制各窗口中运行的程序。例如，我们使用wget下载一个文件：<br><img src="/imgs/learn/ssh-time-out.png" alt="SSH超时样例"><br>之后我们想暂时退出做点别的事情，比如出去散散步，那么在screen窗口键入<code>Ctrl+A</code>然后点击<code>D</code>，Screen会给出detached提示：<br><img src="/imgs/learn/screen-detached.png" alt="Screen Detached"><br>半个小时之后回来了，找到该screen会话：</p>
-<figure class="highlight mel"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">screen -<span class="keyword">ls</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;screen -ls</span><br></pre></td></tr></table></figure>
 <p>重新连接会话：</p>
-<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="title">screen</span> -r 会话ID</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#10;screen -r &#20250;&#35805;ID</span><br></pre></td></tr></table></figure>
 <p>一切工作都会完全回来，区别只在于，他可能已经做好了&gt;_&lt;。</p>
 <h2 id="键绑定"><a href="#键绑定" class="headerlink" title="键绑定"></a>键绑定</h2><blockquote>
 <p>你可能注意到给screen发送命令使用了特殊的键组合<code>Ctrl+A</code>。这是因为我们在键盘上键入的信息是直接发送给当前screen窗口，必须用其他方式向screen窗口管理器发出命令，默认情况下，screen接收以<code>Ctrl+A</code>开始的命令。这种命令形式在screen中叫做键绑定（key binding），<code>Ctrl+A</code>叫做命令字符（command character）。</p>
@@ -226,7 +226,7 @@
                     <p><span>本文标题:</span><a href="/2015/07/01/screen-ssh/">使用Screen管理会话</a></p>
                     <p><span>文章作者:</span><a href="/" title="访问 Xuanwo 的个人博客">Xuanwo</a></p>
                     <p><span>发布时间:</span>2015年7月1日 - 09时07分</p>
-                    <p><span>最后更新:</span>2016年7月2日 - 05时07分</p>
+                    <p><span>最后更新:</span>2016年7月2日 - 07时07分</p>
                     <p><span>原始链接:</span><a href="/2015/07/01/screen-ssh/"
                                             title="使用Screen管理会话">https://xuanwo.org/2015/07/01/screen-ssh/</a></p>
                     <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license"
