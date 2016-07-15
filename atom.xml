@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://xuanwo.org/"/>
-  <updated>2016-07-14T14:25:01.845Z</updated>
+  <updated>2016-07-15T07:56:24.692Z</updated>
   <id>https://xuanwo.org/</id>
   
   <author>
@@ -16,11 +16,72 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>NodeBB 升级迁移总结</title>
+    <link href="https://xuanwo.org/2016/07/08/nodebb-upgrade/"/>
+    <id>https://xuanwo.org/2016/07/08/nodebb-upgrade/</id>
+    <published>2016-07-08T10:00:00.000Z</published>
+    <updated>2016-07-15T07:56:24.692Z</updated>
+    
+    <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://community.qingcloud.com/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;青云用户社区&lt;/a&gt;使用了开源的 NodeBB 论坛，部署之初使用&lt;code&gt;0.7&lt;/code&gt;版本，因为没有跟随官方进度进行更新，导致论坛版本长期停滞。一方面无法享受到官方的BUG Fix，另一方面也无法使用很多业务需求的插件。思量再三后决定对社区进行升级迁移，不在原论坛直接升级，而是部署一套新的环境，将原有的数据全部导出。&lt;/p&gt;
+&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
+&lt;h1 id=&quot;可行性分析&quot;&gt;&lt;a href=&quot;#可行性分析&quot; class=&quot;headerlink&quot; title=&quot;可行性分析&quot;&gt;&lt;/a&gt;可行性分析&lt;/h1&gt;&lt;h2 id=&quot;NodeBB-升级路径&quot;&gt;&lt;a href=&quot;#NodeBB-升级路径&quot; class=&quot;headerlink&quot; title=&quot;NodeBB 升级路径&quot;&gt;&lt;/a&gt;NodeBB 升级路径&lt;/h2&gt;&lt;p&gt;NodeBB 自0.3版本后就提供了一套独特升级路径，主要有以下几个要点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;NodeBB采用语义化版本号：&lt;code&gt;x.y.z&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;对&lt;code&gt;z&lt;/code&gt;版本号的变动，可以直接升级&lt;/li&gt;
+&lt;li&gt;只有当&lt;code&gt;z&lt;/code&gt;版本号已经是&lt;code&gt;x.y&lt;/code&gt;版本下的最新版本，才能升级到&lt;code&gt;x.y+1&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;数据迁移&quot;&gt;&lt;a href=&quot;#数据迁移&quot; class=&quot;headerlink&quot; title=&quot;数据迁移&quot;&gt;&lt;/a&gt;数据迁移&lt;/h2&gt;&lt;p&gt;NodeBB在部署的时候就使用了青云平台上的 Redis 缓存和负载均衡器。这样迁移的问题就会变的简单很多，我只需要将 NodeBB 路径下的&lt;code&gt;public/uploads&lt;/code&gt;资源进行打包即可，Redis 缓存和负载均衡器都可以直接使用。&lt;/p&gt;
+&lt;h1 id=&quot;迁移步骤&quot;&gt;&lt;a href=&quot;#迁移步骤&quot; class=&quot;headerlink&quot; title=&quot;迁移步骤&quot;&gt;&lt;/a&gt;迁移步骤&lt;/h1&gt;&lt;h2 id=&quot;迁移-NodeBB&quot;&gt;&lt;a href=&quot;#迁移-NodeBB&quot; class=&quot;headerlink&quot; title=&quot;迁移 NodeBB&quot;&gt;&lt;/a&gt;迁移 NodeBB&lt;/h2&gt;&lt;p&gt;建议在一个新的环境里面创建迁移环境。&lt;/p&gt;
+&lt;h3 id=&quot;Node-版本&quot;&gt;&lt;a href=&quot;#Node-版本&quot; class=&quot;headerlink&quot; title=&quot;Node 版本&quot;&gt;&lt;/a&gt;Node 版本&lt;/h3&gt;&lt;p&gt;同样建议使用 &lt;code&gt;nvm&lt;/code&gt; 来管理版本，避免其他应用对NodeBB环境产生干扰。&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;nvm install stable&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;nvm use stable&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;如果不想每一次退出shell后都要执行&lt;code&gt;nvm use stable&lt;/code&gt;，可以手动设置默认版本：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;nvm alias default stable&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h3 id=&quot;NodeBB-版本&quot;&gt;&lt;a href=&quot;#NodeBB-版本&quot; class=&quot;headerlink&quot; title=&quot;NodeBB 版本&quot;&gt;&lt;/a&gt;NodeBB 版本&lt;/h3&gt;&lt;p&gt;首先下载跟生产环境一致的NodeBB版本：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;git clone -b v0.7.x&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;然后使用跟生产环境一致的&lt;code&gt;config.json&lt;/code&gt;，NoedBB升级工具会自动更新&lt;code&gt;package.json&lt;/code&gt;，所以无需修改。&lt;/p&gt;
+&lt;p&gt;然后运行&lt;code&gt;./nodebb upgrade&lt;/code&gt;以升级数据结构和依赖并打上所有的补丁。&lt;/p&gt;
+&lt;p&gt;运行完毕后切换到更高版本的分支：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;git fetch&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;git checkout v0.8.x&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;同样运行&lt;code&gt;./nodebb upgrade&lt;/code&gt;，以此类推，直至升级到官方最新版本。&lt;/p&gt;
+&lt;h2 id=&quot;迁移数据&quot;&gt;&lt;a href=&quot;#迁移数据&quot; class=&quot;headerlink&quot; title=&quot;迁移数据&quot;&gt;&lt;/a&gt;迁移数据&lt;/h2&gt;&lt;p&gt;正如之前所说的，Redis已经被直接升级到最新版本，接下来只需要将用户上传的数据导出即可。&lt;/p&gt;
+&lt;p&gt;在生产环境中执行如下命令：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;cd /path/to/nodebb/public&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;tar -cvf nodebb_assets_backup.tar.gz ./upload&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;切换到迁移环境后执行：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;cd /path/to/nodebb/public&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;tar -xvf nodebb_assets_backup.tar.gz&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h2 id=&quot;注意事项&quot;&gt;&lt;a href=&quot;#注意事项&quot; class=&quot;headerlink&quot; title=&quot;注意事项&quot;&gt;&lt;/a&gt;注意事项&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;目前NodeBB不支持降级操作，如果担心破坏生产环境，可以在生成一个 Redis 的备份并重新创建资源，不要对原数据库进行操作。&lt;/li&gt;
+&lt;li&gt;由于 Redis 中会保存对原论坛的主题和插件等配置，在迁移到新版本后，有很大可能会产生错误，可以执行&lt;code&gt;./nodebb reset -a&lt;/code&gt;以清除所有主题和插件配置。确认 NodeBB 运行正常后再逐个启用即可。&lt;/li&gt;
+&lt;li&gt;在升级时候会因为Node.js版本的问题导致某些依赖无法安装，建议可以使用&lt;code&gt;0.12&lt;/code&gt;版本进行升级，升级成功后再切换到更新的版本上重新进行&lt;code&gt;npm install --production&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&quot;感悟&quot;&gt;&lt;a href=&quot;#感悟&quot; class=&quot;headerlink&quot; title=&quot;感悟&quot;&gt;&lt;/a&gt;感悟&lt;/h1&gt;&lt;h2 id=&quot;NodeBB的升级路线设计&quot;&gt;&lt;a href=&quot;#NodeBB的升级路线设计&quot; class=&quot;headerlink&quot; title=&quot;NodeBB的升级路线设计&quot;&gt;&lt;/a&gt;NodeBB的升级路线设计&lt;/h2&gt;&lt;p&gt;这次升级迁移其实经历很久的论证过程。&lt;br&gt;一开始简单地尝试一下之后认定无法直接进行升级就产生了一些畏难情绪，心里想着不如就让它这样，反正现在线上跑得也挺好的，没有出什么太大的问题。而后种种需求的提出让我有些招架不住了，现有的落后版本缺少很多API和现有的插件，自行开发和维护的成本非唱高。这也是我有一段时间觉得开源在实际应用中并不是那么美好的原因。&lt;br&gt;等到我真的沉下心来仔细研究官方的文档，才发现 NodeBB 看似鬼畜坑爹的升级路线设计其实也有着其优雅之处。数据库的结构可以随之版本同步更新，这样可以避免早期数据库结构设计不合理带来的种种弊端，并防止产生版本之间的Breaking Change。抛开API层面的兼容性不谈，NodeBB可以做到我直接使用原来的 Redis 从 &lt;code&gt;0.7.0&lt;/code&gt; 一路升级到 &lt;code&gt;1.0.4&lt;/code&gt;，还能保证我的数据没有出现任何丢失，就冲着这一点，我觉得这个升级路线的设计是有价值的。&lt;br&gt;当然，路线是好的，但是在具体实现升级功能的时候还有待商榷之处：不难发现升级过程中有很大一部分的重复操作，其实这些都是可以避免的。每一个&lt;code&gt;x.y&lt;/code&gt;版本号之间的更新操作其实都是一致的，完全可以通过脚本实现。&lt;/p&gt;
+&lt;h2 id=&quot;应用部署的灵活性&quot;&gt;&lt;a href=&quot;#应用部署的灵活性&quot; class=&quot;headerlink&quot; title=&quot;应用部署的灵活性&quot;&gt;&lt;/a&gt;应用部署的灵活性&lt;/h2&gt;&lt;p&gt;上线任何应用之前都应该考虑其架构的扩展性和迁移能力。&lt;br&gt;很多时候，部署一套应用的目的根本就不是为了去使用他，只是单纯的部署一个玩一玩而已。在这样的心态下，总会干出这样的事情：在一个20G的主机上跑ownCloud；在一个主机上同时跑wordpress，nginx和mysql等应用。当然，这样做并没有什么问题，毕竟是自己的Server，哪怕天天 &lt;code&gt;rm -rf /&lt;/code&gt;都是OK的。&lt;br&gt;但是如果是一套需要给别人用的应用，部署时的扩展性和迁移能力就必须考虑在内。这其实是两个很实在的问题：服务器空间耗尽，性能跟不上怎么办？服务器挂了，如何保全自己的数据？自己设计这样一套系统很麻烦，但是如果是在青云上就不一样了。我最喜欢青云的一点就是，青云几乎所有的资源都是可以动态伸缩和扩展的。带宽受限制了，直接扩大；服务器性能不够了，加核心加内存；单个服务器支撑不住了，批量生成十个并使用负载均衡器进行负载均衡操作；想要测试某个最新的特性，直接从线上创建一个Snapshot并生成资源进行测试。&lt;br&gt;在本次迁移的过程中，我们就可以看出来，我们可以直接使用 Redis 进行升级，而不是手动导出数据库备份再执行导入操作。同样地，我们也不需要再重新配置一遍 Nginx ，只需要再创建一个负载均衡器即可。&lt;/p&gt;
+&lt;h1 id=&quot;更新日志&quot;&gt;&lt;a href=&quot;#更新日志&quot; class=&quot;headerlink&quot; title=&quot;更新日志&quot;&gt;&lt;/a&gt;更新日志&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;2016年07月08日 首次发布&lt;/li&gt;
+&lt;li&gt;2016年07月15日 青云社区成功上线&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://community.qingcloud.com/&quot;&gt;青云用户社区&lt;/a&gt;使用了开源的 NodeBB 论坛，部署之初使用&lt;code&gt;0.7&lt;/code&gt;版本，因为没有跟随官方进度进行更新，导致论坛版本长期停滞。一方面无法享受到官方的BUG Fix，另一方面也无法使用很多业务需求的插件。思量再三后决定对社区进行升级迁移，不在原论坛直接升级，而是部署一套新的环境，将原有的数据全部导出。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Operation" scheme="https://xuanwo.org/categories/Operation/"/>
+    
+    
+      <category term="JavaScript" scheme="https://xuanwo.org/tags/JavaScript/"/>
+    
+      <category term="Node.js" scheme="https://xuanwo.org/tags/Node-js/"/>
+    
+  </entry>
+  
+  <entry>
     <title>新博客上线&amp;Hexo主题开发入门</title>
     <link href="https://xuanwo.org/2016/06/29/new-blog-new-life/"/>
     <id>https://xuanwo.org/2016/06/29/new-blog-new-life/</id>
     <published>2016-06-29T23:06:00.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;曾经看过我的博客的同学大概都会发现，我的博客再一次大变样了~&lt;br&gt;这一次的更新其实酝酿了很久，早在刚开始用Hexo的时候就想着要有一个自己的主题。但是那个时候觉得这是一件很难的事情，要懂HTML，CSS，JavaScript，还要懂Swig，Ejs等模板语言，还要懂Hexo的内部原理，于是就一直搁置了。在独立实现了一个&lt;a href=&quot;https://xuanwo.org/2016/06/16/jade_ims/&quot;&gt;完整的项目&lt;/a&gt;之后，我认为自己已经有这样的能力了，于是决定正式开始。&lt;br&gt;在我看来的话，Hexo的使用者大概分为三个层次：第一种用别人的主题，第二种模仿现有的主题，第三种自己独立开发。我原来是第一种，在Next的基础上做了很多改动，这一次进入到了第二个层次。我找了一套自我感觉还不错的模板，然后套用它的CSS设定和页面结构，就成了我现在的主题。&lt;br&gt;利用两天学习和工作的闲暇时间，我大体上完成了这个主题。做得比较糙，很多细节还有待优化，但是我已经急不可耐地想要正式上线了，笑。在未来的话，我希望能把一些配置都能整理出来，优化一下代码，然后开源这个主题，希望大家能够喜欢~&lt;br&gt;庆祝的话已经说的差不多了，下面来讲一讲如何开发一个Hexo主题。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -97,7 +158,7 @@
     <link href="https://xuanwo.org/2016/06/16/jade_ims/"/>
     <id>https://xuanwo.org/2016/06/16/jade_ims/</id>
     <published>2016-06-16T22:00:00.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;p&gt;&lt;img src=&quot;/imgs/develop/jade-ims-index.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
 &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;这个项目从我们这个学期开了&lt;strong&gt;系统分析与设计&lt;/strong&gt;这门课之后就开始了，首次创建这个项目是在3月26号，实际上真正的开发时间集中在6月上旬。差不多用两个星期的闲暇时间时间完成了这个简单的进销存系统。这个系统基于Flask框架，使用SQLite3数据库，前端则是使用Bootstrap框架，实现了包括客户，库存，销售，进货等管理子系统。说是管理，其实也就是简单的增加和删除而已。&lt;br&gt;前人经常说，不要重复造轮子。既然有类似于Odoo这样强大的ERP系统珠玉在前，我为什么要再自己造一个功能简单，甚至根本不会有人用的轮子呢？从前我确实是这么想的，但是稍微有一点工作经验之后发现再造轮子的原因有两条：&lt;/p&gt;
@@ -172,7 +233,7 @@
     <link href="https://xuanwo.org/2016/06/03/owncloud-on-qingcloud/"/>
     <id>https://xuanwo.org/2016/06/03/owncloud-on-qingcloud/</id>
     <published>2016-06-03T08:00:00.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;因为实在不满意百度云的一些缺陷，我们最终决定部署一套团队内部使用的云存储平台，用于团队协作及资料长期存储。希望能够达到如下目标：&lt;/p&gt;
 &lt;ul&gt;
@@ -327,7 +388,7 @@
     <link href="https://xuanwo.org/2016/05/29/learn-from-qingchat/"/>
     <id>https://xuanwo.org/2016/05/29/learn-from-qingchat/</id>
     <published>2016-05-29T20:57:00.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;之前的一段时间一直在从事&lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Qingchat&lt;/a&gt;的相关开发工作，这个项目是一个基于Mojo-Weixin提供的Rest API开发的一个微信机器人，承担了十余个群，上千人的微信直播活动。秉承着ACM训练出来的“暴力加乱搞”风格，我花了大概一个星期的课余时间，搞出了一个可用的版本。期间也迭代了很多次，既欣慰于Coding的力量，也苦恼于当初设计的不完善带来的种种问题。在这个项目即将大规模重构的前夕，我总结一下开发Qingchat的过程中的经验教训，希望自己能成为一个更好更聪明的Coder。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -364,7 +425,7 @@
     <link href="https://xuanwo.org/2016/05/09/msp430g2553-bellring/"/>
     <id>https://xuanwo.org/2016/05/09/msp430g2553-bellring/</id>
     <published>2016-05-09T08:42:00.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;我萌萌哒的妹纸是一个代码苦手，完全无法理解 C 语言，所以每一次到单片机上机需要交作业的时候都是愁眉苦脸的样子。而我又总是因为自己确实不懂单片机里面的种种奇怪定义（中断，串口，P1.x 之类），所以也一直没有什么好办法去帮她。这一次的作业对编码能力要求较高，但是涉及到的硬件比较少，于是决定以此为契机，开始我的嵌入式开发之旅。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -441,7 +502,7 @@
     <link href="https://xuanwo.org/2016/04/13/gitlab-install-intro/"/>
     <id>https://xuanwo.org/2016/04/13/gitlab-install-intro/</id>
     <published>2016-04-13T23:20:00.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h1 id=&quot;起因&quot;&gt;&lt;a href=&quot;#起因&quot; class=&quot;headerlink&quot; title=&quot;起因&quot;&gt;&lt;/a&gt;起因&lt;/h1&gt;&lt;p&gt;在跟网络中心的老师沟通成立镜像站的相关事宜的时候，意外地接下来搭建一套校内的 Git 服务的任务。&lt;br&gt;&lt;a href=&quot;https://imnerd.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;@怡红公子&lt;/a&gt; 曾经搭建过一套类似的服务，但由于服务器端没有开启 VT 虚拟化导致不能安装 64 位的操作系统，再加上 Gitlab 不提供 32 位的安装包，所以长期以来怡红公子一直都是自行编译并配置 Gitlab 。考虑到后续维护的方便，我们决定趁着这个机会使用另一台支持安装 64 位操作系统的服务器，一劳永逸地解决这个问题。&lt;br&gt;我们的服务器环境是 &lt;strong&gt;CentOS 7.2 64bit&lt;/strong&gt; ，以下所有操作均以此为基准。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -549,7 +610,7 @@
     <link href="https://xuanwo.org/2016/04/04/docopt-intro/"/>
     <id>https://xuanwo.org/2016/04/04/docopt-intro/</id>
     <published>2016-04-04T21:39:00.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;code&gt;Qingchat&lt;/code&gt;&lt;/a&gt; 使用的命令行参数解释器是 &lt;a href=&quot;http://docopt.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;code&gt;docopt&lt;/code&gt;&lt;/a&gt;，用下来感觉非常棒，所以决定介绍一下这个库。（&lt;em&gt;奉劝各位看官，珍爱生命，远离argparse。&lt;/em&gt;）&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -619,7 +680,7 @@
     <link href="https://xuanwo.org/2016/04/01/qingchat-intro/"/>
     <id>https://xuanwo.org/2016/04/01/qingchat-intro/</id>
     <published>2016-04-01T22:03:00.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;在我之前写过的一篇文章中，我曾经探索过类似的问题：&lt;a href=&quot;https://xuanwo.org/2016/02/28/wechat-remove/&quot;&gt;微信群重复人员识别&lt;/a&gt;。当初我就提出过能否自动获取相关数据，但因为种种原因的限制不了了之了。后来发现了&lt;a href=&quot;https://github.com/sjdy521/Mojo-Weixin&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Mojo-Weixin&lt;/a&gt;这个库之后，我决定在这个的基础上实现一个微信多群直播的工具——Qingchat。（&lt;em&gt;尽管在刚刚实现完不久，微信就更新了转发到多个群的功能，Sad。&lt;/em&gt;）探索的成果如下： &lt;a href=&quot;https://github.com/Xuanwo/qingchat&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Qingchat&lt;/a&gt;，目前仅支持 python3 ，欢迎各位看官提 issues ，交 code ，或者拍砖。&lt;br&gt;接下来我会先介绍一下 Qingchat 的原理，然后介绍 Qingchat 的使用，最后展望一下 Qingchat 未来的发展方向。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -722,7 +783,7 @@
     <link href="https://xuanwo.org/2016/03/13/gout/"/>
     <id>https://xuanwo.org/2016/03/13/gout/</id>
     <published>2016-03-13T13:44:00.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;p&gt;其实我很想写出获奖感言的感觉，但是痛风发作的时候真的好疼啊。。。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -759,7 +820,7 @@
     <link href="https://xuanwo.org/2016/03/12/neovim-slow-upgrade/"/>
     <id>https://xuanwo.org/2016/03/12/neovim-slow-upgrade/</id>
     <published>2016-03-12T11:00:00.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;一直都非常羡慕那些能把vim用得非常溜的人，但是自己总是不情愿去学，总是觉得vim的操作方式非常反人类，难度曲线太陡，不适合我。真正让我下定决心去学的，是因为系统切换到Ubuntu Gnome之后发现，Sublime Text 3 不能原生支持中文输入。同时我也发现，如果我不上来就折腾spf13这样的东西的话，其实vim非常好懂。于是，Neovim的慢速升级攻略就这样诞生了。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -823,7 +884,7 @@
     <link href="https://xuanwo.org/2016/02/28/wechat-remove/"/>
     <id>https://xuanwo.org/2016/02/28/wechat-remove/</id>
     <published>2016-02-28T10:05:00.000Z</published>
-    <updated>2016-07-14T14:25:01.849Z</updated>
+    <updated>2016-07-15T07:56:24.696Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;由于微信的限制，人数超过一百以后，只有邀请才能加入。所以，如果想要组织大型的在线活动，就只有建立很多个分群。然而分群的问题在于，会有很多人重复加群，挤占了本来就缺乏的空间。所以需要找到一个可行的办法，清除两个群中的重复人员。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -867,7 +928,7 @@
     <link href="https://xuanwo.org/2016/02/26/debug-for-hexo-1775/"/>
     <id>https://xuanwo.org/2016/02/26/debug-for-hexo-1775/</id>
     <published>2016-02-26T12:54:00.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h2 id=&quot;起因&quot;&gt;&lt;a href=&quot;#起因&quot; class=&quot;headerlink&quot; title=&quot;起因&quot;&gt;&lt;/a&gt;起因&lt;/h2&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/hexojs/hexo/issues/1775&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;hexojs/hexo #1775&lt;/a&gt;&lt;br&gt;BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -908,7 +969,7 @@
     <link href="https://xuanwo.org/2016/02/17/ipv6-in-cugb/"/>
     <id>https://xuanwo.org/2016/02/17/ipv6-in-cugb/</id>
     <published>2016-02-17T18:59:02.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;p&gt;主旨只有两条：开源，节流&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -995,7 +1056,7 @@
     <link href="https://xuanwo.org/2016/02/15/chocolatey-intro/"/>
     <id>https://xuanwo.org/2016/02/15/chocolatey-intro/</id>
     <published>2016-02-15T20:15:46.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;https://chocolatey.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Chocolatey&lt;/a&gt;是一个基于Nuget的Windows包管理工具，截止到我更新此文章的时候，一共有3.7k多个独立包。本文旨在介绍Chocolatey这一工具的安装和用法，希望能有更多人享受到该工具的便利之处。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1060,7 +1121,7 @@
     <link href="https://xuanwo.org/2016/02/04/unlock-your-smart-tv/"/>
     <id>https://xuanwo.org/2016/02/04/unlock-your-smart-tv/</id>
     <published>2016-02-04T23:12:52.000Z</published>
-    <updated>2016-07-14T14:25:01.849Z</updated>
+    <updated>2016-07-15T07:56:24.696Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;现在很多人都买了智能电视，但是出于种种你懂得原因，厂商通常都不允许用户自行安装自己想要的APP，比如腾讯视频，优酷视频之类的。本教程旨在突破这些限制，彻底解放智能电视的全部潜力。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1149,7 +1210,7 @@
     <link href="https://xuanwo.org/2016/01/13/how-to-differ-invalid-link/"/>
     <id>https://xuanwo.org/2016/01/13/how-to-differ-invalid-link/</id>
     <published>2016-01-13T01:18:51.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;前两天我的朋友圈被微信公开课活动的链接+截图刷屏，随后一大帮“业内人士”站出来说这个是盗号连接，只要点开，微信钱包和支付宝就会被盗。作为半个业内人士，我不能忍了，决定跟大家谈一谈如何识别真假链接。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1223,7 +1284,7 @@
     <link href="https://xuanwo.org/2016/01/03/vs-oracle-11g/"/>
     <id>https://xuanwo.org/2016/01/03/vs-oracle-11g/</id>
     <published>2016-01-03T15:31:32.000Z</published>
-    <updated>2016-07-14T14:25:01.849Z</updated>
+    <updated>2016-07-15T07:56:24.696Z</updated>
     
     <content type="html">&lt;h1 id=&quot;开发环境&quot;&gt;&lt;a href=&quot;#开发环境&quot; class=&quot;headerlink&quot; title=&quot;开发环境&quot;&gt;&lt;/a&gt;开发环境&lt;/h1&gt;&lt;p&gt;宿主机：Win10 + VS2015 + ODP.Net for VS2015&lt;br&gt;虚拟机：Win7 + Oracle 11g + 桥接&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1288,7 +1349,7 @@
     <link href="https://xuanwo.org/2015/12/23/best-pdf-read-solution/"/>
     <id>https://xuanwo.org/2015/12/23/best-pdf-read-solution/</id>
     <published>2015-12-23T16:15:20.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;最近因为学习需要，要大量阅读纯文字的PDF文档。然后我惊讶地发现市场上居然没有哪家提供一套完整可用的跨平台PDF阅读解决方案，于是我在尝试了市面几乎所有叫得上名字的各类阅读器之后，形成了一套自己的跨平台PDF阅读解决方案。本文记录了这套方案的详细内容，希望会有所益处。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
@@ -1345,7 +1406,7 @@
     <link href="https://xuanwo.org/2015/12/18/online-video-download-solution/"/>
     <id>https://xuanwo.org/2015/12/18/online-video-download-solution/</id>
     <published>2015-12-18T12:49:49.000Z</published>
-    <updated>2016-07-14T14:25:01.845Z</updated>
+    <updated>2016-07-15T07:56:24.692Z</updated>
     
     <content type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;因为学习需要，产生了一个这样的需求：要从Youtube上批量下载视频。自然，出于方便使用的角度来看，音画不能分离，最好带有对应的字幕。一番搜罗之后，我找到了基于Python的开源产品： &lt;a href=&quot;https://rg3.github.io/youtube-dl/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;youtube-dl&lt;/a&gt;&lt;/p&gt;
 &lt;blockquote&gt;
@@ -1393,47 +1454,6 @@
       <category term="Software" scheme="https://xuanwo.org/tags/Software/"/>
     
       <category term="Video" scheme="https://xuanwo.org/tags/Video/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>断电也能上网！——路由器改造记</title>
-    <link href="https://xuanwo.org/2015/11/27/surf-with-poweroff/"/>
-    <id>https://xuanwo.org/2015/11/27/surf-with-poweroff/</id>
-    <published>2015-11-27T01:34:33.000Z</published>
-    <updated>2016-07-14T14:25:01.849Z</updated>
-    
-    <content type="html">&lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;前两天我对我们宿舍的路由器进行了小小的改造，使得我们在断电之后也能照常上网。原理非常简单：就是使用充电宝来给路由器供电——因为我们墙上的网口是不会断电的，所以只要解决了路由器没有电的问题，就可以解决断网问题。路由器要求的输入电压为5V，电流为0.3A，恰好跟我们常用的充电宝是一致的，淘宝买一根USB转DV线成功解决问题。&lt;/p&gt;
-&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
-&lt;h1 id=&quot;供电方案&quot;&gt;&lt;a href=&quot;#供电方案&quot; class=&quot;headerlink&quot; title=&quot;供电方案&quot;&gt;&lt;/a&gt;供电方案&lt;/h1&gt;&lt;p&gt;我们宿舍现在的路由器供电方案是这样的：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;充电器（A型USB接口）&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        ||&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;充电宝（Micro B型USB接口）&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    |内部电路|&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;充电宝（A型USB接口）&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        ||&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;路由器（DV接口）&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h1 id=&quot;达成效果&quot;&gt;&lt;a href=&quot;#达成效果&quot; class=&quot;headerlink&quot; title=&quot;达成效果&quot;&gt;&lt;/a&gt;达成效果&lt;/h1&gt;&lt;p&gt;现在达成的效果是：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;白天：充电器给充电宝充电，充电宝起到了稳流的作用&lt;/li&gt;
-&lt;li&gt;晚上：充电宝为路由器供电&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;优点&quot;&gt;&lt;a href=&quot;#优点&quot; class=&quot;headerlink&quot; title=&quot;优点&quot;&gt;&lt;/a&gt;优点&lt;/h2&gt;&lt;p&gt;自动循环，自动切换（切换的速度很快，撸啊撸都不会掉线哦~）&lt;/p&gt;
-&lt;h2 id=&quot;缺点&quot;&gt;&lt;a href=&quot;#缺点&quot; class=&quot;headerlink&quot; title=&quot;缺点&quot;&gt;&lt;/a&gt;缺点&lt;/h2&gt;&lt;p&gt;充电宝损耗大，不知道我这个已经用了一年的充电宝能坚持多久= =&lt;/p&gt;
-&lt;h1 id=&quot;硬件要求&quot;&gt;&lt;a href=&quot;#硬件要求&quot; class=&quot;headerlink&quot; title=&quot;硬件要求&quot;&gt;&lt;/a&gt;硬件要求&lt;/h1&gt;&lt;blockquote&gt;
-&lt;p&gt;主流充电宝的电压均为5V1A，有部分充电宝为iPad提供了2A的输出接口，加上充电宝自动限流的功能，所有充电宝这一部分问题不大。&lt;br&gt;路由器很显然必须为5V，如果是12V的路由器还需要另外购买升压模块，电流问题不大，充电宝基本都带得动。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h1 id=&quot;辟谣&quot;&gt;&lt;a href=&quot;#辟谣&quot; class=&quot;headerlink&quot; title=&quot;辟谣&quot;&gt;&lt;/a&gt;辟谣&lt;/h1&gt;&lt;h2 id=&quot;用充电宝网速是不是会变慢？&quot;&gt;&lt;a href=&quot;#用充电宝网速是不是会变慢？&quot; class=&quot;headerlink&quot; title=&quot;用充电宝网速是不是会变慢？&quot;&gt;&lt;/a&gt;用充电宝网速是不是会变慢？&lt;/h2&gt;&lt;p&gt;实测： &lt;strong&gt;不会&lt;/strong&gt;&lt;br&gt;相反的，由于断电之后同时上网的设备数量减少，在延时，最高速率等参数上还有着更加优秀的表现。&lt;/p&gt;
-&lt;h2 id=&quot;用充电宝会导致无法链接Wifi？&quot;&gt;&lt;a href=&quot;#用充电宝会导致无法链接Wifi？&quot; class=&quot;headerlink&quot; title=&quot;用充电宝会导致无法链接Wifi？&quot;&gt;&lt;/a&gt;用充电宝会导致无法链接Wifi？&lt;/h2&gt;&lt;p&gt;舍友反馈的，我只说一句： 不要相信玄学。&lt;br&gt;路由器换一种供电方式会影响到你电脑上的无线网卡的信号发送？这种说法，我肯定是不相信的- -。&lt;/p&gt;
-&lt;h1 id=&quot;更新日志&quot;&gt;&lt;a href=&quot;#更新日志&quot; class=&quot;headerlink&quot; title=&quot;更新日志&quot;&gt;&lt;/a&gt;更新日志&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;2015年11月27日 完成初稿&lt;/li&gt;
-&lt;/ul&gt;
-</content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h1&gt;&lt;p&gt;前两天我对我们宿舍的路由器进行了小小的改造，使得我们在断电之后也能照常上网。原理非常简单：就是使用充电宝来给路由器供电——因为我们墙上的网口是不会断电的，所以只要解决了路由器没有电的问题，就可以解决断网问题。路由器要求的输入电压为5V，电流为0.3A，恰好跟我们常用的充电宝是一致的，淘宝买一根USB转DV线成功解决问题。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="Daily" scheme="https://xuanwo.org/categories/Daily/"/>
-    
-    
-      <category term="Hardware" scheme="https://xuanwo.org/tags/Hardware/"/>
     
   </entry>
   
