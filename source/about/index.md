@@ -7,7 +7,7 @@ layout: "post"
 
 - 中国地质大学（北京）本科三年级在读生
 - 信息管理与信息系统专业
-- [QingCloud](https://www.qingcloud.com/)实习中
+- [青云QingCloud](https://www.qingcloud.com/)实习中
 - 恋爱ing
 
 # 奖项
@@ -33,12 +33,12 @@ layout: "post"
 - C/C++ 熟练
 - html，css，js 初步
 - python 初步
+- node.js 初步
 
 ## 工具类
 
 - git 熟练
-- office 熟练
-- shell/bash 初步
+- shell/bash 初步（目前最爱 Zsh）
 - 各类艹墙工具 熟练
 
 # 正在捣鼓
@@ -47,6 +47,7 @@ layout: "post"
 - [Jade-ims *系统分析与设计的大作业，基于Flask+Sqlite3*](https://github.com/Xuanwo/jade-ims)
 
 # 博客更新日志
+
 - 2014年06月12日 完成`现状`和`兴趣`介绍。
 - 2014年07月03日 迁移至Hexo引擎构建博客。
 - 2014年07月08日 修改Google Fonts服务为360字体库，提升了博客加载速度。（屏蔽弄得我生不如死= =）
@@ -71,3 +72,4 @@ layout: "post"
 - 2015年12月20日 删除了ACM时期文章的tags
 - 2016年01月15日 为每一篇文章添加了微信公众号&捐赠二维码
 - 2016年06月13日 更新近期动态
+- 2016年08月03日 修改了主题，增加了全文检索
