@@ -59,10 +59,40 @@
     </div>
 </footer>
 
+
+<div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Search Anything You Want" />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: 'Untitled',
+        },
+        ROOT_URL: '{{ config.root }}',
+        CONTENT_URL: '{{ url_for("/content.json")}}',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
 <script type="text/javascript" src="/dist/js/jquery.min.js"></script>
 <script type="text/javascript" src="/dist/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/dist/js/wow.min.js"></script>
 <script type="text/javascript" src="/dist/js/custom.js"></script>
+{{ js('dist/js/insight') }}
 <script id="dsq-count-scr" src="//only0god.disqus.com/count.js" async></script>
 <script>
     (function (i, s, o, g, r, a, m) {

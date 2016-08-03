@@ -5,7 +5,7 @@
                 <div class="form-group header">
                     <span>
                     <i class="fa fa-search searchico"></i>
-                    <input type="text" placeholder="Blog Search">
+                    <input type="text" class="search-form-input ins-search-input" placeholder="Search" />
                     <a href="#" class="close-menu"><i class="fa fa-close"></i></a>
                         </span>
                 </div>
