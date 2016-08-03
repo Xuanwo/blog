@@ -2,7 +2,7 @@
 title: NodeBB 升级迁移总结
 date: 2016-07-08 10:00
 tags: [Node.js, JavaScript]
-categories: Operation
+categories: Operate
 toc: true
 ---
 
