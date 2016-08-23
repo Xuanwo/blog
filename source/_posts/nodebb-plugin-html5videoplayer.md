@@ -6,7 +6,7 @@ categories: Developer
 toc: true
 ---
 
-[nodebb-plugin-html5videoplayer]() 是一个简单的 NodeBB 插件，可以让 NodeBB 支持在线视频观看。Fork 自 @ 开发的 [nodebb-plugin-videoplayer]， 在他的基础上做了一些微不足道的贡献，括弧笑。
+[nodebb-plugin-html5videoplayer]() 是一个简单的 NodeBB 插件，可以让 NodeBB 支持在线视频观看。Fork 自 [@ogerly](https://github.com/ogerly) 开发的 [nodebb-plugin-videoplayer](https://github.com/ogerly/nodebb-plugin-videoplayer)， 在他的基础上做了一些微不足道的贡献，括弧笑。
 
 <!-- more -->
 
