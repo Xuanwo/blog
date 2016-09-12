@@ -24,7 +24,7 @@
             </a>
           </span>
         </div>
-        <h2><a href="{{ url_for(post.path) }}">{{ post.title }}</a></h2>
+        <h1><a href="{{ url_for(post.path) }}">{{ post.title }}</a></h1>
         {% if is_index %}
             {% if post.excerpt %}
                 {{ post.excerpt }}
