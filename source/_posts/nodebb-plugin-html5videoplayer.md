@@ -2,7 +2,7 @@
 title: nodebb-plugin-html5videoplayer 发布
 date: 2016-8-22 17:53:25
 tags: [Node.js, NodeBB, JavaScript]
-categories: Developer
+categories: Develope
 toc: true
 ---
 
