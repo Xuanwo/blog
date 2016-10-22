@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Gitlab部署和汉化以及简单运维</title>
+  <meta name="description" content="起因 在跟网络中心的老师沟通成立镜像站的相关事宜的时候，意外地接下来搭建一套校内的 Git 服务的任务。 @怡红公子 曾经搭建过一套类似的服务，但由于服务器端没有开启 VT 虚拟化导致不能安装 64 位的操作系统，再加上 Gitlab 不提供 32 位的安装包，所以长期以来怡红公子一直都是自行编译并配置 Gitl...">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="https://xuanwo.org/2016/04/13/gitlab-install-intro">
+  <link rel="alternate" type="application/rss+xml" title="Xuanwo&#39;s Blog" href="/feed.xml">
+  
+  
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-51515330-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  
+
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Xuanwo&#39;s Blog</a>
+
+    <nav class="site-nav">
+      <span class="menu-icon">
+        <svg viewBox="0 0 18 15" width="18px" height="15px">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </span>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Gitlab部署和汉化以及简单运维</h1>
+    <p class="post-meta"><time datetime="2016-04-13T23:20:00+08:00" itemprop="datePublished">Apr 13, 2016</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <h1 id="section">起因</h1>
+<p>在跟网络中心的老师沟通成立镜像站的相关事宜的时候，意外地接下来搭建一套校内的 Git 服务的任务。
+<a href="https://imnerd.org/">@怡红公子</a> 曾经搭建过一套类似的服务，但由于服务器端没有开启 VT 虚拟化导致不能安装 64 位的操作系统，再加上 Gitlab 不提供 32 位的安装包，所以长期以来怡红公子一直都是自行编译并配置 Gitlab 。考虑到后续维护的方便，我们决定趁着这个机会使用另一台支持安装 64 位操作系统的服务器，一劳永逸地解决这个问题。
+我们的服务器环境是 <strong>CentOS 7.2 64bit</strong> ，以下所有操作均以此为基准。</p>
+
+<!-- more -->
+
+<h1 id="gitlab-">Gitlab 安装</h1>
+
+<p>推荐使用 <a href="https://about.gitlab.com/downloads">Install a GitLab CE Omnibus package</a> 安装 ，其他发行版可以点选对应版本，不再赘述。</p>
+
+<h2 id="section-1">安装和配置依赖</h2>
+
+<p>如果需要安装 Postfix 来发送邮件，则需要在安装过程中选择 <code class="highlighter-rouge">Internet Site</code>。你也可以使用 Sendmail 之类的第三方发信服务或者使用自行配制的 SMTP 服务器。
+除此以外，下列命令将会在防火墙中打开 HTTP(80) 和 SSH(22) 对应端口。</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sudo yum install curl policycoreutils openssh-server openssh-clients
+sudo systemctl <span class="nb">enable </span>sshd
+sudo systemctl start sshd
+sudo yum install postfix
+sudo systemctl <span class="nb">enable </span>postfix
+sudo systemctl start postfix
+sudo firewall-cmd --permanent --add-service<span class="o">=</span>http
+sudo systemctl reload firewalld
+</code></pre>
+</div>
+
+<h2 id="gitlab--1">添加 Gitlab 源并安装</h2>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash
+sudo yum install gitlab-ce
+</code></pre>
+</div>
+<p>这个脚本会在源中添加 Gitlab-CE ，并自动执行<code class="highlighter-rouge">yum makecache</code>，然后安装<code class="highlighter-rouge">gitlab-ce</code>。由于源在国外，可能速度较慢，也可以手动添加来自 清华tuna 的源： https://mirrors.tuna.tsinghua.edu.cn/help/gitlab-ce/ ， 链接中为各发行版下的教程，感谢 清华tuna 提供镜像。</p>
+
+<h2 id="gitlab">配置并启动 Gitlab</h2>
+
+<p>此时已经可以启动服务了：</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sudo gitlab-ctl reconfigure
+</code></pre>
+</div>
+
+<p>进行一长串复杂的启动流程之后， gitlab 就已经可以通过 <code class="highlighter-rouge">localhost</code> 进行访问了。</p>
+
+<h1 id="gitlab--2">Gitlab 配置</h1>
+
+<h2 id="section-2">修改域名</h2>
+
+<p>默认的配置文件保存在 <code class="highlighter-rouge">/etc/gitlab/gitlab.rb</code> ，执行：</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sudo vim /etc/gitlab/gitlab.rb
+</code></pre>
+</div>
+
+<p>打开文件，并修改：</p>
+
+<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="n">external_url</span> <span class="s1">'http://your.domain'</span>
+</code></pre>
+</div>
+
+<p>再次执行</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sudo gitlab-ctl reconfigure
+</code></pre>
+</div>
+
+<p>即可。</p>
+
+<p>有一定概率出现 502 错误，刷新浏览器或者再次更新配置即可。</p>
+
+<h2 id="gitlab--3">Gitlab 汉化</h2>
+
+<p>由于服务对象是广大师生，为了降低新手上手的难度，所有进行汉化也是非常有必要的。好在国内有人已经进行了这方面的工作，我们只需要共享其成果即可（欢迎向<a href="https://gitlab.com/larryli/gitlab">原项目</a>提交高质量翻译）。</p>
+
+<p>首先确认版本：</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sudo cat /opt/gitlab/embedded/service/gitlab-rails/VERSION
+</code></pre>
+</div>
+
+<p>并确认当前汉化版本的 VERSION 是否相同，当前最新的汉化版本为 8.6 。
+如果安装版本小于当前汉化版本，请先升级。如果安装版本大于当前汉化版本，请在本项目中提交新的 issue。
+如果版本相同，首先在本地 clone 仓库。</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># GitLab.com 仓库</span>
+git clone https://gitlab.com/larryli/gitlab.git
+
+<span class="c"># 或 Coding.net 镜像</span>
+git clone https://git.coding.net/larryli/gitlab.git
+</code></pre>
+</div>
+
+<blockquote>
+  <p>根据我的测试， Coding.net 的镜像不完整，clone 之后无法 checkout</p>
+</blockquote>
+
+<p>然后比较汉化分支和原分支，导出 patch 用的 diff 文件。</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># 8.1 版本的汉化补丁</span>
+git diff origin/8-6-stable..8-6-zh &gt; ../8.6.diff
+</code></pre>
+</div>
+
+<p>然后上传 <code class="highlighter-rouge">8.6.diff</code> 文件到服务器。</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># 停止 gitlab</span>
+sudo gitlab-ctl stop
+sudo patch -d /opt/gitlab/embedded/service/gitlab-rails -p1 &lt; 8.6.diff
+</code></pre>
+</div>
+
+<p>确定没有 .rej 文件，重启 GitLab 即可。</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sudo gitlab-ctl start
+</code></pre>
+</div>
+
+<p>如果汉化中出现问题，请重新安装 GitLab（<strong>注意备份数据</strong>）。</p>
+
+<h1 id="gitlab--4">Gitlab 运维</h1>
+
+<h2 id="section-3">管理</h2>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># 启动所有 gitlab 组件：</span>
+sudo gitlab-ctl start
+
+<span class="c"># 停止所有 gitlab 组件：</span>
+sudo gitlab-ctl stop
+
+<span class="c"># 重启所有 gitlab 组件：</span>
+sudo gitlab-ctl restart
+</code></pre>
+</div>
+
+<h2 id="section-4">备份</h2>
+
+<p>备份GitLab repositories and GitLab metadata
+在 crontab 中加入如下命令：</p>
+<div class="highlighter-rouge"><pre class="highlight"><code>0 2 * * * /usr/bin/gitlab-rake gitlab:backup:create
+</code></pre>
+</div>
+
+<h2 id="section-5">恢复</h2>
+
+<p>首先进入备份 gitlab 的目录，这个目录是配置文件中的<code class="highlighter-rouge">gitlab_rails['backup_path']</code>，默认为<code class="highlighter-rouge">/var/opt/gitlab/backups</code>。</p>
+
+<p>然后停止 unicorn 和 sidekiq ，保证数据库没有新的连接，不会有写数据情况。</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sudo gitlab-ctl stop unicorn
+<span class="c"># ok: down: unicorn: 0s, normally up</span>
+sudo gitlab-ctl stop sidekiq
+<span class="c"># ok: down: sidekiq: 0s, normally up</span>
+</code></pre>
+</div>
+
+<p>然后恢复数据，1406691018为备份文件的时间戳</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>gitlab-rake gitlab:backup:restore <span class="nv">BACKUP</span><span class="o">=</span>1406691018
+</code></pre>
+</div>
+
+<h2 id="section-6">修改数据存储地址</h2>
+
+<p>默认情况下，gitlab 将数据存储在<code class="highlighter-rouge">/var/opt/gitlab/git-data</code>目录下，受限于分区情况&amp;方便管理，我们需要将数据迁移到别的目录下。</p>
+
+<h3 id="section-7">无需数据迁移</h3>
+
+<p>如果还没有投入使用，则可以直接在配置文件中添加：</p>
+
+<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="n">git_data_dir</span> <span class="s2">"/path/to/git-data"</span>
+</code></pre>
+</div>
+
+<p>然后执行：</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sudo gitlab-ctl reconfigure
+</code></pre>
+</div>
+
+<p>就可以生效了。</p>
+
+<h3 id="section-8">进行数据迁移</h3>
+
+<p>如果已经有数据了，则需要进行迁移。</p>
+
+<p>首先需要暂停服务，避免用户在迁移期间读写数据：</p>
+
+<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="n">sudo</span> <span class="n">gitlab</span><span class="o">-</span><span class="n">ctl</span> <span class="n">stop</span>
+</code></pre>
+</div>
+
+<p>然后使用rsync数据进行迁移：</p>
+
+<blockquote>
+  <p>注意前一个地址不需要<code class="highlighter-rouge">/</code>，后一个地址需要<code class="highlighter-rouge">/</code>，且只需要迁移<code class="highlighter-rouge">repositories</code>目录即可</p>
+</blockquote>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sudo rsync -av /var/opt/gitlab/git-data/repositories /path/to/git-data/
+</code></pre>
+</div>
+
+<p>然后运行配置工具以更新并重启服务：</p>
+
+<blockquote>
+  <p>官网文档是先更新配置再启动服务，但我在使用中发现先更新配置会提示无法连接上服务器，出现这种问题时可以先启动服务再更新配置。</p>
+</blockquote>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sudo gitlab-ctl reconfigure
+sudo gitlab-ctl start
+</code></pre>
+</div>
+
+<p>最后不要忘了在网页端确认数据的地址是否正确。</p>
+
+<blockquote>
+  <p>关于权限问题
+在使用中，我一开始创建了一个<code class="highlighter-rouge">gitlabhq</code>用户并创建了一个文件夹，然后修改地址，服务正常启动后提示500。
+后来使用<code class="highlighter-rouge">root</code>账户在<code class="highlighter-rouge">/home</code>下直接创建文件夹解决了这个问题。
+如果有遇到类似问题的，可以尝试用<code class="highlighter-rouge">root</code>创建目录。</p>
+</blockquote>
+
+<h2 id="ipv6">监听IPv6</h2>
+
+<p>教育网拥有得天独厚的IPv6资源，所以为我们的gitlab服务添加IPv6支持很有必要。</p>
+
+<p>修改<code class="highlighter-rouge">/etc/gitlab/gitlab.rb</code>文件中的：</p>
+
+<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="c1"># nginx['listen_addresses'] = ['*']</span>
+</code></pre>
+</div>
+
+<p>为</p>
+
+<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="n">nginx</span><span class="p">[</span><span class="s1">'listen_addresses'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'*'</span><span class="p">,</span> <span class="s1">'[::]'</span><span class="p">]</span>
+</code></pre>
+</div>
+
+<p>然后执行</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sudo gitlab-ctl reconfigure
+</code></pre>
+</div>
+
+<p>然后就可以通过IPv6访问了。</p>
+
+<h1 id="section-9">参考资料</h1>
+<ul>
+  <li><a href="https://about.gitlab.com/downloads/">Gitlab 下载</a></li>
+  <li><a href="https://gitlab.com/larryli/gitlab/wikis/home">GitLab Community Edition · Wiki</a></li>
+  <li><a href="http://linuxtools-rst.readthedocs.org/zh_CN/latest/tool/crontab.html">crontab 定时任务</a></li>
+  <li><a href="https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/raketasks/backup_restore.md">Backup restore</a></li>
+  <li><a href="https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/doc/settings/configuration.md#storing-git-data-in-an-alternative-directory">Storing Git data in an alternative directory</a></li>
+</ul>
+
+<h1 id="section-10">更新日志</h1>
+<ul>
+  <li>2016年04月14日 首次发布</li>
+  <li>2016年04月18日 新增数据迁移&amp;监听IPv6配置</li>
+</ul>
+
+  </div>
+
+  
+    
+  
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://xuanwo.org/2016/04/13/gitlab-install-intro';
+      this.page.identifier = 'https://xuanwo.org/2016/04/13/gitlab-install-intro';
+    };
+
+    (function() {
+      var d = document, s = d.createElement('script');
+
+      s.src = 'https://only0god.disqus.com/embed.js';
+
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Xuanwo&#39;s Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            
+              Xuanwo&#39;s Blog
+            
+            </li>
+            
+            <li><a href="mailto:xuanwo.cn@gmail.com">xuanwo.cn@gmail.com</a></li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/Xuanwo"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">Xuanwo</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/onlyxuanwo"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">onlyxuanwo</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Long way to go
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

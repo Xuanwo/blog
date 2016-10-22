@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>动态网页数据抓取踩坑分享</title>
+  <meta name="description" content="之前做了一些数据抓取的工作，期间也踩了一些坑，所以有了这篇文章。">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="https://xuanwo.org/2016/09/13/dynamic-page-data-spider">
+  <link rel="alternate" type="application/rss+xml" title="Xuanwo&#39;s Blog" href="/feed.xml">
+  
+  
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-51515330-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  
+
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Xuanwo&#39;s Blog</a>
+
+    <nav class="site-nav">
+      <span class="menu-icon">
+        <svg viewBox="0 0 18 15" width="18px" height="15px">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </span>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">动态网页数据抓取踩坑分享</h1>
+    <p class="post-meta"><time datetime="2016-09-13T09:58:33+08:00" itemprop="datePublished">Sep 13, 2016</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>之前做了一些数据抓取的工作，期间也踩了一些坑，所以有了这篇文章。</p>
+
+<!-- more -->
+
+<h2 id="section">动态网页数据源获取</h2>
+
+<p>需要抓取的页面是使用<a href="https://facebook.github.io/react/">React</a> JavaScript 框架开发的，所有的页面都是客户端渲染而成，这也就导致我只能看到一个个的 data-id ，没有办法直接获取数据。这就涉及到一个我之前没有接触过的领域——动态网页爬虫。
+一番 Google 之后，我了解到动态网页爬虫大致上可以通过以下两种方法实现：</p>
+
+<ul>
+  <li>分析网页代码结构和请求，找到数据源的请求链接</li>
+  <li>调用Webkit渲染之后再进行抓取</li>
+</ul>
+
+<p>第二种方法相当于在命令行中跑一个浏览器，一个页面一个页面的打开，效率可想而知。再加上待抓取页面的 DOM 结构本来就比较复杂，没有添加相应的 class 和 id，导致即使渲染出来了想要抓到自己需要的数据也非常费劲。
+于是只能采用第一种方案：分析了一下网页的代码之后发现所有的数据都是通过一个接口返回的。使用 Chrome 审查工具中的 <code class="highlighter-rouge">Network</code> 工具可以获取到所有的网络请求，在里面搜索 <code class="highlighter-rouge">JSON</code> ，找到了一个 JSON 的请求。点开一看正是我们需要的数据，解决了动态网页数据源的问题。</p>
+
+<h2 id="section-1">分类不统一</h2>
+
+<p>这个坑主要出在自己对目标网页的数据特性挖掘的不够。一开始以为目标网页是按照一个特定的分类来区分的，但是后来发现这个标准并不统一，最后抓取到的数据不在一个维度上。正当自己准备开工写很多特判的时候发现，如果从另外一个维度来索取数据的话，所有的数据都是统一的。
+在这个案例中，就是将人为的分类切换成通过价格来获取数据，通过选择所有价格，就能获取到所有的数据，不需要再对不同维度的分类进行特判。
+这个与其说是技术问题，更多的是一个经验的问题。</p>
+
+<h2 id="js">页面内部JS执行</h2>
+
+<p>这个坑就比较有趣了。
+目标网页除了通过一个特定的接口获取数据之外，还会在页面内部通过 JavaScript 来直接传递数据。背后的技术考量不得而知，但是摆在我面前的问题就是我要如何获取这些 JavaScript 代码中的数据。
+思考了一下之后想到了两种方案：</p>
+
+<ul>
+  <li>自行匹配需要的字符串</li>
+  <li>通过 phatomjs 等工具执行页面内部的 js 代码，并输出需要的数据变量</li>
+</ul>
+
+<p>自行匹配的问题在于，我需要匹配的字符串的格式不一，很难直接匹配出我需要的数据。而通过 phatomjs 执行，就能比较好的解决这个问题。</p>
+
+<p>一个比较脏的解决方案是这样的：</p>
+
+<ol>
+  <li>下载整个HTML页面到 <code class="highlighter-rouge">test.html</code></li>
+  <li>通过 bs4 获取到所有的 <code class="highlighter-rouge">&lt;script&gt;</code> 标签内部的内容</li>
+  <li>将我们需要的那个标签输出到一个 <code class="highlighter-rouge">data.js</code> 文件中</li>
+  <li>之后把将数据构造成 json 的 js 代码写入 <code class="highlighter-rouge">data.js</code> 文件</li>
+  <li>通过 phatomjs 来执行代码</li>
+  <li>将输出通过 <code class="highlighter-rouge">json.loads</code> 载入并 append 到我们的数据数组中</li>
+</ol>
+
+<p>这样，我们就获得了页面内部js代码中数据的json形式。</p>
+
+<blockquote>
+  <p>phatomjs 中执行的代码最后，千万要记得加上 <code class="highlighter-rouge">phatom.exit()</code>，否则不会自行退出。</p>
+</blockquote>
+
+<h2 id="phatomjs">phatomjs报错</h2>
+
+<p>https://cli.xuanwo.org/Tools/phatomjs.html#qxcbconnection-could-not-connect-to-display</p>
+
+<p>当代码放到服务器上运行时候，出现了这样的报错：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>QXcbConnection: Could not connect to display
+</code></pre>
+</div>
+
+<p>这是因为源中的phatomjs默认运行在图形界面下，只需要在运行前执行：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>export QT_QPA_PLATFORM=offscreen
+</code></pre>
+</div>
+
+<p>即可。</p>
+
+<h2 id="section-2">线程调度</h2>
+
+<p>这个坑就比较隐蔽了，重复调试了很久。
+在前面的流程中，我们有一个下载HTML页面并使用bs4解析的步骤。我之前的实现是通过<code class="highlighter-rouge">subprocess.Popen()</code>直接调用 <code class="highlighter-rouge">curl</code> 之后，就打开<code class="highlighter-rouge">test.html</code>。这样的实现导致了这样的一个问题：有可能网页还没有下载完，我就开始进行解析了，这样就会导致我的解析内容跟本就不正确。也就是说，<code class="highlighter-rouge">subprocess.Popen()</code> 不是一个阻塞的过程，它在调用完 <code class="highlighter-rouge">curl</code> 之后不会等到 <code class="highlighter-rouge">curl</code> 返回再结束。
+定位到问题的话，解决起来就很容易了。通过查阅文档，我知道了可以通过这种方法来保证命令执行完毕再执行下一行代码：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>child = subprocess.Popon("curl xxxx.com &gt; test.html", shell=True)
+child.wait()
+</code></pre>
+</div>
+
+<h2 id="section-3">回顾 &amp; 总结</h2>
+
+<p>这个小小的玩意儿开发没花多久，但是学到了很多东西。从之前自己一直以为很难不敢尝试的动态网页抓取到 Python subprocess 线程调度，果然不踩坑就不会有新的收获。
+这次开发的东西比较敏感，涉及到公司内部的一些事务，所以代码就不开源出来了。有什么想法或者问题可以直接在评论区里提出来，我会尽量回复的。因为是一个一次性的小套件，所以没有怎么考虑优化上的事情，如果有更好的解决方案，也欢迎大家一起探讨，说不定下次就用上了呢~</p>
+
+  </div>
+
+  
+    
+  
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://xuanwo.org/2016/09/13/dynamic-page-data-spider';
+      this.page.identifier = 'https://xuanwo.org/2016/09/13/dynamic-page-data-spider';
+    };
+
+    (function() {
+      var d = document, s = d.createElement('script');
+
+      s.src = 'https://only0god.disqus.com/embed.js';
+
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Xuanwo&#39;s Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            
+              Xuanwo&#39;s Blog
+            
+            </li>
+            
+            <li><a href="mailto:xuanwo.cn@gmail.com">xuanwo.cn@gmail.com</a></li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/Xuanwo"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">Xuanwo</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/onlyxuanwo"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">onlyxuanwo</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Long way to go
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

@@ -1,0 +1,61 @@
+<p>﻿—
+layout: post
+title: POJ 1207 The 3n + 1 problem
+date: 2014-07-10 16:55:39
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1207</p>
+
+<h1 id="section-1">理解</h1>
+<p>额，题意很清楚。就是一道关于3n+1的规律题，要求找出给定的i和j之间最长的循环数列。但是我坑了很久，因为错误的使用了A?B:C这样的三元运算符，被学姐学长痛批一顿之后，果断修改了。AC之余，提醒自己一下，良好的代码规范的重要性。</p>
+
+<!-- more -->
+
+<h1 id="get">新技能get</h1>
+<p><a href="http://zh-google-styleguide.readthedocs.org/en/latest/google-cpp-styleguide/">Google C++开源项目风格指南</a></p>
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;stdio.h&gt;
+
+int main()
+{
+    int a, b, n, longest, tmp;
+    while (scanf("%d%d", &amp;a, &amp;b) != EOF)
+    {
+        printf("%d %d ", a, b);
+        if (a &gt; b)
+        {
+            tmp = a;
+            a = b;
+            b = tmp;
+        }
+        longest = n = 1;
+        for (int i = a; i &lt;= b; i++)
+        {
+            tmp = 1;
+            n = i;
+            while (n-1)
+            {
+                n % 2 == 0 ? (n = n / 2) : (n = 3 * n + 1);
+                tmp++;
+            }
+            if (tmp &gt; longest)
+            {
+                longest = tmp;
+            }
+        }
+        printf("%d\n", longest);
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<p>2014年07月10日 已AC，添加谷歌代码风格指南。</p>

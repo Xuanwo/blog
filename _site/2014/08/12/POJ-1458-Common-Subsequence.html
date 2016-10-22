@@ -1,0 +1,77 @@
+<p>﻿—
+layout: post
+title: POJ 1458 Common Subsequence
+date: 2014-08-12 04:23:00
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1458</p>
+
+<h1 id="section-1">理解</h1>
+<p>DP的基础题，求最长子序列（LCS）。
+状态转移方程伪代码如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>if (i == 0 || j == 0)
+	dp[i,j] = 0
+else if (X[i] == Y[j])
+	dp[i,j] = dp[i-1,j-1] + 1
+else
+	dp[i,j] = max(dp[i-1,j], dp[i,j-1])
+
+</code></pre>
+</div>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+const int SIZE = 999;
+int dp[SIZE][SIZE] = {0};
+
+int max(int x, int y)
+{
+    return x &gt; y ? x : y;
+}
+
+int main(int argc, char const *argv[])
+{
+    int len1, len2;
+    string str1, str2;
+    while (cin &gt;&gt; str1 &gt;&gt; str2)
+    {
+        len1 = str1.length();
+        len2 = str2.length();
+        for (int i = 1; i &lt;= len1; i++)
+        {
+            for (int j = 1; j &lt;= len2; j++)
+            {
+                if (str1[i - 1] == str2[j - 1])
+                {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                }
+                else
+                {
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        cout &lt;&lt; dp[len1][len2] &lt;&lt; endl;
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月12日 已AC。</li>
+</ul>

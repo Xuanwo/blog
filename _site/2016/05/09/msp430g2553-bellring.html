@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>基于MSP430G2553的打铃系统开发手记</title>
+  <meta name="description" content="前言">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="https://xuanwo.org/2016/05/09/msp430g2553-bellring">
+  <link rel="alternate" type="application/rss+xml" title="Xuanwo&#39;s Blog" href="/feed.xml">
+  
+  
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-51515330-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  
+
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Xuanwo&#39;s Blog</a>
+
+    <nav class="site-nav">
+      <span class="menu-icon">
+        <svg viewBox="0 0 18 15" width="18px" height="15px">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </span>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">基于MSP430G2553的打铃系统开发手记</h1>
+    <p class="post-meta"><time datetime="2016-05-09T08:42:00+08:00" itemprop="datePublished">May 9, 2016</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <h1 id="section">前言</h1>
+
+<p>我萌萌哒的妹纸是一个代码苦手，完全无法理解 C 语言，所以每一次到单片机上机需要交作业的时候都是愁眉苦脸的样子。而我又总是因为自己确实不懂单片机里面的种种奇怪定义（中断，串口，P1.x 之类），所以也一直没有什么好办法去帮她。这一次的作业对编码能力要求较高，但是涉及到的硬件比较少，于是决定以此为契机，开始我的嵌入式开发之旅。</p>
+
+<!-- more -->
+
+<h1 id="section-1">需求</h1>
+
+<p>这次的如下：</p>
+
+<h2 id="section-2">基本要求</h2>
+
+<ul>
+  <li>基本计时和显示功能(用 12 小时制显示)。
+包括上下午标志,时、分的数字显示,秒信号指示。</li>
+  <li>能设置当前时间(含上、下午,时,分)</li>
+  <li>能实现基本打铃功能,规定:
+上午 6:00 起床铃;打铃 5 秒、停 2 秒、再打铃 5 秒。
+下午 10:30 熄灯铃;打铃 5 秒、停 2 秒、再打铃 5 秒。</li>
+</ul>
+
+<blockquote>
+  <p>铃声可用 LED 灯光显示,如果实验装置没有 LED 发光管,可以用七段显示管的小数点显示,也可以用显示小时的十位数码管的多余段显示。凡是用到铃声功能的均可如此处理。</p>
+</blockquote>
+
+<h2 id="section-3">发挥部分</h2>
+
+<ul>
+  <li>增加整点报时功能,整点时响铃 5 秒,要求有控制启动和关闭功能。</li>
+  <li>增加调整起床铃、熄灯铃时间的功能。</li>
+  <li>增加调整打铃时间长短和间歇时间长短的功能。</li>
+  <li>增设上午 4 节课的上、下课打铃功能,规定:
+7:30 上课,8:20 下课;8:30 上课,9:20 下课;9:40 上课,10:30 下课;10:40 上课,11:30 下课;每次铃声 5 秒。</li>
+  <li>利用板上按键做一个 12 小时/24 小时的显示格式切换</li>
+</ul>
+
+<h1 id="section-4">分析</h1>
+
+<blockquote>
+  <p>既然我都出动了，肯定不能满足于只完成基本要求，决定把所有功能全都完整的实现。</p>
+</blockquote>
+
+<p>简单的来说，整体需求可以分为三个部分：显示，打铃，修改。</p>
+
+<p>需要用到的东西有：串口，指示灯和一个按键。</p>
+
+<h2 id="section-5">显示</h2>
+
+<p>遵循简单的前后端分离的思想，我们可以使用三个全局变量 hour ， minute ， second 来存储当前的时间，只需要在显示的时候区分上下午和 12 小时／ 24 小时即可。这两个部分解耦之后会发现，我们后面的利用板上按键修改显示格式也变得容易了很多。
+通过串口显示也就是需要向指定变量发送字符，将这个功能抽象并封装之后，对于我后续的编程来说，也就是调用一下 Send_Str(str) 的过程。</p>
+
+<h2 id="section-6">打铃</h2>
+
+<p>打铃是这套系统的重头戏，因为学校方面的资源限制，所以使用指示灯示意的方法来代替打铃。
+指示灯的亮灭是通过控制一个变量的值来确定的，于是我只要在正确时候设置正确的值，打铃系统就能按照我期望的方式工作。</p>
+
+<h2 id="section-7">修改</h2>
+
+<p>修改同样是通过串口进行的。</p>
+
+<blockquote>
+  <p>在最开始的设计文档中，本来是要求使用4个按键来进行设计，也就是说跟一个普通的电子表差不多。但是非常因缺思艇的事情是学校的按键不够了，所以老师要求所有功能都用串口实现。</p>
+</blockquote>
+
+<p>跟显示有些不同的地方是，通过串口向芯片发送数据需要正确使用串口中断。</p>
+
+<p>综上，这个系统所需要的全部内容就已经实现了。可以看到我做了很多将对硬件的操作抽象化的处理，其实这一点非常重要。因为对于我来说，嵌入式开发最大的难题在于，我不知道里面种种变量的含义，不知道如何操作具体的硬件。将硬件操作抽象化处理之后，我就可以很方便地开展我的后续开发。</p>
+
+<h1 id="section-8">问题</h1>
+
+<p>实现就不再赘述了，想必读者一定都比我强，下面聊一聊遇到的问题以及 debug 的经历。</p>
+
+<h2 id="section-9">串口配置</h2>
+
+<p>串口的收和发其实是分开的，这里用到了两个变量： UCA0TXBUF ， UCA0RXBUF 。从字面意思上可以看出，前一个用于发送，后一个用于接收（相对于开发者来说）。发送和接收其实就是给这两个值赋值的过程，看起来这两个变量在接受到值之后会将这个值传给别的变量，所以只要不断的将值赋给它就行，我们写了这样的函数：</p>
+
+<div class="language-c highlighter-rouge"><pre class="highlight"><code><span class="cp">#pragma vector=USCIAB0RX_VECTOR //中断服务函数
+</span>
+<span class="n">__interrupt</span> <span class="kt">void</span> <span class="nf">uart</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">rec</span> <span class="o">=</span> <span class="n">UCA0RXBUF</span><span class="p">;</span>
+    <span class="c1">//读取到缓冲区
+</span>    <span class="n">strtmp</span><span class="p">[</span><span class="n">strlen</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec</span><span class="p">;</span>
+    <span class="n">strtmp</span><span class="p">[</span><span class="n">strlen</span><span class="p">]</span> <span class="o">=</span> <span class="sc">'\0'</span><span class="p">;</span>
+    <span class="c1">//切换模式
+</span>    <span class="n">mode</span> <span class="o">=</span> <span class="n">strtmp</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="c1">//发送字符
+</span><span class="kt">void</span> <span class="nf">Send_Char</span><span class="p">(</span><span class="kt">char</span> <span class="n">ch</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">IFG2</span> <span class="o">&amp;</span> <span class="n">UCA0TXIFG</span><span class="p">));</span>
+    <span class="n">UCA0TXBUF</span> <span class="o">=</span> <span class="n">ch</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">//发送字符串
+</span><span class="kt">void</span> <span class="nf">Send_Str</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">i</span><span class="p">;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">while</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">!=</span> <span class="sc">'\0'</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">IFG2</span> <span class="o">&amp;</span> <span class="n">UCA0TXIFG</span><span class="p">));</span>
+        <span class="n">UCA0TXBUF</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">i</span><span class="p">);</span>
+        <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">Send_Char</span><span class="p">(</span><span class="mh">0x0d</span><span class="p">);</span>
+    <span class="n">Send_Char</span><span class="p">(</span><span class="mh">0x0a</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>uart 貌似是一个内置的中断函数，用来处理串口的接收，只要将变量 UCA0RXBUF 的值存储起来即可；后面的 Send_Str 就非常好理解了，将值发送给 UCA0TXBUF ，从而实现串口的输出。</p>
+
+<p>思路如此清晰，但是测试的时候却遇到了问题，我们的输出是空的，转为16进制显示后，全都是0x00。这个问题调试了很久，拿着原来的代码逐行比对之后发现，出了这样的问题：</p>
+
+<div class="language-c highlighter-rouge"><pre class="highlight"><code><span class="o">-</span> <span class="n">UCA0BR0</span> <span class="o">=</span> <span class="mi">130</span><span class="p">;</span>
+<span class="o">-</span> <span class="n">UCA0BR1</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
+<span class="o">+</span> <span class="n">UCA0BR0</span> <span class="o">=</span> <span class="mi">104</span><span class="p">;</span>
+<span class="o">+</span> <span class="n">UCA0BR1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</code></pre>
+</div>
+
+<p>Google 一下才明白，原来 UCA0BR0 和 UCA0BR1 是由系统的时钟速度和波特率决定的值，如果设置错误就会导致串口发送失败。具体的值可以参考<a href="http://www.ti.com/lit/ug/slau144j/slau144j.pdf">用户手册</a>， Ctrl＋F 搜索 <code class="highlighter-rouge">Table 15-4. Commonly Used Baud Rates</code> 即可。</p>
+
+<h2 id="section-10">串口输出异常</h2>
+
+<p>前面提到我们直接使用三个变量保存当前时间，在输出时做进一步处理，转为字符串的过程中，我们进行了这样的操作：</p>
+
+<div class="language-c highlighter-rouge"><pre class="highlight"><code><span class="n">Time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">hour</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">+</span> <span class="sc">'0'</span><span class="p">;</span>
+</code></pre>
+</div>
+
+<p>但有趣的事情是，在初始化之后，我们得到的输出是这样的： <code class="highlighter-rouge">0/:0/:0/</code> 。随手输出了一下 <code class="highlighter-rouge">/</code> 的 ASCII 码，发现它刚好比 <code class="highlighter-rouge">0</code> 小一。</p>
+
+<p>难道说，存储器中的默认值不是 0 吗？ Google 一下之后发现，还真的不是 0 。 MSP430G2553 中的 Flash 存储器在默认状态下的值全为 1 ，然后写入时只能将 1 置为 0 ，所以每一次写入数据都需要先清空再写入。那么问题来了，为什么全为 1 会导致最后输出的结果小 1 呢？我来简单的阐述一下我的理解：</p>
+
+<p>假设这个存储器只有 8 位，也就是说，现在的值为 <code class="highlighter-rouge">11111111</code> ，然后我加上一个 <code class="highlighter-rouge">1</code> ，于是我们得到：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>  11111111
++        1
+ 100000000
+</code></pre>
+</div>
+
+<p>显然，我们最后的结果已经移除了，此时会产生截断，也就是说，存储器现在的数据变成了 <code class="highlighter-rouge">00000000</code> ，也就是 <code class="highlighter-rouge">0</code>，跟我们期望的结果 <code class="highlighter-rouge">1</code> 刚好相差一。</p>
+
+<p>当然，实际的情况要比我上面的举例要复杂的多，不过我想已经足够我们认识到这个 BUG 的本质，就不再多说啦。</p>
+
+<h2 id="flash-">Flash 存储器未清空</h2>
+
+<p>在测试中，我们发现每一次烧录程序之后， Flash 存储器不会清空，依然会从上一次我们保存的时间开始计时。我觉得这是正确的行为，没有在意，但是我妹纸和她的队友告诉我她们在完成上一个作业的时候每次都是会清空的。我对着这次和上次的代码研究了很久，认为代码里面根本就没有清空 Flash 存储器的操作，如果有的话，掉电保存这项功能根本无从谈起。我妹纸她们也同意我的分析，但是她们的实践确实证明了每次都会清空 Flash 存储区。</p>
+
+<p>这个问题也困扰了很久，直到第二天，用别人的电脑重新烧录了一遍程序，发现他们的是会正常清空的。所以说，问题在于 CCS 的版本：我妹纸使用的 CCS 版本是 6.1 ，而
+他们用的版本是 5.1.1 ，也就是说，不同版本的 CCS 在烧录程序期间的不同行为导致了这次错误。我们换用了 5.1.1 之后，成功解决了这个问题。</p>
+
+<h1 id="section-11">总结</h1>
+
+<p>对嵌入式开发有了初步的了解，向着真·全栈开发工程师又近了一步。</p>
+
+<p>这一次的开发经历遇到了很多因缺思艇的问题，因为嵌入式开发本身比较偏向底层，这次开发甚至还遇到了存储器的存储原理。也有一点将自己看的 CSAPP 融会贯通的感觉，还是很有意思的。</p>
+
+<h1 id="section-12">更新日志</h1>
+
+<ul>
+  <li>2016年05月09日  首次发布</li>
+</ul>
+
+  </div>
+
+  
+    
+  
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://xuanwo.org/2016/05/09/msp430g2553-bellring';
+      this.page.identifier = 'https://xuanwo.org/2016/05/09/msp430g2553-bellring';
+    };
+
+    (function() {
+      var d = document, s = d.createElement('script');
+
+      s.src = 'https://only0god.disqus.com/embed.js';
+
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Xuanwo&#39;s Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            
+              Xuanwo&#39;s Blog
+            
+            </li>
+            
+            <li><a href="mailto:xuanwo.cn@gmail.com">xuanwo.cn@gmail.com</a></li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/Xuanwo"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">Xuanwo</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/onlyxuanwo"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">onlyxuanwo</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Long way to go
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

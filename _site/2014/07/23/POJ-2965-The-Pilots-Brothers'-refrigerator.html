@@ -1,0 +1,83 @@
+<p>﻿—
+layout: post
+title: POJ 2965 The Pilots Brothers’ refrigerator
+date: 2014-07-23 23:31:18
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=2965</p>
+
+<h1 id="section-1">理解</h1>
+<p>参考的某神牛的解法：</p>
+<blockquote>
+
+  <p>证明:</p>
+  <ol>
+    <li>要使一个为’+’的符号变为’-‘,必须其相应的行和列的操作数为奇数;可以证明,如果’+’位置对应的行和列上每一个位置都进行一次操作,则整个图只有这一’+’位置的符号改变,其余都不会改变.</li>
+    <li>设置一个4*4的整型数组,初值为零,用于记录每个点的操作数,那么在每个’+’上的行和列的的位置都加1,得到结果模2(因为一个点进行偶数次操作的效果和没进行操作一样),然后计算整型数组中一的</li>
+    <li>个数即为操作数,’-‘的位置为要操作的位置(其他原来操作数为偶数的因为操作并不发生效果,因此不进行操作)</li>
+  </ol>
+</blockquote>
+
+<p>只适用于这一道题，POJ上那道棋盘翻转貌似不能通用。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstring&gt;
+using namespace std;
+
+bool mark[4][4];
+char s[4][4];
+int i, j, k;
+int ci[16], cj[16];
+int nas = 0;
+
+int main(int argc, char const *argv[])
+{
+    memset(mark, 0, sizeof(mark));
+    for (i = 0; i &lt; 4; i++)
+        cin &gt;&gt; s[i];
+    for (i = 0; i &lt; 4; i++)
+        for (j = 0; j &lt; 4; j++)
+        {
+            char c = s[i][j];
+            if (c == '+')
+            {
+                mark[i][j] = !mark[i][j];
+                for (k = 0; k &lt; 4; k++)
+                {
+                    mark[i][k] = !mark[i][k];
+                    mark[k][j] = !mark[k][j];
+                }
+            }
+        }
+    for (i = 0; i &lt; 4; i++)
+        for (j = 0; j &lt; 4; j++)
+            if (mark[i][j] == true)
+            {
+                ci[nas] = i + 1;
+                cj[nas] = j + 1;
+                nas ++;
+            }
+    printf("%d\n", nas);
+    for (i = 0; i &lt; nas; i++)
+    {
+        printf("%d %d\n", ci[i], cj[i]);
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年07月23日 已AC。</li>
+</ul>

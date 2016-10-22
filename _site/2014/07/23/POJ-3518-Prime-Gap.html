@@ -1,0 +1,62 @@
+<p>﻿—
+layout: post
+title: POJ 3518 Prime Gap
+date: 2014-07-23 23:50:16
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=3518</p>
+
+<h1 id="section-1">理解</h1>
+<p>虽然看起来并没有二分计算的代码，但是应用了二分的思想。设两个端点，分别向两个方向扩展，最后的结果就是两个端点的差值。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include  &lt;iostream&gt;
+#include  &lt;cmath&gt;
+
+using namespace std;
+
+bool isPrime(int n)
+{
+    for(int i=2;i&lt;=sqrt((double)n);i++)
+    {
+        if(n%i==0)  return false;
+    }
+    return true;
+}
+
+int main()
+{
+    int n;
+    while(cin&gt;&gt;n&amp;&amp;n!=0)
+    {
+        if(isPrime(n))
+        {
+            cout&lt;&lt;0&lt;&lt;endl;
+        }
+        else
+        {
+            int x=n-1;
+            int y=n+1;
+            while(!isPrime(x))  x--;
+            while(!isPrime(y))  y++;
+
+            cout&lt;&lt;y-x&lt;&lt;endl;
+        }
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年07月23日 已AC。</li>
+</ul>

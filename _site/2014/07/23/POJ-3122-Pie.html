@@ -1,0 +1,74 @@
+<p>﻿—
+layout: post
+title: POJ 3122 Pie
+date: 2014-07-23 23:47:09
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=3122</p>
+
+<h1 id="section-1">理解</h1>
+<p>这也是一道水题，二分切之。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+#include &lt;algorithm&gt;
+
+using namespace std;
+
+int N, F;
+double pi = acos(-1.0);
+double pie[10032];
+double sum, maxp;
+
+int main()
+{
+    double l, r, m;
+    int i, t, c;
+
+    scanf("%d", &amp;t);
+    while (t--)
+    {
+        scanf("%d%d", &amp;N, &amp;F);
+        F++;
+        maxp = sum = 0;
+        for (i = 0; i &lt; N; i++)
+        {
+            scanf("%d", &amp;c);
+            pie[i] = c * c * pi;
+            maxp = max(maxp, pie[i]);
+            sum += pie[i];
+        }
+        l = maxp / F;
+        r = sum / F;
+        while (l + 0.00001 &lt; r)
+        {
+            m = (l + r) / 2;
+            c = 0;
+            for (i = 0; i &lt; N; i++)
+                c += floor(pie[i] / m);
+            if (c &lt; F)
+                r = m;
+            else
+                l = m;
+        }
+        printf("%.4lf\n", l);
+    }
+
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年07月23日 已AC。</li>
+</ul>

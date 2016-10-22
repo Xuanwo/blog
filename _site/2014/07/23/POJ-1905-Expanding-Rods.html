@@ -1,0 +1,60 @@
+<p>﻿—
+layout: post
+title: POJ 1905 Expanding Rods
+date: 2014-07-23 23:40:45
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1905</p>
+
+<h1 id="section-1">理解</h1>
+<p>很久以前做的题目，是二分法最基础的运用。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;iostream&gt;
+#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+using namespace std;
+
+
+double esp = 1e-5;
+int main()
+{
+    double L, n, C;
+    while (scanf("%lf%lf%lf", &amp;L, &amp;n, &amp;C) != EOF)
+    {
+        if (L &lt; 0 &amp;&amp; n &lt; 0 &amp;&amp; C &lt; 0)
+            break;
+        double LL;
+        LL = (1 + n * C) * L;
+        double low, high;
+        double R, mid;
+        low = 0;
+        high = L / 2;
+        while (high - low &gt; esp)
+        {
+            mid = (high + low) / 2;
+            R = ((mid * mid * 4) + (L * L)) / (8 * mid);
+            if ((2 * R * asin(L / (2 * R))) &lt; LL)
+                low = mid;
+            else
+                high = mid;
+        }
+        printf("%.3f\n", mid);
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年07月23日 已AC。</li>
+</ul>

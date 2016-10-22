@@ -1,0 +1,91 @@
+<p>﻿—
+layout: post
+title: POJ 1979 Red and Black
+date: 2014-08-02 15:37:31
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1979</p>
+
+<h1 id="section-1">理解</h1>
+<p>一个比较简单的DFS练习题</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstring&gt;
+using namespace std;
+#define MAX 25
+
+char tiles[MAX][MAX];
+int used[MAX][MAX];
+int count, w, h;
+
+void dfs(int i, int j)
+{
+    count++;
+    if (i &gt; 1 &amp;&amp; used[i - 1][j] == 0)
+    {
+        used[i - 1][j] = 1; dfs(i - 1, j);
+    }
+    if (i &lt; h &amp;&amp; used[i + 1][j] == 0)
+    {
+        used[i + 1][j] = 1; dfs(i + 1, j);
+    }
+    if (j &gt; 0 &amp;&amp; used[i][j - 1] == 0)
+    {
+        used[i][j - 1] = 1; dfs(i, j - 1);
+    }
+    if (j &lt; w - 1 &amp;&amp; used[i][j + 1] == 0)
+    {
+        used[i][j + 1] = 1; dfs(i, j + 1);
+    }
+}
+
+int main(int argc, char const *argv[])
+{
+    int starti, startj;
+    while (scanf("%d %d", &amp;w, &amp;h) &amp;&amp; w != 0 &amp;&amp; h != 0)
+    {
+        if (w == 0 || h == 0)
+            break;
+        count = 0;
+        memset(used, 0, sizeof(used));
+        for (int i = 1; i &lt;= h; i++)
+        {
+            scanf("%s", tiles[i]);
+        }
+        for (int i = 1; i &lt;= h; i++)
+        {
+            for (int j = 0; j &lt; w; j++)
+            {
+                if (tiles[i][j] == '#')
+                    used[i][j] = 1;
+                else if (tiles[i][j] == '@')
+                {
+                    used[i][j] = 1;
+                    startj = j;
+                    starti = i;
+                }
+            }
+        }
+        dfs(starti, startj);
+        printf("%d\n", count);
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月02日 已AC。</li>
+</ul>

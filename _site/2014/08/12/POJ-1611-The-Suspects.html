@@ -1,0 +1,80 @@
+<p>﻿—
+layout: post
+title: POJ 1611 The Suspects
+date: 2014-08-12 05:03:00
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1611</p>
+
+<h1 id="section-1">理解</h1>
+<p>比较简单的并查集，照着模板敲。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+const int N = 30005;
+
+int n, m, f[N], s[N];
+
+int getfar(int x)
+{
+    return x == f[x] ? x : f[x] = getfar(f[x]);
+}
+
+void init ()
+{
+    for (int i = 0; i &lt;= n; i++)
+    {
+        f[i] = i;
+        s[i] = 1;
+    }
+
+    int k, a, b;
+    for (int i = 0; i &lt; m; i++)
+    {
+        scanf("%d", &amp;k);
+
+        if (k == 0) continue;
+
+        scanf("%d", &amp;a);
+        int p = getfar(a);
+
+        for (int j = 1; j &lt; k; j++)
+        {
+            scanf("%d", &amp;b);
+            int q = getfar(b);
+
+            if (p != q)
+            {
+                f[q] = p;
+                s[p] += s[q];
+            }
+        }
+    }
+}
+
+int main(int argc, char const *argv[])
+{
+    while (scanf("%d%d", &amp;n, &amp;m) == 2 &amp;&amp; n + m)
+    {
+        init ();
+        printf("%d\n", s[getfar(0)]);
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月12日 已AC。</li>
+</ul>

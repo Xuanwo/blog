@@ -1,0 +1,46 @@
+<p>﻿—
+layout: post
+title: POJ 1163 The Triangle
+date: 2014-07-22 21:12:47
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1163</p>
+
+<h1 id="section-1">理解</h1>
+<p>这是第一道关于DP的题目，据说是用暴力的方法会直接超时，因为有大量的重复计算。使用DP可以避免这一点，最关键的公式是
+<code class="highlighter-rouge">triangle[i][j] += max(triangle[i + 1][j] : triangle[i + 1][j + 1])</code></p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include&lt;stdio.h&gt;
+#define MAX 100
+
+int triangle[MAX][MAX];
+
+int main()
+{
+    int n, i, j;
+    scanf("%d", &amp;n);
+    for (i = 0; i &lt; n; i++)
+        for (j = 0; j &lt;= i; j++)
+            scanf("%d", triangle[i] + j);
+    for (i = n - 2; i &gt;= 0; i--)
+        for (j = 0; j &lt;= i; j++)
+            triangle[i][j] += triangle[i + 1][j] &gt; triangle[i + 1][j + 1] ? triangle[i + 1][j] : triangle[i + 1][j + 1];
+    printf("%d\n", triangle[0][0]);
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年07月22日 已AC。</li>
+</ul>

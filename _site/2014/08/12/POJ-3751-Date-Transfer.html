@@ -1,0 +1,51 @@
+<p>﻿—
+layout: post
+title: POJ 3751 时间日期格式转换
+date: 2014-08-12 00:19:00
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=3751</p>
+
+<h1 id="section-1">理解</h1>
+<p>通过标记来判断正午和午夜，水题。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>
+#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+using namespace std;
+
+int t, y, mm, d, h, m, s, tag;
+char ch[2][3] = {"am", "pm"};
+
+int main(int argc, char const *argv[])
+{
+
+    cin &gt;&gt; t;
+    while (t--)
+    {
+        scanf("%d/%d/%d-%d:%d:%d", &amp;y, &amp;mm, &amp;d, &amp;h, &amp;m, &amp;s);
+        if (h &lt; 12)
+            tag = 0, h = (h == 0) ? 12 : h;
+        else
+            tag = 1, h = (h == 12) ? 12 : h - 12;
+        printf("%02d/%02d/%04d-%02d:%02d:%02d%s\n", mm, d, y, h, m, s, ch[tag]);
+    }
+    return 0;
+}
+
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月12日 已AC。</li>
+</ul>

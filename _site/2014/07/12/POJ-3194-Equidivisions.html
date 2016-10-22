@@ -1,0 +1,97 @@
+<p>﻿—
+layout: post
+title: POJ 3194 Equidivisions
+date: 2014-07-12 23:12:37
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=3194</p>
+
+<h1 id="section-1">理解</h1>
+<p>本以为只要逐个判断每一个数是否有相邻即可，事实上，少考虑了一种情况。
+比如下面给出的这种：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>2211
+1111
+1111
+1122
+
+</code></pre>
+</div>
+<p>根据我原来的思路这种也是good，但其实并不是如此。当然，这个例子并不完备，但用于指出原来思路的漏洞已经够了。正确的思路应当是使用DFS来寻找是否存在独立的区块。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+using namespace std;
+int N, ans;
+int map[101][101];
+int visit[101][101];
+
+int step[4][2] = { {-1, 0}, {0, 1}, {1, 0}, {0, -1} };
+
+int color[101];
+bool Check(int x, int y)
+{
+    if (x &gt;= N || x &lt; 0 || y &gt;= N || y &lt; 0)
+        return false;
+    return true;
+}
+void DFS(int CurX, int CurY)
+{
+    ans++;
+    visit[CurX][CurY] = 1;
+    color[map[CurX][CurY]] = 1;
+    for (int i = 0; i &lt; 4; i++)
+    {
+        int x = CurX+step[i][0];
+        int y = CurY+step[i][1];
+        if (Check(x, y) == false || visit[x][y] == 1)
+            continue;
+        if (map[CurX][CurY] == map[x][y] || color[map[x][y]] == 0)
+        {
+            DFS(x, y);
+        }
+    }
+}
+int main()
+{
+    while (cin&gt;&gt;N &amp;&amp; N !=0)
+    {
+        int index = 1;
+        ans = 0;
+        memset(map, 0, sizeof(map));
+        memset(visit, 0, sizeof(visit));
+        memset(color, 0, sizeof(color));
+        for (int i = 0; i &lt; N-1; i++)
+        {
+            for (int j = 0; j &lt; N; j++)
+            {
+                int a, b;
+                cin&gt;&gt;a&gt;&gt;b;
+                map[a-1][b-1] = index;
+            }
+            index++;
+        }
+        DFS(0, 0);
+        if (ans == N*N)
+            cout&lt;&lt;"good"&lt;&lt;endl;
+        else
+            cout&lt;&lt;"wrong"&lt;&lt;endl;
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年07月12日 已AC。</li>
+</ul>

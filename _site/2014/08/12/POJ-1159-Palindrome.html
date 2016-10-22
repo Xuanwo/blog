@@ -1,0 +1,72 @@
+<p>﻿—
+layout: post
+title: POJ 1159 Palindrome
+date: 2014-08-12 00:38:00
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1159</p>
+
+<h1 id="section-1">理解</h1>
+<p>最关键的公式是：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>if (str[i] == str[j])
+    DP[k][j] = DP[1 - k][j - 1];
+else
+    DP[k][j] = min(DP[1 - k][j], DP[k][j - 1]) + 1;
+
+</code></pre>
+</div>
+<p>注意到k空间的循环利用，节省了空间，感谢大牛提供的思路。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;iostream&gt;
+#include &lt;string.h&gt;
+#include &lt;cstdio&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+int DP[2][5003];
+
+int main(int argc, char const *argv[])
+{
+    int n;
+    string str;
+
+    while (scanf("%d", &amp;n) != EOF)
+    {
+        cin &gt;&gt; str;
+        memset(DP, 0, sizeof(DP));
+
+        int k = 0;
+        for (int i = n - 2; i &gt;= 0; i--)
+        {
+            for (int j = i; j &lt; n; j++)
+            {
+                if (str[i] == str[j])
+                    DP[k][j] = DP[1 - k][j - 1];
+                else
+                    DP[k][j] = min(DP[1 - k][j], DP[k][j - 1]) + 1;
+            }
+            for (int j = 0; j &lt; n; j++) DP[1 - k][j] = 0;
+            k = 1 - k;
+        }
+        printf("%d\n", DP[1 - k][n - 1]);
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月12日 已AC。</li>
+</ul>

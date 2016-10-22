@@ -1,0 +1,80 @@
+<p>﻿—
+layout: post
+title: POJ 2028 When Can We Meet?
+date: 2014-08-06 14:13:00
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=2028</p>
+
+<h1 id="section-1">理解</h1>
+<p>一边输入一边记录开会最多且最近的那天。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+
+int a[110];
+int N, Q;
+int day, days, i, j;
+int min, max;
+int flag = 0;
+
+int main(int argc, char const *argv[])
+{
+    while (scanf("%d%d", &amp;N, &amp;Q), Q != 0 || N != 0)
+    {
+        flag = 0;
+        memset(a, 0, sizeof(a));
+        min = 10000;
+        max = -1;
+        for (i = 0; i &lt; N; i++)
+        {
+            scanf("%d", &amp;day);
+            for (j = 0; j &lt; day; j++)
+            {
+                scanf("%d", &amp;days);
+                a[days] ++;
+                if (a[days] &gt;= Q)
+                {
+                    flag = 1;
+                    if (max &lt; a[days])
+                    {
+                        max = a[days];
+                        min = days;
+                    }
+                    if (a[days] == max &amp;&amp; min &gt; days)
+                    {
+                        min = days;
+                        max = a[days];
+                    }
+                }
+            }
+        }
+        if (flag == 1)
+        {
+            printf("%d\n", min);
+        }
+        else
+        {
+            printf("0\n");
+        }
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月06日 已AC。</li>
+</ul>

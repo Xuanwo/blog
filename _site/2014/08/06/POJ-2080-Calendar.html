@@ -1,0 +1,53 @@
+<p>﻿—
+layout: post
+title: POJ 2080 Calendar
+date: 2014-08-06 14:44:00
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=2080</p>
+
+<h1 id="section-1">理解</h1>
+<p>完全的模拟题。将给定的天数转化为年月日，注意闰年，大小月。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;stdio.h&gt;
+using namespace std;
+
+char week[7][10] = {"Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+int year[2] = {365, 366};
+int month[2][12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+int type(int m)
+{
+    if ((m % 4 == 0 &amp;&amp; m % 100 != 0) || (m % 400 == 0))return 1; else return 0;
+}
+
+int main(int argc, char const *argv[])
+{
+    int days, dayofweek;
+    int i = 0, j = 0;
+    while (scanf("%d", &amp;days) &amp;&amp; days != -1)
+    {
+        dayofweek = days % 7;
+        for (i = 2000; days &gt;= year[type(i)]; i++)
+            days -= year[type(i)];
+        for (j = 0; days &gt;= month[type(i)][j]; j++)
+            days -= month[type(i)][j];
+        printf("%d-%02d-%02d %s\n", i, j + 1, days + 1, week[dayofweek]);
+    }
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月06日 已AC。</li>
+</ul>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>在Python中使用JSON</title>
+  <meta name="description" content="JSON介绍 JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。 易于人阅读和编写。同时也易于机器解析和生成。 它基于JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 19...">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="https://xuanwo.org/2015/10/31/python-JSON">
+  <link rel="alternate" type="application/rss+xml" title="Xuanwo&#39;s Blog" href="/feed.xml">
+  
+  
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-51515330-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  
+
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Xuanwo&#39;s Blog</a>
+
+    <nav class="site-nav">
+      <span class="menu-icon">
+        <svg viewBox="0 0 18 15" width="18px" height="15px">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </span>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">在Python中使用JSON</h1>
+    <p class="post-meta"><time datetime="2015-10-31T07:47:23+08:00" itemprop="datePublished">Oct 31, 2015</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <h1 id="json">JSON介绍</h1>
+<p>JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。 易于人阅读和编写。同时也易于机器解析和生成。 它基于JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999的一个子集。 JSON采用完全独立于语言的文本格式，但是也使用了类似于C语言家族的习惯（包括C, C++, C#, Java, JavaScript, Perl, Python等）。 这些特性使JSON成为理想的数据交换语言。</p>
+
+<p><em>引用自<a href="http://www.json.org/json-zh.html">json.org</a></em></p>
+
+<!-- more -->
+
+<h1 id="section">语法</h1>
+
+<h2 id="section-1">结构</h2>
+
+<p>JSON只提供了两种结构——字典和数组。也就是说，JSON可以存储一对一或者一对多的键值对关系。</p>
+
+<h2 id="section-2">形式</h2>
+
+<h3 id="section-3">对象</h3>
+<p>对象是一个无序的键值对集合。
+一个对象以<code class="highlighter-rouge"><span class="p">{</span></code>开始，<code class="highlighter-rouge">}</code>结束。每个<code class="highlighter-rouge">键</code>后跟一个<code class="highlighter-rouge">:</code>；键值对之间使用<code class="highlighter-rouge">,</code>分隔。
+<img src="/imgs/develop/object.gif" alt="object" /></p>
+
+<h3 id="section-4">数组</h3>
+<p>数组是值的有序集合，一个键可以对应一个数组。
+一个数组以<code class="highlighter-rouge">[</code>开始，<code class="highlighter-rouge">]</code>结束。值之间使用<code class="highlighter-rouge">,</code>分隔。
+<img src="/imgs/develop/array.gif" alt="array" /></p>
+
+<h3 id="section-5">值</h3>
+<p>值可以是双引号括起来的字符串、数值、true、false、 null、对象或者数组。这些结构可以嵌套。
+<img src="/imgs/develop/value.gif" alt="value" /></p>
+
+<h3 id="section-6">字符串</h3>
+<p>字符串是由双引号包围的任意数量Unicode字符的集合，使用反斜线转义。一个字符即一个单独的字符串。
+字符串与C/C++中的字符串非常相似，包括常见的各种转义符号。
+<img src="/imgs/develop/string.gif" alt="value" /></p>
+
+<h3 id="section-7">数值</h3>
+<p>数值与C/C++中的数值非常相似，但没有八进制和十六进制格式。
+<img src="/imgs/develop/number.gif" alt="number" /></p>
+
+<h3 id="section-8">空白</h3>
+<p>空白符号（包括空格，Tab以及回车）可以加入到任何符号之间，不会影响JSON的含义</p>
+
+<h1 id="pythonjson">Python中的JSON库</h1>
+<p><em>以Python 3为基准</em></p>
+
+<h2 id="section-9">编码</h2>
+
+<h3 id="section-10">对应类型</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Python</th>
+      <th>JSON</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>dict</td>
+      <td>object</td>
+    </tr>
+    <tr>
+      <td>list, tuple</td>
+      <td>array</td>
+    </tr>
+    <tr>
+      <td>str</td>
+      <td>string</td>
+    </tr>
+    <tr>
+      <td>int, float</td>
+      <td>number</td>
+    </tr>
+    <tr>
+      <td>True</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td>False</td>
+      <td>false</td>
+    </tr>
+    <tr>
+      <td>None</td>
+      <td>null</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="section-11">函数</h3>
+<p>我们使用<code class="highlighter-rouge">JSON</code>库中的<code class="highlighter-rouge">dump</code>以及<code class="highlighter-rouge">dumps</code>函数来进行<code class="highlighter-rouge">JSON</code>编码。<code class="highlighter-rouge">dump</code>和<code class="highlighter-rouge">dumps</code>各项参数含义基本一致，唯一区别在于<code class="highlighter-rouge">dump</code>函数编码产生一个JSON文件流，而<code class="highlighter-rouge">dumps</code>编码产生一个JSON字符串。</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">skipkeys</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">check_circular</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">allow_nan</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+<span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">skipkeys</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">check_circular</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">allow_nan</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<ul>
+  <li><code class="highlighter-rouge">obj</code>：编码对象</li>
+  <li><code class="highlighter-rouge">fp</code>：指定文件流</li>
+  <li><code class="highlighter-rouge">skipkeys</code>：若skipkeys为真，则非标准类型将会跳过；否则返回<code class="highlighter-rouge">TypeError</code></li>
+  <li><code class="highlighter-rouge">ensure_ascii</code>：若<code class="highlighter-rouge">ensure_ascii</code>为真，则输出时将会确保没有非ASCII字符；否则将会原样输出</li>
+  <li><code class="highlighter-rouge">check_circular</code>：若<code class="highlighter-rouge">check_circular</code>为真，则将会检测是否存在循环调用；否则会跳过检测</li>
+  <li><code class="highlighter-rouge">allow_nan</code>：若<code class="highlighter-rouge">allow_nan</code>为真，则将会允许存在空值（无穷大值）；否则会返回<code class="highlighter-rouge">ValueError</code></li>
+  <li><code class="highlighter-rouge">cls</code>：若<code class="highlighter-rouge">cls</code>为空值，则使用<code class="highlighter-rouge">JSONEncoder</code>；否则使用指定子类进行编码</li>
+  <li><code class="highlighter-rouge">indent</code>：若<code class="highlighter-rouge">indent</code>为空值，则无缩进；否则使用指定值进行缩进</li>
+  <li><code class="highlighter-rouge">separators</code>：若<code class="highlighter-rouge">separators</code>为空值，则使用<code class="highlighter-rouge">(',', ': ')</code>分隔；否则使用指定的元组进行分隔</li>
+  <li><code class="highlighter-rouge">default</code>：若<code class="highlighter-rouge">default</code>为空值，则使用自带的<code class="highlighter-rouge">default</code>方法；否则使用指定值</li>
+  <li><code class="highlighter-rouge">sort_keys</code>：若<code class="highlighter-rouge">sort_keys</code>为真，则输出将会按照键进行排序</li>
+</ul>
+
+<h3 id="section-12">示范</h3>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">json</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([</span><span class="s">'foo'</span><span class="p">,</span> <span class="p">{</span><span class="s">'bar'</span><span class="p">:</span> <span class="p">(</span><span class="s">'baz'</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)}])</span>
+<span class="s">'["foo", {"bar": ["baz", null, 1.0, 2]}]'</span>
+
+<span class="c"># 排序</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s">"c"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"b"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"a"</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span> <span class="n">sort_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+<span class="p">{</span><span class="s">"a"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"b"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"c"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+<span class="c"># 分隔符</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,{</span><span class="s">'4'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s">'6'</span><span class="p">:</span> <span class="mi">7</span><span class="p">}],</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s">','</span><span class="p">,</span> <span class="s">':'</span><span class="p">))</span>
+<span class="s">'[1,2,3,{"4":5,"6":7}]'</span>
+
+<span class="c"># Unicode输出</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="s">"</span><span class="se">\u5317\u4eac</span><span class="s">"</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="s">'北京'</span>
+</code></pre>
+</div>
+
+<h2 id="section-13">解码</h2>
+
+<h3 id="section-14">对应类型</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>JSON</th>
+      <th>Python</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>object</td>
+      <td>dict</td>
+    </tr>
+    <tr>
+      <td>array</td>
+      <td>list</td>
+    </tr>
+    <tr>
+      <td>string</td>
+      <td>str</td>
+    </tr>
+    <tr>
+      <td>number (int)</td>
+      <td>int</td>
+    </tr>
+    <tr>
+      <td>number (real)</td>
+      <td>float</td>
+    </tr>
+    <tr>
+      <td>true</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>false</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>null</td>
+      <td>None</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="section-15">函数</h3>
+<p>我们使用<code class="highlighter-rouge">JSON</code>库中的<code class="highlighter-rouge">load</code>以及<code class="highlighter-rouge">loads</code>函数来进行<code class="highlighter-rouge">JSON</code>解码。<code class="highlighter-rouge">load</code>和<code class="highlighter-rouge">loads</code>各项参数含义基本一致，唯一区别在于<code class="highlighter-rouge">load</code>函数用于解码JSON文件流，而<code class="highlighter-rouge">loads</code>用于解码JSON字符串。</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">object_hook</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parse_float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parse_int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parse_constant</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">object_pairs_hook</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+<span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">object_hook</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parse_float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parse_int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parse_constant</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">object_pairs_hook</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<ul>
+  <li><code class="highlighter-rouge">fp</code>：指定文件流</li>
+  <li><code class="highlighter-rouge">s</code>：指定字符串</li>
+  <li><code class="highlighter-rouge">encoding</code>：指定字符串编码</li>
+  <li><code class="highlighter-rouge">cls</code>：若<code class="highlighter-rouge">cls</code>为空值，则使用<code class="highlighter-rouge">JSONEncoder</code>；否则使用指定子类进行编码</li>
+  <li><code class="highlighter-rouge">object_hook</code>：若<code class="highlighter-rouge">object_hook</code>为空值，对象则返回解码器<code class="highlighter-rouge">dict</code>；否则使用自定义类型返回</li>
+  <li><code class="highlighter-rouge">parse_float</code>：若<code class="highlighter-rouge">parse_float</code>为空，则JSON浮点数转换为浮点数；否则转换为指定类型</li>
+  <li><code class="highlighter-rouge">parse_int</code>：若<code class="highlighter-rouge">parse_int</code>为空，则JSON整数转换为整数；否则转换为指定类型</li>
+  <li><code class="highlighter-rouge">parse_constant</code>若<code class="highlighter-rouge">parse_constant</code>为空，则不会处理非法输入；否则抛出异常</li>
+  <li><code class="highlighter-rouge">object_pairs_hook</code>：若<code class="highlighter-rouge">object_pairs_hook</code>为空值，则数组返回解码器<code class="highlighter-rouge">dict</code>；否则使用自定义类型返回</li>
+</ul>
+
+<h3 id="section-16">示范</h3>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">json</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="s">'["foo", {"bar":["baz", null, 1.0, 2]}]'</span><span class="p">)</span>
+<span class="p">[</span><span class="s">'foo'</span><span class="p">,</span> <span class="p">{</span><span class="s">'bar'</span><span class="p">:</span> <span class="p">[</span><span class="s">'baz'</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]}]</span>
+</code></pre>
+</div>
+
+<h1 id="section-17">更新日志</h1>
+<ul>
+  <li>2015年10月30日 初步完成</li>
+</ul>
+
+  </div>
+
+  
+    
+  
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://xuanwo.org/2015/10/31/python-JSON';
+      this.page.identifier = 'https://xuanwo.org/2015/10/31/python-JSON';
+    };
+
+    (function() {
+      var d = document, s = d.createElement('script');
+
+      s.src = 'https://only0god.disqus.com/embed.js';
+
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Xuanwo&#39;s Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            
+              Xuanwo&#39;s Blog
+            
+            </li>
+            
+            <li><a href="mailto:xuanwo.cn@gmail.com">xuanwo.cn@gmail.com</a></li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/Xuanwo"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">Xuanwo</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/onlyxuanwo"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">onlyxuanwo</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Long way to go
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

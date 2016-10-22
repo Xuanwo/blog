@@ -1,0 +1,106 @@
+<p>﻿—
+layout: post
+title: POJ 1051 P,MTHBGWB
+date: 2014-08-12 00:31:00
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1051</p>
+
+<h1 id="section-1">理解</h1>
+<p>简单的字符串转换，要有耐心= =，debug出翔。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#define MAX 102
+
+char str[MAX];
+char code[4*MAX];
+int code_len[MAX];
+int cnt;
+int read_cnt;
+int len;
+
+const char * dic[]={".-","-...","-.-.","-..",".","..-.","--.","....","..",".---","-.-",".-..","--","-.","---",".--.","--.-",".-.","...","-","..-","...-",".--","-..-","-.--","--..","..--","---.",".-.-","----"};
+
+int len_of_code(char ch)
+{
+	if(ch-'A'&lt;26&amp;&amp;ch-'A'&gt;=0) return strlen(dic[ch-'A']);
+	else return 4;
+}
+
+void addcode(char ch)
+{
+	int _i;
+	char cache[5];
+	if(ch-'A'&gt;=0&amp;&amp;ch-'A'&lt;26) strcpy(cache,dic[ch-'A']);
+	else if(ch=='_') strcpy(cache,dic[26]);
+	else if(ch=='.') strcpy(cache,dic[27]);
+	else if(ch==',') strcpy(cache,dic[28]);
+	else if(ch=='?') strcpy(cache,dic[29]);
+	for(_i=0;cache[_i]!='\0';_i++)
+	{
+		code[cnt++]=cache[_i];
+	}
+}
+
+void readcode()
+{
+	char cache[5];
+	int _cnt;
+	int _i,_j;
+	for(_i=len-1;_i&gt;=0;_i--)
+	{
+		_cnt=0;
+		for(_j=0;_j&lt;code_len[_i];_j++)
+			cache[_cnt++]=code[read_cnt++];
+		cache[_cnt]='\0';
+		for(_j=0;_j&lt;30;_j++)
+			if(strcmp(cache,dic[_j])==0)
+			{
+				if(_j&lt;26) printf("%c",_j+'A');
+				else if(_j==26) printf("_");
+				else if(_j==27) printf(".");
+				else if(_j==28) printf(",");
+				else printf("?");
+			}
+	}
+}
+
+int main(int argc, char const *argv[])
+{
+	int n;
+	int i,j;
+
+	scanf("%d",&amp;n);
+	for(i=0;i&lt;n;i++)
+	{
+		cnt=0;read_cnt=0;
+		scanf("%s",str);
+		len=strlen(str);
+		for(j=0;j&lt;len;j++)
+		{
+			code_len[j]=len_of_code(str[j]);
+			addcode(str[j]);
+		}
+		printf("%d: ",i+1);
+		readcode();
+		printf("\n");
+	}
+	return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月12日 已AC。</li>
+</ul>

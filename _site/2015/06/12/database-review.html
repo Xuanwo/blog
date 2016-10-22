@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>数据库系统概论复习</title>
+  <meta name="description" content="绪论 数据库系统概述 数据（Data）： 描述事物的符号记录称为数据。 记录： 计算机中表示和存储数据的一种格式或一种方法。 数据库（DataBase，简称DB）： 数据库是长期存储在计算机内、有组织的、可共享的大量数据的集合。 特点： 数据按一定的数据模型组织、描述和存储 可为各种用户共享 冗余度较小 数据独立...">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="https://xuanwo.org/2015/06/12/database-review">
+  <link rel="alternate" type="application/rss+xml" title="Xuanwo&#39;s Blog" href="/feed.xml">
+  
+  
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-51515330-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  
+
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Xuanwo&#39;s Blog</a>
+
+    <nav class="site-nav">
+      <span class="menu-icon">
+        <svg viewBox="0 0 18 15" width="18px" height="15px">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </span>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">数据库系统概论复习</h1>
+    <p class="post-meta"><time datetime="2015-06-12T22:33:29+08:00" itemprop="datePublished">Jun 12, 2015</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <h1 id="section">绪论</h1>
+<h2 id="section-1">数据库系统概述</h2>
+<p>数据（Data）： 描述事物的符号记录称为数据。
+记录： 计算机中表示和存储数据的一种格式或一种方法。
+数据库（DataBase，简称DB）： 数据库是长期存储在计算机内、有组织的、可共享的大量数据的集合。
+特点：</p>
+<ul>
+  <li>数据按一定的数据模型组织、描述和存储</li>
+  <li>可为各种用户共享</li>
+  <li>冗余度较小</li>
+  <li>数据独立性较高</li>
+  <li>易扩展</li>
+</ul>
+
+<!-- more -->
+
+<p>数据库管理系统（DataBase Management System，DBMS）：位于用户与操作系统之间的一层数据管理软件，它为用户或应用程序提供访问DB的方法，包括DB的建立、查询、更新及各种数据控制。
+主要功能如下：</p>
+<ul>
+  <li>数据定义功能</li>
+  <li>数据组织、存储和管理</li>
+  <li>数据操纵功能</li>
+  <li>数据库的事务管理和运行管理</li>
+  <li>数据库的建立和维护功能</li>
+  <li>其他功能</li>
+</ul>
+
+<p>数据库系统（DataBase System， DBS）：DBS是实现有组织地、动态地存储大量关联数据、方便多用户访问的计算机硬件、软件和数据资源组成的系统，即它是采用数据库技术的计算机系统。
+组成：
+计算机硬件、数据库、数据库管理系统、应用软件、数据库管理员</p>
+
+<p>数据库技术：是研究数据库的结构、存储、设计、管理和使用的一门软件学科。</p>
+
+<h2 id="section-2">数据模型</h2>
+<p>模型： 现实世界特征的模拟和抽象
+数据模型定义：能表示实体类型及实体间联系的模型
+要求：</p>
+<ul>
+  <li>能比较真实的模拟现实世界</li>
+  <li>容易为人所理解</li>
+  <li>便于在计算机上实现</li>
+</ul>
+
+<h3 id="section-3">概念数据模型</h3>
+<p>按用户观点对数据建模，是对现实世界的第一层抽象，如ER图。主要用于数据库设计，是数据模型建立的基础。</p>
+
+<p>实体：客观存在并可相互区别的事物。
+属性：实体所具有的某一特性称为属性。用属性来刻画实体。
+码：唯一标识实体的属性集，如学号。
+域：属性的取值范围称为该属性的域。
+实体型：具有相同性质的实体必然具有共同的特征和性质。
+实体集：同型实体的集合。
+联系：可分为一对一，一对多，多对多。</p>
+
+<h3 id="section-4">逻辑数据模型</h3>
+<p>直接面向数据库的逻辑结构，是对现实世界的第二层抽象。可分为：网状、层次、关系、面对对象等；也可分为模糊、时态、空间、时空、概率、粗糙、分形等。组成包括：数据结构、数据操作、数据的约束条件。</p>
+
+<p><strong>层次数据模型：</strong>
+层次数据模型对应数据结构中的树形结构：</p>
+<ul>
+  <li>有且只有一个称为根的结点</li>
+  <li>当结点数大于1时，除根节点外的结点可以分为M个互相不相交的有限集，其中每一个集合又是一棵数。</li>
+</ul>
+
+<p>数据操纵：查询、插入、删除和修改
+数据约束条件：</p>
+<ul>
+  <li>进行插入操作时，如果没有相应的双亲结点值，不能插入子女结点值。</li>
+  <li>进行删除操作时，如果删除双亲结点值，则相应的子女结点值也被删除。</li>
+  <li>进行修改操作时，应修改所有相应记录，以保证数据的一致性。</li>
+</ul>
+
+<p><strong>网状数据模型：</strong>
+针对数据结构中的图</p>
+
+<p><strong>面向对象的数据模型：</strong>
+最关键的两个概念：
+对象：现实世界中实体的模型化
+类：对象类型和对这个对象模型进行的操作方法</p>
+
+<p><img src="/imgs/learn/four-data-modal.png" alt="四种数据模型的比较" /></p>
+
+<h2 id="section-5">数据库系统结构</h2>
+<p>数据库系统的三级模式结构</p>
+<ul>
+  <li>外模式/模式映像</li>
+  <li>内模式/模式映像</li>
+</ul>
+
+<h2 id="section-6">数据库系统的组成</h2>
+
+<h3 id="section-7">硬件平台及数据库</h3>
+
+<h3 id="section-8">软件</h3>
+
+<h3 id="section-9">人员</h3>
+<ol>
+  <li>数据库管理员</li>
+  <li>系统分析员和数据库设计人员</li>
+  <li>应用程序员</li>
+  <li>用户</li>
+</ol>
+
+<h1 id="section-10">关系型数据库理论</h1>
+<p><img src="/imgs/learn/relate-database-theory.png" alt="关系数据库理论概述" /></p>
+
+<h2 id="section-11">关系模型概述</h2>
+<p><img src="/imgs/learn/relate-database-modal.png" alt="关系模型概述" /></p>
+
+<h2 id="section-12">关系数据结构</h2>
+<p>域：是一组具有相同数据类型的值的集合
+域的笛卡儿积：给定一组域D1，D2，…，Dn，其笛卡尔积为：
+<img src="/imgs/learn/cartesian-product.png" alt="笛卡儿积" /></p>
+
+<h3 id="section-13">关系</h3>
+<p>关系：D1×D2×…×Dn的子集叫做在域D1，D2，…，Dn上的关系，记做：R(D1，D2，…，Dn)。</p>
+
+<blockquote>
+  <p>关系是笛卡尔积的有一定意义、有限的子集。
+关系也是一个二维表，表的每一行对应一个元组，表的每一列对应一个域。
+对每列起一个唯一的名字，称为属性。
+n元关系有n个属性。
+当n=1时，称该关系为单元关系；
+当n=2时，称该关系为二元关系。
+若关系中的某一属性组的值能够唯一地标识一个元组，则称该属性组为候选码。
+若一个关系有多个候选码，则选定其中一个作为主码。
+候选码的诸属性称为主属性。不包含在任何候选码中的属性称为非主属性或非码属性。</p>
+</blockquote>
+
+<p>关系的性质：</p>
+<ul>
+  <li>同质的列</li>
+  <li>不同属性应该有不同的名称</li>
+  <li>属性是无序的</li>
+  <li>元组不能重复</li>
+  <li>元组无序</li>
+  <li>分量是原子（即每一个分量都必须是不可分的数据项）</li>
+</ul>
+
+<h3 id="section-14">关系模式</h3>
+<p>在数据库中要区分型和值，型是指关系模式，值是指关系。</p>
+
+<p>关系：
+一张二维表格，其中每一行为一元组，每一列为一属性。</p>
+
+<p>关系模式：
+关系的描述称为关系模式。它可以形式化的表示为：
+R(U, D, dom, F)
+其中：
+R：关系名
+U：组成该关系的属性集合
+D：属性来自的域
+dom：属性向域的映象集合
+F：属性间数据依赖关系集合</p>
+
+<p>关系模式与关系的关系：</p>
+<ul>
+  <li>关系模式是静态的，稳定的</li>
+  <li>关系是动态地，随时间不断变化的</li>
+  <li>关系是关系模式在某一时刻的状态和内容</li>
+</ul>
+
+<h2 id="section-15">关系的完整性</h2>
+<p>关系模型的完整性规则是对关系的某种约束条件。</p>
+<h3 id="section-16">关系的三类完整性约束</h3>
+<ul>
+  <li>实体完整性</li>
+  <li>参照完整性</li>
+  <li>用户定义的完整性</li>
+</ul>
+
+<h3 id="section-17">实体完整性</h3>
+<p>若属性A是基本关系R的主属性，则属性A不能取空值。</p>
+
+<h3 id="section-18">参照完整性</h3>
+<blockquote>
+  <p>外码
+设F市基本关系R的一个或一组属性，但不是关系R的码。Ks是基本关系S的主码。如果F与Ks相对应，则称D是R的外码。
+并称基本关系R为参照关系，基本关系S为被参照关系或目标关系。
+<em>关系R和S不一定是不同的关系。</em></p>
+</blockquote>
+
+<p>若属性（或属性组）F是基本关系R的外码，它与基本关系S的主码Ks相对应（基本关系R和S不一定是不同的关系），则对于R中每个元组在F上的值必须为：</p>
+<ul>
+  <li>或者取空值（F的每个属性值均为空值）</li>
+  <li>或者等于S中某个元组的主码值</li>
+</ul>
+
+<h3 id="section-19">用户定义的完整性</h3>
+<p>针对某一具体关系数据库的约束条件</p>
+
+<h2 id="section-20">关系代数</h2>
+<p>关系代数是一种抽象的查询语言，它用作对关系的运算来表达查询。
+<img src="/imgs/learn/relate-cal.png" alt="关系代数运算符" /></p>
+
+<h3 id="section-21">传统的集合运算</h3>
+<ul>
+  <li>并</li>
+  <li>差</li>
+  <li>交</li>
+  <li>笛卡儿积</li>
+</ul>
+
+<h3 id="section-22">专门的关系演算</h3>
+<p><strong>选择</strong>
+从关系R中选取使得逻辑表达式F为真的元组，这是从行的角度进行的运算。
+<strong>投影</strong>
+从关系R中选取若干属性列组成新的关系，这是从列的角度进行的运算。
+<em>需要消除重复行，因此有可能导致某些元组被取消。</em>
+<strong>连接</strong>
+从两个关系的笛卡尔积中选取属性间满足一定条件的元组</p>
+<ul>
+  <li>等值连接：要求选取的A，B属性组的值相等</li>
+  <li>自然连接：特殊的等值连接，要求把重复属性列去掉</li>
+</ul>
+
+<p>如果把舍弃的元组也保存在结果关系中，而在其他的属性上填空值（NULL），那么这种连接叫做外连接。
+如果只保留左边关系中要舍弃的部分，叫做左外连接；
+如果只保留右边关系中要舍弃的部分，叫做右外连接。</p>
+
+<p><strong>除</strong>
+<img src="/imgs/learn/divide.png" alt="关系运算-除" /></p>
+
+<h1 id="sql">SQL数据语言</h1>
+<h2 id="sql-1">SQL概述</h2>
+<h3 id="section-23">产生与发展</h3>
+<ul>
+  <li>1974年由Boyce和Chamberlin提出</li>
+  <li>1975-1979年，IBM的System R上实现</li>
+  <li>1986年，ANSI通过SQL标准</li>
+  <li>后来相继提出SQL-89与SQL-92标准</li>
+  <li>目前，大多数数据库均采用SQL作为共同的数据存取和标准接口</li>
+</ul>
+
+<h3 id="sql-2">SQL的特点</h3>
+<ul>
+  <li>综合统一</li>
+  <li>高度非过程化</li>
+  <li>面向集合的操作方式</li>
+  <li>一种语法结构两种方式</li>
+  <li>语言简洁，易学易用</li>
+</ul>
+
+<h3 id="sql-3">SQL基本概念</h3>
+<p>SQL支持关系数据库三级模式结构，其中：</p>
+<ul>
+  <li>外模式——视图和部分基本表（不能独立存在）</li>
+  <li>模式——基本表（独立存在，关系-基本表-存储文件一一对应）</li>
+  <li>内模式——存储文件（存储文件的逻辑结构组成了关系数据库的内模式）</li>
+</ul>
+
+<h3 id="sql-4">SQL对象</h3>
+<p>SQL对象包括数据库、表、视图、属性名等，这些对象名符合一定规则：</p>
+
+<blockquote>
+  <p>SQL SERVER 1-30字符
+ACCESS 64字符
+ORACLE 限制为8个字符</p>
+</blockquote>
+
+<blockquote>
+  <p>应以字母开头，其他字符可以使字母、数字、下划线</p>
+</blockquote>
+
+<h3 id="sql-5">SQL语句</h3>
+<ol>
+  <li>尖括号”&lt;&gt;”中的内容为实际意义</li>
+  <li>中括号”[]”中的内容为任选项</li>
+  <li>[,…]意思是等等</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>大括号”{}”与竖线”</td>
+          <td>“标明此处为选择项，在所列举的各项中仅需选择一项。</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>SQL中的数据项（包括列项、表和视图）分隔符为”,”；其字符串常数的定界符用单引号”'”表示。</li>
+</ol>
+
+<h2 id="section-24">数据定义</h2>
+<p><img src="/imgs/learn/SQL-data-define.png" alt="SQL的数据定义语句" /></p>
+
+<h3 id="section-25">数据库的创建与删除</h3>
+<p>创建数据库</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>CREATE DATABASE &lt;数据库名&gt;;
+CREATE DATABASE Mydb;
+
+</code></pre>
+</div>
+<p>删除数据库</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>DROP DATABASE &lt;数据库名&gt; [,&lt;数据库名&gt;] [,...];
+DROP DATABASE Mydb;
+
+</code></pre>
+</div>
+
+<h3 id="section-26">表的创建与删除</h3>
+<p>创建基本表</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>CREATE TABLE &lt;表名&gt;
+    (&lt;列名&gt; &lt;数据类型&gt; [&lt;列级完整性约束条件&gt;] [&lt;列名&gt; &lt;数据类型&gt; [ &lt;列级完整性约束条件&gt; ] [,...] ] [,&lt;表级完整性约束条件&gt;] [,..]);
+
+</code></pre>
+</div>
+<p><img src="/imgs/learn/main-type.png" alt="主要数据类型" /></p>
+
+<p>约束条件：</p>
+<ul>
+  <li>列级完整性约束条件——只能用于列</li>
+  <li>表级完整性约束条件——只能够用于一张中的多列</li>
+</ul>
+
+<p>SQL完整性约束条件</p>
+<ul>
+  <li>NOT NULL或NULL，列级，是否允许为空</li>
+  <li>UNIQUE，列级，唯一性约束</li>
+  <li>DEFAULT，列级，默认值约束</li>
+  <li>CHECK，列级，检验约束，为插入列中的数据指定约束条件</li>
+  <li>PRIMARY KEY，表级，主键约束，使得主键的数值在每一行中各不相同，不能为空</li>
+  <li>FOREIGN KEY，表级，外键约束，是参照完整性约束</li>
+</ul>
+
+<p>举例
+创建<code class="highlighter-rouge">学生表：Student(sno, sname, sdate, ssex, sdept)</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Create Table Student(
+    sno char(5) not null unique,
+    sdate date,
+    ssex char(2) default '男',
+    sdept char(2)
+    Constraint C1 Check (ssex In ('男', '女')));
+
+</code></pre>
+</div>
+
+<p>删除基本表</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>DROP TABLE &lt;表名&gt;;
+
+</code></pre>
+</div>
+<p>举例</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>DROP TABLE Student;
+
+</code></pre>
+</div>
+
+<h3 id="section-27">表结构的修改</h3>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>ALTER TABLE &lt;表名&gt;
+    [ADD ( &lt;新列名&gt; &lt;数据类型&gt; [&lt;完整性约束条件&gt;][,...])]
+    [DROP &lt;完整性约束名&gt;]
+    [MODIFY ( &lt;列名&gt; &lt;数据类型&gt; [,...])];
+
+</code></pre>
+</div>
+<p>举例</p>
+<blockquote>
+  <p>在Student表中增加‘籍贯native_place’列，数据类型为字符型</p>
+</blockquote>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Alter Table Student
+    Add native_place Varchar(50);
+
+</code></pre>
+</div>
+
+<blockquote>
+  <p>删除Student表中学生姓名必须取唯一值的约束条件</p>
+</blockquote>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Alter Table Student
+    Drop unique(sname);
+
+</code></pre>
+</div>
+
+<blockquote>
+  <p>修改Student表中sname列的数据类型为定长字符型</p>
+</blockquote>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Alter Table Student
+    Modify sname char(8) unique;
+
+</code></pre>
+</div>
+
+<h3 id="section-28">建立和删除索引</h3>
+<p>建立索引</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>CREATE [UNIQUE] [CLUSTER] INDEX  &lt;索引名&gt;
+    ON &lt;表名&gt; (&lt;列名&gt; [&lt;次序&gt;] [, &lt;列名&gt; [&lt;次序&gt;] ] [,…]);
+
+</code></pre>
+</div>
+<p>举例</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Create unique Index stusno_ind
+    On Student (sno ASC);
+
+</code></pre>
+</div>
+
+<p>删除索引</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>DROP INDEX &lt;索引名&gt;;
+
+</code></pre>
+</div>
+<p>举例</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>DROP INDEX Stusno_Ind;
+
+</code></pre>
+</div>
+
+<h2 id="section-29">数据查询</h2>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>SELECT [ALL|DISTINCT] &lt;目标列表达式&gt; [,&lt;目标列表达式&gt;] [,…]
+[INTO &lt;新表名&gt;]
+FROM &lt;表名/视图名&gt; [,&lt;表名/视图名&gt;] [,…]
+[WHERE &lt;条件表达式&gt;]
+[GROUP BY &lt;列名1&gt;] [HAVING &lt;条件表达式&gt;]]
+[ORDER BY &lt;列名2&gt; [ASC|DESC]];
+
+</code></pre>
+</div>
+
+<h3 id="section-30">目标列表达式</h3>
+<p>目标列表达式是一个逗号分隔的表达式列表</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>[&lt;表名&gt;.]&lt;属性列名表达式&gt; [, [&lt;表名&gt;.] &lt;属性列名表达式&gt;] [, …]
+
+</code></pre>
+</div>
+<p>举例</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>//查询单表中全体学生的学号与姓名
+SELECT sno, sname FROM Student;
+//查询单表中的全体学生
+SELECT * FROM Student;
+
+</code></pre>
+</div>
+
+<p>集函数</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&lt;集函数&gt; ( [ DISTINCT | ALL ] * )
+//集函数：SUM、AVG、COUNT、MAX、MIN
+
+</code></pre>
+</div>
+<p>举例</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>SELECT DISTINCT sname, Year(GetDate())-Year(sdate) AS age FROM Student;
+
+</code></pre>
+</div>
+
+<h3 id="section-31">条件表达式</h3>
+<p><img src="/imgs/learn/where.png" alt="条件表达式" />
+举例</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>//从Student表中，查询男同学
+SELECT * FROM Student WHERE ssex='男';
+//从Student表中，查询出生日期在1980年和1990年之间的学生
+SELECT * FROM Student WHERE sdate BETWEEN '1980-01-01' AND '1990-12-31';
+
+</code></pre>
+</div>
+
+<p>通配符</p>
+<blockquote>
+  <p>%：百分号，代表任意长度的字符串
+a%b:ab,acb,addb
+_：下划线，代表单个字符
+a_b: acb,adb, afb</p>
+</blockquote>
+
+<blockquote>
+  <p>[ ]：表示中括号里面的任意一个字符
+A[BCDE]表示第一个字符为A，第二个字符为B,C,D,E中的任意一个
+[^ ]：表示不在中括号里面的任意一个字符
+A[^BCDE]表示第一个字符为A，第二个字符为不为B,C,D,E的任意一个字符</p>
+</blockquote>
+
+<h2 id="section-32">数据操纵</h2>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>数据插入——INSERT——向数据库中插入新纪录
+数据修改——UPDATE——修改数据库中的某记录
+数据删除——DELETE——删除数据库中的某记录
+
+</code></pre>
+</div>
+<h3 id="section-33">数据插入</h3>
+<p>插入元组</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>INSERT
+INTO &lt;表名&gt; [( &lt;字段1&gt;[, &lt;字段2&gt;] [,…])]
+VALUES (&lt;常量1&gt; [, &lt;常量2&gt;] [,…]);
+
+</code></pre>
+</div>
+<p>举例</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>//将一条新学生记录（所有字段都有值）插入到表中
+Insert Into S
+Values (‘95020’,‘陈东’,‘男’,‘IS’,’18’);
+将一条学生记录（部分字段有值）插入表中
+Insert Into S(Sno,Sname)
+Values (‘95020’,‘陈东’);
+
+</code></pre>
+</div>
+
+<p>插入子查询
+子查询不仅可以嵌套在SELECT语句中，也可以嵌套在INSERT语句中，用于生成要插入的批量数据。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>INSERT
+INTO &lt;表名&gt; [( &lt;字段1&gt;[, &lt;字段2&gt;] [,…])]
+子查询;
+
+</code></pre>
+</div>
+<p>举例</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Insert Into Deptage(Sdept, Avgage)
+    Select Sdept, AVG(Sage)
+    From S  Group By Sdept;
+
+</code></pre>
+</div>
+
+<h3 id="section-34">数据修改</h3>
+<p>一般格式</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>UPDATE &lt;表名&gt;
+SET  &lt;字段名1&gt;＝&lt;表达式1&gt;[, &lt;字段2&gt;= &lt;表达式2&gt;] [,…]]
+[WHERE &lt;条件表达式&gt;];
+
+</code></pre>
+</div>
+<p>举例</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>//修改某一元组的值：如将学生95001的年龄改为22岁
+Update S
+Set Sage=22
+Where Sno='95001';
+//修改多个元组的值：如将所有学生的年龄加一岁
+Update S
+Set Sage= Sage+1;
+//带子查询的修改语句：将信息管理系的所有学生成绩置零
+Update SC
+Set Grade=0
+Where 'IS'=
+    (Select Sdept
+    From S
+    Where S.Sno=SC.Sno);
+
+</code></pre>
+</div>
+
+<h3 id="section-35">删除数据</h3>
+<p>一般格式</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>DELETE
+FROM  &lt;表名&gt;
+[WHERE &lt;条件表达式&gt;];
+
+</code></pre>
+</div>
+<p>举例</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>//删除某一元组：如删除学号为95001的学生记录
+Delete
+From S
+Where Sno='95001';
+//将S表清空
+Delete
+From S;
+//带查询的删除语句：如删除信息系所有学生的选课记录
+Delete
+From SC
+Where 'IS'=
+    (Select Sdept
+    From S
+    Where S.Sno=SC.Sno);
+
+</code></pre>
+</div>
+
+<h2 id="section-36">数据控制</h2>
+<p>共享程度与安全性问题的冲突
+数据控制功能：</p>
+<ul>
+  <li>事务管理功能</li>
+  <li>数据保护功能</li>
+</ul>
+
+<p>授予权限
+一般格式</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>GRANT  &lt;权限&gt; [,&lt;权限&gt;][,…]
+    [ON  &lt;对象类型&gt; &lt;对象名称&gt;]
+    TO  &lt;用户&gt; [, &lt;用户&gt;] [,…]
+    [WITH  GRANT OPTION];
+
+</code></pre>
+</div>
+<p>举例</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>//把查询S表的权限授权给用户U1
+GRANT  SELECT
+ON  TABLE  S
+TO U1;
+//把查询S表和C表的全部权限授权给用户U1和U2
+GRANT ALL PRIVILEGES
+ON TABLE S, C
+TO U1, U2;
+
+</code></pre>
+</div>
+
+<p>收回权限
+一般格式</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>REVOKE  &lt;权限&gt; [,&lt;权限&gt;][,…]
+    [ON  &lt;对象类型&gt; &lt;对象名称&gt;]
+    FROM  &lt;用户&gt; [, &lt;用户&gt;] [,…]
+
+</code></pre>
+</div>
+<p>举例</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>//把用户U1修改学号的权限收回
+REVOKE UPDATE(Sno)
+ON TABLE S
+FROM U1;
+//收回所有用户对表SC的查询权限
+REVOKE SELECT
+ON TABLE SC
+FROM PUBLIC;
+
+</code></pre>
+</div>
+
+<h1 id="section-37">关系数据库设计</h1>
+<h2 id="section-38">关系数据库设计理论</h2>
+<h3 id="section-39">关系模式</h3>
+<p><code class="highlighter-rouge">R(U , F)</code>
+当且仅当U上的一个关系r满足F时，r称为关系模式R(U , F)的一个关系</p>
+
+<h3 id="section-40">函数依赖定义</h3>
+<p>定义：
+设R（U）是属性集U上的关系模式。X，Y是U上的子集。
+若R（U）的任意一个可能的关系r，r中不可能存在两个元组在X上的属性值相等而在Y上的属性值不等，则称：
+X函数依赖确定Y或Y函数依赖确定于X，记做<code class="highlighter-rouge">X-&gt;Y</code>。</p>
+
+<p>术语：
+<img src="/imgs/learn/func-define.png" alt="函数依赖术语" /></p>
+
+<h3 id="nf">第一范式（1NF）</h3>
+<p>每一个分量必须是不可分的数据项。
+存在问题：
+数据冗余；插入异常；删除异常。</p>
+
+<h3 id="nf-1">第二范式（2NF）</h3>
+<p>在第一范式的基础上，每一个非主属性完全函数依赖于码。
+存在问题：
+插入异常；删除异常；修改复杂。</p>
+
+<h3 id="nf-2">第三范式（3NF）</h3>
+<p>若关系R（U）的每个非主属性都不部分依赖于也不于传递于码，则称R（U）满足第三范式。</p>
+
+<h3 id="bcnf">BCNF</h3>
+<ul>
+  <li>所有非主属性对每一个码都是完全函数依赖</li>
+  <li>所有的主属性对每一个不包含它的码，是完全函数依赖</li>
+  <li>没有任何属性完全依赖于非码的任何一组属性</li>
+</ul>
+
+<h3 id="section-41">多值依赖</h3>
+<p><img src="/imgs/learn/MVD.png" alt="多值依赖" /></p>
+
+<h3 id="nf-3">第四范式（4NF）</h3>
+<p>关系模式R&lt;U,F&gt;符合第一范式，对于R的每一个非平凡多值依赖，X都含有码，则称关系模式R符合第四范式</p>
+
+<h3 id="section-42">总结</h3>
+<p><img src="/imgs/learn/func-depand-conclusion.png" alt="函数依赖总结" /></p>
+
+<h2 id="section-43">关系数据库设计的步骤</h2>
+<ul>
+  <li>需求分析</li>
+  <li>概念结构设计</li>
+  <li>逻辑结构设计</li>
+  <li>数据库物理设计</li>
+  <li>数据库实施</li>
+  <li>数据库运行和维护</li>
+</ul>
+
+<h3 id="section-44">需求分析</h3>
+<ol>
+  <li>业务流程分析</li>
+  <li>数据流程分析</li>
+  <li>画出ER图</li>
+</ol>
+
+<h3 id="section-45">概念结构设计</h3>
+<p>特点：</p>
+
+<ul>
+  <li>能真实、充分地反映现实世界，包括事物与事物之间的联系</li>
+  <li>易于理解，从而可以用它和不熟悉计算机的用户交换意见</li>
+  <li>易于更改</li>
+  <li>易于向关系、网状、层次等数据模型转换</li>
+</ul>
+
+<p>设计方法：</p>
+
+<ul>
+  <li>自顶向下</li>
+  <li>自底向上</li>
+  <li>逐步扩张：核心概念结构，向外扩张</li>
+  <li>混合策略：自顶向下和自底向上相结合</li>
+</ul>
+
+<p>数据抽象：</p>
+
+<ul>
+  <li>分类</li>
+  <li>聚集</li>
+  <li>概括</li>
+</ul>
+
+<p>任务：
+ER图变为数据库逻辑结构</p>
+
+<p>转换原则：
+实体及其属性的转换：
+一个实体型转换为一个关系模式。
+实体的属性就是关系的属性，实体的码就是关系的码。</p>
+
+<p>1:1
+可以转换为一个独立模式，也可以与任意一段的对应的关系模式合并
+1:n
+可以转换为一个独立模式，可以与N端对应的关系模式合并
+m:n
+转换为一个独立模式</p>
+
+<p>设计用户子模式——视图</p>
+
+<h3 id="section-46">数据库的物理设计</h3>
+<ul>
+  <li>存取方法</li>
+  <li>存取结构</li>
+</ul>
+
+<h3 id="section-47">实施与维护阶段</h3>
+<ul>
+  <li>定义数据库的结构</li>
+  <li>数据装载/编写程序</li>
+  <li>数据库软件试运行</li>
+</ul>
+
+<h1 id="section-48">数据库安全保护</h1>
+<h2 id="section-49">信息安全综述</h2>
+<p>安全：免于危险的质量和状态
+信息安全：是对信息、系统以及使用、存储和传输信息的硬件的保护
+数据库安全：是指保护数据库以防止不合法的使用所造成的数据泄露、更改或破坏
+访问：一个主题或对象使用、操作、修改或者影响另一个主题或对象的能力
+资产：被保护的机构资源
+安全蓝本：对机构里新的安全措施的实施计划
+漏洞：系统内的弱点或错误，或者是使信息暴露给攻击或破坏的保护性机制</p>
+<h2 id="section-50">数据库安全性控制</h2>
+<p>计算机系统的安全模型
+<img src="/imgs/learn/safe-modal.png" alt="计算机系统的安全模型" /></p>
+
+<h3 id="section-51">用户标识和鉴别</h3>
+<p>用户标识和鉴别是系统提供的最外层安全保护措施
+举例：校园网登录</p>
+
+<h3 id="section-52">存取控制</h3>
+<p>数据库安全性主要是存取控制机制</p>
+<ol>
+  <li>定义用户权限</li>
+  <li>合法用户权限检查</li>
+</ol>
+
+<h3 id="section-53">审计</h3>
+<p>把用户对数据库的所有操作自动记录下来放入审计日志</p>
+
+<h3 id="section-54">数据加密</h3>
+<p>高度敏感性数据，需要采用数据加密技术</p>
+
+<h2 id="section-55">统计数据库安全性</h2>
+<p>在统计数据库中存在着特殊的安全性问题，需要注意。</p>
+
+<h2 id="sql-server">SQL SERVER系统安全性</h2>
+<p>简要介绍，略过</p>
+
+<h1 id="section-56">版权信息</h1>
+<p>大部分内容来自于中国地质大学（北京）安海忠老师的授课PPT以及王珊，萨师煊所著的《数据库系统概论》（第四版），可在非商用-署名前提下自由分发。</p>
+
+<h1 id="section-57">更新日志</h1>
+<ul>
+  <li>2015年06月12日 完成初稿</li>
+  <li>2015年06月14日 修复了一些格式错误</li>
+</ul>
+
+  </div>
+
+  
+    
+  
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://xuanwo.org/2015/06/12/database-review';
+      this.page.identifier = 'https://xuanwo.org/2015/06/12/database-review';
+    };
+
+    (function() {
+      var d = document, s = d.createElement('script');
+
+      s.src = 'https://only0god.disqus.com/embed.js';
+
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Xuanwo&#39;s Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            
+              Xuanwo&#39;s Blog
+            
+            </li>
+            
+            <li><a href="mailto:xuanwo.cn@gmail.com">xuanwo.cn@gmail.com</a></li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/Xuanwo"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">Xuanwo</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/onlyxuanwo"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">onlyxuanwo</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Long way to go
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

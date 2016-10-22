@@ -1,0 +1,59 @@
+<p>﻿—
+layout: post
+title: POJ 1256 Anagram
+date: 2014-07-23 02:07:50
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1256</p>
+
+<h1 id="section-1">理解</h1>
+<p>再次遇到一道使用<code class="highlighter-rouge">next_permutation</code>的题目，不过这一次需要针对题目的给出的条件重新写一个<code class="highlighter-rouge">cmp</code>函数。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>
+#include &lt;cstdio&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+using namespace std;
+
+bool cmp(char a, char b)
+{
+    if (tolower(a) == tolower(b))
+        return a &lt; b;
+    else
+        return tolower(a) &lt; tolower(b);
+}
+
+int main()
+{
+    int t;
+    cin &gt;&gt; t;
+    while (t--)
+    {
+        string str;
+        cin &gt;&gt; str;
+        sort(str.begin(), str.end(), cmp);
+        do
+        {
+            cout &lt;&lt; str &lt;&lt; endl;
+        }
+        while (next_permutation(str.begin(), str.end(), cmp));
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年07月23日 已AC。</li>
+</ul>

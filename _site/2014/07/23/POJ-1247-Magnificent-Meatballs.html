@@ -1,0 +1,60 @@
+<p>﻿—
+layout: post
+title: POJ 1247 Magnificent Meatballs
+date: 2014-07-23 02:03:12
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1247</p>
+
+<h1 id="section-1">理解</h1>
+<p>让给的肉丸子少的人继续给，直到最后判断是否相等。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstring&gt;
+using namespace std;
+
+int table[33];
+
+int main(int argc, char const *argv[])
+{
+    int n;
+    while(cin&gt;&gt;n,n)
+    {
+        memset(table,0,sizeof(table));
+        int i;
+        for(i=1;i&lt;=n;i++)
+        {
+            cin&gt;&gt;table[i];
+        }
+        int sumE=0,sumS=0;
+        int postE=n,postS=1;
+        while(postS&lt;=postE)
+        {
+            if(sumE&gt;=sumS) {sumS+=table[postS];postS++;}
+            else {sumE+=table[postE];postE--;}
+        }
+        if(sumE!=sumS)
+        {
+            cout&lt;&lt;"No equal partitioning."&lt;&lt;endl;
+        }
+        else cout&lt;&lt;"Sam stops at position "&lt;&lt;--postS&lt;&lt;" and Ella stops at position "&lt;&lt;++postE&lt;&lt;"."&lt;&lt;endl;
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年07月23日 已AC。</li>
+</ul>

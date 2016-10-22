@@ -1,0 +1,68 @@
+<p>﻿—
+layout: post
+title: POJ 1579 Function Run Fun
+date: 2014-08-03 12:00:24
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1579</p>
+
+<h1 id="section-1">理解</h1>
+<p>题目很简单，就是递归。但是直接递归会导致超时，这里直接处理一下，超过20全都当作20来计算。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+using namespace std;
+const int maxn = 55;
+int f[maxn][maxn][maxn];
+
+int w(int a, int b, int c)
+{
+    if (a &lt;= 0 || b &lt;= 0 || c &lt;= 0)
+    {
+        return 1;
+    }
+    if (a &gt; 20 || b &gt; 20 || c &gt; 20)
+    {
+        return  w(20, 20, 20);
+    }
+    if (f[a][b][c])
+    {
+        return f[a][b][c];
+    }
+    if (a &lt; b &amp;&amp; b &lt; c)
+    {
+        return  f[a][b][c] = w(a, b, c - 1) + w(a, b - 1, c - 1) - w(a, b - 1, c);
+    }
+    return f[a][b][c] = w(a - 1, b, c) + w(a - 1, b - 1, c) + w(a - 1, b, c - 1) - w(a - 1, b - 1, c - 1);
+}
+
+int main(int argc, char const *argv[])
+{
+    int a, b, c;
+    while (scanf("%d%d%d", &amp;a, &amp;b, &amp;c) != EOF)
+    {
+        if (a == -1 &amp;&amp; b == -1 &amp;&amp; c == -1)
+        {
+            return 0;
+        }
+        int res = w(a, b, c);
+        printf("w(%d, %d, %d) = %d\n", a, b, c, res);
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月03日 已AC。</li>
+</ul>

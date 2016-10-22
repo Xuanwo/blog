@@ -1,0 +1,75 @@
+<p>﻿—
+layout: post
+title: POJ 1007 DNA Sorting
+date: 2014-07-07 14:09:22
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1007</p>
+
+<h1 id="section-1">理解</h1>
+<p>我再一次把问题想的太复杂了，其实就是一个计算逆序数并且排序的一个过程。</p>
+
+<!-- more -->
+
+<h1 id="get">新技能get</h1>
+<p><a href="http://www.cplusplus.com/reference/cstdlib/qsort/?kw=qsort">快速排序</a>
+<code class="highlighter-rouge">void qsort (void* base, size_t num, size_t size, int (*compar)(const void*,const void*));</code></p>
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;cstdlib&gt;
+using namespace std;
+
+class DNA
+{
+public:
+    string seqDNA;
+    int num;
+};
+
+int compare(const void *p1, const void *p2)
+{
+    return (((DNA *)p1)-&gt;num - ((DNA *)p2)-&gt;num);
+}
+int main()
+{
+    DNA *dna;
+    int n, m, num, count(0);
+    string listDNA;
+    cin &gt;&gt; m &gt;&gt; n;
+    dna = new DNA[n];
+    while (count &lt; n)
+    {
+        cin &gt;&gt; listDNA;
+        num = 0;
+        for (int i = 0; i &lt; m - 1; ++i)
+        {
+            for (int j = i + 1; j &lt; m; ++j)
+            {
+                if (listDNA.at(i) &gt; listDNA.at(j))
+                    ++num;
+            }
+        }
+        dna[count].num = num;
+        dna[count++].seqDNA = listDNA;
+    }
+    qsort(dna, n, sizeof(DNA), compare);
+    for (int i = 0; i &lt; n; ++i)
+        cout &lt;&lt; dna[i].seqDNA &lt;&lt; endl;
+
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年07月07日 已AC。</li>
+</ul>

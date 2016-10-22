@@ -1,0 +1,56 @@
+<p>﻿—
+layout: post
+title: POJ 1862 Stripies
+date: 2014-08-05 20:31:00
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1862</p>
+
+<h1 id="section-1">理解</h1>
+<p>原先质量越大的，如果越先被计算，那么开根号的次数就会越多，相比之下，最终结果就会越小。最后再排一下序就好。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;iostream&gt;
+#include &lt;math.h&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int a[110];
+
+bool cmp(int a, int b)
+{
+    return a &gt; b;
+}
+
+int main(int argc, char const *argv[])
+{
+    int n;
+    scanf("%d", &amp;n);
+    for (int i = 0; i &lt; n; i++)
+        scanf("%d", &amp;a[i]);
+    sort(a, a + n, cmp);
+    double ans = a[0];
+    for (int i = 1; i &lt; n; i++)
+    {
+        ans = 2 * sqrt(ans * a[i]);
+    }
+    printf("%.3f\n", ans);
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月05日 已AC。</li>
+</ul>

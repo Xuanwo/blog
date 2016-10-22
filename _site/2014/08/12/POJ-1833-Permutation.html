@@ -1,0 +1,54 @@
+<p>﻿—
+layout: post
+title: POJ 1833 排列
+date: 2014-08-12 05:12:00
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1833</p>
+
+<h1 id="section-1">理解</h1>
+<p>再次使用<code class="highlighter-rouge">next_permutation</code>水题。不过G++会超时，C++400ms+。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;cstdio&gt;
+using namespace std;
+
+#define MAX 1034
+int ans[MAX];
+
+int main(int argc, char const *argv[])
+{
+    int nCases;
+    int num, k, i, j;
+    scanf("%d", &amp;nCases);
+    while (nCases--)
+    {
+        scanf("%d %d", &amp;num, &amp;k);
+        for (i = 1; i &lt;= num; ++i)
+            scanf("%d", &amp;ans[i]);
+        for (i = 0; i &lt; k; ++i)
+            next_permutation(ans + 1, ans + num + 1);
+
+        for (j = 1; j &lt;= num; ++j)
+            printf("%d ", ans[j]);
+        printf("\n");
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月12日 已AC。</li>
+</ul>

@@ -1,0 +1,126 @@
+<p>﻿—
+layout: post
+title: POJ 1575 Easier Done Than Said?
+date: 2014-08-03 11:54:33
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1575</p>
+
+<h1 id="section-1">理解</h1>
+<p>运用三种标记，分别标记三种情况。对每一次字符读入均进行判断，一旦遇到不符合条件的，就直接退出循环。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+char availdou[5] = "eo";
+char str[30];
+int words[26];
+
+int main(int argc, char const *argv[])
+{
+    int vowelflag = 0;
+    int douflag;
+    char douch;
+    int tripleflag;
+    int len, i;
+
+    for (i = 0; i &lt; 26; i++)
+    {
+        if ('a' + i == 'a' || 'a' + i == 'e' || 'a' + i == 'i' || 'a' + i == 'o' || 'a' + i == 'u')
+        {
+            words[i] = 1;
+        }
+
+        else
+        {
+            words[i] = 0;
+        }
+    }
+    while (scanf("%s", str), strcmp(str, "end") != 0)
+    {
+        vowelflag = 1;
+        douflag = tripleflag = 0;
+        douch = '\0';
+        len = strlen(str);
+        for (i = 0; i &lt; len; i++)
+        {
+            if (words[str[i] - 'a'] == 1)
+            {
+                vowelflag = 0;
+                if (tripleflag &lt;= 0)
+                {
+                    tripleflag = 1;
+                }
+                else if (tripleflag &lt;= 2)
+                {
+                    tripleflag ++;
+                }
+                //printf("%d: triple1:%d\n", i, tripleflag);
+                if (tripleflag == 3)
+                {
+                    break;
+                }
+                if (douch == str[i])
+                {
+                    if (!(douch == 'e' || douch == 'o'))
+                    {
+                        douflag = 1;
+                        break;
+                    }
+                }
+                douch = str[i];
+            }
+            else if (words[str[i] - 'a'] == 0)
+            {
+                if (tripleflag &gt;= 0)
+                {
+                    tripleflag = -1;
+                }
+                else if (tripleflag &gt;= -2)
+                {
+                    tripleflag --;
+                }
+                if (tripleflag == -3)
+                {
+                    break;
+                }
+                if (douch == str[i])
+                {
+                    douflag = 1;
+                    break;
+                }
+                douch = str[i];
+            }
+        }
+        if (tripleflag == 3 || tripleflag == -3 || douflag || vowelflag)
+        {
+            printf("&lt;%s&gt; is not acceptable.\n", str);
+        }
+        else
+        {
+            printf("&lt;%s&gt; is acceptable.\n", str);
+        }
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月03日 已AC。</li>
+</ul>

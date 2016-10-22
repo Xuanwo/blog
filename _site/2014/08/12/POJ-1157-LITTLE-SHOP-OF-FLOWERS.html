@@ -1,0 +1,61 @@
+<p>﻿—
+layout: post
+title: POJ 1157 LITTLE SHOP OF FLOWERS
+date: 2014-08-12 00:55:00
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=1157</p>
+
+<h1 id="section-1">理解</h1>
+<p>满足的递推方程：<code class="highlighter-rouge">dp[i][j]=max(dp[i][j-1],dp[i-1][j-1]+map[i][j])</code></p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#include&lt;cstdio&gt;
+#include&lt;cstdlib&gt;
+#include&lt;cstring&gt;
+#include&lt;cmath&gt;
+#include&lt;algorithm&gt;
+#define INF 10000
+
+int dp[110][110];
+int map[110][110];
+
+int max(int a, int b)
+{
+    return a &gt; b ? a : b;
+}
+
+int main(int argc, char const *argv[])
+{
+    int n, m;
+    scanf("%d %d", &amp;n, &amp;m);
+    for (int i = 1; i &lt;= n; i++)
+        for (int j = 1; j &lt;= m; j++)
+        {
+            scanf("%d", &amp;map[i][j]);
+        }
+    for (int i = 0; i &lt;= n; i++)
+        for (int j = 0; j &lt; i; j++)
+            dp[i][j] = -INF;
+    for (int j = 1; j &lt;= m; j++)
+        for (int i = 1; i &lt;= -max(-n, -j); i++)
+        {
+            dp[i][j] = max(dp[i][j - 1], dp[i - 1][j - 1] + map[i][j]);
+        }
+    printf("%d\n", dp[n][m]);
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月12日 已AC。</li>
+</ul>

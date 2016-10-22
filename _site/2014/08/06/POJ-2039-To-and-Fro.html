@@ -1,0 +1,82 @@
+<p>﻿—
+layout: post
+title: POJ 2039 To and Fro
+date: 2014-08-06 14:33:00
+categories: Exercise
+toc: true
+—</p>
+<h1 id="section">题目</h1>
+<p>源地址：</p>
+
+<p>http://poj.org/problem?id=2039</p>
+
+<h1 id="section-1">理解</h1>
+<p>找规律的题目。
+首先看一下加密的方式：
+原文为<code class="highlighter-rouge">theresonoplacelikehomeonasnowynightx</code>，分成N列来写，没有写满的用x填充，写成如下队列：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>t o i o y
+h p k n n
+e l e a i
+r a h s g
+e c o n h
+s e m o t
+n l e w x
+
+</code></pre>
+</div>
+<p>对于奇数行，从左向后书写，对于偶数行，从右向左书写，得到密文：
+<code class="highlighter-rouge">toioynnkpheleaigshareconhtomesnlewx</code>
+显然，解密的方式就是原样还原回去。
+一共进行N次读入，对于第i次读取，用j定位行数。
+如果j为偶数，输出<code class="highlighter-rouge">N*j+i</code>；
+如果j为奇数，输出<code class="highlighter-rouge">N*(j+1)-1-i</code>。</p>
+
+<!-- more -->
+
+<h1 id="section-2">代码</h1>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+
+char str[210];
+int N;
+int i, j;
+int len, M;
+
+int main(int argc, char const *argv[])
+{
+    while (scanf("%d", &amp;N), N != 0)
+    {
+        getchar();
+        gets(str);
+        len = strlen(str);
+        M = (int)((double)N / (double)len + 0.999999);
+        for (i = 0; i &lt; N; i++)
+        {
+            for (j = 0; j * N &lt; len; j++)
+            {
+                if (j % 2 == 0)
+                {
+                    printf("%c", str[N * j + i]);
+                }
+                else if (j % 2 == 1)
+                {
+                    printf("%c", str[N * (j + 1) - 1 - i]);
+                }
+            }
+        }
+        printf("\n");
+    }
+    return 0;
+}
+
+</code></pre>
+</div>
+
+<h1 id="section-3">更新日志</h1>
+<ul>
+  <li>2014年08月06日 已AC。</li>
+</ul>
