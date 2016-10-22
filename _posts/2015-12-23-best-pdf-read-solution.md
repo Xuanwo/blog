@@ -27,12 +27,14 @@ toc: true
 
 ## Windows
 ### Goodsync
+
 ![Goodsync](/imgs/opinion/goodsync.png)
 [**Goodsync**](http://www.goodsync.com/)是一款非常强大的同步工具，我们通过它来提供本地到Google Drive的双向同步功能。
 
 > 如果通过SS艹墙，配置Google Drive时请勾选`基于WinInet`，如图：![Goodsync Proxy Setting](/imgs/opinion/goodsync-proxy-setting.png)
 
 ### Foxit Reader
+
 ![Foxit Reader](/imgs/opinion/foxit-reader.png)
 [**Foxit Reader**](http://www.foxitsoftware.cn/)，也就是福昕阅读器，不多说了，新版的界面还是可以的。（尽管我觉得颜值没有Adobe Reader DC高）
 
@@ -40,12 +42,14 @@ toc: true
 
 ## Android
 ### Flodersync
+
 ![Flodersync](/imgs/opinion/Flodersync.png)
 [**Flodersync**](https://play.google.com/store/apps/details?id=dk.tacit.android.foldersync.lite)是一款基于安卓平台的非常棒的一款应用，我们通过它来实现安卓平台的双向同步。
 
 > 开启双向同步请取消勾选`不同步删除`
 
 ### Moon+
+
 ![Moon+](/imgs/opinion/Moon.png)
 [**Moon+**](https://play.google.com/store/apps/details?id=com.flyersoft.moonreader)，静读天下，安卓平台上首屈一指的阅读器，支持格式众多，速度流畅，除了免费版有些功能阉割和广告之外，没有别的问题。
 
