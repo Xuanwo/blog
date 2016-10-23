@@ -1,0 +1,52 @@
+---
+title: Codeforces Beta Round 11 A Increasing Sequence
+date: 2014-11-16 10:45:44
+categories: Exercise
+toc: true
+---
+# 题目
+源地址：
+
+http://codeforces.com/problemset/problem/11/A
+
+# 理解
+给定一个序列，给定一个递增值。要求计算出最少需要多少步，能将这个序列变为递增数列。
+第一个想法就是贪心，甚至都不需要读完数列，直接在输入时处理就可以了。
+
+<!-- more -->
+
+# 代码
+
+```
+
+int n,d;
+int t=0,one,two,temp;
+
+int main(int argc, char const *argv[])
+{
+    while (~scanf("%d%d",&n,&d))
+    {
+        t=0;
+        scanf("%d",&one);
+        for (int i=2; i<=n; i++)
+        {
+            scanf("%d",&two);
+            if (one>two)
+            {
+                temp=(one-two)/d+1;
+                t+=temp;
+                two+=temp*d;
+            }
+            else if (one == two)
+                t++,two+=d;
+            one=two;
+        }
+        printf("%d\n",t);
+    }
+    return 0;
+}
+
+```
+
+# 更新日志
+- 2014年11月16日 已AC。

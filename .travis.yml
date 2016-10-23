@@ -1,0 +1,30 @@
+branches:
+  only:
+  - blog
+
+language: node_js
+
+sudo: false
+
+node_js:
+    - 'stable'
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_26b4962af0e7_key -iv $encrypted_26b4962af0e7_iv
+  -in doc/travis.enc -out ~/.ssh/id_rsa -d
+- chmod 600 ~/.ssh/id_rsa
+- eval $(ssh-agent)
+- ssh-add ~/.ssh/id_rsa
+- cp doc/ssh_config ~/.ssh/config
+- git config --global user.name "xuanwo"
+- git config --global user.email xuanwo.cn@gmail.com
+- git clone -b master git@github.com:Xuanwo/xuanwo.github.io.git .deploy_git
+
+install:
+- npm install hexo-cli -g
+- npm install
+
+script:
+- hexo clean
+- hexo g
+- hexo d

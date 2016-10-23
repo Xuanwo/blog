@@ -1,0 +1,90 @@
+---
+title: UVa 12174 Shuffle
+date: 2014-11-4 22:19:47
+categories: Exercise
+toc: true
+---
+# 题目
+源地址：
+
+http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=513&page=show_problem&problem=3326
+
+# 理解
+题意真心有点看不懂，原谅我这个没有用过音乐播放器的男人= =。
+
+>
+使用一个音乐播放器，采用随机播放。随机播放的原理时先随机产生一个1~n的排列，然后就按这个排列顺序播放歌曲。播放完这序列的所有歌曲以后，再次随机生成一个1～n的排列，再继续播放。然后，现在给你一个播放历史记录，但是这个记录是不完整的，因为当它开始记录的时候，有些歌可能已经播放过了但是没有记录到。现在给你一段历史记录和播放器中歌的个数，问历史记录中的第一首歌是某个随机列表的第几首，总共有多少可能？
+
+整个算法可以分成两段，首先处理min(s,n)中的部分，这部分出现的歌曲都放入一个sames容器，以bool数组ok[i]来记录从标号i开始的歌曲是不是都不相同。然后依次枚举第一首歌是第x首，先检查前s-x是不是都不相同，然后从x开始，依次判断x，x+s，x+2s等等是不是符合条件。
+
+<!-- more -->
+
+# 代码
+
+```
+
+#define MAXN 100000+10
+
+map<int,int> cnt;
+set<int> sames;
+bool no[MAXN];
+int t,s,n;
+int a[MAXN];
+
+int main(int argc, char const *argv[])
+{
+    scanf("%d", &t);
+    while(t--)
+    {
+        memset(no,0,sizeof(no));
+        cnt.clear(),sames.clear();
+        scanf("%d%d", &s,&n);
+        for(int i=0; i<n; ++i)    scanf("%d", a+i);
+        int idx=-1;
+        for(int i=0; i<min(s,n); ++i)
+        {
+            if(cnt[a[i]]>0)
+            {
+                idx=i;
+                break;
+            }
+            cnt[a[i]]++;
+        }
+        if(idx==-1)
+        {
+            printf("%d\n", s);
+            continue;
+        }
+        for(int i=idx; i<min(s,n); ++i)
+        {
+            if(cnt[a[i]]>0) sames.insert(a[i]);
+            cnt[a[i]]++;
+        }
+        for(int i=0; i<n; ++i)
+        {
+            if(sames.size())    no[i]=1;
+            if(i+s<n)
+            {
+                if(cnt[a[i+s]]>0)   sames.insert(a[i+s]);
+                cnt[a[i+s]]++;
+            }
+            if(cnt[a[i]]==2)    sames.erase(a[i]);
+            cnt[a[i]]--;
+        }
+        int ans=0;
+        for(int i=0; i<idx; ++i)
+        {
+            bool can=1;
+            for(int j=i+1; j<n; j+=s) can&=!no[j];
+            ans+=can;
+        }
+        printf("%d\n",ans);
+    }
+    return 0;
+}
+
+```
+
+# 更新日志
+- 2014年11月4日 UVa挂了= =。
+- 2014年11月5日 已AC。

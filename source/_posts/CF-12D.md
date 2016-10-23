@@ -1,0 +1,124 @@
+---
+title: Codeforces Beta Round 12 D Ball (Div.2 Only)
+date: 2014-11-21 22:35:22
+categories: Exercise
+toc: true
+---
+# 题目
+源地址：
+
+http://codeforces.com/contest/12/problem/D
+
+# 理解
+一个很神奇的题目= =。
+给你N个女人的Beauty，Intelect，Richness值。在i女人和j女人之间如果有Bi<Bj&&Ii<Ij&&Ri<Rj,那么i女人就会去自杀！。！问总共有多少个女人会自杀= =。（这心理是有多阴暗。。。。）
+实际上感觉就是一个三维的排序，不过有些细节需要处理。
+首先开一个结构体来保存b，i，r以及id号。然后对每一个女人的beauty值排序，然后将b值离散化，作为这个树状数组的下标。然后再对i值进行排序，这样，每次只要getmax(lady[j].id+1)，就能得到当前最大的女的r值。
+
+<!-- more -->
+
+# 代码
+
+```
+
+#define MAXN 500000+10
+
+int c[MAXN],n,cnt;
+int i,j,ans;
+
+struct node
+{
+    int b,i,r;
+    int id;
+} lady[MAXN];
+
+inline int lowbit(int x)
+{
+    return x&(-x);
+}
+
+void add(int x,int d)
+{
+    while(x>0)
+    {
+        if(c[x]<d)
+            c[x]=d;
+        x-=lowbit(x);
+    }
+}
+
+int getmax(int x)
+{
+    int s=-1;
+    for(int i=x; i<=cnt; i+=lowbit(i))
+    {
+        if(s<c[i])
+            s=c[i];
+    }
+    return s;
+}
+
+bool cmp(node a,node b)
+{
+    return a.b<b.b;
+}
+
+bool cmp1(node a,node b)
+{
+    return a.i>b.i;
+}
+
+void init()
+{
+    ans=0;
+    for(i=0; i<n; i++)
+        scanf("%d",&lady[i].b);
+    for(i=0; i<n; i++)
+        scanf("%d",&lady[i].i);
+    for(i=0; i<n; i++)
+        scanf("%d",&lady[i].r);
+    sort(lady,lady+n,cmp);
+    cnt=1;
+    lady[0].id=1;
+}
+
+int main(int argc, char const *argv[])
+{
+
+    while(scanf("%d",&n)!=EOF)
+    {
+        init();
+        for(i=1; i<n; i++)
+        {
+            if(lady[i].b==lady[i-1].b)
+                lady[i].id=cnt;
+            else
+                lady[i].id=++cnt;
+        };
+        sort(lady,lady+n,cmp1);
+        for(i=1; i<=cnt; i++)
+            c[i]=-1;
+        for(i=0; i<n;)
+        {
+            for(j=i; j<n&&lady[i].i==lady[j].i; j++)
+            {
+                if(getmax(lady[j].id+1)>lady[j].r)
+                {
+                    ans++;
+                }
+            }
+            for(j=i; j<n&&lady[i].i==lady[j].i; j++)
+            {
+                add(lady[j].id,lady[j].r);
+            }
+            i=j;
+        }
+        printf("%d\n",ans);
+    }
+    return 0;
+}
+
+```
+
+# 更新日志
+- 2014年11月21日 已AC。

@@ -1,0 +1,138 @@
+---
+title: 基于Socket.io的虚拟计算机
+date: 2015-7-6 21:05:38
+tags: [实习, 项目, Together, 虚拟化]
+categories: Learn
+toc: true
+---
+# 前言
+基于Socket.io有很多特别强大的应用，socket.io官方提供的一个[虚拟计算机Demo](http://socket.io/demos/computer/)就非常赞。通过将使用Qemu虚拟取出来的PC界面转发至Socket.io的端口，然后对Canvas不断地进行绘制，形成了近似与远程操控的体验。我们[Together项目](http://xuanwo.org/2015/06/30/together-project/)用到了这个库，但由于这个库发布于很久之前，再加上相关文档过少，导致部署起来极为困难。所以我完成了这篇文章，希望能让后来人少走一些弯路。
+<!-- more -->
+*下文基于Ubuntu 14.04 x64，其他系统请自行转换相应命令，谢谢~*
+
+# 环境配置
+## 安装nodejs
+使用APT安装
+
+```
+sudo apt-get -y install nodejs-legacy
+
+```
+或使用nvm来管理不同版本的nodejs
+
+```
+wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh | bash
+
+```
+
+*Canvas库在Debian系的OS上会有些诡异的行为，所以需要格外的做一些处理，感谢[@computernewb](https://github.com/computernewb)的[回复](https://github.com/kevin-roark/socket.io-computer/issues/11#issuecomment-118790681)*
+
+```
+sudo ln -s /usr/bin/nodejs /usr/sbin/node
+
+```
+
+## 安装依赖
+
+```
+sudo apt-get -y install libcairo2-dev libpango1.0-dev libgif-dev build-essential g++
+
+```
+
+## 安装libjpeg9和libjpeg9-dev
+
+```
+wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9_9a-2_amd64.deb
+dpkg -i libjpeg9_9a-2_amd64.deb
+wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9-dev_9a-2_amd64.deb
+dpkg -i libjpeg9-dev_9a-2_amd64.deb
+
+```
+
+# 处理WinXp镜像
+## 下载XP镜像
+### 下载后使用网盘中转
+在[I Tell You](http://msdn.itellyou.cn/)上下载纯净的XP镜像。（如果使用盗版的镜像，VPS可能会因为违反其Tos而封号）
+比如，WinXP的中文简体专业版：
+
+```
+ed2k://|file|CN_WINXP_PRO_ISO.img|530186240|7855069CE4216615D761654E2B75A4F7|/
+
+```
+### 使用sftp上传
+可以使用类似于FileZilla这样的FTP工具直接上传，大部分国内的网盘到国外的速度都不理想= =，百度云还会出现断流，而好用的国外网盘都被墙，本身就需要翻墙上传。所以还不如直接使用sftp传到服务器上。
+## 格式转换
+[I Tell You](http://msdn.itellyou.cn/)上下载下来的是img镜像文件，然而我们需要的是ISO，所以还需要进行转换。将img转换为iso，我们需要`ccd2iso`。
+
+```
+sudo apt-get install ccd2iso
+
+```
+使用方法：
+
+```
+ccd2iso <.img filename> <.iso filename>
+
+```
+
+# socket.io-computer配置
+## 安装依赖
+
+```
+sudo apt-get -y install qemu redis-server
+
+```
+## 虚拟机配置
+生成一个光盘镜像文件用来加载ISO
+
+```
+qemu-img create -f qcow2 winxp.img 10G
+
+```
+## 运行
+### 启动Web服务器
+
+```
+node app.js
+
+```
+### 启动IO服务器
+
+```
+node io.js
+
+```
+### 生成qemu实例
+
+```
+COMPUTER_ISO=winxp.iso COMPUTER_IMG=winxp.img node qemu.js
+
+```
+### 启动虚拟机
+
+```
+COMPUTER_IMG=winxp.img node emu-runner.js
+
+```
+
+# 运行
+访问`http://localhost:5000`
+
+# 注意
+## 若搭建在服务器上，使用IP访问
+需要修改
+
+```
+var url = process.env.COMPUTER_IO_URL || 'http://localhost:6001';
+
+```
+为
+
+```
+var url = process.env.COMPUTER_IO_URL || 'http://your IP address:6001';
+
+```
+否则无法正常连接
+
+# 更新日志
+- 2015年07月06日 完成主体框架

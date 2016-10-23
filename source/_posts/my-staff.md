@@ -1,0 +1,89 @@
+---
+title: 我的五样
+date: 2015-10-8 11:08:16
+tags: [Software, Hardware]
+categories: Daily
+toc: true
+---
+# 前言
+此文用以记录自己用过&在用的各类工具及软件，欢迎推荐
+
+<!-- more -->
+
+# PC
+
+> ThinkPad E531 with Win10 x64
+
+## 聊天
+
+- QQ
+- 微信电脑版
+
+## 输入法
+
+- 搜狗拼音输入法
+
+## 浏览器
+
+- Chrome 64bit
+
+## 下载
+
+- 迅雷极速版
+
+## 视频
+
+- Potplayer-64 Bits
+
+## 系统
+
+- Xshell
+- Xftp
+- [Listary](https://xuanwo.org/2015/07/28/listary/)
+
+## 办公
+
+- SumatraPDF
+- XMind 7
+- Microsoft Office 2016
+- Evernote
+
+## 游戏
+
+- 英雄联盟
+- 龙翼编年史
+
+## 网络
+
+- 百度云管家
+- Shadowsocks
+- Cow
+
+## 音乐
+
+- QQ音乐
+
+## 编程
+
+- [Sublime Text 3](https://xuanwo.org/2014/06/05/sublime-text-3-IDE/)
+- Microsoft Visual Studio
+- JetBrains CLion
+- JetBrains PyCharm
+- JetBrains WebStorm
+- JetBrains IDEA
+- Android Studio
+
+## 解压刻录
+
+- WinRAR
+
+## 迷之工具
+
+- HashCalc
+- Git
+- QTranslate
+- Vagrant
+
+# 更新日志
+- 2015年10月08日 首次发布
+- 2015年11月27日 11月软件更新

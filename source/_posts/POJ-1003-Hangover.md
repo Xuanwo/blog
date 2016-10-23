@@ -1,0 +1,46 @@
+﻿---
+title: POJ 1003 Hangover
+date: 2014-07-04 7:33:55
+categories: Exercise
+toc: true
+---
+# 题目
+源地址：
+
+http://poj.org/problem?id=1003
+
+# 理解
+嗯哼，一道水题，用模拟水过。唯一自认为值得注意的地方是精度的问题，在比较的时候使用了两者之差小于0.001来判断他们是否相等。
+
+<!-- more -->
+
+# 代码
+
+```
+#include <iostream>
+#include <algorithm>
+#include <stdio.h>
+
+using namespace std;
+
+int main()
+{
+    float a, b = 0, i = 2;
+    while (scanf("%f", &a)&&a!=0)
+    {
+        while (a-b>0.001)
+        {
+            b += 1 / i;
+            i++;
+        }
+        cout << i-2 << ' ' << "card(s)" << endl;
+        b=0;
+        i=2;
+    }
+    return 0;
+}
+
+```
+
+# 更新日志
+- 2014年07月04日  已AC。
