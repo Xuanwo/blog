@@ -1,3 +1,0 @@
-title: Categories
-type: "categories"
----
