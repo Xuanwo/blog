@@ -1,0 +1,33 @@
+---
+layout: default
+---
+
+<div class="home">
+
+    <h1 class="page-heading">Tags</h1>
+    <ul class="orgnize-list">
+        {% for tag in site.tags %}
+        <li>
+            <a href="#{{ tag | first }}">{{ tag | first }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+    <ul class="post-list">
+        {% for tag in site.tags %}
+        <li>
+            <h2 id="{{ tag | first }}">
+                {{ tag | first }}: <span> {{ tag | last | size }}</span>
+            </h2>
+            <ul>
+                {% for post in tag.last %}
+                <li>
+                    <h3>
+                        {{ post.date | date:"%Y/%m/%d"}}: <a href="{{ post.url }}">{{ post.title }}</a>
+                    </h3>
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
