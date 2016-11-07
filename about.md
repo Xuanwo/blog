@@ -6,7 +6,7 @@ permalink: /about/
 
 # 现状
 
-- 中国地质大学（北京）本科三年级在读生
+- 中国地质大学（北京）本科四年级在读生
 - 信息管理与信息系统专业
 - [青云QingCloud](https://www.qingcloud.com/)实习中
 - 恋爱ing
@@ -32,6 +32,8 @@ permalink: /about/
 ## 语言类
 
 - C/C++ 熟练
+- php 初步
+- golang 初步
 - html，css，js 初步
 - python 初步
 - node.js 初步
@@ -41,11 +43,6 @@ permalink: /about/
 - git 熟练
 - shell/bash 初步（目前最爱 Zsh）
 - 各类艹墙工具 熟练
-
-# 正在捣鼓
-
-- [Qingchat *一个比较蠢的微信群发机器人*](https://github.com/Xuanwo/qingchat)
-- [Jade-ims *系统分析与设计的大作业，基于Flask+Sqlite3*](https://github.com/Xuanwo/jade-ims)
 
 # 博客更新日志
 
