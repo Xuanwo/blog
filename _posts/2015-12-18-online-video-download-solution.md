@@ -7,7 +7,7 @@ categories: Opinion
 toc: true
 ---
 
-# 前言
+
 因为学习需要，产生了一个这样的需求：要从Youtube上批量下载视频。自然，出于方便使用的角度来看，音画不能分离，最好带有对应的字幕。一番搜罗之后，我找到了基于Python的开源产品： [youtube-dl](https://rg3.github.io/youtube-dl/)
 
 > 值得一提的是，youtube-dl不仅仅能下载youtube上的视频，它支持的视频链接种类多达700+种，几乎囊括了所有在线视频网站，列表参见[此处](https://rg3.github.io/youtube-dl/supportedsites.html)。让我不由得感慨开源的力量。除此以外，某些不存在的网址需要自备梯子，不再赘述。

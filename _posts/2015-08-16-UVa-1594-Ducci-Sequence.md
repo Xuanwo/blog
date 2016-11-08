@@ -5,7 +5,7 @@ date: 2015-8-16 04:04:26
 categories: Exercise
 toc: true
 ---
-# 题目
+## 题目
 源地址：
 
 https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=4469

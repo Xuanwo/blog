@@ -5,7 +5,7 @@ date: 2014-11-4 10:28:10
 categories: Exercise
 toc: true
 ---
-# 比赛地址
+## 比赛地址
 http://acm.hust.edu.cn/vjudge/contest/view.action?cid=61737#overview
 
 # 比赛总结

@@ -6,7 +6,7 @@ tags: [Github, CI, Read, Markdown]
 categories: Opinion
 toc: true
 ---
-# 前言
+
 作为一只ACMer，一个非常现实的需求就是我们需要准备自己的模板。在我的想象当中，我们的模板应当有如下的这些特性：
 
 - 可以生成PDF格式，保证在多个平台下的一致性

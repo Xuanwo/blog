@@ -6,7 +6,7 @@ tags: [Blog, Software, Windows, Github-Pages, Wiki]
 categories: Opinion
 toc: true
 ---
-# 前言
+
 七七事件前一天，我有幸加入了[本校OJ2.0](https://github.com/cugbacm/oj)项目组。非常高兴能够为我们学校自己的OJ开源项目做出一份贡献，虽然只是一份整理Wiki的小活儿，但是这是我第一次真正的参与一个源项目。经过谨慎考虑之后，我决定项目的Wiki使用Github Pages来构建。
 
 <!-- more -->

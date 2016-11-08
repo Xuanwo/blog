@@ -6,7 +6,7 @@ tags: [QingCloud, Work, 爬虫]
 categories: Opinion
 toc: true
 ---
-# 前言
+
 最近完成的一个工作是要抓取某公司的合作伙伴信息，跟上一次的区别在于，这个公司调用了Salesforce之类的第三方CRM服务。合作伙伴的详细信息是需要点开对应的连接之后才可以获得。
 
 <!--more-->

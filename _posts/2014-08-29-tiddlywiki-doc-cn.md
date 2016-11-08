@@ -6,7 +6,7 @@ tags: [Web]
 categories: Opinion
 toc: true
 ---
-# 前言
+
 TiddlyWiki是我见过的配置最为简单的Wiki系统，纯HTML实现，不需要服务器，没有复杂的依赖，使用体验非常赞。但是国内使用的人实在太少，而且TiddlyWiki更新迭代很快，原有的一些文档已经不再适用于最新版本的TiddlyWiki了。
 
 # 基础教学

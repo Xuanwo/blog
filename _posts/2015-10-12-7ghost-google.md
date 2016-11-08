@@ -6,7 +6,7 @@ tags: [Google, CloudFlare, FuckWall, PHP]
 categories: Opinion
 toc: true
 ---
-# 前言
+
 尽管自己已经搭建好了Shadowsocks等翻墙工具，但是总有一些时刻需要临时地使用Google查看一些网页，这个时候一个可用的谷歌镜像就显得很重要。本文旨在使用低成本方案来搭建一个可用的谷歌镜像服务，用以部分解决这个问题。
 
 <!-- more -->

@@ -6,7 +6,7 @@ tags: [Software, Hexo, Github-Pages, Blog]
 categories: Opinion
 toc: true
 ---
-# 前言
+
 
 从2014年的八月份开始接触Hexo，一直用到现在，已经有半年的时间了。这期间，Hexo从2.X一路升级到了3.0，很多地方都发生了改变。不仅如此，很多原来使用Hexo的博主们写下了的教程并没有及时更新，导致后来人一头雾水，挫折感十足。因此，本文致力于提供一份足够简单，长期维护的基于Github Pages的Hexo博客搭建图文教程，希望能有所帮助。
 当然，我个人的力量是有限的，因此也希望使用Hexo的大家也能一起行动起来，通过[提交PR](https://github.com/Xuanwo/xuanwo.github.io/pulls)，[发布issues](https://github.com/Xuanwo/xuanwo.github.io/issues)或者在下方评论区评论等形式参与到本文档的编辑中来。浏览时，使用`Ctrl+F`搜索关键词。*（是不是会有似曾相识的感觉，= =）*

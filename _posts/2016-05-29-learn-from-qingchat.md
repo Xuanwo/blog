@@ -7,7 +7,7 @@ tags: [Python, qingchat, 实习, QingCloud]
 toc: true
 ---
 
-# 前言
+
 
 之前的一段时间一直在从事[Qingchat](https://github.com/Xuanwo/qingchat)的相关开发工作，这个项目是一个基于Mojo-Weixin提供的Rest API开发的一个微信机器人，承担了十余个群，上千人的微信直播活动。秉承着ACM训练出来的“暴力加乱搞”风格，我花了大概一个星期的课余时间，搞出了一个可用的版本。期间也迭代了很多次，既欣慰于Coding的力量，也苦恼于当初设计的不完善带来的种种问题。在这个项目即将大规模重构的前夕，我总结一下开发Qingchat的过程中的经验教训，希望自己能成为一个更好更聪明的Coder。
 

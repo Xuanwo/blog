@@ -5,7 +5,7 @@ date: 2014-08-15 19:28:52
 categories: Exercise
 toc: true
 ---
-# 题目
+## 题目
 源地址：
 
 http://poj.org/problem?id=1969

@@ -7,7 +7,7 @@ categories: Opinion
 toc: true
 ---
 
-# 前言
+
 [Chocolatey](https://chocolatey.org/)是一个基于Nuget的Windows包管理工具，截止到我更新此文章的时候，一共有3.7k多个独立包。本文旨在介绍Chocolatey这一工具的安装和用法，希望能有更多人享受到该工具的便利之处。
 
 <!-- more -->
