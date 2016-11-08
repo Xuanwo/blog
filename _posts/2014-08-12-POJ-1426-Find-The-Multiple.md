@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1426 Find The Multiple
 date: 2014-08-12 04:27:00

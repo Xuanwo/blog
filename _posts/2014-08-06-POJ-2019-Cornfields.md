@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2019 Cornfields
 date: 2014-08-06 14:20:00

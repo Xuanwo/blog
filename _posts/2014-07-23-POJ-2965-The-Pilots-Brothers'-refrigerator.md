@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2965 The Pilots Brothers' refrigerator
 date: 2014-07-23 23:31:18

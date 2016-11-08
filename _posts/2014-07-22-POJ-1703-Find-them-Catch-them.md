@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1703 Find them, Catch them
 date: 2014-07-22 13:51:22

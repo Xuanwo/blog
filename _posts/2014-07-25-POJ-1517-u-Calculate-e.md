@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1517 u Calculate e
 date: 2014-07-25 04:00:19

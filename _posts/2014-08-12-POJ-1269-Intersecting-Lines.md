@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1269 Intersecting Lines
 date: 2014-08-12 01:12:00

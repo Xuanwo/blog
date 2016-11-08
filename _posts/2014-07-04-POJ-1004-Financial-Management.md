@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1004 Financial Management
 date: 2014-07-04 18:41:50

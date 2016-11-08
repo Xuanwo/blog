@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1664 放苹果
 date: 2014-08-05 15:47:50

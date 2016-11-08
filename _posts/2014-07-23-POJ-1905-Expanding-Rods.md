@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1905 Expanding Rods
 date: 2014-07-23 23:40:45

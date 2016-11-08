@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1575 Easier Done Than Said?
 date: 2014-08-03 11:54:33

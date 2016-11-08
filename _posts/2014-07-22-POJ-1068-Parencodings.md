@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1068 Parencodings
 date: 2014-07-22 20:37:35

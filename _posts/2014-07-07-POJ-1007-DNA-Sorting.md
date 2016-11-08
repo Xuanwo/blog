@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1007 DNA Sorting
 date: 2014-07-07 14:09:22

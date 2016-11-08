@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 3194 Equidivisions
 date: 2014-07-12 23:12:37

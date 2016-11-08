@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1988 Cube Stacking
 date: 2014-07-22 16:36:53

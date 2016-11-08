@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1411 Calling Extraterrestrial Intelligence Again
 date: 2014-08-12 04:54:00

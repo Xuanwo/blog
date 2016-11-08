@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1005 I Think I Need a Houseboat
 date: 2014-07-06 19:04:08

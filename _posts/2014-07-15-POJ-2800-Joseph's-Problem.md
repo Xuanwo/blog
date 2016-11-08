@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2800 Joseph's Problem
 date: 2014-07-15 20:41:42

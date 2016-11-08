@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1163 The Triangle
 date: 2014-07-22 21:12:47

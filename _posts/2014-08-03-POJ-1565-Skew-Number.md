@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1565 Skew数
 date: 2014-08-03 11:43:36

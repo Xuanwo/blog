@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 3048 Max Factor
 date: 2014-07-18 0:23:10

@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1326 Mileage Bank
 date: 2014-07-23 14:10:08

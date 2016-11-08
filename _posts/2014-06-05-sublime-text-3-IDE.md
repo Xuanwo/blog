@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: Sublime Text 3 化身为高大上的C/C++ IDE
 tags: [Software, C]

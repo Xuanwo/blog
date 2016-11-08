@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2680 Computer Transformation
 date: 2014-07-15 19:28:08

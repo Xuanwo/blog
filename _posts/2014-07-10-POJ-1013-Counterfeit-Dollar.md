@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1013 Counterfeit Dollar
 date: 2014-07-10 14:22:44

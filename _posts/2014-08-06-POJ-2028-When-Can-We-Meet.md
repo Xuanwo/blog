@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2028 When Can We Meet?
 date: 2014-08-06 14:13:00

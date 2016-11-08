@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1083 Moving Tables
 date: 2014-07-22 21:03:10

@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2305 Basic remains
 date: 2014-07-18 14:46:10

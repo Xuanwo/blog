@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1131 Octal Fractions
 date: 2014-07-18 15:29:12

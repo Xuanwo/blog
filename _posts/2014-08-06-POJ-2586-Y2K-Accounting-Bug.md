@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2586 Y2K Accounting Bug
 date: 2014-08-06 15:23:00

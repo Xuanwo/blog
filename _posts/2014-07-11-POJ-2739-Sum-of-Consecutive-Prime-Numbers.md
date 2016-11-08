@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2739 Sum of Consecutive Prime Numbers
 date: 2014-07-11 19:49:38

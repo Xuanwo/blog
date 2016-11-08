@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1306 Combinations
 date: 2014-07-18 15:43:53

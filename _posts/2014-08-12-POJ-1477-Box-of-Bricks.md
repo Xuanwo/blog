@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1477 Box of Bricks
 date: 2014-08-12 04:32:00

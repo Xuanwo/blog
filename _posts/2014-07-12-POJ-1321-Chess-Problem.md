@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1321 棋盘问题
 date: 2014-07-12 21:30:59

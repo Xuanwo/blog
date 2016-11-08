@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2488 A Knight's Journey
 date: 2014-07-12 19:59:14

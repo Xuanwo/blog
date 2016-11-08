@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1504 Adding Reversed Numbers
 date: 2014-07-25 03:40:50

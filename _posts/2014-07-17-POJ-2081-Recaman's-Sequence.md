@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2081 Recaman's Sequence
 date: 2014-07-17 23:53:55

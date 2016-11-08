@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2714 Random Walk
 date: 2014-07-15 15:55:21

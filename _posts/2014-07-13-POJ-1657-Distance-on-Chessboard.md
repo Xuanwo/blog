@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1657 Distance on Chessboard
 date: 2014-07-13 16:42:02

@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1604 Just the Facts
 date: 2014-08-03 12:16:39

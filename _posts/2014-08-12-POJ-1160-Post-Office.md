@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1160 Post Office
 date: 2014-08-12 00:45:00

@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1190 生日蛋糕
 date: 2014-07-12 20:48:21

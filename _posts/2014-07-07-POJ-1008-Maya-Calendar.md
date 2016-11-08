@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1008 Maya Calendar
 date: 2014-07-07 23:04:08

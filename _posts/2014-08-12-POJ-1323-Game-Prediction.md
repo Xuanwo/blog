@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1323 Game Prediction
 date: 2014-08-12 04:19:00

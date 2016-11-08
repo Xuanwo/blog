@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1018 Communication System
 date: 2014-07-12 13:06:29

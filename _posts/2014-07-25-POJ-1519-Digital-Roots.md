@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1519 Digital Roots
 date: 2014-07-25 04:29:15

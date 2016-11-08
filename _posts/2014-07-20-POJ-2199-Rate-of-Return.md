@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2199 Rate of Return
 date: 2014-07-20 14:25:25

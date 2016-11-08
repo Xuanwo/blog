@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1338 Ugly Numbers
 date: 2014-08-12 04:11:00

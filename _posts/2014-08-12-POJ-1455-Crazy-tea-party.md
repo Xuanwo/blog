@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1455 Crazy tea party
 date: 2014-08-12 04:37:00

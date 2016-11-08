@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1922 Ride to School
 date: 2014-08-05 20:36:00

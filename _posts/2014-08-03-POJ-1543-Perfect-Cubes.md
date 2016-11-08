@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1543 Perfect Cubes
 date: 2014-08-03 11:36:27

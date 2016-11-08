@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 2159 Ancient Cipher
 date: 2014-07-11 13:30:04

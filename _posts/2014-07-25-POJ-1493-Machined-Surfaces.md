@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1493 Machined Surfaces
 date: 2014-07-25 02:59:11

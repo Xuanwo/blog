@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 3273 Monthly Expense
 date: 2014-07-23 23:44:01

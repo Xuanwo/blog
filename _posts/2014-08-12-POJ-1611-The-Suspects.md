@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: POJ 1611 The Suspects
 date: 2014-08-12 05:03:00
