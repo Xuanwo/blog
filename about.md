@@ -9,7 +9,6 @@ permalink: /about/
 - 中国地质大学（北京）本科四年级在读生
 - 信息管理与信息系统专业
 - [青云QingCloud](https://www.qingcloud.com/)实习中
-- 恋爱ing
 
 # 奖项
 
@@ -32,10 +31,10 @@ permalink: /about/
 ## 语言类
 
 - C/C++ 熟练
+- python 熟练
 - php 初步
 - golang 初步
 - html，css，js 初步
-- python 初步
 - node.js 初步
 
 ## 工具类
