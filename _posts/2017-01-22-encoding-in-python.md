@@ -36,6 +36,7 @@ categories: Develop
 ![字节流与字符串](/imgs/develop/decode-encode.png)
 
 在`Python 2`中： `str` = `字节流`，`unicode` = `字符串`
+
 在`Python 3`中： `bytes` = `字节流`， `str` = `unicode` = `字符串`
 
 ### 终端编码
@@ -43,12 +44,15 @@ categories: Develop
 > 这里的终端是泛指，包括 Linux 下的 Console, Windows 下的 CMD 和 PowerShell 以及 Mac OS X 下的 Terminal
 
 终端编码决定了用户的输入和输出应当采用何种编码来进行编码和解码。
+
 Linux 和 Mac 用户应该对终端编码比较熟悉，经常会用的到有以下环境变量： `LC_ALL`，`LC_CTYPE`。他们之间的覆盖关系是 `LC_ALL` > `LC_CTYPE` ，推荐的配置是 `en_US.UTF-8`。
+
 对于 Windows 用户而言就比较麻烦了，他们使用的是一个叫做 `Code Page (代码页)` 的配置，更糟糕的是，`Code Page` 默认为936，也就是我们所熟知的 `cp936` ， 又叫做 `GBK`。想要切换到 `UTF-8` 的话需要执行命令 `chcp 65001`。
 
 ### 字体
 
 字体决定了字符如何显示。
+
 很常见的一种情况是编码支持某个字符，但是字体并不支持，这个时候就会显示成奇怪的字符。使用过 `oh-my-zsh` 的 `agnoster` 主题的同学应该会遇到这种情况，系统默认的字体不支持 `powerline` 所使用的特殊符号，需要为字体打上补丁才能正常显示。
 
 ## 错误剖析
@@ -134,6 +138,7 @@ UnicodeEncodeError: 'gbk' codec can't encode character '\u2122' in position 43: 
 ### 设置代码 coding
 
 建议为所有的源文件加上默认的coding设置： `# -*- coding: utf-8 -*-` 。
+
 尽管在 Python 3 的规范当中要求不需要指定 coding，但是为了兼容性考虑，所有会出现 Non-ASCII 字符的源代码文件都需要加上这个注释。
 
 ### 只使用 Unicode
