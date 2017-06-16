@@ -3,6 +3,7 @@ layout: post
 title: 从浏览器端向 QingStor 对象存储上传文件
 date: 2017-06-15 15:44:00
 categories: Develop
+tags: [Develop, Node.js, HTML, Web, JavaScript, QingStor]
 toc: true
 excerpt: 从浏览器端向 QingStor 对象存储上传是很多开发者的需求，虽然 QingStor 提供了相关的接口和 SDK，但是仍有很多开发者表示不知道怎么样去调用。本文的目的是系统的展示一下如何从浏览器端上传一个文件到对象存储，从而解决大多数开发者们的需求。
 ---
