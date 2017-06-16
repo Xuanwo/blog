@@ -2,7 +2,7 @@
 layout: post
 title: 新博客上线&Hexo主题开发入门
 date: 2016-06-29 23:06
-tags: [Hexo, Blog, HTML, JavaScript, Nodejs]
+tags: [Hexo, Blog, HTML, JavaScript, Node.js]
 categories: [Develop]
 toc: true
 ---
