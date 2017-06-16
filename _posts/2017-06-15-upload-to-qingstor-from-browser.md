@@ -21,7 +21,23 @@ QingStor 对象存储支持通过 HTML 表单上传的方式向存储空间上�
 
 ### 匿名可写
 
-{% gist 425fa071d4601d39fc5c902a12ab5784 post-object-anoymous.html %}
+```html
+<!DOCTYPE html>
+<html>
+
+<body>
+  <h3>Upload</h3>
+  <form id="upload" action="https://<bucket>.<zone>.qingstor.com" method="POST"
+        enctype="multipart/form-data">
+    <span>Click or Drag a File Here to Upload</span>
+    <input type=hidden name="key" value="<key>" />
+    <input type=file name="file" />
+    <input type=submit name="Upload" value="Upload to QingStor" />
+  </form>
+</body>
+
+</html>
+```
 
 其中：
 
@@ -37,7 +53,26 @@ QingStor 对象存储支持通过 HTML 表单上传的方式向存储空间上�
 
 更常见的情况是我们需要上传文件到一个私有的存储空间当中，此时我们需要对我们的 POST 请求进行签名。
 
-{% gist 425fa071d4601d39fc5c902a12ab5784 post-object-non-anoymous.html %}
+```html
+<!DOCTYPE html>
+<html>
+
+<body>
+  <h3>Upload</h3>
+  <form id="upload" action="https://<bucket>.<zone>.qingstor.com" method="POST"
+        enctype="multipart/form-data">
+    <span>Click or Drag a File Here to Upload</span>
+    <input type=hidden name="key" value="<key>" />
+    <input type=hidden name="policy" value="<policy>" />
+    <input type=hidden name="access_key_id" value="<access_key_id>" />
+    <input type=hidden name="signature" value="<signature>" />
+    <input type=file name="file" />
+    <input type=submit name="Upload" value="Upload to QingStor" />
+  </form>
+</body>
+
+</html>
+```
 
 其中：
 
@@ -57,7 +92,37 @@ POST 接口虽然方便，但是功能比较弱，为了满足开发者们的需
 
 > 在开始之前，我们需要正确设置 Bucket 的 CORS 使得我们可以顺利的进行跨域请求。详细操作方法可以参考[此处](https://docs.qingcloud.com/qingstor/guide/index.html#cors)，其中`允许的请求源`和`允许 HTTP 请求头`均可以设置为 `*` 以方便调试。
 
-{% gist 425fa071d4601d39fc5c902a12ab5784 put-sdk.html %}
+```html
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src='qingstor-sdk.min.js'></script>
+</head>
+
+<body>
+  <h3>Upload</h3>
+  <input type="file" onchange="upload()" id="file" name="file" />
+  <script>
+    let Config = require('qingstor-sdk').Config
+    let QingStor = require('qingstor-sdk').QingStor;
+    let config = new Config('<access_key_id>', '<secret_access_key>');
+    let bucket = new QingStor(config).Bucket('<bucket>', '<zone>');
+    function upload() {
+      let f = document.getElementById("file").files[0];
+      let reader = new FileReader();
+      reader.readAsBinaryString(f);
+      reader.onload = (() => {
+        bucket.putObject(f.name, {
+          body: reader.result
+        });
+      });
+    }
+  </script>
+</body>
+
+</html>
+```
 
 其中：
 
@@ -91,7 +156,50 @@ npm install
 
 接下来这个实例会展示如何使用签名服务器进行签名，并上传一个文件。
 
-{% gist 425fa071d4601d39fc5c902a12ab5784 put-signature.html %}
+```html
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src='qingstor-sdk.min.js'></script>
+</head>
+
+<body>
+  <h3>Upload</h3>
+  <input type="file" onchange="upload()" id="file" name="file" />
+  <script>
+    let Config = require('qingstor-sdk').Config
+    let QingStor = require('qingstor-sdk').QingStor;
+    let config = new Config('not_need', 'not_need');
+    let bucket = new QingStor(config).Bucket('<bucket>', '<zone>');
+    function upload() {
+      let f = document.getElementById("file").files[0];
+      let reader = new FileReader();
+      reader.readAsBinaryString(f);
+      reader.onload = (() => {
+        let req = bucket.putObjectRequest(f.name, {
+          "Content-Type": f.type
+        });
+        fetch("http://localhost:9000/operation?channel=header", {
+            method: "POST",
+            body: JSON.stringify(req.operation),
+            headers: {
+              "Content-Type": "application/json; charset=utf-8"
+            }
+          })
+          .then(res => res.json())
+          .then(res => {
+            req.operation.headers.Authorization = res.authorization;
+            req.operation.body = reader.result;
+            req.send()
+          })
+      });
+    }
+  </script>
+</body>
+
+</html>
+```
 
 其中：
 
@@ -109,3 +217,5 @@ npm install
 - POST 接口：简单方便，便于与现有的服务器端集成，适用于论坛附件上传，在线编辑器上传图片等场景
 - SDK 上传： 简单方便，但是会暴露出用户的密钥信息，适用于一些 No Server 应用，可以让用户自行填写自己的密钥，比如在线 Markdown 编辑器，可以实现复制进来的图片自动上传这样的功能。
 - 部署签名服务器： 比较复杂，适用于大多数场景，密钥信息保存在服务器端，不会泄漏给用户。
+
+此外，所有的代码都已经上传到 Gist，感兴趣的同学可以自取： https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784
