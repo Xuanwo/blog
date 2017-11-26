@@ -1,0 +1,27 @@
+{{ partial "head.html" . }}
+<body>
+<div id="container">
+    {{ partial "header.html" . }}
+    <section id="main" class="outer">
+        <section class="layout-wrap">
+            <div class="layout-title">
+                <span>{{ .Title }}</span>
+            </div>
+            <div class="layout-wrap-inner tag-cloud">
+                {{ $site := .Site }}
+                {{ $data := .Data }}
+                <ul>
+                {{ range $key, $value := .Data.Terms.Alphabetical }}
+                <li>
+                    <a href="{{ $site.LanguagePrefix }}/{{ $data.Plural }}/{{ $value.Name | urlize }}">{{ $value.Name }}</a>({{ $value.Count }})
+                </li>
+                {{ end }}
+                </ul>
+            </div>
+
+        </section>
+    </section>
+    {{ partial "footer.html" . }}
+</div>
+</body>
+</html>
