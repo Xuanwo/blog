@@ -29,7 +29,7 @@
             <blockquote>
             {{ if .Params.series }}
               {{ $e := .Params.series }}
-              <p>本文是 <a href="{{ $Site.BaseURL }}/series/{{ $e | urlize }}">{{ $e }}</a> 系列的第 {{ range $index, $element := index .Site.Taxonomies.series ($e | urlize) }} {{ if eq $element.Title $.Title }} {{add $index 1}}{{ end }}{{end}} 篇文章, 共 {{ .Site.Taxonomies.series.Count ($e | urlize) }} 篇。</p>
+              <p>本文是 <a href="{{ $Site.BaseURL }}/series/{{ $e | urlize }}">{{ $e }}</a> 系列的第 {{ range $index, $element := index .Site.Taxonomies.series ($e | urlize) }} {{ if eq $element.Title $.Title }} {{sub (.Site.Taxonomies.series.Count ($e | urlize)) $index }}{{ end }}{{end}} 篇文章, 共 {{ .Site.Taxonomies.series.Count ($e | urlize) }} 篇。</p>
             {{ end }}
             </blockquote>
             {{ .Content }}
