@@ -2,14 +2,20 @@
 title: About
 ---
 
-## About me
+## About Me
 
-- 在 [青云QingCloud](https://www.qingcloud.com/) 工作
-- 心血来潮时奋战到天明，情绪低落时键盘都不碰，靠爱写码
-- 游戏数十个，无一通关；动漫好几 T，无一完结
-- 有时重度强迫症，有时万事都随缘
+- 在 [青云QingCloud](https://www.qingcloud.com/) 工作，后端工程师一枚
 
-## About blog
+## About Social
+
+<script defer src="https://use.fontawesome.com/releases/v5.0.10/js/brands.js" integrity="sha384-6jhVhr5a+Z1nLr9h+fd7ocMEo847wnGFelCHddaOOACUeZNoQwFXTxh4ysXVam8u" crossorigin="anonymous"></script>
+<script defer src="https://use.fontawesome.com/releases/v5.0.10/js/fontawesome.js" integrity="sha384-M2FSA4xMm1G9m4CNXM49UcDHeWcDZNucAlz1WVHxohug0Uw1K+IpUhp/Wjg0y6qG" crossorigin="anonymous"></script>
+
+<a href="https://t.me/xuanwo" style="border-bottom: 0;"><i class="fab fa-telegram fa-3x"></i></a>
+<a href="https://github.com/Xuanwo" style="border-bottom: 0;"><i class="fab fa-github fa-3x"></i></a>
+<a href="https://twitter.com/OnlyXuanwo" style="border-bottom: 0;"><i class="fab fa-twitter fa-3x"></i></a>
+
+## About Blog
 
 time       | description
 ---------- | ----------------------------
