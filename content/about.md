@@ -8,12 +8,9 @@ title: About
 
 ## About Social
 
-<script defer src="https://use.fontawesome.com/releases/v5.0.10/js/brands.js" integrity="sha384-6jhVhr5a+Z1nLr9h+fd7ocMEo847wnGFelCHddaOOACUeZNoQwFXTxh4ysXVam8u" crossorigin="anonymous"></script>
-<script defer src="https://use.fontawesome.com/releases/v5.0.10/js/fontawesome.js" integrity="sha384-M2FSA4xMm1G9m4CNXM49UcDHeWcDZNucAlz1WVHxohug0Uw1K+IpUhp/Wjg0y6qG" crossorigin="anonymous"></script>
-
-<a href="https://t.me/xuanwo" style="border-bottom: 0;"><i class="fab fa-telegram fa-3x"></i></a>
-<a href="https://github.com/Xuanwo" style="border-bottom: 0;"><i class="fab fa-github fa-3x"></i></a>
-<a href="https://twitter.com/OnlyXuanwo" style="border-bottom: 0;"><i class="fab fa-twitter fa-3x"></i></a>
+<a href="https://t.me/xuanwo" style="border-bottom: 0;"><svg width="3em" height="3em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#telegram"></use></svg></a>
+<a href="https://github.com/Xuanwo" style="border-bottom: 0;"><svg width="3em" height="3em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#github"></use></svg></a>
+<a href="https://twitter.com/OnlyXuanwo" style="border-bottom: 0;"><svg width="3em" height="3em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#twitter"></use></svg></a>
 
 ## About Blog
 
