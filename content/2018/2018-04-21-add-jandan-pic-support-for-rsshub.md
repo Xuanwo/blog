@@ -15,7 +15,7 @@ url: /2018/04/21/add-jandan-pic-support-for-rsshub/
 
 ## 准备工作
 
-先了解一下 RSSHub 这个项目的大概构成。RSSHub 基于 [Koa](http://koajs.com/) 开发，请求进来之后就会被直接路由到对应的模块，然后每个模块中实现自己的逻辑。如果想增加新的支持，只需要修改 `router.js` 并在 `routes` 目录中增加对应的模块急了。项目中主要使用 [axios](https://github.com/axios/axios) 来做异步请求，使用 [art-template](https://aui.github.io/art-template/) 来渲染 RSS Feed 的模板，使用 [cheerio](https://cheerio.js.org/) 来解析 HTML。其中 axios 和 art-template 使用的都比较简单，只要模仿其它模块的写法就行了，只有 cheerio 对不怎么熟悉 jQuery 语法的同学会比较麻烦一些（对，就是我），需要花一些时间了解一下如何获取自己需要的内容。
+先了解一下 RSSHub 这个项目的大概构成。RSSHub 基于 [Koa](http://koajs.com/) 开发，请求进来之后就会被直接路由到对应的模块，然后每个模块中实现自己的逻辑。如果想增加新的支持，只需要修改 `router.js` 并在 `routes` 目录中增加对应的模块就可以了。项目中主要使用 [axios](https://github.com/axios/axios) 来做异步请求，使用 [art-template](https://aui.github.io/art-template/) 来渲染 RSS Feed 的模板，使用 [cheerio](https://cheerio.js.org/) 来解析 HTML。其中 axios 和 art-template 使用起来都比较简单，只要模仿其它模块的写法就行了，只有 cheerio 对不怎么熟悉 jQuery 语法的同学来说会比较麻烦一些（对，就是我），需要花一些时间了解一下如何获取自己需要的内容。
 
 ## 抓取无聊图
 
