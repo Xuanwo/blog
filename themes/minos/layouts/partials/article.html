@@ -1,4 +1,5 @@
 <article class="article article-type-post" itemscope itemprop="blogPost">
+    {{ $Site := .Site }}
     <div class="article-inner">
         {{ if .Title }}
         <header class="article-header">
@@ -6,10 +7,10 @@
         </header>
         {{ end }}
         <div class="article-meta">
+            {{ if ne (.Date.Format "2006-01-02") "0001-01-01" }}
             <a href="{{ .RelPermalink }}" class="article-date">
                 <time datetime='{{ .Date.Format "2006-01-02T15:04:05.000-07:00" }}' itemprop="datePublished">{{ .Date.Format "2006-01-02" }}</time>
             </a>
-            {{ $Site := .Site }}
             {{ if .Params.categories }}
             <div class="post-categories">
                 <div class="article-category">
@@ -22,6 +23,7 @@
             <div class="article-comment-link-wrap">
                 <a href="{{ .RelPermalink }}#disqus_thread" class="article-comment-link">Comments</a>
             </div>
+            {{ end }}
             {{ end }}
         </div>
 
