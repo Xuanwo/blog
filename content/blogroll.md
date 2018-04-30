@@ -1,5 +1,6 @@
 ---
 title: 友情链接
+type: single
 ---
 
 > Sorted by domain name in alphabetic order.

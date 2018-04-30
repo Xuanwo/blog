@@ -1,5 +1,6 @@
 ---
 title: About
+type: single
 ---
 
 ## 我是谁？
