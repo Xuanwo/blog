@@ -2,7 +2,6 @@
 categories: Develop
 date: 2018-04-01T10:07:00Z
 tags:
-- Develop
 - Python
 series: "Learn from BUG"
 title: Python os walk 的坑

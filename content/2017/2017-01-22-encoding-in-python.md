@@ -3,7 +3,6 @@ categories: Develop
 date: 2017-01-22T00:00:00Z
 tags:
 - Python
-- 字符串
 title: 聊一聊 Python 的字符串
 url: /2017/01/22/encoding-in-python/
 ---

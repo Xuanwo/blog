@@ -2,7 +2,6 @@
 categories: Develop
 date: 2018-04-21T07:30:00Z
 tags:
-- Develop
 - Node.js
 title: 为 RSSHub 增加煎蛋无聊图支持
 toc: true

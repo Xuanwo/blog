@@ -2,7 +2,6 @@
 categories: Develop
 date: 2016-11-12T00:00:00Z
 tags:
-- Develop
 - Web
 title: httpbin 介绍
 url: /2016/11/12/httpbin-intro/

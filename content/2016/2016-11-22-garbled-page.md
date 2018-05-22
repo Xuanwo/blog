@@ -2,7 +2,6 @@
 categories: Develop
 date: 2016-11-22T00:00:00Z
 tags:
-- Develop
 - Web
 title: 有趣的网页乱码问题
 url: /2016/11/22/garbled-page/

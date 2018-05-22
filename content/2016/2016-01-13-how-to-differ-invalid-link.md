@@ -3,7 +3,6 @@ categories: Daily
 date: 2016-01-13T01:18:51Z
 tags:
 - Software
-- 科普
 title: 如何识别真假链接？
 toc: true
 url: /2016/01/13/how-to-differ-invalid-link/

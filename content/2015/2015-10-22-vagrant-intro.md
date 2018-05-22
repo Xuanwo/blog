@@ -3,7 +3,6 @@ categories: Opinion
 date: 2015-10-22T09:24:57Z
 tags:
 - Software
-- Develop
 title: Vagrant——构建虚拟开发环境的新思路
 toc: true
 url: /2015/10/22/vagrant-intro/

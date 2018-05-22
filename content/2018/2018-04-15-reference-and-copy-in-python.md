@@ -2,7 +2,6 @@
 categories: Develop
 date: 2018-04-15T15:07:00Z
 tags:
-- Develop
 - Python
 series: "Learn from BUG"
 title: Python 中的引用与拷贝

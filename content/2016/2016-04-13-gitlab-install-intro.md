@@ -2,7 +2,6 @@
 categories: Operate
 date: 2016-04-13T00:00:00Z
 tags:
-- 运维
 - CUGBLUG
 - Gitlab
 title: Gitlab部署和汉化以及简单运维

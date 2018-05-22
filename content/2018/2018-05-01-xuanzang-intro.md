@@ -2,9 +2,9 @@
 categories: Develop
 date: 2018-05-01T13:30:00Z
 tags:
-- Develop
 - Golang
 - Blog
+series: "Self-made Wheels"
 title: Xuanzang —— 一款开箱即用的全文搜索引擎
 url: /2018/05/01/xuanzang-intro/
 ---
