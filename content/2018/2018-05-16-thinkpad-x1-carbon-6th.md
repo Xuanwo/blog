@@ -113,7 +113,7 @@ X1C 使用 Arch Linux 整体上没啥问题，但是在很多细节的地方有�
 
 - Xorg + KDE 对不同 DPI 的屏幕支持不太好，导致外接屏幕的时候用起来比较难受。
 - 指纹识别器驱动正在[开发当中](https://github.com/nmikhailov/Validity90)，暂时还用不了。
-- 在 KDE + SDDM 的组合下，进入休眠状态后再恢复，会有一定概率出现屏幕一直闪动的情况。重启 SDDM 之后会恢复正常，从 Xorg 的报错日志能看到类似这样的错误：`Failed to set drm version: Permission denied`。
+- ~~在 KDE + SDDM 的组合下，进入休眠状态后再恢复，会有一定概率出现屏幕一直闪动的情况。重启 SDDM 之后会恢复正常，从 Xorg 的报错日志能看到类似这样的错误：`Failed to set drm version: Permission denied`。~~ 最新版本的 KDE + SDDM 已经修复。
 - X1C 支持 S0i3 待机，但是不支持 S3 待机。两者的区别是在 S0i3 下 CPU 的功耗被降到最低，但仍保持着上电状态，而 S3 则不会。
  - X1C 支持 S3 需要 BIOS 的支持，社区中有人通过为 ACPI DSDT Table 打 Patch 来支持，但是这个 Hack 在最新版的 BIOS 中已经失效了，而且这个操作比较危险。因此我选择等待联想官方修复。就像论坛中有人说的那样：“Come on Lonove, show more love for linux users.”
  - 而 S0i3 待机需要修改内核参数来提供支持，并且增加该参数后会导致无法打开屏盖来唤醒机器。
