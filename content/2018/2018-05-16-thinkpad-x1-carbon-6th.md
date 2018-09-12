@@ -111,12 +111,45 @@ url: /2018/05/16/thinkpad-x1-carbon-6th/
 
 X1C 使用 Arch Linux 整体上没啥问题，但是在很多细节的地方有比较坑的地方：
 
+### 支持 S3 待机
+
+> - X1C 支持 S0i3 待机，但是不支持 S3 待机。两者的区别是在 S0i3 下 CPU 的功耗被降到最低，但仍保持着上电状态，而 S3 则不会。
+>   - X1C 支持 S3 需要 BIOS 的支持，社区中有人通过为 ACPI DSDT Table 打 Patch 来支持，但是这个 Hack 在最新版的 BIOS 中已经失效了，而且这个操作比较危险。因此我选择等待联想官方修复。就像论坛中有人说的那样：“Come on Lonove, show more love for linux users.”
+>   - 而 S0i3 待机需要修改内核参数来提供支持，并且增加该参数后会导致无法打开屏盖来唤醒机器。
+
+评论区有童鞋说最新版本的固件中已经修复了该问题，我升级了固件发现确实如此。此外，联想已经加入了 LVFS (Linux Vendor Firmware Service)，因此我们可以通过 LVFS 来更新固件。
+
+下面简单说一下如何更新固件并开启 S3 支持：
+
+- 使用 Arch 的同学可以通过 pacman 来安装 [`fwupd`](https://www.archlinux.org/packages/community/x86_64/fwupd)
+- 使用 `fwupdmgr get-devices` 获取设备中所有支持固件升级的硬件列表
+- 使用 `fwupdmgr refresh` 更新 metadata
+- 使用 `fwupdmgr get-updates` 来检查是不是有更新可用
+- 使用 `fwupdmgr update` 来进行固件升级
+  - 某些固件可能需要 root 权限
+  - 某些固件可能需要重启
+  - 固件升级的时候务必接好电源，同时电池的电量要保持在 60% 以上，最好能充满
+  - 固件升级的时候可能会把引导项删除，因此最好事先准备一个 live CD，在固件升级完毕之后重新 `grub-install` 一下即可
+- 固件升级完毕后在 BIOS 的 `Config -> Power -> Sleep State` 中将原来的 `Windows 10` 修改为 `Linux`
+
+做完上述的操作之后可以通过 `dmesg` 来检查是不是已经开启了 S3 的支持：
+
+```bash
+:) dmesg | grep -i "acpi: (supports"
+[    0.500484] ACPI: (supports S0 S3 S4 S5)
+```
+
+看到 S3 的话，说明已经搞定啦~
+
+### 已经解决的坑
+
+- 在 KDE + SDDM 的组合下，进入休眠状态后再恢复，会有一定概率出现屏幕一直闪动的情况。重启 SDDM 之后会恢复正常，从 Xorg 的报错日志能看到类似这样的错误：`Failed to set drm version: Permission denied`
+  - 最新版本的 KDE + SDDM 中已经修复了
+
+### 尚未解决的坑
+
 - Xorg + KDE 对不同 DPI 的屏幕支持不太好，导致外接屏幕的时候用起来比较难受。
 - 指纹识别器驱动正在[开发当中](https://github.com/nmikhailov/Validity90)，暂时还用不了。
-- ~~在 KDE + SDDM 的组合下，进入休眠状态后再恢复，会有一定概率出现屏幕一直闪动的情况。重启 SDDM 之后会恢复正常，从 Xorg 的报错日志能看到类似这样的错误：`Failed to set drm version: Permission denied`。~~ 最新版本的 KDE + SDDM 已经修复。
-- X1C 支持 S0i3 待机，但是不支持 S3 待机。两者的区别是在 S0i3 下 CPU 的功耗被降到最低，但仍保持着上电状态，而 S3 则不会。
- - X1C 支持 S3 需要 BIOS 的支持，社区中有人通过为 ACPI DSDT Table 打 Patch 来支持，但是这个 Hack 在最新版的 BIOS 中已经失效了，而且这个操作比较危险。因此我选择等待联想官方修复。就像论坛中有人说的那样：“Come on Lonove, show more love for linux users.”
- - 而 S0i3 待机需要修改内核参数来提供支持，并且增加该参数后会导致无法打开屏盖来唤醒机器。
 - 默认配置下 `Thunderbolt BIOS Assist Mode` 是 Disable 的，这会导致 Linux 在 s2idle 下的能耗特别高，需要进 BIOS 将其设置为 Enable。
 - 默认配置下，Linux 的 CPU 温度上限是 80 度，而 Windows 下是 97 度。这会导致 Linux 的 CPU 性能比 Windows 下要低，目前有一些 dirty hack，官方还没有修复。
 
@@ -127,6 +160,7 @@ X1C 使用 Arch Linux 整体上没啥问题，但是在很多细节的地方有�
 - [low cTDP and trip temperature in Linux](https://forums.lenovo.com/t5/Linux-Discussion/X1C6-T480s-low-cTDP-and-trip-temperature-in-Linux/td-p/4028489)
 - [Lenovo X1C6 / X1Y3 (2018): No deep sleep (S3)?](https://bbs.archlinux.org/viewtopic.php?id=234913)
 - [X1 Carbon Gen 6 cannot enter deep sleep (S3 state aka Suspend-to-RAM) on Linux](https://forums.lenovo.com/t5/Linux-Discussion/X1-Carbon-Gen-6-cannot-enter-deep-sleep-S3-state-aka-Suspend-to/td-p/3998182/highlight/true)
+- [fwupd](https://wiki.archlinux.org/index.php/Fwupd)
 
 ## 动态
 
