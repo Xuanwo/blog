@@ -5,6 +5,12 @@ type: single
 
 > Sorted by domain name in alphabetic order.
 
+[Ephen‘s Blog](https://ephen.me/)
+
+*自称灰姑娘，奇葩一朵，IT 废材，是一只产品汪*
+
+---
+
 [JerryQu 的小站](https://imququ.com/)
 
 *屈光宇，网上代号习惯用 JerryQu、qgy18，目前专注于 Web 端开发，关注 Web 性能优化与安全*
