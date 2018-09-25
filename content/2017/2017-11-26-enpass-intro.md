@@ -44,14 +44,16 @@ Enpass 是由一家在印度古尔冈的私人控股公司 [Sinew](https://www.s
 - 简单好用的密码生成工具
 - 支持备份与恢复
 - 支持导入导出
-- iOS 客户端支持指纹解锁
+- iOS 客户端支持指纹解锁，支持 iOS 12 Password AutoFill
 - 粘贴后自动清除剪贴板
 - 失去焦点一定时间后自动锁定程序
 
 ## 缺点
 
 - 在 Linux 平台上不支持输入法，无法输入中文，只能复制粘贴
+  - Enpass 的 Linux 客户端会捆绑一个特定版本的 Qt，而且缺少了 fcitx 的支持
 - 同步功能不是很稳定，同步失败之后需要重启程序来手动触发
+  - 目前我的方案是直接同步到本地的文件夹，然后使用 Insync 来同步这个目录
 
 ## 收费政策
 
@@ -62,6 +64,7 @@ Enpass 是由一家在印度古尔冈的私人控股公司 [Sinew](https://www.s
 
 - 可以用来同步 TOTP 的验证码，完美取代 Google Authenticator
 - 支持加密文件，可以用来跨平台同步自己的私钥和证书
+- iOS 客户端支持 iOS 12 内置的 Password Autofill，可以在 `Settings -> Passwords & Accounts -> AutoFill Passwords` 中打开
 
 ## 总结
 
