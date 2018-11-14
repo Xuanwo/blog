@@ -33,7 +33,7 @@ url: /2018/10/30/tips-of-systemd/
 
 当然可以写一个 VPN 管理工具啦，但是何必呢，systemd 已经都帮我们做好啦~
 
-只要写一个 `service` 文件，并放在 `/usr/lib/systemd/system` 下：
+只要写一个 `service` 文件，并放在 `/etc/systemd/system` 下：
 
 ```ini
 [Unit]
