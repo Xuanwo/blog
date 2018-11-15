@@ -5,9 +5,21 @@ type: single
 
 > Sorted by domain name in alphabetic order.
 
-[Ephen‘s Blog](https://ephen.me/)
+[Ephen's Blog](https://ephen.me/)
 
 *自称灰姑娘，奇葩一朵，IT 废材，是一只产品汪*
+
+---
+
+[Bruce Z Non-Sense Blog](https://blog.brucezhang.cf/)
+
+*可爱的布鲁斯兔兔*
+
+---
+
+[Farseerfc的小窩](https://farseerfc.me/)
+
+*fc 老师，Archlinux TU，Archlinuxcn 管理员，目前在日本的一所大学当教授*
 
 ---
 
