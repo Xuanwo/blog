@@ -5,15 +5,15 @@ type: single
 
 > Sorted by domain name in alphabetic order.
 
-[Ephen's Blog](https://ephen.me/)
-
-*自称灰姑娘，奇葩一朵，IT 废材，是一只产品汪*
-
----
-
 [Bruce Z Non-Sense Blog](https://blog.brucezhang.cf/)
 
 *可爱的布鲁斯兔兔*
+
+---
+
+[Ephen's Blog](https://ephen.me/)
+
+*自称灰姑娘，奇葩一朵，IT 废材，是一只产品汪*
 
 ---
 
