@@ -25,7 +25,7 @@ index_path: /project/xuanzang/index
 
 source:
   type: sitemap
-  url: https://xuanwo.org/sitemap.xml
+  url: https://xuanwo.io/sitemap.xml
   duration: 3600
 
 dictionary: /project/xuanzang/dictionary.txt
@@ -48,7 +48,7 @@ logger:
 
 ```bash
 :) curl 127.0.0.1:8080?text=aspire
-{"tokens":["aspire"],"docs":[{"title":"友情链接 // Xuanwo's Blog","url":"https://xuanwo.org/blogroll/","content_text":""}],"total":1}
+{"tokens":["aspire"],"docs":[{"title":"友情链接 // Xuanwo's Blog","url":"https://xuanwo.io/blogroll/","content_text":""}],"total":1}
 ```
 
 接入博客十分容易，只需要通过 Ajax 向 Xuanzang 发出请求，并解析返回的 JSON 插入正确的 DOM，比如：
@@ -128,7 +128,7 @@ Elasticsearch 很棒，但是用来做博客的全文搜索，总有一种拿着
 
 ### Google Site Search
 
-这大概是接入最方便的方案了，只需要直接跳转到 google 的 `site:xuanwo.org %s` 即可。缺点是无法控制 Google 的索引行为，也没有办法做到实时的抓取和更新。
+这大概是接入最方便的方案了，只需要直接跳转到 google 的 `site:xuanwo.io %s` 即可。缺点是无法控制 Google 的索引行为，也没有办法做到实时的抓取和更新。
 
 ### Algolia etc.
 

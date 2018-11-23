@@ -57,7 +57,7 @@ url: /2016/09/13/dynamic-page-data-spider/
 
 ## phatomjs报错
 
-https://cli.xuanwo.org/Tools/phatomjs.html#qxcbconnection-could-not-connect-to-display
+https://cli.xuanwo.io/Tools/phatomjs.html#qxcbconnection-could-not-connect-to-display
 
 当代码放到服务器上运行时候，出现了这样的报错：
 

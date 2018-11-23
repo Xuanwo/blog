@@ -9,7 +9,7 @@ title: 基于 AWS Lambda 实现自动化
 url: /2018/01/14/automation-based-on-aws-lambda/
 ---
 
-在上一篇文章中我们介绍了 [Integrmat](https://xuanwo.org/2017/12/03/integromat-intro/) 这个自动化平台，但是在实际的应用当中，它还是有一些不太符合我们项目需求的地方。基于 AWS Lambda 实现的自动化工具就是我们找到的替代方案，接下来我会将阐述一下项目的需求，然后根据对项目的需求分析为什么 Integrmat 不适合以及基于 AWS Lambda 实现的好处在哪里。之后会介绍一下 AWS Lambda 是什么以及如何实现我们的自动化工具，并分享一些在实现自动化工具中遇到的一些坑。
+在上一篇文章中我们介绍了 [Integrmat](https://xuanwo.io/2017/12/03/integromat-intro/) 这个自动化平台，但是在实际的应用当中，它还是有一些不太符合我们项目需求的地方。基于 AWS Lambda 实现的自动化工具就是我们找到的替代方案，接下来我会将阐述一下项目的需求，然后根据对项目的需求分析为什么 Integrmat 不适合以及基于 AWS Lambda 实现的好处在哪里。之后会介绍一下 AWS Lambda 是什么以及如何实现我们的自动化工具，并分享一些在实现自动化工具中遇到的一些坑。
 
 <!--more-->
 

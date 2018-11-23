@@ -20,7 +20,7 @@ url: /2015/01/07/chaoxing-download/
 <!--more-->
 
 # 解决方案
-[超星学术视频下载处理一条龙](http://disk.xuanwo.org/public.php?service=files&t=e0a53590668ea7605f87a056ea3db288)
+[超星学术视频下载处理一条龙](http://disk.xuanwo.io/public.php?service=files&t=e0a53590668ea7605f87a056ea3db288)
 
 ---
 

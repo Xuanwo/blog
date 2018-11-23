@@ -6,7 +6,7 @@ toc: true
 url: /2016/04/01/qingchat-intro/
 ---
 
-在我之前写过的一篇文章中，我曾经探索过类似的问题：[微信群重复人员识别](https://xuanwo.org/2016/02/28/wechat-remove/)。当初我就提出过能否自动获取相关数据，但因为种种原因的限制不了了之了。后来发现了[Mojo-Weixin](https://github.com/sjdy521/Mojo-Weixin)这个库之后，我决定在这个的基础上实现一个微信多群直播的工具——Qingchat。（*尽管在刚刚实现完不久，微信就更新了转发到多个群的功能，Sad。*）探索的成果如下： [Qingchat](https://github.com/Xuanwo/qingchat)，目前仅支持 python3 ，欢迎各位看官提 issues ，交 code ，或者拍砖。
+在我之前写过的一篇文章中，我曾经探索过类似的问题：[微信群重复人员识别](https://xuanwo.io/2016/02/28/wechat-remove/)。当初我就提出过能否自动获取相关数据，但因为种种原因的限制不了了之了。后来发现了[Mojo-Weixin](https://github.com/sjdy521/Mojo-Weixin)这个库之后，我决定在这个的基础上实现一个微信多群直播的工具——Qingchat。（*尽管在刚刚实现完不久，微信就更新了转发到多个群的功能，Sad。*）探索的成果如下： [Qingchat](https://github.com/Xuanwo/qingchat)，目前仅支持 python3 ，欢迎各位看官提 issues ，交 code ，或者拍砖。
 接下来我会先介绍一下 Qingchat 的原理，然后介绍 Qingchat 的使用，最后展望一下 Qingchat 未来的发展方向。
 
 <!--more-->

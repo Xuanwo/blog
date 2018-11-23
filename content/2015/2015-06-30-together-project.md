@@ -102,8 +102,8 @@ Next，我们在路上。
 
 # 引用资料
 ## 产生文档
-- [使用Screen管理会话](http://xuanwo.org/2015/07/01/screen-ssh/)
-- [Teambition团队协作实践](http://xuanwo.org/2015/07/02/teambition-work/)
+- [使用Screen管理会话](http://xuanwo.io/2015/07/01/screen-ssh/)
+- [Teambition团队协作实践](http://xuanwo.io/2015/07/02/teambition-work/)
 
 ## 参考文档
 - [Node.js文档](https://nodejs.org/documentation/)

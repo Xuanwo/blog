@@ -496,7 +496,7 @@ var duoshuoQuery = {short_name:"yourshortname"};
 ### 自行生成SSH key
 
 使用Github客户端可以免去输入密码操作的原因就是客户端在本地生成了一个SSH key并且添加到了Github网站中。不喜欢使用Github客户端的童鞋可以参考下面的流程自行生成SSH key。
-[使用Github SSH Key以免去Hexo部署时输入密码](http://xuanwo.org/2015/02/07/generate-a-ssh-key/)
+[使用Github SSH Key以免去Hexo部署时输入密码](http://xuanwo.io/2015/02/07/generate-a-ssh-key/)
 
 ## 多git部署
 
@@ -522,7 +522,7 @@ deploy:
 Todo
 
 # 贡献者
-- [@Xuanwo](http://xuanwo.org/)
+- [@Xuanwo](http://xuanwo.io/)
 - [@TimNew](http://timnew.me/)
 - [@tommy351](http://zespia.tw/)
 

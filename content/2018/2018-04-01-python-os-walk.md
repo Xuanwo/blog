@@ -46,7 +46,7 @@ Traceback (most recent call last):
 UnicodeDecodeError: 'ascii' codec can't decode byte 0x8b in position 0: ordinal not in range(128)
 ```
 
-之前写过的一篇关于 Python 字符串的[文章](https://xuanwo.org/2017/01/22/encoding-in-python/) 曾经分析过类似的问题，Python 2 在进行字符串比较、拼接、替换时，会进行隐式的类型转换。通过查看 `posixpath.py` 的源码，可以定位到报错的地方：
+之前写过的一篇关于 Python 字符串的[文章](https://xuanwo.io/2017/01/22/encoding-in-python/) 曾经分析过类似的问题，Python 2 在进行字符串比较、拼接、替换时，会进行隐式的类型转换。通过查看 `posixpath.py` 的源码，可以定位到报错的地方：
 
 ```python
 def join(a, *p):

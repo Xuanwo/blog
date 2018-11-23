@@ -10,7 +10,7 @@ toc: true
 url: /2015/02/07/generate-a-ssh-key/
 ---
 
-原文本来放在[Hexo常见问题解决方案](http://xuanwo.org/2014/08/14/hexo-usual-problem/)之中，但是由于步骤较多，理解起来比较困难，因此将本文独立出来单独成篇，以便于进行操作。
+原文本来放在[Hexo常见问题解决方案](http://xuanwo.io/2014/08/14/hexo-usual-problem/)之中，但是由于步骤较多，理解起来比较困难，因此将本文独立出来单独成篇，以便于进行操作。
 
 <!--more-->
 

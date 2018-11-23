@@ -14,7 +14,7 @@ url: /2015/02/07/Travis-CI-Hexo-Autodeploy/
 > 持续集成是一种软件开发实践。在持续集成中，团队成员频繁集成他们的工作成果，一般每人每天至少集成一次，也可以多次。每次集成会经过自动构建（包括自动测试）的检验，以尽快发现集成错误。许多团队发现这种方法可以显著减少集成引起的问题，并可以加快团队合作软件开发的速度。这篇文章简要介绍了持续集成的技巧和它最新的应用。
 然后想到我的博客也恰好满足这样的需求，因为我的博客一旦有了修改，就必须要重新build并且部署，那么能不能用持续集成的思想来改造我部署博客的流程呢？
 
-在这样的指导思想下，我完成了上一篇文章：[VPS搭配Github Webhook实现Hexo自动发布](https://xuanwo.org/2015/02/05/VPS-Hexo-Autodeploy/)，而今天我要介绍一下，在没有VPS的情况下，如何更方便的配置自己的持续集成的博客。
+在这样的指导思想下，我完成了上一篇文章：[VPS搭配Github Webhook实现Hexo自动发布](https://xuanwo.io/2015/02/05/VPS-Hexo-Autodeploy/)，而今天我要介绍一下，在没有VPS的情况下，如何更方便的配置自己的持续集成的博客。
 
 # 好处
 
@@ -44,11 +44,11 @@ Travis CI会在你每一次提交之后生成一个虚拟机来执行你事先�
 *感谢Hexo作者[tommy351](http://zespia.tw/)提供的操作流程，原文可见于[用 Travis CI 自動部署網站到 GitHub](http://zespia.tw/blog/2015/01/21/continuous-deployment-to-github-with-travis/)*
 
 ## 生成SSH Key
-参见[使用Github SSH Key以免去Hexo部署时输入密码](http://xuanwo.org/2015/02/07/generate-a-ssh-key/)
+参见[使用Github SSH Key以免去Hexo部署时输入密码](http://xuanwo.io/2015/02/07/generate-a-ssh-key/)
 需要注意的是，这个SSH key不应成为你账号的全局SSH key*（因为这样Travis CI就获得了你所有代码库的提交权限，这是不正确的）*，而应该添加至https://github.com/username/ropename/settings/keys ，这样，你就控制了Travis CI的权限。
 
 ## 加密私钥
-下面的操作需要事先配置好gem环境，如果没有可以尝试使用[强大且配置项丰富的在线IDE应用——Cloud9](http://xuanwo.org/2014/08/07/Cloud9/)。
+下面的操作需要事先配置好gem环境，如果没有可以尝试使用[强大且配置项丰富的在线IDE应用——Cloud9](http://xuanwo.io/2014/08/07/Cloud9/)。
 
 ### 安装Travis CI的命令行工具
 

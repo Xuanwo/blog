@@ -17,9 +17,9 @@ url: /2018/10/15/revocer-lost-blog-comments/
 查看自己博客的 Discussions 的时候会看到很多奇奇怪怪的链接：
 
 ```
-https://translate.googleusercontent.com/translate_c?act=url&depth=1&ie=UTF8&prev=_t&sl=auto&sp=nmt4&tl=en&u=https://xuanwo.org/2014/07/16/poj-1011-sticks/
-https://translate.googleusercontent.com/translate_c?depth=1&sl=zh-CN&sp=nmt4&tl=en&u=https://xuanwo.org/2015/02/07/generate-a-ssh-key/&xid=17259,15700022,15700124,15700149,15700168,15700186,15700190,15700201,15700208
-https://webcache.googleusercontent.com/search?q=cache:RMRC2X9nD0EJ:https://xuanwo.org/2017/11/26/enpass-intro/+&cd=1&ct=clnk&gl=jp&lr=lang_zh-CN%7Clang_zh-TW
+https://translate.googleusercontent.com/translate_c?act=url&depth=1&ie=UTF8&prev=_t&sl=auto&sp=nmt4&tl=en&u=https://xuanwo.io/2014/07/16/poj-1011-sticks/
+https://translate.googleusercontent.com/translate_c?depth=1&sl=zh-CN&sp=nmt4&tl=en&u=https://xuanwo.io/2015/02/07/generate-a-ssh-key/&xid=17259,15700022,15700124,15700149,15700168,15700186,15700190,15700201,15700208
+https://webcache.googleusercontent.com/search?q=cache:RMRC2X9nD0EJ:https://xuanwo.io/2017/11/26/enpass-intro/+&cd=1&ct=clnk&gl=jp&lr=lang_zh-CN%7Clang_zh-TW
 ```
 
 当然啦，自己的博客有外国友人开着 Google 翻译看自然会觉得开心，但是为啥这些奇怪的地址会被作为这篇文章评论的 URL 存入 Disqus 呢？
@@ -82,7 +82,7 @@ var disqus_config = function () {
 var disqus_config = function() {
     this.page.identifier = '\/2018\/10\/03\/ingress-beijing-central-axis\/';
     this.page.title = 'Ingress 北京中轴线噩梦难度一日速刷攻略';
-    this.page.url = 'https:\/\/xuanwo.org\/2018\/10\/03\/ingress-beijing-central-axis\/';
+    this.page.url = 'https:\/\/xuanwo.io\/2018\/10\/03\/ingress-beijing-central-axis\/';
 };
 ```
 
@@ -105,7 +105,7 @@ var disqus_config = function() {
 
 
 - `LOWER(REPLACE(AXXX,1,4,"https"))` 可以将 protocol 修改为 https 并全部转换为小写
-- `REGEXEXTRACT(AXXX, "https://xuanwo.org[\/\w-]*/")` 可以从 URL 的 Query 中提取出链接
+- `REGEXEXTRACT(AXXX, "https://xuanwo.io[\/\w-]*/")` 可以从 URL 的 Query 中提取出链接
 
 下面将修改好的 CSV 导出并上传，等到 disqus 异步处理即可。
 

@@ -11,7 +11,7 @@ toc: true
 url: /2015/07/02/teambition-work/
 ---
 
-[Together](http://xuanwo.org/2015/06/30/together-project/)团队组建完成后，一个现实的问题在于：我们怎么样进行协作。经过一番筛选之后，我选中了Teambition，一个简约但是够用的团队协作平台。我们团队围绕着我们的需求，基于Teambition建立了我们自己的协作平台。
+[Together](http://xuanwo.io/2015/06/30/together-project/)团队组建完成后，一个现实的问题在于：我们怎么样进行协作。经过一番筛选之后，我选中了Teambition，一个简约但是够用的团队协作平台。我们团队围绕着我们的需求，基于Teambition建立了我们自己的协作平台。
 
 <!--more-->
 
