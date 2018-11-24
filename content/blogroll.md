@@ -85,6 +85,12 @@ type: single
 
 ---
 
+[惠狐之书](https://blog.megumifox.com/)
+
+*惠狐，圣人惠的惠，狐狸的狐，Archlinux User，是电气工程&自动化大佬哒*
+
+---
+
 [Nicholas Wang's Blog](https://www.nicho1as.wang/)
 
 *尼古拉斯王，Archlinux User，有好多神奇的黑科技，还是 [B 站直播 UP 主](https://live.bilibili.com/24384)*
