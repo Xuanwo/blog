@@ -34,15 +34,18 @@ type: single
 - Steam 喜欢玩可以联机的游戏，帐号：[Xuanwo](https://steamcommunity.com/id/xuanwo/)
 - Ingress 玩家，9 级萌新，任务党，常驻北京，ID：Xuanwo，欢迎找我 met & 换 biocard
 
+## Music
+
+- 因为[四月是你的谎言](https://zh.moegirl.org/%E5%9B%9B%E6%9C%88%E6%98%AF%E4%BD%A0%E7%9A%84%E8%B0%8E%E8%A8%80)入坑钢琴，然而上了课，买了琴，但是至今只会小星星，每月练琴时间不超过半个小时，基本宣告 GG
+- 修 BUG 的时候听古典音乐
+- 写业务逻辑的时候听周杰伦
+- 造轮子的时候听各种动漫歌曲
+- 需要屏蔽环境噪音的时候听 LOL 全球总决赛主题曲（
+
 ## Novel
 
 - 最爱的作者：猫腻
 - 最爱的作品：《间客》
-
-## Piano
-
-- 入坑原因：[四月是你的谎言](https://zh.moegirl.org/%E5%9B%9B%E6%9C%88%E6%98%AF%E4%BD%A0%E7%9A%84%E8%B0%8E%E8%A8%80)
-- 上了课，买了琴，但是至今只会小星星，每月练琴时间不超过半个小时，基本宣告 GG
 
 ## Social
 
