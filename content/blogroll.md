@@ -79,6 +79,12 @@ type: single
 
 ---
 
+[It's me, Kiri](https://kirikira.moe/)
+
+*Kiki in the DRESS，萌娘一枚，可爱到鬼畜（催促女装的眼神）*
+
+---
+
 [依云's Blog](https://blog.lilydjwg.me/)
 
 *百合仙子，Archlinuxcn 管理员，擅长 Python，有好多厉害的脚本和工具，[lilac](https://github.com/archlinuxcn/lilac) 作者和维护者*
