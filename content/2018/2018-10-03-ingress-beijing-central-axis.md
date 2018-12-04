@@ -1,5 +1,5 @@
 ---
-categories: Daily
+categories: Game
 date: 2018-10-03T15:35:00Z
 tags:
 - Game
