@@ -3,7 +3,7 @@ categories: Code
 date: 2015-06-12T14:33:29Z
 tags:
 - Database
-- 复习
+
 title: 数据库系统概论复习
 toc: true
 url: /2015/06/12/database-review/

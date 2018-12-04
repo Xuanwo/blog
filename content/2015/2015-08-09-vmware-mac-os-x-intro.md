@@ -2,7 +2,7 @@
 categories: Code
 date: 2015-08-09T01:30:51Z
 tags:
-- 虚拟化
+
 - Mac
 title: 史上最详细的虚拟机安装Mac OS X图文教程
 toc: true

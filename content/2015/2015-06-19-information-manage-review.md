@@ -3,7 +3,7 @@ categories: Code
 date: 2015-06-19T16:58:58Z
 tags:
 - Information
-- 复习
+
 title: 信息资源管理复习
 toc: true
 url: /2015/06/19/information-manage-review/

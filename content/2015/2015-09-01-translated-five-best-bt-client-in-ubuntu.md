@@ -3,7 +3,7 @@ categories: Code
 date: 2015-09-01T10:54:20Z
 tags:
 - Linux
-- 翻译
+
 title: 译-Ubuntu下五个最好的BT客户端
 toc: true
 url: /2015/09/01/translated-five-best-bt-client-in-ubuntu/

@@ -4,7 +4,7 @@ date: 2015-09-24T08:04:13Z
 tags:
 - QingCloud
 - Work
-- 爬虫
+
 title: 多页批量规则数据抓取解决方案
 toc: true
 url: /2015/09/24/multi-page-data-spider/

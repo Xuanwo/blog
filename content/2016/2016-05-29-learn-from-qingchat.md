@@ -4,7 +4,7 @@ date: 2016-05-29T20:57:00Z
 tags:
 - Python
 - qingchat
-- 实习
+
 - QingCloud
 title: 我从Qingchat中学到的教训
 toc: true

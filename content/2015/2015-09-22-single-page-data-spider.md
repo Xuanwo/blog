@@ -4,7 +4,7 @@ date: 2015-09-22T09:07:22Z
 tags:
 - QingCloud
 - Work
-- 爬虫
+
 title: 单页批量规则数据抓取解决方案
 toc: true
 url: /2015/09/22/single-page-data-spider/

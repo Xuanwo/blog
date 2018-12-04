@@ -2,10 +2,10 @@
 categories: Code
 date: 2015-07-02T19:08:55Z
 tags:
-- 实习
-- 项目
+
+
 - Together
-- 协作
+
 title: Teambition团队协作实践
 toc: true
 url: /2015/07/02/teambition-work/
