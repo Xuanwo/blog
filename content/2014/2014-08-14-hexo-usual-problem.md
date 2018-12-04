@@ -1,5 +1,5 @@
 ---
-categories: Opinion
+categories: Code
 date: 2014-08-14T05:20:00Z
 tags:
 - Software

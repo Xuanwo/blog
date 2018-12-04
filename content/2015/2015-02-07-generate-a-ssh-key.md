@@ -1,5 +1,5 @@
 ---
-categories: Opinion
+categories: Code
 date: 2015-02-07T14:40:16Z
 tags:
 - Hexo

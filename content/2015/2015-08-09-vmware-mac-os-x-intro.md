@@ -1,5 +1,5 @@
 ---
-categories: Opinion
+categories: Code
 date: 2015-08-09T01:30:51Z
 tags:
 - 虚拟化

@@ -1,5 +1,5 @@
 ---
-categories: Opinion
+categories: Code
 date: 2018-04-08T16:07:00Z
 tags:
 - Hugo

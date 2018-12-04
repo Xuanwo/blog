@@ -1,5 +1,5 @@
 ---
-categories: Opinion
+categories: Code
 date: 2018-11-15T13:05:00Z
 tags:
 - Archlinux

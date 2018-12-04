@@ -1,5 +1,5 @@
 ---
-categories: Opinion
+categories: Code
 date: 2015-09-30T10:12:58Z
 tags:
 - QingCloud

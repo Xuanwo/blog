@@ -1,5 +1,5 @@
 ---
-categories: Opinion
+categories: Code
 date: 2015-09-01T10:54:20Z
 tags:
 - Linux
