@@ -1,5 +1,5 @@
 ---
-categories: Develop
+categories: Code
 date: 2016-04-01T00:00:00Z
 title: 微信多群直播的新探索——Qingchat
 toc: true

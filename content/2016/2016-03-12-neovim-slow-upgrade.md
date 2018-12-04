@@ -1,5 +1,5 @@
 ---
-categories: Develop
+categories: Code
 date: 2016-03-12T00:00:00Z
 tags:
 - vim
