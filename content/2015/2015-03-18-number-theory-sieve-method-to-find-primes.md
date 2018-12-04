@@ -1,5 +1,5 @@
 ---
-categories: Summary
+categories: Code
 date: 2015-03-18T17:16:01Z
 title: 数论——筛法求素数
 toc: true

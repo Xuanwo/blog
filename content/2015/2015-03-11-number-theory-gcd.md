@@ -1,5 +1,5 @@
 ---
-categories: Summary
+categories: Code
 date: 2015-03-11T10:32:31Z
 title: 数论——欧几里得算法
 toc: true

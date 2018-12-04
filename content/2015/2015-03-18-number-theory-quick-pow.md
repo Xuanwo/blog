@@ -1,5 +1,5 @@
 ---
-categories: Summary
+categories: Code
 date: 2015-03-18T17:43:59Z
 title: 数论——快速幂
 toc: true
