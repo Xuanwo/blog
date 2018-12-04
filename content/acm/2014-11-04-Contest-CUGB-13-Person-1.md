@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-04T10:28:10Z
 title: 13级个人赛第一场
 toc: true

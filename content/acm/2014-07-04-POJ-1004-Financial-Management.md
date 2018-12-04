@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-04T18:41:50Z
 title: POJ 1004 Financial Management
 toc: true

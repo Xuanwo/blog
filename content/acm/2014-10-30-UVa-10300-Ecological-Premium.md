@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-10-30T15:00:57Z
 title: UVa 10300 Ecological Premium
 toc: true

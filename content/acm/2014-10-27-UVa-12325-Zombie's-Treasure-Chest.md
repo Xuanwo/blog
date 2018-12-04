@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-10-27T16:49:40Z
 title: UVa 12325 Zombie's Treasure Chest
 toc: true

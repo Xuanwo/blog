@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-03T12:16:39Z
 title: POJ 1604 Just the Facts
 toc: true

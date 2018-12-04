@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T22:09:08Z
 title: POJ 2470 Ambiguous permutations
 toc: true

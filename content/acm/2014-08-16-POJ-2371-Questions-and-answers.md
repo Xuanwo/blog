@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-16T15:35:31Z
 title: POJ 2371 Questions and answers
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-03T11:36:27Z
 title: POJ 1543 Perfect Cubes
 toc: true

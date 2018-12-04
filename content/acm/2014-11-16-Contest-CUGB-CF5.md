@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-16T13:06:10Z
 title: CF拉练第五场
 toc: true

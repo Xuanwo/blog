@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-16T15:23:55Z
 title: POJ 2350 Above Average
 toc: true

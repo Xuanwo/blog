@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-03T12:19:40Z
 title: POJ 1658 Eva's Problem
 toc: true

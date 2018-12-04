@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-15T20:41:15Z
 title: POJ 3372 Candy Distribution
 toc: true

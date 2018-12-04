@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T22:08:38Z
 title: POJ 3749 破译密码
 toc: true

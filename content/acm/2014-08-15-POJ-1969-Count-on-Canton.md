@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-15T19:28:52Z
 title: POJ 1969 Count on Canton
 toc: true

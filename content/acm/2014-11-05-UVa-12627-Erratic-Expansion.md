@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-05T20:11:48Z
 title: UVa 12627 Erratic Expansion
 toc: true

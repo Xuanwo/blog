@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T17:18:27Z
 title: POJ 3325 ICPC Score Totalizer Software
 toc: true

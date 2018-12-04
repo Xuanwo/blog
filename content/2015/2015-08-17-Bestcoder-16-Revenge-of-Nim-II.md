@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2015-08-17T02:09:37Z
 title: Bestcoder Round 16 C Revenge of Nim II
 toc: true

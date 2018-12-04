@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-18T22:12:24Z
 title: POJ 3737 UmBasketella
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T00:45:00Z
 title: POJ 1160 Post Office
 toc: true

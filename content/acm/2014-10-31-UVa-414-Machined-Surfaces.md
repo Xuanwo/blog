@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-10-31T17:13:19Z
 title: UVa 414 Machined Surfaces
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-18T22:30:24Z
 title: POJ 2593 Max Sequence
 toc: true

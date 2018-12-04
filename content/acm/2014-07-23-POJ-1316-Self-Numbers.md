@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-23T02:43:24Z
 title: POJ 1316 Self Numbers
 toc: true

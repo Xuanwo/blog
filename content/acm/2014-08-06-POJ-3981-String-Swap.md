@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-06T16:00:00Z
 title: POJ 3981 字符串替换
 toc: true

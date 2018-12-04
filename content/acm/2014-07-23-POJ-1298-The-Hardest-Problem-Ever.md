@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-23T02:35:36Z
 title: POJ 1298 史上最难的问题
 toc: true

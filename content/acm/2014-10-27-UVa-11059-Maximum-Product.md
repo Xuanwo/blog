@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-10-27T14:05:31Z
 title: UVa 11059 Maximum Product
 toc: true

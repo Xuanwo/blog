@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-22T21:37:10Z
 title: POJ 1218 THE DRUNK JAILER
 toc: true

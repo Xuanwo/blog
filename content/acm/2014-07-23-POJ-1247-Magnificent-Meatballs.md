@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-23T02:03:12Z
 title: POJ 1247 Magnificent Meatballs
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-17T16:29:05Z
 title: POJ 2656 Unhappy Jinjin
 toc: true

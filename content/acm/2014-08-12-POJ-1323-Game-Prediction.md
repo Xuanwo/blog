@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T04:19:00Z
 title: POJ 1323 Game Prediction
 toc: true

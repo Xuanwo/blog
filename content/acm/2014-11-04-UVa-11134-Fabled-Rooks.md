@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-04T12:58:56Z
 title: UVa 11134 Fabled Rooks
 toc: true

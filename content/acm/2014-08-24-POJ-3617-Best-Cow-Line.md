@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-24T21:42:20Z
 title: POJ 3617 Best Cow Line
 toc: true

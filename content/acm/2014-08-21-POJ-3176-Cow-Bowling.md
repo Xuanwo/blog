@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T18:30:38Z
 title: POJ 3176 Cow Bowling
 toc: true

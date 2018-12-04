@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-12T23:12:37Z
 title: POJ 3194 Equidivisions
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T21:37:59Z
 title: POJ 2575 Jolly Jumpers
 toc: true

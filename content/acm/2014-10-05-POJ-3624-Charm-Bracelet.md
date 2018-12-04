@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-10-05T10:52:48Z
 title: POJ 3624 Charm Bracelet
 toc: true

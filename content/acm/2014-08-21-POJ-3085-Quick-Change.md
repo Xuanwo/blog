@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T18:28:06Z
 title: POJ 3085 Quick Change
 toc: true

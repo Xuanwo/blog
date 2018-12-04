@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-25T02:59:11Z
 title: POJ 1493 Machined Surfaces
 toc: true

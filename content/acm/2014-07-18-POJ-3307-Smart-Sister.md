@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-18T00:23:10Z
 title: POJ 3048 Max Factor
 toc: true

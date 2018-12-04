@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-18T22:23:53Z
 title: POJ 3720 Occurrence of Digits
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T21:35:15Z
 title: POJ 2579 Blurred Vision
 toc: true

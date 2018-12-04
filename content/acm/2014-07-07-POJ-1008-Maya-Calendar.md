@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-07T23:04:08Z
 title: POJ 1008 Maya Calendar
 toc: true

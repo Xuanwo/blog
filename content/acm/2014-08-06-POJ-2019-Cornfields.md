@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-06T14:20:00Z
 title: POJ 2019 Cornfields
 toc: true

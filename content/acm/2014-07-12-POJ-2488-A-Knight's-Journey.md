@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-12T19:59:14Z
 title: POJ 2488 A Knight's Journey
 toc: true

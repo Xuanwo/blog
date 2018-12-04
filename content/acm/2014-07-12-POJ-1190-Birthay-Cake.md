@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-12T20:48:21Z
 title: POJ 1190 生日蛋糕
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-19T16:58:57Z
 title: POJ 3083 Children of the Candy Corn
 toc: true

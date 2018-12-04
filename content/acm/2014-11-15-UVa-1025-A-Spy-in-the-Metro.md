@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-15T11:04:23Z
 title: UVa 1025 A Spy in the Metro
 toc: true

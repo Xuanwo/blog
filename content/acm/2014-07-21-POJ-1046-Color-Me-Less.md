@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-21T15:55:53Z
 title: POJ 1046 Color Me Less
 toc: true

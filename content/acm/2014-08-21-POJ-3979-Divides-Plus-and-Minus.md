@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T23:37:02Z
 title: POJ 3979 分数加减法
 toc: true

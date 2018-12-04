@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-16T16:16:48Z
 title: UVa 12563 Jin Ge Jin Qu hao
 toc: true

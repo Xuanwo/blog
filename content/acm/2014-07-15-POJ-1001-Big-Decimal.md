@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-15T23:09:03Z
 title: POJ 1001 求高精度幂
 toc: true

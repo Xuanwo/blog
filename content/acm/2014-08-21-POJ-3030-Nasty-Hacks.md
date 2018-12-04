@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T09:57:23Z
 title: POJ 3030 Nasty Hacks
 toc: true

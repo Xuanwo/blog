@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T10:06:22Z
 title: POJ 3086 Triangular Sums
 toc: true

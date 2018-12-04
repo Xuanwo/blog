@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-18T23:19:45Z
 title: POJ 2876 Cantoring Along
 toc: true

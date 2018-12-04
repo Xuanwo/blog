@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-18T15:43:53Z
 title: POJ 1306 Combinations
 toc: true

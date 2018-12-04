@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T04:11:00Z
 title: POJ 1338 Ugly Numbers
 toc: true

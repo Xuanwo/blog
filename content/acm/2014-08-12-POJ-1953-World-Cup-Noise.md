@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T05:19:00Z
 title: POJ 1953 World Cup Noise
 toc: true

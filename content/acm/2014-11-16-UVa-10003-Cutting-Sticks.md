@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-16T17:12:15Z
 title: UVa 10003 Cutting Sticks
 toc: true

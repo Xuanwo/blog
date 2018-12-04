@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T09:43:27Z
 title: POJ 2904 Gauß in Elementary School
 toc: true

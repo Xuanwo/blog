@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-18T17:00:55Z
 title: POJ 3278 Catch That Cow
 toc: true

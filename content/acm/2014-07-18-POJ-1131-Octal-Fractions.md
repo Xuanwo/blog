@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-18T15:29:12Z
 title: POJ 1131 Octal Fractions
 toc: true

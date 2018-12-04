@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-10-07T00:25:21Z
 title: POJ 2479 Maximum sum
 toc: true

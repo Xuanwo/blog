@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-10-27T16:13:36Z
 title: UVa 10976 Fractions Again?!
 toc: true

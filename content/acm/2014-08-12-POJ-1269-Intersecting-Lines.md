@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T01:12:00Z
 title: POJ 1269 Intersecting Lines
 toc: true

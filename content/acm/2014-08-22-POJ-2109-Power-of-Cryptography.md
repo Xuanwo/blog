@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T22:32:28Z
 title: POJ 2109 Power of Cryptography
 toc: true

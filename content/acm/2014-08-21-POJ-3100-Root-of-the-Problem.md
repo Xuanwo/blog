@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T18:36:21Z
 title: POJ 3100 Root of the Problem
 toc: true

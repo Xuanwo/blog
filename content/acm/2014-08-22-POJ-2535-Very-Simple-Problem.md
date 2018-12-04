@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T22:04:55Z
 title: POJ 2535 Very Simple Problem
 toc: true

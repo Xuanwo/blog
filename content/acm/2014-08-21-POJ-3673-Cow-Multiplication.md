@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T21:59:04Z
 title: POJ 3673 Cow Multiplication
 toc: true

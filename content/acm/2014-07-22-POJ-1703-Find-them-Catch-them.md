@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-22T13:51:22Z
 title: POJ 1703 Find them, Catch them
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-15T15:55:21Z
 title: POJ 2714 Random Walk
 toc: true

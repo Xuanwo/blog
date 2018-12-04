@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-06T19:04:08Z
 title: POJ 1005 I Think I Need a Houseboat
 toc: true

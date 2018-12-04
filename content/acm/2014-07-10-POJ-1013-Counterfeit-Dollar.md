@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-10T14:22:44Z
 title: POJ 1013 Counterfeit Dollar
 toc: true

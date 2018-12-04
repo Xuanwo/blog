@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-23T14:10:08Z
 title: POJ 1326 Mileage Bank
 toc: true

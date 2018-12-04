@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-06T22:52:00Z
 title: POJ 1251 Jungle Roads
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T17:31:04Z
 title: POJ 3183 Stump Removal
 toc: true

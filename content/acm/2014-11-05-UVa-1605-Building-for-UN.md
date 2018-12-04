@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-05T19:10:54Z
 title: UVa 1605 Building for UN
 toc: true

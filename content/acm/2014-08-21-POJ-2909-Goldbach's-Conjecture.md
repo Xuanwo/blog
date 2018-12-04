@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T09:40:06Z
 title: POJ 2909 Goldbach's Conjecture
 toc: true

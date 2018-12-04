@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T22:28:14Z
 title: POJ 2328 Guessing Game
 toc: true

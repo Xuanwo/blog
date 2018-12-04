@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T18:40:11Z
 title: POJ 3173 Parkside's Triangle
 toc: true

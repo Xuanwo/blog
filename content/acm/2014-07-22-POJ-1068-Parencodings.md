@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-22T20:37:35Z
 title: POJ 1068 Parencodings
 toc: true

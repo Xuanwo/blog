@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-18T22:57:52Z
 title: POJ 2864 Pascal Library
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-06T15:23:00Z
 title: POJ 2586 Y2K Accounting Bug
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-23T13:49:00Z
 title: POJ 1061 青蛙的约会
 toc: true

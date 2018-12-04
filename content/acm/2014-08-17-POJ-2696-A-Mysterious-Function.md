@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-17T23:52:44Z
 title: POJ 2696 A Mysterious Function
 toc: true

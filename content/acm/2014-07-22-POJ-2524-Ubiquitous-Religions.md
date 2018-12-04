@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-22T03:45:40Z
 title: POJ 2524 Ubiquitous Religions
 toc: true

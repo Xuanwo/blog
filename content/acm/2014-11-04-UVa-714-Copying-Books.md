@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-04T13:29:52Z
 title: UVa 714 Copying Books
 toc: true

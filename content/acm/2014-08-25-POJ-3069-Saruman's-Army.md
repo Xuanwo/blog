@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-25T09:31:30Z
 title: POJ 3069 Saruman's Army
 toc: true

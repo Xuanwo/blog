@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T20:02:37Z
 title: POJ 3196 Babylonian Roulette
 toc: true

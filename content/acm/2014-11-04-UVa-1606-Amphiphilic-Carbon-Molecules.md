@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-04T16:47:35Z
 title: UVa 1606 Amphiphilic Carbon Molecules
 toc: true

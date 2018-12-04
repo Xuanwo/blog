@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-16T16:33:57Z
 title: UVa 11400 Lighting System Design
 toc: true

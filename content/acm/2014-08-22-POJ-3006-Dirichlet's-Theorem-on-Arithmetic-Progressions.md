@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T18:13:27Z
 title: POJ 3006 Dirichlet's Theorem on Arithmetic Progressions
 toc: true

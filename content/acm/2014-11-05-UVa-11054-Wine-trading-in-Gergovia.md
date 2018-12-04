@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-05T19:34:31Z
 title: UVa 11054 Wine trading in Gergovia
 toc: true

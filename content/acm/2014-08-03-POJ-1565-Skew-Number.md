@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-03T11:43:36Z
 title: POJ 1565 Skew数
 toc: true

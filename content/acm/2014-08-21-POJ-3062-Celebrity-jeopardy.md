@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T10:00:09Z
 title: POJ 3062 Celebrity jeopardy
 toc: true

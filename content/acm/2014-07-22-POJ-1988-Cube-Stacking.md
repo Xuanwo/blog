@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-22T16:36:53Z
 title: POJ 1988 Cube Stacking
 toc: true

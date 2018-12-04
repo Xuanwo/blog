@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-04T15:19:29Z
 title: UVa 120 Stacks of Flapjacks
 toc: true

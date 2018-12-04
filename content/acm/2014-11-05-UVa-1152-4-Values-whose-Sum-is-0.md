@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-05T19:31:30Z
 title: UVa 1152 4 Values whose Sum is 0
 toc: true

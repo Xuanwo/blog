@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T22:26:15Z
 title: POJ 3750 小孩报数问题
 toc: true

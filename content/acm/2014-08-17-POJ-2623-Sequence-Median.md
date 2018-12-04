@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-17T16:44:10Z
 title: POJ 2623 Sequence Median
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-05T19:51:46Z
 title: UVa 1471 Defense Lines
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-16T14:59:02Z
 title: POJ 2249 Binomial Showdown
 toc: true

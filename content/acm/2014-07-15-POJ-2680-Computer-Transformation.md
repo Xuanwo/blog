@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-15T19:28:08Z
 title: POJ 2680 Computer Transformation
 toc: true

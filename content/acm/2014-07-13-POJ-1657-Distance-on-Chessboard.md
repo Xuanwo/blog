@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-13T16:42:02Z
 title: POJ 1657 Distance on Chessboard
 toc: true

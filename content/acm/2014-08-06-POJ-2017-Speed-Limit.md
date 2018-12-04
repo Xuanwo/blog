@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-06T14:06:00Z
 title: POJ 2017 Speed Limit
 toc: true

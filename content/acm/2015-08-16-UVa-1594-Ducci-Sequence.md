@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2015-08-16T04:04:26Z
 title: UVa 1594 Ducci Sequence
 toc: true

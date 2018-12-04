@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-23T23:44:01Z
 title: POJ 3273 Monthly Expense
 toc: true

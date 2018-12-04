@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-06T19:30:41Z
 title: POJ 1006 Biorhythms
 toc: true

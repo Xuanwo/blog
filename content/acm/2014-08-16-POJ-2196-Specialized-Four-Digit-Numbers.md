@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-16T14:41:33Z
 title: POJ 2196 Specialized Four-Digit Numbers
 toc: true

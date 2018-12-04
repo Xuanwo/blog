@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-10-30T15:16:38Z
 title: UVa 458 The Decoder
 toc: true

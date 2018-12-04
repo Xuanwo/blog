@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-02T15:37:31Z
 title: POJ 1979 Red and Black
 toc: true

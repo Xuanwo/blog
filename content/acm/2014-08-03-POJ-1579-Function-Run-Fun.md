@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-03T12:00:24Z
 title: POJ 1579 Function Run Fun
 toc: true

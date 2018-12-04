@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-05T19:38:51Z
 title: UVa 11572 Unique Snowflakes
 toc: true

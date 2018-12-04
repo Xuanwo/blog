@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-18T22:42:34Z
 title: POJ 2853 Sequence Sum Possibilities
 toc: true

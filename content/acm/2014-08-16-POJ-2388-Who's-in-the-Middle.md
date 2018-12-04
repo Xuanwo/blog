@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-16T15:12:33Z
 title: POJ 2388 Who's in the Middle
 toc: true

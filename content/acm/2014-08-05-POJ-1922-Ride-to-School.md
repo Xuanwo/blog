@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-05T20:36:00Z
 title: POJ 1922 Ride to School
 toc: true

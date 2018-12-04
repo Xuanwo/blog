@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-15T20:41:42Z
 title: POJ 2800 Joseph's Problem
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T00:55:00Z
 title: POJ 1157 LITTLE SHOP OF FLOWERS
 toc: true

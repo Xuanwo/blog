@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-15T16:50:50Z
 title: POJ 2818 Making Change
 toc: true

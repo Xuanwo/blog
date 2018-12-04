@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-06T14:18:10Z
 title: UVa 11093 Just Finish it up
 toc: true

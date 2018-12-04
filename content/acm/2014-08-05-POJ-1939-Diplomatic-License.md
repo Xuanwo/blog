@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-05T20:51:00Z
 title: POJ 1939 Diplomatic License
 toc: true

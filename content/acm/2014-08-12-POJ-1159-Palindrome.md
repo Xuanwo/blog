@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T00:38:00Z
 title: POJ 1159 Palindrome
 toc: true

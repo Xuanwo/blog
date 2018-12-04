@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T04:37:00Z
 title: POJ 1455 Crazy tea party
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T21:30:44Z
 title: POJ 2664 Prerequisites?
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-25T04:29:15Z
 title: POJ 1519 Digital Roots
 toc: true

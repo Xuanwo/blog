@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-18T22:39:35Z
 title: POJ 2871 A Simple Question of Chemistry
 toc: true

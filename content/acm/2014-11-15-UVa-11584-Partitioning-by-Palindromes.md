@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-15T11:33:53Z
 title: UVa 11584 Partitioning by Palindromes
 toc: true

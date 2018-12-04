@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T04:58:00Z
 title: POJ 1562 Oil Deposits
 toc: true

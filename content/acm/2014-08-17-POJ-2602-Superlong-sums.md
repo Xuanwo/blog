@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-17T16:33:30Z
 title: POJ 2602 Superlong sums
 toc: true

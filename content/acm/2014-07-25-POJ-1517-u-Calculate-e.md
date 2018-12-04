@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-25T04:00:19Z
 title: POJ 1517 u Calculate e
 toc: true

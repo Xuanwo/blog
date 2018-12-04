@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-18T22:18:58Z
 title: POJ 3219 二项式系数
 toc: true

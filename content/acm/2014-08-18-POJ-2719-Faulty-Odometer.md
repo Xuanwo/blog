@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-18T22:01:00Z
 title: POJ 2719 Faulty Odometer
 toc: true

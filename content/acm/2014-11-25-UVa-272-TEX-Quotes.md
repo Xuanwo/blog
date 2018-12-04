@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-25T10:40:48Z
 title: UVa 272 TEX Quotes
 toc: true

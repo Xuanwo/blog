@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T09:23:20Z
 title: POJ 2251 Dungeon Master
 toc: true

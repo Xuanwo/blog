@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-16T23:36:24Z
 title: POJ 2453 An Easy Problem
 toc: true

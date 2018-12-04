@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-02T14:52:47Z
 title: UVa 129 Krypton Factor
 toc: true

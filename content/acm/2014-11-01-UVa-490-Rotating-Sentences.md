@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-01T09:21:56Z
 title: UVa 490 Rotating Sentences
 toc: true

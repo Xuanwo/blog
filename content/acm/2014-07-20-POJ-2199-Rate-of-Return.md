@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-20T14:25:25Z
 title: POJ 2199 Rate of Return
 toc: true

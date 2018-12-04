@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T05:03:00Z
 title: POJ 1611 The Suspects
 toc: true

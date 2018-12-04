@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-17T16:08:27Z
 title: POJ 2509 Peter's smokes
 toc: true

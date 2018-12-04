@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T04:23:00Z
 title: POJ 1458 Common Subsequence
 toc: true

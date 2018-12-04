@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-18T17:38:41Z
 title: POJ 1047 Round and Round We Go
 toc: true

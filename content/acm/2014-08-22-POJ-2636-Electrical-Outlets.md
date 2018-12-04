@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T21:32:53Z
 title: POJ 2636 Electrical Outlets
 toc: true

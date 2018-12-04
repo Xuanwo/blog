@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-12T13:06:29Z
 title: POJ 1018 Communication System
 toc: true

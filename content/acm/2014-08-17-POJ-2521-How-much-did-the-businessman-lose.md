@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-17T16:14:20Z
 title: POJ 2521 How much did the businessman lose
 toc: true

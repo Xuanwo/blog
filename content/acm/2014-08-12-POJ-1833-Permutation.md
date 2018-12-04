@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T05:12:00Z
 title: POJ 1833 排列
 toc: true

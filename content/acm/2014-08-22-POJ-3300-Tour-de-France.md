@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T17:24:38Z
 title: POJ 3300 Tour de France
 toc: true

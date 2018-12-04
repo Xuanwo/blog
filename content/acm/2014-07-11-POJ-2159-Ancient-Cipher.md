@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-11T13:30:04Z
 title: POJ 2159 Ancient Cipher
 toc: true

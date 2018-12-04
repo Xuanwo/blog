@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-12T21:30:59Z
 title: POJ 1321 棋盘问题
 toc: true

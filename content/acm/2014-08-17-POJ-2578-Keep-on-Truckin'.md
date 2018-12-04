@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-17T16:24:37Z
 title: POJ 2578 Keep on Truckin'
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T22:41:28Z
 title: POJ 1250 Tanning Salon
 toc: true

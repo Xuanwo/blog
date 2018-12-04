@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-17T23:53:55Z
 title: POJ 2081 Recaman's Sequence
 toc: true

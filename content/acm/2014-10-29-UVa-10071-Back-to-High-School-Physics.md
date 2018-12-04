@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-10-29T20:09:12Z
 title: UVa 10071 Back to High School Physics
 toc: true

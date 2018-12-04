@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-16T15:39:47Z
 title: UVa 116 Unidirectional TSP
 toc: true

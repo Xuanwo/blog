@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-02T13:47:34Z
 title: UVa 524 Prime Ring Problem
 toc: true

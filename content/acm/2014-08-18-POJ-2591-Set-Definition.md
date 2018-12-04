@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-18T22:35:08Z
 title: POJ 2591 Set Definition
 toc: true

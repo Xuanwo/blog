@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-22T21:03:10Z
 title: POJ 1083 Moving Tables
 toc: true

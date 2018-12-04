@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T04:27:00Z
 title: POJ 1426 Find The Multiple
 toc: true

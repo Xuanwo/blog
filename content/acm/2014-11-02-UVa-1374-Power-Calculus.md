@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-02T15:04:43Z
 title: UVa 1374 Power Calculus
 toc: true

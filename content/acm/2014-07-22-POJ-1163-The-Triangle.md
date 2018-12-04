@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-22T21:12:47Z
 title: POJ 1163 The Triangle
 toc: true

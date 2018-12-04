@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T04:54:00Z
 title: POJ 1411 Calling Extraterrestrial Intelligence Again
 toc: true

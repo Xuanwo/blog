@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-18T14:46:10Z
 title: POJ 2305 Basic remains
 toc: true

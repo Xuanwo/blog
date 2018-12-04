@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-21T19:43:07Z
 title: POJ 3125 Printer Queue
 toc: true

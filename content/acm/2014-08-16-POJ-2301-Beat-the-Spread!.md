@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-16T15:19:47Z
 title: POJ 2301 Beat the Spread!
 toc: true

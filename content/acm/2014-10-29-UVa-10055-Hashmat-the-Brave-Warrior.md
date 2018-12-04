@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-10-29T13:24:02Z
 title: UVa 10055  Hashmat the Brave Warrior
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-16T15:15:33Z
 title: POJ 2390 Bank Interest
 toc: true

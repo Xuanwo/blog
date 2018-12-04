@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T17:21:34Z
 title: POJ 3302 Subsequence
 toc: true

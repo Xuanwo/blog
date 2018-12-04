@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-18T15:04:04Z
 title: POJ 1503 Integer Inquiry
 toc: true

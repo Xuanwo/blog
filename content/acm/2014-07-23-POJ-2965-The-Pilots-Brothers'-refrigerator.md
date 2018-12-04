@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-23T23:31:18Z
 title: POJ 2965 The Pilots Brothers' refrigerator
 toc: true

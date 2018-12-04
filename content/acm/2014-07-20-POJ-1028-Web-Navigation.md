@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-20T15:40:31Z
 title: POJ 1028 Web Navigation
 toc: true

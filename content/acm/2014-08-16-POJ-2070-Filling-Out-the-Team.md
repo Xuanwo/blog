@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-16T00:19:37Z
 title: POJ 2070 Filling Out the Team
 toc: true

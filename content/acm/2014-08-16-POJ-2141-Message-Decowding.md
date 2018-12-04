@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-16T00:50:06Z
 title: POJ 2141 Message Decowding
 toc: true

@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-25T03:40:50Z
 title: POJ 1504 Adding Reversed Numbers
 toc: true

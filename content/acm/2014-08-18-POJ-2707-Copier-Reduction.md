@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-18T22:05:01Z
 title: POJ 2707 Copier Reduction
 toc: true

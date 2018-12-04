@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-11-01T09:47:48Z
 title: UVa 445 Marvelous Mazes
 toc: true

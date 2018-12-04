@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-05T21:40:00Z
 title: POJ 2013 Symmetric Order
 toc: true

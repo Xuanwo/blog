@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-12T21:34:56Z
 title: POJ 2386 Lake Counting
 toc: true

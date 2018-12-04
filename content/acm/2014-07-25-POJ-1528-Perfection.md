@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-25T04:34:58Z
 title: POJ 1528 Perfection
 toc: true

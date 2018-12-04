@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-22T22:12:13Z
 title: POJ 2459 Feed Accounting
 toc: true

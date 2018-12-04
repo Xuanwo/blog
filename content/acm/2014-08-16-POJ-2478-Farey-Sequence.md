@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-16T23:33:37Z
 title: POJ 2478 Farey Sequence
 toc: true

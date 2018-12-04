@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-06T14:13:00Z
 title: POJ 2028 When Can We Meet?
 toc: true

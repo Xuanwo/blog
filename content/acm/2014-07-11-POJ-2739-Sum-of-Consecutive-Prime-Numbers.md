@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-11T19:49:38Z
 title: POJ 2739 Sum of Consecutive Prime Numbers
 toc: true

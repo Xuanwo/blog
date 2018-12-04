@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-17T16:50:58Z
 title: POJ 2606 Rabbit hunt
 toc: true

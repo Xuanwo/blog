@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-16T00:37:49Z
 title: POJ 2136 Vertical Histogram
 toc: true

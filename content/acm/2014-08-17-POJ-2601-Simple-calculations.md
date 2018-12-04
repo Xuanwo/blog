@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-17T23:49:14Z
 title: POJ 2601 Simple calculations
 toc: true

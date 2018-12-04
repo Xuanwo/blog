@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-08-12T04:32:00Z
 title: POJ 1477 Box of Bricks
 toc: true

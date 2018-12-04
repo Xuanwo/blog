@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-10-31T16:20:15Z
 title: UVa 494 Kindergarten Counting Game
 toc: true

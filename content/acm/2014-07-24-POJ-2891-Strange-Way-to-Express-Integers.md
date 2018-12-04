@@ -1,5 +1,5 @@
 ---
-categories: Exercise
+categories: Code
 date: 2014-07-24T01:57:51Z
 title: POJ 2891 Strange Way to Express Integers
 toc: true
