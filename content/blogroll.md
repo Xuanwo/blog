@@ -103,6 +103,12 @@ type: single
 
 ---
 
+[NoirGif](https://nir.moe)
+
+*NoirGif，Archlinux User，大文豪，会用英文写博客，会写诗，会做梦，还会写小说，说话喜欢在昵称前加老，看着就会情不自禁的笑出来*
+
+---
+
 [Aspire's Loft](https://pjw.io/)
 
 *后端研发工程师，目前主要用 Go，个人偏爱 Ruby，苹果 & 微软大法粉丝，喜欢玩 GTA 与赛车类游戏*
