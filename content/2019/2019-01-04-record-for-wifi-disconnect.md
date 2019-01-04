@@ -89,7 +89,17 @@ emmmm，我现在问题反而更多了，`STA` 是啥，`BSS` 又是啥，`non-a
 
 我搜索了一下这个 `non-aggressive load balancing`，发现只有一处提到，其他的地方基本都是全文引用的。包括思科在内的多家厂商都没有提过这个词，Linux 内核里面也没有搜索到相关信息，而作者给出两个引用都已经 404 了，所以无从得知这个 `non-aggressive load balancing` 到底是怎么来的。
 
-现在的猜想是当时信号不是很稳定，Kernel 认为自己离开了 BSS，于是断开了链接，过了一会儿收到了 Beacon 帧，于是重新连接了上去。
+> 现在的猜想是当时信号不是很稳定，Kernel 认为自己离开了 BSS，于是断开了链接，过了一会儿收到了 Beacon 帧，于是重新连接了上去。
+
+之前的猜想是这样，但是重新看了下 log 之后发现我的设备会很有规律的每过 300s 就断开重连一次：
+
+```bash
+[153162.962047] wlp2s0: disassociated from 06:69:6c:a9:45:6d (Reason: 8=DISASSOC_STA_HAS_LEFT)
+[153464.350214] wlp2s0: disassociated from 06:69:6c:a9:45:6d (Reason: 8=DISASSOC_STA_HAS_LEFT)
+[153766.738503] wlp2s0: disassociated from 06:69:6c:a9:45:6d (Reason: 8=DISASSOC_STA_HAS_LEFT)
+```
+
+我司的网络设备跟我的 PC 之间大约的确是有点故事了（耸肩，下个星期看看别人的 PC 有没有一样的问题。
 
 ## 答读者问
 
