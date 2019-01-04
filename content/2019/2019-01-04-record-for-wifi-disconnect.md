@@ -34,7 +34,7 @@ Jan 04 13:18:15 thinkpad-x1-carbon wpa_actiond[864]: Interface 'wlp2s0' reestabl
 
 > **Reason**: Disassociated because sending STA is leaving (or has left) BSS
 >
-> **Explanatio**n: Operating System moved the client to another access point using non-aggressive load balancing.
+> **Explanation**: Operating System moved the client to another access point using non-aggressive load balancing.
 
 emmmm，我现在问题反而更多了，`STA` 是啥，`BSS` 又是啥，`non-aggressive load balancing` 又是啥？
 
