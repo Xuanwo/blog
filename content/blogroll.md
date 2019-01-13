@@ -31,6 +31,12 @@ type: single
 
 ---
 
+[Just Facts](https://dang.fan/)
+
+*党主席，名字由来是因为当过科协主席，整天说自己穷但其实 rich 的不行，嵌入式方向的大佬，专利等身*
+
+---
+
 [Ephen's Blog](https://ephen.me/)
 
 *自称灰姑娘，奇葩一朵，IT 废材，是一只产品汪*
