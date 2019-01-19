@@ -166,9 +166,11 @@ MimeType=x-scheme-handler/tg;
   - 运行一个普通应用要输入 sudo 密码，感觉非常蛋疼
 - 如果做一个勇士，通过内核参数设置 `systemd.unified_cgroup_hierarchy` 来强制启用 cgroup v2，那么你会面对如下问题：
   - docker 啥的全崩了，因为 runc 还不支持 cgroups v2，参见[这个 issue](https://github.com/opencontainers/runc/issues/654) ，从社区反馈来看，感觉还遥遥无期
-  - systemd 的 cgroup v2 的资源控制实现有问题，并不能正常工作，在 [PR](https://github.com/systemd/systemd/pull/10894)中已经修复，但是暂时还没有 release
+  - ~systemd 的 cgroup v2 的资源控制实现有问题，并不能正常工作，在 [PR](https://github.com/systemd/systemd/pull/10894)中已经修复，但是暂时还没有 release~
 
 > 虽说暂时还用不上，但是先记录一下，万一修好了呢~
+>
+> 已经修好啦，systemd v240 中已经 fix 了 cgroup v2 相关的问题，可以正确控制用户实例的资源占用量啦~
 
 ## 为指定的 Service 设置环境变量
 
