@@ -1,14 +1,5 @@
 FROM alpine:edge
 
-LABEL "com.github.actions.name"="Hugo for GitHub Pages"
-LABEL "com.github.actions.description"="Builds and deploys the project to GitHub Pages"
-LABEL "com.github.actions.icon"="home"
-LABEL "com.github.actions.color"="red"
-
-LABEL "repository"="https://github.com/Xuanwo/gh-actions-hugo-deploy-gh-pages"
-LABEL "homepage"="https://github.com/Xuanwo/gh-actions-hugo-deploy-gh-pages"
-LABEL "maintainer"="Xuanwo <xuanwo.cn@gmail.com>"
-
 LABEL "Name"="Hugo for GitHub Pages"
 LABEL "Version"="0.1.0"
 
