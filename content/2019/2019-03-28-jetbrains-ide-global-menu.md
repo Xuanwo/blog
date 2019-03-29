@@ -79,6 +79,15 @@ community/libdbusmenu-glib 16.04.0-3
 
 ![](comment.png)
 
+Update: AUR 的维护者已经加上啦：
+
+```bash
+New optional dependencies for intellij-idea-ultimate-edition
+    libdbusmenu-glib: For global menu support [installed]
+```
+
+Arch is the best!
+
 ## 参考资料
 
 - [Support KDE Global Menu](https://youtrack.jetbrains.com/issue/IDEA-169904)
