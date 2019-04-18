@@ -88,6 +88,10 @@ New optional dependencies for intellij-idea-ultimate-edition
 
 Arch is the best!
 
+## 后续
+
+GTK 3 的应用可以通过安装 `appmenu-gtk-module` 来获取全局菜单的支持~
+
 ## 参考资料
 
 - [Support KDE Global Menu](https://youtrack.jetbrains.com/issue/IDEA-169904)
