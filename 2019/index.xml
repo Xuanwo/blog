@@ -1,4 +1,60 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>2019s on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/2019/</link><description>Recent content in 2019s on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 30 Mar 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/2019/index.xml" rel="self" type="application/rss+xml"/><item><title>在 Google 日历度过的欢乐时光</title><link>https://xuanwo.io/2019/03/30/google-calendar/</link><pubDate>Sat, 30 Mar 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/30/google-calendar/</guid><description>&lt;p&gt;前段时间终于下定决定入了 G Suite，花了点时间进行数据迁移，但是在操作日历的时候错误的把朋友们的生日提醒（每年重复）导入到了我的行程当中。为了将这些提醒删掉，我开始了一次 Google 日历的奇妙探险，找到了批量处理的方法，甚至还发现了一个 BUG。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>2019s on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/2019/</link><description>Recent content in 2019s on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 13 May 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/2019/index.xml" rel="self" type="application/rss+xml"/><item><title>翻车实况第 2 期</title><link>https://xuanwo.io/2019/05/13/rollover-2nd/</link><pubDate>Mon, 13 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/13/rollover-2nd/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;这文档里面都说过的事情，哪能算翻车！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;fcitx-快捷键与-rime-冲突&#34;&gt;fcitx 快捷键与 rime 冲突&lt;/h2&gt;
+&lt;p&gt;从很久之前开始就隐隐感觉 fcitx 和 rime 中间有些微妙的不对付，具体现象是使用 &lt;code&gt;L Shift&lt;/code&gt; 切换中英文之后会出现 rime 在中英文间疯狂切换导致无法正常输入。以前一直都是重新 Deploy 一下 rime 将就一下，直到有一天终于忍不住了，在 Archlinuxcn 的群里问了一下，&lt;a href=&#34;https://t.me/archlinuxcn_group/1397962&#34;&gt;传送门&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;rime.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;哦吼，有位群友指出 rime 和 fcitx 都有自己的中英文切换键，所以在默认配置下会出现快捷键的冲突。后来我按照群友的指示把 fcitx 的快捷键关掉，只用 rime 的切换（因为我只需要输入中文和英文，而且我只有 rime 这一个输入法）。&lt;/p&gt;
+&lt;p&gt;果然好了！困扰了我大半年的毛病十秒钟就被解决了= =&lt;/p&gt;
+&lt;h2 id=&#34;tmux-2-9-配置变更&#34;&gt;tmux 2.9 配置变更&lt;/h2&gt;
+&lt;p&gt;前一段时间 tmux 上了 2.9，导致 &lt;code&gt;window-status-bg&lt;/code&gt;，&lt;code&gt;message-fg&lt;/code&gt; 这种常用的配置参数都失效了。&lt;/p&gt;
+&lt;p&gt;tmux 的 CHANGES 文件中有提到如何迁移： &lt;a href=&#34;https://github.com/tmux/tmux/blob/master/CHANGES#L89-L90&#34;&gt;https://github.com/tmux/tmux/blob/master/CHANGES#L89-L90&lt;/a&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;* The individual -fg, -bg and -attr options have been removed; they
+were superseded by -style options in tmux 1.9.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;具体的来说就是把形如 &lt;code&gt;status-bg colour235&lt;/code&gt; 的参数替换为 &lt;code&gt;status-style bg=colour235&lt;/code&gt;，比如&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;set-option -g status-bg colour235
+set-option -g status-fg colour136
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;替换为：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;set-option -g status-style fg=colour136,bg=colour235
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我在用的主题是 &lt;a href=&#34;https://github.com/seebi/tmux-colors-solarized&#34;&gt;tmux-colors-solarized&lt;/a&gt;，已经有人贡献了一个修复 tmux 2.9 兼容的 &lt;a href=&#34;https://github.com/seebi/tmux-colors-solarized/pull/23&#34;&gt;PR&lt;/a&gt;，其他主题参考一下即可。&lt;/p&gt;
+&lt;h2 id=&#34;go-get-failed&#34;&gt;go get failed&lt;/h2&gt;
+&lt;p&gt;有一天用 go get 去访问托管在自建的 gitea 的时候突然发现会出现这样的报错：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;:) go get git.xuanwo.io/let-go-mod-happy/logrus
+package git.xuanwo.io/let-go-mod-happy/logrus: unrecognized import path &amp;quot;git.xuanwo.io/let-go-mod-happy/logrus&amp;quot; (https fetch: Get https://git.xuanwo.io/let-go-mod-happy/logrus?go-get=1: x509: certificate signed by unknown authority)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;一开始感觉有点奇怪，因为浏览器访问是正常的，随后用 curl 测试了一下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;:) curl https://git.xuanwo.io/let-go-mod-happy/logrus -v
+* Trying xxx.xxx.xxx.xxx...
+* TCP_NODELAY set
+* Connected to git.xuanwo.io (xxx.xxx.xxx.xxx) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+* CAfile: /etc/ssl/certs/ca-certificates.crt
+CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (OUT), TLS alert, unknown CA (560):
+* SSL certificate problem: unable to get local issuer certificate
+* Closing connection 0
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+More details here: https://curl.haxx.se/docs/sslcerts.html
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;emmmm，&lt;code&gt;unknown CA&lt;/code&gt;，这可能跟我的 nginx 的 SSL 配置有关。检查了一下果然如此：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ssl_certificate /etc/nginx/certs/git.xuanwo.io/cert;
+ssl_certificate_key /etc/nginx/certs/git.xuanwo.io/key;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我配置的证书并不是完整的链，所以导致 TLS 在握手的时候失败了，将选用的证书修改为 fullchain 即可。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ssl_certificate /etc/nginx/certs/git.xuanwo.io/fullchain;
+ssl_certificate_key /etc/nginx/certs/git.xuanwo.io/key;
+&lt;/code&gt;&lt;/pre&gt;</description></item><item><title>在 Google 日历度过的欢乐时光</title><link>https://xuanwo.io/2019/03/30/google-calendar/</link><pubDate>Sat, 30 Mar 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/30/google-calendar/</guid><description>&lt;p&gt;前段时间终于下定决定入了 G Suite，花了点时间进行数据迁移，但是在操作日历的时候错误的把朋友们的生日提醒（每年重复）导入到了我的行程当中。为了将这些提醒删掉，我开始了一次 Google 日历的奇妙探险，找到了批量处理的方法，甚至还发现了一个 BUG。&lt;/p&gt;
 &lt;h2 id=&#34;apps-script-是好文明&#34;&gt;Apps Script 是好文明&lt;/h2&gt;
 &lt;p&gt;首先来明确一下需要解决的问题：删除个人日历中出现的大量形如 “XXX 的生日” 的行程。OK，问题确定之后，可以初步得到几种解决问题的思路：&lt;/p&gt;
 &lt;ul&gt;
@@ -575,52 +631,4 @@ HDMI-A-2: disconnected&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;看到了当时正在热播的兔女郎学姐，正冲动想买来的时候想起来我还不会日语，打住打住。&lt;/p&gt;
 &lt;p&gt;起风啦，下雨啦，天黑啦，早些归家。&lt;/p&gt;
 &lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
-&lt;p&gt;所有的标题都来自《将夜》，与内容无关~&lt;/p&gt;</description></item><item><title>大阪——波澜不惊的日常</title><link>https://xuanwo.io/2019/01/26/first-day-at-osaka/</link><pubDate>Sat, 26 Jan 2019 06:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/01/26/first-day-at-osaka/</guid><description>&lt;blockquote&gt;
-&lt;p&gt;真的猛士，敢于直面惨淡的人生，敢于正视淋漓的鲜血，敢于表演丢人的剧本。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id=&#34;one-one-one&#34;&gt;One，One，One&lt;/h2&gt;
-&lt;p&gt;我醒的时候，天还没有全亮，朋友还没起床。房间里面也没有什么娱乐设施，于是决定出去走走。东京的清晨有点凉，衣服穿的不太够的我不由得用力的裹了裹。街上的行人很少，不过走的都很快，大概他们也很冷吧。街头的灯还亮着，似乎没有从昨夜的喧嚣中醒来。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;streets-that-no-awake.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;天空中一直回荡着乌鸦的叫声，或许是因为清晨的关系，鸟叫声传的很远，近处与远处交相回响，有了点音乐的感觉。旅行中的人总是更具包容，此时并不觉得吵，反而觉得很有意思，尽管可能回家之后听到同样的叫声免不了要抱怨几句：“吵死了”。&lt;/p&gt;
-&lt;p&gt;天渐渐的变亮，而我的身体却愈发觉得冷，看到街旁有一个热饮店便去买了杯热红茶。（事实证明这是个错误的决定，因为喝完之后我一直想吐，难受了很久= =）双手抱着热茶，我继续饶有兴致的做一个观察者。哪怕是街头的各种标语都觉得新鲜：比如路上喫煙禁止，自転車放置禁止这些。&lt;/p&gt;
-&lt;p&gt;一路走来拍了很多莫名其妙的照片，就不放出来荼毒大家了，唯一一个我觉得有意思的照片是这样的：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;magic.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;拍的时候是乱拍的，但是回家之后翻到这一张觉得非常迷幻。本身隔着玻璃橱窗拍的，店里面还有一个镜子，重重倒影之后，散落在我脚旁是店家们扔出来的生活垃圾，仿佛在提醒我真实的世界在何方。&lt;/p&gt;
-&lt;p&gt;又逛了一会儿之后收到了朋友的消息，他们已经出门了，便跟他们汇合一起去筑地市场。事先就打听过，筑地市场特别火，排队的人很多，所以要早点去。去了之后发现好像跟我们想像的不太一样，相比于饮食街，它更像是一个海鲜批发市场。我们随便找了个店面进去吃了一会儿，但是感觉没啥大的差别，于是没有多吃就出来了。然后现场查攻略，才知道筑底市场分为场内和场外，那些名店大多都在场内。&lt;/p&gt;
-&lt;p&gt;稍微讨论了一下，我们决定做公交车去场内吃大和寿司，这来都来了，不打个卡岂不是亏了。场内市场在一个小岛上，我们头一次在日本感受到了什么叫开阔：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;tsukiji.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;这里大概是装货卸货的地方吧，一大块地上啥都没有，感觉意外的奢侈。按照导航的指引，没多久就到了目的地：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;daiwasushi.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;跟我们差不多时候到的还有一群扛着长枪短炮的摄影师们，后来隐约明白他们是国外来的一个团队，来采访大和寿司的店长。我当时心里一阵不妙，这个店这么厉害的么，怕不是要吃不起。&lt;/p&gt;
-&lt;p&gt;进去之后发现有点像回转寿司，一个厨师负责三到四人的样子，坐下来之后才发现这个店没有菜单- -。能吃的东西都放在面前的玻璃柜中，顾客说自己要什么，厨师直接拿出来做好就直接吃了。真正的新鲜，没有中间商赚差价！我选中了一个看起来像是三文鱼的东西，想告诉厨师我们一人一个，但是一时想不起来咋说，于是一边手指着我们三，一边说出了那句如果我能穿越回去就算是掐死自己也不让说出来的禁句：&lt;strong&gt;“One, One, One”&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;场面一阵安静，我的额头上似乎凌空冒出了三条黑线，我们的朋友在忍住不要发出爆笑，我面前的小哥哥愣了一下之后笑着点头示意：“OK, OK, One, One, One.”。啊，我要疯了= =，漩涡酱大危机，前所未有的丢脸时刻。不行，我得稳住，假装无事发生过，之后每一次点新的寿司我都来一遍 One，One，One，假装这是常见用法。大丈夫です，我能行的。&lt;/p&gt;
-&lt;p&gt;我能稳，但是厨师不让我稳- -。只见他一边切寿司一边跟边上的同事说笑，虽然听不懂，但是时不时冒出来的 “One，One，One” 在疯狂暗示他们说笑的内容。喂，你们这样不行吧，你们知不知道你们在调笑来自异国他乡的客人啊，岂可修！我只能假装认真拍照来掩饰我心中的惊涛骇浪：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;one,one,one.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;别笑了，你看这三文鱼多新鲜！&lt;/p&gt;
-&lt;h2 id=&#34;走-走-走&#34;&gt;走，走，走&lt;/h2&gt;
-&lt;p&gt;吃完寿司之后我们就坐电车回到酒店收拾行囊准备去大阪了，不过因为上午耽搁的比较久，直接坐到大阪的话可能要饿死了，所以决定先坐到名古屋，在名古屋吃完中饭之后再去大阪。&lt;/p&gt;
-&lt;p&gt;经过了有点纠结的换票之后，我们终于看到了新干线的列车：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;shinkansen.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;wow，帅到，这就是铁胆火车侠的本体么！&lt;/p&gt;
-&lt;p&gt;虽说是新干线，但是感觉跟平时坐电车没差，只不过距离远了一些。车上的体验跟国内高铁差不多，相对更安静一点。无聊的我无声哼着无聊的 disco 在无聊的乱拍，直到途中有一段似乎经过了海边：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;oversea.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;列车远离海岸线之后我也困了起来，在车上睡着了。再醒来的时候到了名古屋，已经是中午饭点了，我们决定出去随便吃点然后回来接着坐到大阪。可是车站边上有啥吃的呢？出站之后我们有些懵逼的环顾着四周。啊，有了，我们去吃吉野家！在克服了最初的违和感之后，我们都吃的非常满意，以至于之后的几天都念念不忘吃了好几顿。他们这里叫做牛丼，我们那边叫做牛肉饭的玩意儿是这样子的：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;gyudon.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;我就是饿死，从新干线上跳下去，我也不吃什么吉野家！真香，再来一碗！&lt;/p&gt;
-&lt;h2 id=&#34;买-买-买&#34;&gt;买，买，买&lt;/h2&gt;
-&lt;p&gt;终于吃饱之后，我们换了从名古屋到大阪的票，继续出发。&lt;/p&gt;
-&lt;p&gt;到大阪的时候已经下午三点了，我们决定从地铁站直接走到酒店。我开着导航在前方带队，途中发现了一个特别有意思的事情：这大阪的街道为何这么整齐？&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;streets-in-osaka.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;以至于我们一路上都在讨论一个 7 * 8 的方格，从左下角走到右上角有多少种不同的路线。&lt;/p&gt;
-&lt;p&gt;一路说着闲话，终于到了被我们称为 “日本全季” 的 WBF 北浜店。在 WBF 住的这两天是我们住的最舒服的两天，离开的时候都有些留恋，琢磨着是不是在东京也找个 WBF 住。进门就能看到一个空气净化器，桌上立着几份资料，从里面找到了一份成人节目的列表，偷偷拍了一张，恪守伦理的 “伦理君” 当然是没有看的啦（太贵了）。&lt;/p&gt;
-&lt;p&gt;稍微修整一下之后便朝着心斋桥出发了，此时下午五点，天色渐暗，有点好看：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;night-in-osaka.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;心斋桥附近的街上正好有个灯展，还有个 Apple Store，去观摩了一波。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;light.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;接下来就是买买买时间，我在边上当了一个忠实的吃瓜群众。看着他们熟练的出入各种药妆店，嘴里吞吐着各种我听不懂的术语，这大概就是次元壁吧，我想。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;ruo.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;晚餐吃了一顿温野菜，对着他们的菜单研究了很久。跟国内不太一样的是，日本这边似乎会分成很多套餐，高级的套餐会比低级多一些肉类（日本真的很喜欢各种各样的套餐哎。。），最后决定吃最低级的那种，因为我们吃不了多少，也吃不出来不同种类的牛肉有啥差别。果然没有吃多少就撤了- -，战斗力不强的话就是这个样子啦。&lt;/p&gt;
-&lt;p&gt;回酒店的时候由于我的指挥失误，我们多走了整整 10 分钟，小伙伴们连砍我的力气都没有了，只会无力的问我：还有多久到？嘛，快到了，快到了。我故作欢快地回答，一边把导航的音量调低。&lt;/p&gt;
-&lt;p&gt;到了酒店之后洗了个舒服的热水澡，我们联袂上演了一场惊天地泣鬼神的大翻盘，可以点击&lt;a href=&#34;https://photos.app.goo.gl/tC3zoSu91BwAnMRw6&#34;&gt;这里&lt;/a&gt;查看录像，那位走位飘逸，操作风骚的 &lt;code&gt;qsIndex&lt;/code&gt; 就是我啦~&lt;/p&gt;
-&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
-&lt;p&gt;到现在已经两天过去啦，按照目前这进度，在我下次出去玩之前应该能写完的吧？。。。&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;所有的标题都来自《将夜》，与内容无关~&lt;/p&gt;</description></item></channel></rss>

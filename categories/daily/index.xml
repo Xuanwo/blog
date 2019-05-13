@@ -1,4 +1,60 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Daily on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/categories/daily/</link><description>Recent content in Daily on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 19 Feb 2019 06:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/categories/daily/index.xml" rel="self" type="application/rss+xml"/><item><title>翻车实况第 1 期</title><link>https://xuanwo.io/2019/02/19/rollover-1st/</link><pubDate>Tue, 19 Feb 2019 06:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/02/19/rollover-1st/</guid><description>&lt;blockquote&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Daily on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/categories/daily/</link><description>Recent content in Daily on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 13 May 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/categories/daily/index.xml" rel="self" type="application/rss+xml"/><item><title>翻车实况第 2 期</title><link>https://xuanwo.io/2019/05/13/rollover-2nd/</link><pubDate>Mon, 13 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/13/rollover-2nd/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;这文档里面都说过的事情，哪能算翻车！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;fcitx-快捷键与-rime-冲突&#34;&gt;fcitx 快捷键与 rime 冲突&lt;/h2&gt;
+&lt;p&gt;从很久之前开始就隐隐感觉 fcitx 和 rime 中间有些微妙的不对付，具体现象是使用 &lt;code&gt;L Shift&lt;/code&gt; 切换中英文之后会出现 rime 在中英文间疯狂切换导致无法正常输入。以前一直都是重新 Deploy 一下 rime 将就一下，直到有一天终于忍不住了，在 Archlinuxcn 的群里问了一下，&lt;a href=&#34;https://t.me/archlinuxcn_group/1397962&#34;&gt;传送门&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;rime.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;哦吼，有位群友指出 rime 和 fcitx 都有自己的中英文切换键，所以在默认配置下会出现快捷键的冲突。后来我按照群友的指示把 fcitx 的快捷键关掉，只用 rime 的切换（因为我只需要输入中文和英文，而且我只有 rime 这一个输入法）。&lt;/p&gt;
+&lt;p&gt;果然好了！困扰了我大半年的毛病十秒钟就被解决了= =&lt;/p&gt;
+&lt;h2 id=&#34;tmux-2-9-配置变更&#34;&gt;tmux 2.9 配置变更&lt;/h2&gt;
+&lt;p&gt;前一段时间 tmux 上了 2.9，导致 &lt;code&gt;window-status-bg&lt;/code&gt;，&lt;code&gt;message-fg&lt;/code&gt; 这种常用的配置参数都失效了。&lt;/p&gt;
+&lt;p&gt;tmux 的 CHANGES 文件中有提到如何迁移： &lt;a href=&#34;https://github.com/tmux/tmux/blob/master/CHANGES#L89-L90&#34;&gt;https://github.com/tmux/tmux/blob/master/CHANGES#L89-L90&lt;/a&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;* The individual -fg, -bg and -attr options have been removed; they
+were superseded by -style options in tmux 1.9.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;具体的来说就是把形如 &lt;code&gt;status-bg colour235&lt;/code&gt; 的参数替换为 &lt;code&gt;status-style bg=colour235&lt;/code&gt;，比如&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;set-option -g status-bg colour235
+set-option -g status-fg colour136
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;替换为：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;set-option -g status-style fg=colour136,bg=colour235
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我在用的主题是 &lt;a href=&#34;https://github.com/seebi/tmux-colors-solarized&#34;&gt;tmux-colors-solarized&lt;/a&gt;，已经有人贡献了一个修复 tmux 2.9 兼容的 &lt;a href=&#34;https://github.com/seebi/tmux-colors-solarized/pull/23&#34;&gt;PR&lt;/a&gt;，其他主题参考一下即可。&lt;/p&gt;
+&lt;h2 id=&#34;go-get-failed&#34;&gt;go get failed&lt;/h2&gt;
+&lt;p&gt;有一天用 go get 去访问托管在自建的 gitea 的时候突然发现会出现这样的报错：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;:) go get git.xuanwo.io/let-go-mod-happy/logrus
+package git.xuanwo.io/let-go-mod-happy/logrus: unrecognized import path &amp;quot;git.xuanwo.io/let-go-mod-happy/logrus&amp;quot; (https fetch: Get https://git.xuanwo.io/let-go-mod-happy/logrus?go-get=1: x509: certificate signed by unknown authority)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;一开始感觉有点奇怪，因为浏览器访问是正常的，随后用 curl 测试了一下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;:) curl https://git.xuanwo.io/let-go-mod-happy/logrus -v
+* Trying xxx.xxx.xxx.xxx...
+* TCP_NODELAY set
+* Connected to git.xuanwo.io (xxx.xxx.xxx.xxx) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+* CAfile: /etc/ssl/certs/ca-certificates.crt
+CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (OUT), TLS alert, unknown CA (560):
+* SSL certificate problem: unable to get local issuer certificate
+* Closing connection 0
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+More details here: https://curl.haxx.se/docs/sslcerts.html
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;emmmm，&lt;code&gt;unknown CA&lt;/code&gt;，这可能跟我的 nginx 的 SSL 配置有关。检查了一下果然如此：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ssl_certificate /etc/nginx/certs/git.xuanwo.io/cert;
+ssl_certificate_key /etc/nginx/certs/git.xuanwo.io/key;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我配置的证书并不是完整的链，所以导致 TLS 在握手的时候失败了，将选用的证书修改为 fullchain 即可。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ssl_certificate /etc/nginx/certs/git.xuanwo.io/fullchain;
+ssl_certificate_key /etc/nginx/certs/git.xuanwo.io/key;
+&lt;/code&gt;&lt;/pre&gt;</description></item><item><title>翻车实况第 1 期</title><link>https://xuanwo.io/2019/02/19/rollover-1st/</link><pubDate>Tue, 19 Feb 2019 06:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/02/19/rollover-1st/</guid><description>&lt;blockquote&gt;
 &lt;p&gt;今天翻车了吗？翻了！&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;本次翻车的主角是我小老婆：ThinkPad X1 Carbon，在之前的&lt;a href=&#34;https://xuanwo.io/2018/05/16/thinkpad-x1-carbon-6th/&#34;&gt;开箱手记&lt;/a&gt;曾经爆过照片。用了几个月都没有什么太大的问题，但是自从我春节回家一趟之后，我的 x1 开始了它的频频翻车之旅 = =&lt;/p&gt;
@@ -595,44 +651,4 @@ https又叫做&lt;code&gt;超文本传输安全协议&lt;/code&gt;，使用这�
 &lt;ul&gt;
 &lt;li&gt;2015年10月08日 首次发布&lt;/li&gt;
 &lt;li&gt;2015年11月27日 11月软件更新&lt;/li&gt;
-&lt;/ul&gt;</description></item><item><title>青云参观计划</title><link>https://xuanwo.io/2015/02/18/event-qingcould-plan/</link><pubDate>Wed, 18 Feb 2015 22:50:33 +0000</pubDate><guid>https://xuanwo.io/2015/02/18/event-qingcould-plan/</guid><description>
-&lt;h1 id=&#34;青云是啥&#34;&gt;青云是啥？&lt;/h1&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.36kr.com/p/204836.html&#34;&gt;想做中国的AWS：IaaS提供商QingCloud按“秒”计费实现弹性特征，瞄准中国的DevOps开发市场&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.csdn.net/article/2013-08-20/2816631-IaaS-QingCloud&#34;&gt;国内创业公司QingCloud的魄力：做一个世界级的IaaS服务&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://capital.chinaventure.com.cn/11/7/1389263145.shtml&#34;&gt;青云B轮获2000万美元VC的背后逻辑：用技术超越巨头&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;个人认为对其的了解有助与我们信息管理专业的发展，所以尝试着联系了一下青云的有关人士。后来发现青云那边的人非常nice，非常热心，非常爽快的同意了我们的请求，所以开学后不久我们就可以出发啦。&lt;/p&gt;
-&lt;h1 id=&#34;青云在哪&#34;&gt;青云在哪？&lt;/h1&gt;
-&lt;p&gt;地址：北京市朝阳区北苑路甲13号北辰新纪元大厦2号楼1503
-公交路线：地铁13号线 → 地铁2号线 → 地铁5号线全程约1小时&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;五道口
-3站
-乘坐 地铁13号线(西直门方向), 在 西直门站 下车
-420米
-站内换乘 地铁2号线(内环)
-4站
-乘坐 地铁2号线(内环), 在 雍和宫站 下车
-160米
-站内换乘 地铁5号线(天通苑北方向)
-6站
-乘坐 地铁5号线(天通苑北方向), 在 北苑路北站 下车(A2西北口出)
-350米
-步行至 北辰新纪元2
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h1 id=&#34;去看什么&#34;&gt;去看什么？&lt;/h1&gt;
-&lt;ul&gt;
-&lt;li&gt;公司参观&lt;/li&gt;
-&lt;li&gt;员工分享个人经历&lt;/li&gt;
-&lt;li&gt;CEO分享关于云计算的理解&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&#34;啥时候去&#34;&gt;啥时候去？&lt;/h1&gt;
-&lt;p&gt;2015年3月19日14点&lt;/p&gt;
-&lt;h1 id=&#34;有啥收获&#34;&gt;有啥收获？&lt;/h1&gt;
-&lt;p&gt;这个根据看到了什么而定，不过涨姿势肯定是有的~
-&lt;em&gt;我想看看真正的服务器长啥样= =&lt;/em&gt;&lt;/p&gt;
-&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
-&lt;ul&gt;
-&lt;li&gt;2015年02月18日 发起活动，修正行文格式。&lt;/li&gt;
-&lt;li&gt;2015年03月18日 补充活动更新信息。&lt;/li&gt;
 &lt;/ul&gt;</description></item></channel></rss>
