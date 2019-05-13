@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Together on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/together/</link><description>Recent content in Together on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 06 Jul 2015 21:05:38 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/together/index.xml" rel="self" type="application/rss+xml"/><item><title>基于Socket.io的虚拟计算机</title><link>https://xuanwo.io/2015/07/06/socket-vm/</link><pubDate>Mon, 06 Jul 2015 21:05:38 +0000</pubDate><guid>https://xuanwo.io/2015/07/06/socket-vm/</guid><description>&lt;p&gt;基于Socket.io有很多特别强大的应用，socket.io官方提供的一个&lt;a href=&#34;http://socket.io/demos/computer/&#34;&gt;虚拟计算机Demo&lt;/a&gt;就非常赞。通过将使用Qemu虚拟取出来的PC界面转发至Socket.io的端口，然后对Canvas不断地进行绘制，形成了近似与远程操控的体验。我们&lt;a href=&#34;http://xuanwo.io/2015/06/30/together-project/&#34;&gt;Together项目&lt;/a&gt;用到了这个库，但由于这个库发布于很久之前，再加上相关文档过少，导致部署起来极为困难。所以我完成了这篇文章，希望能让后来人少走一些弯路。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;下文基于Ubuntu 14.04 x64，其他系统请自行转换相应命令，谢谢~&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;环境配置&#34;&gt;环境配置&lt;/h1&gt;
+&lt;h2 id=&#34;安装nodejs&#34;&gt;安装nodejs&lt;/h2&gt;
+&lt;p&gt;使用APT安装&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get -y install nodejs-legacy
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;或使用nvm来管理不同版本的nodejs&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh | bash
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;Canvas库在Debian系的OS上会有些诡异的行为，所以需要格外的做一些处理，感谢&lt;a href=&#34;https://github.com/computernewb&#34;&gt;@computernewb&lt;/a&gt;的&lt;a href=&#34;https://github.com/kevin-roark/socket.io-computer/issues/11#issuecomment-118790681&#34;&gt;回复&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo ln -s /usr/bin/nodejs /usr/sbin/node
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;安装依赖&#34;&gt;安装依赖&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get -y install libcairo2-dev libpango1.0-dev libgif-dev build-essential g++
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;安装libjpeg9和libjpeg9-dev&#34;&gt;安装libjpeg9和libjpeg9-dev&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9_9a-2_amd64.deb
+dpkg -i libjpeg9_9a-2_amd64.deb
+wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9-dev_9a-2_amd64.deb
+dpkg -i libjpeg9-dev_9a-2_amd64.deb
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;处理winxp镜像&#34;&gt;处理WinXp镜像&lt;/h1&gt;
+&lt;h2 id=&#34;下载xp镜像&#34;&gt;下载XP镜像&lt;/h2&gt;
+&lt;h3 id=&#34;下载后使用网盘中转&#34;&gt;下载后使用网盘中转&lt;/h3&gt;
+&lt;p&gt;在&lt;a href=&#34;http://msdn.itellyou.cn/&#34;&gt;I Tell You&lt;/a&gt;上下载纯净的XP镜像。（如果使用盗版的镜像，VPS可能会因为违反其Tos而封号）
+比如，WinXP的中文简体专业版：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ed2k://|file|CN_WINXP_PRO_ISO.img|530186240|7855069CE4216615D761654E2B75A4F7|/
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;使用sftp上传&#34;&gt;使用sftp上传&lt;/h3&gt;
+&lt;p&gt;可以使用类似于FileZilla这样的FTP工具直接上传，大部分国内的网盘到国外的速度都不理想= =，百度云还会出现断流，而好用的国外网盘都被墙，本身就需要翻墙上传。所以还不如直接使用sftp传到服务器上。&lt;/p&gt;
+&lt;h2 id=&#34;格式转换&#34;&gt;格式转换&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;http://msdn.itellyou.cn/&#34;&gt;I Tell You&lt;/a&gt;上下载下来的是img镜像文件，然而我们需要的是ISO，所以还需要进行转换。将img转换为iso，我们需要&lt;code&gt;ccd2iso&lt;/code&gt;。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install ccd2iso
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;使用方法：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ccd2iso &amp;lt;.img filename&amp;gt; &amp;lt;.iso filename&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;socket-io-computer配置&#34;&gt;socket.io-computer配置&lt;/h1&gt;
+&lt;h2 id=&#34;安装依赖-1&#34;&gt;安装依赖&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get -y install qemu redis-server
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;虚拟机配置&#34;&gt;虚拟机配置&lt;/h2&gt;
+&lt;p&gt;生成一个光盘镜像文件用来加载ISO&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;qemu-img create -f qcow2 winxp.img 10G
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;运行&#34;&gt;运行&lt;/h2&gt;
+&lt;h3 id=&#34;启动web服务器&#34;&gt;启动Web服务器&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;node app.js
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;启动io服务器&#34;&gt;启动IO服务器&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;node io.js
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;生成qemu实例&#34;&gt;生成qemu实例&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;COMPUTER_ISO=winxp.iso COMPUTER_IMG=winxp.img node qemu.js
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;启动虚拟机&#34;&gt;启动虚拟机&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;COMPUTER_IMG=winxp.img node emu-runner.js
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;运行-1&#34;&gt;运行&lt;/h1&gt;
+&lt;p&gt;访问&lt;code&gt;http://localhost:5000&lt;/code&gt;&lt;/p&gt;
+&lt;h1 id=&#34;注意&#34;&gt;注意&lt;/h1&gt;
+&lt;h2 id=&#34;若搭建在服务器上-使用ip访问&#34;&gt;若搭建在服务器上，使用IP访问&lt;/h2&gt;
+&lt;p&gt;需要修改&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;var url = process.env.COMPUTER_IO_URL || &#39;http://localhost:6001&#39;;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;为&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;var url = process.env.COMPUTER_IO_URL || &#39;http://your IP address:6001&#39;;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;否则无法正常连接&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年07月06日 完成主体框架&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Teambition团队协作实践</title><link>https://xuanwo.io/2015/07/02/teambition-work/</link><pubDate>Thu, 02 Jul 2015 19:08:55 +0000</pubDate><guid>https://xuanwo.io/2015/07/02/teambition-work/</guid><description>&lt;p&gt;&lt;a href=&#34;http://xuanwo.io/2015/06/30/together-project/&#34;&gt;Together&lt;/a&gt;团队组建完成后，一个现实的问题在于：我们怎么样进行协作。经过一番筛选之后，我选中了Teambition，一个简约但是够用的团队协作平台。我们团队围绕着我们的需求，基于Teambition建立了我们自己的协作平台。&lt;/p&gt;
+&lt;h1 id=&#34;功能模块&#34;&gt;功能模块&lt;/h1&gt;
+&lt;h2 id=&#34;任务管理&#34;&gt;任务管理&lt;/h2&gt;
+&lt;p&gt;在任务管理方面，我们使用了Teambition的任务版功能。没有进行复杂的任务分组以及任务阶段设计，我们只使用了Teambition默认的几个阶段及分组。大致情况如图：
+&lt;img src=&#34;https://xuanwo.io/imgs/opinion/todo-list.png&#34; alt=&#34;Todo List&#34; /&gt;
+主要有以下几个要点：
+- 通过普通，紧急与非常紧急对任务的优先级进行分类
+- 使用关联内容功能，将任务与项目内容结合起来
+- 使用子任务功能将任务分解为多个模块并分配到人
+- 通过评论功能对任务进展及问题进行及时的交流&lt;/p&gt;
+&lt;h2 id=&#34;日程管理&#34;&gt;日程管理&lt;/h2&gt;
+&lt;p&gt;在这一点上，我一开始是有些矛盾的。因为从我的直觉上来讲，我觉得日程管理跟任务管理其实是有重复的地方的，事实上，在协作的过程中，我的组员也确实把这两个混淆了起来。我预想的安排是，固定了时间地点的活动算入日程，而花费的时间未知的需要去做的事情算入任务。不过这个划分确实有些奇怪而且存在矛盾的地方，不过我也没有再做进一步的修正，毕竟现有的划分已经足够满足我们的需求。这些小小的遗憾日后再跟他人交流吧。
+&lt;img src=&#34;https://xuanwo.io/imgs/opinion/date-manage.png&#34; alt=&#34;Date Manage&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;创意分享&#34;&gt;创意分享&lt;/h2&gt;
+&lt;p&gt;在项目一开始，我们导师提出的要求就是要有创意。为了不让我们的想法零碎地分布在QQ聊天中，我们使用Teambition的分享墙功能来进行我们的创意交流。大致情况如图：
+&lt;img src=&#34;https://xuanwo.io/imgs/opinion/idea-sharing.png&#34; alt=&#34;idea sharing&#34; /&gt;
+分享墙中的文章可以通过关联内容功能与Teambition的其他模块联系在一起，这是一个非常棒的体验，当然，特色的及时评论功能也带了非常爽快的体验。&lt;/p&gt;
+&lt;h2 id=&#34;文件管理&#34;&gt;文件管理&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/file-system.png&#34; alt=&#34;File System&#34; /&gt;
+这一块的设计并不符合我们的预期，从图片中也能看出，我们团队分享的文件相当之少。主要原因是QQ实在是太方便了（23333），导致像这样的服务，通常都被QQ群中或讨论组内的文件分享取代了。想在这个方向是做出突破，就必须创造出让人们抛弃QQ传文件的方式的价值。Teambition其实在这一方面做出了非常有效的探索：一方面，Teambition的上传下载速度相当快，通过查看源代码可以看出是使用了又拍云的服务，点个赞；另一方面，常见的文档都可以通过Web页面直接查看其内容，免除了下载再查看的麻烦，看代码可以看出支持预览的有视频，音频，PDF以及office系列的文档，基本上已经满足大众需求了。&lt;/p&gt;
+&lt;h2 id=&#34;财务管理&#34;&gt;财务管理&lt;/h2&gt;
+&lt;p&gt;Teambition为团队提供了一个非常简单但是足够好用的财务管理功能。
+&lt;img src=&#34;https://xuanwo.io/imgs/opinion/cost.png&#34; alt=&#34;Cost&#34; /&gt;
+收入，支出，审核，对于像我们这样的团队而言，已经完全足够了。当然了，具体的财务分配还是通过微信AA收款之类的服务搞定的，或许Teambition可以考虑跟微信，支付宝对接，直接拉起一个支付请求？&lt;/p&gt;
+&lt;h1 id=&#34;teambition缺点&#34;&gt;Teambition缺点&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;点赞功能有些鸡肋&lt;/li&gt;
+&lt;li&gt;权限管理偏弱
+&lt;del&gt;- 主页日程页面显示时常出现重复显示的BUG&lt;/del&gt; (已修复)&lt;/li&gt;
+&lt;li&gt;分享墙中的Markdown功能隐藏太深&lt;/li&gt;
+&lt;li&gt;分享墙中的文档编辑更新显示存在BUG&lt;/li&gt;
+&lt;li&gt;Teambition的客户端功能比较弱
+&lt;del&gt;- 2015年7月3日，docx预览有BUG&lt;/del&gt; (已修复)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;应用中的不足&#34;&gt;应用中的不足&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;团队的活跃性不强，交互还是比较少，组员们并没有养成上Teambition看动态的习惯= =&lt;/li&gt;
+&lt;li&gt;实践中没有完全坚持整套的业务流程，还是在用QQ收发文件&amp;amp;共享信息&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;p&gt;以上是我们团队应用Teambition进行团队协作的实践，欢迎大家一起来探讨团队协作，共同进步！&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年07月02日 完成了协作实践的主要内容&lt;/li&gt;
+&lt;li&gt;2015年07月03日 新增了刚发现的BUG&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Together网站项目设计</title><link>https://xuanwo.io/2015/06/30/together-project/</link><pubDate>Tue, 30 Jun 2015 11:08:47 +0000</pubDate><guid>https://xuanwo.io/2015/06/30/together-project/</guid><description>&lt;p&gt;&lt;strong&gt;本项目仍然处在设计阶段，一切变动以最终成果为准&lt;/strong&gt;&lt;/p&gt;
+&lt;h1 id=&#34;团队介绍&#34;&gt;团队介绍&lt;/h1&gt;
+&lt;h2 id=&#34;团队分工&#34;&gt;团队分工&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;丁皓（组长），负责网站后端建设及维护（兼产品经理？）&lt;/li&gt;
+&lt;li&gt;满全勇，负责网站着陆页设计&amp;amp;文案&lt;/li&gt;
+&lt;li&gt;何壁伟，负责网站内容页设计&lt;/li&gt;
+&lt;li&gt;马可，担任网站首席体验师&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;协同工具&#34;&gt;协同工具&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;分工：&lt;a href=&#34;https://www.teambition.com/&#34;&gt;Teambition&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;交流：&lt;a href=&#34;http://www.qq.com/&#34;&gt;QQ&lt;/a&gt;，&lt;a href=&#34;https://jianliao.com/&#34;&gt;简聊&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;分享：&lt;a href=&#34;https://www.yinxiang.com/&#34;&gt;印象笔记&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;公司简介&#34;&gt;公司简介&lt;/h1&gt;
+&lt;h2 id=&#34;简介&#34;&gt;简介&lt;/h2&gt;
+&lt;p&gt;Next公司成立于2015年3月，致力于用业界最先进的技术为人们带来更好地互联网生活体验。&lt;/p&gt;
+&lt;h2 id=&#34;员工&#34;&gt;员工&lt;/h2&gt;
+&lt;p&gt;目前员工有产品经理兼后端工程师一名，前端工程师两名，用户体验师一名。&lt;/p&gt;
+&lt;h2 id=&#34;产品&#34;&gt;产品&lt;/h2&gt;
+&lt;p&gt;目前推出的产品有NextNote，已经获得三位种子用户，今天我们将带来我公司第二个产品——Together。&lt;/p&gt;
+&lt;h2 id=&#34;格言&#34;&gt;格言&lt;/h2&gt;
+&lt;p&gt;Next，我们在路上。&lt;/p&gt;
+&lt;h1 id=&#34;市场分析&#34;&gt;市场分析&lt;/h1&gt;
+&lt;h2 id=&#34;定义&#34;&gt;定义&lt;/h2&gt;
+&lt;p&gt;在线教育：
+即e-learning，通过应用信息科技和互联网技术进行内容传播和快速学习的方法。
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/coursera.png&#34; alt=&#34;Coursera&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;特点&#34;&gt;特点&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;突破时空限制、知识获取方式灵活；&lt;/li&gt;
+&lt;li&gt;碎片化学习、随着移动互联网的发展，移动设备更具便携性；&lt;/li&gt;
+&lt;li&gt;内容多样化，除了K12教育、高等教育外，还包括各类学前教育、职业教育、兴趣教育等细分领域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;前景&#34;&gt;前景&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;据GSV全球教育行业报告预测，2017年全球在线教育市场规模预计将增至2555亿美元，保持23%的年复合增长率。&lt;/li&gt;
+&lt;li&gt;据天拓咨询估计，2017年中国在线教育市场规模将达到3000亿元人民币左右，保持31.7%的年复合增长率。
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/2014年中国在线教育4.jpg&#34; alt=&#34;2014年中国在线教育4&#34; /&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;数据与图片均引用自&lt;a href=&#34;http://www.infzm.com/content/101577&#34;&gt;南方周末-2014年中国在线教育发展前景有多大？&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;产品简介&#34;&gt;产品简介&lt;/h1&gt;
+&lt;h2 id=&#34;特点-1&#34;&gt;特点&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;运用最新技术，革命性的改进在线教育交互体验&lt;/li&gt;
+&lt;li&gt;广泛运用开源技术，与开源社区保持密切合作&lt;/li&gt;
+&lt;li&gt;服务器要求低，可轻松承载超高并发场景&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;对比&#34;&gt;对比&lt;/h2&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;我们&lt;/th&gt;
+&lt;th&gt;他们&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;支持电子白板功能&lt;/td&gt;
+&lt;td&gt;不支持电子白板功能&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;支持及时聊天功能&lt;/td&gt;
+&lt;td&gt;只能做到响应缓慢的聊天&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;支持虚拟计算机功能&lt;/td&gt;
+&lt;td&gt;无虚拟计算机功能&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;支持HTML5原生的视频接口&lt;/td&gt;
+&lt;td&gt;采用过时的Flash技术&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;全平台支持&lt;/td&gt;
+&lt;td&gt;不支持最新的移动系统&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h1 id=&#34;功能介绍&#34;&gt;功能介绍&lt;/h1&gt;
+&lt;h2 id=&#34;视频直播&#34;&gt;视频直播&lt;/h2&gt;
+&lt;p&gt;运用HTML 5标准中的Canvas以及Jsmpeg技术，我们实现了我们公司高效的支持直播的在线播放器。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;当前，此技术已经运用于233手游直播APP，证明有效可行。&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;在线聊天室&#34;&gt;在线聊天室&lt;/h2&gt;
+&lt;p&gt;运用Node.js以及Socket.io，我们公司搭建了响应迅速的在线交流平台，其特点是可以支持大量用户同时在线交流。
+&lt;a href=&#34;https://github.com/together-education/together-core-whiteboard&#34;&gt;源代码&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;电子白板&#34;&gt;电子白板&lt;/h2&gt;
+&lt;p&gt;同样基于Node.js以及Socket.io，我们公司搭建了自研发的电子白板平台，基于教师-学生结构的主控端与受控端模型，支持在线演示。
+&lt;a href=&#34;https://github.com/together-education/together-core-whiteboard&#34;&gt;源代码&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;虚拟计算机&#34;&gt;虚拟计算机&lt;/h2&gt;
+&lt;p&gt;运用Node.js以及Socket.io，并结合Linux平台上的Qemu虚拟化技术，我们公司首次实现了在线教育领域中的共享操作功能。&lt;/p&gt;
+&lt;h1 id=&#34;创意总结&#34;&gt;创意总结&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;用技术改变教育&lt;/li&gt;
+&lt;li&gt;用开源改变业界&lt;/li&gt;
+&lt;li&gt;用热情改变未来&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;商业推广&#34;&gt;商业推广&lt;/h1&gt;
+&lt;h2 id=&#34;微信推送&#34;&gt;微信推送&lt;/h2&gt;
+&lt;p&gt;建立企业服务号，定期推送优质资源&lt;/p&gt;
+&lt;h2 id=&#34;热点聚焦&#34;&gt;热点聚焦&lt;/h2&gt;
+&lt;p&gt;捕捉社会热点，制作相应专辑，获取群众关注&lt;/p&gt;
+&lt;h2 id=&#34;学校合作&#34;&gt;学校合作&lt;/h2&gt;
+&lt;p&gt;通过与学校进行合作，获取第一批种子客户&lt;/p&gt;
+&lt;h1 id=&#34;引用资料&#34;&gt;引用资料&lt;/h1&gt;
+&lt;h2 id=&#34;产生文档&#34;&gt;产生文档&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://xuanwo.io/2015/07/01/screen-ssh/&#34;&gt;使用Screen管理会话&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://xuanwo.io/2015/07/02/teambition-work/&#34;&gt;Teambition团队协作实践&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;参考文档&#34;&gt;参考文档&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://nodejs.org/documentation/&#34;&gt;Node.js文档&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://socket.io/docs/&#34;&gt;Socket.io文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;开源信息&#34;&gt;开源信息&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;引用的开源库较多，如果发现有用到代码但是没有标注的，请及时通知我加上，谢谢~&lt;/em&gt;
+- 视频直播使用&lt;a href=&#34;https://github.com/phoboslab/jsmpeg&#34;&gt;jsmpeg&lt;/a&gt;
+- 即时聊天使用&lt;a href=&#34;https://github.com/Automattic/socket.io/tree/master/examples/chat&#34;&gt;chat&lt;/a&gt;
+- 在线虚拟机使用&lt;a href=&#34;https://github.com/kevin-roark/socket.io-computer&#34;&gt;socket.io-computer&lt;/a&gt;
+- 弹幕功能使用&lt;a href=&#34;https://github.com/jabbany/CommentCoreLibrary/&#34;&gt;CommentCoreLibrary&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;阶段总结&#34;&gt;阶段总结&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://xuanwo.io/imgs/learn/Together-1.0.0.pptx&#34;&gt;点此下载创意汇报PPT&lt;/a&gt;
+&lt;em&gt;编辑于PowerPoint 2013，2007以下版本可能无法正常显示&lt;/em&gt;
+2015年07月04日上午完成了创意汇报，导师最后的总结是：创意不是新的技术。除此之外，还指出了我们项目的很多不足，包括策划书格式不规范，内容不完整，缺少盈利模式，没有做风险评估等。当然啦，在导师们一遍又一遍地强调突出信息管理特色，不要太过追求技术的大方向下，我来做这样一个项目，确实有点逆向行驶的味道，最后得到这样的评价也不会觉得奇怪。
+下一周，除了要加紧完善我们的网站设计之外，我们还要关注一下自己的策划书的内容。相比于别的小组，我们的内容确实有些单薄。其实老师说的也没有错，好的想法太多了，但是要把想法真正落实，还有很多繁琐但不可少的工作要做。&lt;/p&gt;
+&lt;h1 id=&#34;版权申明&#34;&gt;版权申明&lt;/h1&gt;
+&lt;p&gt;本项目是中国地质大学（北京）人文经管学院2013级信息管理与信息系统专业的暑期实习作品，以&lt;a href=&#34;http://creativecommons.org/licenses/by-nc-sa/4.0/&#34;&gt;署名-非商业性使用-相同方式共享 4.0 国际&lt;/a&gt;协议发布，在此协议下，您可以自由地转载或共享。&lt;/p&gt;
+&lt;h1 id=&#34;小小赞助&#34;&gt;小小赞助&lt;/h1&gt;
+&lt;p&gt;如果您对本项目感兴趣，欢迎使用支付宝扫一扫进行小额赞助以促成项目尽快上线，谢谢~
+&lt;img src=&#34;https://xuanwo.io/imgs/alipay.jpg&#34; alt=&#34;支付宝二维码&#34; /&gt;&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年06月30日 完成项目设计,更新文档结构&lt;/li&gt;
+&lt;li&gt;2015年07月02日 添加了项目执行中产生的文档&lt;/li&gt;
+&lt;li&gt;2015年07月03日 完善并充实项目内容，重新调整了结构&lt;/li&gt;
+&lt;li&gt;2015年07月04日 添加了阶段报告，并提供创意汇报PPT下载&lt;/li&gt;
+&lt;li&gt;2015年07月06日 添加了在线聊天室以及电子白板的源代码&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

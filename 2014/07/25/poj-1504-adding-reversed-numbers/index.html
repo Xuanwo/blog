@@ -1,0 +1,61 @@
+<!doctype html><html><head><title>POJ 1504 Adding Reversed Numbers</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content=Technology,Code,Program,Linux,><meta name=author content=Xuanwo><meta property=og:title content="POJ 1504 Adding Reversed Numbers"><meta property=og:description content="A blog maintained by an interesting programmer."><meta property=og:type content=website><meta property=og:locale content=en_US><meta property=og:url content=https://xuanwo.io/2014/07/25/poj-1504-adding-reversed-numbers/><link href rel=alternate type=application/rss+xml title="Xuanwo's Blog"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/milligram@1.3.0/dist/milligram.min.css integrity="sha256-Ro/wP8uUi8LR71kwIdilf78atpu8bTEwrK5ZotZo+Zc=" crossorigin=anonymous><link rel=stylesheet href=/css/main.min.css><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.54.0"></head><body><div id=container><header id=header><div id=header-outer class=outer><div id=header-inner class=inner><a id=main-nav-toggle class=nav-icon href=javascript:;><svg width="1em" height="1em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#bars"/></svg></a><a id=logo class=logo-text href=https://xuanwo.io>Xuanwo&#39;s Blog</a><nav id=main-nav><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<a class=main-nav-link href=/about/>关于我</a></nav></div></div></header><section id=main class=outer><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 class=article-title itemprop=name>POJ 1504 Adding Reversed Numbers</h1></header><div class=article-meta><a href=/2014/07/25/poj-1504-adding-reversed-numbers/ class=article-date><time datetime=2014-07-25T03:40:50.000&#43;00:00 itemprop=datePublished>2014-07-25</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div><div class=article-comment-link-wrap><a href=/2014/07/25/poj-1504-adding-reversed-numbers/#disqus_thread class=article-comment-link>Comments</a></div></div><div class=article-entry itemprop=articleBody><h2 id=题目>题目</h2><p>源地址：</p><p><a href="http://poj.org/problem?id=1504">http://poj.org/problem?id=1504</a></p><h1 id=理解>理解</h1><p>同样是长长的题目，其实是要求把数字从左到右相加，本质是要用字符数组模拟加法。当然，用java会更快一点，不过这次选择了用C++来写。姿势不是很优美，代码太丑陋了，应该有更优美的写法。</p><h1 id=代码>代码</h1><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;cstdio&gt;
+using namespace std;
+
+int n;
+string a, b;
+char c[100];
+int i;
+int ans;
+
+int main(int argc, char const *argv[])
+{
+    cin &gt;&gt; n;
+    while (n--)
+    {
+        cin &gt;&gt; a &gt;&gt; b;
+        if (a.length() &lt; b.length())   a.swap(b);
+        for (i = 0; i &lt; a.length() + 1; i++) c[i] = '0';
+        ans = 0;
+        for (i = 0; i &lt; b.length(); i++)
+        {
+            c[i] += a[i] + b[i] - 3 * '0';
+            if (c[i] &gt;= 10)
+            {
+                c[i + 1]++;
+                c[i] = c[i] - 10 + '0';
+            }
+            else
+                c[i] = c[i] + '0';
+        }
+        for (i = b.length(); i &lt; a.length(); i++)
+        {
+            c[i] += a[i] - 2 * '0';
+            if (c[i] &gt;= 10)
+            {
+                c[i + 1]++;
+                c[i] = c[i] - 10 + '0';
+            }
+            else
+                c[i] = c[i] + '0';
+        }
+        for (i = 0; i &lt;= a.length(); i++)
+        {
+            ans = ans * 10 + c[i] - '0';
+        }
+        if (ans % 10 == 0)   ans /= 10;
+        printf(&quot;%d\n&quot;, ans);
+    }
+    return 0;
+}
+
+</code></pre><h1 id=更新日志>更新日志</h1><ul><li>2014年07月25日 已AC。</li></ul></div><div class=article-toc></div></div><nav id=article-nav><a href=/2014/07/25/poj-1517-u-calculate-e/ id=article-nav-newer class=article-nav-link-wrap><div class=article-nav-title><span>&lt;</span>&nbsp;
+POJ 1517 u Calculate e</div></a><a href=/2014/07/25/poj-1493-machined-surfaces/ id=article-nav-older class=article-nav-link-wrap><div class=article-nav-title>POJ 1493 Machined Surfaces&nbsp;<span>&gt;</span></div></a></nav></article><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){this.page.identifier='\/2014\/07\/25\/POJ-1504-Adding-Reversed-Numbers\/';this.page.title='POJ 1504 Adding Reversed Numbers';this.page.url='https:\/\/xuanwo.io\/2014\/07\/25\/poj-1504-adding-reversed-numbers\/';};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return;}
+var d=document,s=d.createElement('script');s.async=true;s.src='//'+"only0god"+'.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></section><footer id=footer><div class=outer><div id=footer-info class=inner>&copy; 2019 Xuanwo&#39;s Blog&nbsp;
+Powered by <a href=https://gohugo.io target=_blank>Hugo</a></div></div><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script src=https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js></script><script>tocbot.init({tocSelector:'.article-toc',contentSelector:'.article-entry',headingSelector:'h1, h2, h3, h4, h5',});</script><script>document.getElementById('main-nav-toggle').addEventListener('click',function(){var header=document.getElementById('header');if(header.classList.contains('mobile-on')){header.classList.remove('mobile-on');}else{header.classList.add('mobile-on');}});</script></footer></div></body></html>

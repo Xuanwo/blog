@@ -1,0 +1,799 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>2016s on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/2016/</link><description>Recent content in 2016s on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 22 Nov 2016 00:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/2016/index.xml" rel="self" type="application/rss+xml"/><item><title>有趣的网页乱码问题</title><link>https://xuanwo.io/2016/11/22/garbled-page/</link><pubDate>Tue, 22 Nov 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/11/22/garbled-page/</guid><description>&lt;p&gt;这是来自segmentfault的一个问题：&lt;a href=&#34;https://segmentfault.com/q/1010000007540588&#34;&gt;node.js中抓取utf-8编码的网页为什么也是乱码&lt;/a&gt;，解答完这个问题之后，决定探讨一下网页乱码这个问题。&lt;/p&gt;
+&lt;p&gt;网页乱码之所以产生，是因为我们处理数据的方式与期待的方式不一致。比如说：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;文本编码不一致&lt;/li&gt;
+&lt;li&gt;数据编码不一致&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下面分别来介绍一下这两种情况：&lt;/p&gt;
+&lt;h2 id=&#34;文本编码不一致&#34;&gt;文本编码不一致&lt;/h2&gt;
+&lt;p&gt;这个问题比较常见，常常发生在一些比较老的网站上，采用&lt;code&gt;gbk&lt;/code&gt;或者&lt;code&gt;gb2312&lt;/code&gt;编码，但是大多数语言都是默认使用&lt;code&gt;utf-8&lt;/code&gt;进行解释，这时就会导致乱码。&lt;/p&gt;
+&lt;p&gt;这种情况解决起来比较容易，只需要使用恰当的编码去解释即可。一个比较稳妥的方案是通过&lt;code&gt;Response Headers&lt;/code&gt;中的&lt;code&gt;Content-Type&lt;/code&gt;去获取内容的&lt;code&gt;charset&lt;/code&gt;。当然，服务器端的开发者首先需要尽可能的遵循规范，统一使用&lt;code&gt;utf-8&lt;/code&gt;编码，其次，就算是采用比较特别的编码，也需要在HTML或者headers中显式指定出来，不要让用户来猜测你的编码类型。&lt;/p&gt;
+&lt;p&gt;最坑爹的一种情况是明明是使用&lt;code&gt;gbk&lt;/code&gt;编码的，却标注为&lt;code&gt;utf-8&lt;/code&gt;，这种坑爹的网站建议不要再使用他们的服务了，迟早要完。&lt;/p&gt;
+&lt;h2 id=&#34;数据编码不一致&#34;&gt;数据编码不一致&lt;/h2&gt;
+&lt;p&gt;数据是文本更为底层的表示，如果数据编解码不正确，那么文本肯定无法正常显示。这里来讲一讲我们遇到的这个问题。&lt;/p&gt;
+&lt;h3 id=&#34;问题介绍&#34;&gt;问题介绍&lt;/h3&gt;
+&lt;p&gt;请求的页面是一个纯的静态页面： &lt;a href=&#34;http://www.runoob.com/nodejs/nodejs-tutorial.html&#34;&gt;http://www.runoob.com/nodejs/nodejs-tutorial.html&lt;/a&gt; ，题主使用了这样的代码来进行抓取：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nodejs&#34; data-lang=&#34;nodejs&#34;&gt;var http=require(&amp;#34;http&amp;#34;);
+var go=require(&amp;#34;iconv-lite&amp;#34;)
+http.get(&amp;#34;http://www.runoob.com/nodejs/nodejs-tutorial.html&amp;#34;,function(res){
+var html=&amp;#34;&amp;#34;;
+res.on(&amp;#34;data&amp;#34;,function(data){
+/* html +=go.decode(data,&amp;#34;gb2312&amp;#34;);*/
+html+=data;
+})
+res.on(&amp;#34;end&amp;#34;,function(){
+console.log(html);
+}).on(&amp;#34;error&amp;#34;,function(){
+console.log(&amp;#34;获取失败&amp;#34;)
+})
+})&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;主要进行了两种尝试，第一种是直接拼接后抓取，第二种是使用了&lt;code&gt;iconv-lite&lt;/code&gt;进行了网页编码的转换。
+实际上，这个网页在&lt;code&gt;&amp;lt;head&amp;gt;&lt;/code&gt;部分已经注明：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;meta&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;http-equiv&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;content&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;text/html; charset=UTF-8&amp;#34;&lt;/span&gt; /&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其实这也是题主困惑的地方，明明编码使用的&lt;code&gt;utf-8&lt;/code&gt;，为什么得不到正确的结果？&lt;/p&gt;
+&lt;h3 id=&#34;问题分析&#34;&gt;问题分析&lt;/h3&gt;
+&lt;p&gt;问题出在&lt;code&gt;Response&lt;/code&gt;的数据编码上，可以通过浏览器查看到&lt;code&gt;Response Headers&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;Connection:keep-alive
+Content-Encoding:gzip
+Content-Length:11902
+Content-Type:text/html; charset=utf-8
+Date:Mon, 21 Nov 2016 23:53:49 GMT
+Server:Tengine&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;可以看到这样一行：&lt;code&gt;Content-Encoding:gzip&lt;/code&gt;，当前网页已经使用&lt;code&gt;gzip&lt;/code&gt;进行了加密。就好比说别人发给你一个rar的压缩包，但是你直接当成&lt;code&gt;utf-8&lt;/code&gt;的文本文件进行解码，当然得不到正确的结果。想要得到正确的结果的话，需要先脱鞋子再脱袜子（先解压缩再进行文本编码）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nodejs&#34; data-lang=&#34;nodejs&#34;&gt;var http = require(&amp;#34;http&amp;#34;);
+var zlib = require(&amp;#39;zlib&amp;#39;);
+http.get(&amp;#34;http://www.runoob.com/nodejs/nodejs-tutorial.html&amp;#34;, function(res) {
+var html = [];
+res.on(&amp;#34;data&amp;#34;, function(data) {
+html.push(data);
+})
+res.on(&amp;#34;end&amp;#34;, function() {
+var buffer = Buffer.concat(html);
+zlib.gunzip(buffer, function(err, decoded) {
+console.log(decoded.toString());
+})
+}).on(&amp;#34;error&amp;#34;, function() {
+console.log(&amp;#34;获取失败&amp;#34;)
+})
+})&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;实际上大多数现代语言内部的字符串都使用了&lt;code&gt;utf-8&lt;/code&gt;编码，所以此处解压缩之后就可以得到自己想要的结果。&lt;/p&gt;
+&lt;h3 id=&#34;问题深入&#34;&gt;问题深入&lt;/h3&gt;
+&lt;p&gt;其实题主的代码中隐藏着这样的一个问题：&lt;/p&gt;
+&lt;p&gt;他认为得到数据已经是文本类型了，所以直接使用&lt;code&gt;html+=data;&lt;/code&gt;这种方式来进行拼接。但实际上，服务器端传递过来的数据是二进制数据，对分块后的二进制数据进行拼接或者是编解码操作，可能会导致最后生成的字符串出现截断。所以正确的方式应该是使用内置的&lt;code&gt;Buffer&lt;/code&gt;类型进行操作。&lt;/p&gt;
+&lt;p&gt;后来题主通过私信问了我这样一个问题：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;为什么网页上都有Content-Encoding:gzip，有的需要解压gzip，而有的不需要？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;我认为要看服务器端是怎么实现的，很多服务器会先检测&lt;code&gt;Request Headers&lt;/code&gt;中的&lt;code&gt;Accept-Encoding&lt;/code&gt;，然后再决定发送什么样的数据。&lt;code&gt;runoob.com&lt;/code&gt;这个网站很有可能就是没有做这样的处理，统一返回的gzip之后的页面。&lt;/p&gt;
+&lt;h3 id=&#34;问题解决&#34;&gt;问题解决&lt;/h3&gt;
+&lt;p&gt;这个问题已经解决了，下面需要考虑的是怎么样去避免这个问题。&lt;/p&gt;
+&lt;p&gt;从客户端开发者的角度来看，如果不能确定访问的网页的数据类型，需要自己做一下判断：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nodejs&#34; data-lang=&#34;nodejs&#34;&gt;var contentEncoding = res.headers[&amp;#34;content-encoding&amp;#34;];
+...
+if (contentEncoding === &amp;#34;gzip&amp;#34;) {
+xxxxx;
+} else if (contentEncoding === &amp;#34;deflate&amp;#34;) {
+xxxxx;
+} else {
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;从服务器端开发者的角度来看，不能假定用户会以我们期待的方式去处理数据，所以一定要显式的指定我们数据的呈现形式。&lt;/p&gt;
+&lt;p&gt;包括但不限于：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在&lt;code&gt;HTML&lt;/code&gt;中显式指定&lt;code&gt;Content-Type&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;meta&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;http-equiv&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;content&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;text/html; charset=UTF-8&amp;#34;&lt;/span&gt; /&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;服务器端返回的&lt;code&gt;Response Headers&lt;/code&gt;中要显式指定内容编码和类型&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;Content-Encoding:gzip
+Content-Type:text/html; charset=utf-8&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;其实在web开发这个领域，规范已经非常详细了，文本的编码，Headers的定义，服务器端的返回值等等。不要把规范当成默认，一定要显式指定规范中描述的参数，不要让用户来猜测你的数据类型。作为开发者，在严格遵守相应规范的同时，也要考虑兼容用户不符合规范的行为。当然，这种兼容也要有一定的尺度，强行兼容所有可能的用户行为往往吃力不讨好，落入了过度设计与提早优化的深渊。&lt;/p&gt;
+&lt;p&gt;个中尺度的把握，往往能够看出一个程序员的火候。&lt;/p&gt;
+&lt;p&gt;以此自勉。&lt;/p&gt;</description></item><item><title>httpbin 介绍</title><link>https://xuanwo.io/2016/11/12/httpbin-intro/</link><pubDate>Sat, 12 Nov 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/11/12/httpbin-intro/</guid><description>&lt;p&gt;在所有需要做HTTP请求的开发过程中，总有一个这样的痛点：我发出去的请求到底是什么样子的？特别是在一些需要签名和认证的场合，服务器只会冷冰冰的返回一个&lt;code&gt;40x&lt;/code&gt;错误，你无从得知错误的具体详情。本文旨在介绍&lt;code&gt;httpbin&lt;/code&gt;，看看它是如何解决这个痛点的。&lt;/p&gt;
+&lt;h2 id=&#34;httpbin是什么&#34;&gt;httpbin是什么&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;httpbin&lt;/code&gt;是一个&lt;code&gt;HTTP Request &amp;amp; Response Service&lt;/code&gt;，你可以向他发送请求，然后他会按照指定的规则将你的请求返回。这个类似于&lt;code&gt;echo服务器&lt;/code&gt;，但是功能又比它要更强大一些。
+&lt;code&gt;httpbin&lt;/code&gt;支持HTTP/HTTPS，支持所有的HTTP动词，能模拟302跳转乃至302跳转的次数，还可以返回一个HTML文件或一个XML文件或一个图片文件（还支持指定返回图片的格式）。实在是请求调试中居家必备的良器！&lt;/p&gt;
+&lt;h2 id=&#34;httpbin怎么用&#34;&gt;httpbin怎么用&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;httpbin&lt;/code&gt;的使用方法非常简单，你只需要把请求的地址修改为&lt;code&gt;httpbin.org&lt;/code&gt;即可。
+比如：&lt;/p&gt;
+&lt;h3 id=&#34;获取请求中的user-agent&#34;&gt;获取请求中的user-agent&lt;/h3&gt;
+&lt;p&gt;请求：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;curl http://httpbin.org/user-agent&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;返回：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;user-agent&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;curl/7.19.7 (universal-apple-darwin10.0) libcurl/7.19.7 OpenSSL/0.9.8l zlib/1.2.3&amp;#34;&lt;/span&gt;}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;查看自己的get请求&#34;&gt;查看自己的GET请求&lt;/h3&gt;
+&lt;p&gt;请求：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;curl http://httpbin.org/get&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;返回：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;args&amp;#34;&lt;/span&gt;: {},
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;headers&amp;#34;&lt;/span&gt;: {
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;Accept&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;*/*&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;Connection&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;close&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;Content-Length&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;Host&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;httpbin.org&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;User-Agent&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;curl/7.19.7 (universal-apple-darwin10.0) libcurl/7.19.7 OpenSSL/0.9.8l zlib/1.2.3&amp;#34;&lt;/span&gt;
+},
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;origin&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;24.127.96.129&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;url&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;http://httpbin.org/get&amp;#34;&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;更多的用法可以参考官方的主页： &lt;a href=&#34;https://httpbin.org/&#34;&gt;https://httpbin.org/&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;如何部署在内网&#34;&gt;如何部署在内网&lt;/h2&gt;
+&lt;p&gt;考虑到&lt;code&gt;httpbin&lt;/code&gt;部署在国外，加上业务调试的时候不想跟外部的服务器交互，&lt;code&gt;httpbin&lt;/code&gt;也可以采用自己部署的方式。&lt;/p&gt;
+&lt;h3 id=&#34;从pypi安装并使用&#34;&gt;从Pypi安装并使用&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pip install httpbin gunicorn
+gunicorn httpbin:app&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;从源码安装&#34;&gt;从源码安装&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;git clone https://github.com/Runscope/httpbin.git
+pip install -e httpbin
+python -m httpbin.core &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;--port&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;PORT&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;--host&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;HOST&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://httpbin.org/&#34;&gt;httpbin官方网站&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>再见， Hexo</title><link>https://xuanwo.io/2016/10/23/goodbye-hexo/</link><pubDate>Sun, 23 Oct 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/10/23/goodbye-hexo/</guid><description>&lt;p&gt;其实我现在的心情比较复杂。
+Hexo 我从大一的暑假就开始用，大二的时候加入了 Hexo 的团队，一直到现在，关于 Hexo 的文章都是我博客点击率最高的文章。
+但是由于我实在是精力有限，没有时间去维护Hexo的相关项目，因此只能与Hexo说再见了，希望能有更多人可以加入Hexo的开发团队，希望Hexo能够发展的更好。
+下面简单地分享一下自己在Hexo团队中做的工作和学到的东西。&lt;/p&gt;
+&lt;h2 id=&#34;我给hexo带来了什么&#34;&gt;我给Hexo带来了什么&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;版本更新时的反馈。得益于&lt;code&gt;Travis CI&lt;/code&gt;的自动构建能力，我可以在版本推送的第一时间进行构建并得到反馈。事实上，作者就是使用我的库进行测试的。&lt;/li&gt;
+&lt;li&gt;Pull Request的Review与Merge。其实这个方面在最开始的时候不是做的特别好，因为对&lt;code&gt;Node.js&lt;/code&gt;不熟悉，向&lt;code&gt;master&lt;/code&gt;分支导入了很多ugly的代码。不过做的多了就开始对&lt;code&gt;Node.js&lt;/code&gt;有了自己的感觉。&lt;/li&gt;
+&lt;li&gt;Issues的回复与维护。在我进入Team之前，Issues区有上千个没有回复或处理的问题。在Team成立之后，在我们团队成员的努力之下，这个数字减少到了300+。&lt;/li&gt;
+&lt;li&gt;BUG的Fix。学会了一点&lt;code&gt;Node&lt;/code&gt;之后我开始尝试自己修复&lt;code&gt;BUG&lt;/code&gt;，有一个&lt;code&gt;BUG&lt;/code&gt;确认修好了，但是很可惜没有能推到&lt;code&gt;NPM&lt;/code&gt;上。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;一次官方网站的完全宕机。&lt;/strong&gt; 这个涉及到&lt;code&gt;Travis CI&lt;/code&gt;的一个&lt;code&gt;BUG&lt;/code&gt;，导致我的自动构建任务在出错之后没有停止反而是直接进行了一次提交，从而导致官网直接挂了。详情可以参考： &lt;a href=&#34;https://github.com/hexojs/site/issues/134&#34;&gt;https://github.com/hexojs/site/issues/134&lt;/a&gt; 。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;我从hexo中学到了什么&#34;&gt;我从Hexo中学到了什么&lt;/h2&gt;
+&lt;p&gt;我使用Hexo的这三年，是我精力最旺盛，时间最宽裕的三年。在这期间，我掌握了如下的东西：&lt;/p&gt;
+&lt;h3 id=&#34;技术&#34;&gt;技术&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Node.js&lt;/code&gt;初步入门，能用&lt;code&gt;Node&lt;/code&gt;写一些简单的轮子，能看懂源代码并修复BUG。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HTML&lt;/code&gt;，&lt;code&gt;CSS&lt;/code&gt;初步入门，能对设计稿进行切分并实现相应效果，了解了几个比较常见的&lt;code&gt;CSS&lt;/code&gt;框架：&lt;code&gt;Bootstrap&lt;/code&gt;，&lt;code&gt;Semantic UI&lt;/code&gt;等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;技巧&#34;&gt;技巧&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;学习使用了几个常见前的前端工具，比如：&lt;code&gt;Grunt&lt;/code&gt;，&lt;code&gt;Gulp&lt;/code&gt;，&lt;code&gt;Bower&lt;/code&gt;等&lt;/li&gt;
+&lt;li&gt;学会了&lt;code&gt;Git&lt;/code&gt;，可以熟练使用&lt;code&gt;Git&lt;/code&gt;的&lt;code&gt;branch&lt;/code&gt;，&lt;code&gt;rebase&lt;/code&gt;等功能来进行协作&lt;/li&gt;
+&lt;li&gt;掌握了域名解析的全部过程，申请了自己的第一个域名&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;技能&#34;&gt;技能&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;能够熟练运用&lt;code&gt;Travis CI&lt;/code&gt;来实现自动构建与持续集成&lt;/li&gt;
+&lt;li&gt;英文的书面表达能力在和外国友人沟通的时候有了很大的提高&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;思想&#34;&gt;思想&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;开源的习惯：喜欢开源自己的代码，喜欢去学习别人的代码，喜欢使用开源产品，喜欢在社区反馈并尝试修复自己发现的问题。&lt;/li&gt;
+&lt;li&gt;遇到问题不会再想着推给别人，而是首先考虑自己能不能修复，或者有没有别的解决方案。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;如何从hexo迁移到jekyll&#34;&gt;如何从Hexo迁移到Jekyll&lt;/h2&gt;
+&lt;p&gt;非常有趣的一点是，网上非常多人都是从Jekyll迁移到Hexo，但是很少人有反向迁移的。
+从Hexo迁移到Jekyll其实非常简单，Hexo和Jekyll基本兼容，只需要读取文章的日期，并修改文件名为&lt;code&gt;YYYY-MM-DD-&amp;lt;post_name&amp;gt;.md&lt;/code&gt;即可。根据情况，还需要给文章添加&lt;code&gt;layout: post&lt;/code&gt;，并修改文章内容中一些不兼容的格式。
+我用Python写了一个简单的脚本，稍微整理整理之后会开源在Github并推送到Pypi上。&lt;/p&gt;
+&lt;h2 id=&#34;更新日志&#34;&gt;更新日志&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年10月23日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>动态网页数据抓取踩坑分享</title><link>https://xuanwo.io/2016/09/13/dynamic-page-data-spider/</link><pubDate>Tue, 13 Sep 2016 01:58:33 +0000</pubDate><guid>https://xuanwo.io/2016/09/13/dynamic-page-data-spider/</guid><description>&lt;p&gt;之前做了一些数据抓取的工作，期间也踩了一些坑，所以有了这篇文章。&lt;/p&gt;
+&lt;h2 id=&#34;动态网页数据源获取&#34;&gt;动态网页数据源获取&lt;/h2&gt;
+&lt;p&gt;需要抓取的页面是使用&lt;a href=&#34;https://facebook.github.io/react/&#34;&gt;React&lt;/a&gt; JavaScript 框架开发的，所有的页面都是客户端渲染而成，这也就导致我只能看到一个个的 data-id ，没有办法直接获取数据。这就涉及到一个我之前没有接触过的领域——动态网页爬虫。
+一番 Google 之后，我了解到动态网页爬虫大致上可以通过以下两种方法实现：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;分析网页代码结构和请求，找到数据源的请求链接&lt;/li&gt;
+&lt;li&gt;调用Webkit渲染之后再进行抓取&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;第二种方法相当于在命令行中跑一个浏览器，一个页面一个页面的打开，效率可想而知。再加上待抓取页面的 DOM 结构本来就比较复杂，没有添加相应的 class 和 id，导致即使渲染出来了想要抓到自己需要的数据也非常费劲。
+于是只能采用第一种方案：分析了一下网页的代码之后发现所有的数据都是通过一个接口返回的。使用 Chrome 审查工具中的 &lt;code&gt;Network&lt;/code&gt; 工具可以获取到所有的网络请求，在里面搜索 &lt;code&gt;JSON&lt;/code&gt; ，找到了一个 JSON 的请求。点开一看正是我们需要的数据，解决了动态网页数据源的问题。&lt;/p&gt;
+&lt;h2 id=&#34;分类不统一&#34;&gt;分类不统一&lt;/h2&gt;
+&lt;p&gt;这个坑主要出在自己对目标网页的数据特性挖掘的不够。一开始以为目标网页是按照一个特定的分类来区分的，但是后来发现这个标准并不统一，最后抓取到的数据不在一个维度上。正当自己准备开工写很多特判的时候发现，如果从另外一个维度来索取数据的话，所有的数据都是统一的。
+在这个案例中，就是将人为的分类切换成通过价格来获取数据，通过选择所有价格，就能获取到所有的数据，不需要再对不同维度的分类进行特判。
+这个与其说是技术问题，更多的是一个经验的问题。&lt;/p&gt;
+&lt;h2 id=&#34;页面内部js执行&#34;&gt;页面内部JS执行&lt;/h2&gt;
+&lt;p&gt;这个坑就比较有趣了。
+目标网页除了通过一个特定的接口获取数据之外，还会在页面内部通过 JavaScript 来直接传递数据。背后的技术考量不得而知，但是摆在我面前的问题就是我要如何获取这些 JavaScript 代码中的数据。
+思考了一下之后想到了两种方案：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;自行匹配需要的字符串&lt;/li&gt;
+&lt;li&gt;通过 phatomjs 等工具执行页面内部的 js 代码，并输出需要的数据变量&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;自行匹配的问题在于，我需要匹配的字符串的格式不一，很难直接匹配出我需要的数据。而通过 phatomjs 执行，就能比较好的解决这个问题。&lt;/p&gt;
+&lt;p&gt;一个比较脏的解决方案是这样的：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;下载整个HTML页面到 &lt;code&gt;test.html&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;通过 bs4 获取到所有的 &lt;code&gt;&amp;lt;script&amp;gt;&lt;/code&gt; 标签内部的内容&lt;/li&gt;
+&lt;li&gt;将我们需要的那个标签输出到一个 &lt;code&gt;data.js&lt;/code&gt; 文件中&lt;/li&gt;
+&lt;li&gt;之后把将数据构造成 json 的 js 代码写入 &lt;code&gt;data.js&lt;/code&gt; 文件&lt;/li&gt;
+&lt;li&gt;通过 phatomjs 来执行代码&lt;/li&gt;
+&lt;li&gt;将输出通过 &lt;code&gt;json.loads&lt;/code&gt; 载入并 append 到我们的数据数组中&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这样，我们就获得了页面内部js代码中数据的json形式。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;phatomjs 中执行的代码最后，千万要记得加上 &lt;code&gt;phatom.exit()&lt;/code&gt;，否则不会自行退出。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;phatomjs报错&#34;&gt;phatomjs报错&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://cli.xuanwo.io/Tools/phatomjs.html#qxcbconnection-could-not-connect-to-display&#34;&gt;https://cli.xuanwo.io/Tools/phatomjs.html#qxcbconnection-could-not-connect-to-display&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;当代码放到服务器上运行时候，出现了这样的报错：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;QXcbConnection: Could not connect to display
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这是因为源中的phatomjs默认运行在图形界面下，只需要在运行前执行：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;export QT_QPA_PLATFORM=offscreen
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;即可。&lt;/p&gt;
+&lt;h2 id=&#34;线程调度&#34;&gt;线程调度&lt;/h2&gt;
+&lt;p&gt;这个坑就比较隐蔽了，重复调试了很久。
+在前面的流程中，我们有一个下载HTML页面并使用bs4解析的步骤。我之前的实现是通过&lt;code&gt;subprocess.Popen()&lt;/code&gt;直接调用 &lt;code&gt;curl&lt;/code&gt; 之后，就打开&lt;code&gt;test.html&lt;/code&gt;。这样的实现导致了这样的一个问题：有可能网页还没有下载完，我就开始进行解析了，这样就会导致我的解析内容跟本就不正确。也就是说，&lt;code&gt;subprocess.Popen()&lt;/code&gt; 不是一个阻塞的过程，它在调用完 &lt;code&gt;curl&lt;/code&gt; 之后不会等到 &lt;code&gt;curl&lt;/code&gt; 返回再结束。
+定位到问题的话，解决起来就很容易了。通过查阅文档，我知道了可以通过这种方法来保证命令执行完毕再执行下一行代码：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;child = subprocess.Popon(&amp;quot;curl xxxx.com &amp;gt; test.html&amp;quot;, shell=True)
+child.wait()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;回顾-总结&#34;&gt;回顾 &amp;amp; 总结&lt;/h2&gt;
+&lt;p&gt;这个小小的玩意儿开发没花多久，但是学到了很多东西。从之前自己一直以为很难不敢尝试的动态网页抓取到 Python subprocess 线程调度，果然不踩坑就不会有新的收获。
+这次开发的东西比较敏感，涉及到公司内部的一些事务，所以代码就不开源出来了。有什么想法或者问题可以直接在评论区里提出来，我会尽量回复的。因为是一个一次性的小套件，所以没有怎么考虑优化上的事情，如果有更好的解决方案，也欢迎大家一起探讨，说不定下次就用上了呢~&lt;/p&gt;</description></item><item><title>nodebb-plugin-html5videoplayer 发布</title><link>https://xuanwo.io/2016/08/22/nodebb-plugin-html5videoplayer/</link><pubDate>Mon, 22 Aug 2016 17:53:25 +0000</pubDate><guid>https://xuanwo.io/2016/08/22/nodebb-plugin-html5videoplayer/</guid><description>&lt;p&gt;[nodebb-plugin-html5videoplayer]() 是一个简单的 NodeBB 插件，可以让 NodeBB 支持在线视频观看。Fork 自 &lt;a href=&#34;https://github.com/ogerly&#34;&gt;@ogerly&lt;/a&gt; 开发的 &lt;a href=&#34;https://github.com/ogerly/nodebb-plugin-videoplayer&#34;&gt;nodebb-plugin-videoplayer&lt;/a&gt;， 在他的基础上做了一些微不足道的贡献，括弧笑。&lt;/p&gt;
+&lt;h1 id=&#34;原理&#34;&gt;原理&lt;/h1&gt;
+&lt;p&gt;原理非常简单，将帖子中出现的：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;a href=&amp;quot;xxx.mp4&amp;quot;&amp;gt;&amp;lt;/a&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;标签转换为&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;video preload controls&amp;gt;
+&amp;lt;source src=&amp;quot;xx.mp4&amp;quot;&amp;gt;
+&amp;lt;/video&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;也就是完全通过 HTML5 提供的 video 标签来实现在线视频的观看功能。&lt;/p&gt;
+&lt;h1 id=&#34;区别&#34;&gt;区别&lt;/h1&gt;
+&lt;p&gt;世上轮子千千万，我为什么要Fork原来的再造一个？&lt;/p&gt;
+&lt;p&gt;最关键的因素在于我跟原作者的理念不太一样，原作者除了插入 video 标签以外，还提供了一个固定在下面下方的播放器控制条。由于版本更迭，这个播放器控制条已经失效，CSS 样式也不再适用。因此我 Fork 了原作者的插件，并上传了一个新的插件，旨在提供更简单的在线视频视频集成功能。&lt;/p&gt;
+&lt;p&gt;跟原来版本的区别主要如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;纯粹的播放器，没有多余的功能，不会修改任何页面外观&lt;/li&gt;
+&lt;li&gt;页面自适应，播放窗体会自适应当前页面大小，提供跨平台一致的体验&lt;/li&gt;
+&lt;li&gt;更强的外链支持，可以引用外部的链接，不需要上传到论坛&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;安装&#34;&gt;安装&lt;/h1&gt;
+&lt;p&gt;目前还不知道怎么提交到 NodeBB 的插件的中心，因此只能通过 npm 手动进行安装：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;npm install nodebb-plugin-html5videopalyer
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;使用&#34;&gt;使用&lt;/h1&gt;
+&lt;p&gt;使用起来非常简单，只需要在帖子中拖动上传视频&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[video](/uploads/files/xyz.mp4)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;或者直接输入引用的视频链接&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[video](//aa.com/bb/cc.mp4)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;目前仅支持&lt;code&gt;mp4&lt;/code&gt;，&lt;code&gt;ogv&lt;/code&gt;,&lt;code&gt;webm&lt;/code&gt;,&lt;code&gt;mov&lt;/code&gt;这四种格式
+引用的外链需要去掉协议头，否则无法正常解析&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;demo&#34;&gt;Demo&lt;/h1&gt;
+&lt;p&gt;最后显示的效果可以参考这个链接： &lt;a href=&#34;https://community.qingcloud.com/topic/556&#34;&gt;https://community.qingcloud.com/topic/556&lt;/a&gt;&lt;/p&gt;</description></item><item><title>NodeBB 升级迁移总结</title><link>https://xuanwo.io/2016/07/08/nodebb-upgrade/</link><pubDate>Fri, 08 Jul 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/07/08/nodebb-upgrade/</guid><description>&lt;p&gt;&lt;a href=&#34;https://community.qingcloud.com/&#34;&gt;青云用户社区&lt;/a&gt;使用了开源的 NodeBB 论坛，部署之初使用&lt;code&gt;0.7&lt;/code&gt;版本，因为没有跟随官方进度进行更新，导致论坛版本长期停滞。一方面无法享受到官方的BUG Fix，另一方面也无法使用很多业务需求的插件。思量再三后决定对社区进行升级迁移，不在原论坛直接升级，而是部署一套新的环境，将原有的数据全部导出。&lt;/p&gt;
+&lt;h1 id=&#34;可行性分析&#34;&gt;可行性分析&lt;/h1&gt;
+&lt;h2 id=&#34;nodebb-升级路径&#34;&gt;NodeBB 升级路径&lt;/h2&gt;
+&lt;p&gt;NodeBB 自0.3版本后就提供了一套独特升级路径，主要有以下几个要点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;NodeBB采用语义化版本号：&lt;code&gt;x.y.z&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;对&lt;code&gt;z&lt;/code&gt;版本号的变动，可以直接升级&lt;/li&gt;
+&lt;li&gt;只有当&lt;code&gt;z&lt;/code&gt;版本号已经是&lt;code&gt;x.y&lt;/code&gt;版本下的最新版本，才能升级到&lt;code&gt;x.y+1&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;数据迁移&#34;&gt;数据迁移&lt;/h2&gt;
+&lt;p&gt;NodeBB在部署的时候就使用了青云平台上的 Redis 缓存和负载均衡器。这样迁移的问题就会变的简单很多，我只需要将 NodeBB 路径下的&lt;code&gt;public/uploads&lt;/code&gt;资源进行打包即可，Redis 缓存和负载均衡器都可以直接使用。&lt;/p&gt;
+&lt;h1 id=&#34;迁移步骤&#34;&gt;迁移步骤&lt;/h1&gt;
+&lt;h2 id=&#34;迁移-nodebb&#34;&gt;迁移 NodeBB&lt;/h2&gt;
+&lt;p&gt;建议在一个新的环境里面创建迁移环境。&lt;/p&gt;
+&lt;h3 id=&#34;node-版本&#34;&gt;Node 版本&lt;/h3&gt;
+&lt;p&gt;同样建议使用 &lt;code&gt;nvm&lt;/code&gt; 来管理版本，避免其他应用对NodeBB环境产生干扰。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;nvm install stable
+nvm use stable
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果不想每一次退出shell后都要执行&lt;code&gt;nvm use stable&lt;/code&gt;，可以手动设置默认版本：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;nvm alias default stable
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;nodebb-版本&#34;&gt;NodeBB 版本&lt;/h3&gt;
+&lt;p&gt;首先下载跟生产环境一致的NodeBB版本：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;git clone -b v0.7.x
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后使用跟生产环境一致的&lt;code&gt;config.json&lt;/code&gt;，NoedBB升级工具会自动更新&lt;code&gt;package.json&lt;/code&gt;，所以无需修改。&lt;/p&gt;
+&lt;p&gt;然后运行&lt;code&gt;./nodebb upgrade&lt;/code&gt;以升级数据结构和依赖并打上所有的补丁。&lt;/p&gt;
+&lt;p&gt;运行完毕后切换到更高版本的分支：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;git fetch
+git checkout v0.8.x
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;同样运行&lt;code&gt;./nodebb upgrade&lt;/code&gt;，以此类推，直至升级到官方最新版本。&lt;/p&gt;
+&lt;h2 id=&#34;迁移数据&#34;&gt;迁移数据&lt;/h2&gt;
+&lt;p&gt;正如之前所说的，Redis已经被直接升级到最新版本，接下来只需要将用户上传的数据导出即可。&lt;/p&gt;
+&lt;p&gt;在生产环境中执行如下命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd /path/to/nodebb/public
+tar -cvf nodebb_assets_backup.tar.gz ./upload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;切换到迁移环境后执行：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd /path/to/nodebb/public
+tar -xvf nodebb_assets_backup.tar.gz
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;注意事项&#34;&gt;注意事项&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;目前NodeBB不支持降级操作，如果担心破坏生产环境，可以在生成一个 Redis 的备份并重新创建资源，不要对原数据库进行操作。&lt;/li&gt;
+&lt;li&gt;由于 Redis 中会保存对原论坛的主题和插件等配置，在迁移到新版本后，有很大可能会产生错误，可以执行&lt;code&gt;./nodebb reset -a&lt;/code&gt;以清除所有主题和插件配置。确认 NodeBB 运行正常后再逐个启用即可。&lt;/li&gt;
+&lt;li&gt;在升级时候会因为Node.js版本的问题导致某些依赖无法安装，建议可以使用&lt;code&gt;0.12&lt;/code&gt;版本进行升级，升级成功后再切换到更新的版本上重新进行&lt;code&gt;npm install --production&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;感悟&#34;&gt;感悟&lt;/h1&gt;
+&lt;h2 id=&#34;nodebb的升级路线设计&#34;&gt;NodeBB的升级路线设计&lt;/h2&gt;
+&lt;p&gt;这次升级迁移其实经历很久的论证过程。
+一开始简单地尝试一下之后认定无法直接进行升级就产生了一些畏难情绪，心里想着不如就让它这样，反正现在线上跑得也挺好的，没有出什么太大的问题。而后种种需求的提出让我有些招架不住了，现有的落后版本缺少很多API和现有的插件，自行开发和维护的成本非唱高。这也是我有一段时间觉得开源在实际应用中并不是那么美好的原因。
+等到我真的沉下心来仔细研究官方的文档，才发现 NodeBB 看似鬼畜坑爹的升级路线设计其实也有着其优雅之处。数据库的结构可以随之版本同步更新，这样可以避免早期数据库结构设计不合理带来的种种弊端，并防止产生版本之间的Breaking Change。抛开API层面的兼容性不谈，NodeBB可以做到我直接使用原来的 Redis 从 &lt;code&gt;0.7.0&lt;/code&gt; 一路升级到 &lt;code&gt;1.0.4&lt;/code&gt;，还能保证我的数据没有出现任何丢失，就冲着这一点，我觉得这个升级路线的设计是有价值的。
+当然，路线是好的，但是在具体实现升级功能的时候还有待商榷之处：不难发现升级过程中有很大一部分的重复操作，其实这些都是可以避免的。每一个&lt;code&gt;x.y&lt;/code&gt;版本号之间的更新操作其实都是一致的，完全可以通过脚本实现。&lt;/p&gt;
+&lt;h2 id=&#34;应用部署的灵活性&#34;&gt;应用部署的灵活性&lt;/h2&gt;
+&lt;p&gt;上线任何应用之前都应该考虑其架构的扩展性和迁移能力。
+很多时候，部署一套应用的目的根本就不是为了去使用他，只是单纯的部署一个玩一玩而已。在这样的心态下，总会干出这样的事情：在一个20G的主机上跑ownCloud；在一个主机上同时跑wordpress，nginx和mysql等应用。当然，这样做并没有什么问题，毕竟是自己的Server，哪怕天天 &lt;code&gt;rm -rf /&lt;/code&gt;都是OK的。
+但是如果是一套需要给别人用的应用，部署时的扩展性和迁移能力就必须考虑在内。这其实是两个很实在的问题：服务器空间耗尽，性能跟不上怎么办？服务器挂了，如何保全自己的数据？自己设计这样一套系统很麻烦，但是如果是在青云上就不一样了。我最喜欢青云的一点就是，青云几乎所有的资源都是可以动态伸缩和扩展的。带宽受限制了，直接扩大；服务器性能不够了，加核心加内存；单个服务器支撑不住了，批量生成十个并使用负载均衡器进行负载均衡操作；想要测试某个最新的特性，直接从线上创建一个Snapshot并生成资源进行测试。
+在本次迁移的过程中，我们就可以看出来，我们可以直接使用 Redis 进行升级，而不是手动导出数据库备份再执行导入操作。同样地，我们也不需要再重新配置一遍 Nginx ，只需要再创建一个负载均衡器即可。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年07月08日 首次发布&lt;/li&gt;
+&lt;li&gt;2016年07月15日 青云社区成功上线&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>新博客上线&amp;Hexo主题开发入门</title><link>https://xuanwo.io/2016/06/29/new-blog-new-life/</link><pubDate>Wed, 29 Jun 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/06/29/new-blog-new-life/</guid><description>&lt;p&gt;曾经看过我的博客的同学大概都会发现，我的博客再一次大变样了~
+这一次的更新其实酝酿了很久，早在刚开始用Hexo的时候就想着要有一个自己的主题。但是那个时候觉得这是一件很难的事情，要懂HTML，CSS，JavaScript，还要懂Swig，Ejs等模板语言，还要懂Hexo的内部原理，于是就一直搁置了。在独立实现了一个&lt;a href=&#34;https://xuanwo.io/2016/06/16/jade_ims/&#34;&gt;完整的项目&lt;/a&gt;之后，我认为自己已经有这样的能力了，于是决定正式开始。
+在我看来的话，Hexo的使用者大概分为三个层次：第一种用别人的主题，第二种模仿现有的主题，第三种自己独立开发。我原来是第一种，在Next的基础上做了很多改动，这一次进入到了第二个层次。我找了一套自我感觉还不错的模板，然后套用它的CSS设定和页面结构，就成了我现在的主题。
+利用两天学习和工作的闲暇时间，我大体上完成了这个主题。做得比较糙，很多细节还有待优化，但是我已经急不可耐地想要正式上线了，笑。在未来的话，我希望能把一些配置都能整理出来，优化一下代码，然后开源这个主题，希望大家能够喜欢~
+庆祝的话已经说的差不多了，下面来讲一讲如何开发一个Hexo主题。&lt;/p&gt;
+&lt;h1 id=&#34;结构&#34;&gt;结构&lt;/h1&gt;
+&lt;h2 id=&#34;主题结构&#34;&gt;主题结构&lt;/h2&gt;
+&lt;p&gt;Hexo主题的结构大体如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;.
+├── _config.yml
+├── languages
+│   ├── default.yml
+│   └── zh-Hans.yml
+├── layout
+│   ├── achieve.swig
+│   ├── category.swig
+│   ├── index.swig
+│   ├── _layout.swig
+│   ├── page.swig
+│   ├── _partials
+│   ├── post.swig
+│   └── tag.swig
+└── &lt;span style=&#34;color:#007020&#34;&gt;source&lt;/span&gt;
+├── css
+├── fonts
+├── img
+├── js
+└── vendors&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;首先有一个&lt;code&gt;_config.yml&lt;/code&gt;负责提供主题级别的配置，可以在&lt;code&gt;layout&lt;/code&gt;中通过&lt;code&gt;theme.xxx&lt;/code&gt;的形式进行调用。
+然后&lt;code&gt;languages&lt;/code&gt;负责实现博客的i18N功能，如果博客没有多语言的需求，只需要实现一个&lt;code&gt;default.yml&lt;/code&gt;即可。
+其次是最为重要的&lt;code&gt;layout&lt;/code&gt;文件夹，这个里面主要存放博客的结构，Hexo 引擎会使用指定的渲染引擎将&lt;code&gt;layout&lt;/code&gt;文件渲染成HTML页面。
+最后是&lt;code&gt;source&lt;/code&gt;，把所有主题需要用到的资源，比如CSS，Fonts，JS等都存放到这个文件夹中。&lt;/p&gt;
+&lt;p&gt;这个主题使用了&lt;a href=&#34;http://paularmstrong.github.io/swig/&#34;&gt;swig&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;页面结构&#34;&gt;页面结构&lt;/h2&gt;
+&lt;p&gt;页面结构分为两个维度，一者是我要呈现哪些页面，二者是每个页面上都有哪些内容。&lt;/p&gt;
+&lt;h3 id=&#34;哪些页面&#34;&gt;哪些页面？&lt;/h3&gt;
+&lt;p&gt;作为一个博客，主要需要的页面有以下这些：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;主页&lt;/li&gt;
+&lt;li&gt;单页&lt;/li&gt;
+&lt;li&gt;归档页面&lt;/li&gt;
+&lt;li&gt;分类页面&lt;/li&gt;
+&lt;li&gt;标签页面&lt;/li&gt;
+&lt;li&gt;文章页&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;哪些内容&#34;&gt;哪些内容？&lt;/h3&gt;
+&lt;p&gt;如果没有什么特别的设计，博客的页面大体上可以分为这几个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;head：头部文件&lt;/li&gt;
+&lt;li&gt;body：主体内容
+&lt;ul&gt;
+&lt;li&gt;header：题图，导航栏等&lt;/li&gt;
+&lt;li&gt;content： 内容&lt;/li&gt;
+&lt;li&gt;footer：尾部的联系方式等&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;实现&#34;&gt;实现&lt;/h1&gt;
+&lt;p&gt;前面讲到了 Hexo 的结构，下面来聊一聊具体的实现。&lt;/p&gt;
+&lt;h2 id=&#34;原理&#34;&gt;原理&lt;/h2&gt;
+&lt;p&gt;Hexo 渲染的入口是&lt;code&gt;_layout.swig&lt;/code&gt;，所以一个主题至少需要实现一个&lt;code&gt;_layout.swig&lt;/code&gt;。
+然后Hexo会遍历Hexo目录下&lt;code&gt;source&lt;/code&gt;文件夹中的所有Markdown文件，根据Markdown文件所指定的layout进行渲染，默认类型为&lt;code&gt;post&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;技巧&#34;&gt;技巧&lt;/h2&gt;
+&lt;h3 id=&#34;layout-swig结构&#34;&gt;_layout.swig结构&lt;/h3&gt;
+&lt;p&gt;整体的结构基本如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+&amp;lt;!doctype html&amp;gt;
+&amp;lt;html&amp;gt;
+&amp;lt;head&amp;gt;
+{% include &amp;#39;_partials/head.swig&amp;#39; %}
+&amp;lt;title&amp;gt;{% block title %}{% endblock %}&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body id=&amp;#34;home&amp;#34;&amp;gt;
+{% include &amp;#39;_partials/menu.swig&amp;#39; %}
+&amp;lt;div id=&amp;#34;wrap&amp;#34;&amp;gt;
+{% include &amp;#39;_partials/nav.swig&amp;#39; %}
+{% include &amp;#39;_partials/header.swig&amp;#39; %}
+&amp;lt;div id=&amp;#34;start&amp;#34; class=&amp;#34;container content&amp;#34;&amp;gt;
+{% block content %}{% endblock %}
+&amp;lt;/div&amp;gt;
+{% include &amp;#39;_partials/footer.swig&amp;#39; %}
+&amp;lt;/div&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;实现文章渲染&#34;&gt;实现文章渲染&lt;/h3&gt;
+&lt;p&gt;这个地方主要是借鉴了NexT主题的设计，实现了一个swig的宏来生成对应的文章。这个宏主要有两个参数，第一个是post对象，第二个是是否为主页。如果是主页就只显示简略的内容，如果不是就输出全文。&lt;/p&gt;
+&lt;p&gt;判断的部分实现如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+{% if is_index %}
+{% if post.excerpt %}
+{{ post.excerpt }}
+&amp;lt;a class=&amp;#34;&amp;#34; href=&amp;#34;{{ url_for(post.path) }}&amp;#34;&amp;gt;Read more&amp;lt;/a&amp;gt;
+{% endif %}
+{% else %}
+{{ post.content }}
+{% endif %}
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;用到的post页的参数可以&lt;a href=&#34;https://hexo.io/zh-cn/docs/variables.html&#34;&gt;我翻译的中文文档&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;分页插件&#34;&gt;分页插件&lt;/h3&gt;
+&lt;p&gt;Hexo 自己实现了一个分页插件，直接使用paginator函数即可。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+{% if page.prev or page.next %}
+&amp;lt;nav class=&amp;#34;pagination&amp;#34;&amp;gt;
+{{ paginator({
+prev_text: &amp;#39;&amp;lt;i class=&amp;#34;fa fa-angle-left&amp;#34;&amp;gt;&amp;lt;/i&amp;gt;&amp;#39;,
+next_text: &amp;#39;&amp;lt;i class=&amp;#34;fa fa-angle-right&amp;#34;&amp;gt;&amp;lt;/i&amp;gt;&amp;#39;,
+mid_size: 1
+}) }}
+&amp;lt;/nav&amp;gt;
+{% endif %}
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;评论系统&#34;&gt;评论系统&lt;/h3&gt;
+&lt;p&gt;对于Hexo来说，评论系统就是调用一个第三方的JS。所以只需要在合适的位置插入代码即可。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+&amp;lt;div id=&amp;#34;disqus_thread&amp;#34;&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;script&amp;gt;
+var disqus_config = function () {
+this.page.url = &amp;#39;{{ page.permalink }}&amp;#39;;
+this.page.identifier = &amp;#39;{{ page.path }}&amp;#39;;
+};
+(function () {
+var d = document, s = d.createElement(&amp;#39;script&amp;#39;);
+s.src = &amp;#39;//abc.disqus.com/embed.js&amp;#39;;
+s.setAttribute(&amp;#39;data-timestamp&amp;#39;, +new Date());
+(d.head || d.body).appendChild(s);
+})();
+&amp;lt;/script&amp;gt;
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;需要注意的坑&#34;&gt;需要注意的坑&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;page.posts&lt;/code&gt;是按照时间排序的，但是&lt;code&gt;site.posts&lt;/code&gt;是无序的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://hexo.io/zh-cn/docs/&#34;&gt;Hexo 官方中文文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年06月30日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>马可波罗珠宝进销存系统开发手记</title><link>https://xuanwo.io/2016/06/16/jade_ims/</link><pubDate>Thu, 16 Jun 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/06/16/jade_ims/</guid><description>&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/develop/jade-ims-index.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这个项目从我们这个学期开了&lt;strong&gt;系统分析与设计&lt;/strong&gt;这门课之后就开始了，首次创建这个项目是在3月26号，实际上真正的开发时间集中在6月上旬。差不多用两个星期的闲暇时间时间完成了这个简单的进销存系统。这个系统基于Flask框架，使用SQLite3数据库，前端则是使用Bootstrap框架，实现了包括客户，库存，销售，进货等管理子系统。说是管理，其实也就是简单的增加和删除而已。
+前人经常说，不要重复造轮子。既然有类似于Odoo这样强大的ERP系统珠玉在前，我为什么要再自己造一个功能简单，甚至根本不会有人用的轮子呢？从前我确实是这么想的，但是稍微有一点工作经验之后发现再造轮子的原因有两条：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;作为一个处在知识积累阶段的学生而言，再造轮子很有必要。不造一次轮子，你就永远不会明白轮子内部的真实构造。很多技术虽然看起来简单，但是想要有一个完善且健壮的实现却有很多坑需要踩。踩这些坑的过程，也正是一个技术人员成长最快的过程。&lt;/li&gt;
+&lt;li&gt;别人的轮子终究是别人的。你不知道这个轮子最大能承受多少压力，你也不知道这个轮子在什么样的情况下会爆胎。当一个轮子装上企业呼呼向前的列车，再要想把它替换下来是一件很难且成本很高的事情。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接下来，讲讲造这个轮子的一些经历吧~&lt;/p&gt;
+&lt;h1 id=&#34;项目启动&#34;&gt;项目启动&lt;/h1&gt;
+&lt;p&gt;正如前言中说的，这个项目是系统分析与设计这门课的课程设计，也是贯穿着整个学期的一个主旋律。早在这学期开学之初，我们就知道了自己需要做这样的一个系统。经历了上个学期各种技术炫了半天，最后却只是抄袭各种开源项目草草实现的&lt;a href=&#34;https://xuanwo.io/2015/06/30/together-project/&#34;&gt;失败&lt;/a&gt;，这个学期我务实了很多。从最开始的讨论就一直跟组员强调技术的可行性，基本上否决了所有试图增大项目复杂度的建议，把主题定在了一个纯粹的进销存管理系统。之所以如此，是因为我的观念发生了很大的变化：原来觉得技术的先进是最重要的，开发项目一定要用最现代的技术，最炫目的特效；现在觉得哪怕是一个用VB写出来的能稳定运行的丑陋系统都要胜过采用了种种最新潮技术却漏洞百出根本没法运行的“先进”系统。
+在讨论到最极端的时候，我甚至想只做一个仓库的管理系统，只包括进库和出库这样的简单功能。这样的态度曾经闹得有一次讨论直接不欢而散，好在组员都是非常Nice的人，在我主动表达歉意之后大度地表示没什么。经过多次讨论之后，我们终于达成了共识，要做一个进销存系统，功能尽可能简单，在实现基础功能的前提下，再考虑加入新的功能。
+接下来的事情就没有什么大的分歧了，整体系统采用B/S架构，开发语言选用我个人比较喜欢的Python，使用Flask框架，数据库选用无需配置的SQLite。然后服务器选择阿里云的学生机，系统选择成熟稳定的CentOS 7.2，Web Server选用Nginx，也就是我个人目前比较喜欢的开发平台——LESP(Linux, Nginx, SQLite, Python)。&lt;/p&gt;
+&lt;h1 id=&#34;项目细节&#34;&gt;项目细节&lt;/h1&gt;
+&lt;p&gt;下面再介绍一下项目的细节。&lt;/p&gt;
+&lt;h2 id=&#34;设计模式&#34;&gt;设计模式&lt;/h2&gt;
+&lt;p&gt;项目大体上采用了MVC的思想，不过在具体的实现上并没有太过纠结于概念上的东西。所有的网页模板都在&lt;code&gt;templates&lt;/code&gt;文件夹下，静态资源都扔到了&lt;code&gt;static&lt;/code&gt;目录，使用一个&lt;code&gt;models.py&lt;/code&gt;模块来单独存放所有的数据库定义，然后所有的路由以及操作都在&lt;code&gt;views&lt;/code&gt;中实现。对于我来说，快速地实现需求才是头等大事，是不是符合正统的MVC理念并不是十分重要。实际上现在这样的结构开发起来感觉也蛮顺手的，需要调整前端的样式和表单就在&lt;code&gt;templates&lt;/code&gt;文件夹下操作，需要修改程序的逻辑就去&lt;code&gt;views&lt;/code&gt;，他们基本上是一一对应的关系。&lt;a href=&#34;https://spacewander.github.io/explore-flask-zh/4-organizing_your_project.html&#34;&gt;这里&lt;/a&gt;有更加清晰的讲解，值得一看。&lt;/p&gt;
+&lt;h2 id=&#34;项目中的问题-解决方案&#34;&gt;项目中的问题&amp;amp;解决方案&lt;/h2&gt;
+&lt;h3 id=&#34;在flask框架中同时使用蓝图与flask-sqlalchemy&#34;&gt;在Flask框架中同时使用蓝图与Flask_SQLAlchemy&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/q/1010000005640527&#34;&gt;https://segmentfault.com/q/1010000005640527&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;感谢@Ethan和@，他们强有力地向我证明了有师傅带路的好处。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;这个问题纯粹是因为一直以来都是一个脚本Boy，没有系统性的学习过软件开发导致的。很显然，按照我原来的代码去产生实例，就会导致循环导入的错误。想要解决这样的问题，就需要使用工厂函数去生成实例，而不是自己去生成它。&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;__init__.py&lt;/code&gt;中添加一个&lt;code&gt;create_app()&lt;/code&gt;函数，在函数中进行参数配置，初始化和导入蓝图的操作：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;bps &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.dashboard:dashboard&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.install:install&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.login:login&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.sale:sale&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.customer:customer&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.purchase.inputbill:inputbill&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.purchase.supplier:supplier&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.stock.enterstockbill:enterstockbill&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.stock.leavestockbill:leavestockbill&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.stock.stock:stock&amp;#39;&lt;/span&gt;
+]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;create_app&lt;/span&gt;():
+app &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; Flask(__name__)
+app&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;config&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;from_object(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;config&amp;#39;&lt;/span&gt;)
+app&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;config&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;from_pyfile(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;config.py&amp;#39;&lt;/span&gt;)
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;init_app(app)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; path &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; bps:
+bp &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; import_string(path)
+app&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;register_blueprint(bp)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; app&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;flask如何优雅地重定向所有未登录用户到登陆界面&#34;&gt;Flask如何优雅地重定向所有未登录用户到登陆界面&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/q/1010000005645821&#34;&gt;https://segmentfault.com/q/1010000005645821&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;感谢@zwillon和@igaozp&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;有一个Feature是想要把所有未登录的用户都重定向到登录页面。当时手头上的技术方案主要有两种：第一种是自己包装一个装饰器，并添加在每一个视图函数中；第二种是使用第三方库&lt;code&gt;Flask-Login&lt;/code&gt;，在视图函数中添加&lt;code&gt;@login_required&lt;/code&gt;。但是感觉姿势都不怎么优雅，因为我需要不断地在视图函数中添加这个装饰器，不太符合DRY(Don&amp;rsquo;t Repeat Yourself)准则。
+SF的老司机给了我一个相当优雅的方案——Hook到app的&lt;code&gt;before_request&lt;/code&gt;方法。也就是这样来实现：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@app.before_request&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;check_need_login&lt;/span&gt;():
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 检查登录的逻辑&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;pass&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我第一次是这样实现的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@app.before_request&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;check_need_login&lt;/span&gt;():
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;logged_in&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; session:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; redirect(url_for(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login.user_login&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这样就带来了一个问题，对于未登录的用户来说，所有页面都会不断地重定向从而导致整个应用崩溃。因此还需要指定在某些情况下停止重定向，所以我们还需要修改一下&lt;code&gt;check_need_login&lt;/code&gt;的逻辑：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@app.before_request&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;check_need_login&lt;/span&gt;():
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;logged_in&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; session &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;and&lt;/span&gt; request&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;endpoint &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; (&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login.user_login&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;static&amp;#39;&lt;/span&gt;):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; redirect(url_for(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login.user_login&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;当&lt;code&gt;session&lt;/code&gt;中没有&lt;code&gt;logged_in&lt;/code&gt;字段且&lt;code&gt;endpoint&lt;/code&gt;不是&lt;code&gt;user_login&lt;/code&gt;和&lt;code&gt;static&lt;/code&gt;的时候就重定向到登录页面，这样就比较优雅地解决了重定向未登录用户到登陆界面的需求。&lt;/p&gt;
+&lt;h3 id=&#34;flask-sqlalchemy-插入数据时发生错误后如何处理&#34;&gt;flask_sqlalchemy 插入数据时发生错误后如何处理&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/q/1010000005647431&#34;&gt;https://segmentfault.com/q/1010000005647431&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;在实际开发的过程中发现，如果&lt;code&gt;db.session&lt;/code&gt;中添加的记录有问题，在commit的时候会出现一个报错。所以我们需要在出错的时候进行一些处理，以保证程序出错之后还能够正常地运行。网友 @学不会编程的永仲 给出的回答是我应该在form中验证数据的正确性。虽然我相信他的理解可能是正确的，但是不太符合我的哲学，我更加倾向于&lt;strong&gt;让它崩溃，然后处理异常&lt;/strong&gt;而不是&lt;strong&gt;事先处理好所有的错误&lt;/strong&gt;。
+通过查阅文档，了解到&lt;code&gt;db.session.rollback()&lt;/code&gt;这一函数可以在出错是进行回滚，于是最后的实现变成了这样：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@supplier.route&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;/purchase/supplier/add&amp;#39;&lt;/span&gt;, methods&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;POST&amp;#39;&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;add_supplier&lt;/span&gt;():
+form &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; request&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;form
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; request&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;method &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;POST&amp;#39;&lt;/span&gt;:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(form)
+supplier &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; Supplier(form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_name&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_constract&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_phone&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_address&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_remark&amp;#39;&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;try&lt;/span&gt;:
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;session&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;add(supplier)
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;session&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;commit()
+flash(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;供应商添加成功！&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;success&amp;#39;&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;except&lt;/span&gt;:
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;session&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;rollback()
+flash(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;输入不合法，请重新输入！&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;danger&amp;#39;&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; redirect(url_for(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier.list_supplier&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;项目总结&#34;&gt;项目总结&lt;/h1&gt;
+&lt;p&gt;随着答辩的完成，这个项目进入了尾声。因为很多东西需要去学习，有新的东西需要去探索，所以这个项目也很有可能不会再继续维护了。那么这个项目开源出来的价值在哪里呢？我想，这个项目虽然简单，但它毕竟还算是一个完整的Flask项目，除了&lt;code&gt;flask_sqlalchemy&lt;/code&gt;之外没有多余的依赖，非常适合一个跟我一样的Python初学者进行入门学习。如果说有人能够因为这个项目少走一些弯路，少在一些死胡同浪费时间，我想这个项目的价值就已经实现了。如果再往大一点来说，开源的价值也就实现了。
+如果要我自评的话，我觉得这样的项目应该有60分。之所以给一个及格分，是因为这个项目毕竟实现了需求的大多数功能，也有好好地跑在阿里云的服务器上。丢分的话，大体上是因为这个项目毫无注释，没有安装文档，也没有配置手册，很多东西都是硬编码到了代码中。不仅如此，编程的风格也是相当的不佳，在模板部分缺乏良好的顶层设计，出现了大量的重复代码。这些问题希望自己能在下一个项目中得到一些改善。
+Anyway，随着这个项目的结束，我的大三生涯也要结束了。接下来是波澜壮阔的实习阶段，希望自己能够在实习的时候多踩一些坑，多走一些弯路，多
+得到一些来自“长者”的指点。&lt;/p&gt;
+&lt;h1 id=&#34;参考资源&#34;&gt;参考资源&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://docs.jinkan.org/docs/flask/&#34;&gt;Flask 中文文档 &lt;em&gt;文档略有过时，代码以Github上为准&lt;/em&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://spacewander.github.io/explore-flask-zh/index.html&#34;&gt;Flask 之旅&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://docs.jinkan.org/docs/flask-sqlalchemy/index.html&#34;&gt;Flask-SQLALchemy 中文文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年06月17日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>在QingCloud上部署弹性扩容的OwnCloud</title><link>https://xuanwo.io/2016/06/03/owncloud-on-qingcloud/</link><pubDate>Fri, 03 Jun 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/06/03/owncloud-on-qingcloud/</guid><description>&lt;p&gt;因为实在不满意百度云的一些缺陷，我们最终决定部署一套团队内部使用的云存储平台，用于团队协作及资料长期存储。希望能够达到如下目标：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;数据安全性高&lt;/li&gt;
+&lt;li&gt;权限控制能力强&lt;/li&gt;
+&lt;li&gt;分享功能更强，可以设置密码和过期时间等&lt;/li&gt;
+&lt;li&gt;允许匿名第三方上传数据&lt;/li&gt;
+&lt;li&gt;没有文件上传大小限制&lt;/li&gt;
+&lt;li&gt;支持多平台同步功能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;综合考量各开源项目之后，我最终选定基于QingCloud部署一套开源存储项目OwnCloud。&lt;/p&gt;
+&lt;h1 id=&#34;部署&#34;&gt;部署&lt;/h1&gt;
+&lt;p&gt;在部署之前，我们首先要考虑这套系统大概会有多少人用，会使用多大的空间，需要多少带宽，服务器的配置等问题。我们现在有几个TB的数据，10人使用，未来人数无法预估，各资源使用量也无法预估。但是非常有意思的事情是，在青云QingCloud平台上，一切都是可以动态扩容的，所以我完全可以以最少的资源验证服务是否符合需求，然后再增加服务所使用的资源。&lt;/p&gt;
+&lt;p&gt;整个部署过程概括为如下4步：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;验证功能及预估花费&lt;/li&gt;
+&lt;li&gt;在QingCloud上创建主机、网络等资源并修改配置&lt;/li&gt;
+&lt;li&gt;安装OwnCloud环境&lt;/li&gt;
+&lt;li&gt;使用LVM管理分区，实现空间动态扩容&lt;/li&gt;
+&lt;li&gt;在网页端安装OwnCloud&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;资源编排&#34;&gt;资源编排&lt;/h2&gt;
+&lt;p&gt;在实际生成需要的资源之前，我先通过青云QingCloud的提供的资源编排功能看看青云是否能够满足我们的需求以及搭建这一套服务需要多少钱：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如图所示，我们在一个私有网络中创建一台主机和一个数据库，并为整个VPC网络分配了一个公网IP和防火墙。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-tp.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如图，整套资源预计需要每小时0.56元。&lt;/p&gt;
+&lt;h2 id=&#34;创建并修改配置&#34;&gt;创建并修改配置&lt;/h2&gt;
+&lt;p&gt;生成模板之后，点击创建。等待大概一分钟之后，所有资源全部创建完毕。在SSH连接上服务器开始实际的配置工作之前，需要先修改VPC的设置。&lt;/p&gt;
+&lt;h3 id=&#34;添加端口转发规则&#34;&gt;添加端口转发规则&lt;/h3&gt;
+&lt;p&gt;我需要将来自公网的流量转发到我的主机上，主要有两条，一个是SSH，一个是HTTP。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-2.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;主机的内网地址是&lt;code&gt;192.168.0.2&lt;/code&gt;，所以需要把所有来自22和80的端口都转发到这个地址。&lt;/p&gt;
+&lt;h3 id=&#34;添加防火墙规则&#34;&gt;添加防火墙规则&lt;/h3&gt;
+&lt;p&gt;出于安全性考虑，青云的防火墙默认只开放了22和ICMP。为了可以正常访问到主机，还需要添加80端口的例外规则：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-3.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;我们看到青云在右边提供了常用端口的配置，选择http即可。&lt;/p&gt;
+&lt;h2 id=&#34;安装owncloud&#34;&gt;安装OwnCloud&lt;/h2&gt;
+&lt;p&gt;OwnCloud为CentOS平台提供了二进制的包，没有特殊需求的话，直接使用即可。
+首先添加OwnCloud官方的Key文件：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;rpm --import https://download.owncloud.org/download/repositories/stable/CentOS_7/repodata/repomd.xml.key&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后添加OwnCloud的repo：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;wget http://download.owncloud.org/download/repositories/stable/CentOS_7/ce:stable.repo -O /etc/yum.repos.d/ce:stable.repo&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;更新repo之后开始安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;yum clean expire-cache
+yum install owncloud&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;yum将会自动处理依赖，如果速度不佳的话，可以直接将包下载到本地：&lt;a href=&#34;http://download.owncloud.org/download/repositories/stable/CentOS_7/&#34;&gt;直接下载&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;启用httpd-并测试是否安装正确&#34;&gt;启用httpd，并测试是否安装正确&lt;/h2&gt;
+&lt;p&gt;OwnCloud默认使用Apache作为Web服务器，上一步已经安装了Apache，接下来需要启用它：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;systemctl start httpd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如需要开机自行启动，可以输入：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;systemctl &lt;span style=&#34;color:#007020&#34;&gt;enable&lt;/span&gt; httpd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后在浏览器中访问：&lt;code&gt;http://&amp;lt;your ip&amp;gt;/owncloud&lt;/code&gt;，如果出现OwnCloud的安装界面，说明已经配置成功了。&lt;/p&gt;
+&lt;h2 id=&#34;使用lvm管理分区-实现空间动态扩容&#34;&gt;使用LVM管理分区，实现空间动态扩容&lt;/h2&gt;
+&lt;p&gt;OwnCloud在安装的时候只能选择一个目录，为了能够实现空间的动态扩容，需要使用LVM创建一个逻辑分区并挂载到指定的数据目录下。&lt;/p&gt;
+&lt;p&gt;首先在青云QingCloud的控制台中创建一块硬盘，然后挂载到主机中。之后，就能够通过&lt;code&gt;/dev/sdb&lt;/code&gt;等形式来访问这块硬盘。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;需要注意的是，主机在每次重启的时候硬盘的顺序可能会发生改变，所以如果需要自动挂载的话，需要使用UUID或者LABLE的方式来指定硬盘，不能使用设备名。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;接下来需要在CentOS下使用LVM来配置分区，实现分区的动态扩容。&lt;/p&gt;
+&lt;h3 id=&#34;安装lvm工具&#34;&gt;安装LVM工具&lt;/h3&gt;
+&lt;p&gt;青云QingCloud提供的CentOS 7.2默认映像是没有LVM工具的，所以首先需要安装它：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;yum install lvm2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;创建物理卷-pv&#34;&gt;创建物理卷（PV）&lt;/h3&gt;
+&lt;p&gt;首先检测能够被作为物理卷的设备：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;lvmdiskscan&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后在指定设备上创建物理卷，所有需要用到的设备都需要执行如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pvcreate /dev/sdb&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后查看已经创建好的物理卷：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pvdisplay&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;输出大概如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;--- Physical volume ---
+PV Name /dev/sdb
+PV Size &lt;span style=&#34;color:#40a070&#34;&gt;1000&lt;/span&gt;.00 GiB / not usable &lt;span style=&#34;color:#40a070&#34;&gt;4&lt;/span&gt;.00 MiB
+Allocatable yes
+PE Size &lt;span style=&#34;color:#40a070&#34;&gt;4&lt;/span&gt;.00 MiB
+Total PE &lt;span style=&#34;color:#40a070&#34;&gt;255999&lt;/span&gt;
+Free PE &lt;span style=&#34;color:#40a070&#34;&gt;255999&lt;/span&gt;
+Allocated PE &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+PV UUID EHIeTJ-WBPv-rQkQ-LnuI-0IWE-SM4z-bMPAWx&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;创建卷组-vg&#34;&gt;创建卷组（VG）&lt;/h3&gt;
+&lt;p&gt;物理卷创建完毕后，需要创建一个卷组来实现物理卷的统一管理：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;vgcreate owncloud-vg /dev/sdb /dev/sdc /dev/sdd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;后续如果需要扩展的话，可以使用如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;vgextend owncloud-vg /dev/sde&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;同样地，使用&lt;code&gt;vgdisplay&lt;/code&gt;来查看创建好的卷组：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;--- Volume group ---
+VG Name owncloud-vg
+Format lvm2
+Metadata Areas &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+Metadata Sequence No &lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;
+VG Access read/write
+VG Status resizable
+MAX LV &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+Cur LV &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+Open LV &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+Max PV &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+Cur PV &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+Act PV &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+VG Size &lt;span style=&#34;color:#40a070&#34;&gt;1000&lt;/span&gt;.00 GiB
+PE Size &lt;span style=&#34;color:#40a070&#34;&gt;4&lt;/span&gt;.00 MiB
+Total PE &lt;span style=&#34;color:#40a070&#34;&gt;255999&lt;/span&gt;
+Alloc PE / Size &lt;span style=&#34;color:#40a070&#34;&gt;230400&lt;/span&gt; / &lt;span style=&#34;color:#40a070&#34;&gt;900&lt;/span&gt;.00 GiB
+Free PE / Size &lt;span style=&#34;color:#40a070&#34;&gt;25599&lt;/span&gt; / &lt;span style=&#34;color:#40a070&#34;&gt;100&lt;/span&gt;.00 GiB
+VG UUID xCCtSR-QFcZ-StcI-HM7O-KDAz-PvMC-EgYcSV&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;创建逻辑卷-lv&#34;&gt;创建逻辑卷（LV）&lt;/h3&gt;
+&lt;p&gt;然后就可以开始创建逻辑卷了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;lvcreate -L 900G owncloud-vg -n owncloud-data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;创建完毕后，就可以通过&lt;code&gt;/dev/mapper/owncloud--vg-owncloud--data&lt;/code&gt;或者&lt;code&gt;/dev/owncloud-vg/owncloud-data&lt;/code&gt;来访问这个设备了。&lt;/p&gt;
+&lt;p&gt;如果需要扩大逻辑卷，可以使用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;lvextend -L 1000G /dev/owncloud-vg/owncloud-data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;确认扩展成功后，再更新文件系统：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;resize2fs /dev/owncloud-vg/owncloud-data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;创建文件系统并挂载&#34;&gt;创建文件系统并挂载&lt;/h3&gt;
+&lt;p&gt;在逻辑卷上创建一个ext4分区：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;mkfs.ext4 /dev/mapper/owncloud--vg-owncloud--data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后将分区挂载到期望的目录下，比如&lt;code&gt;/data&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;mount /dev/mapper/owncloud--vg-owncloud--data /data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;修改文件夹权限&#34;&gt;修改文件夹权限&lt;/h2&gt;
+&lt;p&gt;为了OwnCloud能够正确读写数据分区，需要修改&lt;code&gt;/data&lt;/code&gt;的所有者和权限：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;chown -R apache:apache /data
+chmod &lt;span style=&#34;color:#40a070&#34;&gt;775&lt;/span&gt; /data -R&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;网页安装owncloud&#34;&gt;网页安装OwnCloud&lt;/h2&gt;
+&lt;p&gt;全部配置完毕后，可以开始在网页进行OwnCloud安装了。&lt;/p&gt;
+&lt;p&gt;管理员帐号： 自定义
+管理员密码： 自定义
+数据路径：&lt;code&gt;/data&lt;/code&gt;
+数据库用户：&lt;code&gt;root&lt;/code&gt;
+数据库密码：&lt;code&gt;&amp;lt;your password&amp;gt;&lt;/code&gt;
+数据库名称自定义，比如：&lt;code&gt;owncloud&lt;/code&gt;
+数据库地址：&lt;code&gt;&amp;lt;your rdb ip&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在创建RDB时，系统会自动用相同的密码创建Root用户。OwnCloud在安装时需要创建一个新的账户来进行管理，而青云提供的默认用户没有这样的权限。因此需要使用Root用户而不是创建时指定的用户。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;提示创建完毕后，就可以使用管理员用户登陆了。&lt;/p&gt;
+&lt;h1 id=&#34;维护&#34;&gt;维护&lt;/h1&gt;
+&lt;h2 id=&#34;自动备份&#34;&gt;自动备份&lt;/h2&gt;
+&lt;p&gt;一个存储类的应用，必须要有自动备份的功能，保证用户在最坏的情况下都能找回他们的数据，对于存储着工作资料的私有云存储而言更是如此。所以，需要对主机，硬盘和数据库进行定时备份。&lt;/p&gt;
+&lt;h3 id=&#34;主机和硬盘&#34;&gt;主机和硬盘&lt;/h3&gt;
+&lt;p&gt;青云QingCloud 提供了一个叫定时器的功能，可以设置在每天的三点重复执行备份任务。&lt;/p&gt;
+&lt;p&gt;首先创建一个定时器，每天3：00重复执行：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-backup-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;然后在该定时器中添加对应的定时器任务：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-backup-2.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;选中需要备份的主机和硬盘即可。&lt;/p&gt;
+&lt;h3 id=&#34;数据库&#34;&gt;数据库&lt;/h3&gt;
+&lt;p&gt;青云QingCloud 上的数据库自带自动备份功能，只需要开启它。&lt;/p&gt;
+&lt;p&gt;在需要备份的数据库上右击，选择&lt;code&gt;修改自动备份策略&lt;/code&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-backup-3.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;青云QingCloud 首次备份是全量备份，之后是增量备份。当变化较大时，会自动创建新的备份链。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;自动伸缩&#34;&gt;自动伸缩&lt;/h2&gt;
+&lt;p&gt;云存储服务的一个最显著的特点是有明显的高峰期，如果能够实现高峰期时自动增加带宽，低峰期时自动降低带宽就能够节省昂贵的带宽费用的目的。青云QingCloud提供的自动伸缩就能有效地满足这一痛点。&lt;/p&gt;
+&lt;p&gt;首先创建一个自动伸缩策略：&lt;/p&gt;
+&lt;p&gt;操作类型为调整公网IP带宽上限，然后选择需要自动伸缩的资源。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-autoscaling-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;然后添加带宽提高和降低的触发条件：&lt;/p&gt;
+&lt;p&gt;以带宽提高为例，我们可以在公网进流量连续15分钟平均值大于当前带宽的80%时提高带宽。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;青云QingCloud的监控周期为5分钟，而数据采样周期为1分钟。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-autoscaling-2.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;最后添加操作参数：&lt;/p&gt;
+&lt;p&gt;可以设置每次提高5Mbps，最高允许的带宽为20Mbps。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-autoscaling-3.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;硬盘扩容&#34;&gt;硬盘扩容&lt;/h2&gt;
+&lt;p&gt;硬盘扩容有两种方式，第一是硬盘自身的纵向扩容，提升硬盘的大小；第二是硬盘数量的横向扩容，提升硬盘的个数。下面分别讲一讲。&lt;/p&gt;
+&lt;h3 id=&#34;纵向扩容&#34;&gt;纵向扩容&lt;/h3&gt;
+&lt;p&gt;首先暂停服务：&lt;/p&gt;
+&lt;p&gt;进入 Owncloud 所在文件夹，修改&lt;code&gt;config&lt;/code&gt;文件夹下的&lt;code&gt;config.php&lt;/code&gt;文件，将&lt;code&gt;maintenance&lt;/code&gt;修改为&lt;code&gt;true&lt;/code&gt;。这样 Owncloud 就会进入维护模式，从而防止在扩容期间出现意外的数据丢失。&lt;/p&gt;
+&lt;p&gt;然后从系统中卸载数据盘：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;umount /data
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后就可以在青云的控制台中卸载这块磁盘，并执行扩容操作。&lt;strong&gt;一定要先在系统中卸载，再在青云的控制台中卸载，否则会出现不可恢复的数据丢失。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;等到青云提示扩容完成后，再将这块盘挂载到主机上，并执行&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pvresize /dev/sdx
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;来自动探测设备当前大小并将物理卷扩展到其最大容量&lt;/p&gt;
+&lt;p&gt;之后就可以扩容逻辑卷的大小了：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;lvextend -l 100%VG owncloud-vg/owncloud-data
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这个命令会将这个VG的所有空间分配到我们的LV当中。&lt;/p&gt;
+&lt;p&gt;然后将这个逻辑卷挂载到我们的数据分区：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;mount /dev/mapper/owncloud--vg-owncloud--data /data
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后我们需要让文件系统也检测到空间的变更：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;resize2fs /dev/mapper/owncloud--vg-owncloud--data
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;至此，空间扩容完毕，可以再将&lt;code&gt;config.php&lt;/code&gt;中的&lt;code&gt;maintenance&lt;/code&gt;修改为&lt;code&gt;false&lt;/code&gt;，开始正常对外提供服务。&lt;/p&gt;
+&lt;h3 id=&#34;横向扩容&#34;&gt;横向扩容&lt;/h3&gt;
+&lt;p&gt;横向扩容相对比较简单一些。&lt;/p&gt;
+&lt;p&gt;首先将Owncloud置于维护模式，然后在青云的控制台上创建一块新的盘挂载到系统中，然后执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pvcreate /dev/sdx&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;以将这个卷转换为一个物理卷。&lt;/p&gt;
+&lt;p&gt;之后就可以将这个物理卷加入到一个VG中：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;vgextend owncloud-vg /dev/sdx&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;之后的操作跟纵向扩容相似，扩大LV，重新挂载，更新文件系统，退出维护模式等，不再赘述。&lt;/p&gt;
+&lt;h1 id=&#34;应用&#34;&gt;应用&lt;/h1&gt;
+&lt;p&gt;下面来聊一聊OwnCloud的一些应用。&lt;/p&gt;
+&lt;h2 id=&#34;分享功能&#34;&gt;分享功能&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-4.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;分享功能是我比较看重的一个部分。OwnCloud的分享可以选择用户和组，然后还能通过链接进行分享。通过链接分享时，可以指定密码和过期时间，还能允许编辑。这样就可以实现给用户发送需要的资料以及收集来自合作伙伴的视频，文件等功能。&lt;/p&gt;
+&lt;h2 id=&#34;团队协作&#34;&gt;团队协作&lt;/h2&gt;
+&lt;p&gt;OwnCloud内建了一个版本管理功能，同一个文件可以提供多个历史版本，这样方便大家进行版本追溯和管理，为团队协作编辑提供了便利。除此以外还有评论系统，实时性能还不错，基本可以用于对具体文档的简单协作。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-show-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年06月03日 首次发布&lt;/li&gt;
+&lt;li&gt;2016年06月11日 增加自动备份和自动伸缩的配置&lt;/li&gt;
+&lt;li&gt;2016年08月20日 增加了硬盘空间的横向与纵向扩容&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>我从Qingchat中学到的教训</title><link>https://xuanwo.io/2016/05/29/learn-from-qingchat/</link><pubDate>Sun, 29 May 2016 20:57:00 +0000</pubDate><guid>https://xuanwo.io/2016/05/29/learn-from-qingchat/</guid><description>&lt;p&gt;之前的一段时间一直在从事&lt;a href=&#34;https://github.com/Xuanwo/qingchat&#34;&gt;Qingchat&lt;/a&gt;的相关开发工作，这个项目是一个基于Mojo-Weixin提供的Rest API开发的一个微信机器人，承担了十余个群，上千人的微信直播活动。秉承着ACM训练出来的“暴力加乱搞”风格，我花了大概一个星期的课余时间，搞出了一个可用的版本。期间也迭代了很多次，既欣慰于Coding的力量，也苦恼于当初设计的不完善带来的种种问题。在这个项目即将大规模重构的前夕，我总结一下开发Qingchat的过程中的经验教训，希望自己能成为一个更好更聪明的Coder。&lt;/p&gt;
+&lt;h1 id=&#34;经验教训&#34;&gt;经验教训&lt;/h1&gt;
+&lt;h2 id=&#34;没有稳定性的世界&#34;&gt;没有稳定性的世界&lt;/h2&gt;
+&lt;p&gt;从最开始Coding的时候，就有着一个根深蒂固的信念：计算机不会出错。1是1，0是0，只要自己的实现是对的，那最后的结果也一定是对的。然后，真相并非如此：我们存在于一个没有稳定性的世界。
+你访问的路径可能是不存在的，你访问的文件可能是不存在或者已经上锁，你期望的服务器响应因为网络环境太差变成了超时。不仅如此，有时候你还会遇到神出鬼没的黑客们，稍有不慎你可能就永远失去了对数据的掌控权（*我测试用的服务器被人暴力尝试登陆34万次*）。
+所以我们在编程的时候就应当完全抛弃“这个服务是稳定的”这种前提，学会在万物皆有可能出错的假设下编程，不要轻视程序的鲁棒性。你永远都不会知道用户会以何种方式使用你的程序，同样的，你也不会知道用户到底会输入什么样的数据。灵活运用“防御式编程”和“让它出错”两种思想，让你的代码更健壮。&lt;/p&gt;
+&lt;h2 id=&#34;拥抱多线程-走向非阻塞&#34;&gt;拥抱多线程，走向非阻塞&lt;/h2&gt;
+&lt;p&gt;现在回过头来看，自己当初实现的群发功能就是一个彻头彻尾的失败品：容错性差，效率低下。这些问题其实是由同一个原因导致的：我使用了一个单线程阻塞式的实现，不仅如此，还没有做任何异常的处理。这样导致的结果就是只要某个环节出错，整个群发任务就会直接退出。速度是跟微信群的数量成正比的，群的数量上升之后，群发速度过慢成了我的同事们经常向我吐嘈的问题。
+开发的时候不计算网络传输延时绝对是一个重大失误——实际上，网络延时是整个系统的关键瓶颈。为了解决这个问题，Node.js 采用了一种单线程非阻塞的设计（一家之言，轻喷）。对于Python来说也是一样的，适度地拥抱多线程开发以提高并行效率，多采用非阻塞式设计以避免单个任务执行时间过长拖慢运行速度。
+在一次去上课的路上，我形象地把这种设计比作“射后不管”，好像是飞毛腿导弹？&lt;/p&gt;
+&lt;h2 id=&#34;开源非万能&#34;&gt;开源非万能&lt;/h2&gt;
+&lt;p&gt;我原来是一个开源的死忠粉，认为开源可以解决一切问题，那个时候每天思考的问题就是为什么Windows不开源？等到真的进入业界，才明白自己的这种想法有多么幼稚。
+除去那些大型的有基金会在背后支撑的项目，绝大多数项目完全依靠开发者个人热情来维持，某些涉及到商业支持的项目更是存在着“人走项目死”的现象。比如我参与管理的&lt;a href=&#34;https://github.com/hexojs&#34;&gt;Hexo&lt;/a&gt;项目在作者tommy开始实习之后就进展缓慢，再比如我接手但是现状非常差的&lt;a href=&#34;https://github.com/staticfile/static&#34;&gt;staticfile&lt;/a&gt;（*很抱歉我并没有能够做出什么正面的贡献，反而让状况变得更加糟糕了*）。
+这些实践都告诉我，开源并不是万能的，真正想要解决一个问题，需要一个完善的制度以及各方面的激励机制。单纯依赖于开发者个人的热情往往不利于一个项目的长远发展，而在自行开发的项目中依赖于一个开源项目往往会带来更多的风险。开发者不一定会开发你期望的功能，开发者也不一定会按照你期望的进度进行开发。
+作为我个人，我依然是一个热爱开源项目，崇尚开源理念的人；然而作为一个产品的开发者，一个服务的提供者，你必须权衡自行开发，采购商业产品以及使用开源项目之间的利弊。不同的选择取决于不同的项目，不同的需求，不同的自主开发能力，不同的后续维护能力。一味的强调开源理念，不顾实际，往往对开源事业的发展有害无益，挫伤人们对开源的信赖。&lt;/p&gt;
+&lt;h1 id=&#34;未来展望&#34;&gt;未来展望&lt;/h1&gt;
+&lt;p&gt;一个项目最具活力与激情的时刻就是在设计之初实现之前，等到实现的时候往往寸步难行，到了后续维护的时候时常想就此了断。我希望这个项目能够存活更长的时间，希望自己向同事们提出的构想都能够一一变为现实。本次重构希望能够实现一个更加稳定更加高效的Qingchat，希望能够进一步减少重复劳动，提高效率。
+最后感谢同事们的不杀之恩，感谢青云QingCloud的自由空间，可以允许我以自己想要的方式完成工作。最后以青云CTO Reno在某次会上说的话自勉：“你们是青云的Devloper，No excuse。”&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年05月30日 初稿&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

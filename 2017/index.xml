@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>2017s on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/2017/</link><description>Recent content in 2017s on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 03 Dec 2017 10:07:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/2017/index.xml" rel="self" type="application/rss+xml"/><item><title>Integromat -- 最强大的自动化平台</title><link>https://xuanwo.io/2017/12/03/integromat-intro/</link><pubDate>Sun, 03 Dec 2017 10:07:00 +0000</pubDate><guid>https://xuanwo.io/2017/12/03/integromat-intro/</guid><description>&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/integromat-example.png&#34; alt=&#34;Integrmat Example&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;今天想跟大家分享一个类似于 IFTTT 的自动化平台： &lt;a href=&#34;https://www.integromat.com&#34;&gt;Integromat&lt;/a&gt;。与 IFTTT 最大的区别是它允许用户通过操作每一次请求的输入和输出来构建一个完整的链条，比如上图的这个例子就是实现了这样的一个功能：当完成 Todoist 中带有指定属性的任务时，将这个任务移动到 &lt;code&gt;Done&lt;/code&gt; 列表，并将其放到 &lt;code&gt;Done&lt;/code&gt; 列表的顶端。&lt;/p&gt;
+&lt;p&gt;接下来我会先简单地介绍一下 Integromat，然后讲解一下 Integromat 涉及到的一些元素，最后讲讲如何定制并调试自己的场景。&lt;/p&gt;
+&lt;h2 id=&#34;0x00-介绍&#34;&gt;0x00 介绍&lt;/h2&gt;
+&lt;p&gt;Integromat 是由一家专门做系统集成和外包服务的公司 &lt;a href=&#34;www.integrators.cz&#34;&gt;Integrators&lt;/a&gt; 推出的产品，2012 年开始开发， 2016 年正式面向大众推出。目前团队中有 19 人，其中负责技术的有 9 人。他们愿景是要做互联网的胶水，同时自称 Integromat 是最先进的在线自动化平台，在使用了他们的服务之后我发现他们没有骗我。&lt;/p&gt;
+&lt;h2 id=&#34;0x01-特点&#34;&gt;0x01 特点&lt;/h2&gt;
+&lt;p&gt;详细的特性列表可以参考此处： &lt;a href=&#34;https://www.integromat.com/en/features&#34;&gt;https://www.integromat.com/en/features&lt;/a&gt; ，下面我只列出一些我认为有用 &amp;amp; 特别的特性。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;完整的 ACID 事务支持，拥有处理异常的能力&lt;/li&gt;
+&lt;li&gt;可视化操作界面，可以看到每一步操作的详细数据，调试便利程度 Max&lt;/li&gt;
+&lt;li&gt;支持路由功能，可以实现多条分支的处理&lt;/li&gt;
+&lt;li&gt;支持常用函数（数值，时间和字符串的常用操作，甚至还有正则）&lt;/li&gt;
+&lt;li&gt;支持解析 JSON 到预设的数据结构当中&lt;/li&gt;
+&lt;li&gt;支持 Webhook 和 定时器 两种触发器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;作为一个互联网自动化爱好者，我先后使用过 &lt;a href=&#34;https://ifttt.com/&#34;&gt;IFTTT&lt;/a&gt;，&lt;a href=&#34;https://zapier.com&#34;&gt;Zapier&lt;/a&gt; 等商业服务，也部署过 &lt;a href=&#34;https://github.com/muesli/beehive&#34;&gt;Beehive&lt;/a&gt;，&lt;a href=&#34;https://github.com/huginn/huginn&#34;&gt;Huginn&lt;/a&gt; 这样的开源服务，但是没有一个像 Integromat 这么强大，更何况，它的界面也是相当的简洁好看。&lt;/p&gt;
+&lt;h2 id=&#34;0x02-概念介绍&#34;&gt;0x02 概念介绍&lt;/h2&gt;
+&lt;p&gt;强大的功能通常都意味着陡峭的学习曲线，Integromat 也不例外。为了实现上文中提到的诸多特性，Integromat 引入了很多概念，这使得它的上手难度比 IFTTT 和 Zapier 高上不少。但是 Integromat 的工程师们在前端的引导和设计上下了很多功夫，尽可能地降低了新用户的门槛。根据我的实际经验，有初步编程开发经验的同学只要摸索上几分钟就能上手，而零编程基础的同学如果不使用那些高级特性的话，只需要十几分钟就能捣鼓出一个实际可用的场景。&lt;/p&gt;
+&lt;p&gt;为了更好的帮助新同学使用 Integromat，下面我会简单的介绍一下 Integromat 涉及到的一些元素。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Scenario（场景）：场景是 Integromat 中一系列任务的组合，相当于 IFTTT 中的 Applets。&lt;/li&gt;
+&lt;li&gt;Service（服务）：服务是 Integromat 中预设好的一些服务，比如 Dropbox，Gmail 等，相当于 IFTTT 中的 Service。
+&lt;ul&gt;
+&lt;li&gt;Trigger（触发器）：满足一定条件的时候会触发这个服务&lt;/li&gt;
+&lt;li&gt;Instant（实时）：某些触发器会标着实时，这意味着这个触发器可以通过 Webhook 来实时触发，否则就只能使用 Integromat 的定时器来触发。&lt;/li&gt;
+&lt;li&gt;Action（操作）：这个服务通过一定的输入来执行对应的操作。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Connection（联接）：联接是 Integromat 中绑定的服务，联接与服务是多对一的关系，可以通过创建同一个服务的多个联接来实现多帐号。&lt;/li&gt;
+&lt;li&gt;Webhook：某些服务支持在满足某些条件的时候向预先设置好的 Webhook 发送信息，Integromat 可以创建这样的 webhook 来接受指定的信息，注意这个 Webhook 跟服务的触发器是绑定的。&lt;/li&gt;
+&lt;li&gt;Key：Integromat 可以上传一些加密的文件来支持某些敏感的操作&lt;/li&gt;
+&lt;li&gt;Device： 与 IFTTT 一样， Integromat 可以与一些设备绑定来支持设备相关的操作&lt;/li&gt;
+&lt;li&gt;Data structure（数据结构）： 对于预设的服务，Integromat 已经事先解析好了对应的结构体，但是如果是自己创建的 Webhook，那需要自己定义好对应的数据结构，可以通过上传一个 JSON 文件来创建。&lt;/li&gt;
+&lt;li&gt;Data store：Integromat 提供了一个简单的 KV 存储，用于在多个场景或者同一个场景多次执行中共享数据，可以进行 Get，Set 和 Del 等操作。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Integromat 涉及到的元素确实要比 IFTTT 多上不少，但是新同学刚刚上手的时候只需要了解 Scenario，Service 和 Connection 就已经足够了，剩下的高级特性可以之后慢慢摸索。&lt;/p&gt;
+&lt;h2 id=&#34;0x03-收费政策&#34;&gt;0x03 收费政策&lt;/h2&gt;
+&lt;p&gt;Integromat 的收费政策可以参考： &lt;a href=&#34;https://www.integromat.com/en/pricing&#34;&gt;https://www.integromat.com/en/pricing&lt;/a&gt; ， 这里主要讲一下 Free 这一档：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;免费用户每个月可以进行 1000 次操作，有 100 M的流量，定时器的最小间隔为 15 分钟。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;所有用户的场景数量都是没有限制的，但是有着 1000 次的操作数量限制，在单个 Scenario 的历史记录当中可以看到每一次运行都进行了多少次操作。基本上可以看作有多少个 “圈” 就会有多少操作，没有执行到的部分不会进行计算。&lt;/p&gt;
+&lt;p&gt;对于轻度用户而言，1000 次操作基本上刚刚够用；如果不用来在网盘之间同步东西的话，100M 的流量是绰绰有余的。对于重度用户而言，花个 9 刀或者 29 刀购买套餐也是个不错的主意，这么强大的服务值得为止付费。&lt;/p&gt;
+&lt;h2 id=&#34;0x04-如何定制-调试&#34;&gt;0x04 如何定制 &amp;amp; 调试&lt;/h2&gt;
+&lt;p&gt;Integromat 的图形化界面已经足够优秀了，官方也提供了不少的教程，比如 &lt;a href=&#34;https://www.integromat.com/en/kb/tutorial/get-a-tweet-on-twitter-when-a-new-tweet-from-google-sheet-row-is-created.html&#34;&gt;google sheet 中增加了一行就创建一个 tweet &lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;这里主要讲讲我感觉需要注意的一些地方：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每一个场景都必须从一个触发器开始。实际上每次创建一个场景，都会有一个无法删除的模块，你只需要点击并选择某个服务的触发器即可。&lt;/li&gt;
+&lt;li&gt;两个模块连接的地方会有一个漏斗标志，点开之后可以设置过滤器，如果条件不满足就会在这个地方中止。&lt;/li&gt;
+&lt;li&gt;Connections 和 Webhook 不需要提前创建好，只需要在开发场景的时候选择 &lt;code&gt;Add&lt;/code&gt; 即可。&lt;/li&gt;
+&lt;li&gt;所有的模块运行一次之后就会在右上方出现一个带数字的小圆，点开之后可以看到本次运行的实际数据。所以调试的时候可以点一次 &lt;code&gt;Run once&lt;/code&gt;，然后就能看到真实的数据了，这样调试起来更加方便。&lt;/li&gt;
+&lt;li&gt;左下角有一个像飞机的图标 &lt;code&gt;Explain flow&lt;/code&gt;，点击之后就会以动画的形式展示数据的流动。如果正在开发比较复杂的场景，不妨使用这个功能看看数据是怎么流动的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;0x05-总结&#34;&gt;0x05 总结&lt;/h2&gt;
+&lt;p&gt;Integromat 适合以下人群：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;觉得 IFTTT 反应太慢了/可定制化程度太低了/没有想要的功能的普通用户&lt;/li&gt;
+&lt;li&gt;想要跟自己的工作流做集成的工作人士&lt;/li&gt;
+&lt;li&gt;闲着没事干就想折腾黑科技的 Geek 们&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Have fun in automation!&lt;/p&gt;
+&lt;/blockquote&gt;</description></item><item><title>Enpass —— 超赞的密码管理工具</title><link>https://xuanwo.io/2017/11/26/enpass-intro/</link><pubDate>Sun, 26 Nov 2017 10:07:00 +0000</pubDate><guid>https://xuanwo.io/2017/11/26/enpass-intro/</guid><description>&lt;p&gt;不想把自己的密码保存在 LastPass 的服务器上？羡慕 Mac 上好用的 1Password 但是自己的平台上却没有？不喜欢 Linux 密码管理工具过时的界面？ 如果你也曾经为这些问题苦恼过的话，那 &lt;a href=&#34;https://www.enpass.io/&#34;&gt;Enpass&lt;/a&gt; 就有可能是你的最佳之选。&lt;/p&gt;
+&lt;h2 id=&#34;介绍&#34;&gt;介绍&lt;/h2&gt;
+&lt;p&gt;Enpass 是由一家在印度古尔冈的私人控股公司 &lt;a href=&#34;https://www.sinew.io/&#34;&gt;Sinew&lt;/a&gt; 推出的密码管理工具。之前在公司的内部使用，在 2011 年的时候正式面向市场推出，目前有超过 100 万用户，曾用名： Walletx 。&lt;/p&gt;
+&lt;h2 id=&#34;特点&#34;&gt;特点&lt;/h2&gt;
+&lt;h3 id=&#34;全平台支持&#34;&gt;全平台支持&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;支持 macOS，Linux，windows 三大 PC 平台&lt;/li&gt;
+&lt;li&gt;支持 iOS，Android，Windows Phone 等常用移动平台&lt;/li&gt;
+&lt;li&gt;支持 Chromebook&lt;/li&gt;
+&lt;li&gt;支持打包成 Portable 应用&lt;/li&gt;
+&lt;li&gt;浏览器插件支持 Chrome 与 Firefox&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;他们的浏览器插件非常好用，通过快捷键 &lt;code&gt;Ctrl+/&lt;/code&gt; 自动补全用户名帐号和密码。如果有多个相符的帐号会弹出窗口供选择，如果没有找到的话同样会提供一个搜索框。比 LastPass 那个臃肿又难用的浏览器插件要好上不少，1Password 在 mac 上的体验很赞，但是无奈没有 Linux 上的版本。&lt;/p&gt;
+&lt;h3 id=&#34;服务器不保存用户数据&#34;&gt;服务器不保存用户数据&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;跨终端同步基于已有的网盘服务实现&lt;/li&gt;
+&lt;li&gt;如果不想把数据上传到网盘，还可以通过局域网进行同步&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以通过自己的网盘服务来同步加密后的数据库，已经支持了主流的网盘服务，比如 Google Drive，Dropbox，OneDrive，基于 WebDAV 的 ownCloud 和 Nextcloud 等等。从我实际的体验上来看，Linux 上客户端的同步交互有些问题，有时候如果代理挂了，然后它重试数次失败之后就没有办法再手动触发同步，只好重新启动应用来解决。&lt;/p&gt;
+&lt;p&gt;不在服务器端存储用户数据就避免了整天担心 LastPass 数据库被盗之类的问题，据我所知 LastPass 之前就出现过一些问题。即使从来没有出现过问题，LastPass 这么大的目标本身就会吸引黑客们的兴趣，出现数据泄漏从长期来看是必然会发生的事情。因此密码这种东西还是要自己保管来的更加安全一些。&lt;/p&gt;
+&lt;h3 id=&#34;其它&#34;&gt;其它&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;AES-256 强加密&lt;/li&gt;
+&lt;li&gt;简单好用的密码生成工具&lt;/li&gt;
+&lt;li&gt;支持备份与恢复&lt;/li&gt;
+&lt;li&gt;支持导入导出&lt;/li&gt;
+&lt;li&gt;iOS 客户端支持指纹解锁，支持 iOS 12 Password AutoFill&lt;/li&gt;
+&lt;li&gt;粘贴后自动清除剪贴板&lt;/li&gt;
+&lt;li&gt;失去焦点一定时间后自动锁定程序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;缺点&#34;&gt;缺点&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;在 Linux 平台上不支持输入法，无法输入中文，只能复制粘贴
+&lt;ul&gt;
+&lt;li&gt;Enpass 的 Linux 客户端会捆绑一个特定版本的 Qt，而且缺少了 fcitx 的支持&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;同步功能不是很稳定，同步失败之后需要重启程序来手动触发
+&lt;ul&gt;
+&lt;li&gt;目前我的方案是直接同步到本地的文件夹，然后使用 Insync 来同步这个目录&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;收费政策&#34;&gt;收费政策&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Desktop 端不收费&lt;/li&gt;
+&lt;li&gt;移动端可以免费同步一定条目，可以通过支付十刀解锁（只需要支付一次，终身可用）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;技巧&#34;&gt;技巧&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;可以用来同步 TOTP 的验证码，完美取代 Google Authenticator&lt;/li&gt;
+&lt;li&gt;支持加密文件，可以用来跨平台同步自己的私钥和证书&lt;/li&gt;
+&lt;li&gt;iOS 客户端支持 iOS 12 内置的 Password Autofill，可以在 &lt;code&gt;Settings -&amp;gt; Passwords &amp;amp; Accounts -&amp;gt; AutoFill Passwords&lt;/code&gt; 中打开&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;Enpass 适合以下人群：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;想要尝试进行密码管理的新同学&lt;/li&gt;
+&lt;li&gt;Linux 平台上想获得 1Password 类似体验的用户&lt;/li&gt;
+&lt;li&gt;想要自己保管密码库，不信任集中托管服务的用户&lt;/li&gt;
+&lt;li&gt;致力于统一管理自己所有数据的用户 (Like me)&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>从浏览器端向 QingStor 对象存储上传文件</title><link>https://xuanwo.io/2017/06/15/upload-to-qingstor-from-browser/</link><pubDate>Thu, 15 Jun 2017 15:44:00 +0000</pubDate><guid>https://xuanwo.io/2017/06/15/upload-to-qingstor-from-browser/</guid><description>&lt;p&gt;从浏览器端向 QingStor 对象存储上传是很多开发者的需求，虽然 QingStor 提供了相关的接口和 SDK，但是仍有很多开发者表示不知道怎么样去调用。本文的目的是系统的展示一下如何从浏览器端上传一个文件到对象存储，从而解决大多数开发者们的需求。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;为了理解本文的内容，读者需要一些基本的 HTML，JavaScript 知识，同时需要对 QingStor 对象存储服务有一些基本的了解。前者可以查看 &lt;a href=&#34;https://developer.mozilla.org/zh-CN/docs/Web&#34;&gt;MDN Web 技术文档&lt;/a&gt;，后者可以查看 &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/common/overview.html&#34;&gt;QingStor 对象存储服务概述&lt;/a&gt; 。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;表单上传&#34;&gt;表单上传&lt;/h2&gt;
+&lt;p&gt;QingStor 对象存储支持通过 HTML 表单上传的方式向存储空间上传一个对象，文档可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/object/post.html&#34;&gt;此处&lt;/a&gt;。根据存储空间的权限设置，主要分为两种情况：匿名可写与匿名不可写，接下来分别介绍一下。&lt;/p&gt;
+&lt;h3 id=&#34;匿名可写&#34;&gt;匿名可写&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;action&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://&amp;lt;bucket&amp;gt;.&amp;lt;zone&amp;gt;.qingstor.com&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;method&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;enctype&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;multipart/form-data&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;Click or Drag a File Here to Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;key&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;submit&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload to QingStor&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 存储空间的名称&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: 存储空间所在的区域&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;key&amp;gt;&lt;/code&gt;: 文件上传后在存储空间中的名字，支持内置变量，比如 &lt;code&gt;${filename}&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;很多人最开始使用这个接口的时候会吐槽为什么 file 一定要放在最后，这是因为我们遵循了现有的 &lt;a href=&#34;http://hc.apache.org/httpclient-3.x/methods/multipartpost.html&#34;&gt;multipart post 方法&lt;/a&gt; 的实现——将表单分成了两个部分： StringPart 与 FilePart ，file 类型之后的全部表单项都会被丢弃，因此 file 这个 input 项一定要放在表单的最后。&lt;/p&gt;
+&lt;p&gt;解决掉 input 顺序这个问题之后，可以发现表单上传是一个非常简单易用的接口：我只需要构建一个 form 表单，指定上传的域名、文件名即可，浏览器会自动处理剩下的所有工作。&lt;/p&gt;
+&lt;h3 id=&#34;匿名不可写&#34;&gt;匿名不可写&lt;/h3&gt;
+&lt;p&gt;更常见的情况是我们需要上传文件到一个私有的存储空间当中，此时我们需要对我们的 POST 请求进行签名。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;action&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://&amp;lt;bucket&amp;gt;.&amp;lt;zone&amp;gt;.qingstor.com&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;method&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;enctype&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;multipart/form-data&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;Click or Drag a File Here to Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;key&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;policy&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;policy&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;access_key_id&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;access_key_id&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;signature&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;signature&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;submit&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload to QingStor&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;policy&amp;gt;&lt;/code&gt;: policy 是一个经过 base64 编码之后的 JSON 字符串，其中的内容包括除了 file， access_key_id， policy，signature 之外的所有表单项。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;access_key_id&amp;gt;&lt;/code&gt;: access_key_id 是用户的 access_key_id&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;signature&amp;gt;&lt;/code&gt;: 用 secret key 对 base64 编码后的 policy 字符串进行 HMAC-SHA256 签名得到的字符串，同样需要进行 base64 编码。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;与匿名上传相比，上传到一个私有空间需要使用请求者的 access_key_id 进行签名。签名流程如下：计算 policy 字符串并进行 base64 编码，使用 secret key 对 policy 字符串进行 HMAC-SHA256 签名并进行 base64 编码。&lt;/p&gt;
+&lt;p&gt;以最简单的上传为例：policy 字符串为 &lt;code&gt;{&amp;quot;key&amp;quot;: &amp;quot;test_key&amp;quot;}&lt;/code&gt; ，经过 base64 编码之后变为 &lt;code&gt;eyJrZXkiOiAidGVzdF9rZXkifQ==&lt;/code&gt;，我们使用 &lt;code&gt;test_secret_key&lt;/code&gt; 作为 secret key 来进行 HMAC-SHA256 签名并进行 base64 编码，可以得到 &lt;code&gt;HfMhlYYA4bgyoq3SDMWqiJ1XWm1/TORTfkZk+WODxag=&lt;/code&gt;。此时，我们本次请求中的 policy 应填写 &lt;code&gt;eyJrZXkiOiAidGVzdF9rZXkifQ==&lt;/code&gt;， 而 signature 则应填写 &lt;code&gt;HfMhlYYA4bgyoq3SDMWqiJ1XWm1/TORTfkZk+WODxag=&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;使用 POST 接口上传比较简单，后端只需要实现简单的签名逻辑即可实现上传到指定对象存储存储空间的功能，后续还可以结合各种上传插件实现上传进度条等功能。适合用在只需要用户上传文件，没有复杂交互的场景，比如论坛附件上传，在线编辑器上传图片等。&lt;/p&gt;
+&lt;h2 id=&#34;直接调用-sdk-上传&#34;&gt;直接调用 SDK 上传&lt;/h2&gt;
+&lt;p&gt;POST 接口虽然方便，但是功能比较弱，为了满足开发者们的需求，QingStor 提供的 &lt;a href=&#34;https://github.com/yunify/qingstor-sdk-js&#34;&gt;qingsotr-js-sdk&lt;/a&gt; 通过 &lt;a href=&#34;http://browserify.org/&#34;&gt;Browserify&lt;/a&gt; 实现了浏览器环境的兼容，开发者只需要引入我们提供的 js 文件即可在浏览器环境中调用接口。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在开始之前，我们需要正确设置 Bucket 的 CORS 使得我们可以顺利的进行跨域请求。详细操作方法可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/guide/index.html#cors&#34;&gt;此处&lt;/a&gt;，其中&lt;code&gt;允许的请求源&lt;/code&gt;和&lt;code&gt;允许 HTTP 请求头&lt;/code&gt;均可以设置为 &lt;code&gt;*&lt;/code&gt; 以方便调试。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk.min.js&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onchange&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; Config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).Config
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; QingStor &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).QingStor;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Config(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;access_key_id&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;secret_access_key&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; bucket &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; QingStor(config).Bucket(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;bucket&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;zone&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; upload() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;).files[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; reader &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; FileReader();
+reader.readAsBinaryString(f);
+reader.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (() =&amp;gt; {
+bucket.putObject(f.name, {
+body&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; reader.result
+});
+});
+}
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;access_key_id&amp;gt;&lt;/code&gt;: 用户的 access_key_id&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;secret_access_key&amp;gt;&lt;/code&gt;: 用户的 secret_access_key&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 需要上传的 bucket name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: bucket 所在的区域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;样例代码逻辑比较简单，主要有以下几个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;脚本中进行了一些初始化的工作，创建了 Config ，QingStor 和 Bucket 对象。&lt;/li&gt;
+&lt;li&gt;file input 监听了 change 事件，只要用户选择了新的文件，就会调用 upload 方法。&lt;/li&gt;
+&lt;li&gt;在 upload 方法中，首先是选取文件列表中的第一项，然后使用 HTML 5 新提供的 FileReader 接口来读取文件内容。&lt;/li&gt;
+&lt;li&gt;在 FileReader 读取完毕后，调用 bucket.putObject 方法来进行文件上传，使用文件名作为上传所使用的 Key。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以看到，直接使用 SDK 进行文件上传也非常简单。跟使用 POST 接口相比，需要引入一个额外的 JS 文件依赖，不需要自行进行容易出错的签名计算。最大的缺点在于：初始化 SDK 时需要暴露自己的 access_key_id 和 secret_access_key，这显然是不可接受的。我们需要寻找到一种方法，使得签名的过程可以服务器端完成，从而不需要暴露自己的密钥信息。&lt;/p&gt;
+&lt;h2 id=&#34;部署签名服务器&#34;&gt;部署签名服务器&lt;/h2&gt;
+&lt;p&gt;之前提到，在服务器端进行签名可以使得敏感的密钥信息不会暴露出去，解决方案就是部署一套签名服务器。我们实现了一个基于 qingstor-js-sdk 的签名服务器 demo，开源在 &lt;a href=&#34;https://github.com/yunify/qingstor-demo-signature-server-nodejs&#34;&gt;https://github.com/yunify/qingstor-demo-signature-server-nodejs&lt;/a&gt; ，同时附有 server 端和 client 端，开发者可以方便的复用其中的逻辑，按照自己的业务需求来实现相关的逻辑。&lt;/p&gt;
+&lt;p&gt;部署签名服务器非常简单，只需要如下几步：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;git clone https://github.com/yunify/qingstor-demo-signature-server-nodejs.git
+&lt;span style=&#34;color:#007020&#34;&gt;cd&lt;/span&gt; qingstor-demo-signature-server-nodejs
+npm install&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后根据 server_config.yaml.example 编辑自己的 server_config.yaml 文件，最后执行 &lt;code&gt;npm run server&lt;/code&gt; 就可以启动我们的签名服务器 Demo。&lt;/p&gt;
+&lt;p&gt;接下来这个实例会展示如何使用签名服务器进行签名，并上传一个文件。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk.min.js&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onchange&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; Config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).Config
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; QingStor &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).QingStor;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Config(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;not_need&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;not_need&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; bucket &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; QingStor(config).Bucket(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;bucket&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;zone&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; upload() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;).files[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; reader &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; FileReader();
+reader.readAsBinaryString(f);
+reader.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (() =&amp;gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; req &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; bucket.putObjectRequest(f.name, {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; f.type
+});
+fetch(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;http://localhost:9000/operation?channel=header&amp;#34;&lt;/span&gt;, {
+method&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;,
+body&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; JSON.stringify(req.operation),
+headers&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;application/json; charset=utf-8&amp;#34;&lt;/span&gt;
+}
+})
+.then(res =&amp;gt; res.json())
+.then(res =&amp;gt; {
+req.operation.headers.Authorization &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; res.authorization;
+req.operation.body &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; reader.result;
+req.send()
+})
+});
+}
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 需要上传的 bucket name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: bucket 所在的区域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;跟直接使用 SDK 上传相比，通过部署签名服务器上传的方案多了向签名服务器发送本次请求并获取签名信息的部署。js sdk 对外暴露了生成 Request 的接口，通过 bucket.putObjectRequest 可以创建一个 Request 实例，并将 Request.operation 发送到签名服务器以进行签名，最后服务器端返回的是签名好的 Authorization 字符串。然后再手动调用 Request 的 send 方法进行实际的上传即可。&lt;/p&gt;
+&lt;p&gt;部署签名服务器的方案比之前的几种都要复杂，但是更贴合用户的使用场景，可以完整的覆盖大多数用户在浏览器端与 QingStor 对象存储进行交互的需求。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;在这里可以对浏览器端几种与 QingStor 对象存储进行交互的方案进行一个简短的总结：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;POST 接口：简单方便，便于与现有的服务器端集成，适用于论坛附件上传，在线编辑器上传图片等场景&lt;/li&gt;
+&lt;li&gt;SDK 上传： 简单方便，但是会暴露出用户的密钥信息，适用于一些 No BackEnd 应用，可以让用户自行填写自己的密钥，比如在线 Markdown 编辑器，可以实现复制进来的图片自动上传这样的功能。&lt;/li&gt;
+&lt;li&gt;部署签名服务器： 比较复杂，适用于大多数场景，密钥信息保存在服务器端，不会泄漏给用户。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;此外，所有的代码都已经上传到 Gist，感兴趣的同学可以自取： &lt;a href=&#34;https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784&#34;&gt;https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784&lt;/a&gt;&lt;/p&gt;</description></item><item><title>聊一聊 Python 的字符串</title><link>https://xuanwo.io/2017/01/22/encoding-in-python/</link><pubDate>Sun, 22 Jan 2017 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2017/01/22/encoding-in-python/</guid><description>&lt;p&gt;这篇文章目标是解决一个非常简单的问题：如何编写一个跨平台，跨版本且字符串行为一致的 Python 命令行应用。&lt;/p&gt;
+&lt;h2 id=&#34;概念界定&#34;&gt;概念界定&lt;/h2&gt;
+&lt;p&gt;在回答好这个问题之前，首先需要分清楚以下几个概念：字符，字符串，字符集，字符编码，终端编码，字体。&lt;/p&gt;
+&lt;h3 id=&#34;字符&#34;&gt;字符&lt;/h3&gt;
+&lt;p&gt;计算机只能处理0和1这两个数字，如果想要计算机识别更多的字符，则需要定义数字（专业一点可以叫做character code，也称 code point 代码点）到字符的一个映射，通常把这样的映射叫做&lt;code&gt;字符编码(character encoding)&lt;/code&gt;。最常见的字符编码就是 &lt;code&gt;ASCII编码&lt;/code&gt;，它使用8个二进制位来表示字符，其中最前面的1位统一规定为0，后面的7位用来表示符号，共计128个。在C语言中经常使用到的 &lt;code&gt;i &amp;gt;= 65 &amp;amp;&amp;amp; i &amp;lt; 97&lt;/code&gt; 来表示大写字母就是使用了这样的映射关系。&lt;/p&gt;
+&lt;h3 id=&#34;字符集与字符编码&#34;&gt;字符集与字符编码&lt;/h3&gt;
+&lt;p&gt;经常说的 &lt;code&gt;ASCII&lt;/code&gt; 其实涵盖了两个概念： &lt;code&gt;ASCII字符集&lt;/code&gt; 与 &lt;code&gt;ASCII编码&lt;/code&gt;。&lt;code&gt;ASCII字符集&lt;/code&gt; 规定了字符码到字符的映射，而 &lt;code&gt;ASCII编码&lt;/code&gt; 则规定了字符码在计算机中如何存储，即定义了字符集的 &lt;code&gt;存储形式&lt;/code&gt; 。下面我引用来自 &lt;a href=&#34;http://liujiacai.net/blog&#34;&gt;@liujiacai&lt;/a&gt; 的一副图表示他们之间的逻辑关系：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/develop/chararter-code-point.png&#34; alt=&#34;字符、代码点、二进制字节关系图&#34; /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Character 字符&lt;/code&gt;: 人类可以理解的字符，比如：&lt;code&gt;A&lt;/code&gt;，&lt;code&gt;漩&lt;/code&gt;，&lt;code&gt;涡&lt;/code&gt;这样的符号&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Character Set 字符集&lt;/code&gt;: 字符码到字符的映射，比如 &lt;code&gt;Unicode 字符集&lt;/code&gt;`&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Code point 代码点&lt;/code&gt;: 一个无符号数字，在现代计算机中通常用16进制表示&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Encoding 编码&lt;/code&gt;: 根据规定的编码将字符码存储在内存和硬盘中，比如 &lt;code&gt;UTF-8 编码&lt;/code&gt; 和 &lt;code&gt;UTF-16 编码&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Bytes 二进制字节&lt;/code&gt;: 代码点在内存或磁盘中的表示形式，字符码与字节的对应关系&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;字符串与字节流&#34;&gt;字符串与字节流&lt;/h3&gt;
+&lt;p&gt;由字节码组成的串，不妨叫做“字节流”；由字符组成的串，一般叫做字符串。他们之间存在着这样的对应关系：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/develop/decode-encode.png&#34; alt=&#34;字节流与字符串&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;Python 2&lt;/code&gt;中： &lt;code&gt;str&lt;/code&gt; = &lt;code&gt;字节流&lt;/code&gt;，&lt;code&gt;unicode&lt;/code&gt; = &lt;code&gt;字符串&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;Python 3&lt;/code&gt;中： &lt;code&gt;bytes&lt;/code&gt; = &lt;code&gt;字节流&lt;/code&gt;， &lt;code&gt;str&lt;/code&gt; = &lt;code&gt;unicode&lt;/code&gt; = &lt;code&gt;字符串&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;终端编码&#34;&gt;终端编码&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这里的终端是泛指，包括 Linux 下的 Console, Windows 下的 CMD 和 PowerShell 以及 Mac OS X 下的 Terminal&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;终端编码决定了用户的输入和输出应当采用何种编码来进行编码和解码。&lt;/p&gt;
+&lt;p&gt;Linux 和 Mac 用户应该对终端编码比较熟悉，经常会用的到有以下环境变量： &lt;code&gt;LC_ALL&lt;/code&gt;，&lt;code&gt;LC_CTYPE&lt;/code&gt;。他们之间的覆盖关系是 &lt;code&gt;LC_ALL&lt;/code&gt; &amp;gt; &lt;code&gt;LC_CTYPE&lt;/code&gt; ，推荐的配置是 &lt;code&gt;en_US.UTF-8&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;对于 Windows 用户而言就比较麻烦了，他们使用的是一个叫做 &lt;code&gt;Code Page (代码页)&lt;/code&gt; 的配置，更糟糕的是，&lt;code&gt;Code Page&lt;/code&gt; 默认为936，也就是我们所熟知的 &lt;code&gt;cp936&lt;/code&gt; ， 又叫做 &lt;code&gt;GBK&lt;/code&gt;。想要切换到 &lt;code&gt;UTF-8&lt;/code&gt; 的话需要执行命令 &lt;code&gt;chcp 65001&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;字体&#34;&gt;字体&lt;/h3&gt;
+&lt;p&gt;字体决定了字符如何显示。&lt;/p&gt;
+&lt;p&gt;很常见的一种情况是编码支持某个字符，但是字体并不支持，这个时候就会显示成奇怪的字符。使用过 &lt;code&gt;oh-my-zsh&lt;/code&gt; 的 &lt;code&gt;agnoster&lt;/code&gt; 主题的同学应该会遇到这种情况，系统默认的字体不支持 &lt;code&gt;powerline&lt;/code&gt; 所使用的特殊符号，需要为字体打上补丁才能正常显示。&lt;/p&gt;
+&lt;h2 id=&#34;错误剖析&#34;&gt;错误剖析&lt;/h2&gt;
+&lt;p&gt;前面厘清了很多概念，下面可以好好的将一讲在Python中遇到的编码问题了。&lt;/p&gt;
+&lt;h3 id=&#34;未指定代码源文件的coding&#34;&gt;未指定代码源文件的coding&lt;/h3&gt;
+&lt;p&gt;使用Python 2的时候，如果在没有指定coding的源代码中使用了非ASCII字符，会提示一个语法错误：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt; cat test.py
+print&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;测试&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+&amp;gt; python2 test.py
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;test.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+SyntaxError: Non-ASCII character &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;\xe6&amp;#39;&lt;/span&gt; in file test.py on line &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, but no encoding declared; see http://python.org/dev/peps/pep-0263/ &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; details&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这是因为Python默认的文件编码是 ASCII ，从而导致在读取源文件的时候就发生了错误。可以通过在文件的第一行或者第二行添加 &lt;code&gt;# -*- coding: utf-8 -*-&lt;/code&gt; 来解决。&lt;/p&gt;
+&lt;h3 id=&#34;默认的ascii编码导致的错误&#34;&gt;默认的ASCII编码导致的错误&lt;/h3&gt;
+&lt;p&gt;Python 2 中默认用来编解码的同样是 ASCII ，在不指定 &lt;code&gt;UTF-8&lt;/code&gt; 来解码的时候就会发生这样的错误：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# python 2.7.13&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;测试&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;decode()
+Traceback (most recent call last):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;stdin&amp;gt;&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;UnicodeDecodeError&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;ascii&amp;#39;&lt;/span&gt; codec can&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;t decode byte 0xe6 in position 0: ordinal not in range(128)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;只需要指定正确的编码即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# python 2.7.13&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;测试&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;decode(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;utf-8&amp;#34;&lt;/span&gt;)
+&lt;span style=&#34;color:#4070a0&#34;&gt;u&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#4070a0;font-weight:bold&#34;&gt;\u6d4b\u8bd5&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;隐含的编解码转换&#34;&gt;隐含的编解码转换&lt;/h3&gt;
+&lt;p&gt;很常见的一种错误是Python的隐式类型转换导致的。比如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# python 2.7.13&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;测试&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;encode()
+Traceback (most recent call last):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;stdin&amp;gt;&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;UnicodeDecodeError&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;ascii&amp;#39;&lt;/span&gt; codec can&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;t decode byte 0xe6 in position 0: ordinal not in range(128)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;第一次接触到这种错误的时候会有一种荒谬感，明明自己在做&lt;code&gt;encode()&lt;/code&gt;操作，为什么报了一个&lt;code&gt;UnicodeDecodeError&lt;/code&gt;？
+这是因为 python 在调用 &lt;code&gt;str.encode()&lt;/code&gt; 的时候，实际上做的操作是 &lt;code&gt;str.decode().encode()&lt;/code&gt;。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# python 2.7.13&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;测试&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;decode()&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;encode()
+Traceback (most recent call last):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;stdin&amp;gt;&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;UnicodeDecodeError&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;ascii&amp;#39;&lt;/span&gt; codec can&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;t decode byte 0xe6 in position 0: ordinal not in range(128)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;回忆一下字符串与字节流的关系，字符串编码为字节流，字节流解码为字符串。对一个字节流进行编码，实际上是先解码成为字符串，再编码为字节流。Python 中存在着很多这样的隐式转换，包括字符串的比较、拼接、替换，读写文件，print等。遇到这样的问题的时候需要查阅Python的文档，弄清楚到底传入和返回的是什么数据类型再做判断。&lt;/p&gt;
+&lt;h3 id=&#34;错误的终端编码&#34;&gt;错误的终端编码&lt;/h3&gt;
+&lt;p&gt;这种问题比较多见在 Windows 平台上：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;™&amp;#34;&lt;/span&gt;)
+Traceback (most recent call last):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;stdin&amp;gt;&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;UnicodeEncodeError&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;gbk&amp;#39;&lt;/span&gt; codec can&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;t encode character &amp;#39;&lt;/span&gt;\u2122&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39; in position 43: illegal multibyte sequence&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;最神奇的地方在于，Windows自己是可以在CMD中显示 &lt;code&gt;™&lt;/code&gt; 的，这个字符还可以用做合法的 Windows 文件名，但是这个字符并不在 gbk 字符集中。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;p&gt;问题也总结了一遍，现在终于可以来回答文章最开头提出的问题了：如何编写一个跨平台，跨版本且字符串行为一致的 Python 命令行应用？&lt;/p&gt;
+&lt;h3 id=&#34;设置代码-coding&#34;&gt;设置代码 coding&lt;/h3&gt;
+&lt;p&gt;建议为所有的源文件加上默认的coding设置： &lt;code&gt;# -*- coding: utf-8 -*-&lt;/code&gt; 。&lt;/p&gt;
+&lt;p&gt;尽管在 Python 3 的规范当中要求不需要指定 coding，但是为了兼容性考虑，所有会出现 Non-ASCII 字符的源代码文件都需要加上这个注释。&lt;/p&gt;
+&lt;h3 id=&#34;只使用-unicode&#34;&gt;只使用 Unicode&lt;/h3&gt;
+&lt;p&gt;很多的问题都是由于python2中的unicode与str之间的隐式转换导致的，我们可以使用 &lt;code&gt;from __future__ import unicode_literals&lt;/code&gt; 来将代码文件中所有的字面量全都转为 unicode 。可以简单的认为，使用了这个之后，文件中所有的 &lt;code&gt;&amp;quot;test&amp;quot;&lt;/code&gt; 全都变成了 &lt;code&gt;u&amp;quot;test&amp;quot;&lt;/code&gt;。当然，你也可以显示的指定，Python 3 同样兼容这样的表示方法。&lt;/p&gt;
+&lt;h3 id=&#34;设置-pythonencoding&#34;&gt;设置 PYTHONENCODING&lt;/h3&gt;
+&lt;p&gt;前面提到 Python 2 在输出时会根据终端的编码进行编码，但是在重定向的时候就会使用默认的 ASCII 编码。这种时候，通过设置环境变量 &lt;code&gt;PYTHONENCODING&lt;/code&gt; 为 &lt;code&gt;UTF-8&lt;/code&gt; 就可以比较好的解决问题。&lt;/p&gt;
+&lt;h3 id=&#34;判断-python-版本进行特殊处理&#34;&gt;判断 Python 版本进行特殊处理&lt;/h3&gt;
+&lt;p&gt;在不同的 Python 版本中有些函数的输入和输出类型不一样，这时候需要通过判断来执行不同的代码。比如&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; is_python2:
+endpoint &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; endpoint&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;replace(
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; k, quote(&lt;span style=&#34;color:#007020&#34;&gt;unicode&lt;/span&gt;(v)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;encode(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;utf-8&amp;#34;&lt;/span&gt;))
+)
+request_uri &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; request_uri&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;replace(
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; k, quote(&lt;span style=&#34;color:#007020&#34;&gt;unicode&lt;/span&gt;(v)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;encode(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;utf-8&amp;#34;&lt;/span&gt;))
+)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;elif&lt;/span&gt; is_python3:
+endpoint &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; endpoint&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;replace(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; k, quote(&lt;span style=&#34;color:#007020&#34;&gt;str&lt;/span&gt;(v)))
+request_uri &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; request_uri&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;replace(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; k, quote(&lt;span style=&#34;color:#007020&#34;&gt;str&lt;/span&gt;(v)))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里传入的 v 可能是数字，也有可能是 &lt;code&gt;unicode&lt;/code&gt; 。在 Python 2 中，如果全都使用 &lt;code&gt;str&lt;/code&gt; 来做强制类型转换，很有可能导致 &lt;code&gt;UnicodeEncodeError&lt;/code&gt; 错误。因此需要先转换为 &lt;code&gt;unicode&lt;/code&gt; 类型再 &lt;code&gt;encode&lt;/code&gt; 成为 &lt;code&gt;str&lt;/code&gt; 然后再传入 &lt;code&gt;quote()&lt;/code&gt; 函数。在Python 3中就简单多了，直接转换为 &lt;code&gt;str&lt;/code&gt; 即可。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;本文从基础概念讲起，分析了常见的问题，最后给出了自己实践当中的一些做法。受限于个人的能力和眼界，这里做法可能并不是最好的实践，甚至还会有些错误的地方。希望诸位读者可以一起交流，共同进步，以上。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://liujiacai.net/blog/2015/11/20/strings/&#34;&gt;字符串，那些你不知道的事&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://liujiacai.net/blog/2016/06/30/python2-encoding/&#34;&gt;Python2 中的编码问题&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html&#34;&gt;字符编码笔记：ASCII，Unicode和UTF-8&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://help.ubuntu.com/community/EnvironmentVariables#Locale_setting_variables&#34;&gt;Locale setting variables&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

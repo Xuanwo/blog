@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Btrfs on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/btrfs/</link><description>Recent content in Btrfs on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 15 Nov 2018 13:05:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/btrfs/index.xml" rel="self" type="application/rss+xml"/><item><title>记一次 btrfs 的在线转换</title><link>https://xuanwo.io/2018/11/15/record-for-btrfs-conversion/</link><pubDate>Thu, 15 Nov 2018 13:05:00 +0000</pubDate><guid>https://xuanwo.io/2018/11/15/record-for-btrfs-conversion/</guid><description>&lt;p&gt;在 archcn 群里听 &lt;a href=&#34;https://farseerfc.me/&#34;&gt;fc 教授&lt;/a&gt; 安利了有一段时间了，终于在一个心情不是非常美好的晚上决定上一波 btrfs ，这篇文章主要分享这次转换中遇到的一些有趣的故事~&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2 id=&#34;btrfs-是什么以及为什么&#34;&gt;btrfs 是什么以及为什么？&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Btrfs（B-tree文件系统，通常念成Butter FS，Better FS或B-tree FS），一种支持写入时复制（COW）的文件系统，运行在Linux操作系统，采用GPL授权。Oracle于2007年对外宣布这项计划，并发布源代码，在2014年8月发布稳定版。目标是取代Linux目前的ext3文件系统，改善ext3的限制，特别是单个文件的大小，总文件系统大小或文件检查和加入ext3未支持的功能，像是可写快照（writable snapshots）、快照的快照（snapshots of snapshots）、内建磁盘阵列（RAID），以及子卷（subvolumes）。Btrfs也宣称专注在“容错、修复及易于管理”。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;之所以想要换成 btrfs ，主要是因为以下几个原因：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;btrfs 支持快照，可以方便备份和恢复&lt;/li&gt;
+&lt;li&gt;btrfs 支持透明压缩&lt;/li&gt;
+&lt;li&gt;btrfs 支持子卷，结合快照功能，可以作为启动 &lt;code&gt;systemd-nspawn&lt;/code&gt; 容器的模板&lt;/li&gt;
+&lt;li&gt;btrfs 支持数据和元数据的校验&lt;/li&gt;
+&lt;li&gt;btrfs 支持就地从 ext4 转换&lt;/li&gt;
+&lt;li&gt;那天晚上心情不是很好，需要有个足够好玩的事情来吸引我的注意力&lt;/li&gt;
+&lt;li&gt;这是我自己的电脑，我乐意（&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其实我之前一直是坚定的 ext4 党，觉得 ext4 非常稳定，性能优秀，文件系统的高级功能平时也不怎么会用到，所以并不觉得 btrfs 好，反而经常在别人报告自己的 btrfs 翻车的时候在一旁吃瓜，滑稽的喊两句毫无营养的 &lt;em&gt;我选择 ext4&lt;/em&gt; 。但是后来我的想法慢慢的发生了变化，一方面是 fc 老师的持续安利和讲解，另一方面是自己对事物，或者说世界的看法也在变化：&lt;/p&gt;
+&lt;h3 id=&#34;不要迷醉于虚假的安全之中&#34;&gt;不要迷醉于虚假的安全之中&lt;/h3&gt;
+&lt;p&gt;ext4 可能确实是稳，确实是快，但是这是因为它默认没有开启 checksum 。 &lt;em&gt;（虽然没有横向对比过，但此处应使用肯定语气表示强调，只要你不说出来别人也不会去查）&lt;/em&gt; 如果出现了静默错误，ext4 毫无修复的能力，而 btrfs 则会在读取的时候进行校验并尝试去进行修复。&lt;/p&gt;
+&lt;h3 id=&#34;吃瓜群众没有什么可骄傲的&#34;&gt;吃瓜群众没有什么可骄傲的&lt;/h3&gt;
+&lt;p&gt;以前可能习惯的去当一个吃瓜群众，静静的围观各种事件的反转并自诩 &lt;em&gt;机智如我&lt;/em&gt; ，&lt;em&gt;我就知道会这样&lt;/em&gt; 。但是现在渐渐明白了，吃瓜群众只不过是没脑子罢了，被铺天盖地的信息轰炸的多了，失去了自己去查明真相的能力，只能被动的随着信息的浪潮四处漂游。醒醒吧，世界的发展和技术的进步并不是吃瓜群众推动的，如果我们不亲自下场去尝试，最后留在自己手中的只有瓜皮而已。&lt;/p&gt;
+&lt;h2 id=&#34;匹夫之勇&#34;&gt;匹夫之勇&lt;/h2&gt;
+&lt;p&gt;啊，废话说的有点多了，下面开始正题。&lt;/p&gt;
+&lt;p&gt;首先熟读并背诵 Archwiki 中 btrfs 相关的条目，英文的也都仔细读一遍，防止有什么新的信息被遗漏了。敢于尝试新鲜事物是勇者，但是 archwiki 都不好好看，那就是莽夫了。确认重要的信息都 get 到之后，插上 U 盘进入 live 环境。&lt;/p&gt;
+&lt;p&gt;在开始之前有几个比较重要的 Tips：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;备份&lt;/strong&gt;，&lt;strong&gt;备份&lt;/strong&gt;，&lt;strong&gt;备份&lt;/strong&gt;。如果是在没有条件全盘备份，起码把自己的 &lt;code&gt;ssh_key&lt;/code&gt;，&lt;code&gt;gpg_key&lt;/code&gt; 等重要文件都备份好，数据是你自己的，为了帅这一下，不值得。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;btrfs-convert&lt;/code&gt; 会保留原来 ext4 中的 metadata，并作为一个单独的子卷。因此只要保留着这个子卷，你就可以恢复成 ext4 。但是这是有条件的，显然的，btrfs 不可能去在线维护 btrfs 和 ext4 两个 metadata，在 convert 之后的 btrfs 分区中做出的变更将不会同步到 ext4 的 metadata 中。因此请在确认数据都没有问题的情况下再开机进入系统。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;首先执行一次 fsck，避免带病上阵：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;fsck.ext4 /dev/nvme0n1p2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后深呼吸三次，开始执行 &lt;code&gt;btrfs-convert&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;btrfs-convert /dev/nvme0n1p2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;img src=&#34;convert.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在经过漫长的等待后，convert 没有翻车，已经成功一半啦！&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;success.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;接下来把分区挂在上来，检查一下是否有问题：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;mount /dev/nvme0n1p2 /mnt
+mount /dev/nvme0n1p1 /mnt/boot&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;随机抽查了一些文件发现都 OK 之后，下面开始修改一些引导相关的配置。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;修改 &lt;code&gt;/etc/fstab&lt;/code&gt;，把 &lt;code&gt;type&lt;/code&gt; 修改为 &lt;code&gt;btrfs&lt;/code&gt;，把最后一行的 &lt;code&gt;fs_passno&lt;/code&gt; 修改为 &lt;code&gt;0&lt;/code&gt;，因为 btrfs 不在开机的时候做检查&lt;/li&gt;
+&lt;li&gt;如果使用的是 UUID 之类的话，还可能会需要修改 UUID，不过我是用的 PARTUUID，信息存储在 GPT 分区表中，修改文件系统并不会变化，因此不需要修改&lt;/li&gt;
+&lt;li&gt;因为转换的是根目录，因此还需要执行 &lt;code&gt;mkinitcpio -p linux&lt;/code&gt; 以重建内存盘，我使用的是 &lt;code&gt;linux-zen&lt;/code&gt; 内核，因此我还执行了 &lt;code&gt;mkinitcpio -p linux-zen&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;如果用的是 &lt;code&gt;systemd-boot&lt;/code&gt; 的话，不需要做什么额外的配置，用 grub 的同学要按照 wiki 的指示重新生成 &lt;code&gt;grub.config&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接下来就是我做的一些很勇的事情了，请各位同学不要模仿：为了能够充分用上 btrfs 的透明压缩功能，我对全盘执行了一次压缩并修改了 &lt;code&gt;/etc/fstab&lt;/code&gt; 的挂载参数：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;btrfs filesystem defragment -r -v -clzo /mnt&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;最后提示有两个 failure，只是当时我还没有明白这意味着什么。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;failure.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;弱者之愁&#34;&gt;弱者之愁&lt;/h2&gt;
+&lt;p&gt;在压缩完毕后我重启并成功进入系统，于是高兴的在 archcn 的群中宣扬了一番：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;alive.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;后来 fc 教授提醒我需要删除 &lt;code&gt;ext2_saved&lt;/code&gt; 并执行 &lt;code&gt;balance&lt;/code&gt;，然后真正的故事开始了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1868&lt;/span&gt;.392801&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS warning &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: csum failed root -9 ino &lt;span style=&#34;color:#40a070&#34;&gt;465&lt;/span&gt; off &lt;span style=&#34;color:#40a070&#34;&gt;1048576&lt;/span&gt; csum 0x9302c07f expected csum 0x98f94189 mirror &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1868&lt;/span&gt;.393966&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS warning &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: csum failed root -9 ino &lt;span style=&#34;color:#40a070&#34;&gt;465&lt;/span&gt; off &lt;span style=&#34;color:#40a070&#34;&gt;1048576&lt;/span&gt; csum 0x9302c07f expected csum 0x98f94189 mirror &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我的心情毫无波动，甚至有点想笑。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;csum-failed.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;之后在 fc 教授的指导下，查看了 btrfs 相关的各种信息，最后通过 inode 跟踪到了这个对应的错误文件，那是一个 golang 项目的 vendor 文件，所以我直接把这个文件删掉并执行了 &lt;code&gt;scrub&lt;/code&gt; 任务。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:03 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Started Btrfs scrub on /.
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: ERROR: there are uncorrectable errors
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: scrub &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;done&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; 86fd5394-5a32-43cd-8ef5-5f3fbd46056e
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: scrub started at Wed Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:03 &lt;span style=&#34;color:#40a070&#34;&gt;2018&lt;/span&gt; and finished after &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:00:44
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: total bytes scrubbed: &lt;span style=&#34;color:#40a070&#34;&gt;72&lt;/span&gt;.40GiB with &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt; errors
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: error details: &lt;span style=&#34;color:#bb60d5&#34;&gt;csum&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: corrected errors: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, uncorrectable errors: &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;, unverified errors: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: btrfs-scrub@-.service: Main process exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;code&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;status&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;3&lt;/span&gt;/NOTIMPLEMENTED
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: btrfs-scrub@-.service: Failed with result &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;exit-code&amp;#39;&lt;/span&gt;.&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;虽然场面上很慌，但是我的心态出奇的好，感觉非常刺激。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;scrub-failed.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;后来通过 &lt;code&gt;dmesg&lt;/code&gt; 查到了具体的出错信息：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3392&lt;/span&gt;.226163&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS warning &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: checksum error at logical &lt;span style=&#34;color:#40a070&#34;&gt;253848715264&lt;/span&gt; on dev /dev/nvme0n1p2, physical &lt;span style=&#34;color:#40a070&#34;&gt;21546885120&lt;/span&gt;, root &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;, inode &lt;span style=&#34;color:#40a070&#34;&gt;8127262&lt;/span&gt;, offset &lt;span style=&#34;color:#40a070&#34;&gt;3928064&lt;/span&gt;, length &lt;span style=&#34;color:#40a070&#34;&gt;4096&lt;/span&gt;, links &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;path: var/log/journal/22c7d33d64ee4991ab100bf6abeb7ac7/user-1000@00056c232173e076-2815baa2d7d959be.journal~&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3392&lt;/span&gt;.226167&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS error &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: bdev /dev/nvme0n1p2 errs: wr &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, rd &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, flush &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, corrupt &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, gen &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3392&lt;/span&gt;.226169&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS error &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: unable to fixup &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;regular&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; error at logical &lt;span style=&#34;color:#40a070&#34;&gt;253848715264&lt;/span&gt; on dev /dev/nvme0n1p2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个文件是 &lt;code&gt;systemd&lt;/code&gt; 的一个日志文件，于是直接把这个文件删掉了（解决问题最快的方式就是搞定有问题的那个人~），然后重新执行 &lt;code&gt;scrub&lt;/code&gt; 的任务，但是：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3857&lt;/span&gt;.669742&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS error &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: bdev /dev/nvme0n1p2 errs: wr &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, rd &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, flush &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, corrupt &lt;span style=&#34;color:#40a070&#34;&gt;25&lt;/span&gt;, gen &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3857&lt;/span&gt;.669743&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS error &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: unable to fixup &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;regular&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; error at logical &lt;span style=&#34;color:#40a070&#34;&gt;253848748032&lt;/span&gt; on dev /dev/nvme0n1p2
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3857&lt;/span&gt;.669861&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS warning &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: checksum error at logical &lt;span style=&#34;color:#40a070&#34;&gt;253848752128&lt;/span&gt; on dev /dev/nvme0n1p2, physical &lt;span style=&#34;color:#40a070&#34;&gt;21546921984&lt;/span&gt;, root &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;, inode &lt;span style=&#34;color:#40a070&#34;&gt;8127262&lt;/span&gt;, offset &lt;span style=&#34;color:#40a070&#34;&gt;3964928&lt;/span&gt;: path resolving failed with &lt;span style=&#34;color:#bb60d5&#34;&gt;ret&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;感觉坏的更严重了，通过 &lt;code&gt;logic number&lt;/code&gt; 和 &lt;code&gt;inode&lt;/code&gt; 号都查不到这个文件的信息：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; sudo btrfs inspect-internal logical-resolve &lt;span style=&#34;color:#40a070&#34;&gt;253848752128&lt;/span&gt; /
+ERROR: logical ino ioctl: No such file or directory
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; sudo btrfs inspect-internal inode-resolve &lt;span style=&#34;color:#40a070&#34;&gt;8127262&lt;/span&gt; /
+ERROR: ino paths ioctl: No such file or directory&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;后来还是 fc 老师点醒了我：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我的意思是，scrub 發現了之後可能已經幫你刪掉了&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;于是我重新执行了一下 &lt;code&gt;scrub&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;scrub &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;done&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; 86fd5394-5a32-43cd-8ef5-5f3fbd46056e
+scrub started at Wed Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:35:39 &lt;span style=&#34;color:#40a070&#34;&gt;2018&lt;/span&gt; and finished after &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:00:44
+total bytes scrubbed: &lt;span style=&#34;color:#40a070&#34;&gt;72&lt;/span&gt;.37GiB with &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt; errors&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;哈哈，修好啦！ &lt;strong&gt;btrfs 真香！&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id=&#34;收工之喜&#34;&gt;收工之喜&lt;/h2&gt;
+&lt;p&gt;在全盘检查没有问题之后，我重新执行了 &lt;code&gt;balance&lt;/code&gt;，并且顺利完成了。在庆祝收工之余，还进行了如下配置：&lt;/p&gt;
+&lt;p&gt;启用每月一次的全盘校验任务：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; sudo systemctl &lt;span style=&#34;color:#007020&#34;&gt;enable&lt;/span&gt; btrfs-scrub@-.timer
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; sudo systemctl start btrfs-scrub@-.timer&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;因为我使用了 &lt;a href=&#34;https://wiki.archlinux.org/index.php/TLP&#34;&gt;&lt;code&gt;tlp&lt;/code&gt;&lt;/a&gt;，按照 wiki 上的说法，我需要修改一个配置以避免文件系统损坏：&lt;/p&gt;
+&lt;p&gt;修改 &lt;code&gt;/etc/default/tlp&lt;/code&gt; 文件中的 &lt;code&gt;SATA_LINKPWR_ON_BAT&lt;/code&gt; 属性。wiki 要求是修改成 &lt;code&gt;max_performance&lt;/code&gt;，但是配置文件中的注释提到：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# AHCI link power management (ALPM) for disk devices:
+# min_power, med_power_with_dipm(*), medium_power, max_performance.
+# (*) Kernel &amp;gt;= 4.15 required, then recommended.
+# Multiple values separated with spaces are tried sequentially until success.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;因此我设置成了如下的值：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;SATA_LINKPWR_ON_BAT=&amp;quot;med_power_with_dipm max_performance&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/Btrfs&#34;&gt;Btrfs 维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Btrfs_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)&#34;&gt;Btrfs archwiki&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://btrfs.wiki.kernel.org/index.php/Conversion_from_Ext3&#34;&gt;Conversion from Ext3&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;iG 成功夺得 S8 世界总冠军，恭喜！iG 牛逼！&lt;/li&gt;
+&lt;li&gt;上个周末去了一趟红领巾公园，绕着转了三圈，完成了夜刷红领巾的任务
+&lt;ul&gt;
+&lt;li&gt;第一圈的时候有点蒙圈，因为各种找不到 Po，走了不少回头路&lt;/li&gt;
+&lt;li&gt;第二圈的时候感觉自己超强，身体和大脑都非常巅峰&lt;/li&gt;
+&lt;li&gt;第三圈的时候累成傻逼，唯一的想法就是这任务怎么还没做完 = =&lt;/li&gt;
+&lt;li&gt;后来去了朝阳大悦城，在一堆情侣中一个人吃了顿&lt;a href=&#34;http://www.dianping.com/shop/93355360&#34;&gt;越打星&lt;/a&gt;，我觉得海星&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;这周我的母上来了一趟北京
+&lt;ul&gt;
+&lt;li&gt;我带着我最好的两个朋友过去一起吃了顿&lt;a href=&#34;http://www.dianping.com/shop/10338660&#34;&gt;四季民福&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;期间多次提及找对象，买房，成家立业&lt;/li&gt;
+&lt;li&gt;哎，我觉得我的心理年龄才 16 岁，总觉得结婚买房什么的好遥远啊&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;最近比较迷茫，干什么都有点提不起兴趣，是时候去寻找更好玩的东西了？&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

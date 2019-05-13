@@ -1,0 +1,903 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Software on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/software/</link><description>Recent content in Software on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 14 Jan 2018 10:07:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/software/index.xml" rel="self" type="application/rss+xml"/><item><title>基于 AWS Lambda 实现自动化</title><link>https://xuanwo.io/2018/01/14/automation-based-on-aws-lambda/</link><pubDate>Sun, 14 Jan 2018 10:07:00 +0000</pubDate><guid>https://xuanwo.io/2018/01/14/automation-based-on-aws-lambda/</guid><description>&lt;p&gt;在上一篇文章中我们介绍了 &lt;a href=&#34;https://xuanwo.io/2017/12/03/integromat-intro/&#34;&gt;Integrmat&lt;/a&gt; 这个自动化平台，但是在实际的应用当中，它还是有一些不太符合我们项目需求的地方。基于 AWS Lambda 实现的自动化工具就是我们找到的替代方案，接下来我会将阐述一下项目的需求，然后根据对项目的需求分析为什么 Integrmat 不适合以及基于 AWS Lambda 实现的好处在哪里。之后会介绍一下 AWS Lambda 是什么以及如何实现我们的自动化工具，并分享一些在实现自动化工具中遇到的一些坑。&lt;/p&gt;
+&lt;h2 id=&#34;项目需求&#34;&gt;项目需求&lt;/h2&gt;
+&lt;p&gt;我们项目中主要有一下几个部分需要用到自动化工具：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在 Jenkins 上运行的自动构建出错时自动在 Trello 中创建 Card&lt;/li&gt;
+&lt;li&gt;Grafana 报警时自动在 Trello 中创建 Card&lt;/li&gt;
+&lt;li&gt;移动到 Done 列表的超过两周的 Card 自动归档&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;why-not-integrmat&#34;&gt;Why not Integrmat&lt;/h3&gt;
+&lt;p&gt;以 &lt;code&gt;Jenkins 出错后在 Trello 中创建 Card&lt;/code&gt; 这个需求为例，我们需要的不仅仅是简单的出错之后加个 Card 就可以了。我们需要的是一个 Jenkins 出错到恢复的全生命周期的管理，也就是说根据上一次 Jenkins Job 执行的状态和本次状态，我们会有如下几种情况：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;上次状态&lt;/th&gt;
+&lt;th&gt;本次状态&lt;/th&gt;
+&lt;th&gt;执行操作&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;成功&lt;/td&gt;
+&lt;td&gt;成功&lt;/td&gt;
+&lt;td&gt;忽略&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;成功&lt;/td&gt;
+&lt;td&gt;失败&lt;/td&gt;
+&lt;td&gt;创建一个新 Card&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;失败&lt;/td&gt;
+&lt;td&gt;失败&lt;/td&gt;
+&lt;td&gt;在之前创建的 Card 中增加新的评论&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;失败&lt;/td&gt;
+&lt;td&gt;成功&lt;/td&gt;
+&lt;td&gt;归档对应的 Card&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;这就会带来除了创建 Card 之外额外的操作次数调用，而这些都是计费的。&lt;/p&gt;
+&lt;p&gt;不仅如此，我们的 Jenkins 每天 24 小时都在不停的执行 Job，按照并行三个 Job，单个 Job 执行 1 分钟来计算，每天会触发 8640 次。每次 Job 如果失败的话需要操作大约 5 次，成功的话需要操作 2 次。按照 1% 的失败率来计算，我们一个月需要的操作数为 596160 次。对应到 Integrmat 的收费政策，我们需要开通每月 299 刀的最顶级套餐 = =。&lt;/p&gt;
+&lt;p&gt;Integrmat 在其优质服务，良好体验的背后，带来是不菲的开销。显然，此路不通。&lt;/p&gt;
+&lt;h3 id=&#34;why-aws-lambda&#34;&gt;Why AWS Lambda&lt;/h3&gt;
+&lt;p&gt;分析完了上面的为什么不是 Integrmat 之后，使用 AWS Lambda 的理由就变得非常明显了。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不想自己从头撸一个 FaaS 框架&lt;/li&gt;
+&lt;li&gt;AWS Lambda 很便宜&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;AWS 提供的免费套餐中有着如下几条：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Lambda 每月 100 万个免费请求 （永久）&lt;/li&gt;
+&lt;li&gt;DynamoDB 25GB 存储 （永久）&lt;/li&gt;
+&lt;li&gt;API Gateway 每月接收 100 万次 （12 个月免费）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;结合前面的计算，AWS 的免费套餐已经完全可以覆盖我们的需求。&lt;/p&gt;
+&lt;h2 id=&#34;aws-lambda-faas-介绍&#34;&gt;AWS Lambda / FaaS 介绍&lt;/h2&gt;
+&lt;p&gt;FaaS 是指给 Function 提供运行环境和调度的服务，而 AWS Lambda 则是目前 FaaS 中运用比较广泛的一个服务。用户只需要实现业务逻辑，将代码上传到 AWS 之后，AWS 会负责处理接下来的所有事情：调度，伸缩，高可用，日志等等。而这些只有在方法被调用的时候才会计费，可以真正的做到按需运行，按毫秒计费。更详细的介绍可以看老王之前写的一篇文章 —— &lt;a href=&#34;http://jolestar.com/serverless-faas-current-status-and-future/&#34;&gt;Serverless/FaaS 的现状和未来&lt;/a&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;需要说明的是，从理论上来说任何 FaaS 框架都可以用来实现本文中描述功能，本文以 AWS Lambda 为例只是因为我们项目中刚好在用以及比较便宜而已，并不代表本人的任何倾向。老王的文章中也有介绍各个平台的 FaaS 服务，感兴趣的同学可以去看一看。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;如何实现自动化&#34;&gt;如何实现自动化&lt;/h2&gt;
+&lt;p&gt;我们主要用到了以下工具：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Lambda&lt;/li&gt;
+&lt;li&gt;DynamoDB&lt;/li&gt;
+&lt;li&gt;API Gateway&lt;/li&gt;
+&lt;li&gt;CloudWatch&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其中 Lambda 会提供函数运行的环境，我们主要使用了 Python 3.6。Lambda 每次运行都是一个完全独立的环境，我们需要接入 DynamoDB 来提供持久化存储的能力。API Gateway 则会对外暴露出一个链接作为 Webhook 来触发 Lambda 运行，CloudWatch 除了收集日志之外，还能够定时触发任务。这四件套下来，基本上就能够覆盖我们开发自动化工具所需要的大部分功能。下面我们就以 &lt;code&gt;Jenkins 出错后在 Trello 中创建 Card&lt;/code&gt; 这个需求为例，讲解一下如何实现基于 AWS Lambda 的自动化工具。&lt;/p&gt;
+&lt;h3 id=&#34;创建函数&#34;&gt;创建函数&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;进入 Lambda 的界面，点击右上方的 &lt;code&gt;创建函数&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;选择 &lt;code&gt;从头开始创作&lt;/code&gt; 即可。&lt;/li&gt;
+&lt;li&gt;填写函数的名字，这个名字在创建好之后是不能修改的。&lt;/li&gt;
+&lt;li&gt;选择运行语言，根据自己的喜好选择即可&lt;/li&gt;
+&lt;li&gt;选择运行角色，这里我推荐 &lt;code&gt;创建自定义角色&lt;/code&gt;。为每一个函数都创建一个独立的角色，这样方便控制权限，以后比较容易分得清。AWS 的 IAM 超级恶心，这是我摸索出来的不太容易出问题的步骤。对 AWS IAM 熟悉的同学可以忽略我的建议。&lt;/li&gt;
+&lt;li&gt;点击 &lt;code&gt;创建函数&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这样我们的一个函数就创建好了。&lt;/p&gt;
+&lt;h3 id=&#34;接入服务&#34;&gt;接入服务&lt;/h3&gt;
+&lt;p&gt;为了能够实现我们上述的需求，我们还需要接入对应的服务： DynamoDB，API Gateway 和 CloudWatch。其中每个函数会默认添加一个 CloudWatch，因此不需要再做额外的配置。DynamoDB 和 API Gateway 都建议先再外部创建好，然后再在 Lambda 中去添加，要不然 AWS 自动创建的 IAM 规则会非常乱，很容易出现各种奇怪的问题。如果对稳定性要求比较高的同学可以将 API Gateway 绑定到一个固定的 version 上，比如创建一个 version 叫做 &lt;code&gt;production&lt;/code&gt;，然后再将 &lt;code&gt;production&lt;/code&gt; 指向某个具体的版本，这样可以保证线上运行的代码始终是不变的，同时也方便使用 API Gateway 的流量调度来做一些灰度测试之类的。没有这方面需求的同学，可以直接将 API Gateway 绑定到 &lt;code&gt;$LASTEST&lt;/code&gt; 上，这样所有的请求都会由最新的代码来执行。&lt;/p&gt;
+&lt;h3 id=&#34;编辑函数&#34;&gt;编辑函数&lt;/h3&gt;
+&lt;p&gt;函数创建好之后就进入了函数的配置界面。这个地方 AWS 嵌入了 Cloud9 的在线编辑器，自带语言高亮，缩进和提示，还是比较好用的。当然除了在线编辑之外也可以上传 zip 包或者选择从 S3 上传，之后用到的时候再讲。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;os&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;json&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;boto3&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;trello&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; TrelloClient
+trello &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; TrelloClient(
+api_key&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;os&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;environ[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;TRELLO_API_KEY&amp;#39;&lt;/span&gt;],
+api_secret&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;os&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;environ[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;TRELLO_API_SECRET&amp;#39;&lt;/span&gt;],
+token&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;os&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;environ[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;TRELLO_TOKEN&amp;#39;&lt;/span&gt;],
+token_secret&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;os&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;environ[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;TRELLO_TOKEN_SECRET&amp;#39;&lt;/span&gt;]
+)
+board &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; trello&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;get_board(os&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;environ[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;TRELLO_BOARD_ID&amp;#39;&lt;/span&gt;])
+todo_list &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; board&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;get_list(os&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;environ[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;TRELLO_TODO_LIST_ID&amp;#39;&lt;/span&gt;])
+done_list &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; board&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;get_list(os&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;environ[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;TRELLO_DONE_LIST_ID&amp;#39;&lt;/span&gt;])
+dynamodb &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; boto3&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;resource(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;dynamodb&amp;#39;&lt;/span&gt;)
+table &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; dynamodb&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;Table(os&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;environ[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;DYNAMODB_TABLE&amp;#39;&lt;/span&gt;])
+SUCCESS &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;SUCCESS&amp;#39;&lt;/span&gt;]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;main&lt;/span&gt;(event, context):
+event &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;loads(event[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;body&amp;#39;&lt;/span&gt;])
+name &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; event[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;name&amp;#39;&lt;/span&gt;]
+status &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; event[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;build&amp;#39;&lt;/span&gt;][&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;status&amp;#39;&lt;/span&gt;]
+q &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; table&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;get_item(Key&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;project&amp;#39;&lt;/span&gt;: name})
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Create a new card if this project is not exist.&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Item&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; q:
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Nothing need to do if event is successful.&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; status &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; SUCCESS:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+card &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; todo_list&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;add_card(
+name&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; #&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%d&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Build &lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; (name, event[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;build&amp;#39;&lt;/span&gt;][&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;number&amp;#39;&lt;/span&gt;], status),
+desc&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;event[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;build&amp;#39;&lt;/span&gt;][&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;full_url&amp;#39;&lt;/span&gt;],
+position&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;top&amp;#39;&lt;/span&gt;
+)
+table&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;put_item(Item&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;{
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;project&amp;#39;&lt;/span&gt;: name,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;status&amp;#39;&lt;/span&gt;: status,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;card_id&amp;#39;&lt;/span&gt;: card&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;
+})
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# If project exists, we should update card depends on project status.&lt;/span&gt;
+item &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; q[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Item&amp;#39;&lt;/span&gt;]
+card &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; trello&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;get_card(card_id&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;item[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;card_id&amp;#39;&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; status &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; SUCCESS:
+table&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;delete_item(Key&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;project&amp;#39;&lt;/span&gt;: name})
+card&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;comment(
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; #&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%d&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Build &lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0;font-weight:bold&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt;
+(name, event[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;build&amp;#39;&lt;/span&gt;][&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;number&amp;#39;&lt;/span&gt;], status, event[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;build&amp;#39;&lt;/span&gt;][&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;full_url&amp;#39;&lt;/span&gt;]))
+card&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;set_closed(True)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; status &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; SUCCESS:
+card&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;comment(
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; #&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%d&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Build &lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0;font-weight:bold&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt;
+(name, event[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;build&amp;#39;&lt;/span&gt;][&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;number&amp;#39;&lt;/span&gt;], status, event[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;build&amp;#39;&lt;/span&gt;][&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;full_url&amp;#39;&lt;/span&gt;]))
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;以上就是我们实现 &lt;code&gt;Jenkins 出错后在 Trello 中创建 Card&lt;/code&gt; 的全部代码。有几个需要拿出来单独讲一下的地方：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;函数运行是调用的 Handler 函数是可以修改的，比如这里就是修改成了 &lt;code&gt;main.main&lt;/code&gt;，Lambda 会在代码中寻找 &lt;code&gt;main.py&lt;/code&gt; 文件并执行该文件中的 &lt;code&gt;main&lt;/code&gt; 函数。&lt;/li&gt;
+&lt;li&gt;Handler 函数主要接收两个参数，event 与 context，event 中就是外部传入的数据。如果在 Lambda 外面套了 API Gateway 的话，API Gateway 会增加额外的内容，并且把请求体放到 &lt;code&gt;event[&#39;body&#39;]&lt;/code&gt; 中，因此我们需要 &lt;code&gt;json.loads(event[&#39;body&#39;])&lt;/code&gt; 才能取到外部传过来的真实值。&lt;/li&gt;
+&lt;li&gt;Lambda 环境中自带了 boto3 并且与 IAM 集成了，因此可以不需要额外的认证直接调用已经授权的服务，比如这个地方用到的 &lt;code&gt;dynamodb&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;Lambda 支持设置环境变量，因此可以将一些参数都放到环境变量中并通过 &lt;code&gt;os.environ&lt;/code&gt; 来读取。&lt;/li&gt;
+&lt;li&gt;如果要在 Lambda 中引用外部的库，则需要将这些库一起打包上传。以这里的 &lt;code&gt;trello&lt;/code&gt; 库为例，我们需要执行 &lt;code&gt;pip install py-trello -t .&lt;/code&gt; 将这个库及其相关依赖下载到当前目录，然后使用 &lt;code&gt;zip -r ../code.zip *&lt;/code&gt; 压缩后上传。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;具体的实现就不再多讲，相信大家都能看懂。&lt;/p&gt;
+&lt;h3 id=&#34;调试函数&#34;&gt;调试函数&lt;/h3&gt;
+&lt;p&gt;在代码写好之后，我们可以在页面直接调试。页面右上方可以配置一些测试事件，点击 &lt;code&gt;保存&lt;/code&gt; 后点 &lt;code&gt;测试&lt;/code&gt; 即可直接运行。运行结果会有对应的日志展示出来，也可以到 CloudWatch 中去查看更为完整的日志，根据日志反馈的情况修改自己的代码即可。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;从国内上传代码很是恶心，开着代理也经常出问题，不知道啥原因。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;这篇文章主要介绍了如何基于 AWS Lambda 来实现一个自动化脚本。&lt;/p&gt;
+&lt;p&gt;优点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;除了偶尔请求 timeout 之外，服务很稳定，上线之后不用费心维护&lt;/li&gt;
+&lt;li&gt;自动集成的 CloudWatch 日志挺好用，调试很方便&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;缺点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;调试的过程比较麻烦，不能接入外部的 Git 服务，只能用 AWS 自己的那个&lt;/li&gt;
+&lt;li&gt;上线的脚本多了之后维护起来很麻烦，没有一个统一管理的方案&lt;/li&gt;
+&lt;li&gt;强依赖 AWS 自己的服务，日后迁移要大改脚本&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;这篇文章是一月份写的，但是一直到今天（2018.3.4）才写好结尾发出来 = =&lt;/li&gt;
+&lt;li&gt;我的 github profile 是有多像一个前端以至于所有公司给我发的 JD 都是前端？&lt;/li&gt;
+&lt;li&gt;尼尔半价了，2B 小姐姐赛高&lt;/li&gt;
+&lt;li&gt;我永远喜欢薇尔莉特.jpg&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Integromat -- 最强大的自动化平台</title><link>https://xuanwo.io/2017/12/03/integromat-intro/</link><pubDate>Sun, 03 Dec 2017 10:07:00 +0000</pubDate><guid>https://xuanwo.io/2017/12/03/integromat-intro/</guid><description>&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/integromat-example.png&#34; alt=&#34;Integrmat Example&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;今天想跟大家分享一个类似于 IFTTT 的自动化平台： &lt;a href=&#34;https://www.integromat.com&#34;&gt;Integromat&lt;/a&gt;。与 IFTTT 最大的区别是它允许用户通过操作每一次请求的输入和输出来构建一个完整的链条，比如上图的这个例子就是实现了这样的一个功能：当完成 Todoist 中带有指定属性的任务时，将这个任务移动到 &lt;code&gt;Done&lt;/code&gt; 列表，并将其放到 &lt;code&gt;Done&lt;/code&gt; 列表的顶端。&lt;/p&gt;
+&lt;p&gt;接下来我会先简单地介绍一下 Integromat，然后讲解一下 Integromat 涉及到的一些元素，最后讲讲如何定制并调试自己的场景。&lt;/p&gt;
+&lt;h2 id=&#34;0x00-介绍&#34;&gt;0x00 介绍&lt;/h2&gt;
+&lt;p&gt;Integromat 是由一家专门做系统集成和外包服务的公司 &lt;a href=&#34;www.integrators.cz&#34;&gt;Integrators&lt;/a&gt; 推出的产品，2012 年开始开发， 2016 年正式面向大众推出。目前团队中有 19 人，其中负责技术的有 9 人。他们愿景是要做互联网的胶水，同时自称 Integromat 是最先进的在线自动化平台，在使用了他们的服务之后我发现他们没有骗我。&lt;/p&gt;
+&lt;h2 id=&#34;0x01-特点&#34;&gt;0x01 特点&lt;/h2&gt;
+&lt;p&gt;详细的特性列表可以参考此处： &lt;a href=&#34;https://www.integromat.com/en/features&#34;&gt;https://www.integromat.com/en/features&lt;/a&gt; ，下面我只列出一些我认为有用 &amp;amp; 特别的特性。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;完整的 ACID 事务支持，拥有处理异常的能力&lt;/li&gt;
+&lt;li&gt;可视化操作界面，可以看到每一步操作的详细数据，调试便利程度 Max&lt;/li&gt;
+&lt;li&gt;支持路由功能，可以实现多条分支的处理&lt;/li&gt;
+&lt;li&gt;支持常用函数（数值，时间和字符串的常用操作，甚至还有正则）&lt;/li&gt;
+&lt;li&gt;支持解析 JSON 到预设的数据结构当中&lt;/li&gt;
+&lt;li&gt;支持 Webhook 和 定时器 两种触发器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;作为一个互联网自动化爱好者，我先后使用过 &lt;a href=&#34;https://ifttt.com/&#34;&gt;IFTTT&lt;/a&gt;，&lt;a href=&#34;https://zapier.com&#34;&gt;Zapier&lt;/a&gt; 等商业服务，也部署过 &lt;a href=&#34;https://github.com/muesli/beehive&#34;&gt;Beehive&lt;/a&gt;，&lt;a href=&#34;https://github.com/huginn/huginn&#34;&gt;Huginn&lt;/a&gt; 这样的开源服务，但是没有一个像 Integromat 这么强大，更何况，它的界面也是相当的简洁好看。&lt;/p&gt;
+&lt;h2 id=&#34;0x02-概念介绍&#34;&gt;0x02 概念介绍&lt;/h2&gt;
+&lt;p&gt;强大的功能通常都意味着陡峭的学习曲线，Integromat 也不例外。为了实现上文中提到的诸多特性，Integromat 引入了很多概念，这使得它的上手难度比 IFTTT 和 Zapier 高上不少。但是 Integromat 的工程师们在前端的引导和设计上下了很多功夫，尽可能地降低了新用户的门槛。根据我的实际经验，有初步编程开发经验的同学只要摸索上几分钟就能上手，而零编程基础的同学如果不使用那些高级特性的话，只需要十几分钟就能捣鼓出一个实际可用的场景。&lt;/p&gt;
+&lt;p&gt;为了更好的帮助新同学使用 Integromat，下面我会简单的介绍一下 Integromat 涉及到的一些元素。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Scenario（场景）：场景是 Integromat 中一系列任务的组合，相当于 IFTTT 中的 Applets。&lt;/li&gt;
+&lt;li&gt;Service（服务）：服务是 Integromat 中预设好的一些服务，比如 Dropbox，Gmail 等，相当于 IFTTT 中的 Service。
+&lt;ul&gt;
+&lt;li&gt;Trigger（触发器）：满足一定条件的时候会触发这个服务&lt;/li&gt;
+&lt;li&gt;Instant（实时）：某些触发器会标着实时，这意味着这个触发器可以通过 Webhook 来实时触发，否则就只能使用 Integromat 的定时器来触发。&lt;/li&gt;
+&lt;li&gt;Action（操作）：这个服务通过一定的输入来执行对应的操作。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Connection（联接）：联接是 Integromat 中绑定的服务，联接与服务是多对一的关系，可以通过创建同一个服务的多个联接来实现多帐号。&lt;/li&gt;
+&lt;li&gt;Webhook：某些服务支持在满足某些条件的时候向预先设置好的 Webhook 发送信息，Integromat 可以创建这样的 webhook 来接受指定的信息，注意这个 Webhook 跟服务的触发器是绑定的。&lt;/li&gt;
+&lt;li&gt;Key：Integromat 可以上传一些加密的文件来支持某些敏感的操作&lt;/li&gt;
+&lt;li&gt;Device： 与 IFTTT 一样， Integromat 可以与一些设备绑定来支持设备相关的操作&lt;/li&gt;
+&lt;li&gt;Data structure（数据结构）： 对于预设的服务，Integromat 已经事先解析好了对应的结构体，但是如果是自己创建的 Webhook，那需要自己定义好对应的数据结构，可以通过上传一个 JSON 文件来创建。&lt;/li&gt;
+&lt;li&gt;Data store：Integromat 提供了一个简单的 KV 存储，用于在多个场景或者同一个场景多次执行中共享数据，可以进行 Get，Set 和 Del 等操作。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Integromat 涉及到的元素确实要比 IFTTT 多上不少，但是新同学刚刚上手的时候只需要了解 Scenario，Service 和 Connection 就已经足够了，剩下的高级特性可以之后慢慢摸索。&lt;/p&gt;
+&lt;h2 id=&#34;0x03-收费政策&#34;&gt;0x03 收费政策&lt;/h2&gt;
+&lt;p&gt;Integromat 的收费政策可以参考： &lt;a href=&#34;https://www.integromat.com/en/pricing&#34;&gt;https://www.integromat.com/en/pricing&lt;/a&gt; ， 这里主要讲一下 Free 这一档：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;免费用户每个月可以进行 1000 次操作，有 100 M的流量，定时器的最小间隔为 15 分钟。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;所有用户的场景数量都是没有限制的，但是有着 1000 次的操作数量限制，在单个 Scenario 的历史记录当中可以看到每一次运行都进行了多少次操作。基本上可以看作有多少个 “圈” 就会有多少操作，没有执行到的部分不会进行计算。&lt;/p&gt;
+&lt;p&gt;对于轻度用户而言，1000 次操作基本上刚刚够用；如果不用来在网盘之间同步东西的话，100M 的流量是绰绰有余的。对于重度用户而言，花个 9 刀或者 29 刀购买套餐也是个不错的主意，这么强大的服务值得为止付费。&lt;/p&gt;
+&lt;h2 id=&#34;0x04-如何定制-调试&#34;&gt;0x04 如何定制 &amp;amp; 调试&lt;/h2&gt;
+&lt;p&gt;Integromat 的图形化界面已经足够优秀了，官方也提供了不少的教程，比如 &lt;a href=&#34;https://www.integromat.com/en/kb/tutorial/get-a-tweet-on-twitter-when-a-new-tweet-from-google-sheet-row-is-created.html&#34;&gt;google sheet 中增加了一行就创建一个 tweet &lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;这里主要讲讲我感觉需要注意的一些地方：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每一个场景都必须从一个触发器开始。实际上每次创建一个场景，都会有一个无法删除的模块，你只需要点击并选择某个服务的触发器即可。&lt;/li&gt;
+&lt;li&gt;两个模块连接的地方会有一个漏斗标志，点开之后可以设置过滤器，如果条件不满足就会在这个地方中止。&lt;/li&gt;
+&lt;li&gt;Connections 和 Webhook 不需要提前创建好，只需要在开发场景的时候选择 &lt;code&gt;Add&lt;/code&gt; 即可。&lt;/li&gt;
+&lt;li&gt;所有的模块运行一次之后就会在右上方出现一个带数字的小圆，点开之后可以看到本次运行的实际数据。所以调试的时候可以点一次 &lt;code&gt;Run once&lt;/code&gt;，然后就能看到真实的数据了，这样调试起来更加方便。&lt;/li&gt;
+&lt;li&gt;左下角有一个像飞机的图标 &lt;code&gt;Explain flow&lt;/code&gt;，点击之后就会以动画的形式展示数据的流动。如果正在开发比较复杂的场景，不妨使用这个功能看看数据是怎么流动的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;0x05-总结&#34;&gt;0x05 总结&lt;/h2&gt;
+&lt;p&gt;Integromat 适合以下人群：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;觉得 IFTTT 反应太慢了/可定制化程度太低了/没有想要的功能的普通用户&lt;/li&gt;
+&lt;li&gt;想要跟自己的工作流做集成的工作人士&lt;/li&gt;
+&lt;li&gt;闲着没事干就想折腾黑科技的 Geek 们&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Have fun in automation!&lt;/p&gt;
+&lt;/blockquote&gt;</description></item><item><title>Enpass —— 超赞的密码管理工具</title><link>https://xuanwo.io/2017/11/26/enpass-intro/</link><pubDate>Sun, 26 Nov 2017 10:07:00 +0000</pubDate><guid>https://xuanwo.io/2017/11/26/enpass-intro/</guid><description>&lt;p&gt;不想把自己的密码保存在 LastPass 的服务器上？羡慕 Mac 上好用的 1Password 但是自己的平台上却没有？不喜欢 Linux 密码管理工具过时的界面？ 如果你也曾经为这些问题苦恼过的话，那 &lt;a href=&#34;https://www.enpass.io/&#34;&gt;Enpass&lt;/a&gt; 就有可能是你的最佳之选。&lt;/p&gt;
+&lt;h2 id=&#34;介绍&#34;&gt;介绍&lt;/h2&gt;
+&lt;p&gt;Enpass 是由一家在印度古尔冈的私人控股公司 &lt;a href=&#34;https://www.sinew.io/&#34;&gt;Sinew&lt;/a&gt; 推出的密码管理工具。之前在公司的内部使用，在 2011 年的时候正式面向市场推出，目前有超过 100 万用户，曾用名： Walletx 。&lt;/p&gt;
+&lt;h2 id=&#34;特点&#34;&gt;特点&lt;/h2&gt;
+&lt;h3 id=&#34;全平台支持&#34;&gt;全平台支持&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;支持 macOS，Linux，windows 三大 PC 平台&lt;/li&gt;
+&lt;li&gt;支持 iOS，Android，Windows Phone 等常用移动平台&lt;/li&gt;
+&lt;li&gt;支持 Chromebook&lt;/li&gt;
+&lt;li&gt;支持打包成 Portable 应用&lt;/li&gt;
+&lt;li&gt;浏览器插件支持 Chrome 与 Firefox&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;他们的浏览器插件非常好用，通过快捷键 &lt;code&gt;Ctrl+/&lt;/code&gt; 自动补全用户名帐号和密码。如果有多个相符的帐号会弹出窗口供选择，如果没有找到的话同样会提供一个搜索框。比 LastPass 那个臃肿又难用的浏览器插件要好上不少，1Password 在 mac 上的体验很赞，但是无奈没有 Linux 上的版本。&lt;/p&gt;
+&lt;h3 id=&#34;服务器不保存用户数据&#34;&gt;服务器不保存用户数据&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;跨终端同步基于已有的网盘服务实现&lt;/li&gt;
+&lt;li&gt;如果不想把数据上传到网盘，还可以通过局域网进行同步&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以通过自己的网盘服务来同步加密后的数据库，已经支持了主流的网盘服务，比如 Google Drive，Dropbox，OneDrive，基于 WebDAV 的 ownCloud 和 Nextcloud 等等。从我实际的体验上来看，Linux 上客户端的同步交互有些问题，有时候如果代理挂了，然后它重试数次失败之后就没有办法再手动触发同步，只好重新启动应用来解决。&lt;/p&gt;
+&lt;p&gt;不在服务器端存储用户数据就避免了整天担心 LastPass 数据库被盗之类的问题，据我所知 LastPass 之前就出现过一些问题。即使从来没有出现过问题，LastPass 这么大的目标本身就会吸引黑客们的兴趣，出现数据泄漏从长期来看是必然会发生的事情。因此密码这种东西还是要自己保管来的更加安全一些。&lt;/p&gt;
+&lt;h3 id=&#34;其它&#34;&gt;其它&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;AES-256 强加密&lt;/li&gt;
+&lt;li&gt;简单好用的密码生成工具&lt;/li&gt;
+&lt;li&gt;支持备份与恢复&lt;/li&gt;
+&lt;li&gt;支持导入导出&lt;/li&gt;
+&lt;li&gt;iOS 客户端支持指纹解锁，支持 iOS 12 Password AutoFill&lt;/li&gt;
+&lt;li&gt;粘贴后自动清除剪贴板&lt;/li&gt;
+&lt;li&gt;失去焦点一定时间后自动锁定程序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;缺点&#34;&gt;缺点&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;在 Linux 平台上不支持输入法，无法输入中文，只能复制粘贴
+&lt;ul&gt;
+&lt;li&gt;Enpass 的 Linux 客户端会捆绑一个特定版本的 Qt，而且缺少了 fcitx 的支持&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;同步功能不是很稳定，同步失败之后需要重启程序来手动触发
+&lt;ul&gt;
+&lt;li&gt;目前我的方案是直接同步到本地的文件夹，然后使用 Insync 来同步这个目录&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;收费政策&#34;&gt;收费政策&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Desktop 端不收费&lt;/li&gt;
+&lt;li&gt;移动端可以免费同步一定条目，可以通过支付十刀解锁（只需要支付一次，终身可用）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;技巧&#34;&gt;技巧&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;可以用来同步 TOTP 的验证码，完美取代 Google Authenticator&lt;/li&gt;
+&lt;li&gt;支持加密文件，可以用来跨平台同步自己的私钥和证书&lt;/li&gt;
+&lt;li&gt;iOS 客户端支持 iOS 12 内置的 Password Autofill，可以在 &lt;code&gt;Settings -&amp;gt; Passwords &amp;amp; Accounts -&amp;gt; AutoFill Passwords&lt;/code&gt; 中打开&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;Enpass 适合以下人群：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;想要尝试进行密码管理的新同学&lt;/li&gt;
+&lt;li&gt;Linux 平台上想获得 1Password 类似体验的用户&lt;/li&gt;
+&lt;li&gt;想要自己保管密码库，不信任集中托管服务的用户&lt;/li&gt;
+&lt;li&gt;致力于统一管理自己所有数据的用户 (Like me)&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>再见， Hexo</title><link>https://xuanwo.io/2016/10/23/goodbye-hexo/</link><pubDate>Sun, 23 Oct 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/10/23/goodbye-hexo/</guid><description>&lt;p&gt;其实我现在的心情比较复杂。
+Hexo 我从大一的暑假就开始用，大二的时候加入了 Hexo 的团队，一直到现在，关于 Hexo 的文章都是我博客点击率最高的文章。
+但是由于我实在是精力有限，没有时间去维护Hexo的相关项目，因此只能与Hexo说再见了，希望能有更多人可以加入Hexo的开发团队，希望Hexo能够发展的更好。
+下面简单地分享一下自己在Hexo团队中做的工作和学到的东西。&lt;/p&gt;
+&lt;h2 id=&#34;我给hexo带来了什么&#34;&gt;我给Hexo带来了什么&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;版本更新时的反馈。得益于&lt;code&gt;Travis CI&lt;/code&gt;的自动构建能力，我可以在版本推送的第一时间进行构建并得到反馈。事实上，作者就是使用我的库进行测试的。&lt;/li&gt;
+&lt;li&gt;Pull Request的Review与Merge。其实这个方面在最开始的时候不是做的特别好，因为对&lt;code&gt;Node.js&lt;/code&gt;不熟悉，向&lt;code&gt;master&lt;/code&gt;分支导入了很多ugly的代码。不过做的多了就开始对&lt;code&gt;Node.js&lt;/code&gt;有了自己的感觉。&lt;/li&gt;
+&lt;li&gt;Issues的回复与维护。在我进入Team之前，Issues区有上千个没有回复或处理的问题。在Team成立之后，在我们团队成员的努力之下，这个数字减少到了300+。&lt;/li&gt;
+&lt;li&gt;BUG的Fix。学会了一点&lt;code&gt;Node&lt;/code&gt;之后我开始尝试自己修复&lt;code&gt;BUG&lt;/code&gt;，有一个&lt;code&gt;BUG&lt;/code&gt;确认修好了，但是很可惜没有能推到&lt;code&gt;NPM&lt;/code&gt;上。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;一次官方网站的完全宕机。&lt;/strong&gt; 这个涉及到&lt;code&gt;Travis CI&lt;/code&gt;的一个&lt;code&gt;BUG&lt;/code&gt;，导致我的自动构建任务在出错之后没有停止反而是直接进行了一次提交，从而导致官网直接挂了。详情可以参考： &lt;a href=&#34;https://github.com/hexojs/site/issues/134&#34;&gt;https://github.com/hexojs/site/issues/134&lt;/a&gt; 。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;我从hexo中学到了什么&#34;&gt;我从Hexo中学到了什么&lt;/h2&gt;
+&lt;p&gt;我使用Hexo的这三年，是我精力最旺盛，时间最宽裕的三年。在这期间，我掌握了如下的东西：&lt;/p&gt;
+&lt;h3 id=&#34;技术&#34;&gt;技术&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Node.js&lt;/code&gt;初步入门，能用&lt;code&gt;Node&lt;/code&gt;写一些简单的轮子，能看懂源代码并修复BUG。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HTML&lt;/code&gt;，&lt;code&gt;CSS&lt;/code&gt;初步入门，能对设计稿进行切分并实现相应效果，了解了几个比较常见的&lt;code&gt;CSS&lt;/code&gt;框架：&lt;code&gt;Bootstrap&lt;/code&gt;，&lt;code&gt;Semantic UI&lt;/code&gt;等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;技巧&#34;&gt;技巧&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;学习使用了几个常见前的前端工具，比如：&lt;code&gt;Grunt&lt;/code&gt;，&lt;code&gt;Gulp&lt;/code&gt;，&lt;code&gt;Bower&lt;/code&gt;等&lt;/li&gt;
+&lt;li&gt;学会了&lt;code&gt;Git&lt;/code&gt;，可以熟练使用&lt;code&gt;Git&lt;/code&gt;的&lt;code&gt;branch&lt;/code&gt;，&lt;code&gt;rebase&lt;/code&gt;等功能来进行协作&lt;/li&gt;
+&lt;li&gt;掌握了域名解析的全部过程，申请了自己的第一个域名&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;技能&#34;&gt;技能&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;能够熟练运用&lt;code&gt;Travis CI&lt;/code&gt;来实现自动构建与持续集成&lt;/li&gt;
+&lt;li&gt;英文的书面表达能力在和外国友人沟通的时候有了很大的提高&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;思想&#34;&gt;思想&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;开源的习惯：喜欢开源自己的代码，喜欢去学习别人的代码，喜欢使用开源产品，喜欢在社区反馈并尝试修复自己发现的问题。&lt;/li&gt;
+&lt;li&gt;遇到问题不会再想着推给别人，而是首先考虑自己能不能修复，或者有没有别的解决方案。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;如何从hexo迁移到jekyll&#34;&gt;如何从Hexo迁移到Jekyll&lt;/h2&gt;
+&lt;p&gt;非常有趣的一点是，网上非常多人都是从Jekyll迁移到Hexo，但是很少人有反向迁移的。
+从Hexo迁移到Jekyll其实非常简单，Hexo和Jekyll基本兼容，只需要读取文章的日期，并修改文件名为&lt;code&gt;YYYY-MM-DD-&amp;lt;post_name&amp;gt;.md&lt;/code&gt;即可。根据情况，还需要给文章添加&lt;code&gt;layout: post&lt;/code&gt;，并修改文章内容中一些不兼容的格式。
+我用Python写了一个简单的脚本，稍微整理整理之后会开源在Github并推送到Pypi上。&lt;/p&gt;
+&lt;h2 id=&#34;更新日志&#34;&gt;更新日志&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年10月23日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>在QingCloud上部署弹性扩容的OwnCloud</title><link>https://xuanwo.io/2016/06/03/owncloud-on-qingcloud/</link><pubDate>Fri, 03 Jun 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/06/03/owncloud-on-qingcloud/</guid><description>&lt;p&gt;因为实在不满意百度云的一些缺陷，我们最终决定部署一套团队内部使用的云存储平台，用于团队协作及资料长期存储。希望能够达到如下目标：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;数据安全性高&lt;/li&gt;
+&lt;li&gt;权限控制能力强&lt;/li&gt;
+&lt;li&gt;分享功能更强，可以设置密码和过期时间等&lt;/li&gt;
+&lt;li&gt;允许匿名第三方上传数据&lt;/li&gt;
+&lt;li&gt;没有文件上传大小限制&lt;/li&gt;
+&lt;li&gt;支持多平台同步功能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;综合考量各开源项目之后，我最终选定基于QingCloud部署一套开源存储项目OwnCloud。&lt;/p&gt;
+&lt;h1 id=&#34;部署&#34;&gt;部署&lt;/h1&gt;
+&lt;p&gt;在部署之前，我们首先要考虑这套系统大概会有多少人用，会使用多大的空间，需要多少带宽，服务器的配置等问题。我们现在有几个TB的数据，10人使用，未来人数无法预估，各资源使用量也无法预估。但是非常有意思的事情是，在青云QingCloud平台上，一切都是可以动态扩容的，所以我完全可以以最少的资源验证服务是否符合需求，然后再增加服务所使用的资源。&lt;/p&gt;
+&lt;p&gt;整个部署过程概括为如下4步：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;验证功能及预估花费&lt;/li&gt;
+&lt;li&gt;在QingCloud上创建主机、网络等资源并修改配置&lt;/li&gt;
+&lt;li&gt;安装OwnCloud环境&lt;/li&gt;
+&lt;li&gt;使用LVM管理分区，实现空间动态扩容&lt;/li&gt;
+&lt;li&gt;在网页端安装OwnCloud&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;资源编排&#34;&gt;资源编排&lt;/h2&gt;
+&lt;p&gt;在实际生成需要的资源之前，我先通过青云QingCloud的提供的资源编排功能看看青云是否能够满足我们的需求以及搭建这一套服务需要多少钱：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如图所示，我们在一个私有网络中创建一台主机和一个数据库，并为整个VPC网络分配了一个公网IP和防火墙。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-tp.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如图，整套资源预计需要每小时0.56元。&lt;/p&gt;
+&lt;h2 id=&#34;创建并修改配置&#34;&gt;创建并修改配置&lt;/h2&gt;
+&lt;p&gt;生成模板之后，点击创建。等待大概一分钟之后，所有资源全部创建完毕。在SSH连接上服务器开始实际的配置工作之前，需要先修改VPC的设置。&lt;/p&gt;
+&lt;h3 id=&#34;添加端口转发规则&#34;&gt;添加端口转发规则&lt;/h3&gt;
+&lt;p&gt;我需要将来自公网的流量转发到我的主机上，主要有两条，一个是SSH，一个是HTTP。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-2.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;主机的内网地址是&lt;code&gt;192.168.0.2&lt;/code&gt;，所以需要把所有来自22和80的端口都转发到这个地址。&lt;/p&gt;
+&lt;h3 id=&#34;添加防火墙规则&#34;&gt;添加防火墙规则&lt;/h3&gt;
+&lt;p&gt;出于安全性考虑，青云的防火墙默认只开放了22和ICMP。为了可以正常访问到主机，还需要添加80端口的例外规则：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-3.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;我们看到青云在右边提供了常用端口的配置，选择http即可。&lt;/p&gt;
+&lt;h2 id=&#34;安装owncloud&#34;&gt;安装OwnCloud&lt;/h2&gt;
+&lt;p&gt;OwnCloud为CentOS平台提供了二进制的包，没有特殊需求的话，直接使用即可。
+首先添加OwnCloud官方的Key文件：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;rpm --import https://download.owncloud.org/download/repositories/stable/CentOS_7/repodata/repomd.xml.key&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后添加OwnCloud的repo：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;wget http://download.owncloud.org/download/repositories/stable/CentOS_7/ce:stable.repo -O /etc/yum.repos.d/ce:stable.repo&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;更新repo之后开始安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;yum clean expire-cache
+yum install owncloud&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;yum将会自动处理依赖，如果速度不佳的话，可以直接将包下载到本地：&lt;a href=&#34;http://download.owncloud.org/download/repositories/stable/CentOS_7/&#34;&gt;直接下载&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;启用httpd-并测试是否安装正确&#34;&gt;启用httpd，并测试是否安装正确&lt;/h2&gt;
+&lt;p&gt;OwnCloud默认使用Apache作为Web服务器，上一步已经安装了Apache，接下来需要启用它：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;systemctl start httpd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如需要开机自行启动，可以输入：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;systemctl &lt;span style=&#34;color:#007020&#34;&gt;enable&lt;/span&gt; httpd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后在浏览器中访问：&lt;code&gt;http://&amp;lt;your ip&amp;gt;/owncloud&lt;/code&gt;，如果出现OwnCloud的安装界面，说明已经配置成功了。&lt;/p&gt;
+&lt;h2 id=&#34;使用lvm管理分区-实现空间动态扩容&#34;&gt;使用LVM管理分区，实现空间动态扩容&lt;/h2&gt;
+&lt;p&gt;OwnCloud在安装的时候只能选择一个目录，为了能够实现空间的动态扩容，需要使用LVM创建一个逻辑分区并挂载到指定的数据目录下。&lt;/p&gt;
+&lt;p&gt;首先在青云QingCloud的控制台中创建一块硬盘，然后挂载到主机中。之后，就能够通过&lt;code&gt;/dev/sdb&lt;/code&gt;等形式来访问这块硬盘。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;需要注意的是，主机在每次重启的时候硬盘的顺序可能会发生改变，所以如果需要自动挂载的话，需要使用UUID或者LABLE的方式来指定硬盘，不能使用设备名。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;接下来需要在CentOS下使用LVM来配置分区，实现分区的动态扩容。&lt;/p&gt;
+&lt;h3 id=&#34;安装lvm工具&#34;&gt;安装LVM工具&lt;/h3&gt;
+&lt;p&gt;青云QingCloud提供的CentOS 7.2默认映像是没有LVM工具的，所以首先需要安装它：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;yum install lvm2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;创建物理卷-pv&#34;&gt;创建物理卷（PV）&lt;/h3&gt;
+&lt;p&gt;首先检测能够被作为物理卷的设备：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;lvmdiskscan&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后在指定设备上创建物理卷，所有需要用到的设备都需要执行如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pvcreate /dev/sdb&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后查看已经创建好的物理卷：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pvdisplay&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;输出大概如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;--- Physical volume ---
+PV Name /dev/sdb
+PV Size &lt;span style=&#34;color:#40a070&#34;&gt;1000&lt;/span&gt;.00 GiB / not usable &lt;span style=&#34;color:#40a070&#34;&gt;4&lt;/span&gt;.00 MiB
+Allocatable yes
+PE Size &lt;span style=&#34;color:#40a070&#34;&gt;4&lt;/span&gt;.00 MiB
+Total PE &lt;span style=&#34;color:#40a070&#34;&gt;255999&lt;/span&gt;
+Free PE &lt;span style=&#34;color:#40a070&#34;&gt;255999&lt;/span&gt;
+Allocated PE &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+PV UUID EHIeTJ-WBPv-rQkQ-LnuI-0IWE-SM4z-bMPAWx&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;创建卷组-vg&#34;&gt;创建卷组（VG）&lt;/h3&gt;
+&lt;p&gt;物理卷创建完毕后，需要创建一个卷组来实现物理卷的统一管理：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;vgcreate owncloud-vg /dev/sdb /dev/sdc /dev/sdd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;后续如果需要扩展的话，可以使用如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;vgextend owncloud-vg /dev/sde&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;同样地，使用&lt;code&gt;vgdisplay&lt;/code&gt;来查看创建好的卷组：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;--- Volume group ---
+VG Name owncloud-vg
+Format lvm2
+Metadata Areas &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+Metadata Sequence No &lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;
+VG Access read/write
+VG Status resizable
+MAX LV &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+Cur LV &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+Open LV &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+Max PV &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+Cur PV &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+Act PV &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+VG Size &lt;span style=&#34;color:#40a070&#34;&gt;1000&lt;/span&gt;.00 GiB
+PE Size &lt;span style=&#34;color:#40a070&#34;&gt;4&lt;/span&gt;.00 MiB
+Total PE &lt;span style=&#34;color:#40a070&#34;&gt;255999&lt;/span&gt;
+Alloc PE / Size &lt;span style=&#34;color:#40a070&#34;&gt;230400&lt;/span&gt; / &lt;span style=&#34;color:#40a070&#34;&gt;900&lt;/span&gt;.00 GiB
+Free PE / Size &lt;span style=&#34;color:#40a070&#34;&gt;25599&lt;/span&gt; / &lt;span style=&#34;color:#40a070&#34;&gt;100&lt;/span&gt;.00 GiB
+VG UUID xCCtSR-QFcZ-StcI-HM7O-KDAz-PvMC-EgYcSV&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;创建逻辑卷-lv&#34;&gt;创建逻辑卷（LV）&lt;/h3&gt;
+&lt;p&gt;然后就可以开始创建逻辑卷了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;lvcreate -L 900G owncloud-vg -n owncloud-data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;创建完毕后，就可以通过&lt;code&gt;/dev/mapper/owncloud--vg-owncloud--data&lt;/code&gt;或者&lt;code&gt;/dev/owncloud-vg/owncloud-data&lt;/code&gt;来访问这个设备了。&lt;/p&gt;
+&lt;p&gt;如果需要扩大逻辑卷，可以使用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;lvextend -L 1000G /dev/owncloud-vg/owncloud-data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;确认扩展成功后，再更新文件系统：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;resize2fs /dev/owncloud-vg/owncloud-data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;创建文件系统并挂载&#34;&gt;创建文件系统并挂载&lt;/h3&gt;
+&lt;p&gt;在逻辑卷上创建一个ext4分区：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;mkfs.ext4 /dev/mapper/owncloud--vg-owncloud--data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后将分区挂载到期望的目录下，比如&lt;code&gt;/data&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;mount /dev/mapper/owncloud--vg-owncloud--data /data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;修改文件夹权限&#34;&gt;修改文件夹权限&lt;/h2&gt;
+&lt;p&gt;为了OwnCloud能够正确读写数据分区，需要修改&lt;code&gt;/data&lt;/code&gt;的所有者和权限：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;chown -R apache:apache /data
+chmod &lt;span style=&#34;color:#40a070&#34;&gt;775&lt;/span&gt; /data -R&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;网页安装owncloud&#34;&gt;网页安装OwnCloud&lt;/h2&gt;
+&lt;p&gt;全部配置完毕后，可以开始在网页进行OwnCloud安装了。&lt;/p&gt;
+&lt;p&gt;管理员帐号： 自定义
+管理员密码： 自定义
+数据路径：&lt;code&gt;/data&lt;/code&gt;
+数据库用户：&lt;code&gt;root&lt;/code&gt;
+数据库密码：&lt;code&gt;&amp;lt;your password&amp;gt;&lt;/code&gt;
+数据库名称自定义，比如：&lt;code&gt;owncloud&lt;/code&gt;
+数据库地址：&lt;code&gt;&amp;lt;your rdb ip&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在创建RDB时，系统会自动用相同的密码创建Root用户。OwnCloud在安装时需要创建一个新的账户来进行管理，而青云提供的默认用户没有这样的权限。因此需要使用Root用户而不是创建时指定的用户。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;提示创建完毕后，就可以使用管理员用户登陆了。&lt;/p&gt;
+&lt;h1 id=&#34;维护&#34;&gt;维护&lt;/h1&gt;
+&lt;h2 id=&#34;自动备份&#34;&gt;自动备份&lt;/h2&gt;
+&lt;p&gt;一个存储类的应用，必须要有自动备份的功能，保证用户在最坏的情况下都能找回他们的数据，对于存储着工作资料的私有云存储而言更是如此。所以，需要对主机，硬盘和数据库进行定时备份。&lt;/p&gt;
+&lt;h3 id=&#34;主机和硬盘&#34;&gt;主机和硬盘&lt;/h3&gt;
+&lt;p&gt;青云QingCloud 提供了一个叫定时器的功能，可以设置在每天的三点重复执行备份任务。&lt;/p&gt;
+&lt;p&gt;首先创建一个定时器，每天3：00重复执行：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-backup-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;然后在该定时器中添加对应的定时器任务：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-backup-2.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;选中需要备份的主机和硬盘即可。&lt;/p&gt;
+&lt;h3 id=&#34;数据库&#34;&gt;数据库&lt;/h3&gt;
+&lt;p&gt;青云QingCloud 上的数据库自带自动备份功能，只需要开启它。&lt;/p&gt;
+&lt;p&gt;在需要备份的数据库上右击，选择&lt;code&gt;修改自动备份策略&lt;/code&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-backup-3.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;青云QingCloud 首次备份是全量备份，之后是增量备份。当变化较大时，会自动创建新的备份链。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;自动伸缩&#34;&gt;自动伸缩&lt;/h2&gt;
+&lt;p&gt;云存储服务的一个最显著的特点是有明显的高峰期，如果能够实现高峰期时自动增加带宽，低峰期时自动降低带宽就能够节省昂贵的带宽费用的目的。青云QingCloud提供的自动伸缩就能有效地满足这一痛点。&lt;/p&gt;
+&lt;p&gt;首先创建一个自动伸缩策略：&lt;/p&gt;
+&lt;p&gt;操作类型为调整公网IP带宽上限，然后选择需要自动伸缩的资源。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-autoscaling-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;然后添加带宽提高和降低的触发条件：&lt;/p&gt;
+&lt;p&gt;以带宽提高为例，我们可以在公网进流量连续15分钟平均值大于当前带宽的80%时提高带宽。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;青云QingCloud的监控周期为5分钟，而数据采样周期为1分钟。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-autoscaling-2.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;最后添加操作参数：&lt;/p&gt;
+&lt;p&gt;可以设置每次提高5Mbps，最高允许的带宽为20Mbps。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-autoscaling-3.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;硬盘扩容&#34;&gt;硬盘扩容&lt;/h2&gt;
+&lt;p&gt;硬盘扩容有两种方式，第一是硬盘自身的纵向扩容，提升硬盘的大小；第二是硬盘数量的横向扩容，提升硬盘的个数。下面分别讲一讲。&lt;/p&gt;
+&lt;h3 id=&#34;纵向扩容&#34;&gt;纵向扩容&lt;/h3&gt;
+&lt;p&gt;首先暂停服务：&lt;/p&gt;
+&lt;p&gt;进入 Owncloud 所在文件夹，修改&lt;code&gt;config&lt;/code&gt;文件夹下的&lt;code&gt;config.php&lt;/code&gt;文件，将&lt;code&gt;maintenance&lt;/code&gt;修改为&lt;code&gt;true&lt;/code&gt;。这样 Owncloud 就会进入维护模式，从而防止在扩容期间出现意外的数据丢失。&lt;/p&gt;
+&lt;p&gt;然后从系统中卸载数据盘：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;umount /data
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后就可以在青云的控制台中卸载这块磁盘，并执行扩容操作。&lt;strong&gt;一定要先在系统中卸载，再在青云的控制台中卸载，否则会出现不可恢复的数据丢失。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;等到青云提示扩容完成后，再将这块盘挂载到主机上，并执行&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pvresize /dev/sdx
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;来自动探测设备当前大小并将物理卷扩展到其最大容量&lt;/p&gt;
+&lt;p&gt;之后就可以扩容逻辑卷的大小了：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;lvextend -l 100%VG owncloud-vg/owncloud-data
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这个命令会将这个VG的所有空间分配到我们的LV当中。&lt;/p&gt;
+&lt;p&gt;然后将这个逻辑卷挂载到我们的数据分区：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;mount /dev/mapper/owncloud--vg-owncloud--data /data
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后我们需要让文件系统也检测到空间的变更：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;resize2fs /dev/mapper/owncloud--vg-owncloud--data
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;至此，空间扩容完毕，可以再将&lt;code&gt;config.php&lt;/code&gt;中的&lt;code&gt;maintenance&lt;/code&gt;修改为&lt;code&gt;false&lt;/code&gt;，开始正常对外提供服务。&lt;/p&gt;
+&lt;h3 id=&#34;横向扩容&#34;&gt;横向扩容&lt;/h3&gt;
+&lt;p&gt;横向扩容相对比较简单一些。&lt;/p&gt;
+&lt;p&gt;首先将Owncloud置于维护模式，然后在青云的控制台上创建一块新的盘挂载到系统中，然后执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pvcreate /dev/sdx&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;以将这个卷转换为一个物理卷。&lt;/p&gt;
+&lt;p&gt;之后就可以将这个物理卷加入到一个VG中：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;vgextend owncloud-vg /dev/sdx&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;之后的操作跟纵向扩容相似，扩大LV，重新挂载，更新文件系统，退出维护模式等，不再赘述。&lt;/p&gt;
+&lt;h1 id=&#34;应用&#34;&gt;应用&lt;/h1&gt;
+&lt;p&gt;下面来聊一聊OwnCloud的一些应用。&lt;/p&gt;
+&lt;h2 id=&#34;分享功能&#34;&gt;分享功能&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-4.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;分享功能是我比较看重的一个部分。OwnCloud的分享可以选择用户和组，然后还能通过链接进行分享。通过链接分享时，可以指定密码和过期时间，还能允许编辑。这样就可以实现给用户发送需要的资料以及收集来自合作伙伴的视频，文件等功能。&lt;/p&gt;
+&lt;h2 id=&#34;团队协作&#34;&gt;团队协作&lt;/h2&gt;
+&lt;p&gt;OwnCloud内建了一个版本管理功能，同一个文件可以提供多个历史版本，这样方便大家进行版本追溯和管理，为团队协作编辑提供了便利。除此以外还有评论系统，实时性能还不错，基本可以用于对具体文档的简单协作。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-show-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年06月03日 首次发布&lt;/li&gt;
+&lt;li&gt;2016年06月11日 增加自动备份和自动伸缩的配置&lt;/li&gt;
+&lt;li&gt;2016年08月20日 增加了硬盘空间的横向与纵向扩容&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Neovim慢速升级攻略</title><link>https://xuanwo.io/2016/03/12/neovim-slow-upgrade/</link><pubDate>Sat, 12 Mar 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/03/12/neovim-slow-upgrade/</guid><description>&lt;p&gt;一直都非常羡慕那些能把vim用得非常溜的人，但是自己总是不情愿去学，总是觉得vim的操作方式非常反人类，难度曲线太陡，不适合我。真正让我下定决心去学的，是因为系统切换到Ubuntu Gnome之后发现，Sublime Text 3 不能原生支持中文输入。同时我也发现，如果我不上来就折腾spf13这样的东西的话，其实vim非常好懂。于是，Neovim的慢速升级攻略就这样诞生了。&lt;/p&gt;
+&lt;h1 id=&#34;安装&#34;&gt;安装&lt;/h1&gt;
+&lt;p&gt;安装可以参考&lt;a href=&#34;https://github.com/neovim/neovim/wiki/Installing-Neovim&#34;&gt;此处&lt;/a&gt;
+如果是Ubuntu 的话，则可以执行如下代码：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo add-apt-repository ppa:neovim-ppa/unstable
+sudo apt-get update
+sudo apt-get install neovim
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;neovim常用操作&#34;&gt;Neovim常用操作&lt;/h1&gt;
+&lt;h2 id=&#34;初步&#34;&gt;初步&lt;/h2&gt;
+&lt;h3 id=&#34;光标移动&#34;&gt;光标移动&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;gg&lt;/code&gt; 移动到文件开头
+&lt;code&gt;G&lt;/code&gt; 移动到文件末尾&lt;/p&gt;
+&lt;h3 id=&#34;文件操作相关&#34;&gt;文件操作相关&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;:w &amp;lt;filename&amp;gt;&lt;/code&gt; 按照&lt;filename&gt;保存文件
+&lt;code&gt;:wq&lt;/code&gt; 保存并退出
+&lt;code&gt;:q!&lt;/code&gt; 退出不保存
+&lt;code&gt;:e&lt;/code&gt; 打开新的文件并关闭当前文件，使用Tab可以补全&lt;/p&gt;
+&lt;h3 id=&#34;文件编辑相关&#34;&gt;文件编辑相关&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;dd&lt;/code&gt; 删除当前行
+&lt;code&gt;y&lt;/code&gt; 复制
+&lt;code&gt;yy&lt;/code&gt; 复制当前行
+&lt;code&gt;yG&lt;/code&gt; 复制光标以上全部行
+&lt;code&gt;ygg&lt;/code&gt; 复制光标以下全部行
+&lt;code&gt;p&lt;/code&gt; 粘贴
+&lt;code&gt;u&lt;/code&gt; 撤销&lt;/p&gt;
+&lt;h2 id=&#34;入门&#34;&gt;入门&lt;/h2&gt;
+&lt;h3 id=&#34;使用内置终端&#34;&gt;使用内置终端&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;:terminal&lt;/code&gt; 打开终端，输入exit并使用&lt;code&gt;esc&lt;/code&gt;或&lt;code&gt;enter&lt;/code&gt;即可退出&lt;/p&gt;
+&lt;h3 id=&#34;与系统剪切板集成&#34;&gt;与系统剪切板集成&lt;/h3&gt;
+&lt;p&gt;这个地方折腾了好久，Neovim默认是支持&lt;code&gt;+&lt;/code&gt;寄存器的，但是我通过&lt;code&gt;&amp;quot;+y&lt;/code&gt;命令调用寄存器时却提示&lt;code&gt;Clipboard No Provider&lt;/code&gt;。通过阅读&lt;a href=&#34;https://github.com/neovim/neovim/blob/master/runtime/doc/nvim_clipboard.txt#L19-L27&#34;&gt;文档&lt;/a&gt;之后，我得知，必须要安装下列三个包中的至少一个，才能正常使用剪切板：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;xclip&lt;/li&gt;
+&lt;li&gt;xsel (newer alternative to xclip)&lt;/li&gt;
+&lt;li&gt;pbcopy/pbpaste (only for Mac OS X)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;安装好之后再打开，就可以正常使用了。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;快速复制全文的技巧： 在Normal模式下，&lt;code&gt;gg&lt;/code&gt;跳转到文章开头，&lt;code&gt;VG&lt;/code&gt;选中全文，&lt;code&gt;&amp;quot;+y&lt;/code&gt;复制到剪切板。&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;neovim插件&#34;&gt;Neovim插件&lt;/h1&gt;
+&lt;h2 id=&#34;vim-airline&#34;&gt;vim-airline&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/vim-airline/vim-airline&#34;&gt;vim-airline&lt;/a&gt;是一个vim的状态栏插件，同样支持neovim。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://github.com/vim-airline/vim-airline/wiki/screenshots/demo.gif&#34; alt=&#34;vim-airline demo&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;安装此插件后启动nvim会报错，自行编译后错误消失，不知道具体的原因。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;smarter-tab-line&#34;&gt;Smarter tab line&lt;/h3&gt;
+&lt;p&gt;在&lt;code&gt;init.vim&lt;/code&gt;中加入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&#39; 开启tabline功能
+let g:airline#extensions#tabline#enabled = 1
+&#39; 设置tabline分隔符
+let g:airline#extensions#tabline#left_sep = &#39; &#39;
+let g:airline#extensions#tabline#left_alt_sep = &#39;|&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;支持的一些快捷操作命令：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;:bn&lt;/code&gt;: 跳转下一个buffer
+&lt;code&gt;:bp&lt;/code&gt;: 往上一个buffer
+&lt;code&gt;:b&amp;lt;n&amp;gt;&lt;/code&gt;: 跳往第n个buffer
+&lt;code&gt;:bd&lt;/code&gt;: 关掉目前buffer&lt;/p&gt;
+&lt;h3 id=&#34;vim-airline-themes&#34;&gt;vim-airline-themes&lt;/h3&gt;
+&lt;p&gt;个人比较偏爱&lt;code&gt;solarized&lt;/code&gt;的暗色皮肤，所以需要使用这个库来安装airline配套的皮肤。
+在&lt;code&gt;init.vim&lt;/code&gt;中添加&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Plug &#39;vim-airline/vim-airline-themes&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后修改：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;let g:airline_theme=&amp;quot;solarized&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;即可&lt;/p&gt;
+&lt;h2 id=&#34;vim-colors-solarized&#34;&gt;vim-colors-solarized&lt;/h2&gt;
+&lt;p&gt;顾名思义，这是&lt;code&gt;solarized for vim&lt;/code&gt;。
+在&lt;code&gt;init.vim&lt;/code&gt;中添加&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Plug &#39;altercation/vim-colors-solarized&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后修改：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;set background=dark
+colorscheme solarized
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;即可&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年03月12日 首次发布&lt;/li&gt;
+&lt;li&gt;2016年03月15日 增加air-line相关内容&lt;/li&gt;
+&lt;li&gt;2016年06月16日 增加主题配置相关内容，并添加了部分常用快捷键&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>微信群重复人员识别</title><link>https://xuanwo.io/2016/02/28/wechat-remove/</link><pubDate>Sun, 28 Feb 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/02/28/wechat-remove/</guid><description>&lt;p&gt;由于微信的限制，人数超过一百以后，只有邀请才能加入。所以，如果想要组织大型的在线活动，就只有建立很多个分群。然而分群的问题在于，会有很多人重复加群，挤占了本来就缺乏的空间。所以需要找到一个可行的办法，清除两个群中的重复人员。&lt;/p&gt;
+&lt;h1 id=&#34;可行的方法&#34;&gt;可行的方法&lt;/h1&gt;
+&lt;p&gt;在微信网页版中，通过点击群名称右侧的向下箭头，可以打开一个有所有人昵称的面板，通过审查工具可以得到对应的代码，右击选择&lt;code&gt;Edit As HTML&lt;/code&gt;，全选复制，保存到&lt;code&gt;a.txt&lt;/code&gt;中，然后执行&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;cat a.txt | grep -o &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\&amp;#34;&amp;gt;.*&amp;lt;/p&amp;gt;&amp;#34;&lt;/span&gt; &amp;gt; fen.txt&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我们便可以将所有人的名字都输出到&lt;code&gt;fen.txt&lt;/code&gt;中，尽管还有着一些&lt;code&gt;&amp;lt;&lt;/code&gt;，&lt;code&gt;&amp;gt;&lt;/code&gt;的符号，但是已经不影响识别了，故不再做处理。&lt;/p&gt;
+&lt;p&gt;对两个群分别如此操作之后，我们得到了两个群的成员名单。
+然后执行如下Python代码：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;with open(&#39;fen.txt&#39;, &#39;r&#39;) as f:
+fen = f.readlines()
+f.close()
+with open(&#39;main.txt&#39;, &#39;r&#39;) as f:
+main = f.readlines()
+f.close()
+for i in main:
+for j in fen:
+if i == j:
+print(i)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;得到的输出就是两个群中重复的成员，然后一一删除即可。&lt;/p&gt;
+&lt;h1 id=&#34;方案反思&#34;&gt;方案反思&lt;/h1&gt;
+&lt;h2 id=&#34;存在的缺陷&#34;&gt;存在的缺陷&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;自动化程度较低&lt;/li&gt;
+&lt;li&gt;如果存在用户同名的话，会导致删除错误的用户。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;可能的改进&#34;&gt;可能的改进&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;获取资料不需要手动点击审查元素，通过jQuery的text()函数也可以实现。&lt;/li&gt;
+&lt;li&gt;最后实现删除的过程可以进一步优化，通过模拟用户点击的脚本实现（存在隐私泄漏风险）。&lt;/li&gt;
+&lt;li&gt;可以获取用户的UUID，以避免重名现象。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年02月28日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>记一次debug的经历及反思</title><link>https://xuanwo.io/2016/02/26/debug-for-hexo-1775/</link><pubDate>Fri, 26 Feb 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/02/26/debug-for-hexo-1775/</guid><description>&lt;h2 id=&#34;起因&#34;&gt;起因&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/hexojs/hexo/issues/1775&#34;&gt;hexojs/hexo #1775&lt;/a&gt;
+BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。&lt;/p&gt;
+&lt;h2 id=&#34;经过&#34;&gt;经过&lt;/h2&gt;
+&lt;p&gt;收到反馈之后，我在我的测试环境中也复现了这个bug。一开始还怀疑是主题的问题，专门测试了next主题，结果发现也存在这样的问题，于是就排除了主题方面的bug。
+首先我们可以初步判断这个url生成出现了问题，参考landscape主题中此处的代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ejs&#34; data-lang=&#34;ejs&#34;&gt;&amp;lt;% for (var i in theme.menu){ %&amp;gt;
+&amp;lt;a class=&amp;#34;main-nav-link&amp;#34; href=&amp;#34;&amp;lt;%- url_for(theme.menu[i]) %&amp;gt;&amp;#34;&amp;gt;&amp;lt;%= i %&amp;gt;&amp;lt;/a&amp;gt;
+&amp;lt;% } %&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里调用了一个&lt;code&gt;url_for&lt;/code&gt;函数来生成超链接，代码如下（去除了与本BUG无关的部分）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nodejs&#34; data-lang=&#34;nodejs&#34;&gt;function urlForHelper(path, options) {
+path = path || &amp;#39;/&amp;#39;;
+if (path[0] === &amp;#39;#&amp;#39; || path.substring(0, 2) === &amp;#39;//&amp;#39;) {
+return path;
+}
+var config = this.config;
+var root = config.root;
+var data = url.parse(path);
+// Exit if this is an external path
+if (data.protocol) {
+return path;
+}
+// Prepend root path
+path = root + path;
+return path.replace(/\/{2,}/g, &amp;#39;/&amp;#39;);
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;直觉告诉我，这个问题很有可能就是这个函数写搓了。&lt;/p&gt;
+&lt;p&gt;然而我仔细研究了一下，发现&lt;code&gt;url_for&lt;/code&gt;的逻辑并没有什么问题。而且根据我脑补的代码执行情况来看，应该生成一个正确的链接才对，但是&lt;code&gt;config.root&lt;/code&gt;偏偏就丢了。
+真的是非常奇怪，一时之间，我完全懵逼展开了，不明白到底发生了什么。&lt;/p&gt;
+&lt;h2 id=&#34;转折&#34;&gt;转折&lt;/h2&gt;
+&lt;p&gt;后来我跟我的朋友聊天的时候提到这个bug，结果他告诉我，这个&lt;code&gt;url_for&lt;/code&gt;写搓了，我点点头，应该就是这样。然后他说，一个判断都没有中，直接返回自身了，还贴了一张图。图中的代码大致如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nodejs&#34; data-lang=&#34;nodejs&#34;&gt;function urlForHelper(path, options){
+/* jshint validthis: true */
+path = path || &amp;#39;/&amp;#39;;
+var config = this.config;
+var root = config.root;
+var data = url.parse(path);
+// Exit if this is an external path
+if (data.protocol || path.substring(0, 2) === &amp;#39;//&amp;#39;){
+return path;
+}
+// Prepend root path
+if (path[0] !== &amp;#39;/&amp;#39;){
+return root + path;
+}
+return path;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;看到图我立马懵逼了，连忙说，不对啊，你这个不是最新版本的代码。他被我这气场吓到，弱弱回复，我是刚安装的hexo&amp;hellip;。
+我顿时明白自己错在哪里了，npm源里面的稳定版还是3.1.1，但是我们github库中的代码已经是3.2beta了。使用最新的代码测试以后，发现这个bug已经不存在了。
+也就是说，我花一个下午的时间，对着最新版的代码找一个已经被fix的bug…&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;这一次的事情非常乌龙，事后想想觉得自己真的太傻逼了。
+吃一堑长一智，以后做debug工作的时候一定要分清楚线上和线下的代码，首先就要明确出问题的是哪个版本，然后再开展相应的分析。
+除此以外，还跟我不重视流程有关系。尽管我总是让人提供各种version信息，但是我却总是在分析问题的时候忽略这些信息，没有把这些关键的信息加入到自己的分析过程中。
+总结起来就是，too young ，姿势水平还有待提高。&lt;/p&gt;
+&lt;h2 id=&#34;更新日志&#34;&gt;更新日志&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年02月26日 初次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>北地网费新政策下的生存攻略</title><link>https://xuanwo.io/2016/02/17/ipv6-in-cugb/</link><pubDate>Wed, 17 Feb 2016 18:59:02 +0000</pubDate><guid>https://xuanwo.io/2016/02/17/ipv6-in-cugb/</guid><description>&lt;p&gt;主旨只有两条：开源，节流&lt;/p&gt;
+&lt;h1 id=&#34;开源&#34;&gt;开源&lt;/h1&gt;
+&lt;p&gt;根据国家推广ipv6应用的相关规定，IPv6的流量依然是不计费的，所以我们需要充分利用IPv6的广泛资源。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;互联网通讯协议第6版（英文：Internet Protocol version 6，缩写：IPv6）是互联网协议的最新版本，用于分组交换互联网络的网络层协议，旨在解决IPv4地址枯竭问题。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;如何开启ipv6&#34;&gt;如何开启ipv6&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;下面内容仅适用于&lt;strong&gt;地大校园有线网&lt;/strong&gt;，不适用于CUGBNET，不适用于绝大多数USB网卡。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;检查自己的电脑是否已经打开ipv6支持&#34;&gt;检查自己的电脑是否已经打开ipv6支持&lt;/h3&gt;
+&lt;p&gt;打开浏览器访问： &lt;a href=&#34;http://test-ipv6.com/&#34;&gt;http://test-ipv6.com/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;如果所有项目都显示为绿勾，说明你已经可以正常使用IPv6了，如果有红叉，则需要打开系统对IPv6的支持&lt;/p&gt;
+&lt;h3 id=&#34;打开ipv6&#34;&gt;打开ipv6&lt;/h3&gt;
+&lt;p&gt;Win + R 快捷键调出“运行”对话框，输入“ncpa.cpl”。如图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/ipv6-1.png&#34; alt=&#34;Win+R&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;回车后打开网络连接，在&lt;code&gt;以太网&lt;/code&gt;上右击，选择最后一项&lt;code&gt;属性&lt;/code&gt;，打开以太网属性，如图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/ipv6-2.png&#34; alt=&#34;以太网属性&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;向下浏览，确保&lt;code&gt;TCP/IPv6&lt;/code&gt;这一项已经被选中。&lt;/p&gt;
+&lt;p&gt;然后使用&lt;a href=&#34;http://gate.cugbteam.org&#34;&gt;此网址&lt;/a&gt;登陆，深澜自带的登录器貌似有BUG，IPv6不会进行拨号。&lt;/p&gt;
+&lt;h2 id=&#34;ipv6应用&#34;&gt;IPv6应用&lt;/h2&gt;
+&lt;h3 id=&#34;pt下载&#34;&gt;PT下载&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;PT（Private Tracker）是一种改良自BitTorrent协议的P2P下载方式，“Private Tracker”指私有种子服务器。与BT最大的不同点分别为可进行私密范围下载，及可统计每个用户的上传及下载量。
+PT可进行私密范围下载，因此提供PT的讨论区大多非公开的，采用邀请制或是不定时开放注册。用户注册后会得到一个passkey，因此可借由passkey辨识每个用户，用户从某PT站下载种子后，该种子即带有用户的passkey。因此PT的种子是不可外流到其他地方，且不允许一个用户有过多IP（通常上限为3个IP）同时上下传。
+为了控制用户数量，关闭自由注册的PT网站一般采用邀请码制度，由已注册的用户向自己所信任的人发送邀请，以确保用户质量。
+借由这些机制，传统P2P下载常发生一些client端只下载而不分享上传的“吸血”行为将可杜绝。而BT种子在一两周后做种者大幅减少，以致后来下载者无法顺利完档的缺点在PT获得改善。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在教育网中，由于IPv6没有带宽和流量限制，所以PT下载得到了极大的发展。相对于IPv4下的下载，PT下载通常有以下优点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;下载速度飞快，没有上限。在宿舍可以达到10M/s，在实验室可以达到100M/s。&lt;/li&gt;
+&lt;li&gt;国家正在推广IPv6，故IPv6不进行计费，所有IPv6的流量都是免费的。&lt;/li&gt;
+&lt;li&gt;资源丰富。由于PT站的私密特性，很多资源都保存地非常好，新的资源也更新地非常及时。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;老司机友情提醒，欲求先予，如果只下载不上传的话，很容易被删号的。在加入一个PT站的时候一定要先阅读PT站的说明，谨防封号。每个PT站基本都有着邀请制度，需要使用邀请码才能进入。&lt;/p&gt;
+&lt;p&gt;下面给出一些常用的PT站：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://pt.cugb.edu.cn&#34;&gt;北地PT&lt;/a&gt; &lt;em&gt;无需邀请，荒废多年，不过借这波机会应该会复苏了~&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://bt.byr.cn/&#34;&gt;北邮人PT&lt;/a&gt; &lt;em&gt;我校IPv6入口就在北邮，速度相当快，资源也很多，非常活跃&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://bt.neu6.edu.cn/&#34;&gt;六维空间&lt;/a&gt; &lt;em&gt;应当是教育网最大的PT站了，资源最多，非常活跃&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;推荐的PT下载工具：
+- &lt;a href=&#34;http://ll.www.utorrent.com/intl/en/&#34;&gt;utorrent&lt;/a&gt;
+- &lt;a href=&#34;http://www.bittorrent.com/&#34;&gt;bittorrent&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;绝对禁止使用迅雷下载，严重者可能导致封号。&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id=&#34;ipv6电视&#34;&gt;IPv6电视&lt;/h3&gt;
+&lt;p&gt;IPv6电视就相对显得比较简单易懂了，直接在线收看即可，不消耗IPv4流量。&lt;/p&gt;
+&lt;p&gt;下面同样给出一些地址：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://ipv6.pku.edu.cn/&#34;&gt;北京大学IPv6&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://tv.byr.cn/&#34;&gt;北京邮电大学IPv6&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://iptv.pdsu6.edu.cn/&#34;&gt;IPv6电视直播墙&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;ipv6转换&#34;&gt;IPv6转换&lt;/h3&gt;
+&lt;p&gt;当然也可以通过将IPv4流量转换为IPv6来逃开计费。&lt;/p&gt;
+&lt;p&gt;需要安装&lt;a href=&#34;http://www.6kuaibo.com/&#34;&gt;六快拨浏览器&lt;/a&gt;，使用该浏览器即可免费上网。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;利益无关，没有测试，不知速度如何。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;节流&#34;&gt;节流&lt;/h1&gt;
+&lt;h2 id=&#34;网络游戏流量消耗&#34;&gt;网络游戏流量消耗&lt;/h2&gt;
+&lt;p&gt;网络游戏耗费的流量不多，比如英雄联盟，一分钟只消耗一兆不到。所以玩游戏的童鞋们大可放心，按照每天撸三个小时来算，也不过是5.4G不到而已，不慌。&lt;/p&gt;
+&lt;h2 id=&#34;内网文件传输&#34;&gt;内网文件传输&lt;/h2&gt;
+&lt;p&gt;可以用&lt;a href=&#34;http://www.ipmsg.org.cn/&#34;&gt;飞鸽传书&lt;/a&gt;，如果不放心可以在不登录网关的时候传输文件，只需要对方也安装了飞鸽传书即可。&lt;/p&gt;
+&lt;h1 id=&#34;总结&#34;&gt;总结&lt;/h1&gt;
+&lt;p&gt;在充分利用ipv6资源并辅以适当的节流方式下，可以将网费控制在20元(25G)以下。所以童鞋们大可不必惊慌。我的想法是，付费可以，但是请地大提供更加优秀的网络环境。&lt;/p&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/IPv6&#34;&gt;IPv6&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/PT%E4%B8%8B%E8%BC%89&#34;&gt;PT下载&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年02月17日 初次发布&lt;/li&gt;
+&lt;li&gt;2016年02月20日 修复网关登录链接，补充PT下载工具&lt;/li&gt;
+&lt;li&gt;2016年03月11日 修复北京邮电大学IPv6电视链接&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Chocolatey——Windows下的包管理工具</title><link>https://xuanwo.io/2016/02/15/chocolatey-intro/</link><pubDate>Mon, 15 Feb 2016 20:15:46 +0000</pubDate><guid>https://xuanwo.io/2016/02/15/chocolatey-intro/</guid><description>&lt;p&gt;&lt;a href=&#34;https://chocolatey.org/&#34;&gt;Chocolatey&lt;/a&gt;是一个基于Nuget的Windows包管理工具，截止到我更新此文章的时候，一共有3.7k多个独立包。本文旨在介绍Chocolatey这一工具的安装和用法，希望能有更多人享受到该工具的便利之处。&lt;/p&gt;
+&lt;h1 id=&#34;安装chocolatey&#34;&gt;安装chocolatey&lt;/h1&gt;
+&lt;h2 id=&#34;cmd&#34;&gt;CMD&lt;/h2&gt;
+&lt;p&gt;打开一个具有管理员权限的命令行窗口，执行如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;@powershell&lt;/span&gt; -NoProfile -ExecutionPolicy Bypass -Command &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;iex ((new-object net.webclient).DownloadString(&amp;#39;https://chocolatey.org/install.ps1&amp;#39;))&amp;#34;&lt;/span&gt; &amp;amp;&amp;amp; SET PATH=&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;%&lt;/span&gt;PATH%;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;%&lt;/span&gt;ALLUSERSPROFILE%\chocolatey\bin&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;powershell&#34;&gt;PowerShell&lt;/h2&gt;
+&lt;p&gt;打开一个具有管理员权限的PowerShell窗口，执行如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;iex ((&lt;span style=&#34;color:#007020&#34;&gt;new-object&lt;/span&gt; net.webclient).DownloadString(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https://chocolatey.org/install.ps1&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;使用chocolatey&#34;&gt;使用chocolatey&lt;/h1&gt;
+&lt;h2 id=&#34;安装包&#34;&gt;安装包&lt;/h2&gt;
+&lt;p&gt;安装包十分的容易，只需要打开管理员权限的命令行即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;choco install &amp;lt;package&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;卸载包&#34;&gt;卸载包&lt;/h2&gt;
+&lt;p&gt;卸载也同样十分简单，打开管理员权限命令行，执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;choco uninstall &amp;lt;package&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;更新包&#34;&gt;更新包&lt;/h2&gt;
+&lt;p&gt;更新包则需要使用如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;choco upgrade &amp;lt;package&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;为chocolatey做贡献&#34;&gt;为chocolatey做贡献&lt;/h1&gt;
+&lt;p&gt;Chocolatey的一个特点就是社区化的环境，每一个人都可以向它提交自己喜爱的包。因为Chocolatey总是从官方下载所需要的包，所以避免了授权等问题。当然，本来收费的软件，同样需要收费，比如JetBrains系列的产品。&lt;/p&gt;
+&lt;h2 id=&#34;注册apikey&#34;&gt;注册APIKey&lt;/h2&gt;
+&lt;p&gt;提交包则会略为复杂一点，首先你需要在&lt;a href=&#34;https://chocolatey.org/&#34;&gt;https://chocolatey.org/&lt;/a&gt; 注册一个账号，并获取跟你账户绑定的唯一APIKey。然后在命令行中执行如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;choco apikey -k &amp;lt;your key here&amp;gt; -s https&lt;span style=&#34;&#34;&gt;:&lt;/span&gt;//chocolatey.org&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;新建软件包&#34;&gt;新建软件包&lt;/h2&gt;
+&lt;p&gt;在命令行中运行&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;choco new &amp;lt;package name here&amp;gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 为方便理解，此处使用test做包名&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;则当前目录下就会自动生成一个名为&lt;code&gt;test&lt;/code&gt;的文件夹，目录结构如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;test.nuspec
+tools
+|--chocolateyinstall.ps1
+|--chocolateyuninstall.ps1
+|--ReadMe.md&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;完善信息&#34;&gt;完善信息&lt;/h2&gt;
+&lt;h3 id=&#34;修改test-nuspec&#34;&gt;修改test.nuspec&lt;/h3&gt;
+&lt;p&gt;自动生成的描述文件在需要填写的位置都有大写英文注释，只需要按照要求一一填写即可，下面我列举一份已经通过审核的Datagrip的描述文件作为参考：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-XML&#34; data-lang=&#34;XML&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;utf-8&amp;#34;?&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. --&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;package&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;xmlns=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;metadata&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!-- Read this before publishing packages to chocolatey.org: https://github.com/chocolatey/chocolatey/wiki/CreatePackages --&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;id&amp;gt;&lt;/span&gt;datagrip&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/id&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;title&amp;gt;&lt;/span&gt;DataGrip&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/title&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;1.0.1&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;authors&amp;gt;&lt;/span&gt;JetBrains&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/authors&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;owners&amp;gt;&lt;/span&gt;Xuanwo&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/owners&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;summary&amp;gt;&lt;/span&gt;Your Swiss Army Knife for Databases and SQL&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/summary&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;description&amp;gt;&lt;/span&gt;## Intelligent query console
+Allows you to execute queries in different modes and provides local history that keeps track of all your activity and protects you from losing your work.
+......(省略)
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/description&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;projectUrl&amp;gt;&lt;/span&gt;https://www.jetbrains.com/datagrip/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/projectUrl&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;packageSourceUrl&amp;gt;&lt;/span&gt;https://github.com/Xuanwo/datagrip-chocolatey-package&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/packageSourceUrl&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!--&amp;lt;projectSourceUrl&amp;gt;&amp;lt;/projectSourceUrl&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt; &amp;lt;docsUrl&amp;gt;&amp;lt;/docsUrl&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt; &amp;lt;mailingListUrl&amp;gt;&amp;lt;/mailingListUrl&amp;gt;--&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;bugTrackerUrl&amp;gt;&lt;/span&gt;https://youtrack.jetbrains.com/issues/DBE&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/bugTrackerUrl&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;tags&amp;gt;&lt;/span&gt;datagrip admin jetbrains trial 30days&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/tags&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;copyright&amp;gt;&lt;/span&gt;Commercial&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/copyright&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!--&amp;lt;licenseUrl&amp;gt;&amp;lt;/licenseUrl&amp;gt;--&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;requireLicenseAcceptance&amp;gt;&lt;/span&gt;false&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/requireLicenseAcceptance&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!--&amp;lt;iconUrl&amp;gt;http://cdn.rawgit.com/__REPLACE_YOUR_REPO__/master/icons/datagrip.png&amp;lt;/iconUrl&amp;gt;--&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!--&amp;lt;dependencies&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt; &amp;lt;dependency id=&amp;#34;&amp;#34; version=&amp;#34;__VERSION__&amp;#34; /&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt; &amp;lt;dependency id=&amp;#34;&amp;#34; /&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt; &amp;lt;/dependencies&amp;gt;--&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;releaseNotes&amp;gt;&lt;/span&gt;https://confluence.jetbrains.com/display/DBE/DataGrip+1.0.1+Release+Notes&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/releaseNotes&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!--&amp;lt;provides&amp;gt;&amp;lt;/provides&amp;gt;--&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/metadata&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;files&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;tools\**&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;target=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;tools&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/files&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/package&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;有一个比较坑的地方是&lt;code&gt;&amp;lt;description&amp;gt;&lt;/code&gt;部分是支持Markdown的，内容直接顶着括号写就OK，不用另起一行，也不用自己加缩进。&lt;/p&gt;
+&lt;h3 id=&#34;补充chocolateyinstall-ps1&#34;&gt;补充chocolateyinstall.ps1&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;chocolateyuninstall&lt;/code&gt;可以没有，但是一定要有&lt;code&gt;chocolateyinstall&lt;/code&gt;脚本。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;chocolateyinstall.ps1&lt;/code&gt;如果点击&lt;code&gt;编辑&lt;/code&gt;打开的话，会自动调用&lt;code&gt;Windows Powershell ISE&lt;/code&gt;编辑器。&lt;/p&gt;
+&lt;p&gt;下面同样列举一份已经填写完成的样例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;$packageName&lt;/span&gt;= &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;datagrip&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#bb60d5&#34;&gt;$installerType&lt;/span&gt; = &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;EXE&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#bb60d5&#34;&gt;$toolsDir&lt;/span&gt; = &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;$(&lt;span style=&#34;color:#007020&#34;&gt;Split-Path&lt;/span&gt; -parent &lt;span style=&#34;color:#bb60d5&#34;&gt;$MyInvocation&lt;/span&gt;.MyCommand.Definition)&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#bb60d5&#34;&gt;$url&lt;/span&gt; = &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https://download.jetbrains.com/datagrip/datagrip-1.0.1.exe&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#bb60d5&#34;&gt;$silentArgs&lt;/span&gt; = &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;/S&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#bb60d5&#34;&gt;$validExitCodes&lt;/span&gt; = @(0)
+Install-ChocolateyPackage &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;$packageName&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;$installerType&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;$silentArgs&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;$url&amp;#34;&lt;/span&gt; -validExitCodes &lt;span style=&#34;color:#bb60d5&#34;&gt;$validExitCodes&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;需要注意的是，填写完毕之后，一定要在Powershell中运行下列代码以删除所有的注释文字：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;$f&lt;/span&gt;=&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;c:\path\to\thisFile.ps1&amp;#39;&lt;/span&gt;
+gc &lt;span style=&#34;color:#bb60d5&#34;&gt;$f&lt;/span&gt; | ? {&lt;span style=&#34;color:#bb60d5&#34;&gt;$_&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;-notmatch&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;^\s*#&amp;#34;&lt;/span&gt;} | % {&lt;span style=&#34;color:#bb60d5&#34;&gt;$_&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;-replace&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;(^.*?)\s*?[^``]#.*&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;$1&amp;#39;&lt;/span&gt;} | &lt;span style=&#34;color:#007020&#34;&gt;Out-File&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;$f&lt;/span&gt;+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;.~&amp;#34;&lt;/span&gt; -en utf8; mv -fo &lt;span style=&#34;color:#bb60d5&#34;&gt;$f&lt;/span&gt;+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;.~&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;$f&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;打包上传&#34;&gt;打包上传&lt;/h3&gt;
+&lt;p&gt;所有的信息填写完成后，在&lt;code&gt;test.nuspec&lt;/code&gt;所在目录下执行&lt;code&gt;choco pack&lt;/code&gt;就会自动进行打包。
+如果有重要的信息没有填写，choco将会报错，并红字提示：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;LicenseUrl cannot be empty.
+ProjectUrl cannot be empty.
+PackageSourceUrl cannot be empty.&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果没有问题，则会有如下提示：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;Attempting to build package from &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;datagrip.nuspec&amp;#39;&lt;/span&gt;.
+Successfully created package &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;datagrip.1.0.1.nupkg&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;之后执行 &lt;code&gt;choco push datagrip.1.0.1.nupkg&lt;/code&gt;即可将包上传至Chocolatey，通过管理员的审核之后，就会出现在软件列表中供人们下载了。&lt;/p&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://chocolatey.org/&#34;&gt;Chocolatey 官方网站&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://isaachan.github.io/blog/2013/02/07/chocolatey-i-love-you/&#34;&gt;Chocolatey, 我爱你&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年02月15日 初步完成&lt;/li&gt;
+&lt;li&gt;2016年02月20日 修复脚本中的部分错误&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

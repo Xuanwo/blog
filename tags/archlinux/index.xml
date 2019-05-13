@@ -1,0 +1,699 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Archlinux on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/archlinux/</link><description>Recent content in Archlinux on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 28 Mar 2019 12:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/archlinux/index.xml" rel="self" type="application/rss+xml"/><item><title>开启 Jetbrains IDE 的全局菜单</title><link>https://xuanwo.io/2019/03/28/jetbrains-ide-global-menu/</link><pubDate>Thu, 28 Mar 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/28/jetbrains-ide-global-menu/</guid><description>&lt;p&gt;最近在想办法提升自己的开发体验，其中有一步就是去掉了不常用和已经使用快捷键代替的按钮和菜单。但是菜单栏没有办法隐藏，导致观感上不是很好。适逢 Jetbrains IDEA 推出了 2019.1 版本，趁着体验新版本功能的时候研究并解决了这个问题。&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本方案应该适用于所有 Jetbrains IDE，包括 Goland 和 Android Studio&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;Help -&amp;gt; Find Action... -&amp;gt; Experimental Features...&lt;/code&gt;，确认 &lt;code&gt;linux.native.menu&lt;/code&gt; 已打开&lt;/li&gt;
+&lt;li&gt;安装 &lt;code&gt;libdbusmenu-glib&lt;/code&gt;，比如 Arch 上只需要 &lt;code&gt;pacman -S libdbusmenu-glib&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;重启 IDE&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr /&gt;
+&lt;p&gt;好，在这个分割线下分享一下自己解决这个问题的全过程。&lt;/p&gt;
+&lt;h2 id=&#34;确认&#34;&gt;确认&lt;/h2&gt;
+&lt;p&gt;首先问题的现象是很明显的，预期 IDEA 的菜单栏出现在 KDE 顶端的全局菜单中，但实际上并没有。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;bug.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;然后开始用 &lt;code&gt;IDEA&lt;/code&gt;，&lt;code&gt;global menu&lt;/code&gt; 等关键词去搜索，可以得到下列这些有用的信息：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在别人那是好的（有人 Po 出了正常的截图）&lt;/li&gt;
+&lt;li&gt;可以通过 &lt;code&gt;Experiment Features&lt;/code&gt; 开启 &lt;code&gt;linux.native.menu&lt;/code&gt; 的支持&lt;/li&gt;
+&lt;li&gt;在 Issue 的评论中，有人提出需要安装 &lt;code&gt;libdbusmenu-glib&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;OK，现在知道问题应该出在本地可能漏了什么依赖，导致全局菜单没有生效，下面需要想办法定位到具体的问题。&lt;del&gt;（实在定位不出来的时候再一把梭试一下）&lt;/del&gt;&lt;/p&gt;
+&lt;h2 id=&#34;定位&#34;&gt;定位&lt;/h2&gt;
+&lt;p&gt;首先通过 &lt;code&gt;Help -&amp;gt; Find Action... -&amp;gt; Experiment Features&lt;/code&gt; 中可以打开实验特性的开关，其中可以确认 &lt;code&gt;linux.native.menu&lt;/code&gt; 已经默认开启了。（真香！）&lt;/p&gt;
+&lt;p&gt;然后查看 IDEA 的 Log，寻找全局菜单没有启用的原因。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;IDEA 的 Log 一般在 &lt;code&gt;~/.IntelliJIdea2019.1/system/log/&lt;/code&gt;，也可以通过 &lt;code&gt;Help -&amp;gt; Show Log In Dolphin&lt;/code&gt; 直接打开所在位置&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code&gt;2019-03-28 11:03:00,342 [ 5755] INFO - penapi.wm.impl.GlobalMenuLinux - disable global-menu integration because some of shared libraries isn&#39;t installed: java.lang.UnsatisfiedLinkError: /opt/intellij-idea-ultimate-edition/bin/libdbm64.so: libdbusmenu-glib.so.4: cannot open shared object file: No such file or directory
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Ooops，原来是因为缺少一个库导致 &lt;code&gt;global-menu&lt;/code&gt; 被禁用了，只需要把这个库装上就可以了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;happy.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;修复&#34;&gt;修复&lt;/h2&gt;
+&lt;p&gt;搜索一下哪个包提供了 &lt;code&gt;libdbusmenu-glib.so.4&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; yay -Fs libdbusmenu-glib.so.4
+community/libdbusmenu-glib &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;.04.0-3
+usr/lib/libdbusmenu-glib.so.4&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;很明显，是 &lt;code&gt;libdbusmenu-glib&lt;/code&gt; （正是上面 Issue 中有人说要装的那个包），甚至还是社区源里面的包，不用犹豫了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; yay -S libdbusmenu-glib&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;重启 IDE 之后就能看到全局菜单正常工作啦：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;fixed.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在水一篇文章之后，我还能做啥呢？给 AUR 留个言，让维护者把 &lt;code&gt;libdbusmenu-glib&lt;/code&gt; 作为一个可选依赖，这样大家在安装或者更新 IDEA 的时候就知道啦：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;comment.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Update: AUR 的维护者已经加上啦：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;New optional dependencies &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; intellij-idea-ultimate-edition
+libdbusmenu-glib: For global menu support &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;installed&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Arch is the best!&lt;/p&gt;
+&lt;h2 id=&#34;后续&#34;&gt;后续&lt;/h2&gt;
+&lt;p&gt;GTK 3 的应用可以通过安装 &lt;code&gt;appmenu-gtk-module&lt;/code&gt; 来获取全局菜单的支持~&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://youtrack.jetbrains.com/issue/IDEA-169904&#34;&gt;Support KDE Global Menu&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/kde/comments/67mnfq/global_menu_in_plasma_59_with_java_intellij_and/&#34;&gt;Global Menu in Plasma 5.9 with Java (Intellij) and Firefox&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>翻车实况第 1 期</title><link>https://xuanwo.io/2019/02/19/rollover-1st/</link><pubDate>Tue, 19 Feb 2019 06:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/02/19/rollover-1st/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;今天翻车了吗？翻了！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;本次翻车的主角是我小老婆：ThinkPad X1 Carbon，在之前的&lt;a href=&#34;https://xuanwo.io/2018/05/16/thinkpad-x1-carbon-6th/&#34;&gt;开箱手记&lt;/a&gt;曾经爆过照片。用了几个月都没有什么太大的问题，但是自从我春节回家一趟之后，我的 x1 开始了它的频频翻车之旅 = =&lt;/p&gt;
+&lt;h2 id=&#34;大江苏魔法伤害&#34;&gt;大江苏魔法伤害&lt;/h2&gt;
+&lt;p&gt;春节回家之后，电脑就一直放在透气性不大好的背包里面。拿出来的时候发现整个电脑的表面都有一层薄薄的水汽，甚至还能找到一点微妙的水墨画的感觉：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;water.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;想着 ThinkPad 种种键盘洒水问题不大的传说，我完全没有把这点水汽当回事。打开电脑，连上网络，&lt;code&gt;yay&lt;/code&gt; 一把梭。发现内核升级了，随手重启一下，结果翻车了：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;failed-to-start.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这还是我第一次遇到这样的问题，从报错上来看应该跟我的更新没有关系，可能是硬盘有了一些奇怪的问题，中间有些 IO 全部失败了，导致好多服务都起不来了。虽然觉得纳闷，但是还是觉得先重启一下看看，确认一下是否稳定复现。结果问题更加严重了，在滴的一声之后，我的电脑完全没有引导，直接进入了空白的 Boot Menu 页：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;empty-boot.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;噫，这是我整个硬盘都挂掉了的节奏啊。当我准备掏出 archiso 看看还没有救的时候，有人找我有事情，于是我把电脑合上走开了。半个小时回来之后，按下电源键，电脑居然直接正常启动了 = =，我拿着 U 盘一脸懵逼。发生了什么？难道刚才启动不了是因为在启动的一瞬间，硬盘进入了量子态？放置 play 了一会儿之后，它又自己回来了？薛定谔的硬盘？？？&lt;/p&gt;
+&lt;p&gt;稍微琢磨了一下之后，把问题归咎于江苏水汽比较重，电脑长期放在包里面，导致里面的某些部件出现了问题，在开放环境放了一会儿之后就自己好了。（不管你信不信，反正我信了）&lt;/p&gt;
+&lt;h2 id=&#34;帝都的静电攻击&#34;&gt;帝都的静电攻击&lt;/h2&gt;
+&lt;p&gt;我天真的以为翻车事件已经结束了，然而轮胎打滑通常只是真正车祸的前奏（&lt;/p&gt;
+&lt;p&gt;返工的第二天，我普通的起床、普通的上班、普通的进入办公室、普通的坐下、普通的升级系统、普通的重启、普通的接上显示器，普通的，等一下！我的显示器咋不亮了！在那一瞬间，我的大脑瞬间渲染出无数剧情： &lt;em&gt;电脑坏了，送去维修，错过用户大单，被公司开除，孤单一人行走在冬夜空档的大街上，发誓再也不滚系统了。。。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;摇摇头，开始仔细研究发生了什么。&lt;/p&gt;
+&lt;p&gt;显卡是 Intel 提供的集成显卡，驱动用的是 Kernel Mode Setting。正常情况下如果我接上了外接显示器，kernel 会响应并接管这个设备的显示，就像下面这个图一样：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;kms.svg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;每个显示输出设备的连接状态都会都会保存为一个形如 &lt;code&gt;/sys/class/drm/card0-HDMI-A-1/status&lt;/code&gt; 的文件，archwiki 上提供了一个命令来查看电脑上所有输出设备的状态：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; p in /sys/class/drm/*/status; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;con&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;p&lt;/span&gt;%/status&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;}&lt;/span&gt;; &lt;span style=&#34;color:#007020&#34;&gt;echo&lt;/span&gt; -n &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;con&lt;/span&gt;#*/card?-&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;: &amp;#34;&lt;/span&gt;; cat &lt;span style=&#34;color:#bb60d5&#34;&gt;$p&lt;/span&gt;; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;done&lt;/span&gt;
+DP-1: disconnected
+DP-2: disconnected
+eDP-1: connected
+HDMI-A-1: disconnected
+HDMI-A-2: disconnected&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;可以看出来，除了内置的显示屏 &lt;code&gt;eDP-1&lt;/code&gt; 没问题之外，其他的接口都是断开状态的，尽管我的线已经接上去了。噫，照这么看，我的 HDMI 和 Type-C 口都凉了啊，难道只能送修了么？&lt;/p&gt;
+&lt;p&gt;不要放弃治疗，可能是显示器坏了呢！我把同事的电脑拿过来插上发现没有问题；而我的电脑接他的显示器则同样是显示不出来。凉了？不，我还不能就这样放弃治疗，说不定是底裤 D 升级的时候又搞崩了什么东西呢？我选择回滚了一波 systemd，重启，奇迹没有发生。说不定是内核有问题呢？我选择回滚了一波内核，重启，奇迹仍然没有发生。我叹了口气，果然，玄学是不存在的，我的电脑凉了。&lt;/p&gt;
+&lt;p&gt;我都已经放弃治疗准备送修了，我的朋友 P 坚持让我搞个 PE 什么的看看，说不定接口还没坏。反正也不差那么几分钟，为了让我朋友，更为了让我自己死心，我觉得再进行最后一次尝试。我掏出了我的 Archiso 插上，开机，插上 HDMI 线，卧槽，显示器亮了！接口没坏！&lt;/p&gt;
+&lt;p&gt;这可真是&lt;code&gt;踏破铁鞋无觅处，柳暗花明又一村&lt;/code&gt;，我感到自己的人生再次充满了希望，我的大脑中再次闪过无数画面：&lt;em&gt;电脑修好了，完成了后端大规模重构，性能提升 150%，成为了年度优秀员工，找到了三次元老婆，走向人生巅峰。。。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;咳咳咳，冷静。现在的情况是已经排除了是硬件问题，我决定通过 Archlinux Rollback Machine 把电脑回滚到昨天。拔掉 U 盘，开机，我鬼使神差的把线直接接到了电脑上，卧槽，显示器亮了！所以说，既不是硬件问题，也不是软件问题？那还能是啥问题，人品问题么？&lt;/p&gt;
+&lt;p&gt;emmmmmm，仔细想了一下，我觉得不如解释成静电问题，插上 USB 的时候释放掉了机器内部的静电，然后所有的接口都恢复正常了。（不管你信不信，反正我是真的信了）&lt;/p&gt;
+&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
+&lt;p&gt;以上就是本次的翻车实录~&lt;/p&gt;
+&lt;h2 id=&#34;引用资料&#34;&gt;引用资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.kernel.org/doc/html/v4.15/gpu/drm-kms.html&#34;&gt;Kernel Mode Setting (KMS)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/kernel_mode_setting#Forcing_modes&#34;&gt;Kernel mode setting - Archwiki&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>随缘分享第 2 期</title><link>https://xuanwo.io/2019/01/05/share-with-luck-2nd/</link><pubDate>Sat, 05 Jan 2019 05:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/01/05/share-with-luck-2nd/</guid><description>&lt;p&gt;万万没有想到我也有一周双更的时候（，素材攒的太多了，赶紧分享一下~&lt;/p&gt;
+&lt;h2 id=&#34;今天你翻车了吗&#34;&gt;今天你翻车了吗？&lt;/h2&gt;
+&lt;h3 id=&#34;fwupd-翻车&#34;&gt;fwupd 翻车&lt;/h3&gt;
+&lt;p&gt;说起来用 Arch 也有一段时间了，大的翻车没遇到过，小的翻车倒是经常遇到。1 月 2 号晚上睡前日常更新，发现更新了 fwupd 1.2.2 之后就顺手试了一下，结果发现命令行直接 timeout 了，想着可能是我升级之后还没有重启服务，然后 &lt;code&gt;systemd restart fwupd&lt;/code&gt; 结果报错了，于是查了下日志：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;-- Unit fwupd.service has begun starting up.
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon fwupd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;7066&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Failed to get PCR0s: missing executable tpm2_pcrlist in PATH
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon fwupd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;7066&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Failed to load engine: Failed to prepare SQL: no such column: protocol
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: fwupd.service: Main process exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;code&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;status&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;/FAILURE
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: fwupd.service: Failed with result &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;exit-code&amp;#39;&lt;/span&gt;.
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Failed to start Firmware update daemon.
+-- Subject: Unit fwupd.service has failed&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;emmmmm，&lt;code&gt;no such column: protocol&lt;/code&gt; ？这看着是 DB 没做兼容啊，估计是上游翻车了，在 archcn 的群里问了一声没什么回应，于是先睡了，明天再说。&lt;/p&gt;
+&lt;p&gt;第二天早上看了下，已经有人在 arch 这边提了 BUG 了：&lt;a href=&#34;https://bugs.archlinux.org/task/61241?project=5&amp;amp;string=fwupd&#34;&gt;FS#61241 - fwupdmgr Failed to activate service&lt;/a&gt;，但是我感觉应该不是打包的问题，于是直接给上游提了个 BUG：&lt;a href=&#34;https://github.com/hughsie/fwupd/issues/909&#34;&gt;After upgrade to 1.2.2, fwupd failed to start for SQL error&lt;/a&gt;。作者 &lt;a href=&#34;https://github.com/hughsie&#34;&gt;hughsie&lt;/a&gt; 是红帽的员工，维护着不少知名的开源项目。&lt;/p&gt;
+&lt;p&gt;响应速度还算挺快的，考虑我们中间还隔着时差，按照他的要求提供了 &lt;code&gt;pending.db&lt;/code&gt; 之后没多久就加了个修复的 &lt;a href=&#34;https://github.com/hughsie/fwupd/commit/48106951c814f0bee201845fc1cc9cbb0f143faf&#34;&gt;commit&lt;/a&gt;，自行打包了一个 fwupd 测试了一下，确认工作正常并回复了作者。历时大概三天左右，这个 BUG 被修复了。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;说起来，现在嵌入式 DB 领域好像除了 SQLite 之外就没有一个能打的支持 SQL 的选手了啊？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;gitea-升级翻车&#34;&gt;gitea 升级翻车&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;改配置已经很糟心了，这 gitea 甚至还要改运行的用户 = =，我觉得这样不行&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;一波升级之后，gitea 刷了一大波说明出来：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;warning: /etc/gitea/app.ini installed as /etc/gitea/app.ini.pacnew
+gitea now uses its own user/group instead of the git ones.
+Ownership of /var/lib/gitea tree has been changed accordingly.
+You need to update your /etc/gitea/app.ini file to change the
+RUN_USER variable at the top.
+Next step is fixing the SSH configuration. If you have:
+AllowUsers git
+in /etc/ssh/sshd_config, you need to change that to gitea.
+Then restart sshd.service.
+You will need to tell all your users that they have to change
+git@ to gitea@ in their repos clones using git remote set-url.
+If you use a PostgreSQL DB upon Unix socket, you need to fix
+your &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;database&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; configuration and switch USER to gitea.
+Then, you need to change it also in /var/lib/data/pg_hba.conf.
+Finally, as postgres user, run psql and inside it type:
+ALTER USER git RENAME TO gitea;
+&lt;span style=&#34;color:#4070a0;font-weight:bold&#34;&gt;\q&lt;/span&gt;
+Then restart postgresql.service.
+In all cases, you &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;then&lt;/span&gt; need to reload systemd units and
+restart gitea.service.&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;按照要求改了配置，重启了服务。服务是好了- -，但是所有 clone 的 git url 都要改了，有点麻烦。感觉这个变动就很坑了，作为一个后端服务，内部的配置改了就改了，也就是维护起来麻烦一点，但是对外（对用户）暴露的东西不能乱动。得亏我这个 gitea 就自己用用，要是真的有别人在用的话，还得群发个邮件让他们把本地的 remote URL 都改一遍，坑，gitea 好感度减 10。&lt;/p&gt;
+&lt;h3 id=&#34;apfs-翻车&#34;&gt;APFS 翻车&lt;/h3&gt;
+&lt;p&gt;在一个风平浪静的早晨，惠老师突然在水群 Po 了一张图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;rm-failed.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这是啥操作，删除文件提示没空间？&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;open-terminal-failed.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Terminal 也打不开了，2333。&lt;/p&gt;
+&lt;p&gt;后来了解情况的群友解释了一下原因，其实这是两个问题：&lt;/p&gt;
+&lt;p&gt;第一个是采用 CoW 的文件系统固有的问题。我们都知道 CoW 的基本原理是在对数据进行修改的时候，不会直接在原来的数据位置上进行操作，而是重新找个位置修改。那么在磁盘已经完全满了之后就可能会出现问题，问题的起因有两种说法：第一是在删除的时候需要在一个空闲的位置写入一个新的标记，表示这个文件被删除了；第二是文件系统之前有 snapshot，被删除的文件还在被别的 snapshot 引用着，所以不能直接删除，需要加一个标记。所以类似机制的文件系统都可能会出现这样的问题，包括 ZFS 和 Btrfs。&lt;/p&gt;
+&lt;p&gt;第二个是 macOS 在磁盘系统全满的情况下的行为是不可预测的行为，没人知道会发生什么。所以会出现 Terminal 打不开，Finder 打开直接卡住这种事情。&lt;/p&gt;
+&lt;p&gt;最后惠老师进入恢复模式，执行了硬盘急救，最后多了一丢丢，大概 500MB 的空间，终于可以把文件删掉了（&lt;/p&gt;
+&lt;h2 id=&#34;无意义以及其存在的意义&#34;&gt;无意义以及其存在的意义&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;conway-eeeee.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;前一段时间疯狂刷屏的 &lt;a href=&#34;https://github.com/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee&#34;&gt;e98e&lt;/a&gt; 在整个项目被 Archive 进入 read-only 之后热潮消退了。在最开始的时候我非常反感，感觉自己受到了精神污染，甚至想要举报一波，然而并没有找到合适的理由。现在回过头来想一想这个事情，感觉心情非常复杂，总是会去想是不是自己做错了什么，或者说当我在一个公共场合（比如 Telegram 的群中）轻蔑的说某样事情 &lt;strong&gt;无聊&lt;/strong&gt;，&lt;strong&gt;没意义&lt;/strong&gt; 的时候，我是不是真的明白我在说什么。&lt;/p&gt;
+&lt;p&gt;这个问题我琢磨了很久，最后感觉它是由一组复杂的问题组成的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对一个事务的意义判断究竟是谁来做的？&lt;/li&gt;
+&lt;li&gt;无意义的事务有没有存在的意义？&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;不知道是不是受到教育环境的影响，我总是会倾向于去做 &lt;code&gt;有意义&lt;/code&gt; 的事情。那 &lt;code&gt;有意义&lt;/code&gt; 又是意味着什么呢，大多数时候它要 &lt;code&gt;有价值&lt;/code&gt;，而更大多数时候可以概括为 &lt;code&gt;有用&lt;/code&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;玩游戏，就不能浪费时间，玩 1 分钟就要获得 1 分钟的快乐&lt;/li&gt;
+&lt;li&gt;做开源项目就得要出名，要有 Star，要有人关注，要有人用在生产环境上&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;所以说，世界上到底有没有没意义的事情的呢？可能只存在&lt;strong&gt;我认为&lt;/strong&gt;没意义的事情吧。&lt;/p&gt;
+&lt;p&gt;这些问题我可能是想不清楚了，只能一直这么纠结下去，以后遇到所谓的没意义的东西，我大概会选择保持沉默吧：“我觉得你做的事情没意义，但是我尊重你做下去的权利”。&lt;/p&gt;
+&lt;h2 id=&#34;有啥有意思的东西嘛&#34;&gt;有啥有意思的东西嘛？&lt;/h2&gt;
+&lt;p&gt;2018 年最后入手的东西是 OnePlus 6T 和一把宜家的转椅。&lt;/p&gt;
+&lt;p&gt;这么多年过去了，安卓的变化比我想象的还要大，特别是在一加 Oxygen OS 的支持下，感觉到了前所未有的舒畅。虽然国内的生态一如既往的糟糕，但是大多数应用都能用，某些实在流氓或者 Google Play 中没有的应用也直接扔到了 Work Profile 里面。现在基本上是晚上充满电上床看小说，然后第二天直接带去上班，到晚上回家还能有 40% ~ 50% 的电量，已经完全够用了，And 快充也非常给力。用了几个星期，完全不怀念我的 iPhone。&lt;/p&gt;
+&lt;p&gt;之前用的转椅是前同事留在房子里面的，一直凑或用，但是有一天实在忍不了了，决定换一把新的转椅。在朋友 P 的安利下入了宜家的 &lt;a href=&#34;https://www.ikea.cn/cn/zh/catalog/products/50137208/&#34;&gt;MARKUS 马库斯&lt;/a&gt; 转椅，深灰色那款只要 999 元，加上运费总共 1068 元。花了点时间拼了起来，一坐上去整个人就不想起来了，实在是太舒服了。腰部和头部还有手臂都被正好支撑起来，终于不会写着代码感觉自己整个脖子都僵住了。&lt;/p&gt;
+&lt;p&gt;这个椅子支持上下大概 10 cm，向后 30 度左右的调节。配合自己之前买的显示器支架，可以舒舒服服的躺着看动漫，打游戏，生活美滋滋。如果有想换椅子的同学无比留意下~&lt;/p&gt;
+&lt;p&gt;最近还看到一个好玩的 issue： &lt;a href=&#34;https://github.com/antirez/redis/issues/3909&#34;&gt;https://github.com/antirez/redis/issues/3909&lt;/a&gt; ，一个人不小心发了个 issue，然后解释道：“Cat walked over the keyboard sorry guys.”，引发了一场评论区的狂欢。我觉得最好玩的回复是项目的作者回复的：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Observing the keys pressed we can assume the cat was diagonally exploring the keyboard, probably with the front paws oriented towards the &amp;ldquo;/=-[&amp;rdquo; part of the keyboard (right/bottom) since there is more variability there, compared to the (maybe) rear paw staying near the number &amp;ldquo;3&amp;rdquo; (and the other rear paw probably outside the keyboard, in the upper part). However the size of the cat should be very small in that case, or the size of the keyboard should be very large, if we are not willing to assume a reduced-length cat because of attack position or alike.&lt;/p&gt;
+&lt;p&gt;Btw if you could report the &lt;code&gt;INFO&lt;/code&gt; output of your Redis instance, we may be able to perform more educated guesses about the conditions of your cat.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;集段子与安利于一身，是值得我学习的楷模~&lt;/p&gt;
+&lt;h2 id=&#34;最近又看了啥项目&#34;&gt;最近又看了啥项目？&lt;/h2&gt;
+&lt;p&gt;首先简单介绍一下这个 &lt;code&gt;好玩&lt;/code&gt; 和 &lt;code&gt;有用&lt;/code&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;好玩&lt;/code&gt;：是说 &lt;strong&gt;我&lt;/strong&gt; 觉得这个项目很好玩，有意思
+&lt;code&gt;有用&lt;/code&gt;：是说 &lt;strong&gt;我&lt;/strong&gt; 觉得这个项目能派上用场&lt;/p&gt;
+&lt;p&gt;如你所见，只有三个组合，因为又不好玩又没用的项目写它干啥呢？&lt;/p&gt;
+&lt;h3 id=&#34;好玩又有用&#34;&gt;好玩又有用&lt;/h3&gt;
+&lt;h4 id=&#34;vegeta&#34;&gt;Vegeta&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/tsenart/vegeta&#34;&gt;https://github.com/tsenart/vegeta&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;打开这个项目的时候被正面冲过来的贝吉塔吓了一跳，当时就记住了它，然后才反应过来项目名字就是用的贝吉塔的英文：Vegeta。大概寓意着这个项目跟超级塞亚人一样强悍吧，哈哈。&lt;/p&gt;
+&lt;p&gt;这是一个用来做 HTTP 负载测试的库和工具，既可以在代码中调用，也可以直接作为工具使用。项目维护的还不错，以后会考虑用它。&lt;/p&gt;
+&lt;h4 id=&#34;nats&#34;&gt;NATS&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://nats.io/&#34;&gt;https://nats.io/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;NATS 是一个云原生消息系统，是一个 CNCF 项目。它的消息格式很有意思，是一个类似于 Redis 的 text based protocol，我个人很喜欢，简单才是美啊。大概也得益于这么简单的 Protocol 设计，它的吞吐量很大，按照项目给出的评测，它的吞吐量是 Kafka 的两倍，RabbitMQ 的十倍。&lt;/p&gt;
+&lt;p&gt;项目的设计目标给的非常清晰：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Highly performant (fast)&lt;/li&gt;
+&lt;li&gt;Always on and available (dial tone)&lt;/li&gt;
+&lt;li&gt;Extremely lightweight (small footprint)&lt;/li&gt;
+&lt;li&gt;Support for multiple qualities of service (including guaranteed “at-least-once” delivery with NATS Streaming)&lt;/li&gt;
+&lt;li&gt;Support for various messaging models and use cases (flexible)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果有合适的场景，我大概会考虑玩一玩~&lt;/p&gt;
+&lt;h4 id=&#34;uncaptcha2&#34;&gt;uncaptcha2&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/ecthros/uncaptcha2&#34;&gt;https://github.com/ecthros/uncaptcha2&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这是一个今天才看到的段子，思路很有意思，就是输出 Google reCAPTCHA 的语音验证码，然后用 Google 的语音转文字 API 来做识别，然后再填回去，据说识别率还非常不错。&lt;/p&gt;
+&lt;p&gt;哈哈哈，这个真的是现实版的以子之矛，攻子之盾了。&lt;/p&gt;
+&lt;h4 id=&#34;badger&#34;&gt;badger&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/dgraph-io/badger&#34;&gt;https://github.com/dgraph-io/badger&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这是一个很早之前看过的项目了，但是有两个比较有意思的事情：&lt;/p&gt;
+&lt;p&gt;一个是有奖征集数据丢失的场景：&lt;a href=&#34;https://github.com/dgraph-io/badger/issues/601&#34;&gt;Prove that Badger loses data&lt;/a&gt;，只要你能够按照要求给出可复现数据丢失的步骤，就能获得 $1337 。感兴趣的童鞋可以去试试。&lt;/p&gt;
+&lt;p&gt;另一个是 badger 增加了一组 &lt;a href=&#34;https://github.com/dgraph-io/badger/pull/577&#34;&gt;Jepsen-style bank test&lt;/a&gt;，会在他们内部的 CI 平台上运行，可以看&lt;a href=&#34;https://teamcity.dgraph.io/viewType.html?buildTypeId=Badger_BankTest&#34;&gt;现场直播&lt;/a&gt;。&lt;a href=&#34;https://jepsen.io/&#34;&gt;Jepsen&lt;/a&gt; 我是在看 PingCAP 的相关技术分享时候看到的，Jepsen 是一个分布式系统验证的框架，已经成功发现了很多系统的 BUG。&lt;/p&gt;
+&lt;p&gt;之前有个项目技术选型的时候没用 Badger，之后大概可以考虑一下。&lt;/p&gt;
+&lt;p&gt;BTW，他们的项目管理似乎有些问题，依赖管理没做，完全靠 go get，Makefile 也没有，新人想要参与开发感觉是一脸懵逼。Windows 平台上的 CI 一直都是挂的，我还提了个 PR 修了其中的一个：&lt;a href=&#34;https://github.com/dgraph-io/badger/pull/661&#34;&gt;test: Fix TestDropReadOnly failed on windows&lt;/a&gt;，在我这个 PR 之后他们又 Fix 了不少 windows 上的测试，估计再过一段时间就能恢复正常了。他们是怎么忍下去的- -，我完全接受不了一个项目 Master 分支上的 CI 都是挂的，那还不如去掉呢。。。&lt;/p&gt;
+&lt;h3 id=&#34;有用不好玩&#34;&gt;有用不好玩&lt;/h3&gt;
+&lt;h4 id=&#34;gradle&#34;&gt;gradle&lt;/h4&gt;
+&lt;p&gt;Adaptable, fast automation for all &lt;a href=&#34;https://gradle.org&#34;&gt;https://gradle.org&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;以前只是听做 Java 开发同事天天吐槽 gradle，以为只是 Java 生态下的一个工具，定位类似于 npm for node.js，但是今天看了项目才知道原来它的目标是构建自动化并且要支持多语言的开发。&lt;/p&gt;
+&lt;p&gt;这个自动化跟我想要的不太一样。&lt;/p&gt;
+&lt;h4 id=&#34;cloudevents&#34;&gt;cloudevents&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://cloudevents.io/&#34;&gt;https://cloudevents.io/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;有一个定义云消息的规范，还是基于 JSON 的，看起来大概是这个样子：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;specversion&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;0.2&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;type&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;com.github.pull.create&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;source&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://github.com/cloudevents/spec/pull/123&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;id&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;A234-1234-1234&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;time&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;2018-04-05T17:31:00Z&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;comexampleextension1&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;value&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;comexampleextension2&amp;#34;&lt;/span&gt; : {
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;othervalue&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;
+},
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;contenttype&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;text/xml&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;data&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;much wow=\&amp;#34;xml\&amp;#34;/&amp;gt;&amp;#34;&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;无爱。&lt;/p&gt;
+&lt;h3 id=&#34;好玩但没用&#34;&gt;好玩但没用&lt;/h3&gt;
+&lt;h4 id=&#34;lsix&#34;&gt;lsix&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/hackerb9/lsix&#34;&gt;https://github.com/hackerb9/lsix&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;一个为图片设计的 ls，emmm，感觉没有啥特别的用处，虽然确实挺好玩的就是了。&lt;/p&gt;
+&lt;h4 id=&#34;ungoogled-chromium&#34;&gt;ungoogled-chromium&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/Eloston/ungoogled-chromium&#34;&gt;https://github.com/Eloston/ungoogled-chromium&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;清真版本的 Chromium，去掉了 Google 相关的代码，据说非常清真，但是我是 Google 的粉丝，甚至电脑上用的就是 Chrome - -，因此就是围观一下。&lt;/p&gt;
+&lt;h4 id=&#34;citybound&#34;&gt;citybound&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/citybound/citybound&#34;&gt;https://github.com/citybound/citybound&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;一个开源版本的城市模拟，感觉还比较早起，只有一些雏形，还玩不起来，还需要再观察观察。引擎本身是用 rust 写的，前端很有意思，用的是一个叫做 &lt;a href=&#34;https://webflow.com/&#34;&gt;webflow&lt;/a&gt; 产品，交互比较酷炫。可能我这样的前端白痴也有救了？&lt;/p&gt;
+&lt;h2 id=&#34;说点坑爹事情大家开心开心&#34;&gt;说点坑爹事情大家开心开心&lt;/h2&gt;
+&lt;p&gt;偶然发现Chrome 砍掉了 &lt;code&gt;chrome://net-internals/#events&lt;/code&gt; 这个功能。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;坑爹啊！&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The net-internals events viewer and related functionality has been removed. Please use chrome://net-export to save netlogs and the external catapult netlog_viewer to view them.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;现在想要查看 Chrome 的网络交互细节只能打开 &lt;code&gt;chrome://net-export&lt;/code&gt; 点击开始导出，操作完了再结束导出，最后用一个外部工具导入再查看了。&lt;/p&gt;
+&lt;p&gt;Hugging you, Google!&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;以上就是本期随缘分享的全部内容~&lt;/p&gt;</description></item><item><title>记一次 btrfs 的在线转换</title><link>https://xuanwo.io/2018/11/15/record-for-btrfs-conversion/</link><pubDate>Thu, 15 Nov 2018 13:05:00 +0000</pubDate><guid>https://xuanwo.io/2018/11/15/record-for-btrfs-conversion/</guid><description>&lt;p&gt;在 archcn 群里听 &lt;a href=&#34;https://farseerfc.me/&#34;&gt;fc 教授&lt;/a&gt; 安利了有一段时间了，终于在一个心情不是非常美好的晚上决定上一波 btrfs ，这篇文章主要分享这次转换中遇到的一些有趣的故事~&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2 id=&#34;btrfs-是什么以及为什么&#34;&gt;btrfs 是什么以及为什么？&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Btrfs（B-tree文件系统，通常念成Butter FS，Better FS或B-tree FS），一种支持写入时复制（COW）的文件系统，运行在Linux操作系统，采用GPL授权。Oracle于2007年对外宣布这项计划，并发布源代码，在2014年8月发布稳定版。目标是取代Linux目前的ext3文件系统，改善ext3的限制，特别是单个文件的大小，总文件系统大小或文件检查和加入ext3未支持的功能，像是可写快照（writable snapshots）、快照的快照（snapshots of snapshots）、内建磁盘阵列（RAID），以及子卷（subvolumes）。Btrfs也宣称专注在“容错、修复及易于管理”。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;之所以想要换成 btrfs ，主要是因为以下几个原因：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;btrfs 支持快照，可以方便备份和恢复&lt;/li&gt;
+&lt;li&gt;btrfs 支持透明压缩&lt;/li&gt;
+&lt;li&gt;btrfs 支持子卷，结合快照功能，可以作为启动 &lt;code&gt;systemd-nspawn&lt;/code&gt; 容器的模板&lt;/li&gt;
+&lt;li&gt;btrfs 支持数据和元数据的校验&lt;/li&gt;
+&lt;li&gt;btrfs 支持就地从 ext4 转换&lt;/li&gt;
+&lt;li&gt;那天晚上心情不是很好，需要有个足够好玩的事情来吸引我的注意力&lt;/li&gt;
+&lt;li&gt;这是我自己的电脑，我乐意（&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其实我之前一直是坚定的 ext4 党，觉得 ext4 非常稳定，性能优秀，文件系统的高级功能平时也不怎么会用到，所以并不觉得 btrfs 好，反而经常在别人报告自己的 btrfs 翻车的时候在一旁吃瓜，滑稽的喊两句毫无营养的 &lt;em&gt;我选择 ext4&lt;/em&gt; 。但是后来我的想法慢慢的发生了变化，一方面是 fc 老师的持续安利和讲解，另一方面是自己对事物，或者说世界的看法也在变化：&lt;/p&gt;
+&lt;h3 id=&#34;不要迷醉于虚假的安全之中&#34;&gt;不要迷醉于虚假的安全之中&lt;/h3&gt;
+&lt;p&gt;ext4 可能确实是稳，确实是快，但是这是因为它默认没有开启 checksum 。 &lt;em&gt;（虽然没有横向对比过，但此处应使用肯定语气表示强调，只要你不说出来别人也不会去查）&lt;/em&gt; 如果出现了静默错误，ext4 毫无修复的能力，而 btrfs 则会在读取的时候进行校验并尝试去进行修复。&lt;/p&gt;
+&lt;h3 id=&#34;吃瓜群众没有什么可骄傲的&#34;&gt;吃瓜群众没有什么可骄傲的&lt;/h3&gt;
+&lt;p&gt;以前可能习惯的去当一个吃瓜群众，静静的围观各种事件的反转并自诩 &lt;em&gt;机智如我&lt;/em&gt; ，&lt;em&gt;我就知道会这样&lt;/em&gt; 。但是现在渐渐明白了，吃瓜群众只不过是没脑子罢了，被铺天盖地的信息轰炸的多了，失去了自己去查明真相的能力，只能被动的随着信息的浪潮四处漂游。醒醒吧，世界的发展和技术的进步并不是吃瓜群众推动的，如果我们不亲自下场去尝试，最后留在自己手中的只有瓜皮而已。&lt;/p&gt;
+&lt;h2 id=&#34;匹夫之勇&#34;&gt;匹夫之勇&lt;/h2&gt;
+&lt;p&gt;啊，废话说的有点多了，下面开始正题。&lt;/p&gt;
+&lt;p&gt;首先熟读并背诵 Archwiki 中 btrfs 相关的条目，英文的也都仔细读一遍，防止有什么新的信息被遗漏了。敢于尝试新鲜事物是勇者，但是 archwiki 都不好好看，那就是莽夫了。确认重要的信息都 get 到之后，插上 U 盘进入 live 环境。&lt;/p&gt;
+&lt;p&gt;在开始之前有几个比较重要的 Tips：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;备份&lt;/strong&gt;，&lt;strong&gt;备份&lt;/strong&gt;，&lt;strong&gt;备份&lt;/strong&gt;。如果是在没有条件全盘备份，起码把自己的 &lt;code&gt;ssh_key&lt;/code&gt;，&lt;code&gt;gpg_key&lt;/code&gt; 等重要文件都备份好，数据是你自己的，为了帅这一下，不值得。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;btrfs-convert&lt;/code&gt; 会保留原来 ext4 中的 metadata，并作为一个单独的子卷。因此只要保留着这个子卷，你就可以恢复成 ext4 。但是这是有条件的，显然的，btrfs 不可能去在线维护 btrfs 和 ext4 两个 metadata，在 convert 之后的 btrfs 分区中做出的变更将不会同步到 ext4 的 metadata 中。因此请在确认数据都没有问题的情况下再开机进入系统。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;首先执行一次 fsck，避免带病上阵：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;fsck.ext4 /dev/nvme0n1p2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后深呼吸三次，开始执行 &lt;code&gt;btrfs-convert&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;btrfs-convert /dev/nvme0n1p2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;img src=&#34;convert.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在经过漫长的等待后，convert 没有翻车，已经成功一半啦！&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;success.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;接下来把分区挂在上来，检查一下是否有问题：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;mount /dev/nvme0n1p2 /mnt
+mount /dev/nvme0n1p1 /mnt/boot&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;随机抽查了一些文件发现都 OK 之后，下面开始修改一些引导相关的配置。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;修改 &lt;code&gt;/etc/fstab&lt;/code&gt;，把 &lt;code&gt;type&lt;/code&gt; 修改为 &lt;code&gt;btrfs&lt;/code&gt;，把最后一行的 &lt;code&gt;fs_passno&lt;/code&gt; 修改为 &lt;code&gt;0&lt;/code&gt;，因为 btrfs 不在开机的时候做检查&lt;/li&gt;
+&lt;li&gt;如果使用的是 UUID 之类的话，还可能会需要修改 UUID，不过我是用的 PARTUUID，信息存储在 GPT 分区表中，修改文件系统并不会变化，因此不需要修改&lt;/li&gt;
+&lt;li&gt;因为转换的是根目录，因此还需要执行 &lt;code&gt;mkinitcpio -p linux&lt;/code&gt; 以重建内存盘，我使用的是 &lt;code&gt;linux-zen&lt;/code&gt; 内核，因此我还执行了 &lt;code&gt;mkinitcpio -p linux-zen&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;如果用的是 &lt;code&gt;systemd-boot&lt;/code&gt; 的话，不需要做什么额外的配置，用 grub 的同学要按照 wiki 的指示重新生成 &lt;code&gt;grub.config&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接下来就是我做的一些很勇的事情了，请各位同学不要模仿：为了能够充分用上 btrfs 的透明压缩功能，我对全盘执行了一次压缩并修改了 &lt;code&gt;/etc/fstab&lt;/code&gt; 的挂载参数：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;btrfs filesystem defragment -r -v -clzo /mnt&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;最后提示有两个 failure，只是当时我还没有明白这意味着什么。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;failure.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;弱者之愁&#34;&gt;弱者之愁&lt;/h2&gt;
+&lt;p&gt;在压缩完毕后我重启并成功进入系统，于是高兴的在 archcn 的群中宣扬了一番：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;alive.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;后来 fc 教授提醒我需要删除 &lt;code&gt;ext2_saved&lt;/code&gt; 并执行 &lt;code&gt;balance&lt;/code&gt;，然后真正的故事开始了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1868&lt;/span&gt;.392801&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS warning &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: csum failed root -9 ino &lt;span style=&#34;color:#40a070&#34;&gt;465&lt;/span&gt; off &lt;span style=&#34;color:#40a070&#34;&gt;1048576&lt;/span&gt; csum 0x9302c07f expected csum 0x98f94189 mirror &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1868&lt;/span&gt;.393966&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS warning &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: csum failed root -9 ino &lt;span style=&#34;color:#40a070&#34;&gt;465&lt;/span&gt; off &lt;span style=&#34;color:#40a070&#34;&gt;1048576&lt;/span&gt; csum 0x9302c07f expected csum 0x98f94189 mirror &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我的心情毫无波动，甚至有点想笑。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;csum-failed.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;之后在 fc 教授的指导下，查看了 btrfs 相关的各种信息，最后通过 inode 跟踪到了这个对应的错误文件，那是一个 golang 项目的 vendor 文件，所以我直接把这个文件删掉并执行了 &lt;code&gt;scrub&lt;/code&gt; 任务。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:03 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Started Btrfs scrub on /.
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: ERROR: there are uncorrectable errors
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: scrub &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;done&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; 86fd5394-5a32-43cd-8ef5-5f3fbd46056e
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: scrub started at Wed Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:03 &lt;span style=&#34;color:#40a070&#34;&gt;2018&lt;/span&gt; and finished after &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:00:44
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: total bytes scrubbed: &lt;span style=&#34;color:#40a070&#34;&gt;72&lt;/span&gt;.40GiB with &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt; errors
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: error details: &lt;span style=&#34;color:#bb60d5&#34;&gt;csum&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: corrected errors: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, uncorrectable errors: &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;, unverified errors: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: btrfs-scrub@-.service: Main process exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;code&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;status&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;3&lt;/span&gt;/NOTIMPLEMENTED
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: btrfs-scrub@-.service: Failed with result &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;exit-code&amp;#39;&lt;/span&gt;.&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;虽然场面上很慌，但是我的心态出奇的好，感觉非常刺激。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;scrub-failed.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;后来通过 &lt;code&gt;dmesg&lt;/code&gt; 查到了具体的出错信息：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3392&lt;/span&gt;.226163&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS warning &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: checksum error at logical &lt;span style=&#34;color:#40a070&#34;&gt;253848715264&lt;/span&gt; on dev /dev/nvme0n1p2, physical &lt;span style=&#34;color:#40a070&#34;&gt;21546885120&lt;/span&gt;, root &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;, inode &lt;span style=&#34;color:#40a070&#34;&gt;8127262&lt;/span&gt;, offset &lt;span style=&#34;color:#40a070&#34;&gt;3928064&lt;/span&gt;, length &lt;span style=&#34;color:#40a070&#34;&gt;4096&lt;/span&gt;, links &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;path: var/log/journal/22c7d33d64ee4991ab100bf6abeb7ac7/user-1000@00056c232173e076-2815baa2d7d959be.journal~&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3392&lt;/span&gt;.226167&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS error &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: bdev /dev/nvme0n1p2 errs: wr &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, rd &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, flush &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, corrupt &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, gen &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3392&lt;/span&gt;.226169&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS error &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: unable to fixup &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;regular&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; error at logical &lt;span style=&#34;color:#40a070&#34;&gt;253848715264&lt;/span&gt; on dev /dev/nvme0n1p2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个文件是 &lt;code&gt;systemd&lt;/code&gt; 的一个日志文件，于是直接把这个文件删掉了（解决问题最快的方式就是搞定有问题的那个人~），然后重新执行 &lt;code&gt;scrub&lt;/code&gt; 的任务，但是：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3857&lt;/span&gt;.669742&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS error &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: bdev /dev/nvme0n1p2 errs: wr &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, rd &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, flush &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, corrupt &lt;span style=&#34;color:#40a070&#34;&gt;25&lt;/span&gt;, gen &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3857&lt;/span&gt;.669743&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS error &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: unable to fixup &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;regular&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; error at logical &lt;span style=&#34;color:#40a070&#34;&gt;253848748032&lt;/span&gt; on dev /dev/nvme0n1p2
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3857&lt;/span&gt;.669861&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS warning &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: checksum error at logical &lt;span style=&#34;color:#40a070&#34;&gt;253848752128&lt;/span&gt; on dev /dev/nvme0n1p2, physical &lt;span style=&#34;color:#40a070&#34;&gt;21546921984&lt;/span&gt;, root &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;, inode &lt;span style=&#34;color:#40a070&#34;&gt;8127262&lt;/span&gt;, offset &lt;span style=&#34;color:#40a070&#34;&gt;3964928&lt;/span&gt;: path resolving failed with &lt;span style=&#34;color:#bb60d5&#34;&gt;ret&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;感觉坏的更严重了，通过 &lt;code&gt;logic number&lt;/code&gt; 和 &lt;code&gt;inode&lt;/code&gt; 号都查不到这个文件的信息：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; sudo btrfs inspect-internal logical-resolve &lt;span style=&#34;color:#40a070&#34;&gt;253848752128&lt;/span&gt; /
+ERROR: logical ino ioctl: No such file or directory
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; sudo btrfs inspect-internal inode-resolve &lt;span style=&#34;color:#40a070&#34;&gt;8127262&lt;/span&gt; /
+ERROR: ino paths ioctl: No such file or directory&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;后来还是 fc 老师点醒了我：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我的意思是，scrub 發現了之後可能已經幫你刪掉了&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;于是我重新执行了一下 &lt;code&gt;scrub&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;scrub &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;done&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; 86fd5394-5a32-43cd-8ef5-5f3fbd46056e
+scrub started at Wed Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:35:39 &lt;span style=&#34;color:#40a070&#34;&gt;2018&lt;/span&gt; and finished after &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:00:44
+total bytes scrubbed: &lt;span style=&#34;color:#40a070&#34;&gt;72&lt;/span&gt;.37GiB with &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt; errors&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;哈哈，修好啦！ &lt;strong&gt;btrfs 真香！&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id=&#34;收工之喜&#34;&gt;收工之喜&lt;/h2&gt;
+&lt;p&gt;在全盘检查没有问题之后，我重新执行了 &lt;code&gt;balance&lt;/code&gt;，并且顺利完成了。在庆祝收工之余，还进行了如下配置：&lt;/p&gt;
+&lt;p&gt;启用每月一次的全盘校验任务：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; sudo systemctl &lt;span style=&#34;color:#007020&#34;&gt;enable&lt;/span&gt; btrfs-scrub@-.timer
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; sudo systemctl start btrfs-scrub@-.timer&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;因为我使用了 &lt;a href=&#34;https://wiki.archlinux.org/index.php/TLP&#34;&gt;&lt;code&gt;tlp&lt;/code&gt;&lt;/a&gt;，按照 wiki 上的说法，我需要修改一个配置以避免文件系统损坏：&lt;/p&gt;
+&lt;p&gt;修改 &lt;code&gt;/etc/default/tlp&lt;/code&gt; 文件中的 &lt;code&gt;SATA_LINKPWR_ON_BAT&lt;/code&gt; 属性。wiki 要求是修改成 &lt;code&gt;max_performance&lt;/code&gt;，但是配置文件中的注释提到：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# AHCI link power management (ALPM) for disk devices:
+# min_power, med_power_with_dipm(*), medium_power, max_performance.
+# (*) Kernel &amp;gt;= 4.15 required, then recommended.
+# Multiple values separated with spaces are tried sequentially until success.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;因此我设置成了如下的值：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;SATA_LINKPWR_ON_BAT=&amp;quot;med_power_with_dipm max_performance&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/Btrfs&#34;&gt;Btrfs 维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Btrfs_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)&#34;&gt;Btrfs archwiki&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://btrfs.wiki.kernel.org/index.php/Conversion_from_Ext3&#34;&gt;Conversion from Ext3&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;iG 成功夺得 S8 世界总冠军，恭喜！iG 牛逼！&lt;/li&gt;
+&lt;li&gt;上个周末去了一趟红领巾公园，绕着转了三圈，完成了夜刷红领巾的任务
+&lt;ul&gt;
+&lt;li&gt;第一圈的时候有点蒙圈，因为各种找不到 Po，走了不少回头路&lt;/li&gt;
+&lt;li&gt;第二圈的时候感觉自己超强，身体和大脑都非常巅峰&lt;/li&gt;
+&lt;li&gt;第三圈的时候累成傻逼，唯一的想法就是这任务怎么还没做完 = =&lt;/li&gt;
+&lt;li&gt;后来去了朝阳大悦城，在一堆情侣中一个人吃了顿&lt;a href=&#34;http://www.dianping.com/shop/93355360&#34;&gt;越打星&lt;/a&gt;，我觉得海星&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;这周我的母上来了一趟北京
+&lt;ul&gt;
+&lt;li&gt;我带着我最好的两个朋友过去一起吃了顿&lt;a href=&#34;http://www.dianping.com/shop/10338660&#34;&gt;四季民福&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;期间多次提及找对象，买房，成家立业&lt;/li&gt;
+&lt;li&gt;哎，我觉得我的心理年龄才 16 岁，总觉得结婚买房什么的好遥远啊&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;最近比较迷茫，干什么都有点提不起兴趣，是时候去寻找更好玩的东西了？&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Systemd 的一些小技巧</title><link>https://xuanwo.io/2018/10/30/tips-of-systemd/</link><pubDate>Tue, 30 Oct 2018 12:20:00 +0000</pubDate><guid>https://xuanwo.io/2018/10/30/tips-of-systemd/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;我就是累死，写脚本写到吐，我也绝对不换 &lt;code&gt;底裤D&lt;/code&gt;！&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;底裤D&lt;/code&gt; 真香！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr /&gt;
+&lt;p&gt;现在 systemd 正在日益的变成一个 Linux 内核与发行版之间的一个兼容层，systemd 向下管理了诸多底层组件，向上提供了一致的接口和 API。而作为一个 Arch 用户，更是一边各个群中大喊 &lt;code&gt;systemd 真香&lt;/code&gt;，一边乖乖的把自己的底裤交给了 systemd，由此戏称为 &lt;code&gt;底裤D&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;今天主要就是分享一些自己平时用到的一些 systemd 的小技巧，备忘（&lt;/p&gt;
+&lt;h2 id=&#34;管理自己的-vpn&#34;&gt;管理自己的 VPN&lt;/h2&gt;
+&lt;p&gt;因为现在正在做的一个项目同时支持公有云和私有云的部署，因此就有很多的 VPN，难道要到每个 VPN 的目录下面手动执行 openvpn 么，答案当然是否定的，主要的弊端有以下几点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;最显然的一点：麻烦，每次都切换过去，然后手动执行 openvpn，想想就觉得特别蠢&lt;/li&gt;
+&lt;li&gt;VPN 数量多了之后不好维护
+&lt;ul&gt;
+&lt;li&gt;不知道某个 vpn 开没开&lt;/li&gt;
+&lt;li&gt;不知道某个 vpn 是不是成功的起来了&lt;/li&gt;
+&lt;li&gt;后台运行的情况下 log 查起来也很麻烦，特别是在某些 VPN 的路由有冲突的时候&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;让指定的 VPN 开机启动还需要单独写一个脚本&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当然可以写一个 VPN 管理工具啦，但是何必呢，systemd 已经都帮我们做好啦~&lt;/p&gt;
+&lt;p&gt;只要写一个 &lt;code&gt;service&lt;/code&gt; 文件，并放在 &lt;code&gt;/etc/systemd/system&lt;/code&gt; 下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Unit]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Description&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;OpenVPN tunnel for %I&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;After&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;syslog.target network-online.target&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Wants&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;network-online.target&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Documentation&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;man:openvpn(8)&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Documentation&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;https://community.openvpn.net/openvpn/wiki/Openvpn24ManPage&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Documentation&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;https://community.openvpn.net/openvpn/wiki/HOWTO&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Service]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;notify&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;PrivateTmp&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;WorkingDirectory&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/etc/openvpn/xuanwo/%i&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;ExecStart&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/usr/bin/openvpn --suppress-timestamps --nobind --config config.ovpn&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;CapabilityBoundingSet&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;CAP_IPC_LOCK CAP_NET_ADMIN CAP_NET_RAW CAP_SETGID CAP_SETUID CAP_SYS_CHROOT CAP_DAC_OVERRIDE&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;LimitNPROC&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;10&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DeviceAllow&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/dev/null rw&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DeviceAllow&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/dev/net/tun rw&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;ProtectSystem&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;KillMode&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;process&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Install]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;WantedBy&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;multi-user.target&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个文件基本上是 Copy 自 &lt;code&gt;openvpn-client@.service&lt;/code&gt;，根据我实际的情况做了一些改动：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-diff&#34; data-lang=&#34;diff&#34;&gt;&lt;span style=&#34;color:#a00000&#34;&gt;--- a/usr/lib/systemd/system/openvpn-client@.service
+&lt;/span&gt;&lt;span style=&#34;color:#a00000&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;+++ b/usr/lib/systemd/system/vpn@.service
+&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#800080;font-weight:bold&#34;&gt;@@ -9,14 +9,13 @@ Documentation=https://community.openvpn.net/openvpn/wiki/HOWTO
+&lt;/span&gt;&lt;span style=&#34;color:#800080;font-weight:bold&#34;&gt;&lt;/span&gt; [Service]
+Type=notify
+PrivateTmp=true
+&lt;span style=&#34;color:#a00000&#34;&gt;-WorkingDirectory=/etc/openvpn/client
+&lt;/span&gt;&lt;span style=&#34;color:#a00000&#34;&gt;-ExecStart=/usr/bin/openvpn --suppress-timestamps --nobind --config %i.conf
+&lt;/span&gt;&lt;span style=&#34;color:#a00000&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;+WorkingDirectory=/etc/openvpn/xuanwo/%i
+&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;+ExecStart=/usr/bin/openvpn --suppress-timestamps --nobind --config config.ovpn
+&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;&lt;/span&gt; CapabilityBoundingSet=CAP_IPC_LOCK CAP_NET_ADMIN CAP_NET_RAW CAP_SETGID CAP_SETUID CAP_SYS_CHROOT CAP_DAC_OVERRIDE
+LimitNPROC=10
+DeviceAllow=/dev/null rw
+DeviceAllow=/dev/net/tun rw
+ProtectSystem=true
+&lt;span style=&#34;color:#a00000&#34;&gt;-ProtectHome=true
+&lt;/span&gt;&lt;span style=&#34;color:#a00000&#34;&gt;&lt;/span&gt; KillMode=process
+[Install]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这是与源文件的 diff，我针对不同的地方稍微介绍一下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;%i&lt;/code&gt; 是 systemd 中的一个替换标记，表示 &lt;code&gt;已转义的实例名称。对于实例化的单元，就是 &amp;quot;@&amp;quot; 和后缀之间的部分。&lt;/code&gt;，比如 &lt;code&gt;systemctl start vpn@abc&lt;/code&gt;，这个 &lt;code&gt;%i&lt;/code&gt; 就会被替换成 &lt;code&gt;abc&lt;/code&gt;。更多选项可以在参考中查阅。&lt;/li&gt;
+&lt;li&gt;原来的配置文件都是指向一个独立的文件，但是我的 VPN 都会按照文件夹组织起来，所以我把工作目录修改为每个 vpn 独立的目录，并且读取目录下的配置文件 &lt;code&gt;config.ovpn&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ProtectHome=true&lt;/code&gt; 表示 &lt;code&gt;表示对该单元屏蔽 /home, /root, /run/user 目录(内容为空且不可写入)&lt;/code&gt;，此处我知道并且信任这个服务，而且我的 &lt;code&gt;/etc/openvpn/xuanwo&lt;/code&gt; 实际上是一个到 &lt;code&gt;/home/xuanwo/Google/VPN/&lt;/code&gt; 的软链接，我需要它访问 &lt;code&gt;/home&lt;/code&gt; ，因此我去掉了这个配置。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;除此以外，我还配置了两个 systemctl 相关的 alias：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;sys&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;sudo systemctl&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;sus&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;systemctl --user&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;最后的效果是这样的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;我的所有 VPN 配置都放在 &lt;code&gt;/home/xuanwo/Google/VPN&lt;/code&gt; 下并自动加密后同步到 Google Drive&lt;/li&gt;
+&lt;li&gt;每个 VPN 都是一个独立的目录，每个目录下都有这个 vpn 需要的所有文件
+&lt;ul&gt;
+&lt;li&gt;特别的，一些需要密码的 vpn 可以在 &lt;code&gt;config.ovpn&lt;/code&gt; 中配置 &lt;code&gt;auth-user-pass passwd&lt;/code&gt;，并在当前目录下创建一个 &lt;code&gt;passwd&lt;/code&gt; 文件，内容为两行，第一行是用户名，第二行是密码，这样就可以免交互启动 VPN 了。&lt;em&gt;当然了，这样做会导致 VPN 的安全性有所下降，请根据自己的实际情况配置。&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;所有的 vpn 都有了它对应的 service，因此可以做所有 service 支持的操作，比如 start 来启动，stop 来关闭，enable 来设置为开机启动&lt;/li&gt;
+&lt;li&gt;不过现在 systemd 好像没有什么办法能查看指定模板下所有 service 的状态，我一般是用 &lt;code&gt;sys status | grep vpn&lt;/code&gt; 这样来查看（又不是不能用.png）&lt;/li&gt;
+&lt;li&gt;当然也有了 &lt;code&gt;journald&lt;/code&gt; 的支持，我们可以用 &lt;code&gt;journalctl -u vpn@abc -r&lt;/code&gt; 来查看这个 vpn 近期的日志&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;限制某个-service-的内存用量&#34;&gt;限制某个 Service 的内存用量&lt;/h2&gt;
+&lt;p&gt;Systemd 底层使用了 &lt;code&gt;cgroup&lt;/code&gt; 来控制和管理所有的服务，因此我们同样获得了控制服务所使用的内存占用的能力。&lt;/p&gt;
+&lt;p&gt;只需要在 Serivce 的配置文件中增加一行即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;MemoryHigh&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;512M&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里有一些可以选择的配置项：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;MemoryLow&lt;/code&gt;: 尽可能保障该单元中的进程至少可以使用多少内存。如果该单元及其所有父单元的内存用量都低于最低保障线，那么只要还可以从其他未受保护的单元回收内存， 就不会回收该单元占用的内存。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MemoryHigh&lt;/code&gt;: 尽可能限制该单元中的进程最多可以使用多少内存。虽然这是一个允许被突破的柔性限制，但是突破限制后，进程的运行速度将会大打折扣， 并且系统将会尽可能尽快回收超出的内存。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MemoryMax&lt;/code&gt;: 绝对刚性的限制该单元中的进程最多可以使用多少内存。 这是一个不允许突破的刚性限制，触碰此限制会导致进程由于内存不足而被强制杀死。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;比如说我们可以这样来限制 &lt;code&gt;telegram&lt;/code&gt; 的内存使用量（telegram 真垃圾，一个内存泄漏问题至今修不好）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Unit]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Description&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;Telegram&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Service]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;simple&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;ExecStart&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/usr/bin/telegram-desktop -- %u&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;KillMode&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;process&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Restart&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;on-abnormal&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;RestartSec&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;2&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;MemoryHigh&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;512M&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Install]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;WantedBy&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;multi-user.target&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我们可以覆盖应用自带的 desktop 文件，让它总是通过 systemd 来启动应用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-desktop&#34; data-lang=&#34;desktop&#34;&gt;[Desktop Entry]
+Version=1.0
+Name=Telegram Desktop
+Comment=Official desktop version of Telegram messaging app
+Exec=systemctl --user start telegram.service
+Icon=telegram
+Terminal=false
+StartupWMClass=TelegramDesktop
+Type=Application
+Categories=Network;InstantMessaging;Qt;
+MimeType=x-scheme-handler/tg;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;只要把这个文件命名为 &lt;code&gt;telegramdesktop.desktop&lt;/code&gt; 并放在 &lt;code&gt;~/.local/share/applications&lt;/code&gt; 目录下，我们的启动器就会总是使用这个文件，无缝集成~&lt;/p&gt;
+&lt;p&gt;看起来非常美好，然而并没有什么卵用，因为 systemd 这里的实现有问题，主要是以下的几个原因：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;cgroup v1 无法确保非特权进程安全的使用资源控制器，所以 systemd 用户实例无法使用 cgroup v1，也就是说 systemd 的用户实例无法通过配置 &lt;code&gt;MemoryHigh=512M&lt;/code&gt; 来实现资源控制&lt;/li&gt;
+&lt;li&gt;如果使用系统实例的话，会有如下两个问题
+&lt;ul&gt;
+&lt;li&gt;需要额外配置：&lt;code&gt;Environment=DISPLAY=:0&lt;/code&gt;，否则图形化界面不会正确展示&lt;/li&gt;
+&lt;li&gt;运行一个普通应用要输入 sudo 密码，感觉非常蛋疼&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;如果做一个勇士，通过内核参数设置 &lt;code&gt;systemd.unified_cgroup_hierarchy&lt;/code&gt; 来强制启用 cgroup v2，那么你会面对如下问题：
+&lt;ul&gt;
+&lt;li&gt;docker 啥的全崩了，因为 runc 还不支持 cgroups v2，参见&lt;a href=&#34;https://github.com/opencontainers/runc/issues/654&#34;&gt;这个 issue&lt;/a&gt; ，从社区反馈来看，感觉还遥遥无期&lt;/li&gt;
+&lt;li&gt;~systemd 的 cgroup v2 的资源控制实现有问题，并不能正常工作，在 &lt;a href=&#34;https://github.com/systemd/systemd/pull/10894&#34;&gt;PR&lt;/a&gt;中已经修复，但是暂时还没有 release~&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;虽说暂时还用不上，但是先记录一下，万一修好了呢~&lt;/p&gt;
+&lt;p&gt;已经修好啦，systemd v240 中已经 fix 了 cgroup v2 相关的问题，可以正确控制用户实例的资源占用量啦~&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;为指定的-service-设置环境变量&#34;&gt;为指定的 Service 设置环境变量&lt;/h2&gt;
+&lt;p&gt;这个就比较简单啦，总有一些应用自己不提供代理的配置，我们可以通过 systemd 来启动它并为它设置专门的环境变量：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;Environment&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;no_proxy=&amp;#34;localhost,127.0.0.1,localaddress,.localdomain.com&amp;#34; http_proxy=http://127.0.0.1:1090 https_proxy=http://127.0.0.1:1090&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;说的就是你，Skype！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;解决关机时等待-stop-job-的问题&#34;&gt;解决关机时等待 stop job 的问题&lt;/h2&gt;
+&lt;p&gt;关机的时候总会遇到这种问题：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;A stop job is running for Session xxx of user yyy&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这一般是因为 systemd 给某个服务发送 kill 之后，那个服务没有正确退出，因此 systemd 会等待一段时间，直到 timeout 之后，直接给它发送 &lt;code&gt;kill -9&lt;/code&gt; 来强制关闭。这个时候我们首先要查看 systemd 的相关 log 来定位问题到底出在哪里：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;journalctl -b -1 -r&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;-b&lt;/code&gt; 参数表示显示开机至今的日志，而后面跟上 &lt;code&gt;-1&lt;/code&gt; 表示偏差值为一，&lt;code&gt;-r&lt;/code&gt; 表示逆序显示，连在一起就是逆序展示上次开机的日志。&lt;/p&gt;
+&lt;p&gt;接下来我们需要耐心的查看一下日志，每个人启用的服务和系统的状况都不一样，要根据实际的情况来判断，比如我这边关闭失败的日志是这样的：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: Stopped Skype.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Failed with result &#39;timeout&#39;.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Main process exited, code=killed, status=9/KILL
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Killing process 22768 (D-Bus thread) with signal SIGKILL.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Killing process 22001 (TaskSchedulerFo) with signal SIGKILL.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Killing process 1478 (skypeforlinux) with signal SIGKILL.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: State &#39;stop-sigterm&#39; timed out. Killing.
+Oct 29 23:13:26 thinkpad-x1-carbon systemd[547]: Stopping Skype...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我们可以看到在等待了 90s 之后，systemd 强行关闭了 skype。后来发现是我的 service 文件写的不太对，KillMode 被错误的设置成了 &lt;code&gt;control-group&lt;/code&gt;，将这个问题修复之后，这个问题搞定了。&lt;/p&gt;
+&lt;p&gt;有时候有些服务的实现上会有问题，导致没有正确关闭，我们在确定 &lt;code&gt;kill -9&lt;/code&gt; 没有问题的前提下，可以将它的 timeout 时间设置的更短一些，比如：&lt;code&gt;TimeoutStopSec=1s&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.jinbuguo.com/systemd/systemd.unit.html#%E6%9B%BF%E6%8D%A2%E6%A0%87%E8%AE%B0&#34;&gt;可以用在单元文件中的替换标记&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.jinbuguo.com/systemd/systemd.resource-control.html&#34;&gt;systemd.resource-control&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.jinbuguo.com/systemd/systemd.kill.html#KillMode=&#34;&gt;KillMode&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/archlinux/comments/4bawf7/a_stop_job_is_running_for_session_c2_of_user/d187683/&#34;&gt;timesyncd can&amp;rsquo;t stop&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;关于 S8 世界总决赛
+&lt;ul&gt;
+&lt;li&gt;气死了，RNG 八强被淘汰，丢人。&lt;/li&gt;
+&lt;li&gt;尽力了，EDG 八强被淘汰，明年再来。&lt;/li&gt;
+&lt;li&gt;太强了，iG 成功进入总决赛，加油！&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;关于游戏
+&lt;ul&gt;
+&lt;li&gt;荒野大镖客 2 已经出来了，然而我还在苦苦守候着我的皇牌空战 = =&lt;/li&gt;
+&lt;li&gt;传送门骑士真的是垃圾游戏，打个一级的小怪都会卡一下，千万不要玩&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;关于动漫
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/play/ss25510/&#34;&gt;刀剑神域 Alicization&lt;/a&gt; 画质炸裂，诚意满满，强烈推荐！&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/play/ss25733/&#34;&gt;青春猪头少年不会梦到兔女郎学姐&lt;/a&gt; 男主各种神级操作，一定要认真学习，我笔记已经记了好几本了。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/play/ss25696/&#34;&gt;弦音 -风舞高中弓道部-&lt;/a&gt; 我知道你们想说什么 - -，但是弓道真的好帅啊，运动番，运动番&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;关于阅读
+&lt;ul&gt;
+&lt;li&gt;金庸先生走了哎，感觉 20 世纪真的逐步远去，&lt;strong&gt;他&lt;/strong&gt;可能也快要走了&lt;/li&gt;
+&lt;li&gt;重读&lt;a href=&#34;https://book.douban.com/subject/20499536/&#34;&gt;时代的稻草人&lt;/a&gt;，大学毕业一年多，我的精英意识已经完全被现实消磨光了，高中的时候满脑子社会变革，自我批判，要做时代的守望者，现在想起来居然觉得有些羞耻&lt;/li&gt;
+&lt;li&gt;我们 Team 买了一本&lt;a href=&#34;https://www.amazon.cn/dp/B07GJ6H3X3&#34;&gt;万物皆数&lt;/a&gt;，挺有意思的，社会精英当不了，搞搞纯粹理性的东西是不是会更快乐一些&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>ThinkPad X1 Carbon 2018 开箱手记</title><link>https://xuanwo.io/2018/05/16/thinkpad-x1-carbon-6th/</link><pubDate>Wed, 16 May 2018 11:30:00 +0000</pubDate><guid>https://xuanwo.io/2018/05/16/thinkpad-x1-carbon-6th/</guid><description>&lt;p&gt;经过了漫长的等待之后，我的新玩具终于到手了。这篇文章主要晒一些照片，并分享一下我这第一次海淘的经历。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;多图预警&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;配置介绍&#34;&gt;配置介绍&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;CPU： Intel i7-8650U vPro&lt;/li&gt;
+&lt;li&gt;内存：16 GB&lt;/li&gt;
+&lt;li&gt;屏幕：14.0 WQHD IPS&lt;/li&gt;
+&lt;li&gt;硬盘：256G SSD&lt;/li&gt;
+&lt;li&gt;电池：3 cell 57Wh&lt;/li&gt;
+&lt;li&gt;预装：Windows 10 Home Plus&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;开箱照&#34;&gt;开箱照&lt;/h2&gt;
+&lt;h3 id=&#34;外包装箱&#34;&gt;外包装箱&lt;/h3&gt;
+&lt;p&gt;外包装箱挺结实的，晒一下配置的截图。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;outer-box.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;内包装箱&#34;&gt;内包装箱&lt;/h3&gt;
+&lt;p&gt;里面的包装箱非常有质感，不过着急着看电脑，没有多拍。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;inter-box.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;顶盖&#34;&gt;顶盖&lt;/h3&gt;
+&lt;p&gt;电脑本体是用一个黑色的袋子套起来放在盒子里面的，就是图片上压在电脑下面的那个袋子。正面非常简单，左上角是 ThinkPad 的标志，右下角的 X1 标志着这台电脑的纯正血统。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;top-cover.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第一眼&#34;&gt;第一眼&lt;/h3&gt;
+&lt;p&gt;14 寸的屏幕，边框比较窄，看起来会比同尺寸的 Macbook Pro 还要大一些。上方的摄像头有一个机械式的开关，可以防止摄像头被意外的开启。标志性的触控板和小红点还在，指纹识别器改成了按压式的（不过 Arch Linux 还不支持 - -）。键盘的手感一如既往的赞，并不会有不适应的感觉。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;first-look.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;接口&#34;&gt;接口&lt;/h3&gt;
+&lt;p&gt;左侧是两个 USB Type C 接口，一个 HDMI 接口和一个 USB Type A 接口，右侧是一个 USB Type A 接口和耳机口。接口的数量不算特别丰富，但是已经可以满足我的需求了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;left-side.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;right-side.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;与-macbook-pro-的对比&#34;&gt;与 Macbook Pro 的对比&lt;/h3&gt;
+&lt;p&gt;整体的厚度其实跟 Macbook Pro 相差无几，但是因为 X1C 曲线的关系，看起来要比 MBP 更薄一些。实际重量也要比 MBP 轻。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;compare-with-macbook-pro.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;与-thinkpad-t460-的对比&#34;&gt;与 ThinkPad T460 的对比&lt;/h3&gt;
+&lt;p&gt;我上一台电脑是公司发的 T460，可以看到 X1C 要薄上不少。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;compare-with-t460.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;hello-arch&#34;&gt;Hello，Arch！&lt;/h3&gt;
+&lt;p&gt;在下单的时候就跟朋友们都说好了，等买了新电脑就要换 Arch。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;hello-arch.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;海淘之旅&#34;&gt;海淘之旅&lt;/h2&gt;
+&lt;p&gt;这是我的 X1C 的环球之旅：&lt;/p&gt;
+&lt;iframe src=&#34;https://www.google.com/maps/d/embed?mid=1Vb4i9bNCBdAD_bk5IkwQ-zyDJwn92k_w&#34; width=&#34;640&#34; height=&#34;480&#34;&gt;&lt;/iframe&gt;
+&lt;blockquote&gt;
+&lt;p&gt;中国合肥生产，寄到美国，然后再寄回来。相同的配置大概便宜了 6000 多块，真不愧是美帝良心想。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;下面分享一些海淘过程中的一些经验吧：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;海淘的周期真的非常长，前前后后大概等了一个月才拿到手，期间还因为贸易战以为自己的电脑被扣了= =。如果着急要用的话，还是不要海淘了。&lt;/li&gt;
+&lt;li&gt;海淘的时候一定要认真的挑选卖家，每个卖家都要跟他聊一聊，看看是否靠谱。上万块的电脑都买了，不要在乎那么几百块钱的差价，找最靠谱的。绝对不要加卖家的微信或者 QQ 聊，直接用网页版的阿里旺旺，这样你们的交流都是有记录的，以后如果有了纠纷可以靠这个去申诉。&lt;/li&gt;
+&lt;li&gt;整体的流程是这样的：
+&lt;ul&gt;
+&lt;li&gt;把自己想要的配置告诉店家，具体的配置可以在 &lt;a href=&#34;https://www3.lenovo.com/us/en/laptops/thinkpad/thinkpad-x/ThinkPad-X1-Carbon-6th-Gen/p/22TP2TXX16G&#34;&gt;美国联想官网定制&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;之后店家会告诉你完整的价格和完整的配置清单，如果确定没有问题的话先付定金，一般是 2000 块。&lt;/li&gt;
+&lt;li&gt;店家收到定金之后就会去官网上下单，然后把订单号告诉你，这样就可以直接在官网查进度。&lt;em&gt;如果店家没有订单号或者不肯告诉你，我觉得可能有问题。&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;等到电脑寄到了店家在美国的仓库，他会要求你支付尾款。收到尾款之后，他就会把电脑直接快递给你。&lt;/li&gt;
+&lt;li&gt;电脑到了海关，邮政局会给你发短信。你可以选择直接微信公众号支付，这样就会通过 EMS 寄给你；也可以选择自己直接去领，这样就可以当场拿走。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;我的电脑这次交了 300 的关税。据朋友说，所有电脑都是按照 2000 元然后征收 15% 的关税来计算的，这个没有证实。如果关税超过 300 块的话，可以让店家帮忙协调一下。&lt;/li&gt;
+&lt;li&gt;海淘的电脑也可以注册联想的全球联保服务，不需要担心电脑坏了没有地方修，不过联想比较傻逼的政策是只有电脑坏了才能注册。。。&lt;/li&gt;
+&lt;li&gt;很多店家不支持信用卡或者花呗，如果要用的话就要自己补手续费，因此尽可能的提前准备好足够的资金。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;使用体验&#34;&gt;使用体验&lt;/h2&gt;
+&lt;p&gt;电脑已经差不多一周，跟我之前的 T460 大概有以下差异：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;续航特别强劲，开着 Goland，PyCharm 和十多个标签的 Chrome 的情况下，可以连续使用八个小时。彻底戒掉了我晚上带电源回家的习惯，可以安心的带着电脑去参加讨论或者会议而不用担心电不够。&lt;/li&gt;
+&lt;li&gt;软件启动特别快。在 SSD 的加持下，我从打开 Goland 到可以开始实际的开发所需要的时间从 2 分钟降低到了 10 秒。&lt;/li&gt;
+&lt;li&gt;高分屏很舒服。习惯了高分屏之后，再回去看原来的屏幕已经完全接受不了了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;坑&#34;&gt;坑 &amp;gt;.&amp;lt;&lt;/h2&gt;
+&lt;p&gt;X1C 使用 Arch Linux 整体上没啥问题，但是在很多细节的地方有比较坑的地方：&lt;/p&gt;
+&lt;h3 id=&#34;支持-s3-待机&#34;&gt;支持 S3 待机&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;X1C 支持 S0i3 待机，但是不支持 S3 待机。两者的区别是在 S0i3 下 CPU 的功耗被降到最低，但仍保持着上电状态，而 S3 则不会。
+&lt;ul&gt;
+&lt;li&gt;X1C 支持 S3 需要 BIOS 的支持，社区中有人通过为 ACPI DSDT Table 打 Patch 来支持，但是这个 Hack 在最新版的 BIOS 中已经失效了，而且这个操作比较危险。因此我选择等待联想官方修复。就像论坛中有人说的那样：“Come on Lonove, show more love for linux users.”&lt;/li&gt;
+&lt;li&gt;而 S0i3 待机需要修改内核参数来提供支持，并且增加该参数后会导致无法打开屏盖来唤醒机器。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;评论区有童鞋说最新版本的固件中已经修复了该问题，我升级了固件发现确实如此。此外，联想已经加入了 LVFS (Linux Vendor Firmware Service)，因此我们可以通过 LVFS 来更新固件。&lt;/p&gt;
+&lt;p&gt;下面简单说一下如何更新固件并开启 S3 支持：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用 Arch 的同学可以通过 pacman 来安装 &lt;a href=&#34;https://www.archlinux.org/packages/community/x86_64/fwupd&#34;&gt;&lt;code&gt;fwupd&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;fwupdmgr get-devices&lt;/code&gt; 获取设备中所有支持固件升级的硬件列表&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;fwupdmgr refresh&lt;/code&gt; 更新 metadata&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;fwupdmgr get-updates&lt;/code&gt; 来检查是不是有更新可用&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;fwupdmgr update&lt;/code&gt; 来进行固件升级
+&lt;ul&gt;
+&lt;li&gt;某些固件可能需要 root 权限&lt;/li&gt;
+&lt;li&gt;某些固件可能需要重启&lt;/li&gt;
+&lt;li&gt;固件升级的时候务必接好电源，同时电池的电量要保持在 60% 以上，最好能充满&lt;/li&gt;
+&lt;li&gt;固件升级的时候可能会把引导项删除，因此最好事先准备一个 live CD，在固件升级完毕之后重新 &lt;code&gt;grub-install&lt;/code&gt; 一下即可&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;固件升级完毕后在 BIOS 的 &lt;code&gt;Config -&amp;gt; Power -&amp;gt; Sleep State&lt;/code&gt; 中将原来的 &lt;code&gt;Windows 10&lt;/code&gt; 修改为 &lt;code&gt;Linux&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;做完上述的操作之后可以通过 &lt;code&gt;dmesg&lt;/code&gt; 来检查是不是已经开启了 S3 的支持：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; dmesg | grep -i &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;acpi: (supports&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;.500484&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; ACPI: &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;supports S0 S3 S4 S5&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;看到 S3 的话，说明已经搞定啦~&lt;/p&gt;
+&lt;h3 id=&#34;已经解决的坑&#34;&gt;已经解决的坑&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;在 KDE + SDDM 的组合下，进入休眠状态后再恢复，会有一定概率出现屏幕一直闪动的情况。重启 SDDM 之后会恢复正常，从 Xorg 的报错日志能看到类似这样的错误：&lt;code&gt;Failed to set drm version: Permission denied&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;最新版本的 KDE + SDDM 中已经修复了&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;尚未解决的坑&#34;&gt;尚未解决的坑&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Xorg + KDE 对不同 DPI 的屏幕支持不太好，导致外接屏幕的时候用起来比较难受。&lt;/li&gt;
+&lt;li&gt;指纹识别器驱动正在&lt;a href=&#34;https://github.com/nmikhailov/Validity90&#34;&gt;开发当中&lt;/a&gt;，暂时还用不了。&lt;/li&gt;
+&lt;li&gt;默认配置下 &lt;code&gt;Thunderbolt BIOS Assist Mode&lt;/code&gt; 是 Disable 的，这会导致 Linux 在 s2idle 下的能耗特别高，需要进 BIOS 将其设置为 Enable。&lt;/li&gt;
+&lt;li&gt;默认配置下，Linux 的 CPU 温度上限是 80 度，而 Windows 下是 97 度。这会导致 Linux 的 CPU 性能比 Windows 下要低，目前有一些 dirty hack，官方还没有修复。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;引用链接&#34;&gt;引用链接&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Lenovo_ThinkPad_X1_Carbon_(Gen_6)&#34;&gt;Lenovo ThinkPad X1 Carbon (Gen 6) - Arch Wiki&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/thinkpad/comments/870u0a/t480s_linux_throttling_bug/&#34;&gt;T480s Linux throttling bug&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://forums.lenovo.com/t5/Linux-Discussion/X1C6-T480s-low-cTDP-and-trip-temperature-in-Linux/td-p/4028489&#34;&gt;low cTDP and trip temperature in Linux&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bbs.archlinux.org/viewtopic.php?id=234913&#34;&gt;Lenovo X1C6 / X1Y3 (2018): No deep sleep (S3)?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://forums.lenovo.com/t5/Linux-Discussion/X1-Carbon-Gen-6-cannot-enter-deep-sleep-S3-state-aka-Suspend-to/td-p/3998182/highlight/true&#34;&gt;X1 Carbon Gen 6 cannot enter deep sleep (S3 state aka Suspend-to-RAM) on Linux&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Fwupd&#34;&gt;fwupd&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;《间客》又看完了，现在在看《北平无战事》，当年追过一阵儿电视剧，但是没有看完，这次看看后续的剧情到底是怎么发展的。&lt;/li&gt;
+&lt;li&gt;上个周末去北大的黑客马拉松当评委，我最看好一个做猫脸识别的团队居然前十都没有进，很是生气。&lt;/li&gt;
+&lt;li&gt;照片都是在公司拍的，背景是我们公司的茶水间和我的工位，对我们公司感兴趣的话欢迎直接甩简历~&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

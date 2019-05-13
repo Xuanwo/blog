@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Systemd on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/systemd/</link><description>Recent content in Systemd on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 30 Oct 2018 12:20:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/systemd/index.xml" rel="self" type="application/rss+xml"/><item><title>Systemd 的一些小技巧</title><link>https://xuanwo.io/2018/10/30/tips-of-systemd/</link><pubDate>Tue, 30 Oct 2018 12:20:00 +0000</pubDate><guid>https://xuanwo.io/2018/10/30/tips-of-systemd/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;我就是累死，写脚本写到吐，我也绝对不换 &lt;code&gt;底裤D&lt;/code&gt;！&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;底裤D&lt;/code&gt; 真香！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr /&gt;
+&lt;p&gt;现在 systemd 正在日益的变成一个 Linux 内核与发行版之间的一个兼容层，systemd 向下管理了诸多底层组件，向上提供了一致的接口和 API。而作为一个 Arch 用户，更是一边各个群中大喊 &lt;code&gt;systemd 真香&lt;/code&gt;，一边乖乖的把自己的底裤交给了 systemd，由此戏称为 &lt;code&gt;底裤D&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;今天主要就是分享一些自己平时用到的一些 systemd 的小技巧，备忘（&lt;/p&gt;
+&lt;h2 id=&#34;管理自己的-vpn&#34;&gt;管理自己的 VPN&lt;/h2&gt;
+&lt;p&gt;因为现在正在做的一个项目同时支持公有云和私有云的部署，因此就有很多的 VPN，难道要到每个 VPN 的目录下面手动执行 openvpn 么，答案当然是否定的，主要的弊端有以下几点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;最显然的一点：麻烦，每次都切换过去，然后手动执行 openvpn，想想就觉得特别蠢&lt;/li&gt;
+&lt;li&gt;VPN 数量多了之后不好维护
+&lt;ul&gt;
+&lt;li&gt;不知道某个 vpn 开没开&lt;/li&gt;
+&lt;li&gt;不知道某个 vpn 是不是成功的起来了&lt;/li&gt;
+&lt;li&gt;后台运行的情况下 log 查起来也很麻烦，特别是在某些 VPN 的路由有冲突的时候&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;让指定的 VPN 开机启动还需要单独写一个脚本&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当然可以写一个 VPN 管理工具啦，但是何必呢，systemd 已经都帮我们做好啦~&lt;/p&gt;
+&lt;p&gt;只要写一个 &lt;code&gt;service&lt;/code&gt; 文件，并放在 &lt;code&gt;/etc/systemd/system&lt;/code&gt; 下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Unit]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Description&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;OpenVPN tunnel for %I&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;After&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;syslog.target network-online.target&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Wants&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;network-online.target&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Documentation&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;man:openvpn(8)&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Documentation&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;https://community.openvpn.net/openvpn/wiki/Openvpn24ManPage&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Documentation&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;https://community.openvpn.net/openvpn/wiki/HOWTO&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Service]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;notify&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;PrivateTmp&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;WorkingDirectory&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/etc/openvpn/xuanwo/%i&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;ExecStart&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/usr/bin/openvpn --suppress-timestamps --nobind --config config.ovpn&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;CapabilityBoundingSet&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;CAP_IPC_LOCK CAP_NET_ADMIN CAP_NET_RAW CAP_SETGID CAP_SETUID CAP_SYS_CHROOT CAP_DAC_OVERRIDE&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;LimitNPROC&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;10&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DeviceAllow&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/dev/null rw&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DeviceAllow&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/dev/net/tun rw&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;ProtectSystem&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;KillMode&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;process&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Install]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;WantedBy&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;multi-user.target&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个文件基本上是 Copy 自 &lt;code&gt;openvpn-client@.service&lt;/code&gt;，根据我实际的情况做了一些改动：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-diff&#34; data-lang=&#34;diff&#34;&gt;&lt;span style=&#34;color:#a00000&#34;&gt;--- a/usr/lib/systemd/system/openvpn-client@.service
+&lt;/span&gt;&lt;span style=&#34;color:#a00000&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;+++ b/usr/lib/systemd/system/vpn@.service
+&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#800080;font-weight:bold&#34;&gt;@@ -9,14 +9,13 @@ Documentation=https://community.openvpn.net/openvpn/wiki/HOWTO
+&lt;/span&gt;&lt;span style=&#34;color:#800080;font-weight:bold&#34;&gt;&lt;/span&gt; [Service]
+Type=notify
+PrivateTmp=true
+&lt;span style=&#34;color:#a00000&#34;&gt;-WorkingDirectory=/etc/openvpn/client
+&lt;/span&gt;&lt;span style=&#34;color:#a00000&#34;&gt;-ExecStart=/usr/bin/openvpn --suppress-timestamps --nobind --config %i.conf
+&lt;/span&gt;&lt;span style=&#34;color:#a00000&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;+WorkingDirectory=/etc/openvpn/xuanwo/%i
+&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;+ExecStart=/usr/bin/openvpn --suppress-timestamps --nobind --config config.ovpn
+&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;&lt;/span&gt; CapabilityBoundingSet=CAP_IPC_LOCK CAP_NET_ADMIN CAP_NET_RAW CAP_SETGID CAP_SETUID CAP_SYS_CHROOT CAP_DAC_OVERRIDE
+LimitNPROC=10
+DeviceAllow=/dev/null rw
+DeviceAllow=/dev/net/tun rw
+ProtectSystem=true
+&lt;span style=&#34;color:#a00000&#34;&gt;-ProtectHome=true
+&lt;/span&gt;&lt;span style=&#34;color:#a00000&#34;&gt;&lt;/span&gt; KillMode=process
+[Install]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这是与源文件的 diff，我针对不同的地方稍微介绍一下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;%i&lt;/code&gt; 是 systemd 中的一个替换标记，表示 &lt;code&gt;已转义的实例名称。对于实例化的单元，就是 &amp;quot;@&amp;quot; 和后缀之间的部分。&lt;/code&gt;，比如 &lt;code&gt;systemctl start vpn@abc&lt;/code&gt;，这个 &lt;code&gt;%i&lt;/code&gt; 就会被替换成 &lt;code&gt;abc&lt;/code&gt;。更多选项可以在参考中查阅。&lt;/li&gt;
+&lt;li&gt;原来的配置文件都是指向一个独立的文件，但是我的 VPN 都会按照文件夹组织起来，所以我把工作目录修改为每个 vpn 独立的目录，并且读取目录下的配置文件 &lt;code&gt;config.ovpn&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ProtectHome=true&lt;/code&gt; 表示 &lt;code&gt;表示对该单元屏蔽 /home, /root, /run/user 目录(内容为空且不可写入)&lt;/code&gt;，此处我知道并且信任这个服务，而且我的 &lt;code&gt;/etc/openvpn/xuanwo&lt;/code&gt; 实际上是一个到 &lt;code&gt;/home/xuanwo/Google/VPN/&lt;/code&gt; 的软链接，我需要它访问 &lt;code&gt;/home&lt;/code&gt; ，因此我去掉了这个配置。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;除此以外，我还配置了两个 systemctl 相关的 alias：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;sys&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;sudo systemctl&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;sus&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;systemctl --user&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;最后的效果是这样的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;我的所有 VPN 配置都放在 &lt;code&gt;/home/xuanwo/Google/VPN&lt;/code&gt; 下并自动加密后同步到 Google Drive&lt;/li&gt;
+&lt;li&gt;每个 VPN 都是一个独立的目录，每个目录下都有这个 vpn 需要的所有文件
+&lt;ul&gt;
+&lt;li&gt;特别的，一些需要密码的 vpn 可以在 &lt;code&gt;config.ovpn&lt;/code&gt; 中配置 &lt;code&gt;auth-user-pass passwd&lt;/code&gt;，并在当前目录下创建一个 &lt;code&gt;passwd&lt;/code&gt; 文件，内容为两行，第一行是用户名，第二行是密码，这样就可以免交互启动 VPN 了。&lt;em&gt;当然了，这样做会导致 VPN 的安全性有所下降，请根据自己的实际情况配置。&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;所有的 vpn 都有了它对应的 service，因此可以做所有 service 支持的操作，比如 start 来启动，stop 来关闭，enable 来设置为开机启动&lt;/li&gt;
+&lt;li&gt;不过现在 systemd 好像没有什么办法能查看指定模板下所有 service 的状态，我一般是用 &lt;code&gt;sys status | grep vpn&lt;/code&gt; 这样来查看（又不是不能用.png）&lt;/li&gt;
+&lt;li&gt;当然也有了 &lt;code&gt;journald&lt;/code&gt; 的支持，我们可以用 &lt;code&gt;journalctl -u vpn@abc -r&lt;/code&gt; 来查看这个 vpn 近期的日志&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;限制某个-service-的内存用量&#34;&gt;限制某个 Service 的内存用量&lt;/h2&gt;
+&lt;p&gt;Systemd 底层使用了 &lt;code&gt;cgroup&lt;/code&gt; 来控制和管理所有的服务，因此我们同样获得了控制服务所使用的内存占用的能力。&lt;/p&gt;
+&lt;p&gt;只需要在 Serivce 的配置文件中增加一行即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;MemoryHigh&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;512M&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里有一些可以选择的配置项：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;MemoryLow&lt;/code&gt;: 尽可能保障该单元中的进程至少可以使用多少内存。如果该单元及其所有父单元的内存用量都低于最低保障线，那么只要还可以从其他未受保护的单元回收内存， 就不会回收该单元占用的内存。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MemoryHigh&lt;/code&gt;: 尽可能限制该单元中的进程最多可以使用多少内存。虽然这是一个允许被突破的柔性限制，但是突破限制后，进程的运行速度将会大打折扣， 并且系统将会尽可能尽快回收超出的内存。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MemoryMax&lt;/code&gt;: 绝对刚性的限制该单元中的进程最多可以使用多少内存。 这是一个不允许突破的刚性限制，触碰此限制会导致进程由于内存不足而被强制杀死。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;比如说我们可以这样来限制 &lt;code&gt;telegram&lt;/code&gt; 的内存使用量（telegram 真垃圾，一个内存泄漏问题至今修不好）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Unit]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Description&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;Telegram&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Service]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;simple&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;ExecStart&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/usr/bin/telegram-desktop -- %u&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;KillMode&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;process&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Restart&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;on-abnormal&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;RestartSec&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;2&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;MemoryHigh&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;512M&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Install]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;WantedBy&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;multi-user.target&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我们可以覆盖应用自带的 desktop 文件，让它总是通过 systemd 来启动应用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-desktop&#34; data-lang=&#34;desktop&#34;&gt;[Desktop Entry]
+Version=1.0
+Name=Telegram Desktop
+Comment=Official desktop version of Telegram messaging app
+Exec=systemctl --user start telegram.service
+Icon=telegram
+Terminal=false
+StartupWMClass=TelegramDesktop
+Type=Application
+Categories=Network;InstantMessaging;Qt;
+MimeType=x-scheme-handler/tg;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;只要把这个文件命名为 &lt;code&gt;telegramdesktop.desktop&lt;/code&gt; 并放在 &lt;code&gt;~/.local/share/applications&lt;/code&gt; 目录下，我们的启动器就会总是使用这个文件，无缝集成~&lt;/p&gt;
+&lt;p&gt;看起来非常美好，然而并没有什么卵用，因为 systemd 这里的实现有问题，主要是以下的几个原因：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;cgroup v1 无法确保非特权进程安全的使用资源控制器，所以 systemd 用户实例无法使用 cgroup v1，也就是说 systemd 的用户实例无法通过配置 &lt;code&gt;MemoryHigh=512M&lt;/code&gt; 来实现资源控制&lt;/li&gt;
+&lt;li&gt;如果使用系统实例的话，会有如下两个问题
+&lt;ul&gt;
+&lt;li&gt;需要额外配置：&lt;code&gt;Environment=DISPLAY=:0&lt;/code&gt;，否则图形化界面不会正确展示&lt;/li&gt;
+&lt;li&gt;运行一个普通应用要输入 sudo 密码，感觉非常蛋疼&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;如果做一个勇士，通过内核参数设置 &lt;code&gt;systemd.unified_cgroup_hierarchy&lt;/code&gt; 来强制启用 cgroup v2，那么你会面对如下问题：
+&lt;ul&gt;
+&lt;li&gt;docker 啥的全崩了，因为 runc 还不支持 cgroups v2，参见&lt;a href=&#34;https://github.com/opencontainers/runc/issues/654&#34;&gt;这个 issue&lt;/a&gt; ，从社区反馈来看，感觉还遥遥无期&lt;/li&gt;
+&lt;li&gt;~systemd 的 cgroup v2 的资源控制实现有问题，并不能正常工作，在 &lt;a href=&#34;https://github.com/systemd/systemd/pull/10894&#34;&gt;PR&lt;/a&gt;中已经修复，但是暂时还没有 release~&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;虽说暂时还用不上，但是先记录一下，万一修好了呢~&lt;/p&gt;
+&lt;p&gt;已经修好啦，systemd v240 中已经 fix 了 cgroup v2 相关的问题，可以正确控制用户实例的资源占用量啦~&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;为指定的-service-设置环境变量&#34;&gt;为指定的 Service 设置环境变量&lt;/h2&gt;
+&lt;p&gt;这个就比较简单啦，总有一些应用自己不提供代理的配置，我们可以通过 systemd 来启动它并为它设置专门的环境变量：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;Environment&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;no_proxy=&amp;#34;localhost,127.0.0.1,localaddress,.localdomain.com&amp;#34; http_proxy=http://127.0.0.1:1090 https_proxy=http://127.0.0.1:1090&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;说的就是你，Skype！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;解决关机时等待-stop-job-的问题&#34;&gt;解决关机时等待 stop job 的问题&lt;/h2&gt;
+&lt;p&gt;关机的时候总会遇到这种问题：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;A stop job is running for Session xxx of user yyy&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这一般是因为 systemd 给某个服务发送 kill 之后，那个服务没有正确退出，因此 systemd 会等待一段时间，直到 timeout 之后，直接给它发送 &lt;code&gt;kill -9&lt;/code&gt; 来强制关闭。这个时候我们首先要查看 systemd 的相关 log 来定位问题到底出在哪里：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;journalctl -b -1 -r&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;-b&lt;/code&gt; 参数表示显示开机至今的日志，而后面跟上 &lt;code&gt;-1&lt;/code&gt; 表示偏差值为一，&lt;code&gt;-r&lt;/code&gt; 表示逆序显示，连在一起就是逆序展示上次开机的日志。&lt;/p&gt;
+&lt;p&gt;接下来我们需要耐心的查看一下日志，每个人启用的服务和系统的状况都不一样，要根据实际的情况来判断，比如我这边关闭失败的日志是这样的：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: Stopped Skype.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Failed with result &#39;timeout&#39;.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Main process exited, code=killed, status=9/KILL
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Killing process 22768 (D-Bus thread) with signal SIGKILL.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Killing process 22001 (TaskSchedulerFo) with signal SIGKILL.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Killing process 1478 (skypeforlinux) with signal SIGKILL.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: State &#39;stop-sigterm&#39; timed out. Killing.
+Oct 29 23:13:26 thinkpad-x1-carbon systemd[547]: Stopping Skype...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我们可以看到在等待了 90s 之后，systemd 强行关闭了 skype。后来发现是我的 service 文件写的不太对，KillMode 被错误的设置成了 &lt;code&gt;control-group&lt;/code&gt;，将这个问题修复之后，这个问题搞定了。&lt;/p&gt;
+&lt;p&gt;有时候有些服务的实现上会有问题，导致没有正确关闭，我们在确定 &lt;code&gt;kill -9&lt;/code&gt; 没有问题的前提下，可以将它的 timeout 时间设置的更短一些，比如：&lt;code&gt;TimeoutStopSec=1s&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.jinbuguo.com/systemd/systemd.unit.html#%E6%9B%BF%E6%8D%A2%E6%A0%87%E8%AE%B0&#34;&gt;可以用在单元文件中的替换标记&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.jinbuguo.com/systemd/systemd.resource-control.html&#34;&gt;systemd.resource-control&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.jinbuguo.com/systemd/systemd.kill.html#KillMode=&#34;&gt;KillMode&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/archlinux/comments/4bawf7/a_stop_job_is_running_for_session_c2_of_user/d187683/&#34;&gt;timesyncd can&amp;rsquo;t stop&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;关于 S8 世界总决赛
+&lt;ul&gt;
+&lt;li&gt;气死了，RNG 八强被淘汰，丢人。&lt;/li&gt;
+&lt;li&gt;尽力了，EDG 八强被淘汰，明年再来。&lt;/li&gt;
+&lt;li&gt;太强了，iG 成功进入总决赛，加油！&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;关于游戏
+&lt;ul&gt;
+&lt;li&gt;荒野大镖客 2 已经出来了，然而我还在苦苦守候着我的皇牌空战 = =&lt;/li&gt;
+&lt;li&gt;传送门骑士真的是垃圾游戏，打个一级的小怪都会卡一下，千万不要玩&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;关于动漫
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/play/ss25510/&#34;&gt;刀剑神域 Alicization&lt;/a&gt; 画质炸裂，诚意满满，强烈推荐！&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/play/ss25733/&#34;&gt;青春猪头少年不会梦到兔女郎学姐&lt;/a&gt; 男主各种神级操作，一定要认真学习，我笔记已经记了好几本了。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/play/ss25696/&#34;&gt;弦音 -风舞高中弓道部-&lt;/a&gt; 我知道你们想说什么 - -，但是弓道真的好帅啊，运动番，运动番&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;关于阅读
+&lt;ul&gt;
+&lt;li&gt;金庸先生走了哎，感觉 20 世纪真的逐步远去，&lt;strong&gt;他&lt;/strong&gt;可能也快要走了&lt;/li&gt;
+&lt;li&gt;重读&lt;a href=&#34;https://book.douban.com/subject/20499536/&#34;&gt;时代的稻草人&lt;/a&gt;，大学毕业一年多，我的精英意识已经完全被现实消磨光了，高中的时候满脑子社会变革，自我批判，要做时代的守望者，现在想起来居然觉得有些羞耻&lt;/li&gt;
+&lt;li&gt;我们 Team 买了一本&lt;a href=&#34;https://www.amazon.cn/dp/B07GJ6H3X3&#34;&gt;万物皆数&lt;/a&gt;，挺有意思的，社会精英当不了，搞搞纯粹理性的东西是不是会更快乐一些&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

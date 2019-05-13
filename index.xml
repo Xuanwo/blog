@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Xuanwo&#39;s Blog</title><link>https://xuanwo.io/</link><description>Recent content on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 30 Mar 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/index.xml" rel="self" type="application/rss+xml"/><item><title>在 Google 日历度过的欢乐时光</title><link>https://xuanwo.io/2019/03/30/google-calendar/</link><pubDate>Sat, 30 Mar 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/30/google-calendar/</guid><description>&lt;p&gt;前段时间终于下定决定入了 G Suite，花了点时间进行数据迁移，但是在操作日历的时候错误的把朋友们的生日提醒（每年重复）导入到了我的行程当中。为了将这些提醒删掉，我开始了一次 Google 日历的奇妙探险，找到了批量处理的方法，甚至还发现了一个 BUG。&lt;/p&gt;
+&lt;h2 id=&#34;apps-script-是好文明&#34;&gt;Apps Script 是好文明&lt;/h2&gt;
+&lt;p&gt;首先来明确一下需要解决的问题：删除个人日历中出现的大量形如 “XXX 的生日” 的行程。OK，问题确定之后，可以初步得到几种解决问题的思路：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;手动删&lt;/li&gt;
+&lt;li&gt;现成的工具&lt;/li&gt;
+&lt;li&gt;基于 Google 日历 API 开发脚本&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;首先排除第一种，时间成本过高，而且都是机械操作，毫无乐趣可言。现成的工具有是有，但是你需要授权第三方访问你的全部行程，我实在是不想之后某天被人发现我宣称出差公干其实是去宾馆跟朋友们一起玩俄罗斯方块吃鸡（原帖：&lt;a href=&#34;https://bbs.nga.cn/read.php?tid=16784200&#34;&gt;https://bbs.nga.cn/read.php?tid=16784200&lt;/a&gt;）。所以现成工具的方案也被排除了。&lt;/p&gt;
+&lt;p&gt;所以我又要造轮子了么？不，我们可以用 Apps Script！Apps Script 可以理解成自带 Google 绝大部分套件 SDK 组件的 JavaScript 运行环境，最棒的是它还是可以直接在线运行的。&lt;/p&gt;
+&lt;p&gt;研究一下日历的&lt;a href=&#34;https://developers.google.com/apps-script/reference/calendar/&#34;&gt;文档&lt;/a&gt;，可以知道需要用到的 API 只有 &lt;code&gt;getCalendarsByName&lt;/code&gt;，&lt;code&gt;getEvents&lt;/code&gt;，&lt;code&gt;getTitle&lt;/code&gt; 和 &lt;code&gt;deleteEvent&lt;/code&gt; 这些，剩下的都是些逻辑。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; myFunction()
+{
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; fromDate &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Date&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;2000&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; toDate &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Date&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;2999&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; calendarName &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Personal&amp;#39;&lt;/span&gt;;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; calendar &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; CalendarApp.getCalendarsByName(calendarName)[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; events &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; calendar.getEvents(fromDate, toDate, {search&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;生日&amp;#34;&lt;/span&gt;});
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; i&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;; i&lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;events.length;i&lt;span style=&#34;color:#666&#34;&gt;++&lt;/span&gt;){
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; ev &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; events[i];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; title &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; ev.getTitle();
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; (title.indexOf(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;的生日&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;) {
+ev.deleteEvent();
+}
+}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;一顿操作之后，只需要点击 &lt;code&gt;Run&lt;/code&gt; 就能运行啦，这时候切换到 Google 日历就能看到恼人的行程都已经被删掉了。&lt;/p&gt;
+&lt;h2 id=&#34;google-日历预言的世界末日&#34;&gt;Google 日历预言的世界末日&lt;/h2&gt;
+&lt;p&gt;欢乐时光还没有结束！&lt;/p&gt;
+&lt;p&gt;看到自己的脚本成功运行后自然会想要验证一下，于是我通过修改 URL 的方式访问了 &lt;a href=&#34;https://calendar.google.com/calendar/r/month/2099/1/1&#34;&gt;2099/1/1&lt;/a&gt;。emmmmm，这是咋了，为啥界面全都是空的，Console 还有报错：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;Uncaught TypeError&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; Cannot read property &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Iu&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;of&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;null&lt;/span&gt;
+at vEb (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;404&lt;/span&gt;)
+at EU.HJ (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;404&lt;/span&gt;)
+at CEb.h.kAa (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;408&lt;/span&gt;)
+at R1.Oe (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;ltDFwf,syi2,FsScmc&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;symq,sy1,phtQPb&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;321&lt;/span&gt;)
+at m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;727&lt;/span&gt;
+at xha (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;263&lt;/span&gt;)
+at Ei (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;261&lt;/span&gt;)
+at Ci.addCallback (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;260&lt;/span&gt;)
+at Gya (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;727&lt;/span&gt;)
+at m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;726&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;本来想洗洗睡了的我瞬间来了精神，我很好奇！&lt;/p&gt;
+&lt;p&gt;通过二分的方法，我得到了临界点：&lt;a href=&#34;https://calendar.google.com/calendar/r/day/2051/2/10&#34;&gt;2051/2/10&lt;/a&gt; 。这个日子有什么特别的呢？为什么在它之前都是正常的，从它开始不管显示天，周还是月都无法正常显示呢？我瞬间有了几个猜想，不过需要一一验证。&lt;/p&gt;
+&lt;p&gt;第一个猜想是数据类型的限制。我做了一些简单的计算：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;数据类型&lt;/th&gt;
+&lt;th&gt;最大值&lt;/th&gt;
+&lt;th&gt;对应时间&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;int32&lt;/td&gt;
+&lt;td&gt;2147483647&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;2038/1/19 11:14:7&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;uint32&lt;/td&gt;
+&lt;td&gt;4294967295&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;2106/2/7 14:28:16&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JavaScript 最大精确整数&lt;/td&gt;
+&lt;td&gt;9007199254740991&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;285428751/11/12 7:36:31&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;无论哪一个都无法支持先前的猜想，所以问题肯定不是数据类型的问题。&lt;/p&gt;
+&lt;p&gt;第二个猜想是前端的 BUG。我稍微研究了一下 Google 日历混淆之后的代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; vEb &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt;(a, b) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; [b.Iu &lt;span style=&#34;color:#666&#34;&gt;?&lt;/span&gt; a.T &lt;span style=&#34;color:#666&#34;&gt;?&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u95f0&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u958f&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;, CU[b.month], &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u6708&amp;#34;&lt;/span&gt;].join(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;)
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里有几个 Unicode 字符，转换一下：&lt;code&gt;\u95f0 -&amp;gt; 闰&lt;/code&gt;，&lt;code&gt;\u958f -&amp;gt; 閏&lt;/code&gt;，&lt;code&gt;\u6708 -&amp;gt; 月&lt;/code&gt;。Wow，&lt;code&gt;vEb&lt;/code&gt; 函数的作用就是判断当前月是不是闰月，根据用户的语言还会决定显示简体还是繁体。&lt;code&gt;a.T&lt;/code&gt; 显然是在判断语言，不用考虑。&lt;code&gt;b.Iu&lt;/code&gt; 更加关键一些，它会判断给定的日期（这里的 b？）是否是闰月。&lt;/p&gt;
+&lt;p&gt;接下来只要搞懂 b 是怎么来的，前面肯定有某一步返回的 b 是 null。但是面对 Google 混淆过的代码，想搞懂这个 b 是怎么来的谈何容易。我相信给我足够的时间，我能够缕清楚代码的脉络，最后得出一个结论，但是我现在更倾向于先换个思路，回头再来尝试。&lt;/p&gt;
+&lt;p&gt;下面从代码中跳出来思考，2051 年 2 月 10 日，这个日子到底有什么魔力呢？难道 Google 日历这么早就钦定了世界末日么？我开始试着在 Google 上搜索这个时间，结果还真的有发现。有一篇文章&lt;a href=&#34;http://www.mzwu.com/article.asp?id=1380&#34;&gt;ASP农历与公历互转类&lt;/a&gt;中居然出现完全一样的时间：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&#39;公历转农历(查询日期范围1950-2-17至2051-2-10,格式yyyy-mm-dd)
+&#39; Response.Write NongGong.GongToNong(&amp;quot;1984-12-10&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我下意识的将这个日子转换成了农历：&lt;code&gt;2050年 腊月 廿九 （辛未年 庚寅月 丙寅日）&lt;/code&gt;，我好像明白了什么，但是需要更多的信息来做支撑。&lt;/p&gt;
+&lt;h2 id=&#34;农历编排及其转换&#34;&gt;农历编排及其转换&lt;/h2&gt;
+&lt;p&gt;首先要重新认识一下农历：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;农历，是现今东亚地区民间传统广泛使用的阴阳合历。古代相传为黄帝时代或者夏朝创制，又称黄历、夏历。中华民国成立后，由孙中山宣布采用西方格里历，而华夏传统历法则返称为旧历、传统历。中华人民共和国成立后，以格里历为“公历”，夏历改称“农历”。在汉语，西历也称阳历，因此农历常习惯上称为阴历，然而此历其实为阴阳合历。
+农历是阴阳历：“阳”是地球环绕太阳公转，以冬至回归年为基准确定岁实，配合季节阳光分一岁为二十四节气；“阴”根据月球运行定朔望月。中国现存历书最早是西汉版本之《夏小正》，汉武帝时期制定之《太初历》已经有相当完善之历法规则，自此大都采用“夏正”，即以建寅月为正月；之后定朔定气规则又多次修改。现行农历版本是依据既定基本规则，运用现代天文学成果修订，完全依照天文数据计算得来，为一天文历法（astronomical calendar）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;画重点：&lt;strong&gt;依据既定基本规则，运用现代天文学成果修订，完全依照天文数据计算得来，为一天文历法（astronomical calendar）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;那天文历法是什么呢？&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;天文历法（astronomical calendar）是以天文观测为准的历法，例如使用定气定朔的现代农历、宗教性的伊斯兰历及第二圣殿时的古犹太历。这种历法也称为是以观测为准的的历法，好处是完美而且永远准确，缺点是没有一定的公式，若要回推多久以前某一天的日期比较困难。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;与之相对应的是计算历法(arithmetic calendar)：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;计算历法（arithmetic calendar）是以严格的数学公式计算的历法，例如现在的犹太历，也称为是以规则为准的历法，好处是容易计算特定时间是哪一天，不过和自然变化的精准性就比较差，即使历法本身非常的精准，也会因为地球自转及公转的略为变化，造成其精准性慢慢变差，因此一个计算历法使用的期间有限，可能只有数千年，之后就要用新的历法系统代替。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;实际上关于农历的编排，我们国家甚至还制定了国家标准：&lt;a href=&#34;http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296&#34;&gt;农历的编算和颁行&lt;/a&gt;，标准号 &lt;code&gt;GB/T 33661-2017&lt;/code&gt;。标准里面专门提到了计算模型和精度的问题：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;5.1　太阳和月球的位置按IERS Conventions规定的模型计算。&lt;/p&gt;
+&lt;p&gt;5.2　朔和节气的北京时间计算精度应达到1秒。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr /&gt;
+&lt;p&gt;农历的编排本身就需要依赖外部的天文数据，而从公历向农历的转换自然也需要外部数据的支持。所以 Google 不能显示 2051-2-10 之后时间的原因也就出来了：Google 只存储了到 2050 年的农历数据，过了 2050 年农历的最后一天，后续的农历在转换的时候就报错了。&lt;/p&gt;
+&lt;p&gt;问题解决啦，我的好奇心得到了满足，可以安心睡觉了~&lt;/p&gt;
+&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
+&lt;p&gt;当然比我更有好奇心的读者们肯定还会想到为什么是 &lt;code&gt;2050年 腊月 廿九&lt;/code&gt;，难道不应该是腊月三十嘛？这个就留作课后作业吧，相信你们肯定能搞明白的~&lt;/p&gt;
+&lt;p&gt;下面是日常的挑毛病环节：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;To Google 的国际化团队：&lt;code&gt;农历腊月&lt;/code&gt;不能翻译成&lt;code&gt;农历十二月&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;To 国家市场监督管理总局：9102 年了，国家标准在线预览还要依赖 Flash 插件，怕不是思想不正确哟&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;顺便介绍一下 &lt;a href=&#34;https://thetype.com/&#34;&gt;Type is Beautiful&lt;/a&gt; 的&lt;a href=&#34;https://thetype.com/2019/02/12498/&#34;&gt;孔雀计划&lt;/a&gt;，中文的排版问题和本文反映出来的农历问题其根源是一样的：中国的传统文化要主动向外介绍推广，主动参与标准的置顶，需要整个行业的通力合作。中文排版和农历这样充满了美感的东西理应让更多人了解，而不是被掩盖在女德这种真正糟粕的阴影之下。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86&#34;&gt;农历 - 维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E5%8E%86%E6%B3%95&#34;&gt;历法 - 维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296&#34;&gt;农历的编算和颁行&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>开启 Jetbrains IDE 的全局菜单</title><link>https://xuanwo.io/2019/03/28/jetbrains-ide-global-menu/</link><pubDate>Thu, 28 Mar 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/28/jetbrains-ide-global-menu/</guid><description>&lt;p&gt;最近在想办法提升自己的开发体验，其中有一步就是去掉了不常用和已经使用快捷键代替的按钮和菜单。但是菜单栏没有办法隐藏，导致观感上不是很好。适逢 Jetbrains IDEA 推出了 2019.1 版本，趁着体验新版本功能的时候研究并解决了这个问题。&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本方案应该适用于所有 Jetbrains IDE，包括 Goland 和 Android Studio&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;Help -&amp;gt; Find Action... -&amp;gt; Experimental Features...&lt;/code&gt;，确认 &lt;code&gt;linux.native.menu&lt;/code&gt; 已打开&lt;/li&gt;
+&lt;li&gt;安装 &lt;code&gt;libdbusmenu-glib&lt;/code&gt;，比如 Arch 上只需要 &lt;code&gt;pacman -S libdbusmenu-glib&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;重启 IDE&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr /&gt;
+&lt;p&gt;好，在这个分割线下分享一下自己解决这个问题的全过程。&lt;/p&gt;
+&lt;h2 id=&#34;确认&#34;&gt;确认&lt;/h2&gt;
+&lt;p&gt;首先问题的现象是很明显的，预期 IDEA 的菜单栏出现在 KDE 顶端的全局菜单中，但实际上并没有。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;bug.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;然后开始用 &lt;code&gt;IDEA&lt;/code&gt;，&lt;code&gt;global menu&lt;/code&gt; 等关键词去搜索，可以得到下列这些有用的信息：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在别人那是好的（有人 Po 出了正常的截图）&lt;/li&gt;
+&lt;li&gt;可以通过 &lt;code&gt;Experiment Features&lt;/code&gt; 开启 &lt;code&gt;linux.native.menu&lt;/code&gt; 的支持&lt;/li&gt;
+&lt;li&gt;在 Issue 的评论中，有人提出需要安装 &lt;code&gt;libdbusmenu-glib&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;OK，现在知道问题应该出在本地可能漏了什么依赖，导致全局菜单没有生效，下面需要想办法定位到具体的问题。&lt;del&gt;（实在定位不出来的时候再一把梭试一下）&lt;/del&gt;&lt;/p&gt;
+&lt;h2 id=&#34;定位&#34;&gt;定位&lt;/h2&gt;
+&lt;p&gt;首先通过 &lt;code&gt;Help -&amp;gt; Find Action... -&amp;gt; Experiment Features&lt;/code&gt; 中可以打开实验特性的开关，其中可以确认 &lt;code&gt;linux.native.menu&lt;/code&gt; 已经默认开启了。（真香！）&lt;/p&gt;
+&lt;p&gt;然后查看 IDEA 的 Log，寻找全局菜单没有启用的原因。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;IDEA 的 Log 一般在 &lt;code&gt;~/.IntelliJIdea2019.1/system/log/&lt;/code&gt;，也可以通过 &lt;code&gt;Help -&amp;gt; Show Log In Dolphin&lt;/code&gt; 直接打开所在位置&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code&gt;2019-03-28 11:03:00,342 [ 5755] INFO - penapi.wm.impl.GlobalMenuLinux - disable global-menu integration because some of shared libraries isn&#39;t installed: java.lang.UnsatisfiedLinkError: /opt/intellij-idea-ultimate-edition/bin/libdbm64.so: libdbusmenu-glib.so.4: cannot open shared object file: No such file or directory
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Ooops，原来是因为缺少一个库导致 &lt;code&gt;global-menu&lt;/code&gt; 被禁用了，只需要把这个库装上就可以了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;happy.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;修复&#34;&gt;修复&lt;/h2&gt;
+&lt;p&gt;搜索一下哪个包提供了 &lt;code&gt;libdbusmenu-glib.so.4&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; yay -Fs libdbusmenu-glib.so.4
+community/libdbusmenu-glib &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;.04.0-3
+usr/lib/libdbusmenu-glib.so.4&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;很明显，是 &lt;code&gt;libdbusmenu-glib&lt;/code&gt; （正是上面 Issue 中有人说要装的那个包），甚至还是社区源里面的包，不用犹豫了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; yay -S libdbusmenu-glib&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;重启 IDE 之后就能看到全局菜单正常工作啦：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;fixed.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在水一篇文章之后，我还能做啥呢？给 AUR 留个言，让维护者把 &lt;code&gt;libdbusmenu-glib&lt;/code&gt; 作为一个可选依赖，这样大家在安装或者更新 IDEA 的时候就知道啦：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;comment.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Update: AUR 的维护者已经加上啦：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;New optional dependencies &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; intellij-idea-ultimate-edition
+libdbusmenu-glib: For global menu support &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;installed&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Arch is the best!&lt;/p&gt;
+&lt;h2 id=&#34;后续&#34;&gt;后续&lt;/h2&gt;
+&lt;p&gt;GTK 3 的应用可以通过安装 &lt;code&gt;appmenu-gtk-module&lt;/code&gt; 来获取全局菜单的支持~&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://youtrack.jetbrains.com/issue/IDEA-169904&#34;&gt;Support KDE Global Menu&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/kde/comments/67mnfq/global_menu_in_plasma_59_with_java_intellij_and/&#34;&gt;Global Menu in Plasma 5.9 with Java (Intellij) and Firefox&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>东京——圣地巡礼</title><link>https://xuanwo.io/2019/03/25/holy-land-cruise/</link><pubDate>Mon, 25 Mar 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/25/holy-land-cruise/</guid><description>&lt;p&gt;&lt;img src=&#34;do-not-laugh.jpeg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;一个假御宅进行&lt;del&gt;伪&lt;/del&gt;圣地巡礼的一天&lt;/p&gt;
+&lt;h2 id=&#34;侦探坡上的一阵风&#34;&gt;侦探坡上的一阵风&lt;/h2&gt;
+&lt;p&gt;念叨了很久的圣地巡礼终于要开始了，今天的首要目标是圣人惠与伦也相遇的侦探坡。&lt;/p&gt;
+&lt;p&gt;按照导航坐到了&lt;a href=&#34;https://www.google.com/maps/place/%E3%81%AE%E3%81%9E%E3%81%8D%E5%9D%82/@35.7176303,139.7139021,19z/data=!4m9!1m3!11m2!2s_gdWZMxKFvyT939NEjGPMVVl5fLx5g!3e2!3m4!1s0x60188d15b20ad283:0xe876c38539a950e2!8m2!3d35.7176303!4d139.7139021&#34;&gt;のぞき坂&lt;/a&gt;，这个原本应该默默无名的小街道居然有着 4.3 星的评分，还有 92 个评论。最快的方式是坐到副都心线 (Fukutoshin Line) 的雑司が谷駅 (Zoshigaya Station)，然后从 3 号出口出，正对着地铁出口的小道前方就是侦探坡。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;entry.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;虽说没有什么人，但是偶尔还是会有车速很快的出租车经过，所以一定要注意来往的车辆，特别是在坡下面的时候。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;往前走两步就能看到标着坡度 22 度的标志，继续向前就能看到整个坡啦：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;slope.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;顺着坡跑下去还能捡到惠的小圆帽：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;hat.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如果选择回头看的话，还能看到圣人惠在坡顶等你：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;megumi.webp&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;咳咳，这当然只是一个死宅的幻想而已。现实生活中哪来的野生妹纸在大马路上给你捡呢？&lt;/p&gt;
+&lt;p&gt;我坐在伦也曾经坐过的台阶上休息，并没有妹纸向我伸出双手，只有几位大妈背着手路过。她们似乎是见多了像我这样的游客，并没有投来好奇的目光。偶尔有几位路人奋力的骑车上坡，还有力有未逮的几位不得不中途下了车开始推着走。后来还出现了一位装束跟我相似的背包客，端着数码相机在各种大家都懂的位置取景，看来也是一位来圣地巡礼的游客。&lt;/p&gt;
+&lt;p&gt;离开了侦探坡，我还去看了片头曲中大家都会走过的铁轨，做了荒川线到面影桥，然后走了回来。可惜绿色的电车似乎已经退休了，没有办法拍到惠和伦也一起做过的长椅。&lt;/p&gt;
+&lt;p&gt;虽说来之前总是吵着喊着要圣地巡礼，但是真的来了之后反而并没有多么的上心。没有做攻略，没有看别人的分享，只是简单的到了这里，按照自己的记忆取了几张景。就算后来发现跟动漫中的角度和距离都相差甚远也没有什么遗憾的感觉，反而是在喜气洋洋的强调：这个地方我去过。想去的哪里是三次元的圣地，分明就是二次元中幸福世界。所谓的圣地巡礼，大概就是寻找的这么一种感觉吧，大概。（好气啊，为啥三次元就没有圣人惠当老婆！）&lt;/p&gt;
+&lt;h2 id=&#34;你的名字&#34;&gt;你的名字&lt;/h2&gt;
+&lt;p&gt;从侦探坡出来之后有点迷茫，不知道要去哪里，几番纠结之后决定刷一波 Ingress 任务暨圣地巡礼。然而等到任务真的开始刷起来之后，就完全顾不上圣地巡礼了。满脑子只关心下一个任务 Po 在什么地方，距离多远，怎么过去。再加上刷的你的名字过于久远，早已不记得里面的各种细节，因此更谈不上什么圣地巡礼了。不过抛开这个噱头不看的话，其实这趟旅程还是很有意思的。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;helicopter.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;从新宿出发，路上还遇到了一个消防博物馆，领了一个入馆证，进去兜了一圈。这个馆挺大的，大约四五层楼的样子，每层楼都是不同年代的展览。展品丰富，各个年代的消防衣，一比一的消防摩托模型，当然也少不了各种交互式的体验项目：比如模拟水枪的一个小游戏，要在指定时间内用水枪灭火，跟生化危机的街机版本差不多，只不过怪兽变成了火灾，手枪变成了水枪。现场还有模拟消防直升机和消防车体验，还能穿着消防衣用灭火器灭火。我非常想去玩，但是在玩的都是大概小学一二年级的小朋友，实在是不好意思排进去，只能默默溜了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;suga-slope.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;须贺神社的附近也有一个这样的小坡，可惜同样没有圣人惠，也没有三叶。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;suga-step.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;最后三叶和泷相遇的台阶，我到的时候有一组 Coser 正在凹造型，我在一旁默默的看着，没有偷拍（真的）。等到她们终于离开之后，我也在台阶上用三叶和泷的角度拍了两张，PS 难度过高，我就不 P 上人物再放出来了。上面那个圣人惠已经是我 PS 能力的极限了。&lt;/p&gt;
+&lt;p&gt;之后做地铁来到明治神宫附近，发现现场好多人穿着圣诞老人的服装。后来搜了搜当地新闻才知道他们在举办 2018 圣诞老人跑活动，嘛，我可能错失了发布第一手现场报道的好机会。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;red-riding.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;一路刷回歌舞伎町附近，你的名字的任务就算是刷完了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;your_name.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;言叶之庭&#34;&gt;言叶之庭&lt;/h2&gt;
+&lt;p&gt;刷完你的名字之后才下午两点，我打算体验一下东京的电影院，于是就转身进了附近的 TOHO 电影院。挑选了半天之后选择了 18 点开始的《来る》，这个电影有不少故事可以讲，不过先继续我的行程吧，等一下再来分享这些故事。买完票才两点半，还有不少时间，我决定再去刷个言叶之庭的拼图任务。&lt;/p&gt;
+&lt;p&gt;步行走到新宿御苑的新宿门，200 日元买了张门票就进去了。下午的时候就下了一点小雨，地上落满了银杏叶。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;ginkgo-on-board.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;继续往里走就能看到言叶之庭中出现的那片湖：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;lake.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;湖边的小亭也非常好看，可惜一直有人在，所以没有取景。本打算回来的时候再拍，然而后来就忘记了，所以很遗憾的没有巡礼成功。&lt;/p&gt;
+&lt;p&gt;说来也巧，我刚走过一个小桥，就下起了小雨，等到我出园的时候，雨就停了。这贼老天也知道给我渲染气氛么……&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;lake_in_the_rain.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;任务刷到中途还解锁了一个成就牌：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;ingress.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;任务刷完啦！&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;ingress-task-2.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;等到任务做完准备出园的时候，天色已经渐渐暗了下来，我走的这个方向更是一个人都没有。园里面还响起了英日双语的语音播报，说是要 4:30 闭院，而现在已经 4:20 了，于是我加快脚步往出口走。在出口的地方我遇到了一位老奶奶，一开始用日语问了我一句什么，我摆摆手表示没有听懂，于是她就换成英语问我那边还有没有人，我表示过来的路上没看到人。她就低声念叨着 &amp;ldquo;too strange&amp;rdquo; 跟我一起朝出口走，在出去的路上她问我从哪里来，我说中国，她十分感兴趣，问 which city，我回答是北京。她听了之后就开始用发音有些奇怪的中文说：“你好”，然后告诉我她在学中文，她每天会听半个小时的广播，还说她曾经去过北京。哇，真的是太厉害了，会三国语言的老奶奶！我夸她中文说的很好（不太清楚外国人说中文的水平咋评价，但是我能一下子就听懂，应该很强了吧 - -），她很开心，跟我聊了好一会儿，期间我还用中文跟她来了几句简单的对话。后来我们就愉快的告别了，老奶奶很 nice 的问我是否需要什么帮助，我拜拜手说 I&amp;rsquo;m OK，让她回家路上小心。&lt;/p&gt;
+&lt;p&gt;等我走的时候才想起来应该要跟这么可爱的老奶奶合个影才是，哎，遗憾。&lt;/p&gt;
+&lt;h2 id=&#34;赤鸡的电影体验&#34;&gt;赤鸡的电影体验&lt;/h2&gt;
+&lt;p&gt;新宿御苑出来之后我就回电影院准备看电影啦，电影票花了 1800 日元，可以直接刷信用卡。电影开场之前还有不少时间，我在电影院里面乱逛。&lt;/p&gt;
+&lt;p&gt;看到了 Fate Stay Night Heaven&amp;rsquo;s Feel 的第二部剧场版宣传单，我酸了，我第一部都没看上，东京人一月份就能看上第二部。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;fate.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;羡慕死了 = =&lt;/p&gt;
+&lt;p&gt;在我吃完无数个柠檬后，我买的电影终于开场了。进去之后感觉跟国内的电影院也没啥差别，只不过提示你禁止吸烟，手机静音都是用日语的而已。坐在我右边的是个小姐姐，一坐下来就脱下了自己的长筒靴，然后开始脱丝袜。玛雅，我的小心脏咚咚的跳，在日本看电影这么赤鸡？小姐姐脱下丝袜之后取出自己带的毯子盖在了腿上，然后开始跟边上同行的小姐姐用日语轻声聊天，应该不是在说我 Hentai 吧= =&lt;/p&gt;
+&lt;p&gt;没多久电影院就坐满了，电影也准时开始播放。开始之后没过几分钟，我就感觉有点不对，这个电影好像有点渗人啊，啥情况。看了半个小时，我终于看懂了，尼玛，这是恐怖片啊！我当时就想直接退场了，因为想象力过于丰富的关系，每次看完恐怖片，我的脑内小剧场都能演成一个三部曲，能吓得我不敢半夜上厕所。但是这是我第一次在东京看电影，着实不容易，所以我犹豫再三还是选择留在原地看完。&lt;/p&gt;
+&lt;p&gt;幸亏我日语不咋地，只能听懂一些基础对话，很多对话和关键信息都获取不到，所以我的带入感也没有那么强烈。几个最为恐怖和吓人的场景对我来说也没有那么可怖，只不过是声音大了点，血流的多了点，还好还好，万幸万幸。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;对电影感兴趣的同学可以做直通车 -&amp;gt; &lt;a href=&#34;https://movie.douban.com/subject/30140229/&#34;&gt;《来る》&lt;/a&gt;，反正我是真的不知道讲的啥，也不想知道……&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
+&lt;p&gt;在三个月之后，日本游记总算是写完了。七天的行程可以写成七篇流水帐真的是有些意想不到，游记这种速食作品可以写整整三个月也是有些意想不到。中间好多次想就这样弃坑算了，但是感谢朋友们的鼓励和支持，我还是成功写完了。&lt;/p&gt;
+&lt;p&gt;写游记本是为了传达自己当时的所思所感所想所为，但是受到自己的能力限制，还是写成了干巴巴的流水帐。生产型御宅果然不好当，还是要继续努力。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Visited from 2018-12-17 to 2018-12-24&lt;/em&gt;&lt;/p&gt;</description></item><item><title>秋叶原——再见，我去二次元了</title><link>https://xuanwo.io/2019/03/20/akihabara/</link><pubDate>Wed, 20 Mar 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/20/akihabara/</guid><description>&lt;p&gt;&lt;img src=&#34;2nd.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;终于来到了本肥宅的主场！&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2 id=&#34;都宫浅草幸运签&#34;&gt;都宫浅草幸运签&lt;/h2&gt;
+&lt;p&gt;吃过早饭之后就向着都宫浅草寺出发了，大老远就看到了大大的“雷門”，走近了还能看到显眼的“松下电器”，据说是 1960 年松下电器的创办人松下幸之助捐款重建的，这个广告打得值了。这里人实在是太多了，所以也没有挤在人堆里面试图合影，直接朝里面走。简单看了看浅草寺之后我买了一瓶浅草限定的富士天然水，然后抽了个签。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;99th.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;就像朝陽閃耀照在門前，變得明亮般地，有因上天的恩惠而來的好事吧。&lt;/p&gt;
+&lt;p&gt;到現在為止的黑夜中月亮再度變成滿月，普照四周吧。開朗的心情會讓周遭和睦、平靜吧。&lt;/p&gt;
+&lt;p&gt;能得到稀奇的財寶吧。&lt;/p&gt;
+&lt;p&gt;變得有名，變成心願實現吧。應該要謹慎粗心大意和驕傲的事。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;嘛，看起来是个不错的签呢！（不过他们这些解签的网站翻译起来都这么尬么- -）&lt;/p&gt;
+&lt;p&gt;同行的小伙伴们签运也大多不错，把签收好之后我们就离开去上野公园了。&lt;/p&gt;
+&lt;h2 id=&#34;上野公园转圈圈&#34;&gt;上野公园转圈圈&lt;/h2&gt;
+&lt;p&gt;感觉距离上野公园不是特别远，但是走过去却花了不少时间，走到的时候小伙伴们已经有些累了，开始坐下休息。我则是掏出 Ingress 开始随意的 hack，在上野公园转了小两圈。&lt;/p&gt;
+&lt;p&gt;我们来的时候上野公园似乎正在准备晚上的一个演出，一群小姐姐在临时搭成的台子上排练，下面的游客三三两两的坐着，有一搭没一搭地看着她们没有背景音乐的尬舞。说到这个，我觉得挺有意思的，我在 B 站上看宅舞的时候没觉得有啥问题，但是现场看她们跳没有 BGM 的宅舞就充满了 emmmmm 的感觉。&lt;/p&gt;
+&lt;p&gt;附近还有一些博物馆，不过大家都没有什么兴趣的样子，就没有进去逛，最后选择了去东京都美术馆看看。去美术馆的路上有个小的儿童乐园，我进去玩了好一会儿。欸？说我玩起来感觉很熟练？才没有。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;duck.webp&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;宅男不是不会逛&#34;&gt;宅男不是不会逛&lt;/h2&gt;
+&lt;p&gt;下面的行程才是我今日的重点——秋叶原。&lt;/p&gt;
+&lt;p&gt;刚出秋叶原站就感觉到了浓浓的二次元味，啊，令人舒适。我一直在四处张望，兴奋的跟小伙伴们介绍前面那个牌子是 FGO 里面的师匠斯卡哈（我有哦，已经满羁绊了），街上不知道哪个店面正在放的歌是当下正在放映的刀剑神域 Alicization 的片头曲。说起来刀剑神域真的很火欸，走在街上哪里都是刀剑神域里面人物的宣传牌子，似乎是什么秋叶原冬季的特卖活动。&lt;/p&gt;
+&lt;p&gt;在一家吉野家随便对付了一下，我们就开始了我们的秋叶原之旅。计划是先一起逛一下几个大的商场，买一些给家里人带的东西，然后我就自由行动（解放天性）。路过了一家模玩店，看我实在按捺不住的样子，朋友们决定先简单的看看。&lt;/p&gt;
+&lt;p&gt;Rua，一进门我就被铺天盖地的 GUNDAM 模型淹没了。这简直就是男人的天堂！货架上密密麻麻的都是各种型号的各式机体，看得我心痒痒都快要入坑了（最后想想自己的手残程度和钱包厚度，还是忍住了。）&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;gundam.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;特别想买的灭烬龙的小模型也没货了，还特地找了店员小哥哥确认了一下，可惜可惜。手刃过辣么多灭烬龙，居然不能带一个小模型回去纪念一下，有些遗憾。（后来在别的店里也没有找到相似品质的模型- -）&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;dragon.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;只是没去对地方&#34;&gt;只是没去对地方&lt;/h2&gt;
+&lt;p&gt;终于放单飞啦！&lt;/p&gt;
+&lt;p&gt;我直奔刚才路过的一家 Animate，第一层进去是各种各样的杂志和店铺特典，然后楼上每一层售卖的东西都不大一样，小说，设定集，绘本，BD，CD 之类。我每一层都转了一圈，差点剁手买了 FGO 的美术设定集和青春猪头少年的原作小说和 BD。青春猪头少年真的挺火，就在我在边上逛悠的时候就有两个人拿了 BD 直接结帐去了。我逛的时候 Animate 有一个小房间来展示摇曳露营相关的物件，还空出了两面墙挂上了每一话的剧情截图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;camping.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;考虑到 Animate 是我逛的第一家店，所以没有买啥空手就出来了。下一家去了 Sofmap，也是一样从一楼一直逛到了顶楼。在这里我犹豫了很久，最后还是没有剁手买下全套的路人女主 BD。一方面是自己比较穷，另一个是自己真的比较穷 TnT 。一卷 BD 加上特典接近 6300 日元，折合人民币近 400 元，全套 BD 第一季第二季共 12 卷，全套带走要接近 5000 块，实在是囊中羞涩。不仅如此，我虽然有 PS 可以播放 BD，但是我日语五十音还背不顺畅，估计 BD 带回去也是疯狂吃灰。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;bd.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;学姐啊，光是能这样把你拿在手上我就已经要吃土大半年了，实在是没有办法带你走。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;（后来回国了才知道淘宝奸商第一季全套 BD 就要卖 5000 块，我在日本买到就是赚到，我哭了，你呢）&lt;/p&gt;
+&lt;p&gt;终于下定决定放弃了带 BD 回去之后，我决定买了一个手办带回去，毕竟手办不大容易触发我的收集强迫症。不过我找了好久都没有找到圣人惠的手办，倒是金发败犬英梨梨的手办不少。这到底是说明圣人惠比较热门，手办一摆出来就被买走了，还是说明其实是英梨梨比较受欢迎嘞？&lt;/p&gt;
+&lt;p&gt;在店里面找了好几圈，终于找到了圣人惠的泳装款手办：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;megumi.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;不过此时我还在纠结到底要不要带走，想了很久还是放回了架子上。谁知道我刚放上去就有一位小哥把手办拿起来仔细端详，我心跳突然加速，这个是我好不容易才找到的，你该不会想买走吧？顿时有了种我的二次元老婆即将离我而去的恐怖感。好在他看了好一会儿，最后还是放了回去。经过这一折腾我想明白了，该剁手的时候就得剁，要是刚才真被那个小哥带走了我得后悔多久啊。为了避免这种情况的发生，我选择了抱着手办逛。&lt;/p&gt;
+&lt;p&gt;手办展示出来的效果大概就这样，不过店里展示出来的这个后面少了带有 blessing software 标识的披风。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;megumi-swim.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这就是你们要的学姐啦，不过根据我扫荡三轮的观察，sofmap 里面应该确实的确是没有这一款的学姐手办了。（果然还是学姐最受欢迎吧！）如果不在意中古的话，大概还能找到学姐的和服款。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;kasumi-utako.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;再往上面逛就是成人游戏了，成人游戏的楼上就是真正的 AV 专区了，我偷偷拍了两张照片就下去了，光是看看封面就感觉顶不住顶不住。&lt;/p&gt;
+&lt;p&gt;付钱买下了我的圣人惠，感觉今天心满意足。（BTW，后来有逛了好多店，没有看到同款的圣人惠泳装款手办，感觉自己赚到了）&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;megumi-in-my-hand.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;圣人惠已经到手，感觉一切都索然无味。又随便逛了逛一些店，买下了一本当季动漫的杂志，之后就没有买更多的东西了。哦，对了，我还在街上扭了两个扭蛋，里面分别是学妹和英梨梨的钥匙扣。&lt;/p&gt;
+&lt;h2 id=&#34;今日彩蛋&#34;&gt;今日彩蛋&lt;/h2&gt;
+&lt;p&gt;晚上回去的时候本来想找个网吧坐坐，结果被复杂的各种套餐和工作人员的蜜汁英文劝退了，于是走了回去。在回去的路上拍了一波夜景就不多说啦，最让我感到印象深刻的是这个：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;emmm.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;emmmmm，如果想歪了那肯定是你自己的错，跟我取景的方式/角度/内容没有任何关系。&lt;/p&gt;</description></item><item><title>日访富士圣山，夜探歌舞伎町</title><link>https://xuanwo.io/2019/03/18/the-way-to-mount-fuji/</link><pubDate>Mon, 18 Mar 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/18/the-way-to-mount-fuji/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;人为什么要去爬山？因为山在那里！&lt;/p&gt;
+&lt;p&gt;为什么到山脚就停？因为来过，吃过，拍过。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;富士急行線&#34;&gt;富士急行線&lt;/h2&gt;
+&lt;p&gt;第一次来日本的游客总是难免需要去富士山打个卡，我们都是俗人，自然难以免俗。&lt;/p&gt;
+&lt;p&gt;慢悠悠的起床，在家附近的一家 711 买了早餐，在店门口吃完，然后坐车前往大月站，准备坐富士急行线。等我们一路换乘坐到大月站之后，已经是上午十点半了。很遗憾买不到&lt;a href=&#34;http://tc.fujikyu-railway.jp/train/&#34;&gt;富士登山電車&lt;/a&gt;的票，只能坐普通的特快，不过景色依然很赞，虽然大多数都在睡觉（我后来也睡着了= =），所以也不要期待有怎么样的观光效果啦。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;first_view.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;小作&#34;&gt;小作&lt;/h2&gt;
+&lt;p&gt;其实我们来富士山并不是真的来看富士山的（认真）。&lt;/p&gt;
+&lt;p&gt;在制定行程的时候，朋友 P 不知道为啥对&lt;a href=&#34;http://you.ctrip.com/food/fujikawaguchiko60548/10986195.html&#34;&gt;小作&lt;/a&gt;特别着迷，吵嚷着一定要去吃熊肉刺身。因此我们定下了早上去富士山，吃熊肉刺身，然后返程的计划。可惜我们公交车坐过了站，我们下车之后走了有一段距离。好在路上风景非常不错，马路整洁开阔，时不时还有学生下课回家（这是最气的，万恶的资本主义）。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;xiaozuo.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;小作门口就是一大片停车场，大概自驾来玩会非常方便停车。店门口的右边是个水车，不过并没有什么实际的作用，倒是很多有在水车前合影留念（我们也一样），看来店家还是懂人心。有攻略上晚上来会非常好看，我们没这个条件，只能脑补一下了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;in_xiaozuo.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;小作店里面如我们想的一样非常日式，进门需要换鞋，踩在软软的垫子上，非常舒服。在开始聊吃的之前我还想说一下小作有些特别的卫生间设计：我们都已经脱鞋了，那上卫生间咋办呢？他们准备了好几双拖鞋，笑。不仅如此，他们还同时提供了坐便和蹲便！不太清楚日本其他地方的公共场所是否也是如此，但是小作这个还是我印象最深刻的。（咳咳，我为啥要关注这种东西）&lt;/p&gt;
+&lt;p&gt;常看我博客的朋友们应该不难想到，我们去吃的时候，熊肉刺身&lt;strong&gt;果然&lt;/strong&gt;没了。最后我们选择了点了一份马肉刺身，鳗鱼饭，还有天妇罗之类的东西，也算是吃得比较开心，没有白来。&lt;/p&gt;
+&lt;h2 id=&#34;八木崎公园&#34;&gt;八木崎公园&lt;/h2&gt;
+&lt;p&gt;吃完饭之后的时间有些鸡肋，直接回去吧有些可惜，再往山上走吧来不及，简单商量了一下，决定去八木崎公园转转再走。八木崎公园没有什么人，有三四个小孩在踢球，他们欢笑声染透了半个公园，以至于整个下午我的耳边都回荡着他们快活的倒数声：“san，ni，ichi……”&lt;/p&gt;
+&lt;p&gt;除了我们之外还有三个看起来就很专业的小姐姐带着行李箱和单反在取景，我在远处抓住了小姐姐举起单反的那个瞬间。她们的话，肯定能理解这种想把此刻拍下来的冲动的吧？&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;sisters.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;打消了上去跟小姐姐搭讪的念头（我要有这本事还能单身到现在么？），沿着河口湖的边缘一直向前走。拍了好多湖中央的小岛，拍了好多湖对面连绵的山峦，拍了好多整个湖泊的全景，但是始终感觉少了点灵魂。哎，突然涌起强烈的想要脱单的心情，以后要是有对象了，我一定把她抓过来用同样的角度全都补上一张。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;lake.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;走过一个小小的山坡之后，能看到有个老人坐在前方坡顶的一块石头上专注的看着远处的富士山。他会想些什么呢？当年的辉煌岁月？歌颂富士山的恢宏与壮丽？抑或是在为最近菜价又涨了两毛发愁？我经常在想住在景区的人面对那些被无数有人拍来拍去的景点会想些什么，可能就跟看我们老家后头的小山包一样吧，山包大了些，来的人多了些，除此以外并无不同。我还在跟朋友们打趣以后老了就在富士山脚下买个屋子，每天都看看，看一眼就赚一趟来回北京来回东京的机票钱，朋友们就回怼，别傻了，那时候你还惦记机票钱么？也是，我要是有钱了，我就买三套路人女主，一套收藏，一套安利，一套自己看。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;goodbye.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;太阳快下山了，我最后又连着拍了好几张富士山，感谢它给我提供了这么多胡思乱想的素材。&lt;/p&gt;
+&lt;h2 id=&#34;shinjuku&#34;&gt;Shinjuku&lt;/h2&gt;
+&lt;p&gt;从富士山回来之后我们就去了新宿，据说是东京年轻人最多的地方，特别繁华，那个有名的歌舞伎町也在这里。小伙伴们去采购，我在四处乱逛。&lt;/p&gt;
+&lt;p&gt;这里的游戏厅简直震撼，从地下三层到楼上两层（？）都是游戏机，在门外还只能听到轰隆隆的声音，一推开门走进去就会感到一股强大的声浪迎面而来。我来的这个店大多都是玩的战姬绝唱，AKB48 之类的游戏，他们推开门，找空位坐下，插上自己的 ID 卡，然后就拿出大把的现金往里塞，玩得特别专注，完全注意不到我在他们背后逡巡。我本来也想体验一把，但是一方面自己身上并没有多少日元现金，另一方面是自己看着别人玩了好一会儿也没有看懂到底是怎么玩的，所以放弃治疗了。&lt;/p&gt;
+&lt;p&gt;除了我看不懂的游戏机之外，马路对面还有一家娃娃机专门店。各种你想得到的，想不到的东西都能做成娃娃机。我进门的时候看到两个小姐姐正在试图抓一个超大的龙猫，她们一个人负责操控方向杆，一个人负责操控下落的按钮。她们念念有词，大概是什么幸运的咒语，然后在爪子放下之后围着机器大喊加油（大概）。最后龙猫&lt;strong&gt;果然&lt;/strong&gt;成功的掉了下来，她们顾不上把龙猫拿出来，就欢呼着抱在一起跳了起来。后来似乎是注意到了我这个陌生人的凝视，她们有些不好意思的吐了吐舌头，把龙猫拿出来笑着跑开了。喂，你们真的不考虑教教我怎么抓么？我也想整一个啊！&lt;/p&gt;
+&lt;p&gt;正在我犹豫要不要出手的时候，边上的店员正在给两位小哥讲解如何抓一个正方体样式的高达模型。只见他熟练的控制着爪子，然后按下按钮，爪子在正方体的一个角落上叩了一下，那个模型就被直接捅了下来。然后他当着我们三个人的面打开机器，把那个模型放了进去（放了进去- -），再锁上，然后说了些就是这样，你们也来试试吧这样的话。那两个小哥果然天赋异禀，尝试了两三次之后成功的搞定一个。这我哪里忍得住啊，抄起自己的西瓜卡就开搞，最后&lt;strong&gt;果然&lt;/strong&gt;沉了，以至于朋友 P 后来问我干啥去了，为啥卡里都没钱了。我嘴角抽了抽，电子竞技，菜是原罪。&lt;/p&gt;
+&lt;p&gt;后来我们一起去逛了歌舞伎町，我们一直口嗨说要进去体验一下，但是最后啥都没干就出来了。（回国之后我才知道，就算想干嘛也是干不了的，因为不给外国人提供服务）我们回地铁站的时候还看到了格拉斯麗新宿酒店楼顶的超大哥斯拉的头，当然免不了抓拍几张。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;godzilla.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我在很久很久之后才知道画面上这个小姑娘叫做战斗天使阿丽塔 = =&lt;/p&gt;
+&lt;/blockquote&gt;</description></item><item><title>名古屋——匆匆一瞥自风流</title><link>https://xuanwo.io/2019/03/14/one-day-at-nagoya/</link><pubDate>Thu, 14 Mar 2019 14:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/14/one-day-at-nagoya/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;这来都来了，总得看一下嘛~&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;失败的圣地巡礼&#34;&gt;失败的圣地巡礼&lt;/h2&gt;
+&lt;p&gt;晚上回到酒店的时候接近十点，然后发现 fc 教授在一个距离我非常近的地方。本来还在想着是不是可以去找 fc 教授再约个夜宵，可惜他当时有事，很遗憾没有见上面。呆在酒店感觉有些无聊，总是想着是不是可以再出去转转，然后发现一个悲痛的事情：大阪也有电器街，跟秋叶原其名，并称为日本两大电器街——大阪日本桥，甚至还有自己的动漫角色： &lt;a href=&#34;http://nippombashi.jp/project/&#34;&gt;http://nippombashi.jp/project/&lt;/a&gt; 。在大阪两天居然没有安排一点时间去日本桥转转，我果然不是合格的二次元御宅= =。已经消逝的时光肯定无法再追回了，印象中记得大阪也有很多动漫圣地，晚上找找资料，如果距离近的话，说不定可以早上的时候去转转。在 &lt;a href=&#34;https://anime-tourism.jp/&#34;&gt;https://anime-tourism.jp/&lt;/a&gt; 上搜寻一番之后，成功找到了 K-ON 在大阪高麗橋附近的两处圣地，在地图中做好标记之后，我安心的睡着了——虽然没有去成日本桥，但是我圣地巡礼了一波 K-ON，这波不亏嘛。&lt;/p&gt;
+&lt;p&gt;一切都在按照计划进行着：准时起床，穿衣洗漱，出门的时候还没有忘记跟值班的小姐姐们打招呼，按照导航的指引在街道中穿行，直到我到达了预订的地点。我最担心的事情果然发生了：来不及补一遍动漫的我完全认不出来圣地在哪里。我沿着在附近转了好几圈，仿佛在寻找救命稻草一般的乱拍，希望自己能侥幸抓到一张。然而这次行动被证明是彻底的大失败- -，在前往名古屋的新干线上，我久久无语。在揭开谜底之前，先来看一下真正的优秀选手的成果：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;k-on-1.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;k-on-2.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图片来自 &lt;a href=&#34;https://medium.com/@peteryang_59307&#34;&gt;@peteryang_59307&lt;/a&gt; 分享的 &lt;a href=&#34;https://www.google.com/maps/d/u/0/viewer?mid=1NVbOhBY68iiovzs-EpBy84WEd2k&#34;&gt;K-ON 圣地巡礼地图&lt;/a&gt;，有想进行 K-ON 圣地巡礼的同学一定要看看看看他写的 &lt;a href=&#34;https://medium.com/@peteryang_59307/4c6fa099157b&#34;&gt;K-ON! けいおん! 聖地巡礼2018.01&lt;/a&gt;，不仅有精确的地点和对比图，还会教你抓拍的技巧，让你拍的更加还原&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;为啥我没有拍到呢？因为我往前多走了一条街。本来应该在高麗通道的，然而我已经走到了浮世小路，再加上我确实记不得这里是哪个场景了，所以就这样错过了。嘛，尽管我圣地巡礼大失败，但是昨天我还是安心的睡着了，这波还是不亏的嘛，回东京了再找机会好了。想通了这一切之后，我再次安心的睡着了。&lt;/p&gt;
+&lt;h2 id=&#34;旅游在外大不易&#34;&gt;旅游在外大不易&lt;/h2&gt;
+&lt;p&gt;名古屋很快就到了，上次来这里因为行程安排的问题，只是匆匆的吃了个吉野家就走了。这次也一样，只是因为要去铁道馆所以安排了半天的时间，并没有多少时间逛这个城市。我们在名古屋站寄存了自己的行李箱，然后准备坐电车去铁道馆。在等车的时候我们遇到了一位来自中国的妈妈，带着她的小孩儿。她一开始只是想问一下是不是在这里排队，神色间充满了疲惫和在异国他乡语言不通带来的几分慌张感。在发现了我们也是中国人之后，她似乎安心了很多，开始跟我们聊了起来。&lt;/p&gt;
+&lt;p&gt;原来她是报了团，带了孩子来玩，然后一天自由活动的时间，孩子想去名古屋的乐高乐园，于是她就从大阪坐新干线过来，等下玩完了还需要坐新干线回去跟旅游团汇合。听完之后我们都非常感慨，为人父母真的是不容易，出来旅游这样折腾。（等我当了爹，要是小屁孩在大阪吵着闹着要去名古屋的乐高乐园，我肯定把他（她）扔到大阪城玩一下午 #flag）&lt;/p&gt;
+&lt;h2 id=&#34;火车侠-变身&#34;&gt;火车侠，变身！&lt;/h2&gt;
+&lt;p&gt;终于到了 JR 铁道馆，我们都迫不及待的在门口凹起了造型：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;showtime.webp&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这张照片是在 &lt;a href=&#34;https://www.photopea.com/&#34;&gt;https://www.photopea.com/&lt;/a&gt; 上在线编辑的，意外的好用（&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;铁道馆主要是通过各个世代列车的展示来体现日本高速铁轨技术的发展，里面有好多铁道的立体模型，还有新干线模拟驾驶设备。可惜的是模拟设备只有一台，然后每次模拟要 10 分钟，所以每个小时只有 6 位幸运儿能够被抽中，显然的，我不是那个天选之人，暴风哭泣。大概工作人员也知道我们的心情，所以模拟驾驶是在一个开放的房间里面进行的，大家可以自己在里面围观。在小姐姐主动向我招手可以靠近观看之后，我上前拍了几张现场的照片：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;shinkansen-drive.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;啊，羡慕的要死，真男人就该开新干线！&lt;/p&gt;
+&lt;p&gt;虽然最新一代的新干线开不了，但是老的电车却只要 100 日元就能体验一次。这来都来了，总得体验一把吧（。跟上面的那个图差不多，也是有个模拟的屏幕，但是没有那么大，跟街机差不多。可以操控的杆只有一个，向前推是前进，保持着中间是匀速，往后推就是减速，中间还有一个按钮用来启动列车。这些东西都是我后来才搞清楚的，我已经完全忘记了是工作人员小姐姐用日语介绍还是用英语介绍的，我只记得我的心脏咚咚的跳，以至于完全没听懂。第一次发车的时候我不知道要按启动键，在来回的推动前进杆，还是小姐姐实在看不下去了帮我按了一下，然后又给我讲解了一遍。&lt;/p&gt;
+&lt;p&gt;模拟的过程其实非常简单，完全按照界面上的提示操作就行，让你加速就加速，让你减速就减速，让你停车就停车。考评你驾驶技术的唯一标准是是否准点到站，是否准点发车。模拟完全结束之后还会显示一下你的成绩，我瞄了一眼，似乎是排在 70 多位。&lt;/p&gt;
+&lt;p&gt;嘛，看来我还是当不了老司机啊，真男人还是去玩莽死它夯它瓦鲁多吧。&lt;/p&gt;
+&lt;p&gt;除了模拟之外还有很多非常丰富的交互式体验内容，有一个是一排按键，可以控制电场的转换，你要按照一定的节奏按下去，才能推动有磁铁的小车前进。这个主要是可以让你实际的体会到磁悬浮列车是如何前进的。我们都知道日本是一个地震多发的岛国，所以有一个演示专门介绍了新干线列车是如果保证在发生地震的时候可以收到信号并停下来的：只要你按一个键，就会有地震发生，然后车就会停下来，大陆还会晃动表示地震正在发生（非常写实）。这个演示我玩了好几次，还录了个视频： &lt;a href=&#34;https://photos.app.goo.gl/9CrTguqvSHAAnd5U9&#34;&gt;地震演示&lt;/a&gt;。我动手玩了铁道馆的每一个演示，个别还玩了好几遍，感觉他们做这些真的非常认真，演示简单直观，基本上不需要理解就能触发，演示的结果也是简单生动，可以让人明白作用原理，科普典范。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;shinkansen-overview.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;摆在大厅中限时展示的各世代新干线机体也是亮点之一，我们穿梭在不同年代的新干线列车中，仿佛穿越了时空一般。不由得想到前些年撤掉的五道口，不知道那些退役的火车都去了哪里，如果能有一个跟铁道馆一样的中国铁道馆就好了。回家之后搜索了一下发现&lt;a href=&#34;http://www.china-rail.org&#34;&gt;中国铁道馆&lt;/a&gt;原来是有的，但是这些展品啊，还是 too young，sometimes naive。打开一看，摆放的都是 &lt;em&gt;中国轧成的第一根60公斤钢轨切片&lt;/em&gt; ，&lt;em&gt;1913年发行的湖广铁路五厘利息债券&lt;/em&gt; 这样的东西。啊，假如我去了这个博物馆，我知道了这些，又有啥意义呢？我一直以为铭记历史的意义在于照亮未来，这些展品并不能带来除了他们本身的存在以外的任何价值，既不能激发人们的思考，也不能引起孩子的好奇。我觉得中国的这些博物馆啊，都得跟日本好好学学，取取经，他们在科普这件事情上，做的可比国内好多了。我大概明白为啥我小时候不喜欢去博物馆了——不好玩啊！&lt;/p&gt;
+&lt;h2 id=&#34;友都八喜的探险&#34;&gt;友都八喜的探险&lt;/h2&gt;
+&lt;p&gt;离开铁道馆之后我们就向这之前定好的民宿前进了，民宿就在 Skytree 附近，位置倒是不错，起床就能看到高高的 Skytree，但是房间内简陋的装潢（跟 Airbnb 上的展示图片相比）还是让我们心凉了一大截。都住进来了，想退也没办法，只能接受现实。过于简陋的房子让我们有些待不住，决定出去走走。正好不远的地方有个友都八喜，决定去逛一逛。友都八喜（Yodobashi ）这个名字真的非常魔性，一直在反复的念叨，感觉朗朗上口。&lt;/p&gt;
+&lt;p&gt;在手机的展区不意外的看到了华为在最显眼的位置，与之打对台的是三星和日本本土的一些运营商。日本这边还是挺奇怪的，基本上不卖无锁的手机，都是捆绑销售的，所以在卖手机的地方经常是好几家运营商在卖。除此以外还有一个我很匪夷所思的现象是日本的手机贴膜和手机壳都是天价，随便看到一个都是 1000 到 2000 日元，换算成人民币要 100 多，而且那个做工完全比不上淘宝上二三十块钱的货。难道是授权的问题么？我想不出来原因，以后要是有机会倒卖一波手机贴膜和手机壳是不是能发财啊？&lt;/p&gt;
+&lt;p&gt;友都八喜的顶楼有个游戏主机的专门店，我在里面看到了一个特别精致的莽死它夯它瓦鲁多的攻略：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;monster-hunter.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;当时十分心动，想买，但是考虑到明天就要去秋叶原了，肯定还会有的，于是没有当场买下来。（真相是后来再也没看到过，导致啥都没有买着，哭了）回国之后顿悟了一个道理：别动心，要是动了，就立刻行动，不要给自己后悔的机会。（此条八毛，微信，支付宝，比特币均可）&lt;/p&gt;
+&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
+&lt;p&gt;这看都看了，不说点什么么？&lt;/p&gt;</description></item><item><title>通过 gRPC 传递 Request ID</title><link>https://xuanwo.io/2019/03/10/request-id-in-grpc/</link><pubDate>Sun, 10 Mar 2019 04:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/10/request-id-in-grpc/</guid><description>&lt;p&gt;分布式追踪是 &lt;a href=&#34;https://www.qingcloud.com/products/anybox/&#34;&gt;Anybox&lt;/a&gt; 项目中的重要一环，其中在每个请求的入口处设置一个 Request ID 是分布式追踪的第一步。这篇文章主要介绍如何利用 gRPC 的 Metadata 与 Interceptor 功能来实现 Request ID 在不同服务间的生成与传递。&lt;/p&gt;
+&lt;h2 id=&#34;介绍&#34;&gt;介绍&lt;/h2&gt;
+&lt;h3 id=&#34;tracing&#34;&gt;Tracing&lt;/h3&gt;
+&lt;p&gt;关于 Tracing 的介绍，可以看朋友 P 写的 &lt;a href=&#34;https://pjw.io/articles/2018/05/08/opentracing-explanations/#section-3&#34;&gt;OpenTracing 详解&lt;/a&gt;，看完之后就能大概明白为什么需要设置并传递 Request ID。&lt;/p&gt;
+&lt;h3 id=&#34;metadata&#34;&gt;Metadata&lt;/h3&gt;
+&lt;p&gt;Metadata 可以理解为一个 HTTP 请求的 Header（它的底层实现就是 HTTP/2 的 Header），用户可以通过访问和修改每个 gRPC Call 的 Metadata 来传递额外的信息：比如认证信息，比如本文中提到的 Request ID。&lt;/p&gt;
+&lt;h3 id=&#34;interceptor&#34;&gt;Interceptor&lt;/h3&gt;
+&lt;p&gt;Interceptor 有点类似于我们平时常用的 HTTP Middleware，不同的是它可以用在 Client 端和 Server 端。比如在收到请求之后输出日志，在请求出现错误的时候输出错误信息，比如获取请求中设置的 Request ID。&lt;/p&gt;
+&lt;h2 id=&#34;实现&#34;&gt;实现&lt;/h2&gt;
+&lt;p&gt;Anybox 后端主要使用 Golang 和 Python 开发，因此本文主要介绍这两种语言的使用方式，其他语言的使用方式应该与之类似。&lt;/p&gt;
+&lt;h3 id=&#34;golang&#34;&gt;Golang&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryInvoker is called by UnaryClientInterceptor to complete RPCs.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryInvoker &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, reply &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;ClientConn, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;CallOption) &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryClientInterceptor intercepts the execution of a unary RPC on the client. invoker is the handler to complete the RPC
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// and it is the responsibility of the interceptor to call it.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// This is an EXPERIMENTAL API.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryClientInterceptor &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, reply &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;ClientConn, invoker UnaryInvoker, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;CallOption) &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryHandler defines the handler invoked by UnaryServerInterceptor to complete the normal
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// execution of a unary RPC. If a UnaryHandler returns an error, it should be produced by the
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// status package, or else gRPC will use codes.Unknown as the status code and err.Error() as
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// the status message of the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryHandler &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}) (&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryServerInterceptor provides a hook to intercept the execution of a unary RPC on the server. info
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// contains all the information of this RPC the interceptor can operate on. And handler is the wrapper
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// of the service method implementation. It is the responsibility of the interceptor to invoke handler
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// to complete the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryServerInterceptor &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, info &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;UnaryServerInfo, handler UnaryHandler) (resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Golang 的实现是把 Metadata 塞在了 context 里面，只需要使用 &lt;code&gt;metadata.FromOutgoingContext(ctx)&lt;/code&gt; 和 &lt;code&gt;metadata.FromIncomingContext(ctx)&lt;/code&gt; 就能够访问本次请求的 Metadata。概念清楚之后代码应该非常好写了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;RequestIDClientInterceptor&lt;/span&gt;() grpc.UnaryClientInterceptor {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(
+ctx context.Context,
+method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{},
+cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;grpc.ClientConn, invoker grpc.UnaryInvoker, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;grpc.CallOption,
+) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;) {
+md, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; metadata.&lt;span style=&#34;color:#06287e&#34;&gt;FromOutgoingContext&lt;/span&gt;(ctx)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
+md = metadata.&lt;span style=&#34;color:#06287e&#34;&gt;Pairs&lt;/span&gt;()
+}
+value &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; ctx.&lt;span style=&#34;color:#06287e&#34;&gt;Value&lt;/span&gt;(trace.RequestID)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; requestID, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; value.(&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;); ok &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; requestID &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt; {
+md[&lt;span style=&#34;color:#007020&#34;&gt;string&lt;/span&gt;(trace.RequestID)] = []&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;{requestID}
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;invoker&lt;/span&gt;(metadata.&lt;span style=&#34;color:#06287e&#34;&gt;NewOutgoingContext&lt;/span&gt;(ctx, md), method, req, resp, cc, opts&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;)
+}
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;RequestIDServerInterceptor&lt;/span&gt;() grpc.UnaryServerInterceptor {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(
+ctx context.Context,
+req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, info &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+) (resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;) {
+md, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; metadata.&lt;span style=&#34;color:#06287e&#34;&gt;FromIncomingContext&lt;/span&gt;(ctx)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
+md = metadata.&lt;span style=&#34;color:#06287e&#34;&gt;Pairs&lt;/span&gt;()
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Set request ID for context.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; requestIDs &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; md[&lt;span style=&#34;color:#007020&#34;&gt;string&lt;/span&gt;(trace.RequestID)]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;len&lt;/span&gt;(requestIDs) &lt;span style=&#34;color:#666&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt; {
+ctx = context.&lt;span style=&#34;color:#06287e&#34;&gt;WithValue&lt;/span&gt;(ctx, trace.RequestID, requestIDs[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;handler&lt;/span&gt;(ctx, req)
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Generate request ID and set context if not exists.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; requestID &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; id.&lt;span style=&#34;color:#06287e&#34;&gt;NewHex32&lt;/span&gt;()
+ctx = context.&lt;span style=&#34;color:#06287e&#34;&gt;WithValue&lt;/span&gt;(ctx, trace.RequestID, requestID)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;handler&lt;/span&gt;(ctx, req)
+}
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;python&#34;&gt;Python&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Python 这边相对更蛋疼一些，注释写得不是非常清晰，给的使用样例也十分的晦涩难懂，看了好一会儿源码才明白怎么用。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Python 想要实现一个 Client Interceptor 的话需要继承 &lt;code&gt;grpc.UnaryUnaryClientInterceptor&lt;/code&gt; 并实现 &lt;code&gt;intercept_unary_unary&lt;/code&gt; 方法。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;UnaryUnaryClientInterceptor&lt;/span&gt;(six&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;with_metaclass(abc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;ABCMeta)):
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Affords intercepting unary-unary invocations.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; This is an EXPERIMENTAL API.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@abc.abstractmethod&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;intercept_unary_unary&lt;/span&gt;(self, continuation, client_call_details, request):
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Intercepts a unary-unary invocation asynchronously.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Args:
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; continuation: A function that proceeds with the invocation by
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; executing the next interceptor in chain or invoking the
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; actual RPC on the underlying Channel. It is the interceptor&amp;#39;s
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; responsibility to call it if it decides to move the RPC forward.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; The interceptor can use
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; `response_future = continuation(client_call_details, request)`
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; to continue with the RPC. `continuation` returns an object that is
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; both a Call for the RPC and a Future. In the event of RPC
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; completion, the return Call-Future&amp;#39;s result value will be
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; the response message of the RPC. Should the event terminate
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; with non-OK status, the returned Call-Future&amp;#39;s exception value
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; will be an RpcError.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; client_call_details: A ClientCallDetails object describing the
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; outgoing RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; request: The request value for the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Returns:
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; An object that is both a Call for the RPC and a Future.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; In the event of RPC completion, the return Call-Future&amp;#39;s
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; result value will be the response message of the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Should the event terminate with non-OK status, the returned
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Call-Future&amp;#39;s exception value will be an RpcError.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;raise&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;NotImplementedError&lt;/span&gt;()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;client_call_details.metadata&lt;/code&gt; 是一个 list，里面的每一个 item 都是由 &lt;code&gt;(key, value)&lt;/code&gt; 组成的元组。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;_ClientCallDetails&lt;/span&gt;(
+collections&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;namedtuple(
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;_ClientCallDetails&amp;#39;&lt;/span&gt;,
+(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;method&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;timeout&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;metadata&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;credentials&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;wait_for_ready&amp;#39;&lt;/span&gt;)),
+grpc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;ClientCallDetails):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;pass&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;RequestIDClientInterceptor&lt;/span&gt;(grpc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;UnaryUnaryClientInterceptor):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;intercept_unary_unary&lt;/span&gt;(self, continuation, client_call_details, request):
+rid &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; the_function_to_generate_request_id()
+logger&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;info(f&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Sending RPC request, Method: {client_call_details.method}, Request ID: {rid}.&amp;#34;&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Add request into client call details, aka, metadata.&lt;/span&gt;
+metadata &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; []
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;metadata &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;is&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; None:
+metadata &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;list&lt;/span&gt;(client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;metadata)
+metadata&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append((&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;request_id&amp;#34;&lt;/span&gt;, rid))
+client_call_details &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; _ClientCallDetails(
+client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;method, client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;timeout, metadata,
+client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;credentials, client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;wait_for_ready)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; continuation(client_call_details, request)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在初始化 Channel 的时候在实例化一下即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;channel &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; insecure_channel(f&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;{host}:{port}&amp;#34;&lt;/span&gt;)
+channel &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; intercept_channel(channel, RequestIDClientInterceptor())&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://pjw.io/articles/2018/05/08/opentracing-explanations/&#34;&gt;OpenTracing 详解&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-metadata.md&#34;&gt;grpc-metadata&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/grpc/grpc/tree/master/examples/python/interceptors&#34;&gt;gRPC Python Interceptor Examples&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>翻车实况第 1 期</title><link>https://xuanwo.io/2019/02/19/rollover-1st/</link><pubDate>Tue, 19 Feb 2019 06:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/02/19/rollover-1st/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;今天翻车了吗？翻了！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;本次翻车的主角是我小老婆：ThinkPad X1 Carbon，在之前的&lt;a href=&#34;https://xuanwo.io/2018/05/16/thinkpad-x1-carbon-6th/&#34;&gt;开箱手记&lt;/a&gt;曾经爆过照片。用了几个月都没有什么太大的问题，但是自从我春节回家一趟之后，我的 x1 开始了它的频频翻车之旅 = =&lt;/p&gt;
+&lt;h2 id=&#34;大江苏魔法伤害&#34;&gt;大江苏魔法伤害&lt;/h2&gt;
+&lt;p&gt;春节回家之后，电脑就一直放在透气性不大好的背包里面。拿出来的时候发现整个电脑的表面都有一层薄薄的水汽，甚至还能找到一点微妙的水墨画的感觉：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;water.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;想着 ThinkPad 种种键盘洒水问题不大的传说，我完全没有把这点水汽当回事。打开电脑，连上网络，&lt;code&gt;yay&lt;/code&gt; 一把梭。发现内核升级了，随手重启一下，结果翻车了：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;failed-to-start.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这还是我第一次遇到这样的问题，从报错上来看应该跟我的更新没有关系，可能是硬盘有了一些奇怪的问题，中间有些 IO 全部失败了，导致好多服务都起不来了。虽然觉得纳闷，但是还是觉得先重启一下看看，确认一下是否稳定复现。结果问题更加严重了，在滴的一声之后，我的电脑完全没有引导，直接进入了空白的 Boot Menu 页：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;empty-boot.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;噫，这是我整个硬盘都挂掉了的节奏啊。当我准备掏出 archiso 看看还没有救的时候，有人找我有事情，于是我把电脑合上走开了。半个小时回来之后，按下电源键，电脑居然直接正常启动了 = =，我拿着 U 盘一脸懵逼。发生了什么？难道刚才启动不了是因为在启动的一瞬间，硬盘进入了量子态？放置 play 了一会儿之后，它又自己回来了？薛定谔的硬盘？？？&lt;/p&gt;
+&lt;p&gt;稍微琢磨了一下之后，把问题归咎于江苏水汽比较重，电脑长期放在包里面，导致里面的某些部件出现了问题，在开放环境放了一会儿之后就自己好了。（不管你信不信，反正我信了）&lt;/p&gt;
+&lt;h2 id=&#34;帝都的静电攻击&#34;&gt;帝都的静电攻击&lt;/h2&gt;
+&lt;p&gt;我天真的以为翻车事件已经结束了，然而轮胎打滑通常只是真正车祸的前奏（&lt;/p&gt;
+&lt;p&gt;返工的第二天，我普通的起床、普通的上班、普通的进入办公室、普通的坐下、普通的升级系统、普通的重启、普通的接上显示器，普通的，等一下！我的显示器咋不亮了！在那一瞬间，我的大脑瞬间渲染出无数剧情： &lt;em&gt;电脑坏了，送去维修，错过用户大单，被公司开除，孤单一人行走在冬夜空档的大街上，发誓再也不滚系统了。。。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;摇摇头，开始仔细研究发生了什么。&lt;/p&gt;
+&lt;p&gt;显卡是 Intel 提供的集成显卡，驱动用的是 Kernel Mode Setting。正常情况下如果我接上了外接显示器，kernel 会响应并接管这个设备的显示，就像下面这个图一样：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;kms.svg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;每个显示输出设备的连接状态都会都会保存为一个形如 &lt;code&gt;/sys/class/drm/card0-HDMI-A-1/status&lt;/code&gt; 的文件，archwiki 上提供了一个命令来查看电脑上所有输出设备的状态：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; p in /sys/class/drm/*/status; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;con&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;p&lt;/span&gt;%/status&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;}&lt;/span&gt;; &lt;span style=&#34;color:#007020&#34;&gt;echo&lt;/span&gt; -n &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;con&lt;/span&gt;#*/card?-&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;: &amp;#34;&lt;/span&gt;; cat &lt;span style=&#34;color:#bb60d5&#34;&gt;$p&lt;/span&gt;; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;done&lt;/span&gt;
+DP-1: disconnected
+DP-2: disconnected
+eDP-1: connected
+HDMI-A-1: disconnected
+HDMI-A-2: disconnected&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;可以看出来，除了内置的显示屏 &lt;code&gt;eDP-1&lt;/code&gt; 没问题之外，其他的接口都是断开状态的，尽管我的线已经接上去了。噫，照这么看，我的 HDMI 和 Type-C 口都凉了啊，难道只能送修了么？&lt;/p&gt;
+&lt;p&gt;不要放弃治疗，可能是显示器坏了呢！我把同事的电脑拿过来插上发现没有问题；而我的电脑接他的显示器则同样是显示不出来。凉了？不，我还不能就这样放弃治疗，说不定是底裤 D 升级的时候又搞崩了什么东西呢？我选择回滚了一波 systemd，重启，奇迹没有发生。说不定是内核有问题呢？我选择回滚了一波内核，重启，奇迹仍然没有发生。我叹了口气，果然，玄学是不存在的，我的电脑凉了。&lt;/p&gt;
+&lt;p&gt;我都已经放弃治疗准备送修了，我的朋友 P 坚持让我搞个 PE 什么的看看，说不定接口还没坏。反正也不差那么几分钟，为了让我朋友，更为了让我自己死心，我觉得再进行最后一次尝试。我掏出了我的 Archiso 插上，开机，插上 HDMI 线，卧槽，显示器亮了！接口没坏！&lt;/p&gt;
+&lt;p&gt;这可真是&lt;code&gt;踏破铁鞋无觅处，柳暗花明又一村&lt;/code&gt;，我感到自己的人生再次充满了希望，我的大脑中再次闪过无数画面：&lt;em&gt;电脑修好了，完成了后端大规模重构，性能提升 150%，成为了年度优秀员工，找到了三次元老婆，走向人生巅峰。。。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;咳咳咳，冷静。现在的情况是已经排除了是硬件问题，我决定通过 Archlinux Rollback Machine 把电脑回滚到昨天。拔掉 U 盘，开机，我鬼使神差的把线直接接到了电脑上，卧槽，显示器亮了！所以说，既不是硬件问题，也不是软件问题？那还能是啥问题，人品问题么？&lt;/p&gt;
+&lt;p&gt;emmmmmm，仔细想了一下，我觉得不如解释成静电问题，插上 USB 的时候释放掉了机器内部的静电，然后所有的接口都恢复正常了。（不管你信不信，反正我是真的信了）&lt;/p&gt;
+&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
+&lt;p&gt;以上就是本次的翻车实录~&lt;/p&gt;
+&lt;h2 id=&#34;引用资料&#34;&gt;引用资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.kernel.org/doc/html/v4.15/gpu/drm-kms.html&#34;&gt;Kernel Mode Setting (KMS)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/kernel_mode_setting#Forcing_modes&#34;&gt;Kernel mode setting - Archwiki&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>大阪——风起雨落夜将至</title><link>https://xuanwo.io/2019/02/16/second-day-at-osaka/</link><pubDate>Sat, 16 Feb 2019 06:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/02/16/second-day-at-osaka/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;出去玩七天，这游记能写半年啊- -，我都想放弃治疗了，但是坑都开了，还是得填完。。。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;清晨的帝国&#34;&gt;清晨的帝国&lt;/h2&gt;
+&lt;p&gt;尽管昨夜 High 到了黎明（我不说你们是不是都快忘了我昨晚赢了一把大乱斗？），但是今天仍然起得很早。时间还早，于是没有叫我的朋友们起床，决定还是跟之前一样，自己先出去走走。打开地图发现我们住的地方附近有个公园，打算先过去看看，然后找个地方吃早饭。&lt;/p&gt;
+&lt;p&gt;依然是沿途一阵乱拍，比较好玩的事情可能就是沿途有很多“灾难时避难所”的指示。地方不远，很快就到了，但是我对着地图确认了很久，因为眼前的景色一点都不像是一个公园：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;on-bridge.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;就这么大点地方，也能叫公园吗？给大妈们跳广场舞都不够哎= =&lt;/p&gt;
+&lt;h2 id=&#34;凛冬之湖&#34;&gt;凛冬之湖&lt;/h2&gt;
+&lt;p&gt;接受了现实的我只能继续往前走，地图告诉我前方有个大大的湖心岛，我决定从远处看看。途中路过了今桥，然后还知道了这条小河叫做东横堀川，甚至还头一次知道了大阪又叫做水之都= =。终于来到了河边，这时候已经可以清楚的看到河心岛上的景色了：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;river.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;站在桥上拍了几张近处的河心岛，此时已经有点饿了，决定先找个地方解决早饭，然后回酒店准备出发。回去的途中还看到了卡普空的大楼，时间还在，里面一点人都没有，不知道怪物猎人世界是不是就是在这里做出来的。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;capcom.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;本来想在日本尝试一下饺子，但是他们还没有开门，只能吃他边上开的一家牛丼店：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;breakfast.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;吃过早饭之后朋友们也起床了，去对面的全家买了些吃的带了回去。&lt;/p&gt;
+&lt;h2 id=&#34;多事之秋&#34;&gt;多事之秋&lt;/h2&gt;
+&lt;p&gt;按照昨天规划好的路线，我们先去大阪城。路上有点冷，然后就看到几个可爱的小孩子三五成群，上半身是正装，下半身穿着黑色的及膝短裤，黑色的靴子，手里还提着一把伞，一路蹦达过去了，日本的小孩抗冻真的是从小练出来的哎。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;osaka-castle.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;今天朋友 P 化身摄影大师，全程教朋友 F 摄影技巧，光线，角度，距离等等- -，我在一旁伸出手掌按在着据说是古代留下来的石头上，试图呼应出蕴藏在里面的不屈意志。但是还没等我呼应出来，就已经招呼去下一个地方了，有点遗憾。&lt;/p&gt;
+&lt;p&gt;我们简单的沿着游览路线转了一圈，原来是护城河的地方已经长满了叫不出名字的花花草草和青苔。朋友 P 把 F 拉去进行摄影特训，我则是在一棵大树下面坐下歇息。期间还被人叫“帅哥”（别想了，没有艳遇的），帮几个漂亮妹子拍了合影。&lt;/p&gt;
+&lt;h2 id=&#34;垂暮之年&#34;&gt;垂暮之年&lt;/h2&gt;
+&lt;p&gt;下一站是天王寺动物园，不知道为啥，我总是会看成天王山动物园- -&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;tennoji-zoo.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;萌物镇楼：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;moe.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;可能是因为冬天实在比较冷的缘故，不少动物都没啥活力，有些动物还因为过于年老，身上很多地方的毛都脱落了，露出了光光的皮肤。看到老迈的北极熊在不停的把装食物的桶套在头上，大概以为会有吃的掉下来，感觉还是太残酷了，不适合观光。（虽然当时觉得蠢萌蠢萌的，甚至还笑得很开心，但是事后看看当时拍下的照片，感觉挺伤感，不多提了）&lt;/p&gt;
+&lt;h2 id=&#34;神来之笔&#34;&gt;神来之笔&lt;/h2&gt;
+&lt;p&gt;回酒店休息一下之后，我们再度出发，这次的目标是大阪海游馆，据说是世界最大级别的水族馆。边上还有个超大的天保山摩天轮，不过我们这次没有坐，可惜可惜。&lt;/p&gt;
+&lt;p&gt;走到了第一个通道，整个人都兴奋起来了。整个通道都是此起彼伏哇哇叫的惊叹声，我就不一样了，我在执着地抓拍蠢萌蠢萌的笑脸。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;smile.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;我们先是走到整个建筑物的最高处，然后一路向下。刚好遇到工作人员在喂食：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;feed.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;（这是海豹还是海狮？突然有点傻傻分不清了。。）看到它吃完东西之后还想要，但是工作人员用手掌拍了拍它的嘴表示到此为止，然后它就萌萌的向右翻滚了一圈，滚进了水里。&lt;/p&gt;
+&lt;p&gt;看到了一条超大超大的鱼，浑身跟化石一样，以至于我们一直在讨论它到底是不是活的，是不是石头= =，直到它真的游走了才相信这是一条活鱼。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;big-fish.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这个鱼朝我飞过来的时候我顿时想起小时候看过的动画片猛兽侠里面的一个角色，到家之后用自己还记得大猩猩队长之类的关键词搜索了半天才想起来叫做急先锋。（搭配这个视频服用，效果更佳： &lt;a href=&#34;https://v.qq.com/x/page/e0337omdgol.html&#34;&gt;https://v.qq.com/x/page/e0337omdgol.html&lt;/a&gt; ，在找了好久呢 - -）&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;pioneer.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;还看到了真实版本的 HTML5 性能测试之 3D 鱼缸：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;fish-tank.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;啊，海洋馆真的是太有意思了！&lt;/p&gt;
+&lt;h2 id=&#34;忽然之间&#34;&gt;忽然之间&lt;/h2&gt;
+&lt;p&gt;我们在海游馆大概逛了一个多小时，在附近的天保山商场的 KFC 中解决了晚餐，然后决定出发去道顿堀血拼。&lt;/p&gt;
+&lt;p&gt;血拼活动我自然是没有参与啦，在附近随便逛了逛，结果下起了小雨，在蒙蒙的细雨中吃烤串感觉相当有意思。有个好玩的事情是他们不允许边走边吃东西，小吃必须要在买的地方吃完，包装，竹棍之类的要扔在店里的垃圾桶里才能走。这个很有意思，一方面避免了边吃边走容易在人群中蹭到别人身上的尴尬事件，另一方面也降低了保洁工作的负担。还有就是路上没有垃圾桶，想带走你就必须一直拎着垃圾袋。&lt;/p&gt;
+&lt;p&gt;在回酒店的路上顺便逛了逛日本的书店。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;bookshop.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;看到了当时正在热播的兔女郎学姐，正冲动想买来的时候想起来我还不会日语，打住打住。&lt;/p&gt;
+&lt;p&gt;起风啦，下雨啦，天黑啦，早些归家。&lt;/p&gt;
+&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
+&lt;p&gt;所有的标题都来自《将夜》，与内容无关~&lt;/p&gt;</description></item><item><title>大阪——波澜不惊的日常</title><link>https://xuanwo.io/2019/01/26/first-day-at-osaka/</link><pubDate>Sat, 26 Jan 2019 06:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/01/26/first-day-at-osaka/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;真的猛士，敢于直面惨淡的人生，敢于正视淋漓的鲜血，敢于表演丢人的剧本。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;one-one-one&#34;&gt;One，One，One&lt;/h2&gt;
+&lt;p&gt;我醒的时候，天还没有全亮，朋友还没起床。房间里面也没有什么娱乐设施，于是决定出去走走。东京的清晨有点凉，衣服穿的不太够的我不由得用力的裹了裹。街上的行人很少，不过走的都很快，大概他们也很冷吧。街头的灯还亮着，似乎没有从昨夜的喧嚣中醒来。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;streets-that-no-awake.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;天空中一直回荡着乌鸦的叫声，或许是因为清晨的关系，鸟叫声传的很远，近处与远处交相回响，有了点音乐的感觉。旅行中的人总是更具包容，此时并不觉得吵，反而觉得很有意思，尽管可能回家之后听到同样的叫声免不了要抱怨几句：“吵死了”。&lt;/p&gt;
+&lt;p&gt;天渐渐的变亮，而我的身体却愈发觉得冷，看到街旁有一个热饮店便去买了杯热红茶。（事实证明这是个错误的决定，因为喝完之后我一直想吐，难受了很久= =）双手抱着热茶，我继续饶有兴致的做一个观察者。哪怕是街头的各种标语都觉得新鲜：比如路上喫煙禁止，自転車放置禁止这些。&lt;/p&gt;
+&lt;p&gt;一路走来拍了很多莫名其妙的照片，就不放出来荼毒大家了，唯一一个我觉得有意思的照片是这样的：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;magic.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;拍的时候是乱拍的，但是回家之后翻到这一张觉得非常迷幻。本身隔着玻璃橱窗拍的，店里面还有一个镜子，重重倒影之后，散落在我脚旁是店家们扔出来的生活垃圾，仿佛在提醒我真实的世界在何方。&lt;/p&gt;
+&lt;p&gt;又逛了一会儿之后收到了朋友的消息，他们已经出门了，便跟他们汇合一起去筑地市场。事先就打听过，筑地市场特别火，排队的人很多，所以要早点去。去了之后发现好像跟我们想像的不太一样，相比于饮食街，它更像是一个海鲜批发市场。我们随便找了个店面进去吃了一会儿，但是感觉没啥大的差别，于是没有多吃就出来了。然后现场查攻略，才知道筑底市场分为场内和场外，那些名店大多都在场内。&lt;/p&gt;
+&lt;p&gt;稍微讨论了一下，我们决定做公交车去场内吃大和寿司，这来都来了，不打个卡岂不是亏了。场内市场在一个小岛上，我们头一次在日本感受到了什么叫开阔：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;tsukiji.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这里大概是装货卸货的地方吧，一大块地上啥都没有，感觉意外的奢侈。按照导航的指引，没多久就到了目的地：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;daiwasushi.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;跟我们差不多时候到的还有一群扛着长枪短炮的摄影师们，后来隐约明白他们是国外来的一个团队，来采访大和寿司的店长。我当时心里一阵不妙，这个店这么厉害的么，怕不是要吃不起。&lt;/p&gt;
+&lt;p&gt;进去之后发现有点像回转寿司，一个厨师负责三到四人的样子，坐下来之后才发现这个店没有菜单- -。能吃的东西都放在面前的玻璃柜中，顾客说自己要什么，厨师直接拿出来做好就直接吃了。真正的新鲜，没有中间商赚差价！我选中了一个看起来像是三文鱼的东西，想告诉厨师我们一人一个，但是一时想不起来咋说，于是一边手指着我们三，一边说出了那句如果我能穿越回去就算是掐死自己也不让说出来的禁句：&lt;strong&gt;“One, One, One”&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;场面一阵安静，我的额头上似乎凌空冒出了三条黑线，我们的朋友在忍住不要发出爆笑，我面前的小哥哥愣了一下之后笑着点头示意：“OK, OK, One, One, One.”。啊，我要疯了= =，漩涡酱大危机，前所未有的丢脸时刻。不行，我得稳住，假装无事发生过，之后每一次点新的寿司我都来一遍 One，One，One，假装这是常见用法。大丈夫です，我能行的。&lt;/p&gt;
+&lt;p&gt;我能稳，但是厨师不让我稳- -。只见他一边切寿司一边跟边上的同事说笑，虽然听不懂，但是时不时冒出来的 “One，One，One” 在疯狂暗示他们说笑的内容。喂，你们这样不行吧，你们知不知道你们在调笑来自异国他乡的客人啊，岂可修！我只能假装认真拍照来掩饰我心中的惊涛骇浪：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;one,one,one.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;别笑了，你看这三文鱼多新鲜！&lt;/p&gt;
+&lt;h2 id=&#34;走-走-走&#34;&gt;走，走，走&lt;/h2&gt;
+&lt;p&gt;吃完寿司之后我们就坐电车回到酒店收拾行囊准备去大阪了，不过因为上午耽搁的比较久，直接坐到大阪的话可能要饿死了，所以决定先坐到名古屋，在名古屋吃完中饭之后再去大阪。&lt;/p&gt;
+&lt;p&gt;经过了有点纠结的换票之后，我们终于看到了新干线的列车：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;shinkansen.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;wow，帅到，这就是铁胆火车侠的本体么！&lt;/p&gt;
+&lt;p&gt;虽说是新干线，但是感觉跟平时坐电车没差，只不过距离远了一些。车上的体验跟国内高铁差不多，相对更安静一点。无聊的我无声哼着无聊的 disco 在无聊的乱拍，直到途中有一段似乎经过了海边：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;oversea.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;列车远离海岸线之后我也困了起来，在车上睡着了。再醒来的时候到了名古屋，已经是中午饭点了，我们决定出去随便吃点然后回来接着坐到大阪。可是车站边上有啥吃的呢？出站之后我们有些懵逼的环顾着四周。啊，有了，我们去吃吉野家！在克服了最初的违和感之后，我们都吃的非常满意，以至于之后的几天都念念不忘吃了好几顿。他们这里叫做牛丼，我们那边叫做牛肉饭的玩意儿是这样子的：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;gyudon.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;我就是饿死，从新干线上跳下去，我也不吃什么吉野家！真香，再来一碗！&lt;/p&gt;
+&lt;h2 id=&#34;买-买-买&#34;&gt;买，买，买&lt;/h2&gt;
+&lt;p&gt;终于吃饱之后，我们换了从名古屋到大阪的票，继续出发。&lt;/p&gt;
+&lt;p&gt;到大阪的时候已经下午三点了，我们决定从地铁站直接走到酒店。我开着导航在前方带队，途中发现了一个特别有意思的事情：这大阪的街道为何这么整齐？&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;streets-in-osaka.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;以至于我们一路上都在讨论一个 7 * 8 的方格，从左下角走到右上角有多少种不同的路线。&lt;/p&gt;
+&lt;p&gt;一路说着闲话，终于到了被我们称为 “日本全季” 的 WBF 北浜店。在 WBF 住的这两天是我们住的最舒服的两天，离开的时候都有些留恋，琢磨着是不是在东京也找个 WBF 住。进门就能看到一个空气净化器，桌上立着几份资料，从里面找到了一份成人节目的列表，偷偷拍了一张，恪守伦理的 “伦理君” 当然是没有看的啦（太贵了）。&lt;/p&gt;
+&lt;p&gt;稍微修整一下之后便朝着心斋桥出发了，此时下午五点，天色渐暗，有点好看：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;night-in-osaka.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;心斋桥附近的街上正好有个灯展，还有个 Apple Store，去观摩了一波。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;light.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;接下来就是买买买时间，我在边上当了一个忠实的吃瓜群众。看着他们熟练的出入各种药妆店，嘴里吞吐着各种我听不懂的术语，这大概就是次元壁吧，我想。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;ruo.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;晚餐吃了一顿温野菜，对着他们的菜单研究了很久。跟国内不太一样的是，日本这边似乎会分成很多套餐，高级的套餐会比低级多一些肉类（日本真的很喜欢各种各样的套餐哎。。），最后决定吃最低级的那种，因为我们吃不了多少，也吃不出来不同种类的牛肉有啥差别。果然没有吃多少就撤了- -，战斗力不强的话就是这个样子啦。&lt;/p&gt;
+&lt;p&gt;回酒店的时候由于我的指挥失误，我们多走了整整 10 分钟，小伙伴们连砍我的力气都没有了，只会无力的问我：还有多久到？嘛，快到了，快到了。我故作欢快地回答，一边把导航的音量调低。&lt;/p&gt;
+&lt;p&gt;到了酒店之后洗了个舒服的热水澡，我们联袂上演了一场惊天地泣鬼神的大翻盘，可以点击&lt;a href=&#34;https://photos.app.goo.gl/tC3zoSu91BwAnMRw6&#34;&gt;这里&lt;/a&gt;查看录像，那位走位飘逸，操作风骚的 &lt;code&gt;qsIndex&lt;/code&gt; 就是我啦~&lt;/p&gt;
+&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
+&lt;p&gt;到现在已经两天过去啦，按照目前这进度，在我下次出去玩之前应该能写完的吧？。。。&lt;/p&gt;</description></item></channel></rss>

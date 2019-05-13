@@ -1,0 +1,112 @@
+<!doctype html><html><head><title>Xuanwo&#39;s Blog</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content=Technology,Code,Program,Linux,><meta name=author content=Xuanwo><meta property=og:title content="Xuanwo's Blog"><meta property=og:description content="A blog maintained by an interesting programmer."><meta property=og:type content=website><meta property=og:locale content=en_US><meta property=og:url content=https://xuanwo.io/><link href=https://xuanwo.io/index.xml rel=alternate type=application/rss+xml title="Xuanwo's Blog"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/milligram@1.3.0/dist/milligram.min.css integrity="sha256-Ro/wP8uUi8LR71kwIdilf78atpu8bTEwrK5ZotZo+Zc=" crossorigin=anonymous><link rel=stylesheet href=/css/main.min.css><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.54.0"></head><body><div id=container><header id=header><div id=header-outer class=outer><div id=header-inner class=inner><a id=main-nav-toggle class=nav-icon href=javascript:;><svg width="1em" height="1em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#bars"/></svg></a><a id=logo class=logo-text href=https://xuanwo.io>Xuanwo&#39;s Blog</a><nav id=main-nav><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<a class=main-nav-link href=/about/>关于我</a></nav></div></div></header><section id=main class=outer><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 itemprop=name><a class=article-title href=/2014/11/04/uva-714-copying-books/>UVa 714 Copying Books</a></h1></header><div class=article-meta><a href=/2014/11/04/uva-714-copying-books/ class=article-date><time datetime=2014-11-04T13:29:52.000&#43;00:00 itemprop=datePublished>2014-11-04</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div></div><div class=article-entry itemprop=articleBody><p><h2 id=题目>题目</h2><p>源地址：</p><p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=113&amp;page=show_problem&amp;problem=655">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=113&amp;page=show_problem&amp;problem=655</a></p><h1 id=理解>理解</h1><p>比赛的时候读懂了题意，但是没有拿出来敲，因为感觉自己应该是敲不出来的。实际上，这是一道小白书上提到过的题目，也就是最大值最小化问题。
+<img src=/imgs/exercise/UVa-714.jpg alt=算法竞赛入门经典P151>
+使用一个pos数组来保存是否在此分段，然后使用二分最小值来确定pos的取值。
+实际上我还不是能够非常具体地描述中间二分的过程，不妨在二分的循环当中打印pos数组的值来找一找感觉。</p><pre><code>Input:
+1
+9 3
+100 200 300 400 500 600 700 800 900
+
+Output:
+0 0 0 0 0 1 0 0 0
+0 0 0 0 0 1 0 0 0
+0 0 0 0 0 0 1 0 0
+0 0 0 1 0 0 1 0 0
+0 0 0 1 0 0 1 0 0
+0 0 0 0 0 0 0 1 0
+0 0 0 0 0 0 1 1 0
+0 0 0 0 1 0 1 1 0
+0 1 0 0 1 0 1 1 0
+0 1 0 0 1 0 1 1 0
+0 0 0 0 0 0 0 1 0
+0 0 0 0 0 1 0 1 0
+0 0 1 0 0 1 0 1 0
+0 0 1 0 0 1 0 1 0
+0 0 0 0 0 0 0 1 0
+0 0 0 0 0 1 0 1 0
+0 0 1 0 0 1 0 1 0
+0 0 1 0 0 1 0 1 0
+0 0 0 0 0 0 1 0 0
+0 0 0 0 1 0 1 0 0
+0 0 0 0 1 0 1 0 0
+0 0 0 0 0 0 1 0 0
+0 0 0 0 1 0 1 0 0
+0 0 0 0 1 0 1 0 0
+0 0 0 0 0 0 1 0 0
+0 0 0 0 1 0 1 0 0
+0 0 0 0 1 0 1 0 0
+0 0 0 0 0 0 0 1 0
+0 0 0 0 0 1 0 1 0
+0 0 1 0 0 1 0 1 0
+0 0 1 0 0 1 0 1 0
+0 0 0 0 0 0 0 1 0
+0 0 0 0 0 1 0 1 0
+0 0 1 0 0 1 0 1 0
+0 0 1 0 0 1 0 1 0
+0 0 0 0 0 0 1 0 0
+0 0 0 0 1 0 1 0 0
+0 0 0 0 1 0 1 0 0
+0 0 0 0 0 0 1 0 0
+0 0 0 0 1 0 1 0 0
+0 0 0 0 1 0 1 0 0
+0 0 0 0 0 0 1 0 0
+0 0 0 0 1 0 1 0 0
+0 0 0 0 1 0 1 0 0
+
+100 200 300 400 500 / 600 700 / 800 900
+
+</code></pre><p>除去最后一行是答案，不去考虑之外，我们可以看到这是一个在中央取值，然后不断向右靠拢的过程。</p></p><p class=article-more-link><a href=/2014/11/04/uva-714-copying-books/>Read More</a></p></div></div></article><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 itemprop=name><a class=article-title href=/2014/11/04/uva-11134-fabled-rooks/>UVa 11134 Fabled Rooks</a></h1></header><div class=article-meta><a href=/2014/11/04/uva-11134-fabled-rooks/ class=article-date><time datetime=2014-11-04T12:58:56.000&#43;00:00 itemprop=datePublished>2014-11-04</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div></div><div class=article-entry itemprop=articleBody><p><h2 id=题目>题目</h2><p>源地址：</p><p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=24&amp;page=show_problem&amp;problem=2075">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=24&amp;page=show_problem&amp;problem=2075</a></p><h1 id=理解>理解</h1><p>比赛的时候没有写出来。其实很容易可以看出来，这个题目可以变成两个子题目，也就是X和Y方向并没有直接的关系，完全可以看成在X方向是不重叠摆放和在Y方向是不重叠摆放的问题。
+一开始的想法是只要对它进行排序，然后逐个判断是否符合题意就OK，但是后来发现这样并不能解决问题。后来看了题解，决定采用优先队列来维护可以选择的区间。也就是每次都在区间[l,r]中选取l最小且r最小的区间，然后设一个变量maxx保存一下当前已经摆放到了什么位置。要是存在一个l&lt;maxx，那么则需要将这个l修改为maxx，并且重新放入队列中。这样，就能保证后面的棋子都不会和前面已经摆好的重叠。</p></p><p class=article-more-link><a href=/2014/11/04/uva-11134-fabled-rooks/>Read More</a></p></div></div></article><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 itemprop=name><a class=article-title href=/2014/11/04/contest-cugb-13-person-1/>13级个人赛第一场</a></h1></header><div class=article-meta><a href=/2014/11/04/contest-cugb-13-person-1/ class=article-date><time datetime=2014-11-04T10:28:10.000&#43;00:00 itemprop=datePublished>2014-11-04</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div></div><div class=article-entry itemprop=articleBody><p>比赛地址 http://acm.hust.edu.cn/vjudge/contest/view.action?cid=61737#overview
+比赛总结 这次比赛打得还行- -，最近生活比较规律，连带着人也变得机智很多，暴力乱搞加开脑洞，过了很多题。但是，也从侧面暴露出编码能力不强，算法功底不扎实的缺点。接下来还是要好好训练，多多刷题。跟队友多交流，相互促进，不停地PUSH自己。
+分题讲解 A题（STL，模拟） 比赛的时候真的看不懂题意= =，太弱了。赛后看的题解大涨姿势，学会了好多神奇的技巧。 只要理解了翻转的过程，题目并不是很难。 http://xuanwo.io/2014/11/04/UVa-120-Stacks-of-Flapjacks/
+B题（构造） 超想像CLJ一样来一句傻逼题。 开脑洞过了题之后还没反应过来= =，当时的唯一想法是卧槽，这么逗的题怎么没人过？ 然后吐槽了范神带歪了榜= =，导致前面很多水题大家都没做出来。 http://xuanwo.io/2014/11/05/UVa-1605-Building-for-UN/
+C题（暴力） 乱搞，开了一个一千六百万的数组二分过了。 不知道是谁告诉我只要学会暴力就能区域赛拿银来着= =。 http://xuanwo.io/2014/11/05/UVa-1152-4-Values-whose-Sum-is-0/
+D题（贪心） 把问题想得太复杂，其实X和Y方向根本就没有关系，完全可以分开考虑。 http://xuanwo.io/2014/11/04/UVa-11134-Fabled-Rooks/
+E题（贪心） 大胆地喊一句：傻逼题。 想了半天的还差点开始敲网络流模板的我更加傻逼= =。 http://xuanwo.io/2014/11/05/UVa-11054-Wine-trading-in-Gergovia/
+F题（几何） 扫描线算法，当年土豪学长跟我们说过，但是打比赛的时候完全没有印象。 也跟读题能力有关系，看到题目长，题意复杂就不敢下手，太弱了，要加强。 http://xuanwo.io/2014/11/04/UVa-1606-Amphiphilic-Carbon-Molecules/
+G题（模拟） 一开始以为是神奇的数据结构，实际上不用那么复杂。 http://xuanwo.io/2014/11/05/UVa-11572-Unique-Snowflakes/
+H题（二分，乱搞） 感觉是最长上升子序列演变过来的题目。 http://xuanwo.io/2014/11/05/UVa-1471-Defense-Lines/
+I题（几何） 赛后看了大神的论文，数形结合是厉害啊= =。 http://xuanwo.io/2014/11/04/UVa-1451-Average/
+J题（贪心） 小白书上的最大值最小化问题。 http://xuanwo.io/2014/11/04/UVa-714-Copying-Books/
+K题（水题） 傻逼题——我还WA了一发。。。 http://xuanwo.io/2014/11/05/UVa-10954-Add-All/
+L题（分治） 貌似是第一次接触分治，这种把大问题分解为多个小问题的思想需要掌握。 http://xuanwo.io/2014/11/05/UVa-12627-Erratic-Expansion/
+M题（模拟，剪枝） 很多人过的题，但是我没想出来怎么敲。 http://xuanwo.io/2014/11/06/UVa-11093-Just-Finish-it-up/
+N题 O题（模拟） 跟G题有点像，同样是另外开一个数组用来保存第一次出现的位置，这个技巧感觉很有用。 http://xuanwo.io/2014/11/04/UVa-12174-Shuffle/
+更新日志 2014年11月5日 完成部分题解。</p><p class=article-more-link><a href=/2014/11/04/contest-cugb-13-person-1/>Read More</a></p></div></div></article><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 itemprop=name><a class=article-title href=/2014/11/04/contest-cugb-cf1/>CF拉练第一场</a></h1></header><div class=article-meta><a href=/2014/11/04/contest-cugb-cf1/ class=article-date><time datetime=2014-11-04T10:28:10.000&#43;00:00 itemprop=datePublished>2014-11-04</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div></div><div class=article-entry itemprop=articleBody><p>比赛地址 http://acm.hust.edu.cn/vjudge/contest/view.action?cid=61581#overview
+比赛总结 这场比赛打得很挫，一上来看到D题之前做过，就直接贴了代码，被学长们狠狠地批评了一顿。确实，之前做过并不意味着我就能直接贴我的代码，我再写一次不一定写得出来，而且也丧失了一次检验自己是否真的确实掌握了的机会。以后一定要多注意，比赛态度要端正，不能看到自己做过的题就像占到了便宜一样，直接贴出自己的AC代码。 事实上可以看到，自己跟即将退役的12级差距还是很大的，这些水题都A不掉，或者姿势不优越，考虑不全面，思路受限这些问题暴露的很明显。还是题目做的太少，多做题，多总结。
+分题讲解 A题（纯水题） 通过简单的分析就能搞定，一道比较简单的贪心。 http://xuanwo.io/2014/11/03/CF-4B/
+B题（DP） 没做出来，一开始想的是DFS，但是没有处理好2跟5，以及出现0的一些情况。赛后看题解，才写出来使用DP的解法。 http://xuanwo.io/2014/11/03/CF-2B/
+C题（模拟） WA了很多发，比赛的时候考虑的还是太不全面，没能从正面解决. http://xuanwo.io/2014/11/02/CF-3C/
+D题（计算几何） 之前做过的题目，用到了海伦公式和计算圆心角知识。 http://xuanwo.io/2014/10/21/CF-1C/
+E题（贪心） 用的贪心的思想，先使得所有的&rsquo;?&lsquo;都变为&rsquo;)&lsquo;，再来处理合法性和最优化的问题。 http://xuanwo.io/2014/11/03/CF-3D/
+更新日志 2014年11月3日 初稿。</p><p class=article-more-link><a href=/2014/11/04/contest-cugb-cf1/>Read More</a></p></div></div></article><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 itemprop=name><a class=article-title href=/2014/11/03/cf-4b/>Codeforces Beta Round 4 B Before an Exam</a></h1></header><div class=article-meta><a href=/2014/11/03/cf-4b/ class=article-date><time datetime=2014-11-03T19:13:39.000&#43;00:00 itemprop=datePublished>2014-11-03</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div></div><div class=article-entry itemprop=articleBody><p><h2 id=题目>题目</h2><p>源地址：</p><p><a href=http://codeforces.com/contest/4/problem/B>http://codeforces.com/contest/4/problem/B</a></p><h1 id=理解>理解</h1><p>水题一枚。
+首先计算出最小的边界和，然后计算出最大的边界和。只要题目给定的sum不在这个范围内，一定无解。然后使用贪心的方法，计算出tem=最大边界和-sum。然后一个一个减去两个边界之间的差值，直到tem被减为零。</p></p><p class=article-more-link><a href=/2014/11/03/cf-4b/>Read More</a></p></div></div></article><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 itemprop=name><a class=article-title href=/2014/11/03/cf-3d/>Codeforces Beta Round 3 D Least Cost Bracket Sequence</a></h1></header><div class=article-meta><a href=/2014/11/03/cf-3d/ class=article-date><time datetime=2014-11-03T17:18:07.000&#43;00:00 itemprop=datePublished>2014-11-03</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div></div><div class=article-entry itemprop=articleBody><p><h2 id=题目>题目</h2><p>源地址：</p><p><a href=http://codeforces.com/contest/3/problem/D>http://codeforces.com/contest/3/problem/D</a></p><h1 id=理解>理解</h1><p>比赛的时候没有做出来，赛后看了<a href=http://siofive.github.io/2014/11/02/%E6%8B%89%E7%BB%831/>琦神的解题报告</a>才明白应该怎么敲。
+实际上这个题目需要解决两个问题：第一是合法性，也就是是否满足左右括号匹配；第二是最优化，也就是要求Cost消耗最小。
+使用一个变量cnt遍历输入的字符串，遇到&rsquo;(&lsquo;则自增，遇到&rsquo;)&lsquo;则自减。这样，只要判断cnt是否为零，就能判断是不是合法。一开始的时候将每一个&rsquo;?&lsquo;都重置为&rsquo;)&lsquo;，然后维护一个保存左右括号消耗差和当前节点的优先队列。然后开始不断地从优先队列中取出键对，使用保存了所有右括号消耗和的ss变量去减。
+经过这样的处理之后，cnt只有两种情况。cnt不为零时，说明不可能合法，输出&rdquo;-1&rdquo;，cnt为零时，说明有解，输出ss以及最后符合要求的字符串。</p></p><p class=article-more-link><a href=/2014/11/03/cf-3d/>Read More</a></p></div></div></article><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 itemprop=name><a class=article-title href=/2014/11/03/cf-2b/>Codeforces Beta Round 2 B The least round way</a></h1></header><div class=article-meta><a href=/2014/11/03/cf-2b/ class=article-date><time datetime=2014-11-03T15:02:38.000&#43;00:00 itemprop=datePublished>2014-11-03</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div></div><div class=article-entry itemprop=articleBody><p><h2 id=题目>题目</h2><p>源地址：</p><p><a href=http://codeforces.com/contest/2/problem/B>http://codeforces.com/contest/2/problem/B</a></p><h1 id=理解>理解</h1><p>比赛的时候没有做出来，一看就知道应该是一个DP，选取一个2或者5最少的路径。
+首先处理一下，设TWO为0，FIVE为1。在输入的时候就进行判断，当前输入的数和&rsquo;0&rsquo;，&rsquo;2&rsquo;，&rsquo;5&rsquo;之间的关系。得到的结果存在一个数组中，这样就得到整个数组中最多的0的个数。然后对2和5的数量进行比较，只需要考虑比较少的那个。
+然后对第一个数为0的情况进行特判，此时只要随手输出就可以了。如果第一个数不为0，则开始取2比较少的路径开始行走。</p><blockquote><p>大概是我写得不是很优美= =，在提交的时候遇到了各种问题，debug了半天，还是没有找出究竟错在哪里。直到我脑洞一开，把所有变量的定义放在了main函数的里面，居然过了！过了！！了！！！
+蛋疼，不知道问题到底在哪里= =，唉，存疑。</p></blockquote></p><p class=article-more-link><a href=/2014/11/03/cf-2b/>Read More</a></p></div></div></article><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 itemprop=name><a class=article-title href=/2014/11/03/cf-4a/>Codeforces Beta Round 4 A Watermelon</a></h1></header><div class=article-meta><a href=/2014/11/03/cf-4a/ class=article-date><time datetime=2014-11-03T11:23:56.000&#43;00:00 itemprop=datePublished>2014-11-03</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div></div><div class=article-entry itemprop=articleBody><p><h2 id=题目>题目</h2><p>源地址：</p><p><a href=http://codeforces.com/contest/4/problem/A>http://codeforces.com/contest/4/problem/A</a></p><h1 id=理解>理解</h1><p>真不愧是过了1W+的题= =，水的真可怕。
+唯一的trick是当w等于2的时候，不能分成两个偶数。</p></p><p class=article-more-link><a href=/2014/11/03/cf-4a/>Read More</a></p></div></div></article><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 itemprop=name><a class=article-title href=/2014/11/03/cf-3a/>Codeforces Beta Round 3 A Shortest path of the king</a></h1></header><div class=article-meta><a href=/2014/11/03/cf-3a/ class=article-date><time datetime=2014-11-03T11:03:26.000&#43;00:00 itemprop=datePublished>2014-11-03</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div></div><div class=article-entry itemprop=articleBody><p><h2 id=题目>题目</h2><p>源地址：</p><p><a href=http://codeforces.com/contest/3/problem/A>http://codeforces.com/contest/3/problem/A</a></p><h1 id=理解>理解</h1><p>第一开始的想法是可以用DFS或者BFS搞定。后来仔细想了想，发现其实不需要这么复杂，通过建立一个坐标系，可以轻松搞定这个问题。
+首先坐标化，将A~H转化为1~8，方便后续的处理，同时计算出终点与起点位移在x，y轴上的投影，分别设为mx，my。
+然后下面是模拟的步骤：
+- 处理斜角：循环对mx和my进行递增或者递减的操作，直到有一个值变为零。
+- 处理直线：对mx或者my进行递增或者递减的操作，直到这个值也为零，此时已经模拟完毕。</p><p>有两个值得注意的地方：
+- 首先需要输出步数，很显然，步数就是<code>max(abs(mx),abs(my))</code>。
+- 不需要记忆路径，每次处理mx和my的时候，顺便把路径输出即可。</p></p><p class=article-more-link><a href=/2014/11/03/cf-3a/>Read More</a></p></div></div></article><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 itemprop=name><a class=article-title href=/2014/11/02/cf-3c/>Codeforces Beta Round 3 C Tic-tac-toe</a></h1></header><div class=article-meta><a href=/2014/11/02/cf-3c/ class=article-date><time datetime=2014-11-02T17:30:22.000&#43;00:00 itemprop=datePublished>2014-11-02</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div></div><div class=article-entry itemprop=articleBody><p><h2 id=题目>题目</h2><p>源地址：</p><p><a href=http://codeforces.com/problemset/problem/3/C>http://codeforces.com/problemset/problem/3/C</a></p><h1 id=理解>理解</h1><p>一开始看到3*3，第一反应是想要枚举出所有可能的情况，也就是总共有9^3次种，但是发现自己很难处理这些情况，后来还是决定用暴力模拟的方法来做。</p><h2 id=错误解法>错误解法</h2><p>为了简化情况的讨论，我取&rsquo;.&lsquo;为0，&rsquo;X&rsquo;为1，&rsquo;0&rsquo;为2。这样，只要三个数的积为0，说明没有人胜利；三个数的积为1，说明先手胜；三个数的积为8，说明后手胜。这样，在判定胜负的时候，情况就简单了很多。
+但是，我犯的错误就是对非法的状况考虑得不全面，或者说，懒得去自己判定是否非法，直接将非法的判断写在else语句里面，导致这段语句摆在前面挂test4，摆在后面挂test8这样尴尬局面的发生。</p><h2 id=正确解法>正确解法</h2><p>赛后我重新写了这道题，正面强干，没有转换成int数组来处理。将胜负判定和非法判定全都写成了独立的函数，在最开始先判断是否非法，然后判定有没有出现胜者，最后判定是谁进行下一步。</p></p><p class=article-more-link><a href=/2014/11/02/cf-3c/>Read More</a></p></div></div></article><nav id=page-nav><a href=/page/15/ rel=prev class="extend prev">&laquo; Prev</a>
+<a href=/>1</a>
+<a href=/page/2/>2</a>
+<a href=/page/3/>3</a>
+<span aria-hidden=true>&hellip;</span>
+<a href=/page/15/>15</a>
+<span class="page-number current">16</span>
+<a href=/page/17/>17</a>
+<span aria-hidden=true>&hellip;</span>
+<a href=/page/44/>44</a>
+<a href=/page/17/ rel=next class="extend next">Next &raquo;</a></nav></section><footer id=footer><div class=outer><div id=footer-info class=inner>&copy; 2019 Xuanwo&#39;s Blog&nbsp;
+Powered by <a href=https://gohugo.io target=_blank>Hugo</a></div></div><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script src=https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js></script><script>tocbot.init({tocSelector:'.article-toc',contentSelector:'.article-entry',headingSelector:'h1, h2, h3, h4, h5',});</script><script>document.getElementById('main-nav-toggle').addEventListener('click',function(){var header=document.getElementById('header');if(header.classList.contains('mobile-on')){header.classList.remove('mobile-on');}else{header.classList.add('mobile-on');}});</script></footer></div></body></html>

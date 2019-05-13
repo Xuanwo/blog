@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Hugo on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/hugo/</link><description>Recent content in Hugo on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 15 Oct 2018 13:35:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/hugo/index.xml" rel="self" type="application/rss+xml"/><item><title>恢复博客遗失的评论</title><link>https://xuanwo.io/2018/10/15/revocer-lost-blog-comments/</link><pubDate>Mon, 15 Oct 2018 13:35:00 +0000</pubDate><guid>https://xuanwo.io/2018/10/15/revocer-lost-blog-comments/</guid><description>&lt;p&gt;最近发现自己博客的评论少了不少，于是找了一下原因并使用工具做了修复，这篇文章主要就是讲 Hugo 如何正确的配置 Disqus 以及如何使用 Disqus 提供的迁移工具来修复已经出问题的数据。&lt;/p&gt;
+&lt;h2 id=&#34;hugo-sucks&#34;&gt;Hugo sucks&lt;/h2&gt;
+&lt;p&gt;查看自己博客的 Discussions 的时候会看到很多奇奇怪怪的链接：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;https://translate.googleusercontent.com/translate_c?act=url&amp;amp;depth=1&amp;amp;ie=UTF8&amp;amp;prev=_t&amp;amp;sl=auto&amp;amp;sp=nmt4&amp;amp;tl=en&amp;amp;u=https://xuanwo.io/2014/07/16/poj-1011-sticks/
+https://translate.googleusercontent.com/translate_c?depth=1&amp;amp;sl=zh-CN&amp;amp;sp=nmt4&amp;amp;tl=en&amp;amp;u=https://xuanwo.io/2015/02/07/generate-a-ssh-key/&amp;amp;xid=17259,15700022,15700124,15700149,15700168,15700186,15700190,15700201,15700208
+https://webcache.googleusercontent.com/search?q=cache:RMRC2X9nD0EJ:https://xuanwo.io/2017/11/26/enpass-intro/+&amp;amp;cd=1&amp;amp;ct=clnk&amp;amp;gl=jp&amp;amp;lr=lang_zh-CN%7Clang_zh-TW
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;当然啦，自己的博客有外国友人开着 Google 翻译看自然会觉得开心，但是为啥这些奇怪的地址会被作为这篇文章评论的 URL 存入 Disqus 呢？&lt;/p&gt;
+&lt;p&gt;首先看了下网页的源代码中与 disqus 有关的部分：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; disqus_config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; () {
+};
+(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; ([&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;localhost&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;127.0.0.1&amp;#34;&lt;/span&gt;].indexOf(&lt;span style=&#34;color:#007020&#34;&gt;window&lt;/span&gt;.location.hostname) &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;) {
+&lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;disqus_thread&amp;#39;&lt;/span&gt;).innerHTML &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Disqus comments not available by default when the website is previewed locally.&amp;#39;&lt;/span&gt;;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; d &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;, s &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; d.createElement(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;script&amp;#39;&lt;/span&gt;); s.&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;async&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;;
+s.src &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;//&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;only0god&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;.disqus.com/embed.js&amp;#39;&lt;/span&gt;;
+s.setAttribute(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;data-timestamp&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Date&lt;/span&gt;());
+(d.head &lt;span style=&#34;color:#666&#34;&gt;||&lt;/span&gt; d.body).appendChild(s);
+})();
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;可以看到 &lt;code&gt;disqus_config&lt;/code&gt; 是空的，此时首先会感到有些不对劲，接下来看一下 disqus 文档对这个 config 是如何处理的：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;When url or identifier are not defined, the Disqus embed will use the window URL as the main identifier when creating a thread. In other words, each unique URL Disqus loads on will result in a new unique thread. This works well for some sites, however, this method of creating threads can lead to duplicate “split threads” for the same page of content, especially when your site accepts many different URLs for the same page of content.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;所以如果 &lt;code&gt;disqus_config&lt;/code&gt; 是空的，那 disqus 就会取当前的 window URL 创建一个条目。换言之，如果用户通过多个不同的 URL 访问到你这篇博客，那么你的博客就会有多个不一样的评论条目。&lt;/p&gt;
+&lt;p&gt;现在导致 disqus 出现重复的原因知道了，那为什么会这样呢？&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;var disqus_config = function () {
+{{with .GetParam &amp;#34;disqus_identifier&amp;#34; }}this.page.identifier = &amp;#39;{{ . }}&amp;#39;;{{end}}
+{{with .GetParam &amp;#34;disqus_title&amp;#34; }}this.page.title = &amp;#39;{{ . }}&amp;#39;;{{end}}
+{{with .GetParam &amp;#34;disqus_url&amp;#34; }}this.page.url = &amp;#39;{{ . | html }}&amp;#39;;{{end}}
+};&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这是 Hugo 内嵌的 disqus 模板，看得出来，Hugo 为了追求灵活性（总有人想用奇奇怪怪的 URL 作为 disqus 的 url），他选择读取当前页面的参数，而不是直接写死了一个规定的值。这就很坑了，我选择自己改一下这个模板：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;var disqus_config = function () {
+this.page.identifier = &amp;#39;{{ .URL }}&amp;#39;;
+this.page.title = &amp;#39;{{ .Title }}&amp;#39;;
+this.page.url = &amp;#39;{{ .Permalink }}&amp;#39;;
+};&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;URL 是当前页面的相对路径&lt;/li&gt;
+&lt;li&gt;Title 是当前页面的标题&lt;/li&gt;
+&lt;li&gt;Permalink 是当前页面的完整 URL&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;比如说：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; disqus_config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;this&lt;/span&gt;.page.identifier &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;\/2018\/10\/03\/ingress-beijing-central-axis\/&amp;#39;&lt;/span&gt;;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;this&lt;/span&gt;.page.title &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Ingress 北京中轴线噩梦难度一日速刷攻略&amp;#39;&lt;/span&gt;;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;this&lt;/span&gt;.page.url &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https:\/\/xuanwo.io\/2018\/10\/03\/ingress-beijing-central-axis\/&amp;#39;&lt;/span&gt;;
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;此处的 &lt;code&gt;\&lt;/code&gt; 是 JavaScript 的转义，实际的内容中并不包括 &lt;code&gt;\&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;disqus-的-url-mapper&#34;&gt;Disqus 的 URL Mapper&lt;/h2&gt;
+&lt;p&gt;现在已经修复了问题的源头，那现在这个烂摊子如何收拾呢？好在我们有 Disqus 的 URL Mapper，这个工具可以批量的将一组 URL 映射到另外一组 URL 上：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将 A 映射为 B，那么 A 的评论就会迁移到 B 上&lt;/li&gt;
+&lt;li&gt;将 A，B 都映射为 B，那么相当于把 A 和 B 两个页面的评论合并到了 B&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;使用起来也非常简单，访问自己网站的控制面板 &lt;code&gt;TOOLS -&amp;gt; Migration Tools -&amp;gt; URL Mapper&lt;/code&gt;，首先下载一个 csv，里面会包括网站的所有评论链接，然后按照如下规则修改即可：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果想将 A 修改为 B，那么只需要增加一列，写上 B 即可&lt;/li&gt;
+&lt;li&gt;如果想跳过 A，那么直接将 A 这一行删除即可&lt;/li&gt;
+&lt;li&gt;如果 B 为空的话，我也不知道会发生什么，没试过（&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;我是直接将 CSV 上传到了 Google Sheet，然后用它的函数一阵操作搞定了，简单分享一哈：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;LOWER(REPLACE(AXXX,1,4,&amp;quot;https&amp;quot;))&lt;/code&gt; 可以将 protocol 修改为 https 并全部转换为小写&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;REGEXEXTRACT(AXXX, &amp;quot;https://xuanwo.io[\/\w-]*/&amp;quot;)&lt;/code&gt; 可以从 URL 的 Query 中提取出链接&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下面将修改好的 CSV 导出并上传，等到 disqus 异步处理即可。&lt;/p&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://help.disqus.com/troubleshooting/use-configuration-variables-to-avoid-split-threads-and-missing-comments&#34;&gt;Use Configuration Variables to Avoid Split Threads and Missing Comments&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/Xuanwo/xuanwo.github.io/commit/bfb38029cabe8f3a5b1c33f808644e89cb5111b9&#34;&gt;themes: Fix disqus identifier not set correctly&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;RNG 差点在小组赛翻车，最后连续干掉三星和状态火热的 C9，成功以小组第一出线（真的不容易，最后一波团真的是太刺激了），希望 EDG 和 iG 也能顺利出线~&lt;/li&gt;
+&lt;li&gt;不知道为啥突然开始了规律作息，每天 7:30 起床，9 点到公司，感觉很爽，仿佛自己的人生突然多出来一个上午（&lt;/li&gt;
+&lt;li&gt;最近成功加入了 Archlinuxcn 的打包组，并且把我常用的一些包加进了 cn 源，比如 &lt;a href=&#34;https://github.com/archlinuxcn/repo/tree/master/coredns&#34;&gt;coredns&lt;/a&gt;，我这个包可比 AUR 上的那个用心多了，欢迎大家使用并反馈意见~&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Hugo RSS 配置输出全文</title><link>https://xuanwo.io/2018/04/08/hugo-rss-output-all-content/</link><pubDate>Sun, 08 Apr 2018 16:07:00 +0000</pubDate><guid>https://xuanwo.io/2018/04/08/hugo-rss-output-all-content/</guid><description>&lt;p&gt;在折腾 Feedly 的时候偶然发现自己的博客输出的 RSS 里面只有摘要，想要看完整的内容需要跳转。这可不符合我的初衷，于是花了一些时间配置了一下相关的内容。接下来简要的介绍一下如何配置 Hugo 的模板以生成输出全文的 RSS Feed。&lt;/p&gt;
+&lt;h2 id=&#34;r-t-f-m&#34;&gt;R.T.F.M.&lt;/h2&gt;
+&lt;p&gt;在折腾之前，首先阅读一下 Hugo 的文档： &lt;a href=&#34;https://gohugo.io/templates/rss/&#34;&gt;https://gohugo.io/templates/rss/&lt;/a&gt; 。从文档中知道了以下两件事：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;RSS 模板的查找顺序&lt;/li&gt;
+&lt;li&gt;Hugo 自带的 RSS 模板的内容&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;那么想要自定义 RSS 模板的话，只需要在合适的地方放上模板即可。&lt;/p&gt;
+&lt;h2 id=&#34;rss-模板的位置&#34;&gt;RSS 模板的位置&lt;/h2&gt;
+&lt;p&gt;Hugo 内置模板查找的优先级别是最低的，所以只要选择任意一个符合要求的位置都能覆盖它。我选择放在主题的 &lt;code&gt;layouts&lt;/code&gt; 目录下，也就是 &lt;code&gt;layouts/index.rss.xml&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;rss-模板的内容&#34;&gt;RSS 模板的内容&lt;/h2&gt;
+&lt;p&gt;忽略掉一些无关的细节，导致 RSS 输出的文章内容中只有摘要的是如下模板：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go-html-template&#34; data-lang=&#34;go-html-template&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;range&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Data.Pages&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;item&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;title&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Title&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;title&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;link&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Permalink&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;link&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;pubDate&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Date.Format&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Mon, 02 Jan 2006 15:04:05 -0700&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;|&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;safeHTML&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;pubDate&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;with&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Site.Author.email&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;author&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;with&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;$.Site.Author.name&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt; (&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;)&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;author&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;guid&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Permalink&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;guid&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;description&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Summary&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;|&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;html&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;description&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;item&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;.Summary&lt;/code&gt; 引用的是文章的摘要部分，只要将其替换为 &lt;code&gt;.Content&lt;/code&gt; 就能输出文章的完整内容。但是默认情况下，Hugo 会在 RSS Feed 中输出所有文章，如果输出完整内容的话，这个 Feed 会特别大，因此需要想办法限制一下展示的文章数量。继续 RTFM，&lt;a href=&#34;https://gohugo.io/functions/first/&#34;&gt;此处&lt;/a&gt; 描述了一个叫 &lt;code&gt;first&lt;/code&gt; 的方法，跟 &lt;code&gt;range&lt;/code&gt; 搭配起来之后可以起到切片的作用。这样就能够得到如下的模板：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go-html-template&#34; data-lang=&#34;go-html-template&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;range&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;first&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;10&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Data.Pages&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;item&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;title&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Title&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;title&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;link&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Permalink&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;link&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;pubDate&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Date.Format&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Mon, 02 Jan 2006 15:04:05 -0700&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;|&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;safeHTML&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;pubDate&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;with&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Site.Author.email&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;author&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;with&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;$.Site.Author.name&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt; (&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;)&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;author&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;guid&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Permalink&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;guid&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;description&lt;/span&gt;&amp;gt;&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;.Content&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;|&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;html&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;description&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;item&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020&#34;&gt;{{&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;}}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;完整的模板可以参见 commit: &lt;a href=&#34;https://github.com/Xuanwo/xuanwo.github.io/commit/80347d6e7868f4443170fe926a762d496b736944&#34;&gt;https://github.com/Xuanwo/xuanwo.github.io/commit/80347d6e7868f4443170fe926a762d496b736944&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Feedly 上除了我自己居然要还有 5 个订阅用户，有些感动，如果有在北京的童鞋可以邮件我一起约个饭~&lt;/li&gt;
+&lt;li&gt;清明节去了趟苏州，看到了大裤衩，还看了金鸡湖的音乐喷泉，然后拙政园基本啥都没看着，全是人头= =，出来之后就不想再去任何园林了&lt;/li&gt;
+&lt;li&gt;终于下定决心买了 ThinkPad X1 Carbon 2018 (故意写全就是为了装)，等四月底到手了发一波开箱照&lt;/li&gt;
+&lt;li&gt;又要开工了，体会到了久违的小学生暑假开学前一天的心情，大概是因为以前一直没有好好的休假过。。。&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

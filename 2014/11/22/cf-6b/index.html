@@ -1,0 +1,58 @@
+<!doctype html><html><head><title>Codeforces Beta Round 6 B President&#39;s Office (Div.2 Only)</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content=Technology,Code,Program,Linux,><meta name=author content=Xuanwo><meta property=og:title content="Codeforces Beta Round 6 B President's Office (Div.2 Only)"><meta property=og:description content="A blog maintained by an interesting programmer."><meta property=og:type content=website><meta property=og:locale content=en_US><meta property=og:url content=https://xuanwo.io/2014/11/22/cf-6b/><link href rel=alternate type=application/rss+xml title="Xuanwo's Blog"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/milligram@1.3.0/dist/milligram.min.css integrity="sha256-Ro/wP8uUi8LR71kwIdilf78atpu8bTEwrK5ZotZo+Zc=" crossorigin=anonymous><link rel=stylesheet href=/css/main.min.css><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.54.0"></head><body><div id=container><header id=header><div id=header-outer class=outer><div id=header-inner class=inner><a id=main-nav-toggle class=nav-icon href=javascript:;><svg width="1em" height="1em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#bars"/></svg></a><a id=logo class=logo-text href=https://xuanwo.io>Xuanwo&#39;s Blog</a><nav id=main-nav><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<a class=main-nav-link href=/about/>关于我</a></nav></div></div></header><section id=main class=outer><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 class=article-title itemprop=name>Codeforces Beta Round 6 B President&#39;s Office (Div.2 Only)</h1></header><div class=article-meta><a href=/2014/11/22/cf-6b/ class=article-date><time datetime=2014-11-22T17:59:29.000&#43;00:00 itemprop=datePublished>2014-11-22</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div><div class=article-comment-link-wrap><a href=/2014/11/22/cf-6b/#disqus_thread class=article-comment-link>Comments</a></div></div><div class=article-entry itemprop=articleBody><h2 id=题目>题目</h2><p>源地址：</p><p><a href=http://codeforces.com/problemset/problem/6/B>http://codeforces.com/problemset/problem/6/B</a></p><h1 id=理解>理解</h1><p>总统的办公室里面坐着他的副手，然后每个人都会有一张办公桌（长短不一，但每个人都有自己的颜色）。然后告诉你每个人的办公桌都是长方形，给定一个描述办公室布局的图，要你求出这个办公室里面总统的副手有几个。
+一开始我想得太多，觉得应该用DFS来暴力搜索，只要判断总统办公桌的四周即可。后来发现这种方法是不可行，决定采用STL里面的pair+set来做。思路很简单，既然已经告诉我办公桌都是长方形的，那么，我只要找到总统办公桌所占的区域，然后直接遍历这块区域外围的一圈即可。</p><h1 id=代码>代码</h1><pre><code>
+#define MAXN 100+10
+
+char c,road[MAXN][MAXN];
+int n,m;
+pair&lt;int,int&gt; lt(-1,-1);
+	pair&lt;int,int&gt; rb(-1,-1);
+	set&lt;char&gt; ans;
+
+ void init()
+ {
+     scanf(&quot;%d %d %c&quot;, &amp;n,&amp;m,&amp;c);
+     for(int i=0;i&lt;n;i++)
+     {
+         scanf(&quot;%s&quot;, road[i]);
+     }
+ }
+
+int main(int argc, char const *argv[])
+{
+	init();
+
+	for(int i=0;i&lt;n;i++)
+    {
+        for(int j=0;j&lt;m;j++)
+        {
+            if(road[i][j]==c)
+            {
+                rb=pair&lt;int,int&gt;(i,j);
+                if(lt.first&lt;0)  lt=pair&lt;int,int&gt;(i,j);
+            }
+        }
+    }
+    for(int i=lt.first;i&lt;=rb.first;i++)
+    {
+        for(int j=lt.second;j&lt;=rb.second;j++)
+        {
+            if(i&gt;0&amp;&amp;road[i-1][j]!=c&amp;&amp;road[i-1][j]!='.') ans.insert(road[i-1][j]);
+            if(i&lt;n-1&amp;&amp;road[i+1][j]!=c&amp;&amp;road[i+1][j]!='.')   ans.insert(road[i+1][j]);
+            if(j&gt;0&amp;&amp;road[i][j-1]!=c&amp;&amp;road[i][j-1]!='.') ans.insert(road[i][j-1]);
+            if(j&lt;m-1&amp;&amp;road[i][j+1]!=c&amp;&amp;road[i][j+1]!='.')   ans.insert(road[i][j+1]);
+        }
+    }
+    printf(&quot;%d&quot;, ans.size());
+    return 0;
+}
+
+
+</code></pre><h1 id=更新日志>更新日志</h1><ul><li>2014年11月22日 已AC。</li></ul></div><div class=article-toc></div></div><nav id=article-nav><a href=/2014/11/23/cf-15e/ id=article-nav-newer class=article-nav-link-wrap><div class=article-nav-title><span>&lt;</span>&nbsp;
+Codeforces Beta Round 15 E Triangles</div></a><a href=/2014/11/21/contest-cugb-cf6/ id=article-nav-older class=article-nav-link-wrap><div class=article-nav-title>CF拉练第六场&nbsp;<span>&gt;</span></div></a></nav></article><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){this.page.identifier='\/2014\/11\/22\/CF-6B\/';this.page.title='Codeforces Beta Round 6 B President\x27s Office (Div.2 Only)';this.page.url='https:\/\/xuanwo.io\/2014\/11\/22\/cf-6b\/';};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return;}
+var d=document,s=d.createElement('script');s.async=true;s.src='//'+"only0god"+'.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></section><footer id=footer><div class=outer><div id=footer-info class=inner>&copy; 2019 Xuanwo&#39;s Blog&nbsp;
+Powered by <a href=https://gohugo.io target=_blank>Hugo</a></div></div><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script src=https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js></script><script>tocbot.init({tocSelector:'.article-toc',contentSelector:'.article-entry',headingSelector:'h1, h2, h3, h4, h5',});</script><script>document.getElementById('main-nav-toggle').addEventListener('click',function(){var header=document.getElementById('header');if(header.classList.contains('mobile-on')){header.classList.remove('mobile-on');}else{header.classList.add('mobile-on');}});</script></footer></div></body></html>

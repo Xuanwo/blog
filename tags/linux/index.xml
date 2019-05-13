@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Linux on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/linux/</link><description>Recent content in Linux on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 28 Mar 2019 12:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/linux/index.xml" rel="self" type="application/rss+xml"/><item><title>开启 Jetbrains IDE 的全局菜单</title><link>https://xuanwo.io/2019/03/28/jetbrains-ide-global-menu/</link><pubDate>Thu, 28 Mar 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/28/jetbrains-ide-global-menu/</guid><description>&lt;p&gt;最近在想办法提升自己的开发体验，其中有一步就是去掉了不常用和已经使用快捷键代替的按钮和菜单。但是菜单栏没有办法隐藏，导致观感上不是很好。适逢 Jetbrains IDEA 推出了 2019.1 版本，趁着体验新版本功能的时候研究并解决了这个问题。&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本方案应该适用于所有 Jetbrains IDE，包括 Goland 和 Android Studio&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;Help -&amp;gt; Find Action... -&amp;gt; Experimental Features...&lt;/code&gt;，确认 &lt;code&gt;linux.native.menu&lt;/code&gt; 已打开&lt;/li&gt;
+&lt;li&gt;安装 &lt;code&gt;libdbusmenu-glib&lt;/code&gt;，比如 Arch 上只需要 &lt;code&gt;pacman -S libdbusmenu-glib&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;重启 IDE&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr /&gt;
+&lt;p&gt;好，在这个分割线下分享一下自己解决这个问题的全过程。&lt;/p&gt;
+&lt;h2 id=&#34;确认&#34;&gt;确认&lt;/h2&gt;
+&lt;p&gt;首先问题的现象是很明显的，预期 IDEA 的菜单栏出现在 KDE 顶端的全局菜单中，但实际上并没有。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;bug.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;然后开始用 &lt;code&gt;IDEA&lt;/code&gt;，&lt;code&gt;global menu&lt;/code&gt; 等关键词去搜索，可以得到下列这些有用的信息：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在别人那是好的（有人 Po 出了正常的截图）&lt;/li&gt;
+&lt;li&gt;可以通过 &lt;code&gt;Experiment Features&lt;/code&gt; 开启 &lt;code&gt;linux.native.menu&lt;/code&gt; 的支持&lt;/li&gt;
+&lt;li&gt;在 Issue 的评论中，有人提出需要安装 &lt;code&gt;libdbusmenu-glib&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;OK，现在知道问题应该出在本地可能漏了什么依赖，导致全局菜单没有生效，下面需要想办法定位到具体的问题。&lt;del&gt;（实在定位不出来的时候再一把梭试一下）&lt;/del&gt;&lt;/p&gt;
+&lt;h2 id=&#34;定位&#34;&gt;定位&lt;/h2&gt;
+&lt;p&gt;首先通过 &lt;code&gt;Help -&amp;gt; Find Action... -&amp;gt; Experiment Features&lt;/code&gt; 中可以打开实验特性的开关，其中可以确认 &lt;code&gt;linux.native.menu&lt;/code&gt; 已经默认开启了。（真香！）&lt;/p&gt;
+&lt;p&gt;然后查看 IDEA 的 Log，寻找全局菜单没有启用的原因。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;IDEA 的 Log 一般在 &lt;code&gt;~/.IntelliJIdea2019.1/system/log/&lt;/code&gt;，也可以通过 &lt;code&gt;Help -&amp;gt; Show Log In Dolphin&lt;/code&gt; 直接打开所在位置&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code&gt;2019-03-28 11:03:00,342 [ 5755] INFO - penapi.wm.impl.GlobalMenuLinux - disable global-menu integration because some of shared libraries isn&#39;t installed: java.lang.UnsatisfiedLinkError: /opt/intellij-idea-ultimate-edition/bin/libdbm64.so: libdbusmenu-glib.so.4: cannot open shared object file: No such file or directory
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Ooops，原来是因为缺少一个库导致 &lt;code&gt;global-menu&lt;/code&gt; 被禁用了，只需要把这个库装上就可以了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;happy.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;修复&#34;&gt;修复&lt;/h2&gt;
+&lt;p&gt;搜索一下哪个包提供了 &lt;code&gt;libdbusmenu-glib.so.4&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; yay -Fs libdbusmenu-glib.so.4
+community/libdbusmenu-glib &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;.04.0-3
+usr/lib/libdbusmenu-glib.so.4&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;很明显，是 &lt;code&gt;libdbusmenu-glib&lt;/code&gt; （正是上面 Issue 中有人说要装的那个包），甚至还是社区源里面的包，不用犹豫了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; yay -S libdbusmenu-glib&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;重启 IDE 之后就能看到全局菜单正常工作啦：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;fixed.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在水一篇文章之后，我还能做啥呢？给 AUR 留个言，让维护者把 &lt;code&gt;libdbusmenu-glib&lt;/code&gt; 作为一个可选依赖，这样大家在安装或者更新 IDEA 的时候就知道啦：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;comment.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Update: AUR 的维护者已经加上啦：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;New optional dependencies &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; intellij-idea-ultimate-edition
+libdbusmenu-glib: For global menu support &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;installed&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Arch is the best!&lt;/p&gt;
+&lt;h2 id=&#34;后续&#34;&gt;后续&lt;/h2&gt;
+&lt;p&gt;GTK 3 的应用可以通过安装 &lt;code&gt;appmenu-gtk-module&lt;/code&gt; 来获取全局菜单的支持~&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://youtrack.jetbrains.com/issue/IDEA-169904&#34;&gt;Support KDE Global Menu&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/kde/comments/67mnfq/global_menu_in_plasma_59_with_java_intellij_and/&#34;&gt;Global Menu in Plasma 5.9 with Java (Intellij) and Firefox&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>随缘分享第 2 期</title><link>https://xuanwo.io/2019/01/05/share-with-luck-2nd/</link><pubDate>Sat, 05 Jan 2019 05:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/01/05/share-with-luck-2nd/</guid><description>&lt;p&gt;万万没有想到我也有一周双更的时候（，素材攒的太多了，赶紧分享一下~&lt;/p&gt;
+&lt;h2 id=&#34;今天你翻车了吗&#34;&gt;今天你翻车了吗？&lt;/h2&gt;
+&lt;h3 id=&#34;fwupd-翻车&#34;&gt;fwupd 翻车&lt;/h3&gt;
+&lt;p&gt;说起来用 Arch 也有一段时间了，大的翻车没遇到过，小的翻车倒是经常遇到。1 月 2 号晚上睡前日常更新，发现更新了 fwupd 1.2.2 之后就顺手试了一下，结果发现命令行直接 timeout 了，想着可能是我升级之后还没有重启服务，然后 &lt;code&gt;systemd restart fwupd&lt;/code&gt; 结果报错了，于是查了下日志：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;-- Unit fwupd.service has begun starting up.
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon fwupd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;7066&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Failed to get PCR0s: missing executable tpm2_pcrlist in PATH
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon fwupd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;7066&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Failed to load engine: Failed to prepare SQL: no such column: protocol
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: fwupd.service: Main process exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;code&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;status&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;/FAILURE
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: fwupd.service: Failed with result &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;exit-code&amp;#39;&lt;/span&gt;.
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Failed to start Firmware update daemon.
+-- Subject: Unit fwupd.service has failed&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;emmmmm，&lt;code&gt;no such column: protocol&lt;/code&gt; ？这看着是 DB 没做兼容啊，估计是上游翻车了，在 archcn 的群里问了一声没什么回应，于是先睡了，明天再说。&lt;/p&gt;
+&lt;p&gt;第二天早上看了下，已经有人在 arch 这边提了 BUG 了：&lt;a href=&#34;https://bugs.archlinux.org/task/61241?project=5&amp;amp;string=fwupd&#34;&gt;FS#61241 - fwupdmgr Failed to activate service&lt;/a&gt;，但是我感觉应该不是打包的问题，于是直接给上游提了个 BUG：&lt;a href=&#34;https://github.com/hughsie/fwupd/issues/909&#34;&gt;After upgrade to 1.2.2, fwupd failed to start for SQL error&lt;/a&gt;。作者 &lt;a href=&#34;https://github.com/hughsie&#34;&gt;hughsie&lt;/a&gt; 是红帽的员工，维护着不少知名的开源项目。&lt;/p&gt;
+&lt;p&gt;响应速度还算挺快的，考虑我们中间还隔着时差，按照他的要求提供了 &lt;code&gt;pending.db&lt;/code&gt; 之后没多久就加了个修复的 &lt;a href=&#34;https://github.com/hughsie/fwupd/commit/48106951c814f0bee201845fc1cc9cbb0f143faf&#34;&gt;commit&lt;/a&gt;，自行打包了一个 fwupd 测试了一下，确认工作正常并回复了作者。历时大概三天左右，这个 BUG 被修复了。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;说起来，现在嵌入式 DB 领域好像除了 SQLite 之外就没有一个能打的支持 SQL 的选手了啊？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;gitea-升级翻车&#34;&gt;gitea 升级翻车&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;改配置已经很糟心了，这 gitea 甚至还要改运行的用户 = =，我觉得这样不行&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;一波升级之后，gitea 刷了一大波说明出来：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;warning: /etc/gitea/app.ini installed as /etc/gitea/app.ini.pacnew
+gitea now uses its own user/group instead of the git ones.
+Ownership of /var/lib/gitea tree has been changed accordingly.
+You need to update your /etc/gitea/app.ini file to change the
+RUN_USER variable at the top.
+Next step is fixing the SSH configuration. If you have:
+AllowUsers git
+in /etc/ssh/sshd_config, you need to change that to gitea.
+Then restart sshd.service.
+You will need to tell all your users that they have to change
+git@ to gitea@ in their repos clones using git remote set-url.
+If you use a PostgreSQL DB upon Unix socket, you need to fix
+your &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;database&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; configuration and switch USER to gitea.
+Then, you need to change it also in /var/lib/data/pg_hba.conf.
+Finally, as postgres user, run psql and inside it type:
+ALTER USER git RENAME TO gitea;
+&lt;span style=&#34;color:#4070a0;font-weight:bold&#34;&gt;\q&lt;/span&gt;
+Then restart postgresql.service.
+In all cases, you &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;then&lt;/span&gt; need to reload systemd units and
+restart gitea.service.&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;按照要求改了配置，重启了服务。服务是好了- -，但是所有 clone 的 git url 都要改了，有点麻烦。感觉这个变动就很坑了，作为一个后端服务，内部的配置改了就改了，也就是维护起来麻烦一点，但是对外（对用户）暴露的东西不能乱动。得亏我这个 gitea 就自己用用，要是真的有别人在用的话，还得群发个邮件让他们把本地的 remote URL 都改一遍，坑，gitea 好感度减 10。&lt;/p&gt;
+&lt;h3 id=&#34;apfs-翻车&#34;&gt;APFS 翻车&lt;/h3&gt;
+&lt;p&gt;在一个风平浪静的早晨，惠老师突然在水群 Po 了一张图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;rm-failed.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这是啥操作，删除文件提示没空间？&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;open-terminal-failed.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Terminal 也打不开了，2333。&lt;/p&gt;
+&lt;p&gt;后来了解情况的群友解释了一下原因，其实这是两个问题：&lt;/p&gt;
+&lt;p&gt;第一个是采用 CoW 的文件系统固有的问题。我们都知道 CoW 的基本原理是在对数据进行修改的时候，不会直接在原来的数据位置上进行操作，而是重新找个位置修改。那么在磁盘已经完全满了之后就可能会出现问题，问题的起因有两种说法：第一是在删除的时候需要在一个空闲的位置写入一个新的标记，表示这个文件被删除了；第二是文件系统之前有 snapshot，被删除的文件还在被别的 snapshot 引用着，所以不能直接删除，需要加一个标记。所以类似机制的文件系统都可能会出现这样的问题，包括 ZFS 和 Btrfs。&lt;/p&gt;
+&lt;p&gt;第二个是 macOS 在磁盘系统全满的情况下的行为是不可预测的行为，没人知道会发生什么。所以会出现 Terminal 打不开，Finder 打开直接卡住这种事情。&lt;/p&gt;
+&lt;p&gt;最后惠老师进入恢复模式，执行了硬盘急救，最后多了一丢丢，大概 500MB 的空间，终于可以把文件删掉了（&lt;/p&gt;
+&lt;h2 id=&#34;无意义以及其存在的意义&#34;&gt;无意义以及其存在的意义&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;conway-eeeee.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;前一段时间疯狂刷屏的 &lt;a href=&#34;https://github.com/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee&#34;&gt;e98e&lt;/a&gt; 在整个项目被 Archive 进入 read-only 之后热潮消退了。在最开始的时候我非常反感，感觉自己受到了精神污染，甚至想要举报一波，然而并没有找到合适的理由。现在回过头来想一想这个事情，感觉心情非常复杂，总是会去想是不是自己做错了什么，或者说当我在一个公共场合（比如 Telegram 的群中）轻蔑的说某样事情 &lt;strong&gt;无聊&lt;/strong&gt;，&lt;strong&gt;没意义&lt;/strong&gt; 的时候，我是不是真的明白我在说什么。&lt;/p&gt;
+&lt;p&gt;这个问题我琢磨了很久，最后感觉它是由一组复杂的问题组成的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对一个事务的意义判断究竟是谁来做的？&lt;/li&gt;
+&lt;li&gt;无意义的事务有没有存在的意义？&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;不知道是不是受到教育环境的影响，我总是会倾向于去做 &lt;code&gt;有意义&lt;/code&gt; 的事情。那 &lt;code&gt;有意义&lt;/code&gt; 又是意味着什么呢，大多数时候它要 &lt;code&gt;有价值&lt;/code&gt;，而更大多数时候可以概括为 &lt;code&gt;有用&lt;/code&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;玩游戏，就不能浪费时间，玩 1 分钟就要获得 1 分钟的快乐&lt;/li&gt;
+&lt;li&gt;做开源项目就得要出名，要有 Star，要有人关注，要有人用在生产环境上&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;所以说，世界上到底有没有没意义的事情的呢？可能只存在&lt;strong&gt;我认为&lt;/strong&gt;没意义的事情吧。&lt;/p&gt;
+&lt;p&gt;这些问题我可能是想不清楚了，只能一直这么纠结下去，以后遇到所谓的没意义的东西，我大概会选择保持沉默吧：“我觉得你做的事情没意义，但是我尊重你做下去的权利”。&lt;/p&gt;
+&lt;h2 id=&#34;有啥有意思的东西嘛&#34;&gt;有啥有意思的东西嘛？&lt;/h2&gt;
+&lt;p&gt;2018 年最后入手的东西是 OnePlus 6T 和一把宜家的转椅。&lt;/p&gt;
+&lt;p&gt;这么多年过去了，安卓的变化比我想象的还要大，特别是在一加 Oxygen OS 的支持下，感觉到了前所未有的舒畅。虽然国内的生态一如既往的糟糕，但是大多数应用都能用，某些实在流氓或者 Google Play 中没有的应用也直接扔到了 Work Profile 里面。现在基本上是晚上充满电上床看小说，然后第二天直接带去上班，到晚上回家还能有 40% ~ 50% 的电量，已经完全够用了，And 快充也非常给力。用了几个星期，完全不怀念我的 iPhone。&lt;/p&gt;
+&lt;p&gt;之前用的转椅是前同事留在房子里面的，一直凑或用，但是有一天实在忍不了了，决定换一把新的转椅。在朋友 P 的安利下入了宜家的 &lt;a href=&#34;https://www.ikea.cn/cn/zh/catalog/products/50137208/&#34;&gt;MARKUS 马库斯&lt;/a&gt; 转椅，深灰色那款只要 999 元，加上运费总共 1068 元。花了点时间拼了起来，一坐上去整个人就不想起来了，实在是太舒服了。腰部和头部还有手臂都被正好支撑起来，终于不会写着代码感觉自己整个脖子都僵住了。&lt;/p&gt;
+&lt;p&gt;这个椅子支持上下大概 10 cm，向后 30 度左右的调节。配合自己之前买的显示器支架，可以舒舒服服的躺着看动漫，打游戏，生活美滋滋。如果有想换椅子的同学无比留意下~&lt;/p&gt;
+&lt;p&gt;最近还看到一个好玩的 issue： &lt;a href=&#34;https://github.com/antirez/redis/issues/3909&#34;&gt;https://github.com/antirez/redis/issues/3909&lt;/a&gt; ，一个人不小心发了个 issue，然后解释道：“Cat walked over the keyboard sorry guys.”，引发了一场评论区的狂欢。我觉得最好玩的回复是项目的作者回复的：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Observing the keys pressed we can assume the cat was diagonally exploring the keyboard, probably with the front paws oriented towards the &amp;ldquo;/=-[&amp;rdquo; part of the keyboard (right/bottom) since there is more variability there, compared to the (maybe) rear paw staying near the number &amp;ldquo;3&amp;rdquo; (and the other rear paw probably outside the keyboard, in the upper part). However the size of the cat should be very small in that case, or the size of the keyboard should be very large, if we are not willing to assume a reduced-length cat because of attack position or alike.&lt;/p&gt;
+&lt;p&gt;Btw if you could report the &lt;code&gt;INFO&lt;/code&gt; output of your Redis instance, we may be able to perform more educated guesses about the conditions of your cat.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;集段子与安利于一身，是值得我学习的楷模~&lt;/p&gt;
+&lt;h2 id=&#34;最近又看了啥项目&#34;&gt;最近又看了啥项目？&lt;/h2&gt;
+&lt;p&gt;首先简单介绍一下这个 &lt;code&gt;好玩&lt;/code&gt; 和 &lt;code&gt;有用&lt;/code&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;好玩&lt;/code&gt;：是说 &lt;strong&gt;我&lt;/strong&gt; 觉得这个项目很好玩，有意思
+&lt;code&gt;有用&lt;/code&gt;：是说 &lt;strong&gt;我&lt;/strong&gt; 觉得这个项目能派上用场&lt;/p&gt;
+&lt;p&gt;如你所见，只有三个组合，因为又不好玩又没用的项目写它干啥呢？&lt;/p&gt;
+&lt;h3 id=&#34;好玩又有用&#34;&gt;好玩又有用&lt;/h3&gt;
+&lt;h4 id=&#34;vegeta&#34;&gt;Vegeta&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/tsenart/vegeta&#34;&gt;https://github.com/tsenart/vegeta&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;打开这个项目的时候被正面冲过来的贝吉塔吓了一跳，当时就记住了它，然后才反应过来项目名字就是用的贝吉塔的英文：Vegeta。大概寓意着这个项目跟超级塞亚人一样强悍吧，哈哈。&lt;/p&gt;
+&lt;p&gt;这是一个用来做 HTTP 负载测试的库和工具，既可以在代码中调用，也可以直接作为工具使用。项目维护的还不错，以后会考虑用它。&lt;/p&gt;
+&lt;h4 id=&#34;nats&#34;&gt;NATS&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://nats.io/&#34;&gt;https://nats.io/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;NATS 是一个云原生消息系统，是一个 CNCF 项目。它的消息格式很有意思，是一个类似于 Redis 的 text based protocol，我个人很喜欢，简单才是美啊。大概也得益于这么简单的 Protocol 设计，它的吞吐量很大，按照项目给出的评测，它的吞吐量是 Kafka 的两倍，RabbitMQ 的十倍。&lt;/p&gt;
+&lt;p&gt;项目的设计目标给的非常清晰：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Highly performant (fast)&lt;/li&gt;
+&lt;li&gt;Always on and available (dial tone)&lt;/li&gt;
+&lt;li&gt;Extremely lightweight (small footprint)&lt;/li&gt;
+&lt;li&gt;Support for multiple qualities of service (including guaranteed “at-least-once” delivery with NATS Streaming)&lt;/li&gt;
+&lt;li&gt;Support for various messaging models and use cases (flexible)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果有合适的场景，我大概会考虑玩一玩~&lt;/p&gt;
+&lt;h4 id=&#34;uncaptcha2&#34;&gt;uncaptcha2&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/ecthros/uncaptcha2&#34;&gt;https://github.com/ecthros/uncaptcha2&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这是一个今天才看到的段子，思路很有意思，就是输出 Google reCAPTCHA 的语音验证码，然后用 Google 的语音转文字 API 来做识别，然后再填回去，据说识别率还非常不错。&lt;/p&gt;
+&lt;p&gt;哈哈哈，这个真的是现实版的以子之矛，攻子之盾了。&lt;/p&gt;
+&lt;h4 id=&#34;badger&#34;&gt;badger&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/dgraph-io/badger&#34;&gt;https://github.com/dgraph-io/badger&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这是一个很早之前看过的项目了，但是有两个比较有意思的事情：&lt;/p&gt;
+&lt;p&gt;一个是有奖征集数据丢失的场景：&lt;a href=&#34;https://github.com/dgraph-io/badger/issues/601&#34;&gt;Prove that Badger loses data&lt;/a&gt;，只要你能够按照要求给出可复现数据丢失的步骤，就能获得 $1337 。感兴趣的童鞋可以去试试。&lt;/p&gt;
+&lt;p&gt;另一个是 badger 增加了一组 &lt;a href=&#34;https://github.com/dgraph-io/badger/pull/577&#34;&gt;Jepsen-style bank test&lt;/a&gt;，会在他们内部的 CI 平台上运行，可以看&lt;a href=&#34;https://teamcity.dgraph.io/viewType.html?buildTypeId=Badger_BankTest&#34;&gt;现场直播&lt;/a&gt;。&lt;a href=&#34;https://jepsen.io/&#34;&gt;Jepsen&lt;/a&gt; 我是在看 PingCAP 的相关技术分享时候看到的，Jepsen 是一个分布式系统验证的框架，已经成功发现了很多系统的 BUG。&lt;/p&gt;
+&lt;p&gt;之前有个项目技术选型的时候没用 Badger，之后大概可以考虑一下。&lt;/p&gt;
+&lt;p&gt;BTW，他们的项目管理似乎有些问题，依赖管理没做，完全靠 go get，Makefile 也没有，新人想要参与开发感觉是一脸懵逼。Windows 平台上的 CI 一直都是挂的，我还提了个 PR 修了其中的一个：&lt;a href=&#34;https://github.com/dgraph-io/badger/pull/661&#34;&gt;test: Fix TestDropReadOnly failed on windows&lt;/a&gt;，在我这个 PR 之后他们又 Fix 了不少 windows 上的测试，估计再过一段时间就能恢复正常了。他们是怎么忍下去的- -，我完全接受不了一个项目 Master 分支上的 CI 都是挂的，那还不如去掉呢。。。&lt;/p&gt;
+&lt;h3 id=&#34;有用不好玩&#34;&gt;有用不好玩&lt;/h3&gt;
+&lt;h4 id=&#34;gradle&#34;&gt;gradle&lt;/h4&gt;
+&lt;p&gt;Adaptable, fast automation for all &lt;a href=&#34;https://gradle.org&#34;&gt;https://gradle.org&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;以前只是听做 Java 开发同事天天吐槽 gradle，以为只是 Java 生态下的一个工具，定位类似于 npm for node.js，但是今天看了项目才知道原来它的目标是构建自动化并且要支持多语言的开发。&lt;/p&gt;
+&lt;p&gt;这个自动化跟我想要的不太一样。&lt;/p&gt;
+&lt;h4 id=&#34;cloudevents&#34;&gt;cloudevents&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://cloudevents.io/&#34;&gt;https://cloudevents.io/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;有一个定义云消息的规范，还是基于 JSON 的，看起来大概是这个样子：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;specversion&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;0.2&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;type&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;com.github.pull.create&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;source&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://github.com/cloudevents/spec/pull/123&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;id&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;A234-1234-1234&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;time&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;2018-04-05T17:31:00Z&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;comexampleextension1&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;value&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;comexampleextension2&amp;#34;&lt;/span&gt; : {
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;othervalue&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;
+},
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;contenttype&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;text/xml&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;data&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;much wow=\&amp;#34;xml\&amp;#34;/&amp;gt;&amp;#34;&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;无爱。&lt;/p&gt;
+&lt;h3 id=&#34;好玩但没用&#34;&gt;好玩但没用&lt;/h3&gt;
+&lt;h4 id=&#34;lsix&#34;&gt;lsix&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/hackerb9/lsix&#34;&gt;https://github.com/hackerb9/lsix&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;一个为图片设计的 ls，emmm，感觉没有啥特别的用处，虽然确实挺好玩的就是了。&lt;/p&gt;
+&lt;h4 id=&#34;ungoogled-chromium&#34;&gt;ungoogled-chromium&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/Eloston/ungoogled-chromium&#34;&gt;https://github.com/Eloston/ungoogled-chromium&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;清真版本的 Chromium，去掉了 Google 相关的代码，据说非常清真，但是我是 Google 的粉丝，甚至电脑上用的就是 Chrome - -，因此就是围观一下。&lt;/p&gt;
+&lt;h4 id=&#34;citybound&#34;&gt;citybound&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/citybound/citybound&#34;&gt;https://github.com/citybound/citybound&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;一个开源版本的城市模拟，感觉还比较早起，只有一些雏形，还玩不起来，还需要再观察观察。引擎本身是用 rust 写的，前端很有意思，用的是一个叫做 &lt;a href=&#34;https://webflow.com/&#34;&gt;webflow&lt;/a&gt; 产品，交互比较酷炫。可能我这样的前端白痴也有救了？&lt;/p&gt;
+&lt;h2 id=&#34;说点坑爹事情大家开心开心&#34;&gt;说点坑爹事情大家开心开心&lt;/h2&gt;
+&lt;p&gt;偶然发现Chrome 砍掉了 &lt;code&gt;chrome://net-internals/#events&lt;/code&gt; 这个功能。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;坑爹啊！&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The net-internals events viewer and related functionality has been removed. Please use chrome://net-export to save netlogs and the external catapult netlog_viewer to view them.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;现在想要查看 Chrome 的网络交互细节只能打开 &lt;code&gt;chrome://net-export&lt;/code&gt; 点击开始导出，操作完了再结束导出，最后用一个外部工具导入再查看了。&lt;/p&gt;
+&lt;p&gt;Hugging you, Google!&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;以上就是本期随缘分享的全部内容~&lt;/p&gt;</description></item><item><title>记一次 WiFi 断开链接</title><link>https://xuanwo.io/2019/01/04/record-for-wifi-disconnect/</link><pubDate>Fri, 04 Jan 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/01/04/record-for-wifi-disconnect/</guid><description>&lt;p&gt;今天下午的时候我的 WiFi 出现了一次时长大约为两秒的断开链接，当时正在抢回家的车票，面对突如其来的 &lt;code&gt;ERR_ADDRESS_UNREACHABLE&lt;/code&gt; 感到很是愤怒，还在公司的群里问了句刚才 Office 的网络是不是闪断了一下。但是网络组的同事表示监控无异常，较真的我当时就不信了，要不是网络出问题，好端端的电脑怎么会自己断开链接呢？其实结果还真的差不离。。。&lt;/p&gt;
+&lt;h2 id=&#34;致命华彩&#34;&gt;致命华彩&lt;/h2&gt;
+&lt;p&gt;网络组表示他们那边没有看出来什么问题，于是我 &lt;code&gt;journalctl -xe&lt;/code&gt; 看了看，发现了一些可能有关的信息：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:12 thinkpad-x1-carbon kernel: wlp2s0: disassociated from &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;Reason: &lt;span style=&#34;color:#bb60d5&#34;&gt;8&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;DISASSOC_STA_HAS_LEFT&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:12 thinkpad-x1-carbon skypeforlinux&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1944&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: ioctl failed &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; wlan0, &lt;span style=&#34;color:#bb60d5&#34;&gt;errno&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;19&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;No such device&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:12 thinkpad-x1-carbon wpa_actiond&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;864&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Interface &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;wlp2s0&amp;#39;&lt;/span&gt; lost connection to network &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;yunify-ldap&amp;#39;&lt;/span&gt;
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: authenticate with &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: send auth to &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;try &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;/3&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: authenticated
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: associate with &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;try &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;/3&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: RX AssocResp from &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;capab&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;0x1 &lt;span style=&#34;color:#bb60d5&#34;&gt;status&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;aid&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: associated
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: Limiting TX power to &lt;span style=&#34;color:#40a070&#34;&gt;27&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;30&lt;/span&gt; - &lt;span style=&#34;color:#40a070&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; dBm as advertised by &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon wpa_actiond&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;864&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Interface &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;wlp2s0&amp;#39;&lt;/span&gt; reestablished connection to network &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;yunify-ldap&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在 13:18 分的时候突然出现了一次重连，这是为啥呢，明明我在工位上都没有动，为啥网络自己就断开了？我需要搞明白这个 &lt;code&gt;DISASSOC_STA_HAS_LEFT&lt;/code&gt; 是什么意思。外事不决问 Google，简单搜索一下就能找到对这个错误的解释：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Reason&lt;/strong&gt;: Disassociated because sending STA is leaving (or has left) BSS&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Explanation&lt;/strong&gt;: Operating System moved the client to another access point using non-aggressive load balancing.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;emmmm，我现在问题反而更多了，&lt;code&gt;STA&lt;/code&gt; 是啥，&lt;code&gt;BSS&lt;/code&gt; 又是啥，&lt;code&gt;non-aggressive load balancing&lt;/code&gt; 又是啥？&lt;/p&gt;
+&lt;h2 id=&#34;恕瑞玛的传承&#34;&gt;恕瑞玛的传承&lt;/h2&gt;
+&lt;h3 id=&#34;背景知识&#34;&gt;背景知识&lt;/h3&gt;
+&lt;p&gt;想要解决这些问题，需要先补充一些背景知识。&lt;/p&gt;
+&lt;p&gt;首先是耳熟能详的 &lt;code&gt;LAN&lt;/code&gt;，&lt;code&gt;LAN&lt;/code&gt; 是 &lt;code&gt;local area network&lt;/code&gt; 的缩写，中文翻译为局域网，一般用来指有限网络。而 &lt;code&gt;WLAN&lt;/code&gt; 就是 &lt;code&gt;Wireless LAN&lt;/code&gt;，我们常说的无线局域网。我们日常挂在嘴边的 &lt;code&gt;Wi-Fi&lt;/code&gt; 是创建于 &lt;a href=&#34;https://zh.wikipedia.org/wiki/IEEE_802.11&#34;&gt;IEEE 802.11 标准&lt;/a&gt; 的无线局域网技术，有时候看到的 &lt;code&gt;11b&lt;/code&gt;，&lt;code&gt;11n&lt;/code&gt; 就是 &lt;code&gt;IEEE 802.11&lt;/code&gt; 下的不同标准。&lt;/p&gt;
+&lt;p&gt;这里的 &lt;code&gt;STA&lt;/code&gt; 是 &lt;code&gt;Station&lt;/code&gt; 的缩写，表示连接到无线网络中的一个设备，在这里我的电脑就是一个 &lt;code&gt;STA&lt;/code&gt;。而 &lt;code&gt;AP&lt;/code&gt; 则是 &lt;code&gt;Access Point&lt;/code&gt; 的缩写，表示接入点，是无线网络设备中一类特殊节点，无线网络中的其他类型节点可以通过 &lt;code&gt;AP&lt;/code&gt; 与无线网络的内部或者外部进行通信。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;SSID&lt;/code&gt; 大家肯定都很熟悉了，其实这是 &lt;code&gt;Service Set Identifier&lt;/code&gt; 的缩写。&lt;code&gt;Service Set&lt;/code&gt; （服务集）是无线局域网中的一个术语，用来描述 802.11 网络中的构成单位，是一组互相关联的无线设备。服务集有着不同的种类，规范中分别定义了如下三种：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;BSS&lt;/code&gt;（基本服务设置，basic service sets）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;IBSS&lt;/code&gt;（独立基本服务设置，independent BSS）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ESS&lt;/code&gt;（扩展服务设置，extended service sets）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其中 &lt;code&gt;IBSS&lt;/code&gt; 属于对等拓扑模式，也叫做 &lt;code&gt;Ad-Hoc&lt;/code&gt;，各客户端之间直接相互连接而不需要 &lt;code&gt;AP&lt;/code&gt; 协助。而 &lt;code&gt;BSS&lt;/code&gt; 和 &lt;code&gt;ESS&lt;/code&gt; 都属于基础架构模式，所有客户端和一个或多个 &lt;code&gt;AP&lt;/code&gt; 关联，各客户端间的数据传输通过 &lt;code&gt;AP&lt;/code&gt; 中转，各客户端之间不直接相互通信。我们一般家庭中常用的就是 &lt;code&gt;BSS&lt;/code&gt;，只有一个 &lt;code&gt;AP&lt;/code&gt;，所有设备都连接到这个 &lt;code&gt;AP&lt;/code&gt; 上。而在 &lt;code&gt;ESS&lt;/code&gt; 中，会同时存在多个 &lt;code&gt;AP&lt;/code&gt;，他们共享同一个 &lt;code&gt;ESSID&lt;/code&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在这里补充说明一下 &lt;code&gt;ESSID&lt;/code&gt; 与 &lt;code&gt;BSSID&lt;/code&gt;：&lt;code&gt;SSID&lt;/code&gt; 根据标识方式可以细分为两种，其中 &lt;code&gt;BSSID&lt;/code&gt; 是 &lt;code&gt;AP&lt;/code&gt; 的 &lt;code&gt;MAC&lt;/code&gt; 地址，而 &lt;code&gt;ESSID&lt;/code&gt; 是最长 32 字节区分大小写的字符串，我们常说的 &lt;code&gt;SSID&lt;/code&gt; 其实就是 &lt;code&gt;ESSID&lt;/code&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在同一个 &lt;code&gt;ESS&lt;/code&gt; 的不同 &lt;code&gt;BSS&lt;/code&gt; 中间切换的过程叫做漫游。&lt;/p&gt;
+&lt;h3 id=&#34;无线接入&#34;&gt;无线接入&lt;/h3&gt;
+&lt;p&gt;在介绍了一些背景之后，下面需要了解一下 &lt;code&gt;WLAN&lt;/code&gt; 是如何接入的。&lt;/p&gt;
+&lt;p&gt;客户端与 &lt;code&gt;AP&lt;/code&gt; 之间的通信是由 &lt;code&gt;802.11 Mac&lt;/code&gt; 层规定的，大致上分为三步：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Scan&lt;/code&gt;，扫描&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Authentication&lt;/code&gt;，认证&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Association&lt;/code&gt;，关联&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;扫描分为主动扫描和被动扫描：我们手机打开 Wifi 界面时候通常需要等待一会儿才能显示出所有的 &lt;code&gt;SSID&lt;/code&gt;，这个时候手机就是在做主动扫描，手机会在标准规定的 13 个信道中广播一个 &lt;code&gt;Probe Request Frame&lt;/code&gt;，收到这个 &lt;code&gt;Frame&lt;/code&gt; 的 &lt;code&gt;AP&lt;/code&gt; 会根据自己的设置决定是否返回带有自己的 &lt;code&gt;SSID&lt;/code&gt;，加密方式等信息的 &lt;code&gt;Probe Response&lt;/code&gt;。而被动扫描则是侦听 &lt;code&gt;AP&lt;/code&gt; 定时发来的 &lt;code&gt;Beacon Frame&lt;/code&gt;，这个帧提供了 &lt;code&gt;AP&lt;/code&gt; 和所在 &lt;code&gt;BSS&lt;/code&gt; 的信息。&lt;/p&gt;
+&lt;p&gt;现在我们选择了一个 &lt;code&gt;SSID&lt;/code&gt;，手机根据 &lt;code&gt;SSID&lt;/code&gt; 的加密方式会通过不同的方式进行认证，这个阶段就是认证阶段。标准中定义了很多加密方式，我这里就不一一列出来了，我们最常见就是 &lt;code&gt;WPA2-PSK&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;在认证通过之后，&lt;code&gt;AP&lt;/code&gt; 会向 &lt;code&gt;STA&lt;/code&gt; 返回认证响应信息，这时候就会进入关联阶段。&lt;code&gt;STA&lt;/code&gt; 会向 &lt;code&gt;AP&lt;/code&gt; 发起关联请求，而 &lt;code&gt;AP&lt;/code&gt; 则会创建一个 &lt;code&gt;Association ID&lt;/code&gt; 并返回一个成功的关联响应。到了这是，&lt;code&gt;STA&lt;/code&gt; 就已经成功的通过 &lt;code&gt;AP&lt;/code&gt; 连入无线网络了。&lt;/p&gt;
+&lt;p&gt;在连入无线网络之后，&lt;code&gt;STA&lt;/code&gt; 仍然会去侦听 &lt;code&gt;AP&lt;/code&gt; 发来的 &lt;code&gt;Beacon Frame&lt;/code&gt;，&lt;code&gt;STA&lt;/code&gt; 根据相同 &lt;code&gt;SSID&lt;/code&gt; 不同 &lt;code&gt;AP&lt;/code&gt; 发来的 &lt;code&gt;Beacon Frame&lt;/code&gt; 来确定哪个 &lt;code&gt;AP&lt;/code&gt; 信号最强。假设当前连接的是 &lt;code&gt;AP A&lt;/code&gt;，但是 &lt;code&gt;STA&lt;/code&gt; 发现有个 &lt;code&gt;AP B&lt;/code&gt; 跟 &lt;code&gt;AP A&lt;/code&gt; 的 &lt;code&gt;SSID&lt;/code&gt; 相同，但是信号更强，那么 &lt;code&gt;STA&lt;/code&gt; 就会试着向 &lt;code&gt;AP B&lt;/code&gt; 发送关联请求。&lt;code&gt;AP B&lt;/code&gt; 在返回了关联响应之后会通过局域网来通知 &lt;code&gt;AP A&lt;/code&gt;，这个 &lt;code&gt;STA&lt;/code&gt; 已经被我接管了。这就是我们拿着笔记本在办公室中走来走去的过程中发生的故事。&lt;/p&gt;
+&lt;h2 id=&#34;虚空锁敌&#34;&gt;虚空锁敌&lt;/h2&gt;
+&lt;p&gt;好，前面铺垫了那么多，下面终于可以转入正题了。&lt;/p&gt;
+&lt;p&gt;结果就是：&lt;strong&gt;我也不知道确切原因&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;首先有个技术叫做 &lt;code&gt;Client Load Balance&lt;/code&gt;，思科那边称之为 &lt;code&gt;Aggressive Load Balancing&lt;/code&gt;，基本思想是在 &lt;code&gt;STA&lt;/code&gt; 向 &lt;code&gt;AP&lt;/code&gt; 发起关联请求的时候，&lt;code&gt;AP&lt;/code&gt; 根据事先设置好的负载策略（比如最大客户端数量，最大流量等）来决定接受还是拒绝请求。但是这个技术核心要点是只作用于关联阶段，只要成功连上，就不会主动断开你的连接。（有时候在人多的地方死活连不上 WiFi，但是只要连上了就一直能用，就是这么个原因。）因此我的电脑主动断开肯定不是 &lt;code&gt;AP&lt;/code&gt; 的负载均衡问题。&lt;/p&gt;
+&lt;p&gt;我搜索了一下这个 &lt;code&gt;non-aggressive load balancing&lt;/code&gt;，发现只有一处提到，其他的地方基本都是全文引用的。包括思科在内的多家厂商都没有提过这个词，Linux 内核里面也没有搜索到相关信息，而作者给出两个引用都已经 404 了，所以无从得知这个 &lt;code&gt;non-aggressive load balancing&lt;/code&gt; 到底是怎么来的。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;现在的猜想是当时信号不是很稳定，Kernel 认为自己离开了 BSS，于是断开了链接，过了一会儿收到了 Beacon 帧，于是重新连接了上去。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;之前的猜想是这样，但是重新看了下 log 之后发现我的设备会很有规律的每过 300s 就断开重连一次：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;153162&lt;/span&gt;.962047&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; wlp2s0: disassociated from &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;Reason: &lt;span style=&#34;color:#bb60d5&#34;&gt;8&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;DISASSOC_STA_HAS_LEFT&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;153464&lt;/span&gt;.350214&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; wlp2s0: disassociated from &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;Reason: &lt;span style=&#34;color:#bb60d5&#34;&gt;8&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;DISASSOC_STA_HAS_LEFT&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;153766&lt;/span&gt;.738503&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; wlp2s0: disassociated from &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;Reason: &lt;span style=&#34;color:#bb60d5&#34;&gt;8&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;DISASSOC_STA_HAS_LEFT&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我司的网络设备跟我的 PC 之间大约的确是有点故事了（耸肩，下个星期看看别人的 PC 有没有一样的问题。&lt;/p&gt;
+&lt;h2 id=&#34;答读者问&#34;&gt;答读者问&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;搞什么嘛，研究了半天结果不还是信号不稳定，网络抖动嘛？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;结果本身并不重要，重要的是我在这个过程中获得了乐趣~&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这个不明觉历的小标题是什么意思？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;他们是 LOL 中英雄的技能。&lt;/p&gt;
+&lt;p&gt;其中致命华彩是烬的 W 技能，恕瑞玛的传承是沙皇的被动技能，虚空锁敌是卡莎的 W 技能~&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;说好的日本游记呢？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在写了。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.aboutcher.co.uk/2012/07/linux-wifi-deauthenticated-reason-codes/&#34;&gt;Linux WiFi: Deauthenticated Reason Codes&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.cnblogs.com/pyj63/p/8046181.html&#34;&gt;wifi的基础知识及原理1&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/Wi-Fi&#34;&gt;Wi-Fi&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/IEEE_802.11&#34;&gt;IEEE 802.11&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E6%9C%8D%E5%8A%A1%E9%9B%86_(%E6%97%A0%E7%BA%BF%E5%B1%80%E5%9F%9F%E7%BD%91)&#34;&gt;服务集&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E7%84%A1%E7%B7%9A%E9%9A%A8%E6%84%8F%E7%B6%B2%E8%B7%AF&#34;&gt;Ad-Hoc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://witestlab.poly.edu/blog/802-11-wireless-lan-2/&#34;&gt;Understanding the 802.11 Wireless LAN MAC frame format&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://devopedia.org/wi-fi-mac-layer&#34;&gt;Wi-Fi MAC layer&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://documentation.meraki.com/MR/WiFi_Basics_and_Best_Practices/802.11_Association_process_explained&#34;&gt;802.11 Association process explained&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.juniper.net/documentation/en_US/junos-space-apps/network-director3.1/topics/concept/wireless-scanning.html&#34;&gt;Understanding Wireless Scanning&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.draytek.com/en/faq/faq-wlan/wlan.vigorap/what-is-ap-load-balance/&#34;&gt;What is AP Load Balance?&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>ThinkPad X1 Carbon 2018 开箱手记</title><link>https://xuanwo.io/2018/05/16/thinkpad-x1-carbon-6th/</link><pubDate>Wed, 16 May 2018 11:30:00 +0000</pubDate><guid>https://xuanwo.io/2018/05/16/thinkpad-x1-carbon-6th/</guid><description>&lt;p&gt;经过了漫长的等待之后，我的新玩具终于到手了。这篇文章主要晒一些照片，并分享一下我这第一次海淘的经历。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;多图预警&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;配置介绍&#34;&gt;配置介绍&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;CPU： Intel i7-8650U vPro&lt;/li&gt;
+&lt;li&gt;内存：16 GB&lt;/li&gt;
+&lt;li&gt;屏幕：14.0 WQHD IPS&lt;/li&gt;
+&lt;li&gt;硬盘：256G SSD&lt;/li&gt;
+&lt;li&gt;电池：3 cell 57Wh&lt;/li&gt;
+&lt;li&gt;预装：Windows 10 Home Plus&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;开箱照&#34;&gt;开箱照&lt;/h2&gt;
+&lt;h3 id=&#34;外包装箱&#34;&gt;外包装箱&lt;/h3&gt;
+&lt;p&gt;外包装箱挺结实的，晒一下配置的截图。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;outer-box.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;内包装箱&#34;&gt;内包装箱&lt;/h3&gt;
+&lt;p&gt;里面的包装箱非常有质感，不过着急着看电脑，没有多拍。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;inter-box.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;顶盖&#34;&gt;顶盖&lt;/h3&gt;
+&lt;p&gt;电脑本体是用一个黑色的袋子套起来放在盒子里面的，就是图片上压在电脑下面的那个袋子。正面非常简单，左上角是 ThinkPad 的标志，右下角的 X1 标志着这台电脑的纯正血统。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;top-cover.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第一眼&#34;&gt;第一眼&lt;/h3&gt;
+&lt;p&gt;14 寸的屏幕，边框比较窄，看起来会比同尺寸的 Macbook Pro 还要大一些。上方的摄像头有一个机械式的开关，可以防止摄像头被意外的开启。标志性的触控板和小红点还在，指纹识别器改成了按压式的（不过 Arch Linux 还不支持 - -）。键盘的手感一如既往的赞，并不会有不适应的感觉。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;first-look.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;接口&#34;&gt;接口&lt;/h3&gt;
+&lt;p&gt;左侧是两个 USB Type C 接口，一个 HDMI 接口和一个 USB Type A 接口，右侧是一个 USB Type A 接口和耳机口。接口的数量不算特别丰富，但是已经可以满足我的需求了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;left-side.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;right-side.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;与-macbook-pro-的对比&#34;&gt;与 Macbook Pro 的对比&lt;/h3&gt;
+&lt;p&gt;整体的厚度其实跟 Macbook Pro 相差无几，但是因为 X1C 曲线的关系，看起来要比 MBP 更薄一些。实际重量也要比 MBP 轻。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;compare-with-macbook-pro.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;与-thinkpad-t460-的对比&#34;&gt;与 ThinkPad T460 的对比&lt;/h3&gt;
+&lt;p&gt;我上一台电脑是公司发的 T460，可以看到 X1C 要薄上不少。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;compare-with-t460.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;hello-arch&#34;&gt;Hello，Arch！&lt;/h3&gt;
+&lt;p&gt;在下单的时候就跟朋友们都说好了，等买了新电脑就要换 Arch。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;hello-arch.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;海淘之旅&#34;&gt;海淘之旅&lt;/h2&gt;
+&lt;p&gt;这是我的 X1C 的环球之旅：&lt;/p&gt;
+&lt;iframe src=&#34;https://www.google.com/maps/d/embed?mid=1Vb4i9bNCBdAD_bk5IkwQ-zyDJwn92k_w&#34; width=&#34;640&#34; height=&#34;480&#34;&gt;&lt;/iframe&gt;
+&lt;blockquote&gt;
+&lt;p&gt;中国合肥生产，寄到美国，然后再寄回来。相同的配置大概便宜了 6000 多块，真不愧是美帝良心想。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;下面分享一些海淘过程中的一些经验吧：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;海淘的周期真的非常长，前前后后大概等了一个月才拿到手，期间还因为贸易战以为自己的电脑被扣了= =。如果着急要用的话，还是不要海淘了。&lt;/li&gt;
+&lt;li&gt;海淘的时候一定要认真的挑选卖家，每个卖家都要跟他聊一聊，看看是否靠谱。上万块的电脑都买了，不要在乎那么几百块钱的差价，找最靠谱的。绝对不要加卖家的微信或者 QQ 聊，直接用网页版的阿里旺旺，这样你们的交流都是有记录的，以后如果有了纠纷可以靠这个去申诉。&lt;/li&gt;
+&lt;li&gt;整体的流程是这样的：
+&lt;ul&gt;
+&lt;li&gt;把自己想要的配置告诉店家，具体的配置可以在 &lt;a href=&#34;https://www3.lenovo.com/us/en/laptops/thinkpad/thinkpad-x/ThinkPad-X1-Carbon-6th-Gen/p/22TP2TXX16G&#34;&gt;美国联想官网定制&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;之后店家会告诉你完整的价格和完整的配置清单，如果确定没有问题的话先付定金，一般是 2000 块。&lt;/li&gt;
+&lt;li&gt;店家收到定金之后就会去官网上下单，然后把订单号告诉你，这样就可以直接在官网查进度。&lt;em&gt;如果店家没有订单号或者不肯告诉你，我觉得可能有问题。&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;等到电脑寄到了店家在美国的仓库，他会要求你支付尾款。收到尾款之后，他就会把电脑直接快递给你。&lt;/li&gt;
+&lt;li&gt;电脑到了海关，邮政局会给你发短信。你可以选择直接微信公众号支付，这样就会通过 EMS 寄给你；也可以选择自己直接去领，这样就可以当场拿走。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;我的电脑这次交了 300 的关税。据朋友说，所有电脑都是按照 2000 元然后征收 15% 的关税来计算的，这个没有证实。如果关税超过 300 块的话，可以让店家帮忙协调一下。&lt;/li&gt;
+&lt;li&gt;海淘的电脑也可以注册联想的全球联保服务，不需要担心电脑坏了没有地方修，不过联想比较傻逼的政策是只有电脑坏了才能注册。。。&lt;/li&gt;
+&lt;li&gt;很多店家不支持信用卡或者花呗，如果要用的话就要自己补手续费，因此尽可能的提前准备好足够的资金。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;使用体验&#34;&gt;使用体验&lt;/h2&gt;
+&lt;p&gt;电脑已经差不多一周，跟我之前的 T460 大概有以下差异：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;续航特别强劲，开着 Goland，PyCharm 和十多个标签的 Chrome 的情况下，可以连续使用八个小时。彻底戒掉了我晚上带电源回家的习惯，可以安心的带着电脑去参加讨论或者会议而不用担心电不够。&lt;/li&gt;
+&lt;li&gt;软件启动特别快。在 SSD 的加持下，我从打开 Goland 到可以开始实际的开发所需要的时间从 2 分钟降低到了 10 秒。&lt;/li&gt;
+&lt;li&gt;高分屏很舒服。习惯了高分屏之后，再回去看原来的屏幕已经完全接受不了了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;坑&#34;&gt;坑 &amp;gt;.&amp;lt;&lt;/h2&gt;
+&lt;p&gt;X1C 使用 Arch Linux 整体上没啥问题，但是在很多细节的地方有比较坑的地方：&lt;/p&gt;
+&lt;h3 id=&#34;支持-s3-待机&#34;&gt;支持 S3 待机&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;X1C 支持 S0i3 待机，但是不支持 S3 待机。两者的区别是在 S0i3 下 CPU 的功耗被降到最低，但仍保持着上电状态，而 S3 则不会。
+&lt;ul&gt;
+&lt;li&gt;X1C 支持 S3 需要 BIOS 的支持，社区中有人通过为 ACPI DSDT Table 打 Patch 来支持，但是这个 Hack 在最新版的 BIOS 中已经失效了，而且这个操作比较危险。因此我选择等待联想官方修复。就像论坛中有人说的那样：“Come on Lonove, show more love for linux users.”&lt;/li&gt;
+&lt;li&gt;而 S0i3 待机需要修改内核参数来提供支持，并且增加该参数后会导致无法打开屏盖来唤醒机器。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;评论区有童鞋说最新版本的固件中已经修复了该问题，我升级了固件发现确实如此。此外，联想已经加入了 LVFS (Linux Vendor Firmware Service)，因此我们可以通过 LVFS 来更新固件。&lt;/p&gt;
+&lt;p&gt;下面简单说一下如何更新固件并开启 S3 支持：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用 Arch 的同学可以通过 pacman 来安装 &lt;a href=&#34;https://www.archlinux.org/packages/community/x86_64/fwupd&#34;&gt;&lt;code&gt;fwupd&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;fwupdmgr get-devices&lt;/code&gt; 获取设备中所有支持固件升级的硬件列表&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;fwupdmgr refresh&lt;/code&gt; 更新 metadata&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;fwupdmgr get-updates&lt;/code&gt; 来检查是不是有更新可用&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;fwupdmgr update&lt;/code&gt; 来进行固件升级
+&lt;ul&gt;
+&lt;li&gt;某些固件可能需要 root 权限&lt;/li&gt;
+&lt;li&gt;某些固件可能需要重启&lt;/li&gt;
+&lt;li&gt;固件升级的时候务必接好电源，同时电池的电量要保持在 60% 以上，最好能充满&lt;/li&gt;
+&lt;li&gt;固件升级的时候可能会把引导项删除，因此最好事先准备一个 live CD，在固件升级完毕之后重新 &lt;code&gt;grub-install&lt;/code&gt; 一下即可&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;固件升级完毕后在 BIOS 的 &lt;code&gt;Config -&amp;gt; Power -&amp;gt; Sleep State&lt;/code&gt; 中将原来的 &lt;code&gt;Windows 10&lt;/code&gt; 修改为 &lt;code&gt;Linux&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;做完上述的操作之后可以通过 &lt;code&gt;dmesg&lt;/code&gt; 来检查是不是已经开启了 S3 的支持：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; dmesg | grep -i &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;acpi: (supports&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;.500484&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; ACPI: &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;supports S0 S3 S4 S5&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;看到 S3 的话，说明已经搞定啦~&lt;/p&gt;
+&lt;h3 id=&#34;已经解决的坑&#34;&gt;已经解决的坑&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;在 KDE + SDDM 的组合下，进入休眠状态后再恢复，会有一定概率出现屏幕一直闪动的情况。重启 SDDM 之后会恢复正常，从 Xorg 的报错日志能看到类似这样的错误：&lt;code&gt;Failed to set drm version: Permission denied&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;最新版本的 KDE + SDDM 中已经修复了&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;尚未解决的坑&#34;&gt;尚未解决的坑&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Xorg + KDE 对不同 DPI 的屏幕支持不太好，导致外接屏幕的时候用起来比较难受。&lt;/li&gt;
+&lt;li&gt;指纹识别器驱动正在&lt;a href=&#34;https://github.com/nmikhailov/Validity90&#34;&gt;开发当中&lt;/a&gt;，暂时还用不了。&lt;/li&gt;
+&lt;li&gt;默认配置下 &lt;code&gt;Thunderbolt BIOS Assist Mode&lt;/code&gt; 是 Disable 的，这会导致 Linux 在 s2idle 下的能耗特别高，需要进 BIOS 将其设置为 Enable。&lt;/li&gt;
+&lt;li&gt;默认配置下，Linux 的 CPU 温度上限是 80 度，而 Windows 下是 97 度。这会导致 Linux 的 CPU 性能比 Windows 下要低，目前有一些 dirty hack，官方还没有修复。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;引用链接&#34;&gt;引用链接&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Lenovo_ThinkPad_X1_Carbon_(Gen_6)&#34;&gt;Lenovo ThinkPad X1 Carbon (Gen 6) - Arch Wiki&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/thinkpad/comments/870u0a/t480s_linux_throttling_bug/&#34;&gt;T480s Linux throttling bug&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://forums.lenovo.com/t5/Linux-Discussion/X1C6-T480s-low-cTDP-and-trip-temperature-in-Linux/td-p/4028489&#34;&gt;low cTDP and trip temperature in Linux&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bbs.archlinux.org/viewtopic.php?id=234913&#34;&gt;Lenovo X1C6 / X1Y3 (2018): No deep sleep (S3)?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://forums.lenovo.com/t5/Linux-Discussion/X1-Carbon-Gen-6-cannot-enter-deep-sleep-S3-state-aka-Suspend-to/td-p/3998182/highlight/true&#34;&gt;X1 Carbon Gen 6 cannot enter deep sleep (S3 state aka Suspend-to-RAM) on Linux&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Fwupd&#34;&gt;fwupd&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;《间客》又看完了，现在在看《北平无战事》，当年追过一阵儿电视剧，但是没有看完，这次看看后续的剧情到底是怎么发展的。&lt;/li&gt;
+&lt;li&gt;上个周末去北大的黑客马拉松当评委，我最看好一个做猫脸识别的团队居然前十都没有进，很是生气。&lt;/li&gt;
+&lt;li&gt;照片都是在公司拍的，背景是我们公司的茶水间和我的工位，对我们公司感兴趣的话欢迎直接甩简历~&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>译-Ubuntu下五个最好的BT客户端</title><link>https://xuanwo.io/2015/09/01/translated-five-best-bt-client-in-ubuntu/</link><pubDate>Tue, 01 Sep 2015 10:54:20 +0000</pubDate><guid>https://xuanwo.io/2015/09/01/translated-five-best-bt-client-in-ubuntu/</guid><description>&lt;p&gt;&lt;em&gt;本文是我加入LCTT后翻译的第一篇文章，感谢LCTT项目组伙伴们的支持，感谢组长wxy的仔细校对，也欢迎大家加入LCTT项目，共同翻译优质的Linux文章~&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/5_Best_Torrent_Ubuntu.png&#34; alt=&#34;Best Torrent clients for Ubuntu Linux&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在寻找 &lt;strong&gt;Ubuntu 中最好的 BT 客户端&lt;/strong&gt;吗？事实上，Linux 桌面平台中有许多 BT 客户端，但是它们中的哪些才是&lt;strong&gt;最好的 Ubuntu 客户端&lt;/strong&gt;呢？&lt;/p&gt;
+&lt;p&gt;我将会列出 Linux 上最好的五个 BT 客户端，它们都拥有着体积轻盈，功能强大的特点，而且还有令人印象深刻的用户界面。自然，易于安装和使用也是特性之一。&lt;/p&gt;
+&lt;h3 id=&#34;ubuntu-下最好的-bt-客户端&#34;&gt;Ubuntu 下最好的 BT 客户端&lt;/h3&gt;
+&lt;p&gt;考虑到 Ubuntu 默认安装了 Transmission，所以我将会从这个列表中排除了 Transmission。但是这并不意味着 Transmission 没有资格出现在这个列表中，事实上，Transmission 是一个非常好的BT客户端，这也正是它被包括 Ubuntu 在内的多个发行版默认安装的原因。&lt;/p&gt;
+&lt;h3 id=&#34;deluge&#34;&gt;Deluge&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/Deluge.png&#34; alt=&#34;Logo of Deluge torrent client for Ubuntu&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://deluge-torrent.org/&#34;&gt;Deluge&lt;/a&gt; 被 Lifehacker 评选为 Linux 下最好的 BT 客户端，这说明了 Deluge 是多么的有用。而且，并不仅仅只有 Lifehacker 是 Deluge 的粉丝，纵观多个论坛，你都会发现不少 Deluge 的忠实拥趸。&lt;/p&gt;
+&lt;p&gt;快速，时尚而直观的界面使得 Deluge 成为 Linux 用户的挚爱。&lt;/p&gt;
+&lt;p&gt;Deluge 可在 Ubuntu 的仓库中获取，你能够在 Ubuntu 软件中心中安装它，或者使用下面的命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install deluge
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;qbittorrent&#34;&gt;qBittorrent&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qbittorrent_icon.png&#34; alt=&#34;qBittorrent client for Linux&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;正如它的名字所暗示的，&lt;a href=&#34;http://www.qbittorrent.org/&#34;&gt;qBittorrent&lt;/a&gt; 是著名的 &lt;a href=&#34;http://www.bittorrent.com/&#34;&gt;Bittorrent&lt;/a&gt; 应用的 Qt 版本。如果曾经使用过它，你将会看到和 Windows 下的 Bittorrent 相似的界面。同样轻巧并且有着 BT 客户端的所有标准功能， qBittorrent 也可以在 Ubuntu 的默认仓库中找到。&lt;/p&gt;
+&lt;p&gt;它可以通过 Ubuntu 软件仓库安装，或者使用下面的命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install qbittorrent
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;tixati&#34;&gt;Tixati&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/tixati_icon.png&#34; alt=&#34;Tixati torrent client logo&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.tixati.com/&#34;&gt;Tixati&lt;/a&gt; 是另一个不错的 Ubuntu 下的 BT 客户端。它有着一个默认的黑暗主题，尽管很多人喜欢，但是我例外。它拥有着一切你能在 BT 客户端中找到的功能。&lt;/p&gt;
+&lt;p&gt;除此之外，它还有着数据分析的额外功能。你可以在美观的图表中分析流量以及其它数据。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.tixati.com/download/&#34;&gt;下载 Tixati&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;vuze&#34;&gt;Vuze&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/vuze_icon_for_mac_os_x_by_hamzasaleem-d6yx1fp.png&#34; alt=&#34;Vuze Torrent Logo&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.vuze.com/&#34;&gt;Vuze&lt;/a&gt; 是许多 Linux 以及 Windows 用户最喜欢的 BT 客户端。除了标准的功能，你可以直接在应用程序中搜索种子，也可以订阅系列片源，这样就无需再去寻找新的片源了，因为你可以在侧边栏中的订阅看到它们。&lt;/p&gt;
+&lt;p&gt;它还配备了一个视频播放器，可以播放带有字幕的高清视频等等。但是我不认为你会用它来代替那些更好的视频播放器，比如 VLC。&lt;/p&gt;
+&lt;p&gt;Vuze 可以通过 Ubuntu 软件中心安装或者使用下列命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install vuze
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;frostwire&#34;&gt;Frostwire&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/frostwire.png&#34; alt=&#34;Logo of Frostwire torrent client&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.frostwire.com/&#34;&gt;Frostwire&lt;/a&gt; 是一个你应该试一下的应用。它不仅仅是一个简单的 BT 客户端，它还可以应用于安卓，你可以用它通过 Wifi 来共享文件。&lt;/p&gt;
+&lt;p&gt;你可以在应用中搜索种子并且播放他们。除了下载文件，它还可以浏览本地的影音文件，并且将它们有条理的呈现在播放器中。这同样适用于安卓版本。&lt;/p&gt;
+&lt;p&gt;还有一个特点是：Frostwire 提供了独立音乐人的&lt;a href=&#34;http://www.frostclick.com/wp/&#34;&gt;合法音乐下载&lt;/a&gt;。你可以下载并且欣赏它们，免费而且合法。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.frostwire.com/downloads&#34;&gt;下载 Frostwire&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;荣誉奖&#34;&gt;荣誉奖&lt;/h3&gt;
+&lt;p&gt;在 Windows 中，uTorrent（发音：mu torrent）是我最喜欢的 BT 应用。尽管 uTorrent 可以在 Linux 下运行，但是我还是特意忽略了它。因为在 Linux 下使用 uTorrent 不仅困难，而且无法获得完整的应用体验（运行在浏览器中）。&lt;/p&gt;
+&lt;p&gt;可以&lt;a href=&#34;http://sysads.co.uk/2014/05/install-utorrent-3-3-ubuntu-14-04-13-10/&#34;&gt;在这里&lt;/a&gt;阅读 Ubuntu下uTorrent 的安装教程。&lt;/p&gt;
+&lt;h4 id=&#34;快速提示&#34;&gt;快速提示:&lt;/h4&gt;
+&lt;p&gt;大多数情况下，BT 应用不会默认自动启动。如果想改变这一行为，请阅读&lt;a href=&#34;http://itsfoss.com/manage-startup-applications-ubuntu/&#34;&gt;如何管理 Ubuntu 下的自启动程序&lt;/a&gt;来学习。&lt;/p&gt;
+&lt;h3 id=&#34;你最喜欢的是什么&#34;&gt;你最喜欢的是什么？&lt;/h3&gt;
+&lt;p&gt;这些是我对于 Ubuntu 下最好的 BT 客户端的意见。你最喜欢的是什么呢？请发表评论。也可以查看与本主题相关的&lt;a href=&#34;http://itsfoss.com/4-best-download-managers-for-linux/&#34;&gt;Ubuntu 最好的下载管理器&lt;/a&gt;。如果使用 Popcorn Time，试试 &lt;a href=&#34;http://itsfoss.com/popcorn-time-tips/&#34;&gt;Popcorn Time 技巧&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;via: &lt;a href=&#34;http://itsfoss.com/best-torrent-ubuntu/&#34;&gt;http://itsfoss.com/best-torrent-ubuntu/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;作者：&lt;a href=&#34;http://itsfoss.com/author/abhishek/&#34;&gt;Abhishek&lt;/a&gt;
+译者：&lt;a href=&#34;https://github.com/Xuanwo&#34;&gt;Xuanwo&lt;/a&gt;
+校对：&lt;a href=&#34;https://github.com/wxy&#34;&gt;wxy&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;本文由 &lt;a href=&#34;https://github.com/LCTT/TranslateProject&#34;&gt;LCTT&lt;/a&gt; 原创翻译，&lt;a href=&#34;https://linux.cn/&#34;&gt;Linux中国&lt;/a&gt; 荣誉推出&lt;/p&gt;</description></item><item><title>使用Screen管理会话</title><link>https://xuanwo.io/2015/07/01/screen-ssh/</link><pubDate>Wed, 01 Jul 2015 09:49:31 +0000</pubDate><guid>https://xuanwo.io/2015/07/01/screen-ssh/</guid><description>&lt;p&gt;在实现&lt;a href=&#34;http://xuanwo.io/2015/06/30/together-project/&#34;&gt;Together项目&lt;/a&gt;的过程中，有一个需求是需要下载一个500M左右系统镜像包，由于文件源在国内，国外的下载速度简直感人。在经历多次因为SSH超时导致下载意外终止后，我终于决定要解决掉这个问题。&lt;/p&gt;
+&lt;h1 id=&#34;原因&#34;&gt;原因&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;SIGHUP 信号&lt;/strong&gt;
+首先介绍Linux/Unix中的几个概念：
+&amp;gt; [进程组（process group）]()：一个或多个进程的集合，每一个进程组有唯一一个进程组ID，即进程组长进程的ID。
+&amp;gt; [会话期（session）]()：一个或多个进程组的集合，有唯一一个会话期首进程（session leader）。会话期ID为首进程的ID。
+&amp;gt; 会话期可以有一个单独的控制终端（controlling terminal）。与控制终端连接的会话期首进程叫做控制进程（controlling process）。当前与终端交互的进程称为前台进程组。其余进程组称为后台进程组。&lt;/p&gt;
+&lt;p&gt;根据&lt;a href=&#34;https://zh.wikipedia.org/wiki/POSIX&#34;&gt;POSIX.1&lt;/a&gt;定义：
+- 挂断信号（SIGHUP）默认的动作是终止程序。
+- 当终端接口检测到网络连接断开，将挂断信号发送给控制进程（会话期首进程）。
+- 如果会话期首进程终止，则该信号发送到该会话期前台进程组。
+- 一个进程退出导致一个孤儿进程组中产生时，如果任意一个孤儿进程组进程处于STOP状态，发送SIGHUP和SIGCONT信号到该进程组中所有进程。&lt;/p&gt;
+&lt;p&gt;也就是说，一旦putty因为超时产生了SIGHUP信号，那么会连带着当前终端正在运行的程序全部终止。所以，只要避免SIGHUP信号的产生，就可以规避这个问题。&lt;/p&gt;
+&lt;h1 id=&#34;screen&#34;&gt;Screen&lt;/h1&gt;
+&lt;p&gt;简单来说，Screen是一个可以在多个进程之间多路复用一个物理终端的窗口管理器。Screen中有会话的概念，用户可以在一个screen会话中创建多个screen窗口，在每一个screen窗口中就像操作一个真实的telnet/SSH连接窗口那样。&lt;/p&gt;
+&lt;h2 id=&#34;安装&#34;&gt;安装&lt;/h2&gt;
+&lt;p&gt;很多发行版会预装Screen，如果没有（比如Ubuntu），则需要自行安装，以Ubuntu为例：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+sudo apt-get install screen
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;创建&#34;&gt;创建&lt;/h2&gt;
+&lt;h3 id=&#34;直接创建&#34;&gt;直接创建&lt;/h3&gt;
+&lt;p&gt;直接在命令行下输入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+screen
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;之后你会看到几页字，按回车跳过之后，你就来到了一个shell的全屏窗口。你可以执行任意shell程序，就像在ssh窗口中那样。在该窗口中键入exit退出该窗口，如果这是该screen会话的唯一窗口，该screen会话退出，否则screen自动切换到前一个窗口。&lt;/p&gt;
+&lt;h3 id=&#34;快捷键创建新窗口&#34;&gt;快捷键创建新窗口&lt;/h3&gt;
+&lt;p&gt;在已经激活的Screen会话下，使用快捷键&lt;code&gt;Ctrl+A&lt;/code&gt;然后点击&lt;code&gt;C&lt;/code&gt;，screen 在该会话内生成一个新的窗口并切换到该窗口。&lt;/p&gt;
+&lt;h2 id=&#34;暂时中断&#34;&gt;暂时中断&lt;/h2&gt;
+&lt;p&gt;screen还有更高级的功能。你可以不中断screen窗口中程序的运行而暂时断开（detach）screen会话，并在随后时间重新连接（attach）该会话，重新控制各窗口中运行的程序。例如，我们使用wget下载一个文件：
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/ssh-time-out.png&#34; alt=&#34;SSH超时样例&#34; /&gt;
+之后我们想暂时退出做点别的事情，比如出去散散步，那么在screen窗口键入&lt;code&gt;Ctrl+A&lt;/code&gt;然后点击&lt;code&gt;D&lt;/code&gt;，Screen会给出detached提示：
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/screen-detached.png&#34; alt=&#34;Screen Detached&#34; /&gt;
+半个小时之后回来了，找到该screen会话：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+screen -ls
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;重新连接会话：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+screen -r 会话ID
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;一切工作都会完全回来，区别只在于，他可能已经做好了&amp;gt;_&amp;lt;。&lt;/p&gt;
+&lt;h2 id=&#34;键绑定&#34;&gt;键绑定&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;你可能注意到给screen发送命令使用了特殊的键组合&lt;code&gt;Ctrl+A&lt;/code&gt;。这是因为我们在键盘上键入的信息是直接发送给当前screen窗口，必须用其他方式向screen窗口管理器发出命令，默认情况下，screen接收以&lt;code&gt;Ctrl+A&lt;/code&gt;开始的命令。这种命令形式在screen中叫做键绑定（key binding），&lt;code&gt;Ctrl+A&lt;/code&gt;叫做命令字符（command character）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;可以通过&lt;code&gt;Ctrl+A ?&lt;/code&gt;来查看所有的键绑定，常用的键绑定有：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;code&gt;Ctrl+A ?&lt;/code&gt;&lt;/th&gt;
+&lt;th&gt;显示所有键绑定信息&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A w&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;显示所有窗口列表&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A Ctrl+A&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;切换到之前显示的窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A c&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;创建一个新的运行shell的窗口并切换到该窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A n&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;切换到下一个窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A p&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;切换到前一个窗口(与Ctrl+A n相对)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A 0..9&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;切换到窗口0..9&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A a&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;发送 Ctrl+A到当前窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A d&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;暂时断开screen会话&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A k&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;杀掉当前窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A [&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;进入拷贝/回滚模式&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.ibm.com/developerworks/cn/linux/l-cn-screen/index.html&#34;&gt;linux 技巧：使用 screen 管理你的远程会话&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.gnu.org/software/screen/&#34;&gt;GNU Screen&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.slac.stanford.edu/comp/unix/package/epics/extensions/iocConsole/screen.1.html&#34;&gt;Screen的man page提供了最详细的信息&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年07月01日 完成关于Screen的介绍&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

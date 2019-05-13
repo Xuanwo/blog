@@ -1,0 +1,182 @@
+<!doctype html><html><head><title>POJ 3083 Children of the Candy Corn</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content=Technology,Code,Program,Linux,><meta name=author content=Xuanwo><meta property=og:title content="POJ 3083 Children of the Candy Corn"><meta property=og:description content="A blog maintained by an interesting programmer."><meta property=og:type content=website><meta property=og:locale content=en_US><meta property=og:url content=https://xuanwo.io/2014/08/19/poj-3083-children-of-the-candy-corn/><link href rel=alternate type=application/rss+xml title="Xuanwo's Blog"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/milligram@1.3.0/dist/milligram.min.css integrity="sha256-Ro/wP8uUi8LR71kwIdilf78atpu8bTEwrK5ZotZo+Zc=" crossorigin=anonymous><link rel=stylesheet href=/css/main.min.css><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.54.0"></head><body><div id=container><header id=header><div id=header-outer class=outer><div id=header-inner class=inner><a id=main-nav-toggle class=nav-icon href=javascript:;><svg width="1em" height="1em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#bars"/></svg></a><a id=logo class=logo-text href=https://xuanwo.io>Xuanwo&#39;s Blog</a><nav id=main-nav><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<a class=main-nav-link href=/about/>关于我</a></nav></div></div></header><section id=main class=outer><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 class=article-title itemprop=name>POJ 3083 Children of the Candy Corn</h1></header><div class=article-meta><a href=/2014/08/19/poj-3083-children-of-the-candy-corn/ class=article-date><time datetime=2014-08-19T16:58:57.000&#43;00:00 itemprop=datePublished>2014-08-19</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div><div class=article-comment-link-wrap><a href=/2014/08/19/poj-3083-children-of-the-candy-corn/#disqus_thread class=article-comment-link>Comments</a></div></div><div class=article-entry itemprop=articleBody><h2 id=题目>题目</h2><p>源地址：</p><p><a href="http://poj.org/problem?id=3083">http://poj.org/problem?id=3083</a></p><h1 id=理解>理解</h1><p>最开始的代码程序直接报错，反复调试之后，发现我陷入了无限的循环之中。因为先写的左转优先的代码，面对这样的数据时：</p><pre><code>########
+#......#
+#.####.#
+#.####.#
+#.####.#
+#.####.#
+#...#..#  //此行倒数第二和第三的`.`会使得左转优先策略陷入无限循环
+#S#E####
+
+</code></pre><p>因此，仅仅是写DFS是不够的，我还需要对当前的朝向再进行判断。
+除了这个之外，就是一个BFS了，最短路径用DFS不太合适。</p><h1 id=代码>代码</h1><pre><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+#include &lt;cmath&gt;
+#include &lt;ctime&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;deque&gt;
+#include &lt;list&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+#include &lt;stack&gt;
+#include &lt;queue&gt;
+#include &lt;numeric&gt;
+#include &lt;iomanip&gt;
+#include &lt;bitset&gt;
+#include &lt;sstream&gt;
+#include &lt;fstream&gt;
+#define debug puts(&quot;-----&quot;)
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1&lt;&lt;28)
+#define MAXN 45
+using namespace std;
+
+#define see(x) cout&lt;&lt;#x&lt;&lt;&quot;:&quot;&lt;&lt;x&lt;&lt;endl;
+const int N = 50;
+char maze[N][N];
+
+typedef struct
+{
+    int x, y, dis;
+} Node;
+
+const int move[4][4] = { {0, -1}, { -1, 0}, {0, 1}, {1, 0} };
+bool vis[N][N] = {0};
+int r, c;
+queue&lt;Node&gt; q;
+int bfs()
+{
+    int i;
+    Node temp, temp1;
+    int minn = inf;
+    while (!q.empty())
+    {
+        temp = q.front();
+        q.pop();
+        if (maze[temp.x][temp.y] == 'E')
+        {
+            if (temp.dis &lt; minn)
+            {
+                minn = temp.dis;
+            }
+        }
+
+        else
+        {
+            for (i = 0; i &lt; 4; i++)
+            {
+                temp1.x = temp.x + move[i][0];
+                temp1.y = temp.y + move[i][1];
+                temp1.dis = temp.dis + 1;
+                if (temp1.x &gt;= 0 &amp;&amp; temp1.x &lt; r &amp;&amp; temp1.y &gt;= 0 &amp;&amp; temp1.y &lt; c &amp;&amp; maze[temp1.x][temp1.y] != '#' &amp;&amp; !vis[temp1.x][temp1.y])
+                {
+                    vis[temp1.x][temp1.y] = 1;
+                    q.push(temp1);
+                }
+            }
+        }
+    }
+    return minn;
+}
+int dfs(int x, int y, int dir, char mark)
+{
+    int i, ndir, nx, ny;
+    if (maze[x][y] == 'E')
+    {
+        return 1;
+    }
+    if (mark == 'l')
+    {
+        for (i = dir - 1; i &lt; dir + 3; i++)
+        {
+            nx = x + move[(i + 4) % 4][0];
+            ny = y + move[(i + 4) % 4][1];
+            ndir = (i + 4) % 4;
+            if (nx &gt;= 0 &amp;&amp; nx &lt; r &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; c &amp;&amp; maze[nx][ny] != '#')
+            {
+                //    cout&lt;&lt;&quot;nx: &quot;&lt;&lt;nx&lt;&lt;&quot;   ny: &quot;&lt;&lt;ny&lt;&lt;&quot;    &quot;; see(ndir)
+                return dfs(nx, ny, ndir, mark) + 1;
+            }
+        }
+    }
+    if (mark == 'r')
+    {
+        for (i = dir + 1; i &gt; dir - 3; i--)
+        {
+            nx = x + move[(i + 4) % 4][0];
+            ny = y + move[(i + 4) % 4][1];
+            ndir = (i + 4) % 4;
+            if (nx &gt;= 0 &amp;&amp; nx &lt; r &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; c &amp;&amp; maze[nx][ny] != '#')
+            {
+                return dfs(nx, ny, ndir, mark) + 1;
+            }
+        }
+    }
+    return 0;
+}
+int main()
+{
+    int t, lp, rp, sp;
+    int i, j, k, dir;
+    Node s;
+    scanf(&quot;%d&quot;, &amp;t);
+    while (t--)
+    {
+        scanf(&quot;%d%d&quot;, &amp;c, &amp;r);
+        for (i = 0; i &lt; r; i++)
+            scanf(&quot;%s&quot;, maze[i]);
+        for (i = 0; i &lt; r; i++)
+        {
+            for (j = 0; j &lt; c; j++)
+            {
+                if (maze[i][j] == 'S')
+                {
+                    s.x = i; s.y = j; s.dis = 1;
+                    break;
+                }
+            }
+        }
+        if (s.x == 0)
+        {
+            dir = 3;
+        }
+        else if (s.x == 1)
+        {
+            dir = 1;
+        }
+        else if (s.y == 0)
+        {
+            dir = 2;
+        }
+        else
+        {
+            dir = 0;
+        }
+        lp = dfs(s.x, s.y, dir, 'l');
+
+        vis[s.x][s.y] = 1;
+        rp = dfs(s.x, s.y, dir, 'r');
+
+        memset(vis, 0, sizeof(vis));
+        vis[s.x][s.y] = 1;  s.dis = 1;
+        q.push(s);
+        sp = bfs();
+        printf(&quot;%d %d %d\n&quot;, lp, rp, sp);
+    }
+    return 0;
+}
+
+</code></pre><h1 id=更新日志>更新日志</h1><ul><li>2014年08月19日 已AC。</li></ul></div><div class=article-toc></div></div><nav id=article-nav><a href=/2014/08/21/opensource-book/ id=article-nav-newer class=article-nav-link-wrap><div class=article-nav-title><span>&lt;</span>&nbsp;
+Gitbook——你自己的开源电子书</div></a><a href=/2014/08/18/poj-2876-cantoring-along/ id=article-nav-older class=article-nav-link-wrap><div class=article-nav-title>POJ 2876 Cantoring Along&nbsp;<span>&gt;</span></div></a></nav></article><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){this.page.identifier='\/2014\/08\/19\/POJ-3083-Children-of-the-Candy-Corn\/';this.page.title='POJ 3083 Children of the Candy Corn';this.page.url='https:\/\/xuanwo.io\/2014\/08\/19\/poj-3083-children-of-the-candy-corn\/';};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return;}
+var d=document,s=d.createElement('script');s.async=true;s.src='//'+"only0god"+'.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></section><footer id=footer><div class=outer><div id=footer-info class=inner>&copy; 2019 Xuanwo&#39;s Blog&nbsp;
+Powered by <a href=https://gohugo.io target=_blank>Hugo</a></div></div><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script src=https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js></script><script>tocbot.init({tocSelector:'.article-toc',contentSelector:'.article-entry',headingSelector:'h1, h2, h3, h4, h5',});</script><script>document.getElementById('main-nav-toggle').addEventListener('click',function(){var header=document.getElementById('header');if(header.classList.contains('mobile-on')){header.classList.remove('mobile-on');}else{header.classList.add('mobile-on');}});</script></footer></div></body></html>

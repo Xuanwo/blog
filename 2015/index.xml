@@ -1,0 +1,784 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>2015s on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/2015/</link><description>Recent content in 2015s on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Wed, 23 Dec 2015 16:15:20 +0000</lastBuildDate><atom:link href="https://xuanwo.io/2015/index.xml" rel="self" type="application/rss+xml"/><item><title>最佳跨平台PDF阅读解决方案</title><link>https://xuanwo.io/2015/12/23/best-pdf-read-solution/</link><pubDate>Wed, 23 Dec 2015 16:15:20 +0000</pubDate><guid>https://xuanwo.io/2015/12/23/best-pdf-read-solution/</guid><description>&lt;p&gt;最近因为学习需要，要大量阅读纯文字的PDF文档。然后我惊讶地发现市场上居然没有哪家提供一套完整可用的跨平台PDF阅读解决方案，于是我在尝试了市面几乎所有叫得上名字的各类阅读器之后，形成了一套自己的跨平台PDF阅读解决方案。本文记录了这套方案的详细内容，希望会有所益处。&lt;/p&gt;
+&lt;h1 id=&#34;目标&#34;&gt;目标&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;跨平台（目前支持Windows和Android）&lt;/li&gt;
+&lt;li&gt;阅读记录同步&lt;/li&gt;
+&lt;li&gt;支持标准PDF的批注和高亮等功能&lt;/li&gt;
+&lt;li&gt;对PDF文件管理方便&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;思路&#34;&gt;思路&lt;/h1&gt;
+&lt;p&gt;标准PDF的批注和高亮功能是内嵌在PDF文件中的，只要同步了PDF文件，也就同步了所有在PDF文件上的批注和高亮。因此这个问题很大程度上就变成了解决跨平台文件双向同步问题。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;跨平台双向同步在很多人看来是一个已经被Dropbox以及Google Drive解决了问题，但是实际上，它们在PC和移动端的行为是不一样的。PC端是完整的双向同步，而在移动端，为了节省流量和空间，它们都是提供了一个File list，你必须要自己下载指定文件。不仅如此，这个下载下来的文件大多是Read-Only的，用阅读器批注之后，你会发现这个文件无法保存，这样的话，PDF跨平台批注就无从谈起。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;解决方案&#34;&gt;解决方案&lt;/h1&gt;
+&lt;p&gt;按照上面思路中的讨论，我在每一个平台上的解决方案都分成两个部分，第一是解决PDF阅读、批注问题，第二是解决PDF文件双向同步问题。&lt;/p&gt;
+&lt;h2 id=&#34;windows&#34;&gt;Windows&lt;/h2&gt;
+&lt;h3 id=&#34;goodsync&#34;&gt;Goodsync&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/goodsync.png&#34; alt=&#34;Goodsync&#34; /&gt;
+&lt;a href=&#34;http://www.goodsync.com/&#34;&gt;&lt;strong&gt;Goodsync&lt;/strong&gt;&lt;/a&gt;是一款非常强大的同步工具，我们通过它来提供本地到Google Drive的双向同步功能。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如果通过SS艹墙，配置Google Drive时请勾选&lt;code&gt;基于WinInet&lt;/code&gt;，如图：&lt;img src=&#34;https://xuanwo.io/imgs/opinion/goodsync-proxy-setting.png&#34; alt=&#34;Goodsync Proxy Setting&#34; /&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;foxit-reader&#34;&gt;Foxit Reader&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/foxit-reader.png&#34; alt=&#34;Foxit Reader&#34; /&gt;
+&lt;a href=&#34;http://www.foxitsoftware.cn/&#34;&gt;&lt;strong&gt;Foxit Reader&lt;/strong&gt;&lt;/a&gt;，也就是福昕阅读器，不多说了，新版的界面还是可以的。（尽管我觉得颜值没有Adobe Reader DC高）&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;为什么不选Adobe？Adobe最新版本的批注功能在特定的PDF上好像有点问题，我尝试了几个都不能正常保存，总是提示错误110，无奈放弃。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;android&#34;&gt;Android&lt;/h2&gt;
+&lt;h3 id=&#34;flodersync&#34;&gt;Flodersync&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/Flodersync.png&#34; alt=&#34;Flodersync&#34; /&gt;
+&lt;a href=&#34;https://play.google.com/store/apps/details?id=dk.tacit.android.foldersync.lite&#34;&gt;&lt;strong&gt;Flodersync&lt;/strong&gt;&lt;/a&gt;是一款基于安卓平台的非常棒的一款应用，我们通过它来实现安卓平台的双向同步。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;开启双向同步请取消勾选&lt;code&gt;不同步删除&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;moon&#34;&gt;Moon+&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/Moon.png&#34; alt=&#34;Moon+&#34; /&gt;
+&lt;a href=&#34;https://play.google.com/store/apps/details?id=com.flyersoft.moonreader&#34;&gt;&lt;strong&gt;Moon+&lt;/strong&gt;&lt;/a&gt;，静读天下，安卓平台上首屈一指的阅读器，支持格式众多，速度流畅，除了免费版有些功能阉割和广告之外，没有别的问题。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年12月23日 初始发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>在线视频下载完整解决方案</title><link>https://xuanwo.io/2015/12/18/online-video-download-solution/</link><pubDate>Fri, 18 Dec 2015 12:49:49 +0000</pubDate><guid>https://xuanwo.io/2015/12/18/online-video-download-solution/</guid><description>&lt;p&gt;因为学习需要，产生了一个这样的需求：要从Youtube上批量下载视频。自然，出于方便使用的角度来看，音画不能分离，最好带有对应的字幕。一番搜罗之后，我找到了基于Python的开源产品： &lt;a href=&#34;https://rg3.github.io/youtube-dl/&#34;&gt;youtube-dl&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;值得一提的是，youtube-dl不仅仅能下载youtube上的视频，它支持的视频链接种类多达700+种，几乎囊括了所有在线视频网站，列表参见&lt;a href=&#34;https://rg3.github.io/youtube-dl/supportedsites.html&#34;&gt;此处&lt;/a&gt;。让我不由得感慨开源的力量。除此以外，某些不存在的网址需要自备梯子，不再赘述。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;获取&#34;&gt;获取&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;checked on 2015-12-18&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;windows&#34;&gt;Windows&lt;/h2&gt;
+&lt;p&gt;Windows用户可以使用已经打包好的可执行程序：&lt;a href=&#34;https://yt-dl.org/downloads/2015.12.13/youtube-dl.exe&#34;&gt;下载链接&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;unix-like&#34;&gt;UNIX like&lt;/h2&gt;
+&lt;p&gt;类UNIX系统的用户可以使用curl或者wget来获取可执行文件&lt;/p&gt;
+&lt;h3 id=&#34;curl&#34;&gt;curl&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo curl https://yt-dl.org/downloads/2015.12.13/youtube-dl -o /usr/local/bin/youtube-dl
+sudo chmod a+rx /usr/local/bin/youtube-dl&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;wget&#34;&gt;wget&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo wget https://yt-dl.org/downloads/2015.12.13/youtube-dl -O /usr/local/bin/youtube-dl
+sudo chmod a+rx /usr/local/bin/youtube-dl&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;homebrew&#34;&gt;Homebrew&lt;/h2&gt;
+&lt;p&gt;Homebrew用户可以使用如下命令进行安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;brew install youtube-dl&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;pip&#34;&gt;pip&lt;/h2&gt;
+&lt;p&gt;同样的，你也可以使用pip来安装它。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo pip install --upgrade youtube_dl&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;source&#34;&gt;Source&lt;/h2&gt;
+&lt;p&gt;自然，你可以选择下载源代码以及docs，链接&lt;a href=&#34;https://yt-dl.org/downloads/2015.12.13/youtube-dl-2015.12.13.tar.gz&#34;&gt;见此&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;使用&#34;&gt;使用&lt;/h1&gt;
+&lt;h2 id=&#34;简易&#34;&gt;简易&lt;/h2&gt;
+&lt;p&gt;最简单的方式就是直接加上视频链接地址就可以自动下载到当前文件夹：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;youtube-dl.exe url&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;使用代理&#34;&gt;使用代理&lt;/h2&gt;
+&lt;p&gt;以常见的ss代理为例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;youtube-dl.exe url --proxy http://127.0.0.1:1080&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;有一个坑点在于这个参数只支持HTTP/HTTPS代理，所以本地跑SS的话，需要在前面加上一个HTTP的前缀，否则代理不会正常工作。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;下载列表&#34;&gt;下载列表&lt;/h2&gt;
+&lt;p&gt;以Youtube Playlist为例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;youtube-dl.exe --yes-playlist https://www.youtube.com/playlist?list&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;PLZlv_N0_O1gZg3dTMetmsfm_s4lb4-Tg0 --proxy http://127.0.0.1:1080&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;下载字幕&#34;&gt;下载字幕&lt;/h2&gt;
+&lt;p&gt;以Youtube Playlist为例，自动生成字幕并指定下载中文和英文字幕：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;youtube-dl.exe --yes-playlist https://www.youtube.com/playlist?list&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;PLZlv_N0_O1gZg3dTMetmsfm_s4lb4-Tg0 --proxy http://127.0.0.1:1080 --write-auto-sub --sub-lang en,cn&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;字幕相关设定：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;--write-sub 写字幕文件
+--write-auto-sub 写入自动生成的字幕文件 &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;YouTube only&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+--all-subs 下载所有可提供的字幕
+--list-subs 列出当前视频支持的所有字幕
+--sub-format FORMAT 指定字幕格式，比如 &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;srt&amp;#34;&lt;/span&gt; 或者 &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;ass/srt/best&amp;#34;&lt;/span&gt;
+--sub-lang LANGS 指定字幕语言，用&lt;span style=&#34;color:#4070a0&#34;&gt;`&lt;/span&gt;,&lt;span style=&#34;color:#4070a0&#34;&gt;`&lt;/span&gt;分隔, 使用 IETF 语言标记，比如 &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;en,pt&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;IETF语言标记参见&lt;a href=&#34;http://www.ietf.org/assignments/language-subtag-registry/language-subtag-registry&#34;&gt;此处&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年12月18日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>断电也能上网！——路由器改造记</title><link>https://xuanwo.io/2015/11/27/surf-with-poweroff/</link><pubDate>Fri, 27 Nov 2015 01:34:33 +0000</pubDate><guid>https://xuanwo.io/2015/11/27/surf-with-poweroff/</guid><description>&lt;h1 id=&#34;介绍&#34;&gt;介绍&lt;/h1&gt;
+&lt;p&gt;前两天我对我们宿舍的路由器进行了小小的改造，使得我们在断电之后也能照常上网。原理非常简单：就是使用充电宝来给路由器供电——因为我们墙上的网口是不会断电的，所以只要解决了路由器没有电的问题，就可以解决断网问题。路由器要求的输入电压为5V，电流为0.3A，恰好跟我们常用的充电宝是一致的，淘宝买一根USB转DV线成功解决问题。&lt;/p&gt;
+&lt;h1 id=&#34;供电方案&#34;&gt;供电方案&lt;/h1&gt;
+&lt;p&gt;我们宿舍现在的路由器供电方案是这样的：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;充电器（A型USB接口）
+||
+充电宝（Micro B型USB接口）
+|内部电路|
+充电宝（A型USB接口）
+||
+路由器（DV接口）
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;达成效果&#34;&gt;达成效果&lt;/h1&gt;
+&lt;p&gt;现在达成的效果是：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;白天：充电器给充电宝充电，充电宝起到了稳流的作用&lt;/li&gt;
+&lt;li&gt;晚上：充电宝为路由器供电&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;优点&#34;&gt;优点&lt;/h2&gt;
+&lt;p&gt;自动循环，自动切换（切换的速度很快，撸啊撸都不会掉线哦~）&lt;/p&gt;
+&lt;h2 id=&#34;缺点&#34;&gt;缺点&lt;/h2&gt;
+&lt;p&gt;充电宝损耗大，不知道我这个已经用了一年的充电宝能坚持多久= =&lt;/p&gt;
+&lt;h1 id=&#34;硬件要求&#34;&gt;硬件要求&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;主流充电宝的电压均为5V1A，有部分充电宝为iPad提供了2A的输出接口，加上充电宝自动限流的功能，所有充电宝这一部分问题不大。
+路由器很显然必须为5V，如果是12V的路由器还需要另外购买升压模块，电流问题不大，充电宝基本都带得动。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;辟谣&#34;&gt;辟谣&lt;/h1&gt;
+&lt;h2 id=&#34;用充电宝网速是不是会变慢&#34;&gt;用充电宝网速是不是会变慢？&lt;/h2&gt;
+&lt;p&gt;实测： &lt;strong&gt;不会&lt;/strong&gt;
+相反的，由于断电之后同时上网的设备数量减少，在延时，最高速率等参数上还有着更加优秀的表现。&lt;/p&gt;
+&lt;h2 id=&#34;用充电宝会导致无法链接wifi&#34;&gt;用充电宝会导致无法链接Wifi？&lt;/h2&gt;
+&lt;p&gt;舍友反馈的，我只说一句： 不要相信玄学。
+路由器换一种供电方式会影响到你电脑上的无线网卡的信号发送？这种说法，我肯定是不相信的- -。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年11月27日 完成初稿&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>文本转换神器——Pandoc</title><link>https://xuanwo.io/2015/11/14/pandoc/</link><pubDate>Sat, 14 Nov 2015 14:29:18 +0000</pubDate><guid>https://xuanwo.io/2015/11/14/pandoc/</guid><description>&lt;h1 id=&#34;介绍&#34;&gt;介绍&lt;/h1&gt;
+&lt;p&gt;Pandoc是一个用haskell编写的文本转换工具，小巧迅速且支持格式广泛，堪称文本转换应用的瑞士军刀。&lt;/p&gt;
+&lt;h1 id=&#34;支持格式&#34;&gt;支持格式&lt;/h1&gt;
+&lt;h2 id=&#34;输入&#34;&gt;输入&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://daringfireball.net/projects/markdown/&#34;&gt;markdown&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://docutils.sourceforge.net/docs/ref/rst/introduction.html&#34;&gt;reStructuredText&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://redcloth.org/textile&#34;&gt;textile&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.w3.org/TR/html40/&#34;&gt;HTML&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.docbook.org/&#34;&gt;DocBook&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.latex-project.org/&#34;&gt;LaTeX&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.mediawiki.org/wiki/Help:Formatting&#34;&gt;MediaWiki markup&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://twiki.org/cgi-bin/view/TWiki/TextFormattingRules&#34;&gt;TWiki markup&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://dev.opml.org/spec2.html&#34;&gt;OPML&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Emacs &lt;a href=&#34;http://orgmode.org&#34;&gt;Org-Mode&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://txt2tags.org/&#34;&gt;Txt2Tags&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Microsoft Word &lt;a href=&#34;http://www.microsoft.com/interop/openup/openxml/default.aspx&#34;&gt;docx&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;LibreOffice &lt;a href=&#34;http://en.wikipedia.org/wiki/OpenDocument&#34;&gt;ODT&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://en.wikipedia.org/wiki/EPUB&#34;&gt;EPUB&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.haskell.org/haddock/doc/html/ch03s08.html&#34;&gt;Haddock markup&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;输出&#34;&gt;输出&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;HTML格式: XHTML, HTML5, 和 HTML slide shows using
+&lt;a href=&#34;http://www.w3.org/Talks/Tools/Slidy&#34;&gt;Slidy&lt;/a&gt;,
+&lt;a href=&#34;http://lab.hakim.se/reveal-js/&#34;&gt;reveal.js&lt;/a&gt;,
+&lt;a href=&#34;http://goessner.net/articles/slideous/&#34;&gt;Slideous&lt;/a&gt;,
+&lt;a href=&#34;http://meyerweb.com/eric/tools/s5/&#34;&gt;S5&lt;/a&gt;, 或
+&lt;a href=&#34;http://paulrouget.com/dzslides/&#34;&gt;DZSlides&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;字处理格式: Microsoft Word
+&lt;a href=&#34;http://www.microsoft.com/interop/openup/openxml/default.aspx&#34;&gt;docx&lt;/a&gt;,
+OpenOffice/LibreOffice
+&lt;a href=&#34;http://en.wikipedia.org/wiki/OpenDocument&#34;&gt;ODT&lt;/a&gt;, &lt;a href=&#34;http://opendocument.xml.org/&#34;&gt;OpenDocument
+XML&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;电子书: &lt;a href=&#34;http://en.wikipedia.org/wiki/EPUB&#34;&gt;EPUB&lt;/a&gt; version 2或3,
+&lt;a href=&#34;http://www.fictionbook.org/index.php/Eng:XML_Schema_Fictionbook_2.1&#34;&gt;FictionBook2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;文档格式: &lt;a href=&#34;http://www.docbook.org/&#34;&gt;DocBook&lt;/a&gt;, &lt;a href=&#34;http://www.gnu.org/software/texinfo/&#34;&gt;GNU
+TexInfo&lt;/a&gt;, &lt;a href=&#34;http://www.gnu.org/software/groff/groff.html&#34;&gt;Groff
+man&lt;/a&gt; pages, &lt;a href=&#34;http://www.haskell.org/haddock/doc/html/ch03s08.html&#34;&gt;Haddock
+markup&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;页面布局格式: &lt;a href=&#34;https://www.adobe.com/content/dam/Adobe/en/devnet/indesign/cs55-docs/IDML/idml-specification.pdf&#34;&gt;InDesign
+ICML&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;大纲格式: &lt;a href=&#34;http://dev.opml.org/spec2.html&#34;&gt;OPML&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;TeX 格式: &lt;a href=&#34;http://www.latex-project.org/&#34;&gt;LaTeX&lt;/a&gt;,
+&lt;a href=&#34;http://www.pragma-ade.nl/&#34;&gt;ConTeXt&lt;/a&gt;, LaTeX Beamer slides&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://en.wikipedia.org/wiki/Portable_Document_Format&#34;&gt;PDF&lt;/a&gt; via
+LaTeX&lt;/li&gt;
+&lt;li&gt;轻量级标记格式:
+&lt;a href=&#34;http://daringfireball.net/projects/markdown/&#34;&gt;Markdown&lt;/a&gt; (including
+&lt;a href=&#34;http://commonmark.org&#34;&gt;CommonMark&lt;/a&gt;),
+&lt;a href=&#34;http://docutils.sourceforge.net/docs/ref/rst/introduction.html&#34;&gt;reStructuredText&lt;/a&gt;,
+&lt;a href=&#34;http://www.methods.co.nz/asciidoc/&#34;&gt;AsciiDoc&lt;/a&gt;, &lt;a href=&#34;http://www.mediawiki.org/wiki/Help:Formatting&#34;&gt;MediaWiki
+markup&lt;/a&gt;, &lt;a href=&#34;https://www.dokuwiki.org/wiki:syntax&#34;&gt;DokuWiki
+markup&lt;/a&gt;, Emacs
+&lt;a href=&#34;http://orgmode.org&#34;&gt;Org-Mode&lt;/a&gt;,
+&lt;a href=&#34;http://redcloth.org/textile&#34;&gt;Textile&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;自定义格式: custom writers can be written in
+&lt;a href=&#34;http://www.lua.org&#34;&gt;lua&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;安装&#34;&gt;安装&lt;/h1&gt;
+&lt;h2 id=&#34;安装pandoc&#34;&gt;安装Pandoc&lt;/h2&gt;
+&lt;p&gt;在&lt;a href=&#34;https://github.com/jgm/pandoc/releases&#34;&gt;此页面&lt;/a&gt;上寻找对应平台的二进制安装包&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Windows平台需要将Pandoc加入Path目录才能在cmd环境中调用&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;安装tex支持-可选-用于编译tex并输出pdf&#34;&gt;安装Tex支持（可选，用于编译Tex并输出PDF）&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Windows平台建议&lt;a href=&#34;http://miktex.org/&#34;&gt;MiKTeX&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;MacOS平台建议&lt;a href=&#34;http://www.tug.org/mactex/morepackages.html&#34;&gt;BasicTeX&lt;/a&gt;并使用&lt;code&gt;tlmgr&lt;/code&gt;工具安装需要的包&lt;/li&gt;
+&lt;li&gt;Linux平台建议&lt;a href=&#34;http://www.tug.org/texlive/&#34;&gt;Tex Live&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;使用&#34;&gt;使用&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;你可以使用在线的&lt;a href=&#34;http://pandoc.org/try/&#34;&gt;DEMO&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pandoc x.html -o x.md
+pandoc -f html -t markdown http://www.fsf.org
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;-f&lt;/code&gt;参数用于指定源文件格式&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-t&lt;/code&gt;参数用于指定输出文件格式&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-o&lt;/code&gt;参数用于指定输出文件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;如果不使用&lt;code&gt;-f&lt;/code&gt;和&lt;code&gt;-t&lt;/code&gt;参数，pandoc将会根据输入文件以及&lt;code&gt;-o&lt;/code&gt;指定的输出文件格式来确定转换的格式类型&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;注意事项&#34;&gt;注意事项&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;Pandoc不支持&lt;code&gt;.doc&lt;/code&gt;格式，如果需要进行转换，则需要先将&lt;code&gt;.doc&lt;/code&gt;转换为&lt;code&gt;.docx&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;引用资源&#34;&gt;引用资源&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://pandoc.org/&#34;&gt;Pandoc官网 &lt;em&gt;需要梯子&lt;/em&gt; &lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://pandoc.org/README.html&#34;&gt;Pandoc User Guide&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://yanping.me/cn/blog/2012/03/13/pandoc/&#34;&gt;黑魔法利器pandoc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.yangzhiping.com/tech/pandoc.html&#34;&gt;Markdown写作进阶：Pandoc入门浅谈&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年11月14日 完成初步使用&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Python包分发详解</title><link>https://xuanwo.io/2015/11/03/python-packages/</link><pubDate>Tue, 03 Nov 2015 15:24:06 +0000</pubDate><guid>https://xuanwo.io/2015/11/03/python-packages/</guid><description>&lt;p&gt;用Python写过不少的脚本，现在要把脚本打包成模块并进行发布，然后才明白脚本Boy到正规的码农差距有多大= =。
+踩了很多天的坑之后，自己学习到了Python的包分发机制，以及如何利用Pypi向全世界分发自己的模块。现在简单地做一些整理。&lt;/p&gt;
+&lt;h1 id=&#34;python包机制&#34;&gt;Python包机制&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;包是一个模块或模块/子模块的集合，一般情况下被压缩到一个压缩包中。
+其中包含
+1. 依赖信息
+2. 将文件拷贝到标准的包搜索路径的指令。
+3. 编译指令(如果在安装前代码必须被编译的话)。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;也就是说，为了分发模块，我们需要把模块的依赖信息和模块一起打包。在Python中，这个打包好的可分发的文件一般以&lt;code&gt;.egg&lt;/code&gt;结尾，其作用可以理解为java中的jar。Python的包管理以及分发曾经经历过非常混乱的一段时期，但是如今已经基本稳定（或者说，流行？）为两个套件：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;打包&amp;amp;分发：&lt;a href=&#34;https://pythonhosted.org/setuptools/&#34;&gt;Setuptools&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;安装&amp;amp;管理：&lt;a href=&#34;https://pip.readthedocs.org/en/stable/&#34;&gt;pip&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;准备工作&#34;&gt;准备工作&lt;/h1&gt;
+&lt;h2 id=&#34;注册pypi&#34;&gt;注册Pypi&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Pypi - the Python Package Index
+Pypi是Python语言包的仓库，全世界所有开源Python开发者都会在Pypi上提交&amp;amp;下载软件包&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;为了我们后续的提交操作，我们需要首先&lt;a href=&#34;https://pypi.python.org/pypi?%3Aaction=register_form&#34;&gt;注册&lt;/a&gt;一个Pypi的账号，注册非常简单，提供用户名，密码以及邮箱，经过验证之后就注册完成了。&lt;/p&gt;
+&lt;h2 id=&#34;目录结构&#34;&gt;目录结构&lt;/h2&gt;
+&lt;p&gt;Python没有严格的工程目录要求，只要有&lt;code&gt;__init__.py&lt;/code&gt;在的地方，就会被认为是一个Python的包。但是出于方便协作考虑，可以把自己的源代码与各种脚本分开存放。具体的结构可以学习Github上比较流行的Python项目，选择自己喜欢的即可。&lt;/p&gt;
+&lt;h2 id=&#34;环境配置&#34;&gt;环境配置&lt;/h2&gt;
+&lt;p&gt;首先你需要有pip，pip自从&lt;code&gt;3.4&lt;/code&gt;版本开始已经随python内置发布，如果使用的版本比较低，可以自己手动进行安装：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install python-pip
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后我们需要安装&lt;code&gt;setuptools&lt;/code&gt;：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pip install setuptools
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;编写安装脚本&#34;&gt;编写安装脚本&lt;/h1&gt;
+&lt;p&gt;准备工作就绪之后，我们就可以开始编写安装脚本了。&lt;/p&gt;
+&lt;h2 id=&#34;填写配置信息&#34;&gt;填写配置信息&lt;/h2&gt;
+&lt;h3 id=&#34;基本框架&#34;&gt;基本框架&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;setuptools&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; setup, find_packages &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 引入setuptools包&lt;/span&gt;
+setup(
+option &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; values, &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 本质上是一个函数的参数，分行写便于维护&lt;/span&gt;
+)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;参数介绍&#34;&gt;参数介绍&lt;/h3&gt;
+&lt;h4 id=&#34;指定整个包&#34;&gt;指定整个包&lt;/h4&gt;
+&lt;h4 id=&#34;指定单独模块&#34;&gt;指定单独模块&lt;/h4&gt;
+&lt;h4 id=&#34;依赖关系&#34;&gt;依赖关系&lt;/h4&gt;
+&lt;h4 id=&#34;包内数据&#34;&gt;包内数据&lt;/h4&gt;
+&lt;h4 id=&#34;其他数据&#34;&gt;其他数据&lt;/h4&gt;
+&lt;h4 id=&#34;meta-data&#34;&gt;Meta-Data&lt;/h4&gt;
+&lt;p&gt;Meta-Data| 描述值
+&amp;ndash;|&amp;ndash;
+&lt;code&gt;name&lt;/code&gt; | 包名
+&lt;code&gt;version&lt;/code&gt; | 此次发布版本
+&lt;code&gt;author&lt;/code&gt; |作者名
+&lt;code&gt;author_email&lt;/code&gt; | 作者邮箱
+&lt;code&gt;maintainer&lt;/code&gt; | 维护者名
+&lt;code&gt;maintainer_email&lt;/code&gt; | 维护者邮箱
+&lt;code&gt;url&lt;/code&gt; | 主页
+&lt;code&gt;description&lt;/code&gt; | 简要描述
+&lt;code&gt;long_description&lt;/code&gt; | 详细描述
+&lt;code&gt;download_url&lt;/code&gt; | 下载地址
+&lt;code&gt;classifiers&lt;/code&gt; | 分类，参见&lt;a href=&#34;https://pypi.python.org/pypi?%3Aaction=list_classifiers&#34;&gt;此处&lt;/a&gt;
+&lt;code&gt;platforms&lt;/code&gt; | 平台列表
+&lt;code&gt;license&lt;/code&gt; | 授权协议&lt;/p&gt;
+&lt;h3 id=&#34;典型配置&#34;&gt;典型配置&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;setuptools&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; setup, find_packages
+setup(
+name &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;HelloWorld&amp;#34;&lt;/span&gt;,
+version &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;0.1&amp;#34;&lt;/span&gt;,
+packages &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; find_packages(),
+scripts &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;say_hello.py&amp;#39;&lt;/span&gt;],
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Project uses reStructuredText, so ensure that the docutils get&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# installed or upgraded on the target machine&lt;/span&gt;
+install_requires &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;docutils&amp;gt;=0.3&amp;#39;&lt;/span&gt;],
+package_data &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# If any package contains *.txt or *.rst files, include them:&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;: [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;*.txt&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;*.rst&amp;#39;&lt;/span&gt;],
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# And include any *.msg files found in the &amp;#39;hello&amp;#39; package, too:&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;hello&amp;#39;&lt;/span&gt;: [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;*.msg&amp;#39;&lt;/span&gt;],
+},
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# metadata for upload to PyPI&lt;/span&gt;
+author &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Me&amp;#34;&lt;/span&gt;,
+author_email &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;me@example.com&amp;#34;&lt;/span&gt;,
+description &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;This is an Example Package&amp;#34;&lt;/span&gt;,
+license &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;PSF&amp;#34;&lt;/span&gt;,
+keywords &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;hello world example examples&amp;#34;&lt;/span&gt;,
+url &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;http://example.com/HelloWorld/&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# project home page, if any&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# could also include long_description, download_url, classifiers, etc.&lt;/span&gt;
+)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;打包&#34;&gt;打包&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这个坑踩了很久- -，没有老司机的带的痛苦
+与开发环境不同的时候，当用户运行你的包时，使用open等命令是以当前目录为根运行的，所以你必须指定数据所在位置，否则会出现IOError甚至更糟糕的情况&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;指定需要分发的文件&#34;&gt;指定需要分发的文件&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;自动处理&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;当没有&lt;code&gt;MANIFEST.in&lt;/code&gt;文件时，Setuptools将会按照下面的原则处理文件：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;所有&lt;code&gt;py_modules&lt;/code&gt;和&lt;code&gt;packages&lt;/code&gt;选项包含的Python源文件&lt;/li&gt;
+&lt;li&gt;所有&lt;code&gt;ext_modules&lt;/code&gt;或&lt;code&gt;libraries&lt;/code&gt;选项指定的C源文件&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;scripts&lt;/code&gt;指定的脚本（*参见&lt;a href=&#34;https://docs.python.org/3.5/distutils/setupscript.html#distutils-installing-scripts&#34;&gt;Installing Scripts&lt;/a&gt;*）&lt;/li&gt;
+&lt;li&gt;形如&lt;code&gt;test/test*.py&lt;/code&gt;的文件&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;README.txt&lt;/code&gt;（或&lt;code&gt;README&lt;/code&gt;），&lt;code&gt;setup.py&lt;/code&gt;和&lt;code&gt;setup.cfg&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;符合&lt;code&gt;package_data&lt;/code&gt;选项的所有文件（*参见&lt;a href=&#34;https://docs.python.org/3.5/distutils/setupscript.html#distutils-installing-package-data&#34;&gt;Installing Package Data&lt;/a&gt;*）&lt;/li&gt;
+&lt;li&gt;符合&lt;code&gt;data_files&lt;/code&gt;选项的所有文件（*参见&lt;a href=&#34;https://docs.python.org/3.5/distutils/setupscript.html#distutils-additional-files&#34;&gt;Installing Additional Files&lt;/a&gt;*）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;翻译自&lt;a href=&#34;https://docs.python.org/3.5/distutils/sourcedist.html#specifying-the-files-to-distribute&#34;&gt;Python官方文档 Specifying the files to distribute&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;手动处理&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;一般而言，自动处理已经足够，但是如果想要自己指定的话，则需要编辑&lt;code&gt;MANIFEST.in&lt;/code&gt;模板文件。
+&lt;code&gt;MANIFEST.in&lt;/code&gt;模板文件很简单，每一行都导入或者导出表示符合正则的一类文件。比如说：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# 导入根目录下满足*.txt的文件
+include *.txt
+# 递归导入examples目录下满足*.txt和*.py的文件
+recursive-include examples *.txt *.py
+# 导入满足examples/sample?/build的文件夹下所有文件
+prune examples/sample?/build
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;详细语法参见&lt;a href=&#34;https://docs.python.org/3.5/distutils/commandref.html#sdist-cmd&#34;&gt;此处&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;注意：
+当根目录下存在&lt;code&gt;MANIFEST.in&lt;/code&gt;文件时，Setuptools将不会再采用自动处理的设定，因此需要在&lt;code&gt;MANIFEST.in&lt;/code&gt;文件中指明所有需要导入的文件。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;调用数据&#34;&gt;调用数据&lt;/h3&gt;
+&lt;p&gt;当你需要调用Python包中的文件时，你可以使用下面的方法：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pkg_resources&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; resource_string
+data &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; resource_string(__name__, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;data.dat&amp;#39;&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;此时，指定的&lt;code&gt;data.dat&lt;/code&gt;文件将会以二进制文件流的形式赋值到data变量中，你可以按照自己的需要进行进一步处理。比如说：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;from pkg_resources import resource_string
+data = resource_string(__name__, &#39;example.yml&#39;)
+with open(&#39;config.yml&#39;, &#39;w&#39;) as f:
+f.write(str(data, encoding=&#39;utf-8&#39;))
+f.close()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;上述代码实现了从&lt;code&gt;example.yml&lt;/code&gt;中读取数据并保存到&lt;code&gt;config.yml&lt;/code&gt;文件中。&lt;/p&gt;
+&lt;h3 id=&#34;创建源码分发包&#34;&gt;创建源码分发包&lt;/h3&gt;
+&lt;p&gt;在包的根目录下执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;python setup&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;py sdist&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;默认情况下，&lt;code&gt;sdist&lt;/code&gt;命令将会为Unix创建&lt;code&gt;gzip&lt;/code&gt;压缩文件，为Windows创建&lt;code&gt;zip&lt;/code&gt;压缩文件
+你也可以添加参数&lt;code&gt;--formats=zip&lt;/code&gt;指定生成的文件类型，所有支持的参数见&lt;a href=&#34;https://docs.python.org/3.5/distutils/sourcedist.html&#34;&gt;此处&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;源码分发似乎不会导入&lt;code&gt;package_data&lt;/code&gt;中指定的数据，如果上传本分发包可能导致用户通过&lt;code&gt;pip&lt;/code&gt;安装的包中没有需要的数据。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;创建二进制分发包&#34;&gt;创建二进制分发包&lt;/h3&gt;
+&lt;p&gt;除了创建源码分发之外，我们还可以创建基于平台的二进制分发包。
+在包的根目录下执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;python setup&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;py bdist&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;默认情况下，这个命令将会创建基于自身平台的分发包。
+同样的，你也可以添加&lt;code&gt;--format=zip&lt;/code&gt;参数来指定生成的文件，支持的参数见&lt;a href=&#34;https://docs.python.org/3.5/distutils/builtdist.html&#34;&gt;此处&lt;/a&gt;
+除此之外，也可以使用以下的命令直接生成对应格式的分发包：&lt;/p&gt;
+&lt;p&gt;命令|格式
+&amp;ndash;|&amp;ndash;
+bdist_dumb |tar, gztar, bztar, xztar, ztar, zip
+bdist_rpm |rpm, srpm
+bdist_wininst | wininst
+bdist_msi | msi&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这一命令无法跨平台， 在Linux上选择制作&lt;code&gt;wininst&lt;/code&gt;分发包时会提示缺乏相应的支持。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;创建wheel分发包&#34;&gt;创建wheel分发包&lt;/h3&gt;
+&lt;p&gt;wheel是新出的分发格式，旨在取代egg，你可以通过下列命令进行安装：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pip install wheel
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后在包的根目录下执行：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;python setup.ppy bdist_wheel
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;上传到pypi&#34;&gt;上传到Pypi&lt;/h1&gt;
+&lt;h2 id=&#34;注册包&#34;&gt;注册包&lt;/h2&gt;
+&lt;p&gt;在上传我们的包之前，我们需要首先向Pypi提交包的相关信息。
+在包的根目录下执行:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;python setup&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;py register&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;没有登陆的话，需要进行登陆；如果已经登陆，直接回车使用默认设置即可。&lt;/p&gt;
+&lt;h2 id=&#34;上传包&#34;&gt;上传包&lt;/h2&gt;
+&lt;p&gt;注册完毕后，我们可以提交我们的包了。
+在包的根目录下执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;python setup&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;py sdist bdist_wininst upload&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这条命令将会向Pypi提交源码和Win下的安装包，如果需要上传别的包，只要直接写出即可。&lt;/p&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/dccrazyboy/pyeco/blob/master/pyeco.rst&#34;&gt;Python开发生态环境简介&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://timd.cn/2015/10/20/setuptools/&#34;&gt;使用Setuptools构建和分发python包&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://python3-cookbook.readthedocs.org/zh_CN/latest/c10/p08_read_datafile_within_package.html&#34;&gt;10.8 读取位于包中的数据文件&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.python.org/3.5/distutils/sourcedist.html&#34;&gt;Creating a Source Distribution&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.python.org/3.5/distutils/examples.html&#34;&gt;Examples&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年11月03日 初步完成&lt;/li&gt;
+&lt;li&gt;2016年03月30日 修复了部分笔误，添加了一些注释，增加了wheel相关的内容&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>在Python中使用JSON</title><link>https://xuanwo.io/2015/10/30/python-json/</link><pubDate>Fri, 30 Oct 2015 23:47:23 +0000</pubDate><guid>https://xuanwo.io/2015/10/30/python-json/</guid><description>&lt;h1 id=&#34;json介绍&#34;&gt;JSON介绍&lt;/h1&gt;
+&lt;p&gt;JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。 易于人阅读和编写。同时也易于机器解析和生成。 它基于JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999的一个子集。 JSON采用完全独立于语言的文本格式，但是也使用了类似于C语言家族的习惯（包括C, C++, C#, Java, JavaScript, Perl, Python等）。 这些特性使JSON成为理想的数据交换语言。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;引用自&lt;a href=&#34;http://www.json.org/json-zh.html&#34;&gt;json.org&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;语法&#34;&gt;语法&lt;/h1&gt;
+&lt;h2 id=&#34;结构&#34;&gt;结构&lt;/h2&gt;
+&lt;p&gt;JSON只提供了两种结构——字典和数组。也就是说，JSON可以存储一对一或者一对多的键值对关系。&lt;/p&gt;
+&lt;h2 id=&#34;形式&#34;&gt;形式&lt;/h2&gt;
+&lt;h3 id=&#34;对象&#34;&gt;对象&lt;/h3&gt;
+&lt;p&gt;对象是一个无序的键值对集合。
+一个对象以&lt;code&gt;{&lt;/code&gt;开始，&lt;code&gt;}&lt;/code&gt;结束。每个&lt;code&gt;键&lt;/code&gt;后跟一个&lt;code&gt;:&lt;/code&gt;；键值对之间使用&lt;code&gt;,&lt;/code&gt;分隔。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/object.gif&#34; alt=&#34;object&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;数组&#34;&gt;数组&lt;/h3&gt;
+&lt;p&gt;数组是值的有序集合，一个键可以对应一个数组。
+一个数组以&lt;code&gt;[&lt;/code&gt;开始，&lt;code&gt;]&lt;/code&gt;结束。值之间使用&lt;code&gt;,&lt;/code&gt;分隔。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/array.gif&#34; alt=&#34;array&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;值&#34;&gt;值&lt;/h3&gt;
+&lt;p&gt;值可以是双引号括起来的字符串、数值、true、false、 null、对象或者数组。这些结构可以嵌套。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/value.gif&#34; alt=&#34;value&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;字符串&#34;&gt;字符串&lt;/h3&gt;
+&lt;p&gt;字符串是由双引号包围的任意数量Unicode字符的集合，使用反斜线转义。一个字符即一个单独的字符串。
+字符串与C/C++中的字符串非常相似，包括常见的各种转义符号。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/string.gif&#34; alt=&#34;value&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;数值&#34;&gt;数值&lt;/h3&gt;
+&lt;p&gt;数值与C/C++中的数值非常相似，但没有八进制和十六进制格式。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/number.gif&#34; alt=&#34;number&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;空白&#34;&gt;空白&lt;/h3&gt;
+&lt;p&gt;空白符号（包括空格，Tab以及回车）可以加入到任何符号之间，不会影响JSON的含义&lt;/p&gt;
+&lt;h1 id=&#34;python中的json库&#34;&gt;Python中的JSON库&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;以Python 3为基准&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;编码&#34;&gt;编码&lt;/h2&gt;
+&lt;h3 id=&#34;对应类型&#34;&gt;对应类型&lt;/h3&gt;
+&lt;p&gt;Python | JSON
+&amp;ndash;|&amp;ndash;
+dict | object
+list, tuple | array
+str| string
+int, float| number
+True | true
+False | false
+None | null&lt;/p&gt;
+&lt;h3 id=&#34;函数&#34;&gt;函数&lt;/h3&gt;
+&lt;p&gt;我们使用&lt;code&gt;JSON&lt;/code&gt;库中的&lt;code&gt;dump&lt;/code&gt;以及&lt;code&gt;dumps&lt;/code&gt;函数来进行&lt;code&gt;JSON&lt;/code&gt;编码。&lt;code&gt;dump&lt;/code&gt;和&lt;code&gt;dumps&lt;/code&gt;各项参数含义基本一致，唯一区别在于&lt;code&gt;dump&lt;/code&gt;函数编码产生一个JSON文件流，而&lt;code&gt;dumps&lt;/code&gt;编码产生一个JSON字符串。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dump(obj, fp, skipkeys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False, ensure_ascii&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, check_circular&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, allow_nan&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, cls&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, indent&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, separators&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, default&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, sort_keys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False, &lt;span style=&#34;color:#666&#34;&gt;**&lt;/span&gt;kw)
+json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps(obj, skipkeys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False, ensure_ascii&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, check_circular&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, allow_nan&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, cls&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, indent&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, separators&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, default&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, sort_keys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False, &lt;span style=&#34;color:#666&#34;&gt;**&lt;/span&gt;kw)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;obj&lt;/code&gt;：编码对象&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;fp&lt;/code&gt;：指定文件流&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;skipkeys&lt;/code&gt;：若skipkeys为真，则非标准类型将会跳过；否则返回&lt;code&gt;TypeError&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ensure_ascii&lt;/code&gt;：若&lt;code&gt;ensure_ascii&lt;/code&gt;为真，则输出时将会确保没有非ASCII字符；否则将会原样输出&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;check_circular&lt;/code&gt;：若&lt;code&gt;check_circular&lt;/code&gt;为真，则将会检测是否存在循环调用；否则会跳过检测&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;allow_nan&lt;/code&gt;：若&lt;code&gt;allow_nan&lt;/code&gt;为真，则将会允许存在空值（无穷大值）；否则会返回&lt;code&gt;ValueError&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cls&lt;/code&gt;：若&lt;code&gt;cls&lt;/code&gt;为空值，则使用&lt;code&gt;JSONEncoder&lt;/code&gt;；否则使用指定子类进行编码&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;indent&lt;/code&gt;：若&lt;code&gt;indent&lt;/code&gt;为空值，则无缩进；否则使用指定值进行缩进&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;separators&lt;/code&gt;：若&lt;code&gt;separators&lt;/code&gt;为空值，则使用&lt;code&gt;(&#39;,&#39;, &#39;: &#39;)&lt;/code&gt;分隔；否则使用指定的元组进行分隔&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;default&lt;/code&gt;：若&lt;code&gt;default&lt;/code&gt;为空值，则使用自带的&lt;code&gt;default&lt;/code&gt;方法；否则使用指定值&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sort_keys&lt;/code&gt;：若&lt;code&gt;sort_keys&lt;/code&gt;为真，则输出将会按照键进行排序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;示范&#34;&gt;示范&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;json&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps([&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;foo&amp;#39;&lt;/span&gt;, {&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;bar&amp;#39;&lt;/span&gt;: (&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;baz&amp;#39;&lt;/span&gt;, None, &lt;span style=&#34;color:#40a070&#34;&gt;1.0&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;)}])
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;[&amp;#34;foo&amp;#34;, {&amp;#34;bar&amp;#34;: [&amp;#34;baz&amp;#34;, null, 1.0, 2]}]&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 排序&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps({&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;c&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;b&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;a&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;}, sort_keys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True))
+{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;a&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;b&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;c&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 分隔符&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps([&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;3&lt;/span&gt;,{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;4&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;6&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;7&lt;/span&gt;}], separators&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;,&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;:&amp;#39;&lt;/span&gt;))
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;[1,2,3,{&amp;#34;4&amp;#34;:5,&amp;#34;6&amp;#34;:7}]&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Unicode输出&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#4070a0;font-weight:bold&#34;&gt;\u5317\u4eac&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;, ensure_ascii&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False)
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;北京&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;解码&#34;&gt;解码&lt;/h2&gt;
+&lt;h3 id=&#34;对应类型-1&#34;&gt;对应类型&lt;/h3&gt;
+&lt;p&gt;JSON | Python
+&amp;ndash; | &amp;ndash;
+object | dict
+array | list
+string | str
+number (int) | int
+number (real) | float
+true | True
+false | False
+null | None&lt;/p&gt;
+&lt;h3 id=&#34;函数-1&#34;&gt;函数&lt;/h3&gt;
+&lt;p&gt;我们使用&lt;code&gt;JSON&lt;/code&gt;库中的&lt;code&gt;load&lt;/code&gt;以及&lt;code&gt;loads&lt;/code&gt;函数来进行&lt;code&gt;JSON&lt;/code&gt;解码。&lt;code&gt;load&lt;/code&gt;和&lt;code&gt;loads&lt;/code&gt;各项参数含义基本一致，唯一区别在于&lt;code&gt;load&lt;/code&gt;函数用于解码JSON文件流，而&lt;code&gt;loads&lt;/code&gt;用于解码JSON字符串。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;load(fp, cls&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, object_hook&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_float&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_int&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_constant&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, object_pairs_hook&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, &lt;span style=&#34;color:#666&#34;&gt;**&lt;/span&gt;kw)
+json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;loads(s, encoding&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, cls&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, object_hook&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_float&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_int&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_constant&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, object_pairs_hook&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, &lt;span style=&#34;color:#666&#34;&gt;**&lt;/span&gt;kw)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;fp&lt;/code&gt;：指定文件流&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;s&lt;/code&gt;：指定字符串&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;encoding&lt;/code&gt;：指定字符串编码&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cls&lt;/code&gt;：若&lt;code&gt;cls&lt;/code&gt;为空值，则使用&lt;code&gt;JSONEncoder&lt;/code&gt;；否则使用指定子类进行编码&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;object_hook&lt;/code&gt;：若&lt;code&gt;object_hook&lt;/code&gt;为空值，对象则返回解码器&lt;code&gt;dict&lt;/code&gt;；否则使用自定义类型返回&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parse_float&lt;/code&gt;：若&lt;code&gt;parse_float&lt;/code&gt;为空，则JSON浮点数转换为浮点数；否则转换为指定类型&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parse_int&lt;/code&gt;：若&lt;code&gt;parse_int&lt;/code&gt;为空，则JSON整数转换为整数；否则转换为指定类型&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parse_constant&lt;/code&gt;若&lt;code&gt;parse_constant&lt;/code&gt;为空，则不会处理非法输入；否则抛出异常&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;object_pairs_hook&lt;/code&gt;：若&lt;code&gt;object_pairs_hook&lt;/code&gt;为空值，则数组返回解码器&lt;code&gt;dict&lt;/code&gt;；否则使用自定义类型返回&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;示范-1&#34;&gt;示范&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;json&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;loads(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;[&amp;#34;foo&amp;#34;, {&amp;#34;bar&amp;#34;:[&amp;#34;baz&amp;#34;, null, 1.0, 2]}]&amp;#39;&lt;/span&gt;)
+[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;foo&amp;#39;&lt;/span&gt;, {&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;bar&amp;#39;&lt;/span&gt;: [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;baz&amp;#39;&lt;/span&gt;, None, &lt;span style=&#34;color:#40a070&#34;&gt;1.0&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;]}]&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年10月30日 初步完成&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>正则表达式参考手册</title><link>https://xuanwo.io/2015/10/29/regex/</link><pubDate>Thu, 29 Oct 2015 16:26:47 +0000</pubDate><guid>https://xuanwo.io/2015/10/29/regex/</guid><description>&lt;p&gt;一直都知道正则表达式的强大，但是总是觉得正则很难学不会，所以一直不得要领。这次因为工作原因，不得不用到正则，于是顺手将它学了起来。入门之后才发现，花费一点时间学习一下正则非常值得，可以成千上百倍地提升你的工作效率。特别是当你经常和批量数据以及规则文本打交道的时候，你会发现完全离不开正则。闲话到此为止，下面进入正题。&lt;/p&gt;
+&lt;h1 id=&#34;介绍&#34;&gt;介绍&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;正则表达式，又称正规表示式、正规表示法、正规表达式、规则表达式、常规表示法（英语：Regular Expression，在代码中常简写为regex、regexp或RE），计算机科学的一个概念。正则表达式使用单个字符串来描述、匹配一系列符合某个句法规则的字符串。在很多文本编辑器里，正则表达式通常被用来检索、替换那些符合某个模式的文本。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;em&gt;来自&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F&#34;&gt;维基百科&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;语法&#34;&gt;语法&lt;/h1&gt;
+&lt;h2 id=&#34;元字符&#34;&gt;元字符&lt;/h2&gt;
+&lt;p&gt;代码|说明
+&amp;ndash;|&amp;ndash;
+&lt;code&gt;.&lt;/code&gt; | 匹配除换行符以外的任意字符
+&lt;code&gt;\w&lt;/code&gt; | 匹配字母或数字或下划线或汉字
+&lt;code&gt;\s&lt;/code&gt; | 匹配任意的空白符
+&lt;code&gt;\d&lt;/code&gt; | 匹配数字
+&lt;code&gt;\b&lt;/code&gt; | 匹配单词的开始或结束
+&lt;code&gt;^&lt;/code&gt; | 匹配字符串的开始
+&lt;code&gt;$&lt;/code&gt; | 匹配字符串的结束&lt;/p&gt;
+&lt;h2 id=&#34;字符转义&#34;&gt;字符转义&lt;/h2&gt;
+&lt;p&gt;如果需要使用元字符本身，你需要使用&lt;code&gt;\&lt;/code&gt;来取消转义.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;\\&lt;/code&gt; 匹配&lt;code&gt;\&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;C:\\Windows&lt;/code&gt; 匹配 &lt;code&gt;C:\Windows&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;重复&#34;&gt;重复&lt;/h2&gt;
+&lt;p&gt;代码|说明
+&amp;ndash;|&amp;ndash;
+* | 重复零次或更多次
++ | 重复一次或更多次
+? |重复零次或一次
+{n} |重复n次
+{n,} | 重复n次或更多次
+{n,m} | 重复n到m次&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Windows\d+&lt;/code&gt; 匹配Windows后面跟1个或更多数字&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;^\w+&lt;/code&gt; 匹配一行的第一个单词(或整个字符串的第一个单词，具体匹配哪个意思得看选项设置)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;字符类&#34;&gt;字符类&lt;/h2&gt;
+&lt;p&gt;除了使用元字符意外，我们也可以指定一个字符范围，作为一个字符类：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;像[0-9]代表的含意与\d就是完全一致的：一位数字&lt;/li&gt;
+&lt;li&gt;[a-z0-9A-Z_]也完全等同于\w（如果只考虑英文的话）&lt;/li&gt;
+&lt;li&gt;[abc]表示只匹配abc三个字母中的一个&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;逻辑判断&#34;&gt;逻辑判断&lt;/h2&gt;
+&lt;p&gt;我们可以使用&lt;code&gt;|&lt;/code&gt;来将不同的规则分开
+匹配分支条件时会从左往右进行匹配，只要满足了某个分支，就不会再考虑之后的。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;\d{5}-\d{4}|\d{5}&lt;/code&gt; 表示匹配&lt;code&gt;12345-1234&lt;/code&gt;或者&lt;code&gt;12345&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;\d{5}|\d{5}-\d{4}&lt;/code&gt; 但如果这样写，&lt;code&gt;12345-1234&lt;/code&gt;就只会匹配前面的&lt;code&gt;12345&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;分组&#34;&gt;分组&lt;/h2&gt;
+&lt;p&gt;前面讲到了单个字符的重复，如果有多个字符需要重复的话，我们就需要分组——使用&lt;code&gt;(&lt;/code&gt;和&lt;code&gt;)&lt;/code&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;(\d{1,3}.){3}\d{1,3} 表示匹配长得像IP地址的数字串&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;\d{1,3}\.&lt;/code&gt;表示一到三位的数字再加上一个点，分组之后再重复三次，然后再加上一个一到三位的数字&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;反义&#34;&gt;反义&lt;/h2&gt;
+&lt;p&gt;代码|说明
+&amp;ndash;|&amp;ndash;
+&lt;code&gt;\W&lt;/code&gt; | 匹配任意不是字母，数字，下划线，汉字的字符
+&lt;code&gt;\S&lt;/code&gt; | 匹配任意不是空白符的字符
+&lt;code&gt;\D&lt;/code&gt; | 匹配任意非数字的字符
+&lt;code&gt;\B&lt;/code&gt; | 匹配不是单词开头或结束的位置
+&lt;code&gt;[^x]&lt;/code&gt; | 匹配除了x以外的任意字符
+&lt;code&gt;[^aeiou]&lt;/code&gt; | 匹配除了aeiou这几个字母以外的任意字符&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;\S+&lt;/code&gt; 匹配不包含空白符的字符串。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;a[^&amp;gt;]+&amp;gt;&lt;/code&gt; 匹配用尖括号括起来的以a开头的字符串。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;参考资源&#34;&gt;参考资源&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://deerchao.net/tutorials/regex/regex.htm&#34;&gt;正则表达式30分钟入门教程&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://searun.iteye.com/category/61451&#34;&gt;searun的博客 跟我学正则表达式系列&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://cuiqingcai.com/977.html&#34;&gt;Python爬虫入门七之正则表达式 | 静觅&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年10月29日 增加了比较简单&amp;amp;常用的使用方法&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Hash以及Hash校验工具介绍</title><link>https://xuanwo.io/2015/10/28/hashsum/</link><pubDate>Wed, 28 Oct 2015 11:14:56 +0000</pubDate><guid>https://xuanwo.io/2015/10/28/hashsum/</guid><description>&lt;p&gt;前一阵子的Xcodeghost事件给所有人都好好的上了一课——校验的重要性。无论何时，一定要校验！一定要校验！！一定要校验！！！重要的事情重复三遍总是没错的。如果真的无法做到这一点，最起码这些一定要注意：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;系统镜像&lt;/li&gt;
+&lt;li&gt;底层开发工具&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;选择官方认证的软件源，地址尽可能地使用HTTPS而非HTTP以避免缓存影响&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;hash介绍&#34;&gt;Hash介绍&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;散列函数&lt;/strong&gt;（或散列算法，又称哈希函数，英语：Hash Function）是一种从任何一种数据中创建小的数字“指纹”的方法。散列函数把消息或数据压缩成摘要，使得数据量变小，将数据的格式固定下来。该函数将数据打乱混合，重新创建一个叫做散列值（hash values，hash codes，hash sums，或hashes）的指纹。散列值通常用来代表一个短的随机字母和数字组成的字符串。&lt;/p&gt;
+&lt;h1 id=&#34;checksum介绍&#34;&gt;Checksum介绍&lt;/h1&gt;
+&lt;p&gt;校验和（英语：Checksum）是冗余校验的一种形式。 它是通过错误检测方法，对经过空间（如通信）或者时间（如计算机存储）传送的数据的完整性进行检查的一种简单方法。
+计算机领域常见的校验和的方法有循环冗余校验（CRC）、MD5、SHA家族等。&lt;/p&gt;
+&lt;h1 id=&#34;hash校验工具&#34;&gt;Hash校验工具&lt;/h1&gt;
+&lt;h2 id=&#34;web&#34;&gt;Web&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://xuanwo.io/hashcalc&#34;&gt;hashcalc&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;基于&lt;a href=&#34;https://github.com/hacst/HTML5HASH&#34;&gt;HTML5HASH&lt;/a&gt;修改而来，感谢&lt;a href=&#34;http://hacst.net/&#34;&gt;Stefan Hacker&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;windows&#34;&gt;Windows&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.slavasoft.com/hashcalc/&#34;&gt;hashcalc&lt;/a&gt;
+&lt;img src=&#34;https://xuanwo.io/imgs/opinion/hashcalc.png&#34; alt=&#34;hashcalc&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;linux&#34;&gt;Linux&lt;/h2&gt;
+&lt;p&gt;Linux一般都内置了常见的hashsum命令，包括md5sum以及sha家族的ha224sum, sha256sum, sha384sum and sha512sum等。&lt;/p&gt;
+&lt;h3 id=&#34;直接计算&#34;&gt;直接计算&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;md5sum thefile.iso
+sha1sum thefile.iso&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;与给定的checksum文件比对&#34;&gt;与给定的checksum文件比对&lt;/h3&gt;
+&lt;p&gt;很多时候下载方都会提供一个checksum文件用来进行比对，这时候我们可以添加一个&lt;code&gt;-c&lt;/code&gt;或者&lt;code&gt;--check&lt;/code&gt;参数来进行比对&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;md5sum -c md5.checksum thefile.iso
+sha512sum -c sha512.checksum thefilel.iso&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;ma-os-x&#34;&gt;Ma OS X&lt;/h2&gt;
+&lt;p&gt;Mac OS X也内置了和Linux一样的命令，你可以参考Linux进行使用。
+同时，你也可以选择更加平易近人的应用：
+&lt;a href=&#34;https://itunes.apple.com/cn/app/ha-xi-ma-ji-suan-qi/id463459213?mt=12&#34;&gt;哈希码计算器&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;android&#34;&gt;Android&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://play.google.com/store/apps/details?id=jp.md5checker&#34;&gt;Hash Checker&lt;/a&gt;
+&lt;a href=&#34;https://play.google.com/store/apps/details?id=com.ginkel.hashit&#34;&gt;Hash It!&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年10月28日 完成初稿&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>使用pyQuery解析HTML</title><link>https://xuanwo.io/2015/10/23/pyquery-intro/</link><pubDate>Fri, 23 Oct 2015 01:03:09 +0000</pubDate><guid>https://xuanwo.io/2015/10/23/pyquery-intro/</guid><description>&lt;h1 id=&#34;pyquery介绍&#34;&gt;pyQuery介绍&lt;/h1&gt;
+&lt;p&gt;pyquery 可以让你用jquery语法来对xml进行查询。这个API和jquery十分类似。如果利用lxml，pyquery对xml和html的操作将更加快速。&lt;/p&gt;
+&lt;h1 id=&#34;pyquery安装&#34;&gt;pyQuery安装&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;首先，你得有一个python环境，最好是类linux的，因为安装pyquery的过程中需要编译某一个包，在windows上比较难解决依赖问题&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;安装python环境&#34;&gt;安装Python环境&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install python python-dev python-pip
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;python&lt;/code&gt; 安装python环境&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;python-dev&lt;/code&gt; 安装python开发环境&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;python-pip&lt;/code&gt; 安装pip来进行python包管理&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;解决pyquery所需依赖&#34;&gt;解决pyQuery所需依赖&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install libxml2-dev libxslt1-dev libz-dev
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;libxml2-dev&lt;/code&gt;和&lt;code&gt;libxslt1-dev&lt;/code&gt;是编译lxml所需要的包，缺少会导致编译失败&lt;/li&gt;
+&lt;li&gt;某些情况下会提示&lt;code&gt;/usr/bin/ld: cannot find -lz&lt;/code&gt;，所以需要安装&lt;code&gt;libz-dev&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;安装pyquery&#34;&gt;安装pyQuery&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;pip install pyquery
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;解决了依赖问题之后，就可以进行pyquery的安装了。
+&amp;gt; 有一个坑点是在虚拟机编译lxml的过程中，如果内存过小会导致编译失败。如果出现错误，请把虚拟机的内存调整至1024M或更大。&lt;/p&gt;
+&lt;h1 id=&#34;pyquery使用&#34;&gt;pyQuery使用&lt;/h1&gt;
+&lt;h2 id=&#34;最简样例&#34;&gt;最简样例&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+html &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&amp;#39;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;lt;html&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;head&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;title&amp;gt;这是标题&amp;lt;/title&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;/head&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;body&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;p id=&amp;#34;hi&amp;#34;&amp;gt;Hello&amp;lt;/p&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;ul&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;li&amp;gt;list1&amp;lt;/li&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;div class=&amp;#34;ha&amp;#34;&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Cool!
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;/div&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;li&amp;gt;list2&amp;lt;/li&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;/ul&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;/body&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;lt;/html&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&amp;#39;&lt;/span&gt;
+doc &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; pyq(html)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;title&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 获取 title 标签的源码&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# &amp;lt;title&amp;gt;这是标题&amp;lt;/title&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;title&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 获取 title 标签的内容&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 这是标题&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;.ha&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 获取 class 为 ha 的标签的内容&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Cool!&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;#hi&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 获取 id 为 hi 的标签的内容&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Hello&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;p:first&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 还可以支持伪类&lt;/span&gt;
+li &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;li&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 处理多个元素&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; li:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(i)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text()
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# list1&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# list2&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;指定网址&#34;&gt;指定网址&lt;/h2&gt;
+&lt;h3 id=&#34;直接访问&#34;&gt;直接访问&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;urllib&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 直接访问并获取相关信息&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(url&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https://www.google.com&amp;#39;&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;指定headers&#34;&gt;指定headers&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;urllib&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 以指定headers访问并获取相关信息，好处是不会被某些网站拒绝访问&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(url&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https://www.google.com&amp;#39;&lt;/span&gt;, headers&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;User-Agent&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.71 Safari/537.36&amp;#39;&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;指定文件&#34;&gt;指定文件&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(filename&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;path/to/html/file&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;指定lxml文档&#34;&gt;指定lxml文档&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;lxml&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; etree
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# pyquery支持etree的API&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(etree&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;fromstring(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;html&amp;gt;&amp;lt;/html&amp;gt;&amp;#34;&lt;/span&gt;))&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/gawel/pyquery&#34;&gt;gawel/pyquery&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.powerxing.com/python-use-pyquery-to-parse-html/&#34;&gt;Python使用pyQuery解析HTML内容&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://stackoverflow.com/questions/26053982/error-setup-script-exited-with-error-command-x86-64-linux-gnu-gcc-failed-wit&#34;&gt;error: Setup script exited with error: command &amp;lsquo;x86_64-linux-gnu-gcc&amp;rsquo; failed with exit status 1&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://stackoverflow.com/questions/24455238/lxml-installation-error-ubuntu-14-04-internal-compiler-error&#34;&gt;lxml installation error ubuntu 14.04 (internal compiler error)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://stackoverflow.com/a/22256546&#34;&gt;can&amp;rsquo;t installing lxml on Ubuntu 12.04&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年10月23日 初步完成&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Vagrant——构建虚拟开发环境的新思路</title><link>https://xuanwo.io/2015/10/22/vagrant-intro/</link><pubDate>Thu, 22 Oct 2015 09:24:57 +0000</pubDate><guid>https://xuanwo.io/2015/10/22/vagrant-intro/</guid><description>&lt;p&gt;说到虚拟开发环境，人人都觉得好，但是在实际应用中，人们还是在一台电脑上配置所有用到的环境。究其原因，还是因为搭建虚拟开发环境的过程不比在实体机上配置更简单。但是，Vagrant出现了。Vagrant抹平了不同的虚拟化软件的差异，以统一的命令取而代之；抛弃了传统的系统镜像分发安装方式，以直接封装好的虚拟磁盘代替。除此以外，还提供了各种已经封装好的环境下载，搭建一个虚拟开发环境的便利程度有了大幅提高。&lt;/p&gt;
+&lt;p&gt;本文主要介绍了Vagrant的配置以及使用，旨在安利这款十分有用的工具，希望能为更多人带来便利&lt;/p&gt;
+&lt;h1 id=&#34;vagrant介绍&#34;&gt;Vagrant介绍&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.vagrantup.com/&#34;&gt;Vagrant&lt;/a&gt;是一款用来构建虚拟开发环境的工具。对于团队开发而言，可以用来构建一致的开发环境；而对于个人开发而言，则可以方便地搭建不冲突不互相影响的各种开发环境。&lt;/p&gt;
+&lt;h1 id=&#34;vagrant配置&#34;&gt;Vagrant配置&lt;/h1&gt;
+&lt;h2 id=&#34;安装vagrant&#34;&gt;安装Vagrant&lt;/h2&gt;
+&lt;p&gt;在&lt;a href=&#34;https://www.vagrantup.com/downloads.html&#34;&gt;此处下载Vagrant&lt;/a&gt;。
+Vagrant主要以二进制安装包形式分发，覆盖了Windows，Mac OS X，DEB以及RPM。均不支持的平台可以自行编译安装，此处不再赘述。&lt;/p&gt;
+&lt;h2 id=&#34;安装provider&#34;&gt;安装Provider&lt;/h2&gt;
+&lt;p&gt;Vagrant在本地主要支持两种：VirtualBox ，VMware。我推荐使用小巧且开源的&lt;a href=&#34;https://www.virtualbox.org/wiki/Downloads&#34;&gt;VirtualBox&lt;/a&gt;，下载好对应的安装包之后直接安装即可。&lt;/p&gt;
+&lt;h2 id=&#34;配置path&#34;&gt;配置Path&lt;/h2&gt;
+&lt;p&gt;在Windows上使用还需要自行配置Path，否则Vagrant无法调用VirtualBox。
+在Path中添加Vagrant以及VirtualBox的可执行文件路径即可&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;C:\HashiCorp\Vagrant\bin;C:\Program Files\Oracle\VirtualBox
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;vagrant初步&#34;&gt;Vagrant初步&lt;/h1&gt;
+&lt;h2 id=&#34;添加box&#34;&gt;添加box&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;box介绍
+在Vagrant中，box是一个打包好了的Vagrant环境，包括特定的系统配置和软件参数。一个box可以在任何支持Vagrant的平台和系统上运行，可以跨平台地提供一致的系统环境，这正是Vagrant的有用之处。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;首先在&lt;a href=&#34;https://atlas.hashicorp.com/search&#34;&gt;此处&lt;/a&gt;下载自己想要的box，然后使用&lt;code&gt;vagrant box add ubuntu\vivid64 X:\path\to\box&lt;/code&gt;来注册一个本地的box以便于后续的使用。&lt;/p&gt;
+&lt;h2 id=&#34;初始化&#34;&gt;初始化&lt;/h2&gt;
+&lt;p&gt;首先使用&lt;code&gt;vagrant init ubuntu/vivid64&lt;/code&gt;命令在当前目录下新建一个基于Ubuntu 15.04的配置文件。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;此处使用ubuntu 15.04作为演示，更多的box可以在&lt;a href=&#34;https://atlas.hashicorp.com/search&#34;&gt;此处&lt;/a&gt;下载&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;启动&#34;&gt;启动&lt;/h2&gt;
+&lt;p&gt;经过初始化操作后，就可以使用&lt;code&gt;vagrant up&lt;/code&gt;启动自己的虚拟机了。
+默认的情况下，可以使用&lt;code&gt;127.0.0.1:2222&lt;/code&gt;来连接虚拟机，你可以非常方便地使用自己喜欢的ssh工具来进行操作。
+存放着&lt;code&gt;vagrantfile&lt;/code&gt;的文件夹会以&lt;code&gt;/vagrant&lt;/code&gt;的形式挂载到虚拟机中，你可以毫无障碍的在主机和虚拟机之间传递文件，比如将代码放在此文件夹下，虚拟机就可以直接进行编译并执行，非常酷炫。&lt;/p&gt;
+&lt;h1 id=&#34;vagrant进阶&#34;&gt;Vagrant进阶&lt;/h1&gt;
+&lt;h2 id=&#34;修改虚拟机默认内存大小&#34;&gt;修改虚拟机默认内存大小&lt;/h2&gt;
+&lt;p&gt;VirtualBox的默认内存大小为512MB，在编译某些软件时会因为内存过小导致错误。
+可以修改&lt;code&gt;Vagrantfile&lt;/code&gt;来改变这个参数：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;config.vm.provider &amp;quot;virtualbox&amp;quot; do |vb|
+# # Display the VirtualBox GUI when booting the machine
+# vb.gui = true
+#
+# # Customize the amount of memory on the VM:
+vb.memory = &amp;quot;2048&amp;quot;
+end
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;修改时需要注意，如果要启用&lt;code&gt;vb.memory&lt;/code&gt;这一选项，需要同时取消上面&lt;code&gt;config&lt;/code&gt;以及下面的&lt;code&gt;end&lt;/code&gt;之前的注释，否则vagrant执行时会因为配置文件格式错误而报错。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年10月22日 初步完成&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

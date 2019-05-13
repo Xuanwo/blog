@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Acms on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/acm/</link><description>Recent content in Acms on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 16 Aug 2015 04:04:26 +0000</lastBuildDate><atom:link href="https://xuanwo.io/acm/index.xml" rel="self" type="application/rss+xml"/><item><title>UVa 1594 Ducci Sequence</title><link>https://xuanwo.io/2015/08/16/uva-1594-ducci-sequence/</link><pubDate>Sun, 16 Aug 2015 04:04:26 +0000</pubDate><guid>https://xuanwo.io/2015/08/16/uva-1594-ducci-sequence/</guid><description>&lt;h2 id=&#34;题目&#34;&gt;题目&lt;/h2&gt;
+&lt;p&gt;源地址：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;amp;Itemid=8&amp;amp;page=show_problem&amp;amp;problem=4469&#34;&gt;https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;amp;Itemid=8&amp;amp;page=show_problem&amp;amp;problem=4469&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;理解&#34;&gt;理解&lt;/h1&gt;
+&lt;h2 id=&#34;题意分析&#34;&gt;题意分析&lt;/h2&gt;
+&lt;p&gt;题意十分简单，给定一个序列的变换，每一次都把当前位置上的数变为当前位置与下一个位置差的绝对值。然后问你这个序列最后是变成一个循环还是全都变为0。&lt;/p&gt;
+&lt;h2 id=&#34;暴力做法&#34;&gt;暴力做法&lt;/h2&gt;
+&lt;p&gt;一开始看题目的时候感觉很难下手，不知道应该怎样去判断这个序列能否构成一个循环。但是注意到另外一个条件——题目中给出了最大的循环次数，1000次。再加上n的值比较小，也就是说，我完全可以暴力模拟一千次，如果还是没有全为0的串的话，这个串一定是一个循环的串。基于这种想法，我可以得到一个非常简单的暴力算法。&lt;/p&gt;
+&lt;h2 id=&#34;floyd判圈算法&#34;&gt;Floyd判圈算法&lt;/h2&gt;
+&lt;h3 id=&#34;概述&#34;&gt;概述&lt;/h3&gt;
+&lt;p&gt;这道题已经AC了，但是问题并没有结束。回到我最一开始的想法——我该如何判断一个序列是否构成了循环呢？这样，我们就引出了一个算法：&lt;a href=&#34;https://zh.wikipedia.org/zh/Floyd%E5%88%A4%E5%9C%88%E7%AE%97%E6%B3%95&#34;&gt;Floyd判圈算法&lt;/a&gt;。是的，这个Floyd就是那个最短路算法的发明者。
+这个算法可以在有限状态机，迭代函数或者链表上判断是否存在环，并求出该环的起点和长度的算法。&lt;/p&gt;
+&lt;h3 id=&#34;介绍&#34;&gt;介绍&lt;/h3&gt;
+&lt;p&gt;下面请允许我引用维基百科上对于该算法的介绍：
+&amp;gt;
+如果有限状态机、迭代函数或者链表上存在环，那么在某个环上以不同速度前进的2个指针必定会在某个时刻相遇。同时显然地，如果从同一个起点(即使这个起点不在某个环上)同时开始以不同速度前进的2个指针最终相遇，那么可以判定存在一个环，且可以求出2者相遇处所在的环的起点与长度。&lt;/p&gt;
+&lt;h3 id=&#34;实现&#34;&gt;实现&lt;/h3&gt;
+&lt;p&gt;如果有限状态机、迭代函数或者链表存在环，那么一定存在一个起点可以到达某个环的某处(这个起点也可以在某个环上)。&lt;/p&gt;
+&lt;p&gt;初始状态下，假设已知某个起点节点为节点S。现设两个指针t和h，将它们均指向S。&lt;/p&gt;
+&lt;p&gt;接着，同时让t和h往前推进，但是二者的速度不同：t每前进1步，h前进2步。只要二者都可以前进而且没有相遇，就如此保持二者的推进。当h无法前进，即到达某个没有后继的节点时，就可以确定从S出发不会遇到环。反之当t与h再次相遇时，就可以确定从S出发一定会进入某个环，设其为环C。&lt;/p&gt;
+&lt;p&gt;如果确定了存在某个环，就可以求此环的起点与长度。&lt;/p&gt;
+&lt;p&gt;上述算法刚判断出存在环C时，显然t和h位于同一节点，设其为节点M。显然，仅需令h不动，而t不断推进，最终又会返回节点M，统计这一次t推进的步数，显然这就是环C的长度。&lt;/p&gt;
+&lt;p&gt;为了求出环C的起点，只要令h仍均位于节点M，而令t返回起点节点S。随后，同时让t和h往前推进，且保持二者的速度相同：t每前进1步，h前进1步。持续该过程直至t与h再一次相遇，设此次相遇时位于同一节点P，则节点P即为从节点S出发所到达的环C的第一个节点，即环C的一个起点。&lt;/p&gt;
+&lt;h3 id=&#34;伪代码&#34;&gt;伪代码&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;t := &amp;amp;S
+h := &amp;amp;S //令指针t和h均指向起点节点S。
+repeat
+t := t-&amp;gt;next
+h := h-&amp;gt;next
+if h is not NULL //要注意这一判断一般不能省略
+h := h-&amp;gt;next
+until t = h or h = NULL
+if h != NULL //如果存在环的话
+n := 0
+repeat //求环的长度
+t := t-&amp;gt;next
+n := n+1
+until t = h
+t := &amp;amp;S //求环的一个起点
+while t != h
+t := t-&amp;gt;next
+h := h-&amp;gt;next
+P := *t
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;本题应用&#34;&gt;本题应用&lt;/h3&gt;
+&lt;p&gt;具体到本题中，我只需要将输入的数据分别存入两个数组a和b，然后让a每次操作一次，让b每次操作两次。这样就使得a和b有了不一样的速度，然后每次都进行判断，根据前面讲解的算法，只要a和b相等，那就意味着这个数组一定是循环的。然后再处理一下均为0的情况，这道题的Floyd判圈算法的版本就出来了。&lt;/p&gt;
+&lt;h3 id=&#34;速度更快的brent判圈算法&#34;&gt;速度更快的Brent判圈算法&lt;/h3&gt;
+&lt;p&gt;在维基百科的条目中还提到了一个比Floyd判断算法快36%的Brent判圈算法，不过目前貌似资料不足，所以这个部分就暂时按下不表了。&lt;/p&gt;
+&lt;h1 id=&#34;代码&#34;&gt;代码&lt;/h1&gt;
+&lt;h2 id=&#34;暴力算法&#34;&gt;暴力算法&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;const int maxn = 100;
+int t,n,a[maxn],b[maxn];
+bool judge()
+{
+for(int i=1; i&amp;lt;=n; ++i)
+{
+if(a[i]!=0) return false;
+}
+return true;
+}
+void next()
+{
+for(int i=1; i&amp;lt;=n; ++i)
+{
+b[i]=abs(a[i]-a[i+1]);
+}
+for(int i=1; i&amp;lt;=n; ++i)
+{
+a[i]=b[i];
+}
+a[n+1]=a[1];
+}
+bool ans;
+int main()
+{
+scanf(&amp;quot;%d&amp;quot;,&amp;amp;t);
+while(t--)
+{
+ans = false;
+scanf(&amp;quot;%d&amp;quot;, &amp;amp;n);
+for(int i=1; i&amp;lt;=n; ++i) scanf(&amp;quot;%d&amp;quot;, &amp;amp;a[i]);
+a[0]=a[n];
+a[n+1]=a[1];
+for(int k=1; k&amp;lt;=1000; ++k)
+{
+if(judge())
+{
+ans=true;
+break;
+}
+else
+{
+next();
+}
+}
+if(!ans) printf(&amp;quot;LOOP\n&amp;quot;);
+else printf(&amp;quot;ZERO\n&amp;quot;);
+}
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;floyd判圈算法-1&#34;&gt;Floyd判圈算法&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;const int maxn = 100;
+int t,n,a[maxn];
+int b[maxn],c[maxn]= {0};
+void next(int a[])
+{
+for(int i=1; i&amp;lt;=n; ++i)
+{
+a[i]=abs(a[i]-a[i+1]);
+}
+a[n+1]=a[1];
+}
+bool equal(int a[], int b[])
+{
+for(int i=1; i&amp;lt;=n; ++i)
+{
+if(a[i]!=b[i]) return false;
+}
+return true;
+}
+int main()
+{
+scanf(&amp;quot;%d&amp;quot;, &amp;amp;t);
+while(t--)
+{
+scanf(&amp;quot;%d&amp;quot;, &amp;amp;n);
+for(int i=1; i&amp;lt;=n; ++i)
+{
+scanf(&amp;quot;%d&amp;quot;, &amp;amp;a[i]);
+b[i]=a[i];
+}
+a[n+1]=b[n+1]=a[1];
+bool loop =true;
+for(int i=0; i&amp;lt;1010; ++i)
+{
+next(a);
+next(b);
+next(b);
+if(equal(a,c))
+{
+loop = false;
+break;
+}
+if(equal(a,b))
+{
+loop = true;
+break;
+}
+if(equal(b,c))
+{
+loop = false;
+break;
+}
+}
+if(loop) printf(&amp;quot;LOOP\n&amp;quot;);
+else printf(&amp;quot;ZERO\n&amp;quot;);
+}
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年08月16日 本题已经用两种方法AC&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Codeforces Beta Round 65 A Way Too Long Words (Div. 2)</title><link>https://xuanwo.io/2015/02/10/cf-71a/</link><pubDate>Tue, 10 Feb 2015 23:11:25 +0000</pubDate><guid>https://xuanwo.io/2015/02/10/cf-71a/</guid><description>&lt;h2 id=&#34;题目&#34;&gt;题目&lt;/h2&gt;
+&lt;p&gt;源地址：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://codeforces.com/problemset/problem/71/A&#34;&gt;http://codeforces.com/problemset/problem/71/A&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;理解&#34;&gt;理解&lt;/h1&gt;
+&lt;p&gt;刷水题，保持手指灵活性= =&lt;/p&gt;
+&lt;h1 id=&#34;代码&#34;&gt;代码&lt;/h1&gt;
+&lt;pre&gt;&lt;code&gt;
+#include &amp;lt;cstdio&amp;gt;
+#include &amp;lt;cstdlib&amp;gt;
+#include &amp;lt;cstring&amp;gt;
+#include &amp;lt;cmath&amp;gt;
+#include &amp;lt;ctime&amp;gt;
+#include &amp;lt;iostream&amp;gt;
+#include &amp;lt;algorithm&amp;gt;
+#include &amp;lt;string&amp;gt;
+#include &amp;lt;vector&amp;gt;
+#include &amp;lt;deque&amp;gt;
+#include &amp;lt;list&amp;gt;
+#include &amp;lt;set&amp;gt;
+#include &amp;lt;map&amp;gt;
+#include &amp;lt;stack&amp;gt;
+#include &amp;lt;queue&amp;gt;
+#include &amp;lt;numeric&amp;gt;
+#include &amp;lt;iomanip&amp;gt;
+#include &amp;lt;bitset&amp;gt;
+#include &amp;lt;sstream&amp;gt;
+#include &amp;lt;fstream&amp;gt;
+#define debug puts(&amp;quot;-----&amp;quot;)
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1&amp;lt;&amp;lt;28)
+#define ll long long int
+using namespace std;
+#define MAXN 100+10
+int n;
+char a[MAXN];
+int main(int argc, char const *argv[])
+{
+scanf(&amp;quot;%d&amp;quot;, &amp;amp;n);
+while (n--)
+{
+memset(a, 0, sizeof(a));
+scanf(&amp;quot;%s&amp;quot;, a);
+int len = strlen(a);
+if (len &amp;lt;= 10) cout &amp;lt;&amp;lt; a &amp;lt;&amp;lt; endl;
+else cout &amp;lt;&amp;lt; a[0] &amp;lt;&amp;lt; len - 2 &amp;lt;&amp;lt; a[len - 1] &amp;lt;&amp;lt; endl;
+}
+return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年2月10日 已AC。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>VK Cup 2012 Qualification Round 1 A Next Round</title><link>https://xuanwo.io/2015/02/10/cf-158a/</link><pubDate>Tue, 10 Feb 2015 22:07:24 +0000</pubDate><guid>https://xuanwo.io/2015/02/10/cf-158a/</guid><description>&lt;h2 id=&#34;题目&#34;&gt;题目&lt;/h2&gt;
+&lt;p&gt;源地址：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://codeforces.com/problemset/problem/158/A&#34;&gt;http://codeforces.com/problemset/problem/158/A&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;理解&#34;&gt;理解&lt;/h1&gt;
+&lt;p&gt;水题&lt;/p&gt;
+&lt;h1 id=&#34;代码&#34;&gt;代码&lt;/h1&gt;
+&lt;pre&gt;&lt;code&gt;
+#include &amp;lt;cstdio&amp;gt;
+#include &amp;lt;cstdlib&amp;gt;
+#include &amp;lt;cstring&amp;gt;
+#include &amp;lt;cmath&amp;gt;
+#include &amp;lt;ctime&amp;gt;
+#include &amp;lt;iostream&amp;gt;
+#include &amp;lt;algorithm&amp;gt;
+#include &amp;lt;string&amp;gt;
+#include &amp;lt;vector&amp;gt;
+#include &amp;lt;deque&amp;gt;
+#include &amp;lt;list&amp;gt;
+#include &amp;lt;set&amp;gt;
+#include &amp;lt;map&amp;gt;
+#include &amp;lt;stack&amp;gt;
+#include &amp;lt;queue&amp;gt;
+#include &amp;lt;numeric&amp;gt;
+#include &amp;lt;iomanip&amp;gt;
+#include &amp;lt;bitset&amp;gt;
+#include &amp;lt;sstream&amp;gt;
+#include &amp;lt;fstream&amp;gt;
+#define debug puts(&amp;quot;-----&amp;quot;)
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1&amp;lt;&amp;lt;28)
+#define ll long long int
+using namespace std;
+#define MAXN 50+10
+int n, k;
+int a[MAXN];
+int ans = 0;
+bool cmp(int x, int y)
+{
+return x &amp;gt; y;
+}
+int main(int argc, char const *argv[])
+{
+scanf(&amp;quot;%d%d&amp;quot;, &amp;amp;n, &amp;amp;k);
+for (int i = 0; i &amp;lt; n; i++)
+{
+scanf(&amp;quot;%d&amp;quot;, &amp;amp;a[i]);
+}
+sort(a, a + n, cmp);
+for(int i=0;i&amp;lt;n;i++)
+{
+if(a[i]&amp;gt;=a[k-1]&amp;amp;&amp;amp;a[i]&amp;gt;0) ans++;
+}
+cout&amp;lt;&amp;lt;ans&amp;lt;&amp;lt;endl;
+return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年2月10日 已AC。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>CF拉练第七场</title><link>https://xuanwo.io/2014/11/26/contest-cugb-cf7/</link><pubDate>Wed, 26 Nov 2014 16:40:28 +0000</pubDate><guid>https://xuanwo.io/2014/11/26/contest-cugb-cf7/</guid><description>
+&lt;h2 id=&#34;比赛地址&#34;&gt;比赛地址&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;http://acm.hust.edu.cn/vjudge/contest/view.action?cid=63852#overview&#34;&gt;http://acm.hust.edu.cn/vjudge/contest/view.action?cid=63852#overview&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;比赛总结&#34;&gt;比赛总结&lt;/h1&gt;
+&lt;p&gt;这场比赛做的很渣，第一题卡了很久，还WA了两发。第二题一个裸的最短路模板题还折腾了半天。第三题是一个比较简单的数论题，用到了GCD。然后D和E都没有敲出来，其实D是一个要用到一点技巧的裸Nim。而E题。。。正面解法思绪繁杂，没有捋出来，而从结果入手开开脑洞倒是可以有点思路= =。&lt;/p&gt;
+&lt;h1 id=&#34;分题讲解&#34;&gt;分题讲解&lt;/h1&gt;
+&lt;h2 id=&#34;a题-暴力&#34;&gt;A题（暴力）&lt;/h2&gt;
+&lt;p&gt;从前后分别入手求出和，然后对应进行判断即可。
+&lt;a href=&#34;http://xuanwo.io/2014/11/26/CF-18C/&#34;&gt;http://xuanwo.io/2014/11/26/CF-18C/&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;b题-最短路&#34;&gt;B题（最短路）&lt;/h2&gt;
+&lt;p&gt;模板题，注意路径的输出。
+&lt;a href=&#34;http://xuanwo.io/2014/11/26/CF-20C/&#34;&gt;http://xuanwo.io/2014/11/26/CF-20C/&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;c题-数论&#34;&gt;C题（数论）&lt;/h2&gt;
+&lt;p&gt;用到了GCD，只要找出原来的最简比例就可以了。
+&lt;a href=&#34;http://xuanwo.io/2014/11/26/CF-16C/&#34;&gt;http://xuanwo.io/2014/11/26/CF-16C/&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;d题-nim博弈&#34;&gt;D题（Nim博弈）&lt;/h2&gt;
+&lt;p&gt;用到了很多异或的性质，位运算果然是一门大学问。
+&lt;a href=&#34;http://xuanwo.io/2014/11/26/CF-15C/&#34;&gt;http://xuanwo.io/2014/11/26/CF-15C/&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;e题-dp-构造&#34;&gt;E题（DP，构造）&lt;/h2&gt;
+&lt;p&gt;这个题= =，还没有办法证明。
+&lt;a href=&#34;http://xuanwo.io/2014/11/23/CF-15E/&#34;&gt;http://xuanwo.io/2014/11/23/CF-15E/&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年11月26日 完成题解。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Codeforces Beta Round 15 C Industrial Nim</title><link>https://xuanwo.io/2014/11/26/cf-15c/</link><pubDate>Wed, 26 Nov 2014 14:25:00 +0000</pubDate><guid>https://xuanwo.io/2014/11/26/cf-15c/</guid><description>&lt;h2 id=&#34;题目&#34;&gt;题目&lt;/h2&gt;
+&lt;p&gt;源地址：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://codeforces.com/problemset/problem/15/C&#34;&gt;http://codeforces.com/problemset/problem/15/C&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;理解&#34;&gt;理解&lt;/h1&gt;
+&lt;p&gt;有n个矿场，第i个矿场有mi辆矿车，第一辆矿车有xi颗石头，第二辆xi+1颗，如此递推，直到第mi辆有mi+xi-1颗。然后有两个人轮流取石头（金矿？），他们可以选择任意一个矿场任意一辆矿车取走任意非0数量的石头，直到第一个不能再取的人认输。
+实际上，这就是一个裸的Nim博弈问题，只要直接运用结论就能完成解答。但是问题在于，数据太多，导致每一个全都异或起来的话耗时太长。所以需要采用一些手段处理一下。我们需要用到两个结论：第一，从1异或到n的答案存在着这样一个特性：n%4==1时，答案为1；n%4==2时，答案为x+1；n%4==3时，答案为0；n%4==4时，答案为x。第二，从x异或到y的值等于nim(x-1)^nim(y)。
+经过上述的处理，最后的结果就出来了~&lt;/p&gt;
+&lt;h1 id=&#34;代码&#34;&gt;代码&lt;/h1&gt;
+&lt;pre&gt;&lt;code&gt;
+#define MAXN 100000+10
+ll n,x,m,ans=0;
+ll nim(ll x)
+{
+ll tmp=x%4;
+if(tmp==1)
+return 1;
+else if(tmp==2)
+return x+1;
+else if(tmp==3)
+return 0;
+else
+return x;
+}
+int main(int argc, char const *argv[])
+{
+scanf(&amp;quot;%I64d&amp;quot;, &amp;amp;n);
+while(n--)
+{
+scanf(&amp;quot;%I64d %I64d&amp;quot;, &amp;amp;x, &amp;amp;m);
+m=nim(m+x-1);
+x=nim(x-1);
+ans^=x^m;
+}
+ans?puts(&amp;quot;tolik&amp;quot;):puts(&amp;quot;bolik&amp;quot;);
+return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年11月26日 已AC。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Codeforces Beta Round 16 C Monitor (Div. 2 Only)</title><link>https://xuanwo.io/2014/11/26/cf-16c/</link><pubDate>Wed, 26 Nov 2014 14:04:11 +0000</pubDate><guid>https://xuanwo.io/2014/11/26/cf-16c/</guid><description>&lt;h2 id=&#34;题目&#34;&gt;题目&lt;/h2&gt;
+&lt;p&gt;源地址：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://codeforces.com/problemset/problem/16/C&#34;&gt;http://codeforces.com/problemset/problem/16/C&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;理解&#34;&gt;理解&lt;/h1&gt;
+&lt;p&gt;一道关于分辨率转化的问题。要求将一个大分辨率按照指定的宽高比进行转化，如果宽高比不符，则进行切割。首先，我们来求一个x和y的最大公约数d，然后分别令x=x/d，y=y/d，这样就得到了x和y之间最简的比例形式。然后a和b分别去除以x和y，得到的两个背书中去掉小数部分较小的那个，就是切割之后的倍数比。最后得到的结果就是符合要求的结果。&lt;/p&gt;
+&lt;h1 id=&#34;代码&#34;&gt;代码&lt;/h1&gt;
+&lt;pre&gt;&lt;code&gt;
+ll a,b,x,y;
+ll d,t1,t2;
+void init()
+{
+scanf(&amp;quot;%I64d%I64d%I64d%I64d&amp;quot;, &amp;amp;a, &amp;amp;b, &amp;amp;x, &amp;amp;y);
+}
+ll gcd(ll a, ll b)
+{
+return b ? gcd(b, a%b) : a;
+}
+int main(int argc, char const *argv[])
+{
+init();
+d = gcd(x, y);
+x = x / d, y = y / d;
+t1 = a / x;
+t2 = b / y;
+t1 = min(t1, t2);
+cout&amp;lt;&amp;lt;x*t1&amp;lt;&amp;lt;&amp;quot; &amp;quot;&amp;lt;&amp;lt;y*t1&amp;lt;&amp;lt;endl;
+return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年11月26日 已AC。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Codeforces Alpha Round 20 C Dijkstra? (Codeforces format)</title><link>https://xuanwo.io/2014/11/26/cf-20c/</link><pubDate>Wed, 26 Nov 2014 13:59:18 +0000</pubDate><guid>https://xuanwo.io/2014/11/26/cf-20c/</guid><description>&lt;h2 id=&#34;题目&#34;&gt;题目&lt;/h2&gt;
+&lt;p&gt;源地址：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://codeforces.com/problemset/problem/20/C&#34;&gt;http://codeforces.com/problemset/problem/20/C&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;理解&#34;&gt;理解&lt;/h1&gt;
+&lt;p&gt;实际上题目不难，但是我们都捣鼓了很久。原因是我们根本就没有掌握这种算法，导致连一个输出路径都搞得这么蛋疼。使用邻接表来存储每一个节点，每一个节点都自带一个指针指向下一个节点（可以自己使用数组模拟），最后的结果倒过来输出即可。&lt;/p&gt;
+&lt;h1 id=&#34;代码&#34;&gt;代码&lt;/h1&gt;
+&lt;pre&gt;&lt;code&gt;
+#define MAXN 100000*4+10
+const ll maxd = 1E13;
+int v[MAXN],w[MAXN],next[MAXN],pre[MAXN],res[MAXN];
+int first[MAXN],inq[MAXN],e;
+ll d[MAXN];
+int m,n;
+int x,y,z;
+void addeage(int x,int y,int z)
+{
+v[e]=y;
+w[e]=z;
+next[e]=first[x];
+first[x]=e;
+e++;
+}
+void spfa(int s)
+{
+queue&amp;lt;int&amp;gt; q;
+for(int i =0; i&amp;lt;MAXN; i++)
+d[i]=maxd;
+d[s]=0;
+inq[s]=1;
+q.push(s);
+while(q.empty()==false)
+{
+int u = q.front();
+q.pop();
+inq[u]=0;
+for(int i =first[u]; i!=-1; i=next[i])
+{
+if(d[v[i]]&amp;gt;d[u]+w[i])
+{
+d[v[i]]=(d[u]+w[i]);
+pre[v[i]]=u;
+if(inq[v[i]]==0)
+{
+q.push(v[i]);
+inq[v[i]]=1;
+}
+}
+}
+}
+}
+void init()
+{
+for(int i=0; i&amp;lt;MAXN; i++)
+{
+first[i]=-1;
+}
+e=0;
+scanf(&amp;quot;%d%d&amp;quot;,&amp;amp;m,&amp;amp;n);
+while(n--)
+{
+scanf(&amp;quot;%d%d%d&amp;quot;,&amp;amp;x,&amp;amp;y,&amp;amp;z);
+addeage(x,y,z);
+addeage(y,x,z);
+}
+}
+int main(int argc, char const *argv[])
+{
+init();
+spfa(1);
+if(d[m]==maxd)
+printf(&amp;quot;-1&amp;quot;);
+else
+{
+int now=m;
+int cnt=0;
+while(now!=1)
+{
+res[cnt++] = now;
+now = pre[now];
+}
+res[cnt++] = 1;
+for(int i = cnt-1; i &amp;gt;= 0; i--)
+printf(&amp;quot;%d &amp;quot;,res[i]);
+}
+return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年11月26日 已AC。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Codeforces Beta Round 18 C Stripe (Div.2 Only)</title><link>https://xuanwo.io/2014/11/26/cf-18c/</link><pubDate>Wed, 26 Nov 2014 13:16:29 +0000</pubDate><guid>https://xuanwo.io/2014/11/26/cf-18c/</guid><description>&lt;h2 id=&#34;题目&#34;&gt;题目&lt;/h2&gt;
+&lt;p&gt;源地址：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://codeforces.com/problemset/problem/18/C&#34;&gt;http://codeforces.com/problemset/problem/18/C&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;理解&#34;&gt;理解&lt;/h1&gt;
+&lt;p&gt;题意很简单，把一个给定的数列分成两份，要求两份数字之和相等。直接暴力乱搞，预处理的时候用两个数组分别保存前后缀的数字之和，然后只要遍历一遍，就能得到最后的结果。&lt;/p&gt;
+&lt;h1 id=&#34;代码&#34;&gt;代码&lt;/h1&gt;
+&lt;pre&gt;&lt;code&gt;
+#define MAXN 100000+10
+int a[MAXN];
+int b[MAXN];
+int c[MAXN];
+int n,ans;
+void init()
+{
+scanf(&amp;quot;%d&amp;quot;,&amp;amp;n);
+b[0]=0;
+for(int i=1; i&amp;lt;=n; i++)
+{
+scanf(&amp;quot;%d&amp;quot;,&amp;amp;a[i]);
+b[i]=b[i-1]+a[i];
+}
+for(int j=n; j&amp;gt;=1; j--)
+{
+c[j]=c[j+1]+a[j];
+}
+}
+int main(int argc, char const *argv[])
+{
+init();
+for(int i=1; i&amp;lt;n; i++)
+{
+if(b[i]==c[i+1])
+ans++;
+}
+printf(&amp;quot;%d\n&amp;quot;,ans);
+return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年11月26日 已AC。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>UVa 272 TEX Quotes</title><link>https://xuanwo.io/2014/11/25/uva-272-tex-quotes/</link><pubDate>Tue, 25 Nov 2014 10:40:48 +0000</pubDate><guid>https://xuanwo.io/2014/11/25/uva-272-tex-quotes/</guid><description>&lt;h2 id=&#34;题目&#34;&gt;题目&lt;/h2&gt;
+&lt;p&gt;源地址：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;amp;Itemid=8&amp;amp;category=829&amp;amp;page=show_problem&amp;amp;problem=208&#34;&gt;http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;amp;Itemid=8&amp;amp;category=829&amp;amp;page=show_problem&amp;amp;problem=208&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;理解&#34;&gt;理解&lt;/h1&gt;
+&lt;p&gt;同样的，题目很简单。只需要考虑当前处理的是前面的还是后面的那个引号。&lt;/p&gt;
+&lt;h1 id=&#34;代码&#34;&gt;代码&lt;/h1&gt;
+&lt;pre&gt;&lt;code&gt;
+char a;
+int flag=0;
+int main(int argc, char const *argv[])
+{
+while(~scanf(&amp;quot;%c&amp;quot;, &amp;amp;a))
+{
+if(a==&#39;&amp;quot;&#39;)
+{
+flag++;
+if(flag%2==1)
+{
+printf(&amp;quot;%s&amp;quot;, &amp;quot;``&amp;quot;);
+}
+else
+{
+printf(&amp;quot;%s&amp;quot;, &amp;quot;&#39;&#39;&amp;quot;);
+}
+}
+else
+{
+printf(&amp;quot;%c&amp;quot;, a);
+}
+}
+return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年11月25日 已AC。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>UVa 10082 WERTYU</title><link>https://xuanwo.io/2014/11/25/uva-10082-wertyu/</link><pubDate>Tue, 25 Nov 2014 10:34:01 +0000</pubDate><guid>https://xuanwo.io/2014/11/25/uva-10082-wertyu/</guid><description>&lt;h2 id=&#34;题目&#34;&gt;题目&lt;/h2&gt;
+&lt;p&gt;源地址：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;amp;Itemid=8&amp;amp;category=829&amp;amp;page=show_problem&amp;amp;problem=1023&#34;&gt;http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;amp;Itemid=8&amp;amp;category=829&amp;amp;page=show_problem&amp;amp;problem=1023&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;理解&#34;&gt;理解&lt;/h1&gt;
+&lt;p&gt;很简单的一道题，不过想了很久。我觉得需要注意的地方大概有三处：
+- 不用自己手写所有情况的判断，使用一个字符串数组可以高效地解决问题。
+- 可以采用一边读入一边处理的方法，不需要开一个数组来保存所有的数，更何况那样做还要处理空格和回车的问题。
+- 读题的时候忽略了两处地方，多行以及没有&lt;code&gt;QAZ&lt;/code&gt;这些字符，导致最后处理的时候出现了问题。
+注意到这些，这道题就可以轻松A了。&lt;/p&gt;
+&lt;h1 id=&#34;代码&#34;&gt;代码&lt;/h1&gt;
+&lt;pre&gt;&lt;code&gt;
+#define MAXN 50
+char a[MAXN]=&amp;quot;`1234567890-=QWERTYUIOP[]\\ASDFGHJKL;&#39;ZXCVBNM,./&amp;quot;;
+char b;
+int len=strlen(a);
+int main(int argc, char const *argv[])
+{
+while(~scanf(&amp;quot;%c&amp;quot;, &amp;amp;b))
+{
+if(b==&#39; &#39;) printf(&amp;quot; &amp;quot;);
+else if(b==&#39;\n&#39;) printf(&amp;quot;\n&amp;quot;);
+else
+{
+for(int i=0;i&amp;lt;len;i++)
+{
+if(b==a[i]) printf(&amp;quot;%c&amp;quot;, a[i-1]);
+}
+}
+}
+return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年11月25日 已AC。&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

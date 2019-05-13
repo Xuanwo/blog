@@ -1,0 +1,616 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Qingcloud on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/qingcloud/</link><description>Recent content in Qingcloud on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Wed, 05 Sep 2018 09:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/qingcloud/index.xml" rel="self" type="application/rss+xml"/><item><title>qscamel —— 数据迁移工具</title><link>https://xuanwo.io/2018/09/05/qscamel-intro/</link><pubDate>Wed, 05 Sep 2018 09:00:00 +0000</pubDate><guid>https://xuanwo.io/2018/09/05/qscamel-intro/</guid><description>&lt;p&gt;qscamel 是一个用于在不同的端点 (Endpoint) 中高效迁移数据的工具。&lt;/p&gt;
+&lt;p&gt;作为一个面向用户的数据迁移工具，它必须要满足如下要求：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不丢数据：这是一个数据迁移工具最基本的要求。不能多，不能少，不能错，要支持校验和修复。&lt;/li&gt;
+&lt;li&gt;好用：作为一个给用户使用的工具，它需要足够好用。有完善的日志，不会无故退出，网络波动时能够自动重试，部署 &amp;amp; 配置容易，能够支持断点续传，无需人工干预。&lt;/li&gt;
+&lt;li&gt;高效：数据迁移通常都会有大量的文件传输，工具必须能够高效的使用服务器资源和带宽，节省用户执行迁移所需要的时间。&lt;/li&gt;
+&lt;li&gt;扩展性强：数据迁移所需要的场景千奇百怪，工具必须能够扩展并支持大多数用户的场景，减少后续开发和维护的成本。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;qscamel 正是在这些要求下诞生的产物，它或许还不是那么完美，但是已经可用。目前已经圆满完成了很多数据迁移任务，任务涉及文件数量上亿，文件大小达数百 TB 。这篇文章将会介绍 qscamel 设计，实现和开发过程中的一些小故事，希望能够简单的告诉大家在 QingCloud 我们是如何做产品的，以及为我们的 HR 小姐姐提前打一个招聘的广告:)&lt;/p&gt;
+&lt;h2 id=&#34;设计&#34;&gt;设计&lt;/h2&gt;
+&lt;p&gt;qscamel 只有一个功能，但是为了把这个功能做好，它需要在各个层面上都有一个比较良好的设计。&lt;/p&gt;
+&lt;h3 id=&#34;用户交互&#34;&gt;用户交互&lt;/h3&gt;
+&lt;p&gt;一个好的命令行工具应该如何跟用户交互呢？嗯，抛开使用场景谈好坏都是耍流氓，那我重新组织一下语言：一个给&lt;strong&gt;终端用户&lt;/strong&gt;使用的&lt;strong&gt;数据迁移&lt;/strong&gt;工具应该如何跟用户交互？这里有两个关键点：第一，终端用户意味着使用者不是像我这样的高级用户，他们大多数只有一点甚至是没有使用命令行程序的经验，他们能读一些中文的文档，他们无法自行处理或者理解程序返回的错误，他们记不住程序的参数；第二，数据迁移意味着这个程序可能会运行很长的时间，用户不会一直在边上守着，同时这个程序用户可能不会频繁使用。分析到这里，我们已经能够大概的想象到这个工具应该是什么样子了：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;命令要少，参数要少&lt;/li&gt;
+&lt;li&gt;学习成本要低，迁移成本要低（换个任务类型不需要重新学习配置方法）&lt;/li&gt;
+&lt;li&gt;任务启动后无需用户介入&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;除了需要考虑用户体验之外，我们还需要考虑开发体验。一个数据迁移工具，必然需要能够处理多种不同的数据来源和迁移目标，以及他们各自不一样的复杂参数。如果按照传统开发命令行工具的习惯，每个不同的端点都使用参数来进行配置，那光是参数解析和处理就要写很久。&lt;/p&gt;
+&lt;p&gt;因此，qscamel 最终的交互设计稿是这样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ qscamel run task-name &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; -t /path/to/task/file &lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;
+$ qscamel delete task-name
+$ qscamel status
+$ qscamel clean
+$ qscamel version&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;与之相对比的是 v1 版本的 qscamel：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ qscamel -t s3 -s s3-bucket-name -z us-east-1 -a &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;S3ACCESSKEYID&amp;#34;&lt;/span&gt; -S &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;S3SECRETACCESSKEY&amp;#34;&lt;/span&gt; -b qingstor-bucket-name -d &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;migrate 05&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;同时，我们将复杂的任务配置拆分为三块：qscamel 本身的配置，任务的配置，端点的配置，并将他们分成两个文件：qscamel 本身的配置独立的存储在一个全局的配置文件中，任务和端点的配置放在一个我们定义好的任务配置当中。&lt;/p&gt;
+&lt;p&gt;全局的配置文件形如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;concurrency:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;log_level:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;info&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;pid_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.qscamel/qscamel.pid&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;log_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.qscamel/qscamel.log&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;database_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.qscamel/db&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;而任务的配置文件格式同样是精心设计过的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;copy&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;source:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;fs&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/path/to/source&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;destination:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;qingstor&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/path/to/destination&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;options:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;bucket_name:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;example_bucket&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;access_key_id:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;example_access_key_id&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;secret_access_key:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;example_secret_access_key&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;ignore_existing:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;last_modified&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;每个任务会由 &lt;code&gt;type&lt;/code&gt;，&lt;code&gt;source&lt;/code&gt;，&lt;code&gt;destination&lt;/code&gt; 和任务相关的配置组成。其中 &lt;code&gt;source&lt;/code&gt; 和 &lt;code&gt;destination&lt;/code&gt; 配置格式一样，都由 &lt;code&gt;type&lt;/code&gt;，&lt;code&gt;path&lt;/code&gt; 和 &lt;code&gt;options&lt;/code&gt; 组成。藉由这样的设计，我们希望能够在易用性和扩展性上取得一个统一。用户可以很快的知道自己需要配置的东西，并且能够忽略无关参数的干扰，比如说我要配置从 fs 迁移到 qingstor，我就不需要了解 s3 的配置参数。还有一个好处是，用户只要写一次配置文件，他就能够将其应用到别的场景：比如说进行 &lt;code&gt;delete&lt;/code&gt; 而不是 &lt;code&gt;copy&lt;/code&gt;，比如说从 &lt;code&gt;s3&lt;/code&gt; 迁移到 &lt;code&gt;qingstor&lt;/code&gt; 而不是从 &lt;code&gt;fs&lt;/code&gt;。使用一个格式规范的配置文件对于开发来说更是意义重大，开发者不再需要去维护一份晦涩难懂的参数列表，能够用更加一致的方法来处理所有的端点。&lt;/p&gt;
+&lt;p&gt;下面我们同样用 v1 版本的 qscamel 来做对比：&lt;/p&gt;
+&lt;p&gt;他首先有一个参数列表&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;| short | full | type | required |
+|-------|------------------|--------|----------|
+| -z | --src-zone | string | N |
+| -a | --src-access-key | string | N |
+| -S | --src-secret-key | string | N |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后根据不同的 Source 还需要选择不同参数的组合：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;| platform | require --src-zone | require --src-access-key | require --src-secret-key |
+|----------|--------------------|--------------------------|--------------------------|
+| s3 | Y | Y | Y |
+| qiniu | N | Y | Y |
+| aliyun | Y | Y | Y |
+| upyun | Y | Y | Y |
+| qingstor | Y | Y | Y |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这还没有考虑到不同 Source 各自不同的参数配置呐 (๑•̀ㅂ•́) ✧&lt;/p&gt;
+&lt;h3 id=&#34;整体流程&#34;&gt;整体流程&lt;/h3&gt;
+&lt;p&gt;上面我们说到 qscamel 需要做到&lt;code&gt;任务启动后无需用户介入&lt;/code&gt;，接下来就聊一聊 qscamel 整体的任务流程是怎么样的。&lt;/p&gt;
+&lt;p&gt;启动任务，检查任务文件的内容是否正确，初始化 Source 和 Destination 之后，qscamel 会不断的进行如下循环：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;启动一个 listWorker 不断的从 Source 中遍历 Object
+&lt;ul&gt;
+&lt;li&gt;如果遍历失败将会自动重试&lt;/li&gt;
+&lt;li&gt;如果遍历结束将会关闭任务队列，不再追加新的任务&lt;/li&gt;
+&lt;li&gt;如果获取到新的 Object，则首先会将其保存到数据库，然后再添加到任务队列&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;启动指定数量的 migrateWorker 不断的从任务队列中获取任务
+&lt;ul&gt;
+&lt;li&gt;如果任务执行失败则会重试三次，每次重试的间隔会变长，若还是失败则会跳过&lt;/li&gt;
+&lt;li&gt;如果任务执行成功则会从数据库中删除该任务&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;等到任务队列中所有的任务均已执行完毕，qscamel 将会遍历数据库
+&lt;ul&gt;
+&lt;li&gt;如果数据库中没有未执行完毕的任务，则该迁移任务已成功，退出&lt;/li&gt;
+&lt;li&gt;如果数据库中还有未执行完毕的任务，则重新开始上述流程&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;不难发现，如果因为某些原因，某个 Object 一直在重试，那么 qscamel 将永远不会退出，并一直在输出报错的日志。这个在设计中是作为一个产品特性考虑的，但是根据实际的用户反馈，他们更希望程序能够将这些一直失败的任务在最后的时候统一输出，因此之后重新考虑一下，看如何交互更好。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;分段上传&#34;&gt;分段上传&lt;/h3&gt;
+&lt;p&gt;分段上传并不是什么新奇玩意儿，但是如果要做一个不依赖服务器状态，支持并发上传多个块，支持从断点恢复而且还好看的分段上传，却实打实的花了我整整一个下午的时间。不依赖服务器状态是说我们需要在本地存储分块上传的完成情况，而不是通过调用服务器端的 API 来获取，这样可以减少很多轮查询的开销；支持并发上传多个块就是字面意思，我们需要在分块的级别上做到并发，而不是单线程跑；支持从断点恢复是说已经上传的块需要跳过，只上传还没有完成的块。之前 qscamel 使用的是 qingstor-sdk-go 提供的一个比较简陋的 upload client 封装，只是简单的顺序调用接口，没有异常的处理。直到有一天，一个用户说我要上传一个 11 TB 的单文件到对象存储 (狗头.png)&lt;/p&gt;
+&lt;p&gt;为了将分块上传的逻辑与我们刚才的逻辑可以优雅的结合起来，原来的 Object 和 Job （也就是一个 Folder）被组合并拆分成了三种 Object：DirectoryObject，SingleObject，PartialObject。顾名思义，DirectoryObject 就等同于原来的 Job，SingleObject 表示一个完整的 Object，而 PartialObject 除了有跟 SingleObject 一样的属性之外，它还会携带着与分段上传有关的信息，比如 part number，upload id 等。这样就使得每一个 PartialObject 都可以独立的进行上传，不需要依赖外部的信息。&lt;/p&gt;
+&lt;p&gt;分段上传在实现的过程中最大限度的复用了原有的逻辑，只不过在每一个 Object 开始上传时会做相关的检查：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果是 PartialObject，则会使用 Object 中的信息进行分段上传。&lt;/li&gt;
+&lt;li&gt;如果是 SingleObject，则会根据 Endpoint 是否支持分段和这个 Object 的大小来判断是否需要拆分成 PartialObject：
+&lt;ul&gt;
+&lt;li&gt;如果 Endpoint 不支持分段，或者 Object 的大小不够大，则会直接上传。&lt;/li&gt;
+&lt;li&gt;反之，则会使用 Endpoint 的初始化分段接口进行分片，并将所有的 PartialObject 创建好。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;实现&#34;&gt;实现&lt;/h2&gt;
+&lt;p&gt;刚才我们讲了 qscamel 几处关键部分的设计，下面我们聊一聊 qscamel 的实现。qscamel 在实现过程中保持着对开发者友好的风格，没有使用什么黑科技，也没有使用什么奇怪的 Hack，简单直接，使用的也都是最常见的模型。&lt;/p&gt;
+&lt;h3 id=&#34;生产者-消费者&#34;&gt;生产者-消费者&lt;/h3&gt;
+&lt;p&gt;在绝大部分场景下，列取操作都要比上传和下载操作来得快，因此使用单生产者多消费者的模型更加合适，同时逻辑也会变得更加清晰。实现上我们使用 &lt;code&gt;sync.WaitGroup&lt;/code&gt; 做了一个简单的 &lt;code&gt;goroutine&lt;/code&gt; 池，在初始化的时候会一次性创建完毕，并始终监听 Object Channel，在 channel 关闭后自动退出。&lt;/p&gt;
+&lt;h3 id=&#34;endpoint-中的-interface&#34;&gt;Endpoint 中的 interface&lt;/h3&gt;
+&lt;p&gt;qscamel 要求支持的 endpoint 类型很多，从本地文件系统到各种对象存储，还包括本地文件的列表和 URL 的列表。想要快速开发，便于维护就要求将各个 endpoint 中的公共部分尽可能抽象出来，让 endpoint 实现者只需要关注自己逻辑相关的部分。为了做到这一点，qscamel 将 endpoint 中需要用到的所有方法拆分成了三个 interface，endpoint 实现者可以自行实现自己想要支持的功能。&lt;/p&gt;
+&lt;p&gt;其中，所有 endpoint 都必须要实现的 base interface 中包括如下函数：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Base is the interface that both Source and Destination should implement.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Base &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Name will return the endpoint&amp;#39;s name.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Name&lt;/span&gt;(ctx context.Context) (name &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Stat will get the metadata.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Stat&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (o &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;model.SingleObject, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Read will return a reader.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Read&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (r io.Reader, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// ReadRange will read content with range [offset, offset+size)
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;ReadRange&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, offset, size &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;) (r io.Reader, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果想要作为 Source，则还需要 Source interface：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Source is the interface for source endpoint.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Source &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+Base
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// List will list from the job.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;List&lt;/span&gt;(ctx context.Context, j &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;model.DirectoryObject, fn &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(model.Object)) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Reach will return an accessible url.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Reach&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (url &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Reachable will return whether current endpoint supports reach.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Reachable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中 List 会用来支持列取，而 Reach 则是可选的，这主要是用来支持对象存储的 Object Fetch 功能。&lt;/p&gt;
+&lt;p&gt;如果想要作为一个 Task 的 Destination，则需要实现 Destination interface：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Destination is the interface for destination endpoint.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Destination &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+Base
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Delete will use endpoint to delete the path.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Delete&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Deletable will return whether current endpoint supports delete.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Deletable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Fetch will use endpoint to fetch the url.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Fetch&lt;/span&gt;(ctx context.Context, path, url &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Fetchable will return whether current endpoint supports fetch.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Fetchable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// InitPart will inti a multipart upload.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;InitPart&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, size &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;) (uploadID &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, partSize &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;, partNumbers &lt;span style=&#34;color:#902000&#34;&gt;int&lt;/span&gt;, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UploadPart will upload a part.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;UploadPart&lt;/span&gt;(ctx context.Context, o &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;model.PartialObject, r io.Reader) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Partable will return whether current endpoint supports multipart upload.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Partable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Write will read data from the reader and write to endpoint.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Write&lt;/span&gt;(ctx context.Context, path &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, size &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;, r io.Reader) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Writable will return whether current endpoint supports write.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Writable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在每个 interface 中，开发者对自己不想或者暂时不想实现的功能都可以在对应的 &lt;code&gt;Xxxable()&lt;/code&gt; 函数中返回 &lt;code&gt;false&lt;/code&gt; 即可，qscamel 在初始化任务时会进行对应功能的检查，并在任务要求不满足时报错。&lt;/p&gt;
+&lt;p&gt;这样，我们 qscamel 就能够方便快捷的扩展新 endpoint 了~&lt;/p&gt;
+&lt;h3 id=&#34;leveldb&#34;&gt;LevelDB&lt;/h3&gt;
+&lt;p&gt;qscamel 是我们 QingStor Team 推出的第一款有状态的命令行工具，之前我们做 &lt;code&gt;qingcloud-cli&lt;/code&gt; 和 &lt;code&gt;qsctl&lt;/code&gt; 都只是直接调用对象存储的 API，不会在本地存储持久化的状态。但是 qscamel 作为一款数据迁移工具，它必须在本地维护大量信息以支持任务的断点续传。&lt;/p&gt;
+&lt;p&gt;qscamel 在选型过程中考察了很多方案：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;首先排除掉了所有 Server - Client 模式的数据库，迁移工具要求部署简单，轻量级，如果迁移数据还需要部署一个 MySQL 或者 Redis，那就太滑稽了，因此可选择的一定是嵌入式 DB。&lt;/li&gt;
+&lt;li&gt;然后因为开发者（没错，就是我）的个人偏好，排除掉了所有必须使用 CGO 的嵌入式 DB。RocksDB 非常酷炫，但是因为找不到一个足够好的纯 go 实现，所以被否决了。&lt;/li&gt;
+&lt;li&gt;再次因为 qscamel 规划当中会在 DB 中存储的数据类型不会超过 3 种，同时也不会存在需要 Join 的情况，所以排除掉了所有嵌入式 SQL 数据库。&lt;/li&gt;
+&lt;li&gt;最后在社区那么多嵌入式 K-V 数据库中，我们还需要排除掉所有不靠谱的，没有生产环境实际验证过的，维护状态不佳的，以及看着就不大行的项目。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在筛过好几轮之后，摆在我们面前的可选方案有三个：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/etcd-io/bbolt&#34;&gt;BoltDB&lt;/a&gt; &lt;em&gt;原作者已经不维护了，现在由 coreos team 的人 Fork 并维护了一份，最近转移给了 etcd-io&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/dgraph-io/badger&#34;&gt;Badger&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/syndtr/goleveldb&#34;&gt;LevelDB&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;BoltDB 使用了 B+tree，LevelDB 使用了 LSM tree，而 Badger 则是借鉴了论文 &lt;a href=&#34;https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf&#34;&gt;WiscKey&lt;/a&gt;，论文我没有细看，但大致的思想是将 LSM trees 中的 Key 和 Value 分开，将 Key 存储在 LSM tree 中，而 Value 则存在 value logs 里面。相对的来说，BoltDB 更加适合于读多写少的场景，而基于 LSM tree 的 DB 写入会更有优势。此外，LevelDB 不提供事务，它提供批量写入和读取时的 Snapshot，而 BoltDB 和 Badger 提供了完整的 ACID 事务，其中 BoltDB 不支持并发写事务，而 Badger 则支持。再三权衡之后，我首先放弃了 Badger。虽然特性很多，功能很强，Benchmark 也非常好看，但是它的特性我们基本上都用不到，加上我个人对这个项目的代码还不是很熟悉，可靠性上还有着疑虑，所以放弃了。&lt;/p&gt;
+&lt;p&gt;本着够用就行的想法，我一开始选择了被广泛运用的 BoltDB 。但是事实证明这个选择是错误的，在 qscamel 实际的场景下，剧烈的写事务竞争导致性能很差，并且发现 qscamel 对事务其实并没有什么需求，因此切换成了 LevelDB。&lt;/p&gt;
+&lt;h2 id=&#34;故事&#34;&gt;故事&lt;/h2&gt;
+&lt;h3 id=&#34;遇事不决-黄金切割&#34;&gt;遇事不决，黄金切割&lt;/h3&gt;
+&lt;p&gt;在 qscamel 探索的过程中，有过需要 magic number 的阶段，处于个人偏好，我无一例外的全部选择了黄金切割比。&lt;/p&gt;
+&lt;p&gt;案例一：生产者与消费者比例&lt;/p&gt;
+&lt;p&gt;之前 qscamel 是采用的多生产者，多消费者的方案，每个 worker 从一个统一的任务队列中取任务，又是生产者，又是消费者。看起来很美好，但是运行到某个时点，qscamel 总是会停止响应。当然了，现在回头来看可以知道这个 BUG 是由多种原因导致的。但是当时的一个分析是 Worker 的调度有问题，有可能所有的 Worker 都在生产，没有消费，导致整个任务队列阻塞了。作为一个解决方案，需要人为的固定生产者和消费者的比例，纠结了一会儿，选择了 0.618。&lt;/p&gt;
+&lt;p&gt;事后的测试中发现这个 Fix 完全没有什么用，于是删掉了（&lt;/p&gt;
+&lt;p&gt;案例二：乱搞的文件一致性检验&lt;/p&gt;
+&lt;p&gt;为了加快一致性检验的速度，qscamel 曾经自己乱搞过一个&lt;a href=&#34;https://github.com/yunify/qscamel/commit/5a29fc9346b56b6ab5c6377f58d49675ace49838#diff-77889babdacd806bb9d5b8299a56e9a9&#34;&gt;一致性的算法&lt;/a&gt;。想法非常简单，从文件的头尾和 0.618 处，分别取 3 MB，总计 9 MB，然后计算它们的 MD5 。很快这个想法被毙了，用户开 MD5 的检查就是为了保证自己文件上传没错，搞一个所谓 quickMD5 完全没有实际的意义，要是万一有一个文件 MD5 不对，结果没有检查出来，那就大发了。&lt;/p&gt;
+&lt;p&gt;总的来说，所有引入黄金切割的尝试全都失败了，但是我还在期待着下一个机会（&lt;/p&gt;
+&lt;h3 id=&#34;buffer-的-bytes&#34;&gt;Buffer 的 Bytes&lt;/h3&gt;
+&lt;p&gt;qscamel 很多地方都使用了我朋友 &lt;a href=&#34;https://pjw.io/&#34;&gt;@Aspire&lt;/a&gt; 写的&lt;a href=&#34;https://github.com/pengsrc/go-shared&#34;&gt;库&lt;/a&gt;，但是有一天被坑了一手，因为我发现它的 &lt;code&gt;buffer.Bytes()&lt;/code&gt; 不是线程安全的。因为它是这样实现的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Bytes returns a mutable reference to the underlying byte slice.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (b &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;BytesBuffer) &lt;span style=&#34;color:#06287e&#34;&gt;Bytes&lt;/span&gt;() []&lt;span style=&#34;color:#902000&#34;&gt;byte&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; b.bs
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;他将底层的 byte slice 直接返回，那就有可能在使用到一半的时候这个 buffer 被释放并写入了新的值，从而导致外部的调用者看到了一个错误的值。我提了一个 &lt;a href=&#34;https://github.com/pengsrc/go-shared/pull/3&#34;&gt;PR&lt;/a&gt;，跟 @Aspire 讨论了一下这个问题。虽说当初他实现的时候没有怎么考虑这个问题，但是想了一下他认为这是设计预期的，主要的点有两个：第一，设计这个 buffer 库就是为了复用内存，减少频繁创建 bytes slice 带来的开销，降低 gc 的压力，如果这个地方按照我的 PR 那样返回了一个新的 bytes slice 的话，那这个库就跟它的设计目标相违背了；第二，在 Golang 中，如果没有明确声明并发访问某事物是安全的，那它就不是安全的，比如 Golang 自己 &lt;a href=&#34;https://golang.org/src/bytes/buffer.go&#34;&gt;Buffer 实现&lt;/a&gt;就不是并发安全的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Bytes returns a slice of length b.Len() holding the unread portion of the buffer.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// The slice is valid for use only until the next buffer modification (that is,
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// only until the next call to a method like Read, Write, Reset, or Truncate).
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// The slice aliases the buffer content at least until the next buffer modification,
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// so immediate changes to the slice will affect the result of future reads.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (b &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;Buffer) &lt;span style=&#34;color:#06287e&#34;&gt;Bytes&lt;/span&gt;() []&lt;span style=&#34;color:#902000&#34;&gt;byte&lt;/span&gt; { &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; b.buf[b.off:] }&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;最后的决定是增加一个类似于 &lt;code&gt;SafeBytes()&lt;/code&gt; 的函数，不过因为懒，所以一直没有做，以后再补上吧~&lt;/p&gt;
+&lt;h3 id=&#34;小人物的重构-从早到晚&#34;&gt;小人物的重构，从早到晚&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;语出猫腻《间客》许乐在老虎死后跟随舰队穿越虫洞，手刃卡顿郡王前：“大人物报仇，隐忍十年也不算晚，小人物的复仇，却是从早到晚。”&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;其实 qscamel 的分段上传逻辑写了两遍，最开始是在原来的基础上缝缝补补，为 Object 加了很多新的属性，然后加了很多复杂判断，基本可用之后交付给了售前去做测试。晚上下班回家之后实在不满意那个版本，于是采用新的，也就是现在这样的逻辑重新实现了一遍。性能上有轻微提升，逻辑上变得更加顺畅，更主要的是我更加开心了 ʅ(‾◡◝)ʃ&lt;/p&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;这文章写了好几个月了，都不知道动态该写啥了。。&lt;/li&gt;
+&lt;li&gt;LOL 洲际赛夺冠了，亚运会也夺冠了，又又又是最有希望的一年，希望今年能拿到 S 系列赛的冠军&lt;/li&gt;
+&lt;li&gt;最近在重温《希灵帝国》，还买了微信读书新出的无限卡，每个月可以免费解锁 300 个章节，按照每个章节 0.3 元的均价，每月 19 块还是比较划算的（会计小能手&lt;/li&gt;
+&lt;li&gt;PS 会免了命运 2，跟小伙伴一起突突突了两天，导致接下来的一个星期睡觉都满脑子枪声&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;广告&#34;&gt;广告&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;广告位招租，8 点 17 分发&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;想要加入我们一起来做靠谱的产品吗，快访问 &lt;a href=&#34;https://www.qingcloud.com/jobs&#34;&gt;https://www.qingcloud.com/jobs&lt;/a&gt; 寻找自己中意的岗位并且给我发简历吧~&lt;/p&gt;</description></item><item><title>动态网页数据抓取踩坑分享</title><link>https://xuanwo.io/2016/09/13/dynamic-page-data-spider/</link><pubDate>Tue, 13 Sep 2016 01:58:33 +0000</pubDate><guid>https://xuanwo.io/2016/09/13/dynamic-page-data-spider/</guid><description>&lt;p&gt;之前做了一些数据抓取的工作，期间也踩了一些坑，所以有了这篇文章。&lt;/p&gt;
+&lt;h2 id=&#34;动态网页数据源获取&#34;&gt;动态网页数据源获取&lt;/h2&gt;
+&lt;p&gt;需要抓取的页面是使用&lt;a href=&#34;https://facebook.github.io/react/&#34;&gt;React&lt;/a&gt; JavaScript 框架开发的，所有的页面都是客户端渲染而成，这也就导致我只能看到一个个的 data-id ，没有办法直接获取数据。这就涉及到一个我之前没有接触过的领域——动态网页爬虫。
+一番 Google 之后，我了解到动态网页爬虫大致上可以通过以下两种方法实现：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;分析网页代码结构和请求，找到数据源的请求链接&lt;/li&gt;
+&lt;li&gt;调用Webkit渲染之后再进行抓取&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;第二种方法相当于在命令行中跑一个浏览器，一个页面一个页面的打开，效率可想而知。再加上待抓取页面的 DOM 结构本来就比较复杂，没有添加相应的 class 和 id，导致即使渲染出来了想要抓到自己需要的数据也非常费劲。
+于是只能采用第一种方案：分析了一下网页的代码之后发现所有的数据都是通过一个接口返回的。使用 Chrome 审查工具中的 &lt;code&gt;Network&lt;/code&gt; 工具可以获取到所有的网络请求，在里面搜索 &lt;code&gt;JSON&lt;/code&gt; ，找到了一个 JSON 的请求。点开一看正是我们需要的数据，解决了动态网页数据源的问题。&lt;/p&gt;
+&lt;h2 id=&#34;分类不统一&#34;&gt;分类不统一&lt;/h2&gt;
+&lt;p&gt;这个坑主要出在自己对目标网页的数据特性挖掘的不够。一开始以为目标网页是按照一个特定的分类来区分的，但是后来发现这个标准并不统一，最后抓取到的数据不在一个维度上。正当自己准备开工写很多特判的时候发现，如果从另外一个维度来索取数据的话，所有的数据都是统一的。
+在这个案例中，就是将人为的分类切换成通过价格来获取数据，通过选择所有价格，就能获取到所有的数据，不需要再对不同维度的分类进行特判。
+这个与其说是技术问题，更多的是一个经验的问题。&lt;/p&gt;
+&lt;h2 id=&#34;页面内部js执行&#34;&gt;页面内部JS执行&lt;/h2&gt;
+&lt;p&gt;这个坑就比较有趣了。
+目标网页除了通过一个特定的接口获取数据之外，还会在页面内部通过 JavaScript 来直接传递数据。背后的技术考量不得而知，但是摆在我面前的问题就是我要如何获取这些 JavaScript 代码中的数据。
+思考了一下之后想到了两种方案：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;自行匹配需要的字符串&lt;/li&gt;
+&lt;li&gt;通过 phatomjs 等工具执行页面内部的 js 代码，并输出需要的数据变量&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;自行匹配的问题在于，我需要匹配的字符串的格式不一，很难直接匹配出我需要的数据。而通过 phatomjs 执行，就能比较好的解决这个问题。&lt;/p&gt;
+&lt;p&gt;一个比较脏的解决方案是这样的：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;下载整个HTML页面到 &lt;code&gt;test.html&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;通过 bs4 获取到所有的 &lt;code&gt;&amp;lt;script&amp;gt;&lt;/code&gt; 标签内部的内容&lt;/li&gt;
+&lt;li&gt;将我们需要的那个标签输出到一个 &lt;code&gt;data.js&lt;/code&gt; 文件中&lt;/li&gt;
+&lt;li&gt;之后把将数据构造成 json 的 js 代码写入 &lt;code&gt;data.js&lt;/code&gt; 文件&lt;/li&gt;
+&lt;li&gt;通过 phatomjs 来执行代码&lt;/li&gt;
+&lt;li&gt;将输出通过 &lt;code&gt;json.loads&lt;/code&gt; 载入并 append 到我们的数据数组中&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这样，我们就获得了页面内部js代码中数据的json形式。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;phatomjs 中执行的代码最后，千万要记得加上 &lt;code&gt;phatom.exit()&lt;/code&gt;，否则不会自行退出。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;phatomjs报错&#34;&gt;phatomjs报错&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://cli.xuanwo.io/Tools/phatomjs.html#qxcbconnection-could-not-connect-to-display&#34;&gt;https://cli.xuanwo.io/Tools/phatomjs.html#qxcbconnection-could-not-connect-to-display&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;当代码放到服务器上运行时候，出现了这样的报错：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;QXcbConnection: Could not connect to display
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这是因为源中的phatomjs默认运行在图形界面下，只需要在运行前执行：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;export QT_QPA_PLATFORM=offscreen
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;即可。&lt;/p&gt;
+&lt;h2 id=&#34;线程调度&#34;&gt;线程调度&lt;/h2&gt;
+&lt;p&gt;这个坑就比较隐蔽了，重复调试了很久。
+在前面的流程中，我们有一个下载HTML页面并使用bs4解析的步骤。我之前的实现是通过&lt;code&gt;subprocess.Popen()&lt;/code&gt;直接调用 &lt;code&gt;curl&lt;/code&gt; 之后，就打开&lt;code&gt;test.html&lt;/code&gt;。这样的实现导致了这样的一个问题：有可能网页还没有下载完，我就开始进行解析了，这样就会导致我的解析内容跟本就不正确。也就是说，&lt;code&gt;subprocess.Popen()&lt;/code&gt; 不是一个阻塞的过程，它在调用完 &lt;code&gt;curl&lt;/code&gt; 之后不会等到 &lt;code&gt;curl&lt;/code&gt; 返回再结束。
+定位到问题的话，解决起来就很容易了。通过查阅文档，我知道了可以通过这种方法来保证命令执行完毕再执行下一行代码：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;child = subprocess.Popon(&amp;quot;curl xxxx.com &amp;gt; test.html&amp;quot;, shell=True)
+child.wait()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;回顾-总结&#34;&gt;回顾 &amp;amp; 总结&lt;/h2&gt;
+&lt;p&gt;这个小小的玩意儿开发没花多久，但是学到了很多东西。从之前自己一直以为很难不敢尝试的动态网页抓取到 Python subprocess 线程调度，果然不踩坑就不会有新的收获。
+这次开发的东西比较敏感，涉及到公司内部的一些事务，所以代码就不开源出来了。有什么想法或者问题可以直接在评论区里提出来，我会尽量回复的。因为是一个一次性的小套件，所以没有怎么考虑优化上的事情，如果有更好的解决方案，也欢迎大家一起探讨，说不定下次就用上了呢~&lt;/p&gt;</description></item><item><title>在QingCloud上部署弹性扩容的OwnCloud</title><link>https://xuanwo.io/2016/06/03/owncloud-on-qingcloud/</link><pubDate>Fri, 03 Jun 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/06/03/owncloud-on-qingcloud/</guid><description>&lt;p&gt;因为实在不满意百度云的一些缺陷，我们最终决定部署一套团队内部使用的云存储平台，用于团队协作及资料长期存储。希望能够达到如下目标：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;数据安全性高&lt;/li&gt;
+&lt;li&gt;权限控制能力强&lt;/li&gt;
+&lt;li&gt;分享功能更强，可以设置密码和过期时间等&lt;/li&gt;
+&lt;li&gt;允许匿名第三方上传数据&lt;/li&gt;
+&lt;li&gt;没有文件上传大小限制&lt;/li&gt;
+&lt;li&gt;支持多平台同步功能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;综合考量各开源项目之后，我最终选定基于QingCloud部署一套开源存储项目OwnCloud。&lt;/p&gt;
+&lt;h1 id=&#34;部署&#34;&gt;部署&lt;/h1&gt;
+&lt;p&gt;在部署之前，我们首先要考虑这套系统大概会有多少人用，会使用多大的空间，需要多少带宽，服务器的配置等问题。我们现在有几个TB的数据，10人使用，未来人数无法预估，各资源使用量也无法预估。但是非常有意思的事情是，在青云QingCloud平台上，一切都是可以动态扩容的，所以我完全可以以最少的资源验证服务是否符合需求，然后再增加服务所使用的资源。&lt;/p&gt;
+&lt;p&gt;整个部署过程概括为如下4步：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;验证功能及预估花费&lt;/li&gt;
+&lt;li&gt;在QingCloud上创建主机、网络等资源并修改配置&lt;/li&gt;
+&lt;li&gt;安装OwnCloud环境&lt;/li&gt;
+&lt;li&gt;使用LVM管理分区，实现空间动态扩容&lt;/li&gt;
+&lt;li&gt;在网页端安装OwnCloud&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;资源编排&#34;&gt;资源编排&lt;/h2&gt;
+&lt;p&gt;在实际生成需要的资源之前，我先通过青云QingCloud的提供的资源编排功能看看青云是否能够满足我们的需求以及搭建这一套服务需要多少钱：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如图所示，我们在一个私有网络中创建一台主机和一个数据库，并为整个VPC网络分配了一个公网IP和防火墙。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-tp.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如图，整套资源预计需要每小时0.56元。&lt;/p&gt;
+&lt;h2 id=&#34;创建并修改配置&#34;&gt;创建并修改配置&lt;/h2&gt;
+&lt;p&gt;生成模板之后，点击创建。等待大概一分钟之后，所有资源全部创建完毕。在SSH连接上服务器开始实际的配置工作之前，需要先修改VPC的设置。&lt;/p&gt;
+&lt;h3 id=&#34;添加端口转发规则&#34;&gt;添加端口转发规则&lt;/h3&gt;
+&lt;p&gt;我需要将来自公网的流量转发到我的主机上，主要有两条，一个是SSH，一个是HTTP。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-2.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;主机的内网地址是&lt;code&gt;192.168.0.2&lt;/code&gt;，所以需要把所有来自22和80的端口都转发到这个地址。&lt;/p&gt;
+&lt;h3 id=&#34;添加防火墙规则&#34;&gt;添加防火墙规则&lt;/h3&gt;
+&lt;p&gt;出于安全性考虑，青云的防火墙默认只开放了22和ICMP。为了可以正常访问到主机，还需要添加80端口的例外规则：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-3.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;我们看到青云在右边提供了常用端口的配置，选择http即可。&lt;/p&gt;
+&lt;h2 id=&#34;安装owncloud&#34;&gt;安装OwnCloud&lt;/h2&gt;
+&lt;p&gt;OwnCloud为CentOS平台提供了二进制的包，没有特殊需求的话，直接使用即可。
+首先添加OwnCloud官方的Key文件：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;rpm --import https://download.owncloud.org/download/repositories/stable/CentOS_7/repodata/repomd.xml.key&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后添加OwnCloud的repo：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;wget http://download.owncloud.org/download/repositories/stable/CentOS_7/ce:stable.repo -O /etc/yum.repos.d/ce:stable.repo&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;更新repo之后开始安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;yum clean expire-cache
+yum install owncloud&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;yum将会自动处理依赖，如果速度不佳的话，可以直接将包下载到本地：&lt;a href=&#34;http://download.owncloud.org/download/repositories/stable/CentOS_7/&#34;&gt;直接下载&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;启用httpd-并测试是否安装正确&#34;&gt;启用httpd，并测试是否安装正确&lt;/h2&gt;
+&lt;p&gt;OwnCloud默认使用Apache作为Web服务器，上一步已经安装了Apache，接下来需要启用它：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;systemctl start httpd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如需要开机自行启动，可以输入：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;systemctl &lt;span style=&#34;color:#007020&#34;&gt;enable&lt;/span&gt; httpd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后在浏览器中访问：&lt;code&gt;http://&amp;lt;your ip&amp;gt;/owncloud&lt;/code&gt;，如果出现OwnCloud的安装界面，说明已经配置成功了。&lt;/p&gt;
+&lt;h2 id=&#34;使用lvm管理分区-实现空间动态扩容&#34;&gt;使用LVM管理分区，实现空间动态扩容&lt;/h2&gt;
+&lt;p&gt;OwnCloud在安装的时候只能选择一个目录，为了能够实现空间的动态扩容，需要使用LVM创建一个逻辑分区并挂载到指定的数据目录下。&lt;/p&gt;
+&lt;p&gt;首先在青云QingCloud的控制台中创建一块硬盘，然后挂载到主机中。之后，就能够通过&lt;code&gt;/dev/sdb&lt;/code&gt;等形式来访问这块硬盘。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;需要注意的是，主机在每次重启的时候硬盘的顺序可能会发生改变，所以如果需要自动挂载的话，需要使用UUID或者LABLE的方式来指定硬盘，不能使用设备名。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;接下来需要在CentOS下使用LVM来配置分区，实现分区的动态扩容。&lt;/p&gt;
+&lt;h3 id=&#34;安装lvm工具&#34;&gt;安装LVM工具&lt;/h3&gt;
+&lt;p&gt;青云QingCloud提供的CentOS 7.2默认映像是没有LVM工具的，所以首先需要安装它：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;yum install lvm2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;创建物理卷-pv&#34;&gt;创建物理卷（PV）&lt;/h3&gt;
+&lt;p&gt;首先检测能够被作为物理卷的设备：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;lvmdiskscan&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后在指定设备上创建物理卷，所有需要用到的设备都需要执行如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pvcreate /dev/sdb&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后查看已经创建好的物理卷：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pvdisplay&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;输出大概如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;--- Physical volume ---
+PV Name /dev/sdb
+PV Size &lt;span style=&#34;color:#40a070&#34;&gt;1000&lt;/span&gt;.00 GiB / not usable &lt;span style=&#34;color:#40a070&#34;&gt;4&lt;/span&gt;.00 MiB
+Allocatable yes
+PE Size &lt;span style=&#34;color:#40a070&#34;&gt;4&lt;/span&gt;.00 MiB
+Total PE &lt;span style=&#34;color:#40a070&#34;&gt;255999&lt;/span&gt;
+Free PE &lt;span style=&#34;color:#40a070&#34;&gt;255999&lt;/span&gt;
+Allocated PE &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+PV UUID EHIeTJ-WBPv-rQkQ-LnuI-0IWE-SM4z-bMPAWx&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;创建卷组-vg&#34;&gt;创建卷组（VG）&lt;/h3&gt;
+&lt;p&gt;物理卷创建完毕后，需要创建一个卷组来实现物理卷的统一管理：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;vgcreate owncloud-vg /dev/sdb /dev/sdc /dev/sdd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;后续如果需要扩展的话，可以使用如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;vgextend owncloud-vg /dev/sde&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;同样地，使用&lt;code&gt;vgdisplay&lt;/code&gt;来查看创建好的卷组：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;--- Volume group ---
+VG Name owncloud-vg
+Format lvm2
+Metadata Areas &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+Metadata Sequence No &lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;
+VG Access read/write
+VG Status resizable
+MAX LV &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+Cur LV &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+Open LV &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+Max PV &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+Cur PV &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+Act PV &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+VG Size &lt;span style=&#34;color:#40a070&#34;&gt;1000&lt;/span&gt;.00 GiB
+PE Size &lt;span style=&#34;color:#40a070&#34;&gt;4&lt;/span&gt;.00 MiB
+Total PE &lt;span style=&#34;color:#40a070&#34;&gt;255999&lt;/span&gt;
+Alloc PE / Size &lt;span style=&#34;color:#40a070&#34;&gt;230400&lt;/span&gt; / &lt;span style=&#34;color:#40a070&#34;&gt;900&lt;/span&gt;.00 GiB
+Free PE / Size &lt;span style=&#34;color:#40a070&#34;&gt;25599&lt;/span&gt; / &lt;span style=&#34;color:#40a070&#34;&gt;100&lt;/span&gt;.00 GiB
+VG UUID xCCtSR-QFcZ-StcI-HM7O-KDAz-PvMC-EgYcSV&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;创建逻辑卷-lv&#34;&gt;创建逻辑卷（LV）&lt;/h3&gt;
+&lt;p&gt;然后就可以开始创建逻辑卷了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;lvcreate -L 900G owncloud-vg -n owncloud-data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;创建完毕后，就可以通过&lt;code&gt;/dev/mapper/owncloud--vg-owncloud--data&lt;/code&gt;或者&lt;code&gt;/dev/owncloud-vg/owncloud-data&lt;/code&gt;来访问这个设备了。&lt;/p&gt;
+&lt;p&gt;如果需要扩大逻辑卷，可以使用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;lvextend -L 1000G /dev/owncloud-vg/owncloud-data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;确认扩展成功后，再更新文件系统：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;resize2fs /dev/owncloud-vg/owncloud-data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;创建文件系统并挂载&#34;&gt;创建文件系统并挂载&lt;/h3&gt;
+&lt;p&gt;在逻辑卷上创建一个ext4分区：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;mkfs.ext4 /dev/mapper/owncloud--vg-owncloud--data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后将分区挂载到期望的目录下，比如&lt;code&gt;/data&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;mount /dev/mapper/owncloud--vg-owncloud--data /data&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;修改文件夹权限&#34;&gt;修改文件夹权限&lt;/h2&gt;
+&lt;p&gt;为了OwnCloud能够正确读写数据分区，需要修改&lt;code&gt;/data&lt;/code&gt;的所有者和权限：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;chown -R apache:apache /data
+chmod &lt;span style=&#34;color:#40a070&#34;&gt;775&lt;/span&gt; /data -R&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;网页安装owncloud&#34;&gt;网页安装OwnCloud&lt;/h2&gt;
+&lt;p&gt;全部配置完毕后，可以开始在网页进行OwnCloud安装了。&lt;/p&gt;
+&lt;p&gt;管理员帐号： 自定义
+管理员密码： 自定义
+数据路径：&lt;code&gt;/data&lt;/code&gt;
+数据库用户：&lt;code&gt;root&lt;/code&gt;
+数据库密码：&lt;code&gt;&amp;lt;your password&amp;gt;&lt;/code&gt;
+数据库名称自定义，比如：&lt;code&gt;owncloud&lt;/code&gt;
+数据库地址：&lt;code&gt;&amp;lt;your rdb ip&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在创建RDB时，系统会自动用相同的密码创建Root用户。OwnCloud在安装时需要创建一个新的账户来进行管理，而青云提供的默认用户没有这样的权限。因此需要使用Root用户而不是创建时指定的用户。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;提示创建完毕后，就可以使用管理员用户登陆了。&lt;/p&gt;
+&lt;h1 id=&#34;维护&#34;&gt;维护&lt;/h1&gt;
+&lt;h2 id=&#34;自动备份&#34;&gt;自动备份&lt;/h2&gt;
+&lt;p&gt;一个存储类的应用，必须要有自动备份的功能，保证用户在最坏的情况下都能找回他们的数据，对于存储着工作资料的私有云存储而言更是如此。所以，需要对主机，硬盘和数据库进行定时备份。&lt;/p&gt;
+&lt;h3 id=&#34;主机和硬盘&#34;&gt;主机和硬盘&lt;/h3&gt;
+&lt;p&gt;青云QingCloud 提供了一个叫定时器的功能，可以设置在每天的三点重复执行备份任务。&lt;/p&gt;
+&lt;p&gt;首先创建一个定时器，每天3：00重复执行：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-backup-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;然后在该定时器中添加对应的定时器任务：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-backup-2.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;选中需要备份的主机和硬盘即可。&lt;/p&gt;
+&lt;h3 id=&#34;数据库&#34;&gt;数据库&lt;/h3&gt;
+&lt;p&gt;青云QingCloud 上的数据库自带自动备份功能，只需要开启它。&lt;/p&gt;
+&lt;p&gt;在需要备份的数据库上右击，选择&lt;code&gt;修改自动备份策略&lt;/code&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-backup-3.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;青云QingCloud 首次备份是全量备份，之后是增量备份。当变化较大时，会自动创建新的备份链。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;自动伸缩&#34;&gt;自动伸缩&lt;/h2&gt;
+&lt;p&gt;云存储服务的一个最显著的特点是有明显的高峰期，如果能够实现高峰期时自动增加带宽，低峰期时自动降低带宽就能够节省昂贵的带宽费用的目的。青云QingCloud提供的自动伸缩就能有效地满足这一痛点。&lt;/p&gt;
+&lt;p&gt;首先创建一个自动伸缩策略：&lt;/p&gt;
+&lt;p&gt;操作类型为调整公网IP带宽上限，然后选择需要自动伸缩的资源。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-autoscaling-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;然后添加带宽提高和降低的触发条件：&lt;/p&gt;
+&lt;p&gt;以带宽提高为例，我们可以在公网进流量连续15分钟平均值大于当前带宽的80%时提高带宽。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;青云QingCloud的监控周期为5分钟，而数据采样周期为1分钟。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-autoscaling-2.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;最后添加操作参数：&lt;/p&gt;
+&lt;p&gt;可以设置每次提高5Mbps，最高允许的带宽为20Mbps。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-autoscaling-3.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;硬盘扩容&#34;&gt;硬盘扩容&lt;/h2&gt;
+&lt;p&gt;硬盘扩容有两种方式，第一是硬盘自身的纵向扩容，提升硬盘的大小；第二是硬盘数量的横向扩容，提升硬盘的个数。下面分别讲一讲。&lt;/p&gt;
+&lt;h3 id=&#34;纵向扩容&#34;&gt;纵向扩容&lt;/h3&gt;
+&lt;p&gt;首先暂停服务：&lt;/p&gt;
+&lt;p&gt;进入 Owncloud 所在文件夹，修改&lt;code&gt;config&lt;/code&gt;文件夹下的&lt;code&gt;config.php&lt;/code&gt;文件，将&lt;code&gt;maintenance&lt;/code&gt;修改为&lt;code&gt;true&lt;/code&gt;。这样 Owncloud 就会进入维护模式，从而防止在扩容期间出现意外的数据丢失。&lt;/p&gt;
+&lt;p&gt;然后从系统中卸载数据盘：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;umount /data
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后就可以在青云的控制台中卸载这块磁盘，并执行扩容操作。&lt;strong&gt;一定要先在系统中卸载，再在青云的控制台中卸载，否则会出现不可恢复的数据丢失。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;等到青云提示扩容完成后，再将这块盘挂载到主机上，并执行&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pvresize /dev/sdx
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;来自动探测设备当前大小并将物理卷扩展到其最大容量&lt;/p&gt;
+&lt;p&gt;之后就可以扩容逻辑卷的大小了：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;lvextend -l 100%VG owncloud-vg/owncloud-data
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这个命令会将这个VG的所有空间分配到我们的LV当中。&lt;/p&gt;
+&lt;p&gt;然后将这个逻辑卷挂载到我们的数据分区：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;mount /dev/mapper/owncloud--vg-owncloud--data /data
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后我们需要让文件系统也检测到空间的变更：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;resize2fs /dev/mapper/owncloud--vg-owncloud--data
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;至此，空间扩容完毕，可以再将&lt;code&gt;config.php&lt;/code&gt;中的&lt;code&gt;maintenance&lt;/code&gt;修改为&lt;code&gt;false&lt;/code&gt;，开始正常对外提供服务。&lt;/p&gt;
+&lt;h3 id=&#34;横向扩容&#34;&gt;横向扩容&lt;/h3&gt;
+&lt;p&gt;横向扩容相对比较简单一些。&lt;/p&gt;
+&lt;p&gt;首先将Owncloud置于维护模式，然后在青云的控制台上创建一块新的盘挂载到系统中，然后执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pvcreate /dev/sdx&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;以将这个卷转换为一个物理卷。&lt;/p&gt;
+&lt;p&gt;之后就可以将这个物理卷加入到一个VG中：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;vgextend owncloud-vg /dev/sdx&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;之后的操作跟纵向扩容相似，扩大LV，重新挂载，更新文件系统，退出维护模式等，不再赘述。&lt;/p&gt;
+&lt;h1 id=&#34;应用&#34;&gt;应用&lt;/h1&gt;
+&lt;p&gt;下面来聊一聊OwnCloud的一些应用。&lt;/p&gt;
+&lt;h2 id=&#34;分享功能&#34;&gt;分享功能&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-4.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;分享功能是我比较看重的一个部分。OwnCloud的分享可以选择用户和组，然后还能通过链接进行分享。通过链接分享时，可以指定密码和过期时间，还能允许编辑。这样就可以实现给用户发送需要的资料以及收集来自合作伙伴的视频，文件等功能。&lt;/p&gt;
+&lt;h2 id=&#34;团队协作&#34;&gt;团队协作&lt;/h2&gt;
+&lt;p&gt;OwnCloud内建了一个版本管理功能，同一个文件可以提供多个历史版本，这样方便大家进行版本追溯和管理，为团队协作编辑提供了便利。除此以外还有评论系统，实时性能还不错，基本可以用于对具体文档的简单协作。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/qingcloud-owncloud-show-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年06月03日 首次发布&lt;/li&gt;
+&lt;li&gt;2016年06月11日 增加自动备份和自动伸缩的配置&lt;/li&gt;
+&lt;li&gt;2016年08月20日 增加了硬盘空间的横向与纵向扩容&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>我从Qingchat中学到的教训</title><link>https://xuanwo.io/2016/05/29/learn-from-qingchat/</link><pubDate>Sun, 29 May 2016 20:57:00 +0000</pubDate><guid>https://xuanwo.io/2016/05/29/learn-from-qingchat/</guid><description>&lt;p&gt;之前的一段时间一直在从事&lt;a href=&#34;https://github.com/Xuanwo/qingchat&#34;&gt;Qingchat&lt;/a&gt;的相关开发工作，这个项目是一个基于Mojo-Weixin提供的Rest API开发的一个微信机器人，承担了十余个群，上千人的微信直播活动。秉承着ACM训练出来的“暴力加乱搞”风格，我花了大概一个星期的课余时间，搞出了一个可用的版本。期间也迭代了很多次，既欣慰于Coding的力量，也苦恼于当初设计的不完善带来的种种问题。在这个项目即将大规模重构的前夕，我总结一下开发Qingchat的过程中的经验教训，希望自己能成为一个更好更聪明的Coder。&lt;/p&gt;
+&lt;h1 id=&#34;经验教训&#34;&gt;经验教训&lt;/h1&gt;
+&lt;h2 id=&#34;没有稳定性的世界&#34;&gt;没有稳定性的世界&lt;/h2&gt;
+&lt;p&gt;从最开始Coding的时候，就有着一个根深蒂固的信念：计算机不会出错。1是1，0是0，只要自己的实现是对的，那最后的结果也一定是对的。然后，真相并非如此：我们存在于一个没有稳定性的世界。
+你访问的路径可能是不存在的，你访问的文件可能是不存在或者已经上锁，你期望的服务器响应因为网络环境太差变成了超时。不仅如此，有时候你还会遇到神出鬼没的黑客们，稍有不慎你可能就永远失去了对数据的掌控权（*我测试用的服务器被人暴力尝试登陆34万次*）。
+所以我们在编程的时候就应当完全抛弃“这个服务是稳定的”这种前提，学会在万物皆有可能出错的假设下编程，不要轻视程序的鲁棒性。你永远都不会知道用户会以何种方式使用你的程序，同样的，你也不会知道用户到底会输入什么样的数据。灵活运用“防御式编程”和“让它出错”两种思想，让你的代码更健壮。&lt;/p&gt;
+&lt;h2 id=&#34;拥抱多线程-走向非阻塞&#34;&gt;拥抱多线程，走向非阻塞&lt;/h2&gt;
+&lt;p&gt;现在回过头来看，自己当初实现的群发功能就是一个彻头彻尾的失败品：容错性差，效率低下。这些问题其实是由同一个原因导致的：我使用了一个单线程阻塞式的实现，不仅如此，还没有做任何异常的处理。这样导致的结果就是只要某个环节出错，整个群发任务就会直接退出。速度是跟微信群的数量成正比的，群的数量上升之后，群发速度过慢成了我的同事们经常向我吐嘈的问题。
+开发的时候不计算网络传输延时绝对是一个重大失误——实际上，网络延时是整个系统的关键瓶颈。为了解决这个问题，Node.js 采用了一种单线程非阻塞的设计（一家之言，轻喷）。对于Python来说也是一样的，适度地拥抱多线程开发以提高并行效率，多采用非阻塞式设计以避免单个任务执行时间过长拖慢运行速度。
+在一次去上课的路上，我形象地把这种设计比作“射后不管”，好像是飞毛腿导弹？&lt;/p&gt;
+&lt;h2 id=&#34;开源非万能&#34;&gt;开源非万能&lt;/h2&gt;
+&lt;p&gt;我原来是一个开源的死忠粉，认为开源可以解决一切问题，那个时候每天思考的问题就是为什么Windows不开源？等到真的进入业界，才明白自己的这种想法有多么幼稚。
+除去那些大型的有基金会在背后支撑的项目，绝大多数项目完全依靠开发者个人热情来维持，某些涉及到商业支持的项目更是存在着“人走项目死”的现象。比如我参与管理的&lt;a href=&#34;https://github.com/hexojs&#34;&gt;Hexo&lt;/a&gt;项目在作者tommy开始实习之后就进展缓慢，再比如我接手但是现状非常差的&lt;a href=&#34;https://github.com/staticfile/static&#34;&gt;staticfile&lt;/a&gt;（*很抱歉我并没有能够做出什么正面的贡献，反而让状况变得更加糟糕了*）。
+这些实践都告诉我，开源并不是万能的，真正想要解决一个问题，需要一个完善的制度以及各方面的激励机制。单纯依赖于开发者个人的热情往往不利于一个项目的长远发展，而在自行开发的项目中依赖于一个开源项目往往会带来更多的风险。开发者不一定会开发你期望的功能，开发者也不一定会按照你期望的进度进行开发。
+作为我个人，我依然是一个热爱开源项目，崇尚开源理念的人；然而作为一个产品的开发者，一个服务的提供者，你必须权衡自行开发，采购商业产品以及使用开源项目之间的利弊。不同的选择取决于不同的项目，不同的需求，不同的自主开发能力，不同的后续维护能力。一味的强调开源理念，不顾实际，往往对开源事业的发展有害无益，挫伤人们对开源的信赖。&lt;/p&gt;
+&lt;h1 id=&#34;未来展望&#34;&gt;未来展望&lt;/h1&gt;
+&lt;p&gt;一个项目最具活力与激情的时刻就是在设计之初实现之前，等到实现的时候往往寸步难行，到了后续维护的时候时常想就此了断。我希望这个项目能够存活更长的时间，希望自己向同事们提出的构想都能够一一变为现实。本次重构希望能够实现一个更加稳定更加高效的Qingchat，希望能够进一步减少重复劳动，提高效率。
+最后感谢同事们的不杀之恩，感谢青云QingCloud的自由空间，可以允许我以自己想要的方式完成工作。最后以青云CTO Reno在某次会上说的话自勉：“你们是青云的Devloper，No excuse。”&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年05月30日 初稿&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>微信公众平台数据抓取解决方案</title><link>https://xuanwo.io/2015/09/30/wechat-mp-data-spider/</link><pubDate>Wed, 30 Sep 2015 10:12:58 +0000</pubDate><guid>https://xuanwo.io/2015/09/30/wechat-mp-data-spider/</guid><description>&lt;p&gt;有一个需求是将微信公众平台的数据导出到Excel以进行后续的数据分析。在关注人数等数据上，微信已经提供了Excel导出的接口，但是在图文分析上，尽管有很详细的数据提供，却没有提供一个好的导出接口。所以我需要寻求一个简单的方案来抓取微信公众平台的图文分析数据。&lt;/p&gt;
+&lt;h1 id=&#34;分析&#34;&gt;分析&lt;/h1&gt;
+&lt;p&gt;图文分析页面是JS加载的，通过后台提交返回数据，然后使用JS渲染生成页面。对着页面分析了一会儿，没有发现比较简单的请求构造方式，但是发现微信给出的数据形式非常有规律，可以采用正则来获取我想要的信息。&lt;/p&gt;
+&lt;h1 id=&#34;方案&#34;&gt;方案&lt;/h1&gt;
+&lt;h2 id=&#34;适用范围&#34;&gt;适用范围&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;单页&lt;/li&gt;
+&lt;li&gt;批量&lt;/li&gt;
+&lt;li&gt;规则数据&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;工具&#34;&gt;工具&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Chrome&lt;/li&gt;
+&lt;li&gt;Sublime Text 3&lt;/li&gt;
+&lt;li&gt;Excel 2016&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;流程&#34;&gt;流程&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;使用Chrome访问相关页面，列出公众号指定时段的所有图文消息&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Ctrl+A&lt;/code&gt;大法，选中所有数据并保存到Sublime中&lt;/li&gt;
+&lt;li&gt;运用正则批量处理之&lt;/li&gt;
+&lt;li&gt;导入到Excel&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;坑点&#34;&gt;坑点&lt;/h1&gt;
+&lt;h2 id=&#34;微信公众平台bug&#34;&gt;微信公众平台BUG&lt;/h2&gt;
+&lt;p&gt;微信公众平台的图文分析的排序规则上有着很明显的BUG，比如按照发表时间排序，但是并不是所有文章都是按照时间排序的。不过这个BUG并不是非常大，输出到Excel之后排序更快更好。
+除此之外，当选择的时间跨度比较大的时候，还有一定概率会出现错误。这个没有做复现，所以没有进行进一步的分析。&lt;/p&gt;
+&lt;h2 id=&#34;分隔符的选择&#34;&gt;分隔符的选择&lt;/h2&gt;
+&lt;p&gt;在本次正则的处理中，我使用了&lt;code&gt;|&lt;/code&gt;作为分隔符，但是坑爹之处在于，公众平台的文章标题中，有一部分也使用了&lt;code&gt;|&lt;/code&gt;这个符号。导致最后生成的数据中出现了部分标题被分隔为两端的现象，幸好数据不多，自己手动Fix了。&lt;/p&gt;
+&lt;h1 id=&#34;总结&#34;&gt;总结&lt;/h1&gt;
+&lt;p&gt;经过多次数据抓取的实战，对于前期的分析以及抓取流程已经非常娴熟，但是在后期的数据处理过程中，仍然有着比较大的问题。一个比较明显的问题就是对于数据的特征把握不全面，经常出现所有数据处理完才发现数据中某个特定的值导致批量处理的结果不符合预期。所以以后处理数据时要注意对数据特征的全面把握，不要依赖后期自己的手动Fix。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年09月30日 完成初稿&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>多页批量规则数据抓取解决方案</title><link>https://xuanwo.io/2015/09/24/multi-page-data-spider/</link><pubDate>Thu, 24 Sep 2015 08:04:13 +0000</pubDate><guid>https://xuanwo.io/2015/09/24/multi-page-data-spider/</guid><description>&lt;p&gt;最近完成的一个工作是要抓取某公司的合作伙伴信息，跟上一次的区别在于，这个公司调用了Salesforce之类的第三方CRM服务。合作伙伴的详细信息是需要点开对应的连接之后才可以获得。&lt;/p&gt;
+&lt;h1 id=&#34;分析&#34;&gt;分析&lt;/h1&gt;
+&lt;p&gt;毫无疑问，这次的工作难度高了很多。不过还是遵循一样的思路——获取，整理，导入。&lt;/p&gt;
+&lt;h2 id=&#34;获取&#34;&gt;获取&lt;/h2&gt;
+&lt;p&gt;首先解决获取问题，不难发现每一个合作伙伴的对应详细信息网址都是有规律的，通过传入一个类似于id的参数来获得，也就是说问题转换成如何获取所有合作伙伴的id。通过分析HTML代码可以发现（在F12中查看，而不是直接查看源代码），id出现的位置都有着相当的特征，通过正则即可提取。
+得到id之后，就可以模仿着构造出对应的请求链接。得到请求链接之后，就可以用各种网络库来下载相关网页了。这一次，我使用了简单粗暴的curl。&lt;/p&gt;
+&lt;h2 id=&#34;整理&#34;&gt;整理&lt;/h2&gt;
+&lt;p&gt;得到了包含联系方式的文件，我需要从中提取出我需要的信息，自然想到了正则。但是经过多次试错之后发现，正则并不能完美实现我的需求，总是存在部分疏漏。有数据量较大，冗余文本过多，我无法一一排查正则表达式何处出错，故不得不放弃了这一方案。最后实现的思路是通过C++编写相关代码，搜索联系方式前后出现的特征串（比如&lt;code&gt;电话&lt;/code&gt;或&lt;code&gt;Phone&lt;/code&gt;之类）。&lt;/p&gt;
+&lt;h2 id=&#34;导入&#34;&gt;导入&lt;/h2&gt;
+&lt;p&gt;数据的导入仍然是通过Excel打开文本的形式导入，不过要处理好号码粘连在一起的部分条目。比如说：开头数字相近的长度为在7到8之间的串，以及一个1开头的长度为11的串。这些处理完毕之后，记得统一一下字体及字号，照顾一下阅读这些数据的人的感受~&lt;/p&gt;
+&lt;h1 id=&#34;方案&#34;&gt;方案&lt;/h1&gt;
+&lt;h2 id=&#34;适用范围&#34;&gt;适用范围&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;多页（链接有规律）&lt;/li&gt;
+&lt;li&gt;批量&lt;/li&gt;
+&lt;li&gt;规则数据&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;工具&#34;&gt;工具&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Chrome&lt;/li&gt;
+&lt;li&gt;curl&lt;/li&gt;
+&lt;li&gt;Sublime Text 3（支持正则表达式）&lt;/li&gt;
+&lt;li&gt;Clion&lt;/li&gt;
+&lt;li&gt;Excel 2016&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;流程&#34;&gt;流程&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;使用Chrome获得包含合作伙伴id的HTML代码&lt;/li&gt;
+&lt;li&gt;使用正则获取对应id并构造请求链接&lt;/li&gt;
+&lt;li&gt;使用curl下载对应的HTML&lt;/li&gt;
+&lt;li&gt;使用正则提取合作伙伴的联系方式&lt;/li&gt;
+&lt;li&gt;整理之后导入Excel&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;坑点&#34;&gt;坑点&lt;/h1&gt;
+&lt;h2 id=&#34;想当然的使用正则&#34;&gt;想当然的使用正则&lt;/h2&gt;
+&lt;p&gt;正则强大是强大，但是如果自己在不了解具体的数据构成方式的时候，错误的随意的使用正则，往往只能得到错误的结果。为了这个坑，我调试了大概有两个小时，铭记在心。&lt;/p&gt;
+&lt;h1 id=&#34;总结&#34;&gt;总结&lt;/h1&gt;
+&lt;p&gt;这次工作娴熟了很多，对这一类问题已经有了比较系统的思路，区别仅仅是在于如何针对特定的规则改变自己使用工具的方式而已。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年09月24日 完成初稿&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>单页批量规则数据抓取解决方案</title><link>https://xuanwo.io/2015/09/22/single-page-data-spider/</link><pubDate>Tue, 22 Sep 2015 09:07:22 +0000</pubDate><guid>https://xuanwo.io/2015/09/22/single-page-data-spider/</guid><description>&lt;p&gt;加入青云后接的第一个活儿是抓取某公司的经销商的全部信息。该公司通过一个动态页面来展示经销商信息，使用后台的POST提交请求数据，并使用JS在页面下方加载请求的经销商信息，而且网址不会发生变化。&lt;/p&gt;
+&lt;h1 id=&#34;分析&#34;&gt;分析&lt;/h1&gt;
+&lt;p&gt;接到活儿时候还在上课，电脑不在身边，就用手机先看了看页面。每一条数据都不出意外地非常有规律。观察辣个公司的页面源代码，看得头晕脑胀（只有一个萌萌的员工写的一句&lt;code&gt;别删我&lt;/code&gt;让我傻乐了一会儿），无收获。没有办法使用BeautifulSoup，也不会用py来模拟用户的操作，我只好另辟蹊径了。&lt;/p&gt;
+&lt;h1 id=&#34;方案&#34;&gt;方案&lt;/h1&gt;
+&lt;h2 id=&#34;适用范围&#34;&gt;适用范围&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;单页&lt;/li&gt;
+&lt;li&gt;批量&lt;/li&gt;
+&lt;li&gt;规则数据（起码得比较有规则）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;工具&#34;&gt;工具&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Chrome&lt;/li&gt;
+&lt;li&gt;Sublime Text 3&lt;/li&gt;
+&lt;li&gt;Clion&lt;/li&gt;
+&lt;li&gt;Excel 2016&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;流程&#34;&gt;流程&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;使用Chrome访问指定页面，列出所有经销商&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Ctrl+A&lt;/code&gt;，然后&lt;code&gt;Ctrl+C&lt;/code&gt;保存到ST3中（是的，你没看错）&lt;/li&gt;
+&lt;li&gt;使用ST3的查找替换功能处理部分规则文本替换为空格&lt;/li&gt;
+&lt;li&gt;使用Clion编写C++代码，将部分换行处理为空格&lt;/li&gt;
+&lt;li&gt;使用Excel的文本导入功能，使用空格作为分隔符，Done&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;坑点&#34;&gt;坑点&lt;/h1&gt;
+&lt;h2 id=&#34;编码&#34;&gt;编码&lt;/h2&gt;
+&lt;p&gt;需要注意下输入和输出文本中均需使用GB2312(cp936)编码（为什么如此？）&lt;/p&gt;
+&lt;h2 id=&#34;不规范格式&#34;&gt;不规范格式&lt;/h2&gt;
+&lt;p&gt;辣个公司的部分经销商提供的信息不规范，主要有一下现象：
+- 地址中存在空格（泥煤啊！）
+- 区号和号码之间不使用&lt;code&gt;-&lt;/code&gt;分隔&lt;/p&gt;
+&lt;p&gt;因为Excel会在导入文本时使用行作为行，使用每一个分隔符来区分列。所以这样的不规范信息会导致部分经销商的信息错误，需要手动修复一下。&lt;/p&gt;
+&lt;h1 id=&#34;总结&#34;&gt;总结&lt;/h1&gt;
+&lt;p&gt;前期的调试和试错工作进行了大概两个小时，最后的实际工作只花了10分钟左右。最后处理了1500+的经销商信息，按照每个经销商需要操作30秒来计算，实际的效率大概提高了5.7倍，自我感觉还是很满意的。
+不过这次经历也暴露出了我经验不足的缺点：在没有对自己的脚本进行充分测试之后就开始批量处理数据，结果手动处理数据时才发现这些特例数据的量太大，只能推倒重来，浪费了大量时间。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年09月22日 完成初稿&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

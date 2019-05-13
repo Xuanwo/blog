@@ -1,0 +1,1079 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Python on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/python/</link><description>Recent content in Python on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 10 Mar 2019 04:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/python/index.xml" rel="self" type="application/rss+xml"/><item><title>通过 gRPC 传递 Request ID</title><link>https://xuanwo.io/2019/03/10/request-id-in-grpc/</link><pubDate>Sun, 10 Mar 2019 04:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/10/request-id-in-grpc/</guid><description>&lt;p&gt;分布式追踪是 &lt;a href=&#34;https://www.qingcloud.com/products/anybox/&#34;&gt;Anybox&lt;/a&gt; 项目中的重要一环，其中在每个请求的入口处设置一个 Request ID 是分布式追踪的第一步。这篇文章主要介绍如何利用 gRPC 的 Metadata 与 Interceptor 功能来实现 Request ID 在不同服务间的生成与传递。&lt;/p&gt;
+&lt;h2 id=&#34;介绍&#34;&gt;介绍&lt;/h2&gt;
+&lt;h3 id=&#34;tracing&#34;&gt;Tracing&lt;/h3&gt;
+&lt;p&gt;关于 Tracing 的介绍，可以看朋友 P 写的 &lt;a href=&#34;https://pjw.io/articles/2018/05/08/opentracing-explanations/#section-3&#34;&gt;OpenTracing 详解&lt;/a&gt;，看完之后就能大概明白为什么需要设置并传递 Request ID。&lt;/p&gt;
+&lt;h3 id=&#34;metadata&#34;&gt;Metadata&lt;/h3&gt;
+&lt;p&gt;Metadata 可以理解为一个 HTTP 请求的 Header（它的底层实现就是 HTTP/2 的 Header），用户可以通过访问和修改每个 gRPC Call 的 Metadata 来传递额外的信息：比如认证信息，比如本文中提到的 Request ID。&lt;/p&gt;
+&lt;h3 id=&#34;interceptor&#34;&gt;Interceptor&lt;/h3&gt;
+&lt;p&gt;Interceptor 有点类似于我们平时常用的 HTTP Middleware，不同的是它可以用在 Client 端和 Server 端。比如在收到请求之后输出日志，在请求出现错误的时候输出错误信息，比如获取请求中设置的 Request ID。&lt;/p&gt;
+&lt;h2 id=&#34;实现&#34;&gt;实现&lt;/h2&gt;
+&lt;p&gt;Anybox 后端主要使用 Golang 和 Python 开发，因此本文主要介绍这两种语言的使用方式，其他语言的使用方式应该与之类似。&lt;/p&gt;
+&lt;h3 id=&#34;golang&#34;&gt;Golang&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryInvoker is called by UnaryClientInterceptor to complete RPCs.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryInvoker &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, reply &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;ClientConn, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;CallOption) &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryClientInterceptor intercepts the execution of a unary RPC on the client. invoker is the handler to complete the RPC
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// and it is the responsibility of the interceptor to call it.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// This is an EXPERIMENTAL API.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryClientInterceptor &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, reply &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;ClientConn, invoker UnaryInvoker, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;CallOption) &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryHandler defines the handler invoked by UnaryServerInterceptor to complete the normal
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// execution of a unary RPC. If a UnaryHandler returns an error, it should be produced by the
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// status package, or else gRPC will use codes.Unknown as the status code and err.Error() as
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// the status message of the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryHandler &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}) (&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryServerInterceptor provides a hook to intercept the execution of a unary RPC on the server. info
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// contains all the information of this RPC the interceptor can operate on. And handler is the wrapper
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// of the service method implementation. It is the responsibility of the interceptor to invoke handler
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// to complete the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryServerInterceptor &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, info &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;UnaryServerInfo, handler UnaryHandler) (resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Golang 的实现是把 Metadata 塞在了 context 里面，只需要使用 &lt;code&gt;metadata.FromOutgoingContext(ctx)&lt;/code&gt; 和 &lt;code&gt;metadata.FromIncomingContext(ctx)&lt;/code&gt; 就能够访问本次请求的 Metadata。概念清楚之后代码应该非常好写了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;RequestIDClientInterceptor&lt;/span&gt;() grpc.UnaryClientInterceptor {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(
+ctx context.Context,
+method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{},
+cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;grpc.ClientConn, invoker grpc.UnaryInvoker, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;grpc.CallOption,
+) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;) {
+md, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; metadata.&lt;span style=&#34;color:#06287e&#34;&gt;FromOutgoingContext&lt;/span&gt;(ctx)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
+md = metadata.&lt;span style=&#34;color:#06287e&#34;&gt;Pairs&lt;/span&gt;()
+}
+value &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; ctx.&lt;span style=&#34;color:#06287e&#34;&gt;Value&lt;/span&gt;(trace.RequestID)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; requestID, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; value.(&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;); ok &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; requestID &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt; {
+md[&lt;span style=&#34;color:#007020&#34;&gt;string&lt;/span&gt;(trace.RequestID)] = []&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;{requestID}
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;invoker&lt;/span&gt;(metadata.&lt;span style=&#34;color:#06287e&#34;&gt;NewOutgoingContext&lt;/span&gt;(ctx, md), method, req, resp, cc, opts&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;)
+}
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;RequestIDServerInterceptor&lt;/span&gt;() grpc.UnaryServerInterceptor {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(
+ctx context.Context,
+req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, info &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+) (resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;) {
+md, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; metadata.&lt;span style=&#34;color:#06287e&#34;&gt;FromIncomingContext&lt;/span&gt;(ctx)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
+md = metadata.&lt;span style=&#34;color:#06287e&#34;&gt;Pairs&lt;/span&gt;()
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Set request ID for context.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; requestIDs &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; md[&lt;span style=&#34;color:#007020&#34;&gt;string&lt;/span&gt;(trace.RequestID)]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;len&lt;/span&gt;(requestIDs) &lt;span style=&#34;color:#666&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt; {
+ctx = context.&lt;span style=&#34;color:#06287e&#34;&gt;WithValue&lt;/span&gt;(ctx, trace.RequestID, requestIDs[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;handler&lt;/span&gt;(ctx, req)
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Generate request ID and set context if not exists.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; requestID &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; id.&lt;span style=&#34;color:#06287e&#34;&gt;NewHex32&lt;/span&gt;()
+ctx = context.&lt;span style=&#34;color:#06287e&#34;&gt;WithValue&lt;/span&gt;(ctx, trace.RequestID, requestID)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;handler&lt;/span&gt;(ctx, req)
+}
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;python&#34;&gt;Python&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Python 这边相对更蛋疼一些，注释写得不是非常清晰，给的使用样例也十分的晦涩难懂，看了好一会儿源码才明白怎么用。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Python 想要实现一个 Client Interceptor 的话需要继承 &lt;code&gt;grpc.UnaryUnaryClientInterceptor&lt;/code&gt; 并实现 &lt;code&gt;intercept_unary_unary&lt;/code&gt; 方法。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;UnaryUnaryClientInterceptor&lt;/span&gt;(six&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;with_metaclass(abc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;ABCMeta)):
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Affords intercepting unary-unary invocations.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; This is an EXPERIMENTAL API.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@abc.abstractmethod&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;intercept_unary_unary&lt;/span&gt;(self, continuation, client_call_details, request):
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Intercepts a unary-unary invocation asynchronously.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Args:
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; continuation: A function that proceeds with the invocation by
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; executing the next interceptor in chain or invoking the
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; actual RPC on the underlying Channel. It is the interceptor&amp;#39;s
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; responsibility to call it if it decides to move the RPC forward.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; The interceptor can use
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; `response_future = continuation(client_call_details, request)`
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; to continue with the RPC. `continuation` returns an object that is
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; both a Call for the RPC and a Future. In the event of RPC
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; completion, the return Call-Future&amp;#39;s result value will be
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; the response message of the RPC. Should the event terminate
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; with non-OK status, the returned Call-Future&amp;#39;s exception value
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; will be an RpcError.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; client_call_details: A ClientCallDetails object describing the
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; outgoing RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; request: The request value for the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Returns:
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; An object that is both a Call for the RPC and a Future.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; In the event of RPC completion, the return Call-Future&amp;#39;s
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; result value will be the response message of the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Should the event terminate with non-OK status, the returned
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Call-Future&amp;#39;s exception value will be an RpcError.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;raise&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;NotImplementedError&lt;/span&gt;()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;client_call_details.metadata&lt;/code&gt; 是一个 list，里面的每一个 item 都是由 &lt;code&gt;(key, value)&lt;/code&gt; 组成的元组。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;_ClientCallDetails&lt;/span&gt;(
+collections&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;namedtuple(
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;_ClientCallDetails&amp;#39;&lt;/span&gt;,
+(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;method&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;timeout&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;metadata&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;credentials&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;wait_for_ready&amp;#39;&lt;/span&gt;)),
+grpc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;ClientCallDetails):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;pass&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;RequestIDClientInterceptor&lt;/span&gt;(grpc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;UnaryUnaryClientInterceptor):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;intercept_unary_unary&lt;/span&gt;(self, continuation, client_call_details, request):
+rid &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; the_function_to_generate_request_id()
+logger&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;info(f&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Sending RPC request, Method: {client_call_details.method}, Request ID: {rid}.&amp;#34;&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Add request into client call details, aka, metadata.&lt;/span&gt;
+metadata &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; []
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;metadata &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;is&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; None:
+metadata &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;list&lt;/span&gt;(client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;metadata)
+metadata&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append((&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;request_id&amp;#34;&lt;/span&gt;, rid))
+client_call_details &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; _ClientCallDetails(
+client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;method, client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;timeout, metadata,
+client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;credentials, client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;wait_for_ready)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; continuation(client_call_details, request)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在初始化 Channel 的时候在实例化一下即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;channel &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; insecure_channel(f&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;{host}:{port}&amp;#34;&lt;/span&gt;)
+channel &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; intercept_channel(channel, RequestIDClientInterceptor())&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://pjw.io/articles/2018/05/08/opentracing-explanations/&#34;&gt;OpenTracing 详解&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-metadata.md&#34;&gt;grpc-metadata&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/grpc/grpc/tree/master/examples/python/interceptors&#34;&gt;gRPC Python Interceptor Examples&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Python 中的引用与拷贝</title><link>https://xuanwo.io/2018/04/15/reference-and-copy-in-python/</link><pubDate>Sun, 15 Apr 2018 15:07:00 +0000</pubDate><guid>https://xuanwo.io/2018/04/15/reference-and-copy-in-python/</guid><description>&lt;p&gt;用户反馈使用 &lt;a href=&#34;https://github.com/yunify/qsctl&#34;&gt;qsctl&lt;/a&gt; 同步时文件内容不正确，调查后发现是对 Python 字典的错误使用导致了这个问题。这篇文章就来详细的介绍一下 Python 中的引用与拷贝。&lt;/p&gt;
+&lt;h2 id=&#34;定位&#34;&gt;定位&lt;/h2&gt;
+&lt;p&gt;按照用户给出的信息成功的复现出了用户描述的问题，进一步的，还发现当线程数量限制为只有一个时候，这个问题就消失了，因此可以判断是 Python 多线程间共享变量的时候出现了问题。qsctl 本身只是将文件 list 出来并调用 SDK 进行上传，没有做额外的处理，因此可以排除 qsctl 的嫌疑。也就是说，问题出在 Python SDK 上。阅读一下 Python SDK 中 &lt;a href=&#34;https://github.com/yunify/qingstor-sdk-python/blob/master/qingstor/sdk/service/bucket.py#L1148&#34;&gt;PutObject&lt;/a&gt; 相关方法的源代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;put_object_request&lt;/span&gt;(self, object_key, body&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None):
+operation &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;API&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;PutObject&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Method&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;PUT&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;URI&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/&amp;lt;bucket-name&amp;gt;/&amp;lt;object-key&amp;gt;&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Headers&amp;#34;&lt;/span&gt;: {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Host&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;join([self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;properties[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;zone&amp;#34;&lt;/span&gt;], &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;.&amp;#34;&lt;/span&gt;, self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;config&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;host]),
+},
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Properties&amp;#34;&lt;/span&gt;: self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;properties,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Body&amp;#34;&lt;/span&gt;: body
+}
+operation[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Properties&amp;#34;&lt;/span&gt;][&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;object-key&amp;#34;&lt;/span&gt;] &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; object_key
+self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;put_object_validate(operation)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; Request(self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;config, operation)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;put_object&lt;/span&gt;(self, object_key, body&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None):
+req &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;put_object_request(object_key, body&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;body)
+resp &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;client&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;send(req&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;sign())
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; Unpacker(resp)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;忽略掉一些无关的代码之后，我们可以得到上面的简化代码。其中 &lt;code&gt;self&lt;/code&gt; 也就是这个 &lt;code&gt;Bucket&lt;/code&gt; 类会在一开始就初始化，之后的所有线程都会共享这一变量。顺着这个思路下去，很快发现一处可能导致出现问题的代码：&lt;code&gt;&amp;quot;Properties&amp;quot;: self.properties&lt;/code&gt;。显然的，在 Python SDK 开发者（其实是我- -）认为，此处将会对 &lt;code&gt;self.properties&lt;/code&gt; 进行一次复制，下面的 &lt;code&gt;operation[&amp;quot;Properties&amp;quot;][&amp;quot;object-key&amp;quot;] = object_key&lt;/code&gt; 操作不会影响其它的线程。那这个想法是否正确？我们需要做个实验。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; {}
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; b &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; a
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; b[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;x&amp;#34;&lt;/span&gt;] &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;y&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a
+{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;x&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;y&amp;#39;&lt;/span&gt;}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;显然，Python SDK 开发者的想法是错误的。此处对 &lt;code&gt;operation[&amp;quot;Properties&amp;quot;]&lt;/code&gt; 将会修改 &lt;code&gt;self.properties&lt;/code&gt;，从而导致多个线程可能会覆盖掉同一个 Object，进而导致上传了错误的内容。&lt;/p&gt;
+&lt;h2 id=&#34;修复&#34;&gt;修复&lt;/h2&gt;
+&lt;p&gt;想要修改这个问题只需要每次创建 operation 字典时传递一个 &lt;code&gt;self.properties&lt;/code&gt; 的副本，保证接下来的修改不会影响到 &lt;code&gt;self.properties&lt;/code&gt; 本身即可。此处使用了 Python 字典提供的 &lt;a href=&#34;file:///home/xuanwo/.local/share/Zeal/Zeal/docsets/Python_3.docset/Contents/Resources/Documents/doc/library/stdtypes.html#dict&#34;&gt;copy 方法&lt;/a&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yunify/qingstor-sdk-python/pull/43/commits/208172502fb72b9be85e7f1a494673810ee2e974&#34;&gt;Fix concurrency issue in object related methods&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;思考&#34;&gt;思考&lt;/h2&gt;
+&lt;p&gt;问题已经解决了，但是思考还在继续。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Python 中的引用和复制是什么关系？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;为了解决这个问题，首先需要知道以下两个关键的事实：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;变量只是用来指代对象的名称 (&lt;em&gt;Variables are simply names that refer to objects.&lt;/em&gt;)&lt;/li&gt;
+&lt;li&gt;List，Dict 是可变对象 (&lt;em&gt;Lists are mutable, which means that you can change their content.&lt;/em&gt;)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;事实-1&#34;&gt;事实 1&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;变量只是用来指代对象的名称 (&lt;em&gt;Variables are simply names that refer to objects.&lt;/em&gt;)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;先来看一段简短的代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; b&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;a
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;(a)
+&lt;span style=&#34;color:#40a070&#34;&gt;9128416&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;(b)
+&lt;span style=&#34;color:#40a070&#34;&gt;9128416&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;a href=&#34;https://docs.python.org/3/library/functions.html#id&#34;&gt;&lt;code&gt;id&lt;/code&gt;&lt;/a&gt; 函数会返回每一个 Object 的唯一 ID，并且保证在这个对象的整个生命周期中保持不变。对于 CPython 的实现而言，这个函数会返回这个对象在内存中的地址。也就是说，如果两个对象的 ID 相同，表示他们是同一个对象。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在类 C 的语言当中，每个变量都代表着一块内存区域；但是在 Python 当中，一切都是对象，变量只是对象的一个名称（a.k.a. 标签，引用），变量本身没有类型信息，类型信息存储在对象当中。上述的代码中 &lt;code&gt;a=2&lt;/code&gt;，实际上是先创建了 Int 对象 &lt;code&gt;2&lt;/code&gt; ，然后将变量 &lt;code&gt;a&lt;/code&gt; 绑定到了 &lt;code&gt;2&lt;/code&gt; 上。接下来的 &lt;code&gt;b=a&lt;/code&gt; 则是在对象 &lt;code&gt;2&lt;/code&gt; 上绑定了一个新的变量 &lt;code&gt;b&lt;/code&gt;。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; {}
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; b &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; a
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;(a)
+&lt;span style=&#34;color:#40a070&#34;&gt;140092073651336&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;(b)
+&lt;span style=&#34;color:#40a070&#34;&gt;140092073651336&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; b[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;x&amp;#34;&lt;/span&gt;] &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;y&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a
+{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;x&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;y&amp;#39;&lt;/span&gt;}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在了解上述事实之后，我们就能理解这段代码了：这里的 &lt;code&gt;a&lt;/code&gt; 与 &lt;code&gt;b&lt;/code&gt; 指向了同一个对象，因此通过 &lt;code&gt;b&lt;/code&gt; 进行的修改相当于通过 &lt;code&gt;a&lt;/code&gt; 进行同样的修改。&lt;/p&gt;
+&lt;h3 id=&#34;事实-2&#34;&gt;事实 2&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;List，Dict 是可变对象 (&lt;em&gt;Lists are mutable, which means that you can change their content.&lt;/em&gt;)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;通过事实 1 我们已经明白了 &lt;strong&gt;变量&lt;/strong&gt; 与 &lt;strong&gt;对象&lt;/strong&gt; 的关系，但是还是不够，因为我们无法解释下面这段代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; b&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;a
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;a&lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;(a)
+&lt;span style=&#34;color:#40a070&#34;&gt;9128448&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;(b)
+&lt;span style=&#34;color:#40a070&#34;&gt;9128416&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;按照刚才得出的结论，&lt;code&gt;a&lt;/code&gt; 和 &lt;code&gt;b&lt;/code&gt; 应该指向同一个对象，为什么对 &lt;code&gt;a&lt;/code&gt; 进行的操作没有反应在 &lt;code&gt;b&lt;/code&gt; 上呢？因为 Int 类型是一个不可变对象(immutable)。&lt;/p&gt;
+&lt;p&gt;在 Python 中有两类对象类型：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;可变对象(mutable): list, dict 等&lt;/li&gt;
+&lt;li&gt;不可变对象(immutable): int, string, float, tuple 等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;不可变对象是不变的。在 &lt;code&gt;a=a+1&lt;/code&gt; 这一操作中没有修改 &lt;code&gt;a&lt;/code&gt; 之前对应的对象 &lt;code&gt;2&lt;/code&gt; 的值，而是创建了一个新的对象 &lt;code&gt;3&lt;/code&gt; 并且将 &lt;code&gt;a&lt;/code&gt; 绑定了上去。&lt;/p&gt;
+&lt;p&gt;而可变对象则可以通过某些函数来修改这个对象。需要注意的是，并不是所有的可变对象的操作都是修改可变对象本身。Python 标准库会通过函数是否返回 &lt;code&gt;None&lt;/code&gt; 来区分这个函数是修改了这个对象，还是创建了一个新的对象。比如 List 的 &lt;code&gt;append&lt;/code&gt; 和 &lt;code&gt;sort&lt;/code&gt; 函数返回 &lt;code&gt;None&lt;/code&gt;，这表示它们修改了这个 List 本身；而 &lt;code&gt;sorted()&lt;/code&gt; 函数则是会返回一个排序后的对象，这说明它创建了一个新的对象。&lt;/p&gt;
+&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
+&lt;p&gt;根据对上述两个事实的分析，可以得出以下结论：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对可变对象而言，我们可以修改它并且所有指向它的变量都会观察到这一变更&lt;/li&gt;
+&lt;li&gt;对不可变对象而言，所有指向它的变量都会始终看到同一个值，对它的修改操作总是会创建一个新的对象&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;现在我们就能够解决我们最开始提出的那些问题了：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Python 中的引用和拷贝是什么关系？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;其实没啥关系。对于赋值操作而言，&lt;code&gt;b=a&lt;/code&gt; 实际上是将 &lt;code&gt;b&lt;/code&gt; 绑定到了 &lt;code&gt;a&lt;/code&gt; 所对应的那个对象。而 &lt;code&gt;b=a.copy()&lt;/code&gt; 这是将 &lt;code&gt;b&lt;/code&gt; 绑定到了新创建的与 &lt;code&gt;a&lt;/code&gt; 所对应的那个对象的副本上。特别的，Python 中还有 &lt;code&gt;浅拷贝&lt;/code&gt; 和 &lt;code&gt;深拷贝&lt;/code&gt; 的概念，&lt;code&gt;浅拷贝&lt;/code&gt; 只会复制对象最外层的元素，而 &lt;code&gt;深拷贝&lt;/code&gt; 则会递归的复制整个对象。当对象内的元素全都是不可变对象时，它们两者并没有差异；而当对象内的元素中有可变对象时，&lt;code&gt;浅拷贝&lt;/code&gt; 会创建一个到该可变对象的新绑定，&lt;code&gt;深拷贝&lt;/code&gt; 则会创建一个与该可变对象相同的新对象并对这个可变对象继续做 &lt;code&gt;深拷贝&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;测试&#34;&gt;测试&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;先思考得出答案，然后再实际运行，并做出解释。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;case-1&#34;&gt;Case 1&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;test&lt;/span&gt;(arg):
+arg &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(arg)
+a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+test(a)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(a)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;case-2&#34;&gt;Case 2&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;test&lt;/span&gt;(arg):
+arg&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append(&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(arg)
+a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; []
+test(a)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(a)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;case-3&#34;&gt;Case 3&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;test&lt;/span&gt;(arg):
+arg &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; arg &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; [&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(arg)
+a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; []
+test(a)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(a)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;case-4&#34;&gt;Case 4&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;test&lt;/span&gt;(arg):
+arg &lt;span style=&#34;color:#666&#34;&gt;+=&lt;/span&gt; [&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(arg)
+a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; []
+test(a)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(a)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;case-5&#34;&gt;Case 5&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;test&lt;/span&gt;(arg&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;[]):
+arg&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append(&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(arg)
+test()
+test()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.python.org/3/faq/programming.html#why-did-changing-list-y-also-change-list-x&#34;&gt;Why did changing list ‘y’ also change list ‘x’?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://winterttr.me/2015/10/24/python-passing-arguments-as-value-or-reference/&#34;&gt;Python的函数参数传递：传值？引用？&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://foofish.net/python-function-args.html&#34;&gt;Python 函数中，参数是传值，还是传引用？&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;通关了《尼尔：机械纪元》，最后十分感动地共享出了自己所有的存档，不说了，六周目见。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Python os walk 的坑</title><link>https://xuanwo.io/2018/04/01/python-os-walk/</link><pubDate>Sun, 01 Apr 2018 10:07:00 +0000</pubDate><guid>https://xuanwo.io/2018/04/01/python-os-walk/</guid><description>&lt;p&gt;用户反馈使用在 windows 下使用 &lt;a href=&#34;https://github.com/yunify/qsctl&#34;&gt;qsctl&lt;/a&gt; 上传文件的时候会中断并抛出 &lt;code&gt;UnicodeDecodeError&lt;/code&gt; 异常，经过一番调查之后发现居然是 &lt;code&gt;os.walk&lt;/code&gt; 的坑。&lt;/p&gt;
+&lt;h2 id=&#34;定位&#34;&gt;定位&lt;/h2&gt;
+&lt;p&gt;接到用户的反馈之后，首先尝试进行了复现，最后成功的找到了一个能复现该问题的 case:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt;&amp;gt;&amp;gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# create a file with bad name and sync with qsctl 1.7.0 on python 2.7.13:&lt;/span&gt;
+&amp;gt;&amp;gt;&amp;gt; touch &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;$(&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;echo&lt;/span&gt; -e &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\x8b\x8bThis&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;)&lt;/span&gt;
+&amp;gt;&amp;gt;&amp;gt; qsctl sync ./ qs://xxxxxx&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;抛出来的异常如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Traceback (most recent call last):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/bin/qsctl&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;27&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;
+sys&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;exit&lt;/span&gt;(main())
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/bin/qsctl&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;24&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; main
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; qingstor&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;qsctl&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;driver&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;main()
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/lib/python2.7/site-packages/qingstor/qsctl/driver.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;100&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; main
+command&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;main(args[&lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;:])
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/lib/python2.7/site-packages/qingstor/qsctl/commands/base.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;276&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; main
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; cls&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;send_request()
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/lib/python2.7/site-packages/qingstor/qsctl/commands/transfer.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;546&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; send_request
+cls&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;upload_files()
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/lib/python2.7/site-packages/qingstor/qsctl/commands/transfer.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;165&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; upload_files
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; rt, dirs, files &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; os&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;walk(source_path):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/lib/python2.7/os.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;286&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; walk
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; isdir(join(top, name)):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/lib/python2.7/posixpath.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;71&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; join
+path &lt;span style=&#34;color:#666&#34;&gt;+=&lt;/span&gt; b
+&lt;span style=&#34;color:#007020&#34;&gt;UnicodeDecodeError&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;ascii&amp;#39;&lt;/span&gt; codec can&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;t decode byte 0x8b in position 0: ordinal not in range(128)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;之前写过的一篇关于 Python 字符串的&lt;a href=&#34;https://xuanwo.io/2017/01/22/encoding-in-python/&#34;&gt;文章&lt;/a&gt; 曾经分析过类似的问题，Python 2 在进行字符串比较、拼接、替换时，会进行隐式的类型转换。通过查看 &lt;code&gt;posixpath.py&lt;/code&gt; 的源码，可以定位到报错的地方：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;join&lt;/span&gt;(a, &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;p):
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Join two or more pathname components, inserting &amp;#39;/&amp;#39; as needed.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; If any component is an absolute path, all previous path components
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; will be discarded. An empty last part will result in a path that
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; ends with a separator.&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+path &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; a
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; b &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; p:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; b&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;startswith(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;/&amp;#39;&lt;/span&gt;):
+path &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; b
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;elif&lt;/span&gt; path &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;or&lt;/span&gt; path&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;endswith(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;/&amp;#39;&lt;/span&gt;):
+path &lt;span style=&#34;color:#666&#34;&gt;+=&lt;/span&gt; b &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# This is line 71.&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;else&lt;/span&gt;:
+path &lt;span style=&#34;color:#666&#34;&gt;+=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;/&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; b
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; path&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在 Python 2 下，str 与 unicode 相加，str 会做一次 decode() 转换为 unicode 再相加。也就是说此处报错是因为 path 和 b 的类型不一致导致出现了本不该出现的一次 decode()。顺着代码继续分析，path 和 b 是上层传入的 top 和 name，而这一层的调用是在 os 包的内部进行的。也就是说，os.walk 在处理过程中并没有严格遵循保持类型一致的不成文约定，而是在传入 unicode 的情况下，出现了 str 类型。知道了问题出在 &lt;code&gt;os.walk&lt;/code&gt;，接下来再看看 &lt;code&gt;os.walk&lt;/code&gt; 的实现就能明白问题的所在了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;walk&lt;/span&gt;(top, func, arg):
+islink, join, isdir &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; path&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;islink, path&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;join, path&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;isdir
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# We may not have read permission for top, in which case we can&amp;#39;t&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# get a list of the files the directory contains. os.path.walk&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# always suppressed the exception then, rather than blow up for a&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# minor reason when (say) a thousand readable directories are still&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# left to visit. That logic is copied here.&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;try&lt;/span&gt;:
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Note that listdir and error are globals in this module due&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# to earlier import-*.&lt;/span&gt;
+names &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; listdir(top)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;except&lt;/span&gt; error, err:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; onerror &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;is&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; None:
+onerror(err)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+dirs, nondirs &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [], []
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; name &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; names:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; isdir(join(top, name)):
+dirs&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append(name)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;else&lt;/span&gt;:
+nondirs&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append(name)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; topdown:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;yield&lt;/span&gt; top, dirs, nondirs
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; name &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; dirs:
+new_path &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; join(top, name)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; followlinks &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;or&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; islink(new_path):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; x &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; walk(new_path, topdown, onerror, followlinks):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;yield&lt;/span&gt; x
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; topdown:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;yield&lt;/span&gt; top, dirs, nondirs&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;等到读完 &lt;code&gt;os.walk&lt;/code&gt; 的实现我们就能明白，&lt;code&gt;os.walk&lt;/code&gt; 也是被迫背锅的，那个奇怪的 str 是由 &lt;code&gt;os.listdir&lt;/code&gt; 返回的。但是 &lt;code&gt;os.listdir&lt;/code&gt; 的实现是系统相关的，&lt;code&gt;os.walk&lt;/code&gt; 理应屏蔽掉编码的细节，为用户提供一个行为一致的接口。&lt;/p&gt;
+&lt;h2 id=&#34;修复&#34;&gt;修复&lt;/h2&gt;
+&lt;p&gt;定位到问题之后，修复起来就变得简单了。检查一下 listdir 的返回值，如果类型是 str，我们就试着去做一次 decode。如果报错了的话，我们需要通过 onerror 来处理这个情况然后把这个文件从结果中去掉以保证同步可以继续进行。
+最后通过这两个 commit 对这个问题进行了修复：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yunify/qsctl/commit/f071667b12f8172451a9e7d63dcdd44f9348bf22&#34;&gt;Handle UnicodeDecodeError while use os.walk&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yunify/qsctl/commit/840a97ef8954fbe35659cfc6d457f461dcf2b77d&#34;&gt;Handle illegal characters in a better way&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;接口是开发者与用户的神圣契约，我们要尽量避免不一致的行为。&lt;/li&gt;
+&lt;li&gt;上层接口要尽可能屏蔽下层的细节，不要把本该自己处理的问题扔给用户处理。&lt;/li&gt;
+&lt;li&gt;Python 2 快点死掉吧 = =&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;正如开头所说的，这篇文章是 “Learn From BUG” 系列的第一篇，之后我会不定期的整理和分享一些自己平时遇到的 BUG 解决思路。一方面是为了自己能够从 BUG 中学到更多，另一方面是希望能够帮助到被类似 BUG 困扰的人们。&lt;/li&gt;
+&lt;li&gt;随着再一次的心血来潮，我在 Linode 买了台机器部署并且把 Blog 迁移了过去，去掉了减速 CDN，实测速度比之前快上了不少。&lt;/li&gt;
+&lt;li&gt;《比宇宙更遥远的地方》完结撒花了，我现在唯一的感触就是这次的圣地巡礼可能有点贵 = =&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>聊一聊 Python 的字符串</title><link>https://xuanwo.io/2017/01/22/encoding-in-python/</link><pubDate>Sun, 22 Jan 2017 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2017/01/22/encoding-in-python/</guid><description>&lt;p&gt;这篇文章目标是解决一个非常简单的问题：如何编写一个跨平台，跨版本且字符串行为一致的 Python 命令行应用。&lt;/p&gt;
+&lt;h2 id=&#34;概念界定&#34;&gt;概念界定&lt;/h2&gt;
+&lt;p&gt;在回答好这个问题之前，首先需要分清楚以下几个概念：字符，字符串，字符集，字符编码，终端编码，字体。&lt;/p&gt;
+&lt;h3 id=&#34;字符&#34;&gt;字符&lt;/h3&gt;
+&lt;p&gt;计算机只能处理0和1这两个数字，如果想要计算机识别更多的字符，则需要定义数字（专业一点可以叫做character code，也称 code point 代码点）到字符的一个映射，通常把这样的映射叫做&lt;code&gt;字符编码(character encoding)&lt;/code&gt;。最常见的字符编码就是 &lt;code&gt;ASCII编码&lt;/code&gt;，它使用8个二进制位来表示字符，其中最前面的1位统一规定为0，后面的7位用来表示符号，共计128个。在C语言中经常使用到的 &lt;code&gt;i &amp;gt;= 65 &amp;amp;&amp;amp; i &amp;lt; 97&lt;/code&gt; 来表示大写字母就是使用了这样的映射关系。&lt;/p&gt;
+&lt;h3 id=&#34;字符集与字符编码&#34;&gt;字符集与字符编码&lt;/h3&gt;
+&lt;p&gt;经常说的 &lt;code&gt;ASCII&lt;/code&gt; 其实涵盖了两个概念： &lt;code&gt;ASCII字符集&lt;/code&gt; 与 &lt;code&gt;ASCII编码&lt;/code&gt;。&lt;code&gt;ASCII字符集&lt;/code&gt; 规定了字符码到字符的映射，而 &lt;code&gt;ASCII编码&lt;/code&gt; 则规定了字符码在计算机中如何存储，即定义了字符集的 &lt;code&gt;存储形式&lt;/code&gt; 。下面我引用来自 &lt;a href=&#34;http://liujiacai.net/blog&#34;&gt;@liujiacai&lt;/a&gt; 的一副图表示他们之间的逻辑关系：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/develop/chararter-code-point.png&#34; alt=&#34;字符、代码点、二进制字节关系图&#34; /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Character 字符&lt;/code&gt;: 人类可以理解的字符，比如：&lt;code&gt;A&lt;/code&gt;，&lt;code&gt;漩&lt;/code&gt;，&lt;code&gt;涡&lt;/code&gt;这样的符号&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Character Set 字符集&lt;/code&gt;: 字符码到字符的映射，比如 &lt;code&gt;Unicode 字符集&lt;/code&gt;`&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Code point 代码点&lt;/code&gt;: 一个无符号数字，在现代计算机中通常用16进制表示&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Encoding 编码&lt;/code&gt;: 根据规定的编码将字符码存储在内存和硬盘中，比如 &lt;code&gt;UTF-8 编码&lt;/code&gt; 和 &lt;code&gt;UTF-16 编码&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Bytes 二进制字节&lt;/code&gt;: 代码点在内存或磁盘中的表示形式，字符码与字节的对应关系&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;字符串与字节流&#34;&gt;字符串与字节流&lt;/h3&gt;
+&lt;p&gt;由字节码组成的串，不妨叫做“字节流”；由字符组成的串，一般叫做字符串。他们之间存在着这样的对应关系：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/develop/decode-encode.png&#34; alt=&#34;字节流与字符串&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;Python 2&lt;/code&gt;中： &lt;code&gt;str&lt;/code&gt; = &lt;code&gt;字节流&lt;/code&gt;，&lt;code&gt;unicode&lt;/code&gt; = &lt;code&gt;字符串&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;Python 3&lt;/code&gt;中： &lt;code&gt;bytes&lt;/code&gt; = &lt;code&gt;字节流&lt;/code&gt;， &lt;code&gt;str&lt;/code&gt; = &lt;code&gt;unicode&lt;/code&gt; = &lt;code&gt;字符串&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;终端编码&#34;&gt;终端编码&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这里的终端是泛指，包括 Linux 下的 Console, Windows 下的 CMD 和 PowerShell 以及 Mac OS X 下的 Terminal&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;终端编码决定了用户的输入和输出应当采用何种编码来进行编码和解码。&lt;/p&gt;
+&lt;p&gt;Linux 和 Mac 用户应该对终端编码比较熟悉，经常会用的到有以下环境变量： &lt;code&gt;LC_ALL&lt;/code&gt;，&lt;code&gt;LC_CTYPE&lt;/code&gt;。他们之间的覆盖关系是 &lt;code&gt;LC_ALL&lt;/code&gt; &amp;gt; &lt;code&gt;LC_CTYPE&lt;/code&gt; ，推荐的配置是 &lt;code&gt;en_US.UTF-8&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;对于 Windows 用户而言就比较麻烦了，他们使用的是一个叫做 &lt;code&gt;Code Page (代码页)&lt;/code&gt; 的配置，更糟糕的是，&lt;code&gt;Code Page&lt;/code&gt; 默认为936，也就是我们所熟知的 &lt;code&gt;cp936&lt;/code&gt; ， 又叫做 &lt;code&gt;GBK&lt;/code&gt;。想要切换到 &lt;code&gt;UTF-8&lt;/code&gt; 的话需要执行命令 &lt;code&gt;chcp 65001&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;字体&#34;&gt;字体&lt;/h3&gt;
+&lt;p&gt;字体决定了字符如何显示。&lt;/p&gt;
+&lt;p&gt;很常见的一种情况是编码支持某个字符，但是字体并不支持，这个时候就会显示成奇怪的字符。使用过 &lt;code&gt;oh-my-zsh&lt;/code&gt; 的 &lt;code&gt;agnoster&lt;/code&gt; 主题的同学应该会遇到这种情况，系统默认的字体不支持 &lt;code&gt;powerline&lt;/code&gt; 所使用的特殊符号，需要为字体打上补丁才能正常显示。&lt;/p&gt;
+&lt;h2 id=&#34;错误剖析&#34;&gt;错误剖析&lt;/h2&gt;
+&lt;p&gt;前面厘清了很多概念，下面可以好好的将一讲在Python中遇到的编码问题了。&lt;/p&gt;
+&lt;h3 id=&#34;未指定代码源文件的coding&#34;&gt;未指定代码源文件的coding&lt;/h3&gt;
+&lt;p&gt;使用Python 2的时候，如果在没有指定coding的源代码中使用了非ASCII字符，会提示一个语法错误：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt; cat test.py
+print&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;测试&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+&amp;gt; python2 test.py
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;test.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+SyntaxError: Non-ASCII character &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;\xe6&amp;#39;&lt;/span&gt; in file test.py on line &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, but no encoding declared; see http://python.org/dev/peps/pep-0263/ &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; details&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这是因为Python默认的文件编码是 ASCII ，从而导致在读取源文件的时候就发生了错误。可以通过在文件的第一行或者第二行添加 &lt;code&gt;# -*- coding: utf-8 -*-&lt;/code&gt; 来解决。&lt;/p&gt;
+&lt;h3 id=&#34;默认的ascii编码导致的错误&#34;&gt;默认的ASCII编码导致的错误&lt;/h3&gt;
+&lt;p&gt;Python 2 中默认用来编解码的同样是 ASCII ，在不指定 &lt;code&gt;UTF-8&lt;/code&gt; 来解码的时候就会发生这样的错误：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# python 2.7.13&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;测试&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;decode()
+Traceback (most recent call last):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;stdin&amp;gt;&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;UnicodeDecodeError&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;ascii&amp;#39;&lt;/span&gt; codec can&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;t decode byte 0xe6 in position 0: ordinal not in range(128)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;只需要指定正确的编码即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# python 2.7.13&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;测试&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;decode(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;utf-8&amp;#34;&lt;/span&gt;)
+&lt;span style=&#34;color:#4070a0&#34;&gt;u&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#4070a0;font-weight:bold&#34;&gt;\u6d4b\u8bd5&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;隐含的编解码转换&#34;&gt;隐含的编解码转换&lt;/h3&gt;
+&lt;p&gt;很常见的一种错误是Python的隐式类型转换导致的。比如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# python 2.7.13&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;测试&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;encode()
+Traceback (most recent call last):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;stdin&amp;gt;&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;UnicodeDecodeError&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;ascii&amp;#39;&lt;/span&gt; codec can&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;t decode byte 0xe6 in position 0: ordinal not in range(128)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;第一次接触到这种错误的时候会有一种荒谬感，明明自己在做&lt;code&gt;encode()&lt;/code&gt;操作，为什么报了一个&lt;code&gt;UnicodeDecodeError&lt;/code&gt;？
+这是因为 python 在调用 &lt;code&gt;str.encode()&lt;/code&gt; 的时候，实际上做的操作是 &lt;code&gt;str.decode().encode()&lt;/code&gt;。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# python 2.7.13&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;测试&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;decode()&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;encode()
+Traceback (most recent call last):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;stdin&amp;gt;&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;UnicodeDecodeError&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;ascii&amp;#39;&lt;/span&gt; codec can&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;t decode byte 0xe6 in position 0: ordinal not in range(128)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;回忆一下字符串与字节流的关系，字符串编码为字节流，字节流解码为字符串。对一个字节流进行编码，实际上是先解码成为字符串，再编码为字节流。Python 中存在着很多这样的隐式转换，包括字符串的比较、拼接、替换，读写文件，print等。遇到这样的问题的时候需要查阅Python的文档，弄清楚到底传入和返回的是什么数据类型再做判断。&lt;/p&gt;
+&lt;h3 id=&#34;错误的终端编码&#34;&gt;错误的终端编码&lt;/h3&gt;
+&lt;p&gt;这种问题比较多见在 Windows 平台上：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;™&amp;#34;&lt;/span&gt;)
+Traceback (most recent call last):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;stdin&amp;gt;&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;UnicodeEncodeError&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;gbk&amp;#39;&lt;/span&gt; codec can&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;t encode character &amp;#39;&lt;/span&gt;\u2122&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39; in position 43: illegal multibyte sequence&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;最神奇的地方在于，Windows自己是可以在CMD中显示 &lt;code&gt;™&lt;/code&gt; 的，这个字符还可以用做合法的 Windows 文件名，但是这个字符并不在 gbk 字符集中。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;p&gt;问题也总结了一遍，现在终于可以来回答文章最开头提出的问题了：如何编写一个跨平台，跨版本且字符串行为一致的 Python 命令行应用？&lt;/p&gt;
+&lt;h3 id=&#34;设置代码-coding&#34;&gt;设置代码 coding&lt;/h3&gt;
+&lt;p&gt;建议为所有的源文件加上默认的coding设置： &lt;code&gt;# -*- coding: utf-8 -*-&lt;/code&gt; 。&lt;/p&gt;
+&lt;p&gt;尽管在 Python 3 的规范当中要求不需要指定 coding，但是为了兼容性考虑，所有会出现 Non-ASCII 字符的源代码文件都需要加上这个注释。&lt;/p&gt;
+&lt;h3 id=&#34;只使用-unicode&#34;&gt;只使用 Unicode&lt;/h3&gt;
+&lt;p&gt;很多的问题都是由于python2中的unicode与str之间的隐式转换导致的，我们可以使用 &lt;code&gt;from __future__ import unicode_literals&lt;/code&gt; 来将代码文件中所有的字面量全都转为 unicode 。可以简单的认为，使用了这个之后，文件中所有的 &lt;code&gt;&amp;quot;test&amp;quot;&lt;/code&gt; 全都变成了 &lt;code&gt;u&amp;quot;test&amp;quot;&lt;/code&gt;。当然，你也可以显示的指定，Python 3 同样兼容这样的表示方法。&lt;/p&gt;
+&lt;h3 id=&#34;设置-pythonencoding&#34;&gt;设置 PYTHONENCODING&lt;/h3&gt;
+&lt;p&gt;前面提到 Python 2 在输出时会根据终端的编码进行编码，但是在重定向的时候就会使用默认的 ASCII 编码。这种时候，通过设置环境变量 &lt;code&gt;PYTHONENCODING&lt;/code&gt; 为 &lt;code&gt;UTF-8&lt;/code&gt; 就可以比较好的解决问题。&lt;/p&gt;
+&lt;h3 id=&#34;判断-python-版本进行特殊处理&#34;&gt;判断 Python 版本进行特殊处理&lt;/h3&gt;
+&lt;p&gt;在不同的 Python 版本中有些函数的输入和输出类型不一样，这时候需要通过判断来执行不同的代码。比如&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; is_python2:
+endpoint &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; endpoint&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;replace(
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; k, quote(&lt;span style=&#34;color:#007020&#34;&gt;unicode&lt;/span&gt;(v)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;encode(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;utf-8&amp;#34;&lt;/span&gt;))
+)
+request_uri &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; request_uri&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;replace(
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; k, quote(&lt;span style=&#34;color:#007020&#34;&gt;unicode&lt;/span&gt;(v)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;encode(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;utf-8&amp;#34;&lt;/span&gt;))
+)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;elif&lt;/span&gt; is_python3:
+endpoint &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; endpoint&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;replace(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; k, quote(&lt;span style=&#34;color:#007020&#34;&gt;str&lt;/span&gt;(v)))
+request_uri &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; request_uri&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;replace(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; k, quote(&lt;span style=&#34;color:#007020&#34;&gt;str&lt;/span&gt;(v)))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里传入的 v 可能是数字，也有可能是 &lt;code&gt;unicode&lt;/code&gt; 。在 Python 2 中，如果全都使用 &lt;code&gt;str&lt;/code&gt; 来做强制类型转换，很有可能导致 &lt;code&gt;UnicodeEncodeError&lt;/code&gt; 错误。因此需要先转换为 &lt;code&gt;unicode&lt;/code&gt; 类型再 &lt;code&gt;encode&lt;/code&gt; 成为 &lt;code&gt;str&lt;/code&gt; 然后再传入 &lt;code&gt;quote()&lt;/code&gt; 函数。在Python 3中就简单多了，直接转换为 &lt;code&gt;str&lt;/code&gt; 即可。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;本文从基础概念讲起，分析了常见的问题，最后给出了自己实践当中的一些做法。受限于个人的能力和眼界，这里做法可能并不是最好的实践，甚至还会有些错误的地方。希望诸位读者可以一起交流，共同进步，以上。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://liujiacai.net/blog/2015/11/20/strings/&#34;&gt;字符串，那些你不知道的事&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://liujiacai.net/blog/2016/06/30/python2-encoding/&#34;&gt;Python2 中的编码问题&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html&#34;&gt;字符编码笔记：ASCII，Unicode和UTF-8&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://help.ubuntu.com/community/EnvironmentVariables#Locale_setting_variables&#34;&gt;Locale setting variables&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>马可波罗珠宝进销存系统开发手记</title><link>https://xuanwo.io/2016/06/16/jade_ims/</link><pubDate>Thu, 16 Jun 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/06/16/jade_ims/</guid><description>&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/develop/jade-ims-index.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这个项目从我们这个学期开了&lt;strong&gt;系统分析与设计&lt;/strong&gt;这门课之后就开始了，首次创建这个项目是在3月26号，实际上真正的开发时间集中在6月上旬。差不多用两个星期的闲暇时间时间完成了这个简单的进销存系统。这个系统基于Flask框架，使用SQLite3数据库，前端则是使用Bootstrap框架，实现了包括客户，库存，销售，进货等管理子系统。说是管理，其实也就是简单的增加和删除而已。
+前人经常说，不要重复造轮子。既然有类似于Odoo这样强大的ERP系统珠玉在前，我为什么要再自己造一个功能简单，甚至根本不会有人用的轮子呢？从前我确实是这么想的，但是稍微有一点工作经验之后发现再造轮子的原因有两条：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;作为一个处在知识积累阶段的学生而言，再造轮子很有必要。不造一次轮子，你就永远不会明白轮子内部的真实构造。很多技术虽然看起来简单，但是想要有一个完善且健壮的实现却有很多坑需要踩。踩这些坑的过程，也正是一个技术人员成长最快的过程。&lt;/li&gt;
+&lt;li&gt;别人的轮子终究是别人的。你不知道这个轮子最大能承受多少压力，你也不知道这个轮子在什么样的情况下会爆胎。当一个轮子装上企业呼呼向前的列车，再要想把它替换下来是一件很难且成本很高的事情。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接下来，讲讲造这个轮子的一些经历吧~&lt;/p&gt;
+&lt;h1 id=&#34;项目启动&#34;&gt;项目启动&lt;/h1&gt;
+&lt;p&gt;正如前言中说的，这个项目是系统分析与设计这门课的课程设计，也是贯穿着整个学期的一个主旋律。早在这学期开学之初，我们就知道了自己需要做这样的一个系统。经历了上个学期各种技术炫了半天，最后却只是抄袭各种开源项目草草实现的&lt;a href=&#34;https://xuanwo.io/2015/06/30/together-project/&#34;&gt;失败&lt;/a&gt;，这个学期我务实了很多。从最开始的讨论就一直跟组员强调技术的可行性，基本上否决了所有试图增大项目复杂度的建议，把主题定在了一个纯粹的进销存管理系统。之所以如此，是因为我的观念发生了很大的变化：原来觉得技术的先进是最重要的，开发项目一定要用最现代的技术，最炫目的特效；现在觉得哪怕是一个用VB写出来的能稳定运行的丑陋系统都要胜过采用了种种最新潮技术却漏洞百出根本没法运行的“先进”系统。
+在讨论到最极端的时候，我甚至想只做一个仓库的管理系统，只包括进库和出库这样的简单功能。这样的态度曾经闹得有一次讨论直接不欢而散，好在组员都是非常Nice的人，在我主动表达歉意之后大度地表示没什么。经过多次讨论之后，我们终于达成了共识，要做一个进销存系统，功能尽可能简单，在实现基础功能的前提下，再考虑加入新的功能。
+接下来的事情就没有什么大的分歧了，整体系统采用B/S架构，开发语言选用我个人比较喜欢的Python，使用Flask框架，数据库选用无需配置的SQLite。然后服务器选择阿里云的学生机，系统选择成熟稳定的CentOS 7.2，Web Server选用Nginx，也就是我个人目前比较喜欢的开发平台——LESP(Linux, Nginx, SQLite, Python)。&lt;/p&gt;
+&lt;h1 id=&#34;项目细节&#34;&gt;项目细节&lt;/h1&gt;
+&lt;p&gt;下面再介绍一下项目的细节。&lt;/p&gt;
+&lt;h2 id=&#34;设计模式&#34;&gt;设计模式&lt;/h2&gt;
+&lt;p&gt;项目大体上采用了MVC的思想，不过在具体的实现上并没有太过纠结于概念上的东西。所有的网页模板都在&lt;code&gt;templates&lt;/code&gt;文件夹下，静态资源都扔到了&lt;code&gt;static&lt;/code&gt;目录，使用一个&lt;code&gt;models.py&lt;/code&gt;模块来单独存放所有的数据库定义，然后所有的路由以及操作都在&lt;code&gt;views&lt;/code&gt;中实现。对于我来说，快速地实现需求才是头等大事，是不是符合正统的MVC理念并不是十分重要。实际上现在这样的结构开发起来感觉也蛮顺手的，需要调整前端的样式和表单就在&lt;code&gt;templates&lt;/code&gt;文件夹下操作，需要修改程序的逻辑就去&lt;code&gt;views&lt;/code&gt;，他们基本上是一一对应的关系。&lt;a href=&#34;https://spacewander.github.io/explore-flask-zh/4-organizing_your_project.html&#34;&gt;这里&lt;/a&gt;有更加清晰的讲解，值得一看。&lt;/p&gt;
+&lt;h2 id=&#34;项目中的问题-解决方案&#34;&gt;项目中的问题&amp;amp;解决方案&lt;/h2&gt;
+&lt;h3 id=&#34;在flask框架中同时使用蓝图与flask-sqlalchemy&#34;&gt;在Flask框架中同时使用蓝图与Flask_SQLAlchemy&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/q/1010000005640527&#34;&gt;https://segmentfault.com/q/1010000005640527&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;感谢@Ethan和@，他们强有力地向我证明了有师傅带路的好处。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;这个问题纯粹是因为一直以来都是一个脚本Boy，没有系统性的学习过软件开发导致的。很显然，按照我原来的代码去产生实例，就会导致循环导入的错误。想要解决这样的问题，就需要使用工厂函数去生成实例，而不是自己去生成它。&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;__init__.py&lt;/code&gt;中添加一个&lt;code&gt;create_app()&lt;/code&gt;函数，在函数中进行参数配置，初始化和导入蓝图的操作：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;bps &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.dashboard:dashboard&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.install:install&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.login:login&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.sale:sale&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.customer:customer&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.purchase.inputbill:inputbill&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.purchase.supplier:supplier&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.stock.enterstockbill:enterstockbill&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.stock.leavestockbill:leavestockbill&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.stock.stock:stock&amp;#39;&lt;/span&gt;
+]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;create_app&lt;/span&gt;():
+app &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; Flask(__name__)
+app&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;config&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;from_object(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;config&amp;#39;&lt;/span&gt;)
+app&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;config&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;from_pyfile(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;config.py&amp;#39;&lt;/span&gt;)
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;init_app(app)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; path &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; bps:
+bp &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; import_string(path)
+app&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;register_blueprint(bp)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; app&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;flask如何优雅地重定向所有未登录用户到登陆界面&#34;&gt;Flask如何优雅地重定向所有未登录用户到登陆界面&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/q/1010000005645821&#34;&gt;https://segmentfault.com/q/1010000005645821&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;感谢@zwillon和@igaozp&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;有一个Feature是想要把所有未登录的用户都重定向到登录页面。当时手头上的技术方案主要有两种：第一种是自己包装一个装饰器，并添加在每一个视图函数中；第二种是使用第三方库&lt;code&gt;Flask-Login&lt;/code&gt;，在视图函数中添加&lt;code&gt;@login_required&lt;/code&gt;。但是感觉姿势都不怎么优雅，因为我需要不断地在视图函数中添加这个装饰器，不太符合DRY(Don&amp;rsquo;t Repeat Yourself)准则。
+SF的老司机给了我一个相当优雅的方案——Hook到app的&lt;code&gt;before_request&lt;/code&gt;方法。也就是这样来实现：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@app.before_request&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;check_need_login&lt;/span&gt;():
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 检查登录的逻辑&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;pass&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我第一次是这样实现的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@app.before_request&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;check_need_login&lt;/span&gt;():
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;logged_in&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; session:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; redirect(url_for(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login.user_login&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这样就带来了一个问题，对于未登录的用户来说，所有页面都会不断地重定向从而导致整个应用崩溃。因此还需要指定在某些情况下停止重定向，所以我们还需要修改一下&lt;code&gt;check_need_login&lt;/code&gt;的逻辑：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@app.before_request&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;check_need_login&lt;/span&gt;():
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;logged_in&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; session &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;and&lt;/span&gt; request&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;endpoint &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; (&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login.user_login&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;static&amp;#39;&lt;/span&gt;):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; redirect(url_for(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login.user_login&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;当&lt;code&gt;session&lt;/code&gt;中没有&lt;code&gt;logged_in&lt;/code&gt;字段且&lt;code&gt;endpoint&lt;/code&gt;不是&lt;code&gt;user_login&lt;/code&gt;和&lt;code&gt;static&lt;/code&gt;的时候就重定向到登录页面，这样就比较优雅地解决了重定向未登录用户到登陆界面的需求。&lt;/p&gt;
+&lt;h3 id=&#34;flask-sqlalchemy-插入数据时发生错误后如何处理&#34;&gt;flask_sqlalchemy 插入数据时发生错误后如何处理&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/q/1010000005647431&#34;&gt;https://segmentfault.com/q/1010000005647431&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;在实际开发的过程中发现，如果&lt;code&gt;db.session&lt;/code&gt;中添加的记录有问题，在commit的时候会出现一个报错。所以我们需要在出错的时候进行一些处理，以保证程序出错之后还能够正常地运行。网友 @学不会编程的永仲 给出的回答是我应该在form中验证数据的正确性。虽然我相信他的理解可能是正确的，但是不太符合我的哲学，我更加倾向于&lt;strong&gt;让它崩溃，然后处理异常&lt;/strong&gt;而不是&lt;strong&gt;事先处理好所有的错误&lt;/strong&gt;。
+通过查阅文档，了解到&lt;code&gt;db.session.rollback()&lt;/code&gt;这一函数可以在出错是进行回滚，于是最后的实现变成了这样：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@supplier.route&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;/purchase/supplier/add&amp;#39;&lt;/span&gt;, methods&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;POST&amp;#39;&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;add_supplier&lt;/span&gt;():
+form &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; request&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;form
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; request&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;method &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;POST&amp;#39;&lt;/span&gt;:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(form)
+supplier &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; Supplier(form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_name&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_constract&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_phone&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_address&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_remark&amp;#39;&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;try&lt;/span&gt;:
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;session&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;add(supplier)
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;session&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;commit()
+flash(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;供应商添加成功！&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;success&amp;#39;&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;except&lt;/span&gt;:
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;session&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;rollback()
+flash(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;输入不合法，请重新输入！&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;danger&amp;#39;&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; redirect(url_for(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier.list_supplier&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;项目总结&#34;&gt;项目总结&lt;/h1&gt;
+&lt;p&gt;随着答辩的完成，这个项目进入了尾声。因为很多东西需要去学习，有新的东西需要去探索，所以这个项目也很有可能不会再继续维护了。那么这个项目开源出来的价值在哪里呢？我想，这个项目虽然简单，但它毕竟还算是一个完整的Flask项目，除了&lt;code&gt;flask_sqlalchemy&lt;/code&gt;之外没有多余的依赖，非常适合一个跟我一样的Python初学者进行入门学习。如果说有人能够因为这个项目少走一些弯路，少在一些死胡同浪费时间，我想这个项目的价值就已经实现了。如果再往大一点来说，开源的价值也就实现了。
+如果要我自评的话，我觉得这样的项目应该有60分。之所以给一个及格分，是因为这个项目毕竟实现了需求的大多数功能，也有好好地跑在阿里云的服务器上。丢分的话，大体上是因为这个项目毫无注释，没有安装文档，也没有配置手册，很多东西都是硬编码到了代码中。不仅如此，编程的风格也是相当的不佳，在模板部分缺乏良好的顶层设计，出现了大量的重复代码。这些问题希望自己能在下一个项目中得到一些改善。
+Anyway，随着这个项目的结束，我的大三生涯也要结束了。接下来是波澜壮阔的实习阶段，希望自己能够在实习的时候多踩一些坑，多走一些弯路，多
+得到一些来自“长者”的指点。&lt;/p&gt;
+&lt;h1 id=&#34;参考资源&#34;&gt;参考资源&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://docs.jinkan.org/docs/flask/&#34;&gt;Flask 中文文档 &lt;em&gt;文档略有过时，代码以Github上为准&lt;/em&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://spacewander.github.io/explore-flask-zh/index.html&#34;&gt;Flask 之旅&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://docs.jinkan.org/docs/flask-sqlalchemy/index.html&#34;&gt;Flask-SQLALchemy 中文文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年06月17日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>我从Qingchat中学到的教训</title><link>https://xuanwo.io/2016/05/29/learn-from-qingchat/</link><pubDate>Sun, 29 May 2016 20:57:00 +0000</pubDate><guid>https://xuanwo.io/2016/05/29/learn-from-qingchat/</guid><description>&lt;p&gt;之前的一段时间一直在从事&lt;a href=&#34;https://github.com/Xuanwo/qingchat&#34;&gt;Qingchat&lt;/a&gt;的相关开发工作，这个项目是一个基于Mojo-Weixin提供的Rest API开发的一个微信机器人，承担了十余个群，上千人的微信直播活动。秉承着ACM训练出来的“暴力加乱搞”风格，我花了大概一个星期的课余时间，搞出了一个可用的版本。期间也迭代了很多次，既欣慰于Coding的力量，也苦恼于当初设计的不完善带来的种种问题。在这个项目即将大规模重构的前夕，我总结一下开发Qingchat的过程中的经验教训，希望自己能成为一个更好更聪明的Coder。&lt;/p&gt;
+&lt;h1 id=&#34;经验教训&#34;&gt;经验教训&lt;/h1&gt;
+&lt;h2 id=&#34;没有稳定性的世界&#34;&gt;没有稳定性的世界&lt;/h2&gt;
+&lt;p&gt;从最开始Coding的时候，就有着一个根深蒂固的信念：计算机不会出错。1是1，0是0，只要自己的实现是对的，那最后的结果也一定是对的。然后，真相并非如此：我们存在于一个没有稳定性的世界。
+你访问的路径可能是不存在的，你访问的文件可能是不存在或者已经上锁，你期望的服务器响应因为网络环境太差变成了超时。不仅如此，有时候你还会遇到神出鬼没的黑客们，稍有不慎你可能就永远失去了对数据的掌控权（*我测试用的服务器被人暴力尝试登陆34万次*）。
+所以我们在编程的时候就应当完全抛弃“这个服务是稳定的”这种前提，学会在万物皆有可能出错的假设下编程，不要轻视程序的鲁棒性。你永远都不会知道用户会以何种方式使用你的程序，同样的，你也不会知道用户到底会输入什么样的数据。灵活运用“防御式编程”和“让它出错”两种思想，让你的代码更健壮。&lt;/p&gt;
+&lt;h2 id=&#34;拥抱多线程-走向非阻塞&#34;&gt;拥抱多线程，走向非阻塞&lt;/h2&gt;
+&lt;p&gt;现在回过头来看，自己当初实现的群发功能就是一个彻头彻尾的失败品：容错性差，效率低下。这些问题其实是由同一个原因导致的：我使用了一个单线程阻塞式的实现，不仅如此，还没有做任何异常的处理。这样导致的结果就是只要某个环节出错，整个群发任务就会直接退出。速度是跟微信群的数量成正比的，群的数量上升之后，群发速度过慢成了我的同事们经常向我吐嘈的问题。
+开发的时候不计算网络传输延时绝对是一个重大失误——实际上，网络延时是整个系统的关键瓶颈。为了解决这个问题，Node.js 采用了一种单线程非阻塞的设计（一家之言，轻喷）。对于Python来说也是一样的，适度地拥抱多线程开发以提高并行效率，多采用非阻塞式设计以避免单个任务执行时间过长拖慢运行速度。
+在一次去上课的路上，我形象地把这种设计比作“射后不管”，好像是飞毛腿导弹？&lt;/p&gt;
+&lt;h2 id=&#34;开源非万能&#34;&gt;开源非万能&lt;/h2&gt;
+&lt;p&gt;我原来是一个开源的死忠粉，认为开源可以解决一切问题，那个时候每天思考的问题就是为什么Windows不开源？等到真的进入业界，才明白自己的这种想法有多么幼稚。
+除去那些大型的有基金会在背后支撑的项目，绝大多数项目完全依靠开发者个人热情来维持，某些涉及到商业支持的项目更是存在着“人走项目死”的现象。比如我参与管理的&lt;a href=&#34;https://github.com/hexojs&#34;&gt;Hexo&lt;/a&gt;项目在作者tommy开始实习之后就进展缓慢，再比如我接手但是现状非常差的&lt;a href=&#34;https://github.com/staticfile/static&#34;&gt;staticfile&lt;/a&gt;（*很抱歉我并没有能够做出什么正面的贡献，反而让状况变得更加糟糕了*）。
+这些实践都告诉我，开源并不是万能的，真正想要解决一个问题，需要一个完善的制度以及各方面的激励机制。单纯依赖于开发者个人的热情往往不利于一个项目的长远发展，而在自行开发的项目中依赖于一个开源项目往往会带来更多的风险。开发者不一定会开发你期望的功能，开发者也不一定会按照你期望的进度进行开发。
+作为我个人，我依然是一个热爱开源项目，崇尚开源理念的人；然而作为一个产品的开发者，一个服务的提供者，你必须权衡自行开发，采购商业产品以及使用开源项目之间的利弊。不同的选择取决于不同的项目，不同的需求，不同的自主开发能力，不同的后续维护能力。一味的强调开源理念，不顾实际，往往对开源事业的发展有害无益，挫伤人们对开源的信赖。&lt;/p&gt;
+&lt;h1 id=&#34;未来展望&#34;&gt;未来展望&lt;/h1&gt;
+&lt;p&gt;一个项目最具活力与激情的时刻就是在设计之初实现之前，等到实现的时候往往寸步难行，到了后续维护的时候时常想就此了断。我希望这个项目能够存活更长的时间，希望自己向同事们提出的构想都能够一一变为现实。本次重构希望能够实现一个更加稳定更加高效的Qingchat，希望能够进一步减少重复劳动，提高效率。
+最后感谢同事们的不杀之恩，感谢青云QingCloud的自由空间，可以允许我以自己想要的方式完成工作。最后以青云CTO Reno在某次会上说的话自勉：“你们是青云的Devloper，No excuse。”&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年05月30日 初稿&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>docopt——好用的Python命令行参数解释器</title><link>https://xuanwo.io/2016/04/04/docopt-intro/</link><pubDate>Mon, 04 Apr 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/04/04/docopt-intro/</guid><description>&lt;p&gt;&lt;a href=&#34;https://github.com/Xuanwo/qingchat&#34;&gt;&lt;code&gt;Qingchat&lt;/code&gt;&lt;/a&gt; 使用的命令行参数解释器是 &lt;a href=&#34;http://docopt.org/&#34;&gt;&lt;code&gt;docopt&lt;/code&gt;&lt;/a&gt;，用下来感觉非常棒，所以决定介绍一下这个库。（*奉劝各位看官，珍爱生命，远离argparse。*）&lt;/p&gt;
+&lt;h1 id=&#34;介绍&#34;&gt;介绍&lt;/h1&gt;
+&lt;p&gt;docopt 本质上是在 Python 中引入了一种针对命令行参数的形式语言，在代码的最开头使用&lt;code&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/code&gt;文档注释的形式写出符合要求的文档，就会自动生成对应的parse，体验非常赞。&lt;/p&gt;
+&lt;h1 id=&#34;用法&#34;&gt;用法&lt;/h1&gt;
+&lt;h2 id=&#34;样例&#34;&gt;样例&lt;/h2&gt;
+&lt;p&gt;docopt的使用非常简单，以Qingchat为例，你只需要在代码最开头加入：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Qingchat CLI
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;Usage:
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat config ip &amp;lt;ip&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat config port &amp;lt;port&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat config login
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat group list
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat group choose &amp;lt;group_name&amp;gt;...
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat group clean
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat group send -t &amp;lt;content&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat group send -i &amp;lt;media&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat group send -f &amp;lt;file&amp;gt; [&amp;lt;delaytime&amp;gt;]
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;Options:
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; -h --help Show this screen.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; -v --version Show version.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后在执行代码中加入：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;arguments &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; docopt(__doc__, version&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Qingchat 0.3.2&amp;#39;&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;就会在你的程序中导入一个&lt;code&gt;arguments&lt;/code&gt;字典，这个字典中的内容形如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;{
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;-f&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;-i&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;-t&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;content&amp;gt;&amp;#39;&lt;/span&gt;: None,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;file&amp;gt;&amp;#39;&lt;/span&gt;: None,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;group_name&amp;gt;&amp;#39;&lt;/span&gt;: [],
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;ip&amp;gt;&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;127.0.0.1&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;media&amp;gt;&amp;#39;&lt;/span&gt;: None,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;port&amp;gt;&amp;#39;&lt;/span&gt;: None,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;choose&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;clean&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;config&amp;#39;&lt;/span&gt;: True,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;group&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;ip&amp;#39;&lt;/span&gt;: True,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;list&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;port&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;send&amp;#39;&lt;/span&gt;: False
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这样应该就能很容易看出来，我们在文档中写的每一个短语，都被转化为一个对应的类型。只要直接调用&lt;code&gt;arguments[&#39;xxx&#39;]&lt;/code&gt;就可以判断或者使用对应的值，从而实现对应的功能。&lt;/p&gt;
+&lt;h2 id=&#34;详解&#34;&gt;详解&lt;/h2&gt;
+&lt;p&gt;前面我们举了一个例子，下面我们来详细介绍一下如何完成一个符合 &lt;code&gt;docopt&lt;/code&gt; 要求的注释文档。&lt;/p&gt;
+&lt;h3 id=&#34;usage&#34;&gt;Usage&lt;/h3&gt;
+&lt;p&gt;所有出现在&lt;code&gt;usage:&lt;/code&gt;（区分大小写）和一个空行之间的文本都会被识别为一个命令组合，&lt;code&gt;usage&lt;/code&gt;后的第一个字母将会被识别为这个程序的名字，所有命令组合的每一个部分（空格分隔）都会成为字典中的一个key。&lt;/p&gt;
+&lt;h4 id=&#34;参数&#34;&gt;参数&lt;/h4&gt;
+&lt;p&gt;形如 &lt;code&gt;&amp;lt;argument&amp;gt;&lt;/code&gt; 或者 &lt;code&gt;ARGUMENT&lt;/code&gt; 的文本将会被识别为参数。
+在转化后的字典中的取值为 &lt;code&gt;True&lt;/code&gt; 或者 &lt;code&gt;False&lt;/code&gt; 。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;host&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;port&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;选项&#34;&gt;选项&lt;/h4&gt;
+&lt;p&gt;形如 &lt;code&gt;-o&lt;/code&gt; 或者 &lt;code&gt;--option&lt;/code&gt; 的文本将会被识别为选项。
+在转化后的字典中的取值为 &lt;code&gt;True&lt;/code&gt; 或者 &lt;code&gt;False&lt;/code&gt; 。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;f &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;file&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Tips:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;短选项可以组合起来，比如&lt;code&gt;-abc&lt;/code&gt;等价于&lt;code&gt;-a -b -c&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;长选项需要的参数需要使用 &lt;code&gt;=&lt;/code&gt; 或者空格来分隔，&lt;code&gt;--input=ARG&lt;/code&gt; 等价于 &lt;code&gt;--input ARG&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;短选项可以不需要空格， &lt;code&gt;-f FILE&lt;/code&gt; 等价于 &lt;code&gt;-fFILE&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;命令&#34;&gt;命令&lt;/h4&gt;
+&lt;p&gt;其他不满足 &lt;code&gt;--options&lt;/code&gt; 或者 &lt;code&gt;&amp;lt;arguments&amp;gt;&lt;/code&gt; 的文本将会被识别为（子）命令。
+在转化后的字典中取值为 &lt;code&gt;True&lt;/code&gt; 或者 &lt;code&gt;False&lt;/code&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;可选项&#34;&gt;可选项&lt;/h4&gt;
+&lt;p&gt;形如 &lt;code&gt;[optional elements]&lt;/code&gt; 的文本是可选项。
+&lt;code&gt;elements&lt;/code&gt;包括上述的三种类型：参数，选项以及命令。&lt;/p&gt;
+&lt;p&gt;在相同或者不同的括号中都是一样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program [command &lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;option &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;argument&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;]&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;等价于&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program [command] [&lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;option] [&lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;argument&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;]&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;必填项&#34;&gt;必填项&lt;/h4&gt;
+&lt;p&gt;形如 &lt;code&gt;(required elements)&lt;/code&gt; 的文本是必填项。
+上述三种元素默认都是必填项，&lt;code&gt;()&lt;/code&gt;符号用在一些比较特殊的情形下，比如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program (&lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;either&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;this &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;and&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;that&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;or&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;this&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;选择项&#34;&gt;选择项&lt;/h4&gt;
+&lt;p&gt;形如 &lt;code&gt;element|another&lt;/code&gt; 的文本是选择项，你可以从中选择一个值。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program go (&lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;up &lt;span style=&#34;color:#666&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;down &lt;span style=&#34;color:#666&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;left &lt;span style=&#34;color:#666&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;right)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;列表项&#34;&gt;列表项&lt;/h4&gt;
+&lt;p&gt;形如 &lt;code&gt;element...&lt;/code&gt; 的文本是列表项，你可以输入多个参数。&lt;/p&gt;
+&lt;p&gt;比如说：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program &lt;span style=&#34;color:#007020&#34;&gt;open&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;file&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;...&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后你可以通过&lt;code&gt;arguments[&#39;&amp;lt;file&amp;gt;&#39;]&lt;/code&gt; 来访问这个列表。&lt;/p&gt;
+&lt;h3 id=&#34;option&#34;&gt;Option&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;Option&lt;/code&gt; 部分用于指定某些特殊情形，比如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将某个短参数与长参数关联起来，比如&lt;code&gt;-i &amp;lt;file&amp;gt;, --input &amp;lt;file&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;某个选项有一个参数&lt;/li&gt;
+&lt;li&gt;选项的默认值，比如&lt;code&gt;--coefficient=K The K coefficient [default: 2.95]&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;校验&#34;&gt;校验&lt;/h3&gt;
+&lt;p&gt;如果对自己完成的文档有疑问，可以使用&lt;a href=&#34;http://try.docopt.org/&#34;&gt;在线工具&lt;/a&gt;进行校验。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年04月04日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Python包分发详解</title><link>https://xuanwo.io/2015/11/03/python-packages/</link><pubDate>Tue, 03 Nov 2015 15:24:06 +0000</pubDate><guid>https://xuanwo.io/2015/11/03/python-packages/</guid><description>&lt;p&gt;用Python写过不少的脚本，现在要把脚本打包成模块并进行发布，然后才明白脚本Boy到正规的码农差距有多大= =。
+踩了很多天的坑之后，自己学习到了Python的包分发机制，以及如何利用Pypi向全世界分发自己的模块。现在简单地做一些整理。&lt;/p&gt;
+&lt;h1 id=&#34;python包机制&#34;&gt;Python包机制&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;包是一个模块或模块/子模块的集合，一般情况下被压缩到一个压缩包中。
+其中包含
+1. 依赖信息
+2. 将文件拷贝到标准的包搜索路径的指令。
+3. 编译指令(如果在安装前代码必须被编译的话)。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;也就是说，为了分发模块，我们需要把模块的依赖信息和模块一起打包。在Python中，这个打包好的可分发的文件一般以&lt;code&gt;.egg&lt;/code&gt;结尾，其作用可以理解为java中的jar。Python的包管理以及分发曾经经历过非常混乱的一段时期，但是如今已经基本稳定（或者说，流行？）为两个套件：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;打包&amp;amp;分发：&lt;a href=&#34;https://pythonhosted.org/setuptools/&#34;&gt;Setuptools&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;安装&amp;amp;管理：&lt;a href=&#34;https://pip.readthedocs.org/en/stable/&#34;&gt;pip&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;准备工作&#34;&gt;准备工作&lt;/h1&gt;
+&lt;h2 id=&#34;注册pypi&#34;&gt;注册Pypi&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Pypi - the Python Package Index
+Pypi是Python语言包的仓库，全世界所有开源Python开发者都会在Pypi上提交&amp;amp;下载软件包&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;为了我们后续的提交操作，我们需要首先&lt;a href=&#34;https://pypi.python.org/pypi?%3Aaction=register_form&#34;&gt;注册&lt;/a&gt;一个Pypi的账号，注册非常简单，提供用户名，密码以及邮箱，经过验证之后就注册完成了。&lt;/p&gt;
+&lt;h2 id=&#34;目录结构&#34;&gt;目录结构&lt;/h2&gt;
+&lt;p&gt;Python没有严格的工程目录要求，只要有&lt;code&gt;__init__.py&lt;/code&gt;在的地方，就会被认为是一个Python的包。但是出于方便协作考虑，可以把自己的源代码与各种脚本分开存放。具体的结构可以学习Github上比较流行的Python项目，选择自己喜欢的即可。&lt;/p&gt;
+&lt;h2 id=&#34;环境配置&#34;&gt;环境配置&lt;/h2&gt;
+&lt;p&gt;首先你需要有pip，pip自从&lt;code&gt;3.4&lt;/code&gt;版本开始已经随python内置发布，如果使用的版本比较低，可以自己手动进行安装：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install python-pip
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后我们需要安装&lt;code&gt;setuptools&lt;/code&gt;：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pip install setuptools
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;编写安装脚本&#34;&gt;编写安装脚本&lt;/h1&gt;
+&lt;p&gt;准备工作就绪之后，我们就可以开始编写安装脚本了。&lt;/p&gt;
+&lt;h2 id=&#34;填写配置信息&#34;&gt;填写配置信息&lt;/h2&gt;
+&lt;h3 id=&#34;基本框架&#34;&gt;基本框架&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;setuptools&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; setup, find_packages &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 引入setuptools包&lt;/span&gt;
+setup(
+option &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; values, &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 本质上是一个函数的参数，分行写便于维护&lt;/span&gt;
+)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;参数介绍&#34;&gt;参数介绍&lt;/h3&gt;
+&lt;h4 id=&#34;指定整个包&#34;&gt;指定整个包&lt;/h4&gt;
+&lt;h4 id=&#34;指定单独模块&#34;&gt;指定单独模块&lt;/h4&gt;
+&lt;h4 id=&#34;依赖关系&#34;&gt;依赖关系&lt;/h4&gt;
+&lt;h4 id=&#34;包内数据&#34;&gt;包内数据&lt;/h4&gt;
+&lt;h4 id=&#34;其他数据&#34;&gt;其他数据&lt;/h4&gt;
+&lt;h4 id=&#34;meta-data&#34;&gt;Meta-Data&lt;/h4&gt;
+&lt;p&gt;Meta-Data| 描述值
+&amp;ndash;|&amp;ndash;
+&lt;code&gt;name&lt;/code&gt; | 包名
+&lt;code&gt;version&lt;/code&gt; | 此次发布版本
+&lt;code&gt;author&lt;/code&gt; |作者名
+&lt;code&gt;author_email&lt;/code&gt; | 作者邮箱
+&lt;code&gt;maintainer&lt;/code&gt; | 维护者名
+&lt;code&gt;maintainer_email&lt;/code&gt; | 维护者邮箱
+&lt;code&gt;url&lt;/code&gt; | 主页
+&lt;code&gt;description&lt;/code&gt; | 简要描述
+&lt;code&gt;long_description&lt;/code&gt; | 详细描述
+&lt;code&gt;download_url&lt;/code&gt; | 下载地址
+&lt;code&gt;classifiers&lt;/code&gt; | 分类，参见&lt;a href=&#34;https://pypi.python.org/pypi?%3Aaction=list_classifiers&#34;&gt;此处&lt;/a&gt;
+&lt;code&gt;platforms&lt;/code&gt; | 平台列表
+&lt;code&gt;license&lt;/code&gt; | 授权协议&lt;/p&gt;
+&lt;h3 id=&#34;典型配置&#34;&gt;典型配置&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;setuptools&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; setup, find_packages
+setup(
+name &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;HelloWorld&amp;#34;&lt;/span&gt;,
+version &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;0.1&amp;#34;&lt;/span&gt;,
+packages &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; find_packages(),
+scripts &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;say_hello.py&amp;#39;&lt;/span&gt;],
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Project uses reStructuredText, so ensure that the docutils get&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# installed or upgraded on the target machine&lt;/span&gt;
+install_requires &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;docutils&amp;gt;=0.3&amp;#39;&lt;/span&gt;],
+package_data &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# If any package contains *.txt or *.rst files, include them:&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;: [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;*.txt&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;*.rst&amp;#39;&lt;/span&gt;],
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# And include any *.msg files found in the &amp;#39;hello&amp;#39; package, too:&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;hello&amp;#39;&lt;/span&gt;: [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;*.msg&amp;#39;&lt;/span&gt;],
+},
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# metadata for upload to PyPI&lt;/span&gt;
+author &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Me&amp;#34;&lt;/span&gt;,
+author_email &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;me@example.com&amp;#34;&lt;/span&gt;,
+description &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;This is an Example Package&amp;#34;&lt;/span&gt;,
+license &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;PSF&amp;#34;&lt;/span&gt;,
+keywords &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;hello world example examples&amp;#34;&lt;/span&gt;,
+url &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;http://example.com/HelloWorld/&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# project home page, if any&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# could also include long_description, download_url, classifiers, etc.&lt;/span&gt;
+)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;打包&#34;&gt;打包&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这个坑踩了很久- -，没有老司机的带的痛苦
+与开发环境不同的时候，当用户运行你的包时，使用open等命令是以当前目录为根运行的，所以你必须指定数据所在位置，否则会出现IOError甚至更糟糕的情况&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;指定需要分发的文件&#34;&gt;指定需要分发的文件&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;自动处理&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;当没有&lt;code&gt;MANIFEST.in&lt;/code&gt;文件时，Setuptools将会按照下面的原则处理文件：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;所有&lt;code&gt;py_modules&lt;/code&gt;和&lt;code&gt;packages&lt;/code&gt;选项包含的Python源文件&lt;/li&gt;
+&lt;li&gt;所有&lt;code&gt;ext_modules&lt;/code&gt;或&lt;code&gt;libraries&lt;/code&gt;选项指定的C源文件&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;scripts&lt;/code&gt;指定的脚本（*参见&lt;a href=&#34;https://docs.python.org/3.5/distutils/setupscript.html#distutils-installing-scripts&#34;&gt;Installing Scripts&lt;/a&gt;*）&lt;/li&gt;
+&lt;li&gt;形如&lt;code&gt;test/test*.py&lt;/code&gt;的文件&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;README.txt&lt;/code&gt;（或&lt;code&gt;README&lt;/code&gt;），&lt;code&gt;setup.py&lt;/code&gt;和&lt;code&gt;setup.cfg&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;符合&lt;code&gt;package_data&lt;/code&gt;选项的所有文件（*参见&lt;a href=&#34;https://docs.python.org/3.5/distutils/setupscript.html#distutils-installing-package-data&#34;&gt;Installing Package Data&lt;/a&gt;*）&lt;/li&gt;
+&lt;li&gt;符合&lt;code&gt;data_files&lt;/code&gt;选项的所有文件（*参见&lt;a href=&#34;https://docs.python.org/3.5/distutils/setupscript.html#distutils-additional-files&#34;&gt;Installing Additional Files&lt;/a&gt;*）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;翻译自&lt;a href=&#34;https://docs.python.org/3.5/distutils/sourcedist.html#specifying-the-files-to-distribute&#34;&gt;Python官方文档 Specifying the files to distribute&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;手动处理&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;一般而言，自动处理已经足够，但是如果想要自己指定的话，则需要编辑&lt;code&gt;MANIFEST.in&lt;/code&gt;模板文件。
+&lt;code&gt;MANIFEST.in&lt;/code&gt;模板文件很简单，每一行都导入或者导出表示符合正则的一类文件。比如说：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# 导入根目录下满足*.txt的文件
+include *.txt
+# 递归导入examples目录下满足*.txt和*.py的文件
+recursive-include examples *.txt *.py
+# 导入满足examples/sample?/build的文件夹下所有文件
+prune examples/sample?/build
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;详细语法参见&lt;a href=&#34;https://docs.python.org/3.5/distutils/commandref.html#sdist-cmd&#34;&gt;此处&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;注意：
+当根目录下存在&lt;code&gt;MANIFEST.in&lt;/code&gt;文件时，Setuptools将不会再采用自动处理的设定，因此需要在&lt;code&gt;MANIFEST.in&lt;/code&gt;文件中指明所有需要导入的文件。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;调用数据&#34;&gt;调用数据&lt;/h3&gt;
+&lt;p&gt;当你需要调用Python包中的文件时，你可以使用下面的方法：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pkg_resources&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; resource_string
+data &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; resource_string(__name__, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;data.dat&amp;#39;&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;此时，指定的&lt;code&gt;data.dat&lt;/code&gt;文件将会以二进制文件流的形式赋值到data变量中，你可以按照自己的需要进行进一步处理。比如说：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;from pkg_resources import resource_string
+data = resource_string(__name__, &#39;example.yml&#39;)
+with open(&#39;config.yml&#39;, &#39;w&#39;) as f:
+f.write(str(data, encoding=&#39;utf-8&#39;))
+f.close()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;上述代码实现了从&lt;code&gt;example.yml&lt;/code&gt;中读取数据并保存到&lt;code&gt;config.yml&lt;/code&gt;文件中。&lt;/p&gt;
+&lt;h3 id=&#34;创建源码分发包&#34;&gt;创建源码分发包&lt;/h3&gt;
+&lt;p&gt;在包的根目录下执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;python setup&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;py sdist&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;默认情况下，&lt;code&gt;sdist&lt;/code&gt;命令将会为Unix创建&lt;code&gt;gzip&lt;/code&gt;压缩文件，为Windows创建&lt;code&gt;zip&lt;/code&gt;压缩文件
+你也可以添加参数&lt;code&gt;--formats=zip&lt;/code&gt;指定生成的文件类型，所有支持的参数见&lt;a href=&#34;https://docs.python.org/3.5/distutils/sourcedist.html&#34;&gt;此处&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;源码分发似乎不会导入&lt;code&gt;package_data&lt;/code&gt;中指定的数据，如果上传本分发包可能导致用户通过&lt;code&gt;pip&lt;/code&gt;安装的包中没有需要的数据。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;创建二进制分发包&#34;&gt;创建二进制分发包&lt;/h3&gt;
+&lt;p&gt;除了创建源码分发之外，我们还可以创建基于平台的二进制分发包。
+在包的根目录下执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;python setup&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;py bdist&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;默认情况下，这个命令将会创建基于自身平台的分发包。
+同样的，你也可以添加&lt;code&gt;--format=zip&lt;/code&gt;参数来指定生成的文件，支持的参数见&lt;a href=&#34;https://docs.python.org/3.5/distutils/builtdist.html&#34;&gt;此处&lt;/a&gt;
+除此之外，也可以使用以下的命令直接生成对应格式的分发包：&lt;/p&gt;
+&lt;p&gt;命令|格式
+&amp;ndash;|&amp;ndash;
+bdist_dumb |tar, gztar, bztar, xztar, ztar, zip
+bdist_rpm |rpm, srpm
+bdist_wininst | wininst
+bdist_msi | msi&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这一命令无法跨平台， 在Linux上选择制作&lt;code&gt;wininst&lt;/code&gt;分发包时会提示缺乏相应的支持。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;创建wheel分发包&#34;&gt;创建wheel分发包&lt;/h3&gt;
+&lt;p&gt;wheel是新出的分发格式，旨在取代egg，你可以通过下列命令进行安装：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pip install wheel
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后在包的根目录下执行：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;python setup.ppy bdist_wheel
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;上传到pypi&#34;&gt;上传到Pypi&lt;/h1&gt;
+&lt;h2 id=&#34;注册包&#34;&gt;注册包&lt;/h2&gt;
+&lt;p&gt;在上传我们的包之前，我们需要首先向Pypi提交包的相关信息。
+在包的根目录下执行:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;python setup&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;py register&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;没有登陆的话，需要进行登陆；如果已经登陆，直接回车使用默认设置即可。&lt;/p&gt;
+&lt;h2 id=&#34;上传包&#34;&gt;上传包&lt;/h2&gt;
+&lt;p&gt;注册完毕后，我们可以提交我们的包了。
+在包的根目录下执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;python setup&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;py sdist bdist_wininst upload&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这条命令将会向Pypi提交源码和Win下的安装包，如果需要上传别的包，只要直接写出即可。&lt;/p&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/dccrazyboy/pyeco/blob/master/pyeco.rst&#34;&gt;Python开发生态环境简介&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://timd.cn/2015/10/20/setuptools/&#34;&gt;使用Setuptools构建和分发python包&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://python3-cookbook.readthedocs.org/zh_CN/latest/c10/p08_read_datafile_within_package.html&#34;&gt;10.8 读取位于包中的数据文件&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.python.org/3.5/distutils/sourcedist.html&#34;&gt;Creating a Source Distribution&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.python.org/3.5/distutils/examples.html&#34;&gt;Examples&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年11月03日 初步完成&lt;/li&gt;
+&lt;li&gt;2016年03月30日 修复了部分笔误，添加了一些注释，增加了wheel相关的内容&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>在Python中使用JSON</title><link>https://xuanwo.io/2015/10/30/python-json/</link><pubDate>Fri, 30 Oct 2015 23:47:23 +0000</pubDate><guid>https://xuanwo.io/2015/10/30/python-json/</guid><description>&lt;h1 id=&#34;json介绍&#34;&gt;JSON介绍&lt;/h1&gt;
+&lt;p&gt;JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。 易于人阅读和编写。同时也易于机器解析和生成。 它基于JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999的一个子集。 JSON采用完全独立于语言的文本格式，但是也使用了类似于C语言家族的习惯（包括C, C++, C#, Java, JavaScript, Perl, Python等）。 这些特性使JSON成为理想的数据交换语言。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;引用自&lt;a href=&#34;http://www.json.org/json-zh.html&#34;&gt;json.org&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;语法&#34;&gt;语法&lt;/h1&gt;
+&lt;h2 id=&#34;结构&#34;&gt;结构&lt;/h2&gt;
+&lt;p&gt;JSON只提供了两种结构——字典和数组。也就是说，JSON可以存储一对一或者一对多的键值对关系。&lt;/p&gt;
+&lt;h2 id=&#34;形式&#34;&gt;形式&lt;/h2&gt;
+&lt;h3 id=&#34;对象&#34;&gt;对象&lt;/h3&gt;
+&lt;p&gt;对象是一个无序的键值对集合。
+一个对象以&lt;code&gt;{&lt;/code&gt;开始，&lt;code&gt;}&lt;/code&gt;结束。每个&lt;code&gt;键&lt;/code&gt;后跟一个&lt;code&gt;:&lt;/code&gt;；键值对之间使用&lt;code&gt;,&lt;/code&gt;分隔。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/object.gif&#34; alt=&#34;object&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;数组&#34;&gt;数组&lt;/h3&gt;
+&lt;p&gt;数组是值的有序集合，一个键可以对应一个数组。
+一个数组以&lt;code&gt;[&lt;/code&gt;开始，&lt;code&gt;]&lt;/code&gt;结束。值之间使用&lt;code&gt;,&lt;/code&gt;分隔。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/array.gif&#34; alt=&#34;array&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;值&#34;&gt;值&lt;/h3&gt;
+&lt;p&gt;值可以是双引号括起来的字符串、数值、true、false、 null、对象或者数组。这些结构可以嵌套。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/value.gif&#34; alt=&#34;value&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;字符串&#34;&gt;字符串&lt;/h3&gt;
+&lt;p&gt;字符串是由双引号包围的任意数量Unicode字符的集合，使用反斜线转义。一个字符即一个单独的字符串。
+字符串与C/C++中的字符串非常相似，包括常见的各种转义符号。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/string.gif&#34; alt=&#34;value&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;数值&#34;&gt;数值&lt;/h3&gt;
+&lt;p&gt;数值与C/C++中的数值非常相似，但没有八进制和十六进制格式。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/number.gif&#34; alt=&#34;number&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;空白&#34;&gt;空白&lt;/h3&gt;
+&lt;p&gt;空白符号（包括空格，Tab以及回车）可以加入到任何符号之间，不会影响JSON的含义&lt;/p&gt;
+&lt;h1 id=&#34;python中的json库&#34;&gt;Python中的JSON库&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;以Python 3为基准&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;编码&#34;&gt;编码&lt;/h2&gt;
+&lt;h3 id=&#34;对应类型&#34;&gt;对应类型&lt;/h3&gt;
+&lt;p&gt;Python | JSON
+&amp;ndash;|&amp;ndash;
+dict | object
+list, tuple | array
+str| string
+int, float| number
+True | true
+False | false
+None | null&lt;/p&gt;
+&lt;h3 id=&#34;函数&#34;&gt;函数&lt;/h3&gt;
+&lt;p&gt;我们使用&lt;code&gt;JSON&lt;/code&gt;库中的&lt;code&gt;dump&lt;/code&gt;以及&lt;code&gt;dumps&lt;/code&gt;函数来进行&lt;code&gt;JSON&lt;/code&gt;编码。&lt;code&gt;dump&lt;/code&gt;和&lt;code&gt;dumps&lt;/code&gt;各项参数含义基本一致，唯一区别在于&lt;code&gt;dump&lt;/code&gt;函数编码产生一个JSON文件流，而&lt;code&gt;dumps&lt;/code&gt;编码产生一个JSON字符串。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dump(obj, fp, skipkeys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False, ensure_ascii&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, check_circular&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, allow_nan&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, cls&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, indent&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, separators&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, default&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, sort_keys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False, &lt;span style=&#34;color:#666&#34;&gt;**&lt;/span&gt;kw)
+json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps(obj, skipkeys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False, ensure_ascii&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, check_circular&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, allow_nan&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, cls&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, indent&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, separators&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, default&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, sort_keys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False, &lt;span style=&#34;color:#666&#34;&gt;**&lt;/span&gt;kw)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;obj&lt;/code&gt;：编码对象&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;fp&lt;/code&gt;：指定文件流&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;skipkeys&lt;/code&gt;：若skipkeys为真，则非标准类型将会跳过；否则返回&lt;code&gt;TypeError&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ensure_ascii&lt;/code&gt;：若&lt;code&gt;ensure_ascii&lt;/code&gt;为真，则输出时将会确保没有非ASCII字符；否则将会原样输出&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;check_circular&lt;/code&gt;：若&lt;code&gt;check_circular&lt;/code&gt;为真，则将会检测是否存在循环调用；否则会跳过检测&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;allow_nan&lt;/code&gt;：若&lt;code&gt;allow_nan&lt;/code&gt;为真，则将会允许存在空值（无穷大值）；否则会返回&lt;code&gt;ValueError&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cls&lt;/code&gt;：若&lt;code&gt;cls&lt;/code&gt;为空值，则使用&lt;code&gt;JSONEncoder&lt;/code&gt;；否则使用指定子类进行编码&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;indent&lt;/code&gt;：若&lt;code&gt;indent&lt;/code&gt;为空值，则无缩进；否则使用指定值进行缩进&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;separators&lt;/code&gt;：若&lt;code&gt;separators&lt;/code&gt;为空值，则使用&lt;code&gt;(&#39;,&#39;, &#39;: &#39;)&lt;/code&gt;分隔；否则使用指定的元组进行分隔&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;default&lt;/code&gt;：若&lt;code&gt;default&lt;/code&gt;为空值，则使用自带的&lt;code&gt;default&lt;/code&gt;方法；否则使用指定值&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sort_keys&lt;/code&gt;：若&lt;code&gt;sort_keys&lt;/code&gt;为真，则输出将会按照键进行排序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;示范&#34;&gt;示范&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;json&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps([&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;foo&amp;#39;&lt;/span&gt;, {&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;bar&amp;#39;&lt;/span&gt;: (&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;baz&amp;#39;&lt;/span&gt;, None, &lt;span style=&#34;color:#40a070&#34;&gt;1.0&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;)}])
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;[&amp;#34;foo&amp;#34;, {&amp;#34;bar&amp;#34;: [&amp;#34;baz&amp;#34;, null, 1.0, 2]}]&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 排序&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps({&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;c&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;b&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;a&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;}, sort_keys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True))
+{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;a&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;b&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;c&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 分隔符&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps([&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;3&lt;/span&gt;,{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;4&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;6&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;7&lt;/span&gt;}], separators&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;,&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;:&amp;#39;&lt;/span&gt;))
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;[1,2,3,{&amp;#34;4&amp;#34;:5,&amp;#34;6&amp;#34;:7}]&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Unicode输出&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#4070a0;font-weight:bold&#34;&gt;\u5317\u4eac&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;, ensure_ascii&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False)
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;北京&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;解码&#34;&gt;解码&lt;/h2&gt;
+&lt;h3 id=&#34;对应类型-1&#34;&gt;对应类型&lt;/h3&gt;
+&lt;p&gt;JSON | Python
+&amp;ndash; | &amp;ndash;
+object | dict
+array | list
+string | str
+number (int) | int
+number (real) | float
+true | True
+false | False
+null | None&lt;/p&gt;
+&lt;h3 id=&#34;函数-1&#34;&gt;函数&lt;/h3&gt;
+&lt;p&gt;我们使用&lt;code&gt;JSON&lt;/code&gt;库中的&lt;code&gt;load&lt;/code&gt;以及&lt;code&gt;loads&lt;/code&gt;函数来进行&lt;code&gt;JSON&lt;/code&gt;解码。&lt;code&gt;load&lt;/code&gt;和&lt;code&gt;loads&lt;/code&gt;各项参数含义基本一致，唯一区别在于&lt;code&gt;load&lt;/code&gt;函数用于解码JSON文件流，而&lt;code&gt;loads&lt;/code&gt;用于解码JSON字符串。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;load(fp, cls&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, object_hook&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_float&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_int&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_constant&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, object_pairs_hook&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, &lt;span style=&#34;color:#666&#34;&gt;**&lt;/span&gt;kw)
+json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;loads(s, encoding&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, cls&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, object_hook&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_float&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_int&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_constant&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, object_pairs_hook&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, &lt;span style=&#34;color:#666&#34;&gt;**&lt;/span&gt;kw)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;fp&lt;/code&gt;：指定文件流&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;s&lt;/code&gt;：指定字符串&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;encoding&lt;/code&gt;：指定字符串编码&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cls&lt;/code&gt;：若&lt;code&gt;cls&lt;/code&gt;为空值，则使用&lt;code&gt;JSONEncoder&lt;/code&gt;；否则使用指定子类进行编码&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;object_hook&lt;/code&gt;：若&lt;code&gt;object_hook&lt;/code&gt;为空值，对象则返回解码器&lt;code&gt;dict&lt;/code&gt;；否则使用自定义类型返回&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parse_float&lt;/code&gt;：若&lt;code&gt;parse_float&lt;/code&gt;为空，则JSON浮点数转换为浮点数；否则转换为指定类型&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parse_int&lt;/code&gt;：若&lt;code&gt;parse_int&lt;/code&gt;为空，则JSON整数转换为整数；否则转换为指定类型&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parse_constant&lt;/code&gt;若&lt;code&gt;parse_constant&lt;/code&gt;为空，则不会处理非法输入；否则抛出异常&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;object_pairs_hook&lt;/code&gt;：若&lt;code&gt;object_pairs_hook&lt;/code&gt;为空值，则数组返回解码器&lt;code&gt;dict&lt;/code&gt;；否则使用自定义类型返回&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;示范-1&#34;&gt;示范&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;json&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;loads(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;[&amp;#34;foo&amp;#34;, {&amp;#34;bar&amp;#34;:[&amp;#34;baz&amp;#34;, null, 1.0, 2]}]&amp;#39;&lt;/span&gt;)
+[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;foo&amp;#39;&lt;/span&gt;, {&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;bar&amp;#39;&lt;/span&gt;: [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;baz&amp;#39;&lt;/span&gt;, None, &lt;span style=&#34;color:#40a070&#34;&gt;1.0&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;]}]&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年10月30日 初步完成&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>使用pyQuery解析HTML</title><link>https://xuanwo.io/2015/10/23/pyquery-intro/</link><pubDate>Fri, 23 Oct 2015 01:03:09 +0000</pubDate><guid>https://xuanwo.io/2015/10/23/pyquery-intro/</guid><description>&lt;h1 id=&#34;pyquery介绍&#34;&gt;pyQuery介绍&lt;/h1&gt;
+&lt;p&gt;pyquery 可以让你用jquery语法来对xml进行查询。这个API和jquery十分类似。如果利用lxml，pyquery对xml和html的操作将更加快速。&lt;/p&gt;
+&lt;h1 id=&#34;pyquery安装&#34;&gt;pyQuery安装&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;首先，你得有一个python环境，最好是类linux的，因为安装pyquery的过程中需要编译某一个包，在windows上比较难解决依赖问题&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;安装python环境&#34;&gt;安装Python环境&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install python python-dev python-pip
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;python&lt;/code&gt; 安装python环境&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;python-dev&lt;/code&gt; 安装python开发环境&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;python-pip&lt;/code&gt; 安装pip来进行python包管理&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;解决pyquery所需依赖&#34;&gt;解决pyQuery所需依赖&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install libxml2-dev libxslt1-dev libz-dev
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;libxml2-dev&lt;/code&gt;和&lt;code&gt;libxslt1-dev&lt;/code&gt;是编译lxml所需要的包，缺少会导致编译失败&lt;/li&gt;
+&lt;li&gt;某些情况下会提示&lt;code&gt;/usr/bin/ld: cannot find -lz&lt;/code&gt;，所以需要安装&lt;code&gt;libz-dev&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;安装pyquery&#34;&gt;安装pyQuery&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;pip install pyquery
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;解决了依赖问题之后，就可以进行pyquery的安装了。
+&amp;gt; 有一个坑点是在虚拟机编译lxml的过程中，如果内存过小会导致编译失败。如果出现错误，请把虚拟机的内存调整至1024M或更大。&lt;/p&gt;
+&lt;h1 id=&#34;pyquery使用&#34;&gt;pyQuery使用&lt;/h1&gt;
+&lt;h2 id=&#34;最简样例&#34;&gt;最简样例&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+html &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&amp;#39;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;lt;html&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;head&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;title&amp;gt;这是标题&amp;lt;/title&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;/head&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;body&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;p id=&amp;#34;hi&amp;#34;&amp;gt;Hello&amp;lt;/p&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;ul&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;li&amp;gt;list1&amp;lt;/li&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;div class=&amp;#34;ha&amp;#34;&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Cool!
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;/div&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;li&amp;gt;list2&amp;lt;/li&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;/ul&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;/body&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;lt;/html&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&amp;#39;&lt;/span&gt;
+doc &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; pyq(html)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;title&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 获取 title 标签的源码&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# &amp;lt;title&amp;gt;这是标题&amp;lt;/title&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;title&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 获取 title 标签的内容&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 这是标题&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;.ha&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 获取 class 为 ha 的标签的内容&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Cool!&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;#hi&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 获取 id 为 hi 的标签的内容&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Hello&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;p:first&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 还可以支持伪类&lt;/span&gt;
+li &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;li&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 处理多个元素&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; li:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(i)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text()
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# list1&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# list2&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;指定网址&#34;&gt;指定网址&lt;/h2&gt;
+&lt;h3 id=&#34;直接访问&#34;&gt;直接访问&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;urllib&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 直接访问并获取相关信息&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(url&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https://www.google.com&amp;#39;&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;指定headers&#34;&gt;指定headers&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;urllib&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 以指定headers访问并获取相关信息，好处是不会被某些网站拒绝访问&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(url&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https://www.google.com&amp;#39;&lt;/span&gt;, headers&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;User-Agent&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.71 Safari/537.36&amp;#39;&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;指定文件&#34;&gt;指定文件&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(filename&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;path/to/html/file&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;指定lxml文档&#34;&gt;指定lxml文档&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;lxml&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; etree
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# pyquery支持etree的API&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(etree&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;fromstring(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;html&amp;gt;&amp;lt;/html&amp;gt;&amp;#34;&lt;/span&gt;))&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/gawel/pyquery&#34;&gt;gawel/pyquery&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.powerxing.com/python-use-pyquery-to-parse-html/&#34;&gt;Python使用pyQuery解析HTML内容&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://stackoverflow.com/questions/26053982/error-setup-script-exited-with-error-command-x86-64-linux-gnu-gcc-failed-wit&#34;&gt;error: Setup script exited with error: command &amp;lsquo;x86_64-linux-gnu-gcc&amp;rsquo; failed with exit status 1&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://stackoverflow.com/questions/24455238/lxml-installation-error-ubuntu-14-04-internal-compiler-error&#34;&gt;lxml installation error ubuntu 14.04 (internal compiler error)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://stackoverflow.com/a/22256546&#34;&gt;can&amp;rsquo;t installing lxml on Ubuntu 12.04&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年10月23日 初步完成&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

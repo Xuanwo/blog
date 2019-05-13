@@ -1,0 +1,85 @@
+<!doctype html><html><head><title>POJ 1061 青蛙的约会</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content=Technology,Code,Program,Linux,><meta name=author content=Xuanwo><meta property=og:title content="POJ 1061 青蛙的约会"><meta property=og:description content="A blog maintained by an interesting programmer."><meta property=og:type content=website><meta property=og:locale content=en_US><meta property=og:url content=https://xuanwo.io/2014/07/23/poj-1061-date-of-frogs/><link href rel=alternate type=application/rss+xml title="Xuanwo's Blog"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/milligram@1.3.0/dist/milligram.min.css integrity="sha256-Ro/wP8uUi8LR71kwIdilf78atpu8bTEwrK5ZotZo+Zc=" crossorigin=anonymous><link rel=stylesheet href=/css/main.min.css><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.54.0"></head><body><div id=container><header id=header><div id=header-outer class=outer><div id=header-inner class=inner><a id=main-nav-toggle class=nav-icon href=javascript:;><svg width="1em" height="1em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#bars"/></svg></a><a id=logo class=logo-text href=https://xuanwo.io>Xuanwo&#39;s Blog</a><nav id=main-nav><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<a class=main-nav-link href=/about/>关于我</a></nav></div></div></header><section id=main class=outer><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 class=article-title itemprop=name>POJ 1061 青蛙的约会</h1></header><div class=article-meta><a href=/2014/07/23/poj-1061-date-of-frogs/ class=article-date><time datetime=2014-07-23T13:49:00.000&#43;00:00 itemprop=datePublished>2014-07-23</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div><div class=article-comment-link-wrap><a href=/2014/07/23/poj-1061-date-of-frogs/#disqus_thread class=article-comment-link>Comments</a></div></div><div class=article-entry itemprop=articleBody><h2 id=题目>题目</h2><p>源地址：</p><p><a href="http://poj.org/problem?id=1061">http://poj.org/problem?id=1061</a></p><h1 id=理解>理解</h1><p>扩展欧几里德方程的模板体。当初没有做出来，现在好像明白一点了。</p><h1 id=新技能get>新技能get</h1><p><code>扩展欧几里德方程</code>解法
+&gt;
+设标准方程式为： a*x +b*y =d (a,b已知)
+1. 首先求出gcd(a,b) ，然后化简方程，使得a/=gcd(a,b); b/=gcd(a,b); d/=gcd(a,b);
+2. 先求出 a*x+b*y=gcd(a,b) 的一组特解，也就是方程 a*x+b<em>y=1 的一个特解。然后将特解（x0, y0） 代入方程，并变形： a</em> x0 <em>d + b</em> y0 <em>d= d
+3. 根据解系的 公式： x =x1 + b</em> t ; y =y1 - a *t; 我们首先假设他最小的解x=0 ，然后求出 此时的 t=-x1/b; 然后带入求最小的解x=x1+b*t=x1 - b*t ;因为此时的t为 负数， 减去他的 负数，就是等于加上他。</p><h1 id=代码>代码</h1><pre><code>#include &lt;iostream&gt;
+#include &lt;cmath&gt;
+#include &lt;cstdio&gt;
+using namespace std;
+
+
+long long x, y, m, n, l;
+long long a, b, d, k, s, t;
+
+long long gcd(long long a, long long b)
+{
+    long long c;
+    if (a &lt; b)
+    {
+        c = a;    a = b;
+        b = c;
+    }
+    while (b)
+    {
+        c = b;
+        b = a % b;
+        a = c;
+    }
+    return a;
+}
+
+long long extended_gcd(long long a, long long b, long long &amp;x, long long &amp;y)
+{
+    long long ans, t;
+    if (b == 0)
+    {
+        x = 1;    y = 0;
+        return a;
+    }
+    else
+    {
+        ans = extended_gcd(b, a % b, x, y);
+        t = x;    x = y;
+        y = t - (a / b) * y;
+    }
+    return ans;
+}
+
+int main(int argc, char const *argv[])
+{
+    while (scanf(&quot;%lld %lld %lld %lld %lld&quot;, &amp;x, &amp;y, &amp;m, &amp;n, &amp;l) != EOF)
+    {
+        a = n - m;
+        b = l;
+        d = x - y;
+        long long r = gcd(a, b);
+        if (d % r != 0)
+        {
+            printf(&quot;Impossible\n&quot;);
+            continue;
+        }
+        a /= r;
+        b /= r;
+        d /= r;
+        extended_gcd(a, b, s, k);
+        s = s * d;
+        k = k * d;
+        t = s / b;
+        s = s - t * b;
+        if (s &lt; 0)
+            s += b;
+        printf(&quot;%lld\n&quot;, s);
+    }
+    return 0;
+}
+
+</code></pre><h1 id=更新日志>更新日志</h1><ul><li>2014年07月23日 已AC。</li></ul></div><div class=article-toc></div></div><nav id=article-nav><a href=/2014/07/23/poj-1326-mileage-bank/ id=article-nav-newer class=article-nav-link-wrap><div class=article-nav-title><span>&lt;</span>&nbsp;
+POJ 1326 Mileage Bank</div></a><a href=/2014/07/23/poj-1318-word-amalgamation/ id=article-nav-older class=article-nav-link-wrap><div class=article-nav-title>POJ 1318 Word Amalgamation&nbsp;<span>&gt;</span></div></a></nav></article><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){this.page.identifier='\/2014\/07\/23\/POJ-1061-Date-of-Frogs\/';this.page.title='POJ 1061 青蛙的约会';this.page.url='https:\/\/xuanwo.io\/2014\/07\/23\/poj-1061-date-of-frogs\/';};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return;}
+var d=document,s=d.createElement('script');s.async=true;s.src='//'+"only0god"+'.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></section><footer id=footer><div class=outer><div id=footer-info class=inner>&copy; 2019 Xuanwo&#39;s Blog&nbsp;
+Powered by <a href=https://gohugo.io target=_blank>Hugo</a></div></div><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script src=https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js></script><script>tocbot.init({tocSelector:'.article-toc',contentSelector:'.article-entry',headingSelector:'h1, h2, h3, h4, h5',});</script><script>document.getElementById('main-nav-toggle').addEventListener('click',function(){var header=document.getElementById('header');if(header.classList.contains('mobile-on')){header.classList.remove('mobile-on');}else{header.classList.add('mobile-on');}});</script></footer></div></body></html>

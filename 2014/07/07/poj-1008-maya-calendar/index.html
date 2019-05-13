@@ -1,0 +1,94 @@
+<!doctype html><html><head><title>POJ 1008 Maya Calendar</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content=Technology,Code,Program,Linux,><meta name=author content=Xuanwo><meta property=og:title content="POJ 1008 Maya Calendar"><meta property=og:description content="A blog maintained by an interesting programmer."><meta property=og:type content=website><meta property=og:locale content=en_US><meta property=og:url content=https://xuanwo.io/2014/07/07/poj-1008-maya-calendar/><link href rel=alternate type=application/rss+xml title="Xuanwo's Blog"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/milligram@1.3.0/dist/milligram.min.css integrity="sha256-Ro/wP8uUi8LR71kwIdilf78atpu8bTEwrK5ZotZo+Zc=" crossorigin=anonymous><link rel=stylesheet href=/css/main.min.css><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.54.0"></head><body><div id=container><header id=header><div id=header-outer class=outer><div id=header-inner class=inner><a id=main-nav-toggle class=nav-icon href=javascript:;><svg width="1em" height="1em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#bars"/></svg></a><a id=logo class=logo-text href=https://xuanwo.io>Xuanwo&#39;s Blog</a><nav id=main-nav><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<a class=main-nav-link href=/about/>关于我</a></nav></div></div></header><section id=main class=outer><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 class=article-title itemprop=name>POJ 1008 Maya Calendar</h1></header><div class=article-meta><a href=/2014/07/07/poj-1008-maya-calendar/ class=article-date><time datetime=2014-07-07T23:04:08.000&#43;00:00 itemprop=datePublished>2014-07-07</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div><div class=article-comment-link-wrap><a href=/2014/07/07/poj-1008-maya-calendar/#disqus_thread class=article-comment-link>Comments</a></div></div><div class=article-entry itemprop=articleBody><h2 id=题目>题目</h2><p>源地址：</p><p><a href="http://poj.org/problem?id=1008">http://poj.org/problem?id=1008</a></p><h1 id=理解>理解</h1><p>两种纪年法的转换，另外设一个<code>days</code>的变量保存总天数，然后以它为基准进行变换，没有什么难度。但是在具体的方法上，还是有些优化的余地。比如我不用写那么多长长的if判断语句，使用一个<code>string</code>数组就可以轻松搞定了，这是我不机智的地方。此外，应当注意到，两种纪年法的第一天分别是0和1，要小心。</p><h1 id=新技能get>新技能get</h1><p><a href="http://www.cplusplus.com/reference/string/string/?kw=string">string类</a>
+C++就是比C高大上，再也不需要<code>char</code>数组了～
+介绍一下<code>string类</code>常用的一些方法和变量：
+- <a href=http://www.cplusplus.com/reference/string/string/length/><code>length</code></a>
+- <a href=http://www.cplusplus.com/reference/string/string/find/><code>find</code></a>
+- <a href=http://www.cplusplus.com/reference/string/string/copy/><code>copy</code></a>
+- <a href=http://www.cplusplus.com/reference/string/string/swap-free/><code>swap</code></a>
+- <a href=http://www.cplusplus.com/reference/string/string/compare/><code>compare</code></a></p><h1 id=代码>代码</h1><pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int transHabb(string month)
+{
+    if (!month.compare(&quot;pop&quot;))    return 1;
+    else if (!month.compare(&quot;no&quot;))   return 2;
+    else if (!month.compare(&quot;zip&quot;))   return 3;
+    else if (!month.compare(&quot;zotz&quot;))   return 4;
+    else if (!month.compare(&quot;tzec&quot;))   return 5;
+    else if (!month.compare(&quot;xul&quot;))   return 6;
+    else if (!month.compare(&quot;yoxkin&quot;))   return 7;
+    else if (!month.compare(&quot;mol&quot;))   return 8;
+    else if (!month.compare(&quot;chen&quot;))   return 9;
+    else if (!month.compare(&quot;yax&quot;))   return 10;
+    else if (!month.compare(&quot;zac&quot;))   return 11;
+    else if (!month.compare(&quot;ceh&quot;))   return 12;
+    else if (!month.compare(&quot;mac&quot;))   return 13;
+    else if (!month.compare(&quot;kankin&quot;))   return 14;
+    else if (!month.compare(&quot;muan&quot;))   return 15;
+    else if (!month.compare(&quot;pax&quot;))   return 16;
+    else if (!month.compare(&quot;koyab&quot;))   return 17;
+    else if (!month.compare(&quot;cumhu&quot;))   return 18;
+    else return 19;
+
+}
+
+string transTzolkin(int day)
+{
+    if (day == 1)    return &quot;imix&quot;;
+    else if (day == 2)   return &quot;ik&quot;;
+    else if (day == 3)   return &quot;akbal&quot;;
+    else if (day == 4)   return &quot;kan&quot;;
+    else if (day == 5)   return &quot;chicchan&quot;;
+    else if (day == 6)   return &quot;cimi&quot;;
+    else if (day == 7)   return &quot;manik&quot;;
+    else if (day == 8)   return &quot;lamat&quot;;
+    else if (day == 9)   return &quot;muluk&quot;;
+    else if (day == 10)   return &quot;ok&quot;;
+    else if (day == 11)   return &quot;chuen&quot;;
+    else if (day == 12)   return &quot;eb&quot;;
+    else if (day == 13)   return &quot;ben&quot;;
+    else if (day == 14)   return &quot;ix&quot;;
+    else if (day == 15)   return &quot;mem&quot;;
+    else if (day == 16)   return &quot;cib&quot;;
+    else if (day == 17)   return &quot;caban&quot;;
+    else if (day == 18)   return &quot;eznab&quot;;
+    else if (day == 19)   return &quot;canac&quot;;
+    else   return &quot;ahau&quot;;
+}
+
+int Habb(int day, string month, int year)
+{
+    return day + (transHabb(month) - 1) * 20 + year * 365;
+}
+
+int main()
+{
+    int n;
+    cin &gt;&gt; n;
+    cout &lt;&lt; n &lt;&lt; endl;
+    while (n--)
+    {
+        int Tzolkinmonth = 0, Tzolkinyear = 0, Habbday = 0, Habbyear = 0, days = 0;
+        string Tzolkinday = &quot;\0&quot;, Habbmonth = &quot;\0&quot;;
+        scanf(&quot;%d. &quot;, &amp;Habbday);
+        cin &gt;&gt; Habbmonth;
+        scanf(&quot; %d&quot;, &amp;Habbyear);
+        days = Habb(Habbday, Habbmonth, Habbyear);
+        Tzolkinyear = days / 260;
+        Tzolkinmonth = days % 260 % 13+1;
+        Tzolkinday = transTzolkin(days % 260 % 20+1);
+        cout &lt;&lt; Tzolkinmonth &lt;&lt; &quot; &quot; &lt;&lt; Tzolkinday &lt;&lt; &quot; &quot; &lt;&lt; Tzolkinyear &lt;&lt; endl;
+    }
+}
+
+</code></pre><h1 id=更新日志>更新日志</h1><ul><li>2014年07月07日 已AC，文章BUG修正。</li></ul></div><div class=article-toc></div></div><nav id=article-nav><a href=/2014/07/10/poj-1013-counterfeit-dollar/ id=article-nav-newer class=article-nav-link-wrap><div class=article-nav-title><span>&lt;</span>&nbsp;
+POJ 1013 Counterfeit Dollar</div></a><a href=/2014/07/07/poj-1007-dna-sorting/ id=article-nav-older class=article-nav-link-wrap><div class=article-nav-title>POJ 1007 DNA Sorting&nbsp;<span>&gt;</span></div></a></nav></article><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){this.page.identifier='\/2014\/07\/07\/POJ-1008-Maya-Calendar\/';this.page.title='POJ 1008 Maya Calendar';this.page.url='https:\/\/xuanwo.io\/2014\/07\/07\/poj-1008-maya-calendar\/';};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return;}
+var d=document,s=d.createElement('script');s.async=true;s.src='//'+"only0god"+'.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></section><footer id=footer><div class=outer><div id=footer-info class=inner>&copy; 2019 Xuanwo&#39;s Blog&nbsp;
+Powered by <a href=https://gohugo.io target=_blank>Hugo</a></div></div><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script src=https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js></script><script>tocbot.init({tocSelector:'.article-toc',contentSelector:'.article-entry',headingSelector:'h1, h2, h3, h4, h5',});</script><script>document.getElementById('main-nav-toggle').addEventListener('click',function(){var header=document.getElementById('header');if(header.classList.contains('mobile-on')){header.classList.remove('mobile-on');}else{header.classList.add('mobile-on');}});</script></footer></div></body></html>

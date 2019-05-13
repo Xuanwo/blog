@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Vps on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/vps/</link><description>Recent content in Vps on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Wed, 01 Jul 2015 09:49:31 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/vps/index.xml" rel="self" type="application/rss+xml"/><item><title>使用Screen管理会话</title><link>https://xuanwo.io/2015/07/01/screen-ssh/</link><pubDate>Wed, 01 Jul 2015 09:49:31 +0000</pubDate><guid>https://xuanwo.io/2015/07/01/screen-ssh/</guid><description>&lt;p&gt;在实现&lt;a href=&#34;http://xuanwo.io/2015/06/30/together-project/&#34;&gt;Together项目&lt;/a&gt;的过程中，有一个需求是需要下载一个500M左右系统镜像包，由于文件源在国内，国外的下载速度简直感人。在经历多次因为SSH超时导致下载意外终止后，我终于决定要解决掉这个问题。&lt;/p&gt;
+&lt;h1 id=&#34;原因&#34;&gt;原因&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;SIGHUP 信号&lt;/strong&gt;
+首先介绍Linux/Unix中的几个概念：
+&amp;gt; [进程组（process group）]()：一个或多个进程的集合，每一个进程组有唯一一个进程组ID，即进程组长进程的ID。
+&amp;gt; [会话期（session）]()：一个或多个进程组的集合，有唯一一个会话期首进程（session leader）。会话期ID为首进程的ID。
+&amp;gt; 会话期可以有一个单独的控制终端（controlling terminal）。与控制终端连接的会话期首进程叫做控制进程（controlling process）。当前与终端交互的进程称为前台进程组。其余进程组称为后台进程组。&lt;/p&gt;
+&lt;p&gt;根据&lt;a href=&#34;https://zh.wikipedia.org/wiki/POSIX&#34;&gt;POSIX.1&lt;/a&gt;定义：
+- 挂断信号（SIGHUP）默认的动作是终止程序。
+- 当终端接口检测到网络连接断开，将挂断信号发送给控制进程（会话期首进程）。
+- 如果会话期首进程终止，则该信号发送到该会话期前台进程组。
+- 一个进程退出导致一个孤儿进程组中产生时，如果任意一个孤儿进程组进程处于STOP状态，发送SIGHUP和SIGCONT信号到该进程组中所有进程。&lt;/p&gt;
+&lt;p&gt;也就是说，一旦putty因为超时产生了SIGHUP信号，那么会连带着当前终端正在运行的程序全部终止。所以，只要避免SIGHUP信号的产生，就可以规避这个问题。&lt;/p&gt;
+&lt;h1 id=&#34;screen&#34;&gt;Screen&lt;/h1&gt;
+&lt;p&gt;简单来说，Screen是一个可以在多个进程之间多路复用一个物理终端的窗口管理器。Screen中有会话的概念，用户可以在一个screen会话中创建多个screen窗口，在每一个screen窗口中就像操作一个真实的telnet/SSH连接窗口那样。&lt;/p&gt;
+&lt;h2 id=&#34;安装&#34;&gt;安装&lt;/h2&gt;
+&lt;p&gt;很多发行版会预装Screen，如果没有（比如Ubuntu），则需要自行安装，以Ubuntu为例：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+sudo apt-get install screen
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;创建&#34;&gt;创建&lt;/h2&gt;
+&lt;h3 id=&#34;直接创建&#34;&gt;直接创建&lt;/h3&gt;
+&lt;p&gt;直接在命令行下输入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+screen
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;之后你会看到几页字，按回车跳过之后，你就来到了一个shell的全屏窗口。你可以执行任意shell程序，就像在ssh窗口中那样。在该窗口中键入exit退出该窗口，如果这是该screen会话的唯一窗口，该screen会话退出，否则screen自动切换到前一个窗口。&lt;/p&gt;
+&lt;h3 id=&#34;快捷键创建新窗口&#34;&gt;快捷键创建新窗口&lt;/h3&gt;
+&lt;p&gt;在已经激活的Screen会话下，使用快捷键&lt;code&gt;Ctrl+A&lt;/code&gt;然后点击&lt;code&gt;C&lt;/code&gt;，screen 在该会话内生成一个新的窗口并切换到该窗口。&lt;/p&gt;
+&lt;h2 id=&#34;暂时中断&#34;&gt;暂时中断&lt;/h2&gt;
+&lt;p&gt;screen还有更高级的功能。你可以不中断screen窗口中程序的运行而暂时断开（detach）screen会话，并在随后时间重新连接（attach）该会话，重新控制各窗口中运行的程序。例如，我们使用wget下载一个文件：
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/ssh-time-out.png&#34; alt=&#34;SSH超时样例&#34; /&gt;
+之后我们想暂时退出做点别的事情，比如出去散散步，那么在screen窗口键入&lt;code&gt;Ctrl+A&lt;/code&gt;然后点击&lt;code&gt;D&lt;/code&gt;，Screen会给出detached提示：
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/screen-detached.png&#34; alt=&#34;Screen Detached&#34; /&gt;
+半个小时之后回来了，找到该screen会话：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+screen -ls
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;重新连接会话：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+screen -r 会话ID
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;一切工作都会完全回来，区别只在于，他可能已经做好了&amp;gt;_&amp;lt;。&lt;/p&gt;
+&lt;h2 id=&#34;键绑定&#34;&gt;键绑定&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;你可能注意到给screen发送命令使用了特殊的键组合&lt;code&gt;Ctrl+A&lt;/code&gt;。这是因为我们在键盘上键入的信息是直接发送给当前screen窗口，必须用其他方式向screen窗口管理器发出命令，默认情况下，screen接收以&lt;code&gt;Ctrl+A&lt;/code&gt;开始的命令。这种命令形式在screen中叫做键绑定（key binding），&lt;code&gt;Ctrl+A&lt;/code&gt;叫做命令字符（command character）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;可以通过&lt;code&gt;Ctrl+A ?&lt;/code&gt;来查看所有的键绑定，常用的键绑定有：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;code&gt;Ctrl+A ?&lt;/code&gt;&lt;/th&gt;
+&lt;th&gt;显示所有键绑定信息&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A w&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;显示所有窗口列表&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A Ctrl+A&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;切换到之前显示的窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A c&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;创建一个新的运行shell的窗口并切换到该窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A n&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;切换到下一个窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A p&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;切换到前一个窗口(与Ctrl+A n相对)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A 0..9&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;切换到窗口0..9&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A a&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;发送 Ctrl+A到当前窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A d&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;暂时断开screen会话&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A k&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;杀掉当前窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A [&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;进入拷贝/回滚模式&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.ibm.com/developerworks/cn/linux/l-cn-screen/index.html&#34;&gt;linux 技巧：使用 screen 管理你的远程会话&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.gnu.org/software/screen/&#34;&gt;GNU Screen&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.slac.stanford.edu/comp/unix/package/epics/extensions/iocConsole/screen.1.html&#34;&gt;Screen的man page提供了最详细的信息&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年07月01日 完成关于Screen的介绍&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>VPS搭配Github Webhook实现Hexo自动发布</title><link>https://xuanwo.io/2015/02/05/vps-hexo-autodeploy/</link><pubDate>Thu, 05 Feb 2015 23:22:30 +0000</pubDate><guid>https://xuanwo.io/2015/02/05/vps-hexo-autodeploy/</guid><description>&lt;p&gt;自从买了VPS之后，我的人生就多了一个需要思考的问题——我的VPS还能用来干嘛？然后想到Github有一个Webhook的功能，可以在每一次提交之后发送一个POST到指定的URL。那么，只要找一个办法获取这个POST，再执行指定的命令，可以实现Hexo的自动发布功能了。从此以后，不管在哪里，我只要修改我的md文件，push之后我的服务器就能自动进行编译并且部署了。&lt;/p&gt;
+&lt;h1 id=&#34;配置nginx&#34;&gt;配置Nginx&lt;/h1&gt;
+&lt;h2 id=&#34;安装nginx&#34;&gt;安装Nginx&lt;/h2&gt;
+&lt;p&gt;使用apt-get程序来安装nginx&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+apt-get update
+apt-get install nginx
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在浏览器中访问&lt;a href=&#34;http://your-ip-address&#34;&gt;http://your-ip-address&lt;/a&gt; or domain/， 如果看到&lt;code&gt;Welcome to nginx!&lt;/code&gt;字样，说明Nginx已经安装成功了。&lt;/p&gt;
+&lt;h2 id=&#34;配置nginx-1&#34;&gt;配置Nginx&lt;/h2&gt;
+&lt;p&gt;修改&lt;code&gt;/etc/nginx/sites-available/default&lt;/code&gt;文件，在&lt;code&gt;serve&lt;/code&gt;的框里面的空行中输入：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+location /update {
+proxy_pass http://127.0.0.1:1111;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这样设置之后&lt;code&gt;http://your-ip-address or domain/update&lt;/code&gt;访问就会被重定向到1111端口。&lt;/p&gt;
+&lt;h2 id=&#34;重启nginx&#34;&gt;重启Nginx&lt;/h2&gt;
+&lt;p&gt;输入：
+&lt;code&gt;/etc/init.d/nginx restart&lt;/code&gt;&lt;/p&gt;
+&lt;h1 id=&#34;配置git&#34;&gt;配置Git&lt;/h1&gt;
+&lt;h2 id=&#34;安装git&#34;&gt;安装Git&lt;/h2&gt;
+&lt;p&gt;输入：
+&lt;code&gt;apt-get install git&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;下载自己的代码库&#34;&gt;下载自己的代码库&lt;/h2&gt;
+&lt;p&gt;输入：
+&lt;code&gt;git clone yourgit yourdir&lt;/code&gt;&lt;/p&gt;
+&lt;h1 id=&#34;配置python&#34;&gt;配置Python&lt;/h1&gt;
+&lt;h2 id=&#34;安装python环境&#34;&gt;安装Python环境&lt;/h2&gt;
+&lt;p&gt;输入：
+&lt;code&gt;apt-get install python-pip&lt;/code&gt;
+然后系统会自动完成相关的配置。&lt;/p&gt;
+&lt;h2 id=&#34;编辑python文件&#34;&gt;编辑Python文件&lt;/h2&gt;
+&lt;p&gt;输入：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+cd ~/yourdir
+vi hook.py
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在打开的vim界面中，点击一下&lt;code&gt;i&lt;/code&gt;，进入insert模式，然后粘贴以下代码：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+#!/usr/bin/env python3
+#-*- coding:utf-8 -*-
+# start a python service and watch the nginx request dog
+from http.server import HTTPServer,CGIHTTPRequestHandler
+from threading import Thread,RLock
+import subprocess
+import logging
+import sys
+import os.path
+_PWD=os.path.abspath(os.path.dirname(__file__))
+def execute_cmd(args,cwd=None,timeout=30):
+if isinstance(args,str): args = [args]
+try:
+with subprocess.Popen(args,stdout=subprocess.PIPE,cwd=cwd) as proc:
+try:
+output,unused_err = proc.communicate(timeout=timeout)
+except:
+proc.kill()
+raise
+retcode = proc.poll()
+if retcode:
+raise subprocess.CalledProcessError(retcode, proc.args, output=output)
+return output.decode(&#39;utf-8&#39;,&#39;ignore&#39;) if output else &#39;&#39;
+except Exception as ex:
+logging.error(&#39;EXECUTE_CMD_ERROR: %s&#39;,&#39; &#39;.join(str(x) for x in args))
+raise ex
+class HttpHandler(CGIHTTPRequestHandler):
+_lock = RLock()
+_counter = 0
+_building = False
+def build(self):
+with HttpHandler._lock:
+if HttpHandler._counter == 0 or HttpHandler._building:
+return
+HttpHandler._counter = 0
+HttpHandler._building = True
+logging.info(&amp;quot;BUILDING NOW...&amp;quot;)
+try:
+resp = execute_cmd(os.path.join(_PWD,&#39;build.sh&#39;),cwd=_PWD,timeout=600)
+logging.info(resp)
+finally:
+HttpHandler._building = False
+self.build()
+def do_GET(self):
+self.do_POST()
+def do_POST(self):
+self.send_response(200,&#39;OK&#39;)
+self.end_headers()
+self.wfile.write(b&#39;OK&#39;)
+self.wfile.flush()
+with HttpHandler._lock:
+HttpHandler._counter += 1
+Thread(target=self.build).start()
+if __name__ == &#39;__main__&#39;:
+logging.basicConfig(format=&#39;%(asctime)s %(levelname)s: %(message)s&#39;,level=logging.INFO)
+port = int(sys.argv[1]) if len(sys.argv) &amp;gt; 1 else 1111
+logging.info(&#39;starting the server at 127.0.0.1:%s&#39;,port)
+httpd = HTTPServer((&#39;127.0.0.1&#39;,port),HttpHandler)
+httpd.serve_forever()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;编辑完成后，输入&lt;code&gt;:wq&lt;/code&gt;退出vi。&lt;/p&gt;
+&lt;h1 id=&#34;编辑sh文件&#34;&gt;编辑sh文件&lt;/h1&gt;
+&lt;p&gt;切换到yourdir，然后输入：
+&lt;code&gt;vi build.sh&lt;/code&gt;
+在打开的vi界面中，点击&lt;code&gt;i&lt;/code&gt;进入编辑模式，然后输入：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+#!/bin/bash
+echo &amp;quot;build at `date`&amp;quot;
+. ~/.nvm/nvm.sh
+nvm use 0.10.36
+cd ~/xuanwo
+git pull
+hexo clean
+hexo d -g
+echo &amp;quot;built successfully&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;编辑完成后，输入&lt;code&gt;:wq&lt;/code&gt;退出vi。&lt;/p&gt;
+&lt;h1 id=&#34;后台运行python脚本进行监视&#34;&gt;后台运行Python脚本进行监视&lt;/h1&gt;
+&lt;p&gt;运行：
+&lt;code&gt;nohup python3 ~/xuanwo/hook.py &amp;gt;&amp;gt; /tmp/hook.log 2&amp;gt;&amp;amp;1 &amp;amp;&lt;/code&gt;
+&lt;strong&gt;每次重启VPS后，貌似都需要运行一次&lt;/strong&gt;&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年2月6日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Cugblug on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/cugblug/</link><description>Recent content in Cugblug on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Wed, 13 Apr 2016 00:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/cugblug/index.xml" rel="self" type="application/rss+xml"/><item><title>Gitlab部署和汉化以及简单运维</title><link>https://xuanwo.io/2016/04/13/gitlab-install-intro/</link><pubDate>Wed, 13 Apr 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/04/13/gitlab-install-intro/</guid><description>&lt;h1 id=&#34;起因&#34;&gt;起因&lt;/h1&gt;
+&lt;p&gt;在跟网络中心的老师沟通成立镜像站的相关事宜的时候，意外地接下来搭建一套校内的 Git 服务的任务。
+&lt;a href=&#34;https://imnerd.org/&#34;&gt;@怡红公子&lt;/a&gt; 曾经搭建过一套类似的服务，但由于服务器端没有开启 VT 虚拟化导致不能安装 64 位的操作系统，再加上 Gitlab 不提供 32 位的安装包，所以长期以来怡红公子一直都是自行编译并配置 Gitlab 。考虑到后续维护的方便，我们决定趁着这个机会使用另一台支持安装 64 位操作系统的服务器，一劳永逸地解决这个问题。
+我们的服务器环境是 &lt;strong&gt;CentOS 7.2 64bit&lt;/strong&gt; ，以下所有操作均以此为基准。&lt;/p&gt;
+&lt;h1 id=&#34;gitlab-安装&#34;&gt;Gitlab 安装&lt;/h1&gt;
+&lt;p&gt;推荐使用 &lt;a href=&#34;https://about.gitlab.com/downloads&#34;&gt;Install a GitLab CE Omnibus package&lt;/a&gt; 安装 ，其他发行版可以点选对应版本，不再赘述。&lt;/p&gt;
+&lt;h2 id=&#34;安装和配置依赖&#34;&gt;安装和配置依赖&lt;/h2&gt;
+&lt;p&gt;如果需要安装 Postfix 来发送邮件，则需要在安装过程中选择 &lt;code&gt;Internet Site&lt;/code&gt;。你也可以使用 Sendmail 之类的第三方发信服务或者使用自行配制的 SMTP 服务器。
+除此以外，下列命令将会在防火墙中打开 HTTP(80) 和 SSH(22) 对应端口。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo yum install curl policycoreutils openssh-server openssh-clients
+sudo systemctl &lt;span style=&#34;color:#007020&#34;&gt;enable&lt;/span&gt; sshd
+sudo systemctl start sshd
+sudo yum install postfix
+sudo systemctl &lt;span style=&#34;color:#007020&#34;&gt;enable&lt;/span&gt; postfix
+sudo systemctl start postfix
+sudo firewall-cmd --permanent --add-service&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;http
+sudo systemctl reload firewalld&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;添加-gitlab-源并安装&#34;&gt;添加 Gitlab 源并安装&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash
+sudo yum install gitlab-ce&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个脚本会在源中添加 Gitlab-CE ，并自动执行&lt;code&gt;yum makecache&lt;/code&gt;，然后安装&lt;code&gt;gitlab-ce&lt;/code&gt;。由于源在国外，可能速度较慢，也可以手动添加来自 清华tuna 的源： &lt;a href=&#34;https://mirrors.tuna.tsinghua.edu.cn/help/gitlab-ce/&#34;&gt;https://mirrors.tuna.tsinghua.edu.cn/help/gitlab-ce/&lt;/a&gt; ， 链接中为各发行版下的教程，感谢 清华tuna 提供镜像。&lt;/p&gt;
+&lt;h2 id=&#34;配置并启动-gitlab&#34;&gt;配置并启动 Gitlab&lt;/h2&gt;
+&lt;p&gt;此时已经可以启动服务了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo gitlab-ctl reconfigure&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;进行一长串复杂的启动流程之后， gitlab 就已经可以通过 &lt;code&gt;localhost&lt;/code&gt; 进行访问了。&lt;/p&gt;
+&lt;h1 id=&#34;gitlab-配置&#34;&gt;Gitlab 配置&lt;/h1&gt;
+&lt;h2 id=&#34;修改域名&#34;&gt;修改域名&lt;/h2&gt;
+&lt;p&gt;默认的配置文件保存在 &lt;code&gt;/etc/gitlab/gitlab.rb&lt;/code&gt; ，执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo vim /etc/gitlab/gitlab.rb&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;打开文件，并修改：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;external_url &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;http://your.domain&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;再次执行&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo gitlab-ctl reconfigure&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;即可。&lt;/p&gt;
+&lt;p&gt;有一定概率出现 502 错误，刷新浏览器或者再次更新配置即可。&lt;/p&gt;
+&lt;h2 id=&#34;gitlab-汉化&#34;&gt;Gitlab 汉化&lt;/h2&gt;
+&lt;p&gt;由于服务对象是广大师生，为了降低新手上手的难度，所有进行汉化也是非常有必要的。好在国内有人已经进行了这方面的工作，我们只需要共享其成果即可（欢迎向&lt;a href=&#34;https://gitlab.com/larryli/gitlab&#34;&gt;原项目&lt;/a&gt;提交高质量翻译）。&lt;/p&gt;
+&lt;p&gt;首先确认版本：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo cat /opt/gitlab/embedded/service/gitlab-rails/VERSION&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;并确认当前汉化版本的 VERSION 是否相同，当前最新的汉化版本为 8.6 。
+如果安装版本小于当前汉化版本，请先升级。如果安装版本大于当前汉化版本，请在本项目中提交新的 issue。
+如果版本相同，首先在本地 clone 仓库。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# GitLab.com 仓库&lt;/span&gt;
+git clone https://gitlab.com/larryli/gitlab.git
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 或 Coding.net 镜像&lt;/span&gt;
+git clone https://git.coding.net/larryli/gitlab.git&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;根据我的测试， Coding.net 的镜像不完整，clone 之后无法 checkout&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;然后比较汉化分支和原分支，导出 patch 用的 diff 文件。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 8.1 版本的汉化补丁&lt;/span&gt;
+git diff origin/8-6-stable..8-6-zh &amp;gt; ../8.6.diff&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后上传 &lt;code&gt;8.6.diff&lt;/code&gt; 文件到服务器。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 停止 gitlab&lt;/span&gt;
+sudo gitlab-ctl stop
+sudo patch -d /opt/gitlab/embedded/service/gitlab-rails -p1 &amp;lt; &lt;span style=&#34;color:#40a070&#34;&gt;8&lt;/span&gt;.6.diff&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;确定没有 .rej 文件，重启 GitLab 即可。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo gitlab-ctl start&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果汉化中出现问题，请重新安装 GitLab（&lt;strong&gt;注意备份数据&lt;/strong&gt;）。&lt;/p&gt;
+&lt;h1 id=&#34;gitlab-运维&#34;&gt;Gitlab 运维&lt;/h1&gt;
+&lt;h2 id=&#34;管理&#34;&gt;管理&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 启动所有 gitlab 组件：&lt;/span&gt;
+sudo gitlab-ctl start
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 停止所有 gitlab 组件：&lt;/span&gt;
+sudo gitlab-ctl stop
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 重启所有 gitlab 组件：&lt;/span&gt;
+sudo gitlab-ctl restart&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;备份&#34;&gt;备份&lt;/h2&gt;
+&lt;p&gt;备份GitLab repositories and GitLab metadata
+在 crontab 中加入如下命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;0 2 * * * /usr/bin/gitlab-rake gitlab:backup:create
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;恢复&#34;&gt;恢复&lt;/h2&gt;
+&lt;p&gt;首先进入备份 gitlab 的目录，这个目录是配置文件中的&lt;code&gt;gitlab_rails[&#39;backup_path&#39;]&lt;/code&gt;，默认为&lt;code&gt;/var/opt/gitlab/backups&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;然后停止 unicorn 和 sidekiq ，保证数据库没有新的连接，不会有写数据情况。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo gitlab-ctl stop unicorn
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# ok: down: unicorn: 0s, normally up&lt;/span&gt;
+sudo gitlab-ctl stop sidekiq
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# ok: down: sidekiq: 0s, normally up&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后恢复数据，1406691018为备份文件的时间戳&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;gitlab-rake gitlab:backup:restore &lt;span style=&#34;color:#bb60d5&#34;&gt;BACKUP&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1406691018&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;修改数据存储地址&#34;&gt;修改数据存储地址&lt;/h2&gt;
+&lt;p&gt;默认情况下，gitlab 将数据存储在&lt;code&gt;/var/opt/gitlab/git-data&lt;/code&gt;目录下，受限于分区情况&amp;amp;方便管理，我们需要将数据迁移到别的目录下。&lt;/p&gt;
+&lt;h3 id=&#34;无需数据迁移&#34;&gt;无需数据迁移&lt;/h3&gt;
+&lt;p&gt;如果还没有投入使用，则可以直接在配置文件中添加：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;git_data_dir &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/path/to/git-data&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo gitlab-ctl reconfigure&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;就可以生效了。&lt;/p&gt;
+&lt;h3 id=&#34;进行数据迁移&#34;&gt;进行数据迁移&lt;/h3&gt;
+&lt;p&gt;如果已经有数据了，则需要进行迁移。&lt;/p&gt;
+&lt;p&gt;首先需要暂停服务，避免用户在迁移期间读写数据：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;sudo gitlab&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;ctl stop&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后使用rsync数据进行迁移：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;注意前一个地址不需要&lt;code&gt;/&lt;/code&gt;，后一个地址需要&lt;code&gt;/&lt;/code&gt;，且只需要迁移&lt;code&gt;repositories&lt;/code&gt;目录即可&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo rsync -av /var/opt/gitlab/git-data/repositories /path/to/git-data/&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后运行配置工具以更新并重启服务：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;官网文档是先更新配置再启动服务，但我在使用中发现先更新配置会提示无法连接上服务器，出现这种问题时可以先启动服务再更新配置。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo gitlab-ctl reconfigure
+sudo gitlab-ctl start&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;最后不要忘了在网页端确认数据的地址是否正确。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;关于权限问题
+在使用中，我一开始创建了一个&lt;code&gt;gitlabhq&lt;/code&gt;用户并创建了一个文件夹，然后修改地址，服务正常启动后提示500。
+后来使用&lt;code&gt;root&lt;/code&gt;账户在&lt;code&gt;/home&lt;/code&gt;下直接创建文件夹解决了这个问题。
+如果有遇到类似问题的，可以尝试用&lt;code&gt;root&lt;/code&gt;创建目录。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;监听ipv6&#34;&gt;监听IPv6&lt;/h2&gt;
+&lt;p&gt;教育网拥有得天独厚的IPv6资源，所以为我们的gitlab服务添加IPv6支持很有必要。&lt;/p&gt;
+&lt;p&gt;修改&lt;code&gt;/etc/gitlab/gitlab.rb&lt;/code&gt;文件中的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# nginx[&amp;#39;listen_addresses&amp;#39;] = [&amp;#39;*&amp;#39;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;为&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;nginx&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;listen_addresses&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;*&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;[::]&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后执行&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;sudo gitlab-ctl reconfigure&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后就可以通过IPv6访问了。&lt;/p&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://about.gitlab.com/downloads/&#34;&gt;Gitlab 下载&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://gitlab.com/larryli/gitlab/wikis/home&#34;&gt;GitLab Community Edition · Wiki&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://linuxtools-rst.readthedocs.org/zh_CN/latest/tool/crontab.html&#34;&gt;crontab 定时任务&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/raketasks/backup_restore.md&#34;&gt;Backup restore&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/doc/settings/configuration.md#storing-git-data-in-an-alternative-directory&#34;&gt;Storing Git data in an alternative directory&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年04月14日 首次发布&lt;/li&gt;
+&lt;li&gt;2016年04月18日 新增数据迁移&amp;amp;监听IPv6配置&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

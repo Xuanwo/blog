@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Html on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/html/</link><description>Recent content in Html on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 15 Jun 2017 15:44:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/html/index.xml" rel="self" type="application/rss+xml"/><item><title>从浏览器端向 QingStor 对象存储上传文件</title><link>https://xuanwo.io/2017/06/15/upload-to-qingstor-from-browser/</link><pubDate>Thu, 15 Jun 2017 15:44:00 +0000</pubDate><guid>https://xuanwo.io/2017/06/15/upload-to-qingstor-from-browser/</guid><description>&lt;p&gt;从浏览器端向 QingStor 对象存储上传是很多开发者的需求，虽然 QingStor 提供了相关的接口和 SDK，但是仍有很多开发者表示不知道怎么样去调用。本文的目的是系统的展示一下如何从浏览器端上传一个文件到对象存储，从而解决大多数开发者们的需求。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;为了理解本文的内容，读者需要一些基本的 HTML，JavaScript 知识，同时需要对 QingStor 对象存储服务有一些基本的了解。前者可以查看 &lt;a href=&#34;https://developer.mozilla.org/zh-CN/docs/Web&#34;&gt;MDN Web 技术文档&lt;/a&gt;，后者可以查看 &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/common/overview.html&#34;&gt;QingStor 对象存储服务概述&lt;/a&gt; 。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;表单上传&#34;&gt;表单上传&lt;/h2&gt;
+&lt;p&gt;QingStor 对象存储支持通过 HTML 表单上传的方式向存储空间上传一个对象，文档可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/object/post.html&#34;&gt;此处&lt;/a&gt;。根据存储空间的权限设置，主要分为两种情况：匿名可写与匿名不可写，接下来分别介绍一下。&lt;/p&gt;
+&lt;h3 id=&#34;匿名可写&#34;&gt;匿名可写&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;action&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://&amp;lt;bucket&amp;gt;.&amp;lt;zone&amp;gt;.qingstor.com&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;method&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;enctype&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;multipart/form-data&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;Click or Drag a File Here to Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;key&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;submit&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload to QingStor&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 存储空间的名称&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: 存储空间所在的区域&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;key&amp;gt;&lt;/code&gt;: 文件上传后在存储空间中的名字，支持内置变量，比如 &lt;code&gt;${filename}&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;很多人最开始使用这个接口的时候会吐槽为什么 file 一定要放在最后，这是因为我们遵循了现有的 &lt;a href=&#34;http://hc.apache.org/httpclient-3.x/methods/multipartpost.html&#34;&gt;multipart post 方法&lt;/a&gt; 的实现——将表单分成了两个部分： StringPart 与 FilePart ，file 类型之后的全部表单项都会被丢弃，因此 file 这个 input 项一定要放在表单的最后。&lt;/p&gt;
+&lt;p&gt;解决掉 input 顺序这个问题之后，可以发现表单上传是一个非常简单易用的接口：我只需要构建一个 form 表单，指定上传的域名、文件名即可，浏览器会自动处理剩下的所有工作。&lt;/p&gt;
+&lt;h3 id=&#34;匿名不可写&#34;&gt;匿名不可写&lt;/h3&gt;
+&lt;p&gt;更常见的情况是我们需要上传文件到一个私有的存储空间当中，此时我们需要对我们的 POST 请求进行签名。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;action&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://&amp;lt;bucket&amp;gt;.&amp;lt;zone&amp;gt;.qingstor.com&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;method&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;enctype&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;multipart/form-data&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;Click or Drag a File Here to Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;key&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;policy&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;policy&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;access_key_id&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;access_key_id&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;signature&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;signature&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;submit&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload to QingStor&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;policy&amp;gt;&lt;/code&gt;: policy 是一个经过 base64 编码之后的 JSON 字符串，其中的内容包括除了 file， access_key_id， policy，signature 之外的所有表单项。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;access_key_id&amp;gt;&lt;/code&gt;: access_key_id 是用户的 access_key_id&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;signature&amp;gt;&lt;/code&gt;: 用 secret key 对 base64 编码后的 policy 字符串进行 HMAC-SHA256 签名得到的字符串，同样需要进行 base64 编码。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;与匿名上传相比，上传到一个私有空间需要使用请求者的 access_key_id 进行签名。签名流程如下：计算 policy 字符串并进行 base64 编码，使用 secret key 对 policy 字符串进行 HMAC-SHA256 签名并进行 base64 编码。&lt;/p&gt;
+&lt;p&gt;以最简单的上传为例：policy 字符串为 &lt;code&gt;{&amp;quot;key&amp;quot;: &amp;quot;test_key&amp;quot;}&lt;/code&gt; ，经过 base64 编码之后变为 &lt;code&gt;eyJrZXkiOiAidGVzdF9rZXkifQ==&lt;/code&gt;，我们使用 &lt;code&gt;test_secret_key&lt;/code&gt; 作为 secret key 来进行 HMAC-SHA256 签名并进行 base64 编码，可以得到 &lt;code&gt;HfMhlYYA4bgyoq3SDMWqiJ1XWm1/TORTfkZk+WODxag=&lt;/code&gt;。此时，我们本次请求中的 policy 应填写 &lt;code&gt;eyJrZXkiOiAidGVzdF9rZXkifQ==&lt;/code&gt;， 而 signature 则应填写 &lt;code&gt;HfMhlYYA4bgyoq3SDMWqiJ1XWm1/TORTfkZk+WODxag=&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;使用 POST 接口上传比较简单，后端只需要实现简单的签名逻辑即可实现上传到指定对象存储存储空间的功能，后续还可以结合各种上传插件实现上传进度条等功能。适合用在只需要用户上传文件，没有复杂交互的场景，比如论坛附件上传，在线编辑器上传图片等。&lt;/p&gt;
+&lt;h2 id=&#34;直接调用-sdk-上传&#34;&gt;直接调用 SDK 上传&lt;/h2&gt;
+&lt;p&gt;POST 接口虽然方便，但是功能比较弱，为了满足开发者们的需求，QingStor 提供的 &lt;a href=&#34;https://github.com/yunify/qingstor-sdk-js&#34;&gt;qingsotr-js-sdk&lt;/a&gt; 通过 &lt;a href=&#34;http://browserify.org/&#34;&gt;Browserify&lt;/a&gt; 实现了浏览器环境的兼容，开发者只需要引入我们提供的 js 文件即可在浏览器环境中调用接口。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在开始之前，我们需要正确设置 Bucket 的 CORS 使得我们可以顺利的进行跨域请求。详细操作方法可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/guide/index.html#cors&#34;&gt;此处&lt;/a&gt;，其中&lt;code&gt;允许的请求源&lt;/code&gt;和&lt;code&gt;允许 HTTP 请求头&lt;/code&gt;均可以设置为 &lt;code&gt;*&lt;/code&gt; 以方便调试。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk.min.js&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onchange&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; Config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).Config
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; QingStor &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).QingStor;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Config(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;access_key_id&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;secret_access_key&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; bucket &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; QingStor(config).Bucket(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;bucket&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;zone&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; upload() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;).files[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; reader &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; FileReader();
+reader.readAsBinaryString(f);
+reader.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (() =&amp;gt; {
+bucket.putObject(f.name, {
+body&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; reader.result
+});
+});
+}
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;access_key_id&amp;gt;&lt;/code&gt;: 用户的 access_key_id&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;secret_access_key&amp;gt;&lt;/code&gt;: 用户的 secret_access_key&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 需要上传的 bucket name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: bucket 所在的区域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;样例代码逻辑比较简单，主要有以下几个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;脚本中进行了一些初始化的工作，创建了 Config ，QingStor 和 Bucket 对象。&lt;/li&gt;
+&lt;li&gt;file input 监听了 change 事件，只要用户选择了新的文件，就会调用 upload 方法。&lt;/li&gt;
+&lt;li&gt;在 upload 方法中，首先是选取文件列表中的第一项，然后使用 HTML 5 新提供的 FileReader 接口来读取文件内容。&lt;/li&gt;
+&lt;li&gt;在 FileReader 读取完毕后，调用 bucket.putObject 方法来进行文件上传，使用文件名作为上传所使用的 Key。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以看到，直接使用 SDK 进行文件上传也非常简单。跟使用 POST 接口相比，需要引入一个额外的 JS 文件依赖，不需要自行进行容易出错的签名计算。最大的缺点在于：初始化 SDK 时需要暴露自己的 access_key_id 和 secret_access_key，这显然是不可接受的。我们需要寻找到一种方法，使得签名的过程可以服务器端完成，从而不需要暴露自己的密钥信息。&lt;/p&gt;
+&lt;h2 id=&#34;部署签名服务器&#34;&gt;部署签名服务器&lt;/h2&gt;
+&lt;p&gt;之前提到，在服务器端进行签名可以使得敏感的密钥信息不会暴露出去，解决方案就是部署一套签名服务器。我们实现了一个基于 qingstor-js-sdk 的签名服务器 demo，开源在 &lt;a href=&#34;https://github.com/yunify/qingstor-demo-signature-server-nodejs&#34;&gt;https://github.com/yunify/qingstor-demo-signature-server-nodejs&lt;/a&gt; ，同时附有 server 端和 client 端，开发者可以方便的复用其中的逻辑，按照自己的业务需求来实现相关的逻辑。&lt;/p&gt;
+&lt;p&gt;部署签名服务器非常简单，只需要如下几步：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;git clone https://github.com/yunify/qingstor-demo-signature-server-nodejs.git
+&lt;span style=&#34;color:#007020&#34;&gt;cd&lt;/span&gt; qingstor-demo-signature-server-nodejs
+npm install&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后根据 server_config.yaml.example 编辑自己的 server_config.yaml 文件，最后执行 &lt;code&gt;npm run server&lt;/code&gt; 就可以启动我们的签名服务器 Demo。&lt;/p&gt;
+&lt;p&gt;接下来这个实例会展示如何使用签名服务器进行签名，并上传一个文件。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk.min.js&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onchange&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; Config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).Config
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; QingStor &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).QingStor;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Config(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;not_need&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;not_need&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; bucket &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; QingStor(config).Bucket(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;bucket&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;zone&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; upload() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;).files[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; reader &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; FileReader();
+reader.readAsBinaryString(f);
+reader.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (() =&amp;gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; req &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; bucket.putObjectRequest(f.name, {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; f.type
+});
+fetch(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;http://localhost:9000/operation?channel=header&amp;#34;&lt;/span&gt;, {
+method&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;,
+body&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; JSON.stringify(req.operation),
+headers&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;application/json; charset=utf-8&amp;#34;&lt;/span&gt;
+}
+})
+.then(res =&amp;gt; res.json())
+.then(res =&amp;gt; {
+req.operation.headers.Authorization &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; res.authorization;
+req.operation.body &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; reader.result;
+req.send()
+})
+});
+}
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 需要上传的 bucket name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: bucket 所在的区域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;跟直接使用 SDK 上传相比，通过部署签名服务器上传的方案多了向签名服务器发送本次请求并获取签名信息的部署。js sdk 对外暴露了生成 Request 的接口，通过 bucket.putObjectRequest 可以创建一个 Request 实例，并将 Request.operation 发送到签名服务器以进行签名，最后服务器端返回的是签名好的 Authorization 字符串。然后再手动调用 Request 的 send 方法进行实际的上传即可。&lt;/p&gt;
+&lt;p&gt;部署签名服务器的方案比之前的几种都要复杂，但是更贴合用户的使用场景，可以完整的覆盖大多数用户在浏览器端与 QingStor 对象存储进行交互的需求。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;在这里可以对浏览器端几种与 QingStor 对象存储进行交互的方案进行一个简短的总结：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;POST 接口：简单方便，便于与现有的服务器端集成，适用于论坛附件上传，在线编辑器上传图片等场景&lt;/li&gt;
+&lt;li&gt;SDK 上传： 简单方便，但是会暴露出用户的密钥信息，适用于一些 No BackEnd 应用，可以让用户自行填写自己的密钥，比如在线 Markdown 编辑器，可以实现复制进来的图片自动上传这样的功能。&lt;/li&gt;
+&lt;li&gt;部署签名服务器： 比较复杂，适用于大多数场景，密钥信息保存在服务器端，不会泄漏给用户。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;此外，所有的代码都已经上传到 Gist，感兴趣的同学可以自取： &lt;a href=&#34;https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784&#34;&gt;https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784&lt;/a&gt;&lt;/p&gt;</description></item><item><title>新博客上线&amp;Hexo主题开发入门</title><link>https://xuanwo.io/2016/06/29/new-blog-new-life/</link><pubDate>Wed, 29 Jun 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/06/29/new-blog-new-life/</guid><description>&lt;p&gt;曾经看过我的博客的同学大概都会发现，我的博客再一次大变样了~
+这一次的更新其实酝酿了很久，早在刚开始用Hexo的时候就想着要有一个自己的主题。但是那个时候觉得这是一件很难的事情，要懂HTML，CSS，JavaScript，还要懂Swig，Ejs等模板语言，还要懂Hexo的内部原理，于是就一直搁置了。在独立实现了一个&lt;a href=&#34;https://xuanwo.io/2016/06/16/jade_ims/&#34;&gt;完整的项目&lt;/a&gt;之后，我认为自己已经有这样的能力了，于是决定正式开始。
+在我看来的话，Hexo的使用者大概分为三个层次：第一种用别人的主题，第二种模仿现有的主题，第三种自己独立开发。我原来是第一种，在Next的基础上做了很多改动，这一次进入到了第二个层次。我找了一套自我感觉还不错的模板，然后套用它的CSS设定和页面结构，就成了我现在的主题。
+利用两天学习和工作的闲暇时间，我大体上完成了这个主题。做得比较糙，很多细节还有待优化，但是我已经急不可耐地想要正式上线了，笑。在未来的话，我希望能把一些配置都能整理出来，优化一下代码，然后开源这个主题，希望大家能够喜欢~
+庆祝的话已经说的差不多了，下面来讲一讲如何开发一个Hexo主题。&lt;/p&gt;
+&lt;h1 id=&#34;结构&#34;&gt;结构&lt;/h1&gt;
+&lt;h2 id=&#34;主题结构&#34;&gt;主题结构&lt;/h2&gt;
+&lt;p&gt;Hexo主题的结构大体如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;.
+├── _config.yml
+├── languages
+│   ├── default.yml
+│   └── zh-Hans.yml
+├── layout
+│   ├── achieve.swig
+│   ├── category.swig
+│   ├── index.swig
+│   ├── _layout.swig
+│   ├── page.swig
+│   ├── _partials
+│   ├── post.swig
+│   └── tag.swig
+└── &lt;span style=&#34;color:#007020&#34;&gt;source&lt;/span&gt;
+├── css
+├── fonts
+├── img
+├── js
+└── vendors&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;首先有一个&lt;code&gt;_config.yml&lt;/code&gt;负责提供主题级别的配置，可以在&lt;code&gt;layout&lt;/code&gt;中通过&lt;code&gt;theme.xxx&lt;/code&gt;的形式进行调用。
+然后&lt;code&gt;languages&lt;/code&gt;负责实现博客的i18N功能，如果博客没有多语言的需求，只需要实现一个&lt;code&gt;default.yml&lt;/code&gt;即可。
+其次是最为重要的&lt;code&gt;layout&lt;/code&gt;文件夹，这个里面主要存放博客的结构，Hexo 引擎会使用指定的渲染引擎将&lt;code&gt;layout&lt;/code&gt;文件渲染成HTML页面。
+最后是&lt;code&gt;source&lt;/code&gt;，把所有主题需要用到的资源，比如CSS，Fonts，JS等都存放到这个文件夹中。&lt;/p&gt;
+&lt;p&gt;这个主题使用了&lt;a href=&#34;http://paularmstrong.github.io/swig/&#34;&gt;swig&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;页面结构&#34;&gt;页面结构&lt;/h2&gt;
+&lt;p&gt;页面结构分为两个维度，一者是我要呈现哪些页面，二者是每个页面上都有哪些内容。&lt;/p&gt;
+&lt;h3 id=&#34;哪些页面&#34;&gt;哪些页面？&lt;/h3&gt;
+&lt;p&gt;作为一个博客，主要需要的页面有以下这些：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;主页&lt;/li&gt;
+&lt;li&gt;单页&lt;/li&gt;
+&lt;li&gt;归档页面&lt;/li&gt;
+&lt;li&gt;分类页面&lt;/li&gt;
+&lt;li&gt;标签页面&lt;/li&gt;
+&lt;li&gt;文章页&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;哪些内容&#34;&gt;哪些内容？&lt;/h3&gt;
+&lt;p&gt;如果没有什么特别的设计，博客的页面大体上可以分为这几个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;head：头部文件&lt;/li&gt;
+&lt;li&gt;body：主体内容
+&lt;ul&gt;
+&lt;li&gt;header：题图，导航栏等&lt;/li&gt;
+&lt;li&gt;content： 内容&lt;/li&gt;
+&lt;li&gt;footer：尾部的联系方式等&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;实现&#34;&gt;实现&lt;/h1&gt;
+&lt;p&gt;前面讲到了 Hexo 的结构，下面来聊一聊具体的实现。&lt;/p&gt;
+&lt;h2 id=&#34;原理&#34;&gt;原理&lt;/h2&gt;
+&lt;p&gt;Hexo 渲染的入口是&lt;code&gt;_layout.swig&lt;/code&gt;，所以一个主题至少需要实现一个&lt;code&gt;_layout.swig&lt;/code&gt;。
+然后Hexo会遍历Hexo目录下&lt;code&gt;source&lt;/code&gt;文件夹中的所有Markdown文件，根据Markdown文件所指定的layout进行渲染，默认类型为&lt;code&gt;post&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;技巧&#34;&gt;技巧&lt;/h2&gt;
+&lt;h3 id=&#34;layout-swig结构&#34;&gt;_layout.swig结构&lt;/h3&gt;
+&lt;p&gt;整体的结构基本如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+&amp;lt;!doctype html&amp;gt;
+&amp;lt;html&amp;gt;
+&amp;lt;head&amp;gt;
+{% include &amp;#39;_partials/head.swig&amp;#39; %}
+&amp;lt;title&amp;gt;{% block title %}{% endblock %}&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body id=&amp;#34;home&amp;#34;&amp;gt;
+{% include &amp;#39;_partials/menu.swig&amp;#39; %}
+&amp;lt;div id=&amp;#34;wrap&amp;#34;&amp;gt;
+{% include &amp;#39;_partials/nav.swig&amp;#39; %}
+{% include &amp;#39;_partials/header.swig&amp;#39; %}
+&amp;lt;div id=&amp;#34;start&amp;#34; class=&amp;#34;container content&amp;#34;&amp;gt;
+{% block content %}{% endblock %}
+&amp;lt;/div&amp;gt;
+{% include &amp;#39;_partials/footer.swig&amp;#39; %}
+&amp;lt;/div&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;实现文章渲染&#34;&gt;实现文章渲染&lt;/h3&gt;
+&lt;p&gt;这个地方主要是借鉴了NexT主题的设计，实现了一个swig的宏来生成对应的文章。这个宏主要有两个参数，第一个是post对象，第二个是是否为主页。如果是主页就只显示简略的内容，如果不是就输出全文。&lt;/p&gt;
+&lt;p&gt;判断的部分实现如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+{% if is_index %}
+{% if post.excerpt %}
+{{ post.excerpt }}
+&amp;lt;a class=&amp;#34;&amp;#34; href=&amp;#34;{{ url_for(post.path) }}&amp;#34;&amp;gt;Read more&amp;lt;/a&amp;gt;
+{% endif %}
+{% else %}
+{{ post.content }}
+{% endif %}
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;用到的post页的参数可以&lt;a href=&#34;https://hexo.io/zh-cn/docs/variables.html&#34;&gt;我翻译的中文文档&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;分页插件&#34;&gt;分页插件&lt;/h3&gt;
+&lt;p&gt;Hexo 自己实现了一个分页插件，直接使用paginator函数即可。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+{% if page.prev or page.next %}
+&amp;lt;nav class=&amp;#34;pagination&amp;#34;&amp;gt;
+{{ paginator({
+prev_text: &amp;#39;&amp;lt;i class=&amp;#34;fa fa-angle-left&amp;#34;&amp;gt;&amp;lt;/i&amp;gt;&amp;#39;,
+next_text: &amp;#39;&amp;lt;i class=&amp;#34;fa fa-angle-right&amp;#34;&amp;gt;&amp;lt;/i&amp;gt;&amp;#39;,
+mid_size: 1
+}) }}
+&amp;lt;/nav&amp;gt;
+{% endif %}
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;评论系统&#34;&gt;评论系统&lt;/h3&gt;
+&lt;p&gt;对于Hexo来说，评论系统就是调用一个第三方的JS。所以只需要在合适的位置插入代码即可。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+&amp;lt;div id=&amp;#34;disqus_thread&amp;#34;&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;script&amp;gt;
+var disqus_config = function () {
+this.page.url = &amp;#39;{{ page.permalink }}&amp;#39;;
+this.page.identifier = &amp;#39;{{ page.path }}&amp;#39;;
+};
+(function () {
+var d = document, s = d.createElement(&amp;#39;script&amp;#39;);
+s.src = &amp;#39;//abc.disqus.com/embed.js&amp;#39;;
+s.setAttribute(&amp;#39;data-timestamp&amp;#39;, +new Date());
+(d.head || d.body).appendChild(s);
+})();
+&amp;lt;/script&amp;gt;
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;需要注意的坑&#34;&gt;需要注意的坑&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;page.posts&lt;/code&gt;是按照时间排序的，但是&lt;code&gt;site.posts&lt;/code&gt;是无序的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://hexo.io/zh-cn/docs/&#34;&gt;Hexo 官方中文文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年06月30日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>马可波罗珠宝进销存系统开发手记</title><link>https://xuanwo.io/2016/06/16/jade_ims/</link><pubDate>Thu, 16 Jun 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/06/16/jade_ims/</guid><description>&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/develop/jade-ims-index.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这个项目从我们这个学期开了&lt;strong&gt;系统分析与设计&lt;/strong&gt;这门课之后就开始了，首次创建这个项目是在3月26号，实际上真正的开发时间集中在6月上旬。差不多用两个星期的闲暇时间时间完成了这个简单的进销存系统。这个系统基于Flask框架，使用SQLite3数据库，前端则是使用Bootstrap框架，实现了包括客户，库存，销售，进货等管理子系统。说是管理，其实也就是简单的增加和删除而已。
+前人经常说，不要重复造轮子。既然有类似于Odoo这样强大的ERP系统珠玉在前，我为什么要再自己造一个功能简单，甚至根本不会有人用的轮子呢？从前我确实是这么想的，但是稍微有一点工作经验之后发现再造轮子的原因有两条：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;作为一个处在知识积累阶段的学生而言，再造轮子很有必要。不造一次轮子，你就永远不会明白轮子内部的真实构造。很多技术虽然看起来简单，但是想要有一个完善且健壮的实现却有很多坑需要踩。踩这些坑的过程，也正是一个技术人员成长最快的过程。&lt;/li&gt;
+&lt;li&gt;别人的轮子终究是别人的。你不知道这个轮子最大能承受多少压力，你也不知道这个轮子在什么样的情况下会爆胎。当一个轮子装上企业呼呼向前的列车，再要想把它替换下来是一件很难且成本很高的事情。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接下来，讲讲造这个轮子的一些经历吧~&lt;/p&gt;
+&lt;h1 id=&#34;项目启动&#34;&gt;项目启动&lt;/h1&gt;
+&lt;p&gt;正如前言中说的，这个项目是系统分析与设计这门课的课程设计，也是贯穿着整个学期的一个主旋律。早在这学期开学之初，我们就知道了自己需要做这样的一个系统。经历了上个学期各种技术炫了半天，最后却只是抄袭各种开源项目草草实现的&lt;a href=&#34;https://xuanwo.io/2015/06/30/together-project/&#34;&gt;失败&lt;/a&gt;，这个学期我务实了很多。从最开始的讨论就一直跟组员强调技术的可行性，基本上否决了所有试图增大项目复杂度的建议，把主题定在了一个纯粹的进销存管理系统。之所以如此，是因为我的观念发生了很大的变化：原来觉得技术的先进是最重要的，开发项目一定要用最现代的技术，最炫目的特效；现在觉得哪怕是一个用VB写出来的能稳定运行的丑陋系统都要胜过采用了种种最新潮技术却漏洞百出根本没法运行的“先进”系统。
+在讨论到最极端的时候，我甚至想只做一个仓库的管理系统，只包括进库和出库这样的简单功能。这样的态度曾经闹得有一次讨论直接不欢而散，好在组员都是非常Nice的人，在我主动表达歉意之后大度地表示没什么。经过多次讨论之后，我们终于达成了共识，要做一个进销存系统，功能尽可能简单，在实现基础功能的前提下，再考虑加入新的功能。
+接下来的事情就没有什么大的分歧了，整体系统采用B/S架构，开发语言选用我个人比较喜欢的Python，使用Flask框架，数据库选用无需配置的SQLite。然后服务器选择阿里云的学生机，系统选择成熟稳定的CentOS 7.2，Web Server选用Nginx，也就是我个人目前比较喜欢的开发平台——LESP(Linux, Nginx, SQLite, Python)。&lt;/p&gt;
+&lt;h1 id=&#34;项目细节&#34;&gt;项目细节&lt;/h1&gt;
+&lt;p&gt;下面再介绍一下项目的细节。&lt;/p&gt;
+&lt;h2 id=&#34;设计模式&#34;&gt;设计模式&lt;/h2&gt;
+&lt;p&gt;项目大体上采用了MVC的思想，不过在具体的实现上并没有太过纠结于概念上的东西。所有的网页模板都在&lt;code&gt;templates&lt;/code&gt;文件夹下，静态资源都扔到了&lt;code&gt;static&lt;/code&gt;目录，使用一个&lt;code&gt;models.py&lt;/code&gt;模块来单独存放所有的数据库定义，然后所有的路由以及操作都在&lt;code&gt;views&lt;/code&gt;中实现。对于我来说，快速地实现需求才是头等大事，是不是符合正统的MVC理念并不是十分重要。实际上现在这样的结构开发起来感觉也蛮顺手的，需要调整前端的样式和表单就在&lt;code&gt;templates&lt;/code&gt;文件夹下操作，需要修改程序的逻辑就去&lt;code&gt;views&lt;/code&gt;，他们基本上是一一对应的关系。&lt;a href=&#34;https://spacewander.github.io/explore-flask-zh/4-organizing_your_project.html&#34;&gt;这里&lt;/a&gt;有更加清晰的讲解，值得一看。&lt;/p&gt;
+&lt;h2 id=&#34;项目中的问题-解决方案&#34;&gt;项目中的问题&amp;amp;解决方案&lt;/h2&gt;
+&lt;h3 id=&#34;在flask框架中同时使用蓝图与flask-sqlalchemy&#34;&gt;在Flask框架中同时使用蓝图与Flask_SQLAlchemy&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/q/1010000005640527&#34;&gt;https://segmentfault.com/q/1010000005640527&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;感谢@Ethan和@，他们强有力地向我证明了有师傅带路的好处。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;这个问题纯粹是因为一直以来都是一个脚本Boy，没有系统性的学习过软件开发导致的。很显然，按照我原来的代码去产生实例，就会导致循环导入的错误。想要解决这样的问题，就需要使用工厂函数去生成实例，而不是自己去生成它。&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;__init__.py&lt;/code&gt;中添加一个&lt;code&gt;create_app()&lt;/code&gt;函数，在函数中进行参数配置，初始化和导入蓝图的操作：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;bps &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.dashboard:dashboard&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.install:install&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.login:login&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.sale:sale&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.customer:customer&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.purchase.inputbill:inputbill&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.purchase.supplier:supplier&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.stock.enterstockbill:enterstockbill&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.stock.leavestockbill:leavestockbill&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.stock.stock:stock&amp;#39;&lt;/span&gt;
+]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;create_app&lt;/span&gt;():
+app &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; Flask(__name__)
+app&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;config&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;from_object(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;config&amp;#39;&lt;/span&gt;)
+app&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;config&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;from_pyfile(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;config.py&amp;#39;&lt;/span&gt;)
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;init_app(app)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; path &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; bps:
+bp &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; import_string(path)
+app&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;register_blueprint(bp)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; app&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;flask如何优雅地重定向所有未登录用户到登陆界面&#34;&gt;Flask如何优雅地重定向所有未登录用户到登陆界面&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/q/1010000005645821&#34;&gt;https://segmentfault.com/q/1010000005645821&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;感谢@zwillon和@igaozp&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;有一个Feature是想要把所有未登录的用户都重定向到登录页面。当时手头上的技术方案主要有两种：第一种是自己包装一个装饰器，并添加在每一个视图函数中；第二种是使用第三方库&lt;code&gt;Flask-Login&lt;/code&gt;，在视图函数中添加&lt;code&gt;@login_required&lt;/code&gt;。但是感觉姿势都不怎么优雅，因为我需要不断地在视图函数中添加这个装饰器，不太符合DRY(Don&amp;rsquo;t Repeat Yourself)准则。
+SF的老司机给了我一个相当优雅的方案——Hook到app的&lt;code&gt;before_request&lt;/code&gt;方法。也就是这样来实现：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@app.before_request&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;check_need_login&lt;/span&gt;():
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 检查登录的逻辑&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;pass&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我第一次是这样实现的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@app.before_request&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;check_need_login&lt;/span&gt;():
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;logged_in&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; session:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; redirect(url_for(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login.user_login&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这样就带来了一个问题，对于未登录的用户来说，所有页面都会不断地重定向从而导致整个应用崩溃。因此还需要指定在某些情况下停止重定向，所以我们还需要修改一下&lt;code&gt;check_need_login&lt;/code&gt;的逻辑：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@app.before_request&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;check_need_login&lt;/span&gt;():
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;logged_in&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; session &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;and&lt;/span&gt; request&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;endpoint &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; (&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login.user_login&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;static&amp;#39;&lt;/span&gt;):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; redirect(url_for(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login.user_login&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;当&lt;code&gt;session&lt;/code&gt;中没有&lt;code&gt;logged_in&lt;/code&gt;字段且&lt;code&gt;endpoint&lt;/code&gt;不是&lt;code&gt;user_login&lt;/code&gt;和&lt;code&gt;static&lt;/code&gt;的时候就重定向到登录页面，这样就比较优雅地解决了重定向未登录用户到登陆界面的需求。&lt;/p&gt;
+&lt;h3 id=&#34;flask-sqlalchemy-插入数据时发生错误后如何处理&#34;&gt;flask_sqlalchemy 插入数据时发生错误后如何处理&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/q/1010000005647431&#34;&gt;https://segmentfault.com/q/1010000005647431&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;在实际开发的过程中发现，如果&lt;code&gt;db.session&lt;/code&gt;中添加的记录有问题，在commit的时候会出现一个报错。所以我们需要在出错的时候进行一些处理，以保证程序出错之后还能够正常地运行。网友 @学不会编程的永仲 给出的回答是我应该在form中验证数据的正确性。虽然我相信他的理解可能是正确的，但是不太符合我的哲学，我更加倾向于&lt;strong&gt;让它崩溃，然后处理异常&lt;/strong&gt;而不是&lt;strong&gt;事先处理好所有的错误&lt;/strong&gt;。
+通过查阅文档，了解到&lt;code&gt;db.session.rollback()&lt;/code&gt;这一函数可以在出错是进行回滚，于是最后的实现变成了这样：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@supplier.route&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;/purchase/supplier/add&amp;#39;&lt;/span&gt;, methods&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;POST&amp;#39;&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;add_supplier&lt;/span&gt;():
+form &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; request&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;form
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; request&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;method &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;POST&amp;#39;&lt;/span&gt;:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(form)
+supplier &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; Supplier(form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_name&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_constract&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_phone&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_address&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_remark&amp;#39;&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;try&lt;/span&gt;:
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;session&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;add(supplier)
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;session&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;commit()
+flash(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;供应商添加成功！&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;success&amp;#39;&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;except&lt;/span&gt;:
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;session&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;rollback()
+flash(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;输入不合法，请重新输入！&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;danger&amp;#39;&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; redirect(url_for(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier.list_supplier&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;项目总结&#34;&gt;项目总结&lt;/h1&gt;
+&lt;p&gt;随着答辩的完成，这个项目进入了尾声。因为很多东西需要去学习，有新的东西需要去探索，所以这个项目也很有可能不会再继续维护了。那么这个项目开源出来的价值在哪里呢？我想，这个项目虽然简单，但它毕竟还算是一个完整的Flask项目，除了&lt;code&gt;flask_sqlalchemy&lt;/code&gt;之外没有多余的依赖，非常适合一个跟我一样的Python初学者进行入门学习。如果说有人能够因为这个项目少走一些弯路，少在一些死胡同浪费时间，我想这个项目的价值就已经实现了。如果再往大一点来说，开源的价值也就实现了。
+如果要我自评的话，我觉得这样的项目应该有60分。之所以给一个及格分，是因为这个项目毕竟实现了需求的大多数功能，也有好好地跑在阿里云的服务器上。丢分的话，大体上是因为这个项目毫无注释，没有安装文档，也没有配置手册，很多东西都是硬编码到了代码中。不仅如此，编程的风格也是相当的不佳，在模板部分缺乏良好的顶层设计，出现了大量的重复代码。这些问题希望自己能在下一个项目中得到一些改善。
+Anyway，随着这个项目的结束，我的大三生涯也要结束了。接下来是波澜壮阔的实习阶段，希望自己能够在实习的时候多踩一些坑，多走一些弯路，多
+得到一些来自“长者”的指点。&lt;/p&gt;
+&lt;h1 id=&#34;参考资源&#34;&gt;参考资源&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://docs.jinkan.org/docs/flask/&#34;&gt;Flask 中文文档 &lt;em&gt;文档略有过时，代码以Github上为准&lt;/em&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://spacewander.github.io/explore-flask-zh/index.html&#34;&gt;Flask 之旅&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://docs.jinkan.org/docs/flask-sqlalchemy/index.html&#34;&gt;Flask-SQLALchemy 中文文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年06月17日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>使用pyQuery解析HTML</title><link>https://xuanwo.io/2015/10/23/pyquery-intro/</link><pubDate>Fri, 23 Oct 2015 01:03:09 +0000</pubDate><guid>https://xuanwo.io/2015/10/23/pyquery-intro/</guid><description>&lt;h1 id=&#34;pyquery介绍&#34;&gt;pyQuery介绍&lt;/h1&gt;
+&lt;p&gt;pyquery 可以让你用jquery语法来对xml进行查询。这个API和jquery十分类似。如果利用lxml，pyquery对xml和html的操作将更加快速。&lt;/p&gt;
+&lt;h1 id=&#34;pyquery安装&#34;&gt;pyQuery安装&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;首先，你得有一个python环境，最好是类linux的，因为安装pyquery的过程中需要编译某一个包，在windows上比较难解决依赖问题&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;安装python环境&#34;&gt;安装Python环境&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install python python-dev python-pip
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;python&lt;/code&gt; 安装python环境&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;python-dev&lt;/code&gt; 安装python开发环境&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;python-pip&lt;/code&gt; 安装pip来进行python包管理&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;解决pyquery所需依赖&#34;&gt;解决pyQuery所需依赖&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install libxml2-dev libxslt1-dev libz-dev
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;libxml2-dev&lt;/code&gt;和&lt;code&gt;libxslt1-dev&lt;/code&gt;是编译lxml所需要的包，缺少会导致编译失败&lt;/li&gt;
+&lt;li&gt;某些情况下会提示&lt;code&gt;/usr/bin/ld: cannot find -lz&lt;/code&gt;，所以需要安装&lt;code&gt;libz-dev&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;安装pyquery&#34;&gt;安装pyQuery&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;pip install pyquery
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;解决了依赖问题之后，就可以进行pyquery的安装了。
+&amp;gt; 有一个坑点是在虚拟机编译lxml的过程中，如果内存过小会导致编译失败。如果出现错误，请把虚拟机的内存调整至1024M或更大。&lt;/p&gt;
+&lt;h1 id=&#34;pyquery使用&#34;&gt;pyQuery使用&lt;/h1&gt;
+&lt;h2 id=&#34;最简样例&#34;&gt;最简样例&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+html &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&amp;#39;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;lt;html&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;head&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;title&amp;gt;这是标题&amp;lt;/title&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;/head&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;body&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;p id=&amp;#34;hi&amp;#34;&amp;gt;Hello&amp;lt;/p&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;ul&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;li&amp;gt;list1&amp;lt;/li&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;div class=&amp;#34;ha&amp;#34;&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Cool!
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;/div&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;li&amp;gt;list2&amp;lt;/li&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;/ul&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;lt;/body&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;lt;/html&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&amp;#39;&lt;/span&gt;
+doc &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; pyq(html)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;title&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 获取 title 标签的源码&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# &amp;lt;title&amp;gt;这是标题&amp;lt;/title&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;title&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 获取 title 标签的内容&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 这是标题&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;.ha&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 获取 class 为 ha 的标签的内容&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Cool!&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;#hi&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 获取 id 为 hi 的标签的内容&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Hello&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;p:first&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 还可以支持伪类&lt;/span&gt;
+li &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; doc(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;li&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 处理多个元素&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; li:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(i)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text()
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# list1&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# list2&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;指定网址&#34;&gt;指定网址&lt;/h2&gt;
+&lt;h3 id=&#34;直接访问&#34;&gt;直接访问&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;urllib&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 直接访问并获取相关信息&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(url&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https://www.google.com&amp;#39;&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;指定headers&#34;&gt;指定headers&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;urllib&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 以指定headers访问并获取相关信息，好处是不会被某些网站拒绝访问&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(url&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https://www.google.com&amp;#39;&lt;/span&gt;, headers&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;User-Agent&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.71 Safari/537.36&amp;#39;&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;指定文件&#34;&gt;指定文件&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(filename&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;path/to/html/file&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;指定lxml文档&#34;&gt;指定lxml文档&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;#!/usr/bin/python&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# -*- coding: UTF-8 -*-&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;pyquery&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; PyQuery &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;as&lt;/span&gt; pyq
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;lxml&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; etree
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# pyquery支持etree的API&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt; pyq(etree&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;fromstring(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;html&amp;gt;&amp;lt;/html&amp;gt;&amp;#34;&lt;/span&gt;))&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;text()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/gawel/pyquery&#34;&gt;gawel/pyquery&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.powerxing.com/python-use-pyquery-to-parse-html/&#34;&gt;Python使用pyQuery解析HTML内容&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://stackoverflow.com/questions/26053982/error-setup-script-exited-with-error-command-x86-64-linux-gnu-gcc-failed-wit&#34;&gt;error: Setup script exited with error: command &amp;lsquo;x86_64-linux-gnu-gcc&amp;rsquo; failed with exit status 1&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://stackoverflow.com/questions/24455238/lxml-installation-error-ubuntu-14-04-internal-compiler-error&#34;&gt;lxml installation error ubuntu 14.04 (internal compiler error)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://stackoverflow.com/a/22256546&#34;&gt;can&amp;rsquo;t installing lxml on Ubuntu 12.04&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年10月23日 初步完成&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

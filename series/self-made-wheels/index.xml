@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Self Made Wheels on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/series/self-made-wheels/</link><description>Recent content in Self Made Wheels on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Wed, 05 Sep 2018 09:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/series/self-made-wheels/index.xml" rel="self" type="application/rss+xml"/><item><title>qscamel —— 数据迁移工具</title><link>https://xuanwo.io/2018/09/05/qscamel-intro/</link><pubDate>Wed, 05 Sep 2018 09:00:00 +0000</pubDate><guid>https://xuanwo.io/2018/09/05/qscamel-intro/</guid><description>&lt;p&gt;qscamel 是一个用于在不同的端点 (Endpoint) 中高效迁移数据的工具。&lt;/p&gt;
+&lt;p&gt;作为一个面向用户的数据迁移工具，它必须要满足如下要求：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不丢数据：这是一个数据迁移工具最基本的要求。不能多，不能少，不能错，要支持校验和修复。&lt;/li&gt;
+&lt;li&gt;好用：作为一个给用户使用的工具，它需要足够好用。有完善的日志，不会无故退出，网络波动时能够自动重试，部署 &amp;amp; 配置容易，能够支持断点续传，无需人工干预。&lt;/li&gt;
+&lt;li&gt;高效：数据迁移通常都会有大量的文件传输，工具必须能够高效的使用服务器资源和带宽，节省用户执行迁移所需要的时间。&lt;/li&gt;
+&lt;li&gt;扩展性强：数据迁移所需要的场景千奇百怪，工具必须能够扩展并支持大多数用户的场景，减少后续开发和维护的成本。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;qscamel 正是在这些要求下诞生的产物，它或许还不是那么完美，但是已经可用。目前已经圆满完成了很多数据迁移任务，任务涉及文件数量上亿，文件大小达数百 TB 。这篇文章将会介绍 qscamel 设计，实现和开发过程中的一些小故事，希望能够简单的告诉大家在 QingCloud 我们是如何做产品的，以及为我们的 HR 小姐姐提前打一个招聘的广告:)&lt;/p&gt;
+&lt;h2 id=&#34;设计&#34;&gt;设计&lt;/h2&gt;
+&lt;p&gt;qscamel 只有一个功能，但是为了把这个功能做好，它需要在各个层面上都有一个比较良好的设计。&lt;/p&gt;
+&lt;h3 id=&#34;用户交互&#34;&gt;用户交互&lt;/h3&gt;
+&lt;p&gt;一个好的命令行工具应该如何跟用户交互呢？嗯，抛开使用场景谈好坏都是耍流氓，那我重新组织一下语言：一个给&lt;strong&gt;终端用户&lt;/strong&gt;使用的&lt;strong&gt;数据迁移&lt;/strong&gt;工具应该如何跟用户交互？这里有两个关键点：第一，终端用户意味着使用者不是像我这样的高级用户，他们大多数只有一点甚至是没有使用命令行程序的经验，他们能读一些中文的文档，他们无法自行处理或者理解程序返回的错误，他们记不住程序的参数；第二，数据迁移意味着这个程序可能会运行很长的时间，用户不会一直在边上守着，同时这个程序用户可能不会频繁使用。分析到这里，我们已经能够大概的想象到这个工具应该是什么样子了：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;命令要少，参数要少&lt;/li&gt;
+&lt;li&gt;学习成本要低，迁移成本要低（换个任务类型不需要重新学习配置方法）&lt;/li&gt;
+&lt;li&gt;任务启动后无需用户介入&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;除了需要考虑用户体验之外，我们还需要考虑开发体验。一个数据迁移工具，必然需要能够处理多种不同的数据来源和迁移目标，以及他们各自不一样的复杂参数。如果按照传统开发命令行工具的习惯，每个不同的端点都使用参数来进行配置，那光是参数解析和处理就要写很久。&lt;/p&gt;
+&lt;p&gt;因此，qscamel 最终的交互设计稿是这样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ qscamel run task-name &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; -t /path/to/task/file &lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;
+$ qscamel delete task-name
+$ qscamel status
+$ qscamel clean
+$ qscamel version&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;与之相对比的是 v1 版本的 qscamel：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ qscamel -t s3 -s s3-bucket-name -z us-east-1 -a &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;S3ACCESSKEYID&amp;#34;&lt;/span&gt; -S &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;S3SECRETACCESSKEY&amp;#34;&lt;/span&gt; -b qingstor-bucket-name -d &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;migrate 05&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;同时，我们将复杂的任务配置拆分为三块：qscamel 本身的配置，任务的配置，端点的配置，并将他们分成两个文件：qscamel 本身的配置独立的存储在一个全局的配置文件中，任务和端点的配置放在一个我们定义好的任务配置当中。&lt;/p&gt;
+&lt;p&gt;全局的配置文件形如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;concurrency:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;log_level:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;info&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;pid_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.qscamel/qscamel.pid&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;log_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.qscamel/qscamel.log&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;database_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.qscamel/db&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;而任务的配置文件格式同样是精心设计过的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;copy&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;source:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;fs&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/path/to/source&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;destination:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;qingstor&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/path/to/destination&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;options:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;bucket_name:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;example_bucket&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;access_key_id:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;example_access_key_id&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;secret_access_key:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;example_secret_access_key&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;ignore_existing:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;last_modified&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;每个任务会由 &lt;code&gt;type&lt;/code&gt;，&lt;code&gt;source&lt;/code&gt;，&lt;code&gt;destination&lt;/code&gt; 和任务相关的配置组成。其中 &lt;code&gt;source&lt;/code&gt; 和 &lt;code&gt;destination&lt;/code&gt; 配置格式一样，都由 &lt;code&gt;type&lt;/code&gt;，&lt;code&gt;path&lt;/code&gt; 和 &lt;code&gt;options&lt;/code&gt; 组成。藉由这样的设计，我们希望能够在易用性和扩展性上取得一个统一。用户可以很快的知道自己需要配置的东西，并且能够忽略无关参数的干扰，比如说我要配置从 fs 迁移到 qingstor，我就不需要了解 s3 的配置参数。还有一个好处是，用户只要写一次配置文件，他就能够将其应用到别的场景：比如说进行 &lt;code&gt;delete&lt;/code&gt; 而不是 &lt;code&gt;copy&lt;/code&gt;，比如说从 &lt;code&gt;s3&lt;/code&gt; 迁移到 &lt;code&gt;qingstor&lt;/code&gt; 而不是从 &lt;code&gt;fs&lt;/code&gt;。使用一个格式规范的配置文件对于开发来说更是意义重大，开发者不再需要去维护一份晦涩难懂的参数列表，能够用更加一致的方法来处理所有的端点。&lt;/p&gt;
+&lt;p&gt;下面我们同样用 v1 版本的 qscamel 来做对比：&lt;/p&gt;
+&lt;p&gt;他首先有一个参数列表&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;| short | full | type | required |
+|-------|------------------|--------|----------|
+| -z | --src-zone | string | N |
+| -a | --src-access-key | string | N |
+| -S | --src-secret-key | string | N |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后根据不同的 Source 还需要选择不同参数的组合：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;| platform | require --src-zone | require --src-access-key | require --src-secret-key |
+|----------|--------------------|--------------------------|--------------------------|
+| s3 | Y | Y | Y |
+| qiniu | N | Y | Y |
+| aliyun | Y | Y | Y |
+| upyun | Y | Y | Y |
+| qingstor | Y | Y | Y |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这还没有考虑到不同 Source 各自不同的参数配置呐 (๑•̀ㅂ•́) ✧&lt;/p&gt;
+&lt;h3 id=&#34;整体流程&#34;&gt;整体流程&lt;/h3&gt;
+&lt;p&gt;上面我们说到 qscamel 需要做到&lt;code&gt;任务启动后无需用户介入&lt;/code&gt;，接下来就聊一聊 qscamel 整体的任务流程是怎么样的。&lt;/p&gt;
+&lt;p&gt;启动任务，检查任务文件的内容是否正确，初始化 Source 和 Destination 之后，qscamel 会不断的进行如下循环：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;启动一个 listWorker 不断的从 Source 中遍历 Object
+&lt;ul&gt;
+&lt;li&gt;如果遍历失败将会自动重试&lt;/li&gt;
+&lt;li&gt;如果遍历结束将会关闭任务队列，不再追加新的任务&lt;/li&gt;
+&lt;li&gt;如果获取到新的 Object，则首先会将其保存到数据库，然后再添加到任务队列&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;启动指定数量的 migrateWorker 不断的从任务队列中获取任务
+&lt;ul&gt;
+&lt;li&gt;如果任务执行失败则会重试三次，每次重试的间隔会变长，若还是失败则会跳过&lt;/li&gt;
+&lt;li&gt;如果任务执行成功则会从数据库中删除该任务&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;等到任务队列中所有的任务均已执行完毕，qscamel 将会遍历数据库
+&lt;ul&gt;
+&lt;li&gt;如果数据库中没有未执行完毕的任务，则该迁移任务已成功，退出&lt;/li&gt;
+&lt;li&gt;如果数据库中还有未执行完毕的任务，则重新开始上述流程&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;不难发现，如果因为某些原因，某个 Object 一直在重试，那么 qscamel 将永远不会退出，并一直在输出报错的日志。这个在设计中是作为一个产品特性考虑的，但是根据实际的用户反馈，他们更希望程序能够将这些一直失败的任务在最后的时候统一输出，因此之后重新考虑一下，看如何交互更好。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;分段上传&#34;&gt;分段上传&lt;/h3&gt;
+&lt;p&gt;分段上传并不是什么新奇玩意儿，但是如果要做一个不依赖服务器状态，支持并发上传多个块，支持从断点恢复而且还好看的分段上传，却实打实的花了我整整一个下午的时间。不依赖服务器状态是说我们需要在本地存储分块上传的完成情况，而不是通过调用服务器端的 API 来获取，这样可以减少很多轮查询的开销；支持并发上传多个块就是字面意思，我们需要在分块的级别上做到并发，而不是单线程跑；支持从断点恢复是说已经上传的块需要跳过，只上传还没有完成的块。之前 qscamel 使用的是 qingstor-sdk-go 提供的一个比较简陋的 upload client 封装，只是简单的顺序调用接口，没有异常的处理。直到有一天，一个用户说我要上传一个 11 TB 的单文件到对象存储 (狗头.png)&lt;/p&gt;
+&lt;p&gt;为了将分块上传的逻辑与我们刚才的逻辑可以优雅的结合起来，原来的 Object 和 Job （也就是一个 Folder）被组合并拆分成了三种 Object：DirectoryObject，SingleObject，PartialObject。顾名思义，DirectoryObject 就等同于原来的 Job，SingleObject 表示一个完整的 Object，而 PartialObject 除了有跟 SingleObject 一样的属性之外，它还会携带着与分段上传有关的信息，比如 part number，upload id 等。这样就使得每一个 PartialObject 都可以独立的进行上传，不需要依赖外部的信息。&lt;/p&gt;
+&lt;p&gt;分段上传在实现的过程中最大限度的复用了原有的逻辑，只不过在每一个 Object 开始上传时会做相关的检查：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果是 PartialObject，则会使用 Object 中的信息进行分段上传。&lt;/li&gt;
+&lt;li&gt;如果是 SingleObject，则会根据 Endpoint 是否支持分段和这个 Object 的大小来判断是否需要拆分成 PartialObject：
+&lt;ul&gt;
+&lt;li&gt;如果 Endpoint 不支持分段，或者 Object 的大小不够大，则会直接上传。&lt;/li&gt;
+&lt;li&gt;反之，则会使用 Endpoint 的初始化分段接口进行分片，并将所有的 PartialObject 创建好。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;实现&#34;&gt;实现&lt;/h2&gt;
+&lt;p&gt;刚才我们讲了 qscamel 几处关键部分的设计，下面我们聊一聊 qscamel 的实现。qscamel 在实现过程中保持着对开发者友好的风格，没有使用什么黑科技，也没有使用什么奇怪的 Hack，简单直接，使用的也都是最常见的模型。&lt;/p&gt;
+&lt;h3 id=&#34;生产者-消费者&#34;&gt;生产者-消费者&lt;/h3&gt;
+&lt;p&gt;在绝大部分场景下，列取操作都要比上传和下载操作来得快，因此使用单生产者多消费者的模型更加合适，同时逻辑也会变得更加清晰。实现上我们使用 &lt;code&gt;sync.WaitGroup&lt;/code&gt; 做了一个简单的 &lt;code&gt;goroutine&lt;/code&gt; 池，在初始化的时候会一次性创建完毕，并始终监听 Object Channel，在 channel 关闭后自动退出。&lt;/p&gt;
+&lt;h3 id=&#34;endpoint-中的-interface&#34;&gt;Endpoint 中的 interface&lt;/h3&gt;
+&lt;p&gt;qscamel 要求支持的 endpoint 类型很多，从本地文件系统到各种对象存储，还包括本地文件的列表和 URL 的列表。想要快速开发，便于维护就要求将各个 endpoint 中的公共部分尽可能抽象出来，让 endpoint 实现者只需要关注自己逻辑相关的部分。为了做到这一点，qscamel 将 endpoint 中需要用到的所有方法拆分成了三个 interface，endpoint 实现者可以自行实现自己想要支持的功能。&lt;/p&gt;
+&lt;p&gt;其中，所有 endpoint 都必须要实现的 base interface 中包括如下函数：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Base is the interface that both Source and Destination should implement.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Base &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Name will return the endpoint&amp;#39;s name.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Name&lt;/span&gt;(ctx context.Context) (name &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Stat will get the metadata.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Stat&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (o &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;model.SingleObject, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Read will return a reader.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Read&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (r io.Reader, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// ReadRange will read content with range [offset, offset+size)
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;ReadRange&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, offset, size &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;) (r io.Reader, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果想要作为 Source，则还需要 Source interface：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Source is the interface for source endpoint.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Source &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+Base
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// List will list from the job.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;List&lt;/span&gt;(ctx context.Context, j &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;model.DirectoryObject, fn &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(model.Object)) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Reach will return an accessible url.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Reach&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (url &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Reachable will return whether current endpoint supports reach.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Reachable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中 List 会用来支持列取，而 Reach 则是可选的，这主要是用来支持对象存储的 Object Fetch 功能。&lt;/p&gt;
+&lt;p&gt;如果想要作为一个 Task 的 Destination，则需要实现 Destination interface：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Destination is the interface for destination endpoint.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Destination &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+Base
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Delete will use endpoint to delete the path.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Delete&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Deletable will return whether current endpoint supports delete.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Deletable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Fetch will use endpoint to fetch the url.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Fetch&lt;/span&gt;(ctx context.Context, path, url &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Fetchable will return whether current endpoint supports fetch.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Fetchable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// InitPart will inti a multipart upload.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;InitPart&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, size &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;) (uploadID &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, partSize &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;, partNumbers &lt;span style=&#34;color:#902000&#34;&gt;int&lt;/span&gt;, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UploadPart will upload a part.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;UploadPart&lt;/span&gt;(ctx context.Context, o &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;model.PartialObject, r io.Reader) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Partable will return whether current endpoint supports multipart upload.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Partable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Write will read data from the reader and write to endpoint.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Write&lt;/span&gt;(ctx context.Context, path &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, size &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;, r io.Reader) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Writable will return whether current endpoint supports write.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Writable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在每个 interface 中，开发者对自己不想或者暂时不想实现的功能都可以在对应的 &lt;code&gt;Xxxable()&lt;/code&gt; 函数中返回 &lt;code&gt;false&lt;/code&gt; 即可，qscamel 在初始化任务时会进行对应功能的检查，并在任务要求不满足时报错。&lt;/p&gt;
+&lt;p&gt;这样，我们 qscamel 就能够方便快捷的扩展新 endpoint 了~&lt;/p&gt;
+&lt;h3 id=&#34;leveldb&#34;&gt;LevelDB&lt;/h3&gt;
+&lt;p&gt;qscamel 是我们 QingStor Team 推出的第一款有状态的命令行工具，之前我们做 &lt;code&gt;qingcloud-cli&lt;/code&gt; 和 &lt;code&gt;qsctl&lt;/code&gt; 都只是直接调用对象存储的 API，不会在本地存储持久化的状态。但是 qscamel 作为一款数据迁移工具，它必须在本地维护大量信息以支持任务的断点续传。&lt;/p&gt;
+&lt;p&gt;qscamel 在选型过程中考察了很多方案：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;首先排除掉了所有 Server - Client 模式的数据库，迁移工具要求部署简单，轻量级，如果迁移数据还需要部署一个 MySQL 或者 Redis，那就太滑稽了，因此可选择的一定是嵌入式 DB。&lt;/li&gt;
+&lt;li&gt;然后因为开发者（没错，就是我）的个人偏好，排除掉了所有必须使用 CGO 的嵌入式 DB。RocksDB 非常酷炫，但是因为找不到一个足够好的纯 go 实现，所以被否决了。&lt;/li&gt;
+&lt;li&gt;再次因为 qscamel 规划当中会在 DB 中存储的数据类型不会超过 3 种，同时也不会存在需要 Join 的情况，所以排除掉了所有嵌入式 SQL 数据库。&lt;/li&gt;
+&lt;li&gt;最后在社区那么多嵌入式 K-V 数据库中，我们还需要排除掉所有不靠谱的，没有生产环境实际验证过的，维护状态不佳的，以及看着就不大行的项目。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在筛过好几轮之后，摆在我们面前的可选方案有三个：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/etcd-io/bbolt&#34;&gt;BoltDB&lt;/a&gt; &lt;em&gt;原作者已经不维护了，现在由 coreos team 的人 Fork 并维护了一份，最近转移给了 etcd-io&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/dgraph-io/badger&#34;&gt;Badger&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/syndtr/goleveldb&#34;&gt;LevelDB&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;BoltDB 使用了 B+tree，LevelDB 使用了 LSM tree，而 Badger 则是借鉴了论文 &lt;a href=&#34;https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf&#34;&gt;WiscKey&lt;/a&gt;，论文我没有细看，但大致的思想是将 LSM trees 中的 Key 和 Value 分开，将 Key 存储在 LSM tree 中，而 Value 则存在 value logs 里面。相对的来说，BoltDB 更加适合于读多写少的场景，而基于 LSM tree 的 DB 写入会更有优势。此外，LevelDB 不提供事务，它提供批量写入和读取时的 Snapshot，而 BoltDB 和 Badger 提供了完整的 ACID 事务，其中 BoltDB 不支持并发写事务，而 Badger 则支持。再三权衡之后，我首先放弃了 Badger。虽然特性很多，功能很强，Benchmark 也非常好看，但是它的特性我们基本上都用不到，加上我个人对这个项目的代码还不是很熟悉，可靠性上还有着疑虑，所以放弃了。&lt;/p&gt;
+&lt;p&gt;本着够用就行的想法，我一开始选择了被广泛运用的 BoltDB 。但是事实证明这个选择是错误的，在 qscamel 实际的场景下，剧烈的写事务竞争导致性能很差，并且发现 qscamel 对事务其实并没有什么需求，因此切换成了 LevelDB。&lt;/p&gt;
+&lt;h2 id=&#34;故事&#34;&gt;故事&lt;/h2&gt;
+&lt;h3 id=&#34;遇事不决-黄金切割&#34;&gt;遇事不决，黄金切割&lt;/h3&gt;
+&lt;p&gt;在 qscamel 探索的过程中，有过需要 magic number 的阶段，处于个人偏好，我无一例外的全部选择了黄金切割比。&lt;/p&gt;
+&lt;p&gt;案例一：生产者与消费者比例&lt;/p&gt;
+&lt;p&gt;之前 qscamel 是采用的多生产者，多消费者的方案，每个 worker 从一个统一的任务队列中取任务，又是生产者，又是消费者。看起来很美好，但是运行到某个时点，qscamel 总是会停止响应。当然了，现在回头来看可以知道这个 BUG 是由多种原因导致的。但是当时的一个分析是 Worker 的调度有问题，有可能所有的 Worker 都在生产，没有消费，导致整个任务队列阻塞了。作为一个解决方案，需要人为的固定生产者和消费者的比例，纠结了一会儿，选择了 0.618。&lt;/p&gt;
+&lt;p&gt;事后的测试中发现这个 Fix 完全没有什么用，于是删掉了（&lt;/p&gt;
+&lt;p&gt;案例二：乱搞的文件一致性检验&lt;/p&gt;
+&lt;p&gt;为了加快一致性检验的速度，qscamel 曾经自己乱搞过一个&lt;a href=&#34;https://github.com/yunify/qscamel/commit/5a29fc9346b56b6ab5c6377f58d49675ace49838#diff-77889babdacd806bb9d5b8299a56e9a9&#34;&gt;一致性的算法&lt;/a&gt;。想法非常简单，从文件的头尾和 0.618 处，分别取 3 MB，总计 9 MB，然后计算它们的 MD5 。很快这个想法被毙了，用户开 MD5 的检查就是为了保证自己文件上传没错，搞一个所谓 quickMD5 完全没有实际的意义，要是万一有一个文件 MD5 不对，结果没有检查出来，那就大发了。&lt;/p&gt;
+&lt;p&gt;总的来说，所有引入黄金切割的尝试全都失败了，但是我还在期待着下一个机会（&lt;/p&gt;
+&lt;h3 id=&#34;buffer-的-bytes&#34;&gt;Buffer 的 Bytes&lt;/h3&gt;
+&lt;p&gt;qscamel 很多地方都使用了我朋友 &lt;a href=&#34;https://pjw.io/&#34;&gt;@Aspire&lt;/a&gt; 写的&lt;a href=&#34;https://github.com/pengsrc/go-shared&#34;&gt;库&lt;/a&gt;，但是有一天被坑了一手，因为我发现它的 &lt;code&gt;buffer.Bytes()&lt;/code&gt; 不是线程安全的。因为它是这样实现的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Bytes returns a mutable reference to the underlying byte slice.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (b &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;BytesBuffer) &lt;span style=&#34;color:#06287e&#34;&gt;Bytes&lt;/span&gt;() []&lt;span style=&#34;color:#902000&#34;&gt;byte&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; b.bs
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;他将底层的 byte slice 直接返回，那就有可能在使用到一半的时候这个 buffer 被释放并写入了新的值，从而导致外部的调用者看到了一个错误的值。我提了一个 &lt;a href=&#34;https://github.com/pengsrc/go-shared/pull/3&#34;&gt;PR&lt;/a&gt;，跟 @Aspire 讨论了一下这个问题。虽说当初他实现的时候没有怎么考虑这个问题，但是想了一下他认为这是设计预期的，主要的点有两个：第一，设计这个 buffer 库就是为了复用内存，减少频繁创建 bytes slice 带来的开销，降低 gc 的压力，如果这个地方按照我的 PR 那样返回了一个新的 bytes slice 的话，那这个库就跟它的设计目标相违背了；第二，在 Golang 中，如果没有明确声明并发访问某事物是安全的，那它就不是安全的，比如 Golang 自己 &lt;a href=&#34;https://golang.org/src/bytes/buffer.go&#34;&gt;Buffer 实现&lt;/a&gt;就不是并发安全的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Bytes returns a slice of length b.Len() holding the unread portion of the buffer.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// The slice is valid for use only until the next buffer modification (that is,
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// only until the next call to a method like Read, Write, Reset, or Truncate).
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// The slice aliases the buffer content at least until the next buffer modification,
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// so immediate changes to the slice will affect the result of future reads.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (b &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;Buffer) &lt;span style=&#34;color:#06287e&#34;&gt;Bytes&lt;/span&gt;() []&lt;span style=&#34;color:#902000&#34;&gt;byte&lt;/span&gt; { &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; b.buf[b.off:] }&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;最后的决定是增加一个类似于 &lt;code&gt;SafeBytes()&lt;/code&gt; 的函数，不过因为懒，所以一直没有做，以后再补上吧~&lt;/p&gt;
+&lt;h3 id=&#34;小人物的重构-从早到晚&#34;&gt;小人物的重构，从早到晚&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;语出猫腻《间客》许乐在老虎死后跟随舰队穿越虫洞，手刃卡顿郡王前：“大人物报仇，隐忍十年也不算晚，小人物的复仇，却是从早到晚。”&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;其实 qscamel 的分段上传逻辑写了两遍，最开始是在原来的基础上缝缝补补，为 Object 加了很多新的属性，然后加了很多复杂判断，基本可用之后交付给了售前去做测试。晚上下班回家之后实在不满意那个版本，于是采用新的，也就是现在这样的逻辑重新实现了一遍。性能上有轻微提升，逻辑上变得更加顺畅，更主要的是我更加开心了 ʅ(‾◡◝)ʃ&lt;/p&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;这文章写了好几个月了，都不知道动态该写啥了。。&lt;/li&gt;
+&lt;li&gt;LOL 洲际赛夺冠了，亚运会也夺冠了，又又又是最有希望的一年，希望今年能拿到 S 系列赛的冠军&lt;/li&gt;
+&lt;li&gt;最近在重温《希灵帝国》，还买了微信读书新出的无限卡，每个月可以免费解锁 300 个章节，按照每个章节 0.3 元的均价，每月 19 块还是比较划算的（会计小能手&lt;/li&gt;
+&lt;li&gt;PS 会免了命运 2，跟小伙伴一起突突突了两天，导致接下来的一个星期睡觉都满脑子枪声&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;广告&#34;&gt;广告&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;广告位招租，8 点 17 分发&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;想要加入我们一起来做靠谱的产品吗，快访问 &lt;a href=&#34;https://www.qingcloud.com/jobs&#34;&gt;https://www.qingcloud.com/jobs&lt;/a&gt; 寻找自己中意的岗位并且给我发简历吧~&lt;/p&gt;</description></item><item><title>Tiresias v0.3</title><link>https://xuanwo.io/2018/07/22/tiresias-v0.3/</link><pubDate>Sun, 22 Jul 2018 16:00:00 +0000</pubDate><guid>https://xuanwo.io/2018/07/22/tiresias-v0.3/</guid><description>&lt;p&gt;经过一段时间的摸鱼，Tiresias 发布了 v0.3 。新版本重新实现了 sync 的逻辑并且修复了部分 BUG，完整的 changelog 可以参考: &lt;a href=&#34;https://github.com/Xuanwo/tiresias/blob/master/CHANGELOG.md&#34;&gt;https://github.com/Xuanwo/tiresias/blob/master/CHANGELOG.md&lt;/a&gt; 。这篇文章主要介绍一下新的 sync 逻辑是如何实现的并介绍一下新增的功能。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Tiresias 是一个服务器信息管理工具，其目标是自动化服务器信息管理，取代手工维护的 Hosts 和 SSH Config&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;新的-sync-逻辑&#34;&gt;新的 Sync 逻辑&lt;/h2&gt;
+&lt;p&gt;最开始想做一个简单易用的工具，因此没有引入任何复杂的逻辑，只是简单的从不同的 Source 端点中读取数据并写入到配置好的 Destination 端点中。但是在实际的使用中遇到了这样的一些问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;无法处理 Source 端点不可达的情况，直接报错导致所有的 Source 都更新失败&lt;/li&gt;
+&lt;li&gt;某些 Source 网络不可达（比如这个 Source 是一个在 VPC 中的 Consul 节点），但是 Tiresias 会一直尝试链接并等待&lt;/li&gt;
+&lt;li&gt;Source 的数据没有持久化，导致部分 Source 失败的时候，Destination 中被更新了不完整的数据&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;为了解决上述的问题，Tiresias 在 v0.3 中引入了一个全新的 Sync 逻辑：将 Source 的读取和 Destination 的更新拆开，从 Source 中读取到的数据将会写入本地的 leveldb 当中，而 Destination 更新时也会从 leveldb 中读取。更完整一些的逻辑是这样的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;从 leveldb 中读取所有已经存储 Source，并保存在 StoredSources 当中&lt;/li&gt;
+&lt;li&gt;从配置文件中读取到的所有初始化成功的 Source 将会存储在 ExpectedSources 当中&lt;/li&gt;
+&lt;li&gt;尝试连接所有的 Source，连接失败的会跳过，而连接成功的会存储在 AvailableSources 当中&lt;/li&gt;
+&lt;li&gt;遍历所有的 AvailableSources，更新 db 中的数据&lt;/li&gt;
+&lt;li&gt;从 DB 中读取所有数据，更新所有已配置的 Destinations&lt;/li&gt;
+&lt;li&gt;遍历 StoredSources，删除所有不存在于 ExpectedSources 中的数据&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在新的 Sync 逻辑下，Tiresias 可以更好地处理如下情况：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;初始化失败的 Source 会被忽略并从 DB 中删除&lt;/li&gt;
+&lt;li&gt;连接失败的 Source 将会跳过&lt;/li&gt;
+&lt;li&gt;已经被删除的 Source 将会从 DB 删除&lt;/li&gt;
+&lt;li&gt;有内容更新的 Source 将会完整的进行更新&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;新增的功能&#34;&gt;新增的功能&lt;/h2&gt;
+&lt;p&gt;从上一次发文章到现在，Tiresias 增加了对 fs glob path 的支持：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;src:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;fs&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;options:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/home/xuanwo/.tiresias/server/&lt;span style=&#34;color:#007020&#34;&gt;*.yaml&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这样就可以很舒服的把服务器拆分到多个文件进行管理了（&lt;/p&gt;
+&lt;p&gt;除此以外，还增加了对 Consul 的支持：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;src:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;consul&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;options:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;address:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1.2&lt;/span&gt;.&lt;span style=&#34;color:#40a070&#34;&gt;4.8&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;8500&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;schema:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;http&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;datacenter:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;test&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;prefix:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;test&lt;span style=&#34;color:#4070a0;font-style:italic&#34;&gt;-
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0;font-style:italic&#34;&gt; default:&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;user:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;root&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;identity_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.ssh/key&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;告别手动维护 hosts 和在群里询问 XXX 环境的 IP 是多少的过去（&lt;/p&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;过了一个很平淡的生日，又老了一岁（&lt;/li&gt;
+&lt;li&gt;为自己还能手写 Trie 树感到激动不已&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/media/md102392&#34;&gt;工作细胞&lt;/a&gt; 真香&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/media/md102792&#34;&gt;Angels of Death&lt;/a&gt; 真甜&lt;/li&gt;
+&lt;li&gt;周末把尼尔的六周目给通了（上一个三周目的时候特别感动把存档删了 = =）&lt;/li&gt;
+&lt;li&gt;跟朋友去试了下&lt;a href=&#34;http://www.dianping.com/shop/5864352&#34;&gt;包肉&lt;/a&gt;，第二天肚子疼+拉稀一天，差评&lt;/li&gt;
+&lt;li&gt;终于找到由头又水了一篇，开心&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Tiresias —— 服务器信息管理工具</title><link>https://xuanwo.io/2018/05/22/tiresias-intro/</link><pubDate>Tue, 22 May 2018 04:00:00 +0000</pubDate><guid>https://xuanwo.io/2018/05/22/tiresias-intro/</guid><description>&lt;p&gt;大概从大二的时候开始就有这种困惑：不同的服务器所在的云服务商，数据中心，网段，用户名和私钥各不相同，他们的信息要如何管理？最开始是把所有的服务器信息都存放在了密码管理工具当中，后来知道了使用 &lt;a href=&#34;https://github.com/moul/advanced-ssh-config&#34;&gt;assh&lt;/a&gt; 来生成 &lt;code&gt;ssh_config&lt;/code&gt;，最后是 &lt;a href=&#34;https://pjw.io/&#34;&gt;@Aspire&lt;/a&gt; 提供的一个思路：使用脚本生成 &lt;code&gt;hosts&lt;/code&gt; 文件。于是我顺着 Aspire 的思路开发了一个工具：&lt;a href=&#34;https://github.com/Xuanwo/tiresias&#34;&gt;Tiresias&lt;/a&gt;，它可以读取事先写好的 YAML 配置文件并生成 &lt;code&gt;ssh_config&lt;/code&gt; 和 &lt;code&gt;hosts&lt;/code&gt; 文件。今天这篇文章就主要介绍一下我造的又一个轮子。&lt;/p&gt;
+&lt;h2 id=&#34;介绍&#34;&gt;介绍&lt;/h2&gt;
+&lt;p&gt;Tiresias，一般翻译为&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E7%89%B9%E4%BC%8A%E8%A5%BF%E4%BA%9A%E6%96%AF&#34;&gt;特伊西亚斯&lt;/a&gt;，古希腊神话人物，是一位盲人先知，凭借多种获得信息的能力并对世界进行解释而闻名于世。这个工具取这个名字主要就是采用了盲人先知的意象，希望它可以更好帮助管理众多服务器的信息。&lt;/p&gt;
+&lt;h2 id=&#34;使用&#34;&gt;使用&lt;/h2&gt;
+&lt;p&gt;Tiresias 不需要特别的安装过程，只需要从 &lt;a href=&#34;https://github.com/Xuanwo/tiresias/releases&#34;&gt;release&lt;/a&gt; 处下载编译好的二进制即可使用。&lt;/p&gt;
+&lt;p&gt;Tiresias 运行时需要指定一个配置文件，比如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;src:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;fs&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/path/to/source/file&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;dst:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;ssh_config&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/home/xuanwo/.ssh/config&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;hosts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/etc/hosts&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;src&lt;/code&gt; 目前支持 &lt;code&gt;fs&lt;/code&gt; 类型，可以指向一个 yaml 配置文件：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# production server&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;name:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;production-server&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;address:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1.1&lt;/span&gt;.&lt;span style=&#34;color:#40a070&#34;&gt;1.1&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;user:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;root&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;identity_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.ssh/private_key&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# staging server&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;name:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;staging-server&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;address:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;2.2&lt;/span&gt;.&lt;span style=&#34;color:#40a070&#34;&gt;2.2&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;user:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;root&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;identity_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.ssh/private_key&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;dst&lt;/code&gt; 目前支持 &lt;code&gt;ssh_config&lt;/code&gt; 和 &lt;code&gt;hosts&lt;/code&gt; 类型，可以通过 path 指定生成文件的地址。以刚才的输入为例，将会分别生成如下两个文件：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ssh_config&#34; data-lang=&#34;ssh_config&#34;&gt;# -- Generated by tiresias at 2018-05-22 13:35:35.669119377 +0800 CST m=+0.002915397 --
+Host production-server
+HostName 1.1.1.1
+User root
+IdentityFile ~/.ssh/private_key
+Host staging-server
+HostName 2.2.2.2
+User root
+IdentityFile ~/.ssh/private_key&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-hosts&#34; data-lang=&#34;hosts&#34;&gt;# -- Generated by tiresias at 2018-05-22 13:35:35.669429758 +0800 CST m=+0.003225739 --
+1.1.1.1 production-server
+2.2.2.2 staging-server&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;配合上 shell 提供的自动补全功能，我们就可以这样使用了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ ping production-server
+$ ssh staging-server
+$ redis-cli -h production-server
+$ mysql -h staging-server -u root -p&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;实现&#34;&gt;实现&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Tiresias&lt;/code&gt; 实现上并不复杂，分别定义了 &lt;code&gt;Source&lt;/code&gt; 和 &lt;code&gt;Destnation&lt;/code&gt; 两个 interface，然后从 Source 读取数据并写入到 Destnation。&lt;/p&gt;
+&lt;h2 id=&#34;展望&#34;&gt;展望&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;配合 systemd.path 或者 inotify 可以实现文件变更之后的自动更新&lt;/li&gt;
+&lt;li&gt;支持从更多的 Source 中读取数据，比如一个 url，etcd 或者是 Keyring&lt;/li&gt;
+&lt;li&gt;支持向更多的 Destnation 中写入数据，比如写入到 Keyring 或者密码管理器&lt;/li&gt;
+&lt;li&gt;支持 Server name 的通配符以支持配置批量服务器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Tiresias&lt;/code&gt; 以一种非侵入式的方式实现了服务器信息的管理和应用，使得用户只需要维护一个固定的源就能方便快捷的维护自己的所有服务器，不会产生任何非预期的行为。&lt;/p&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;上个周末一直在看 MSI，时隔三年，LPL 终于再一次拿到了 MSI 的冠军。小狗牛逼，RNG 牛逼，LPL 牛逼！&lt;/li&gt;
+&lt;li&gt;MSI 决赛的第三局 Letme 的一手剑来，让我又想再把 《雪中悍刀行》再看一遍了&lt;/li&gt;
+&lt;li&gt;据说隔壁 Dota 2 项目也得了冠军，西恩军团牛逼！&lt;/li&gt;
+&lt;li&gt;为了庆祝 RNG MSI 夺冠，昨天请好朋友一起吃了日本料理，Excited ！&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Xuanzang —— 一款开箱即用的全文搜索引擎</title><link>https://xuanwo.io/2018/05/01/xuanzang-intro/</link><pubDate>Tue, 01 May 2018 13:30:00 +0000</pubDate><guid>https://xuanwo.io/2018/05/01/xuanzang-intro/</guid><description>&lt;p&gt;&lt;a href=&#34;https://github.com/Xuanwo/xuanzang&#34;&gt;Xuanzang&lt;/a&gt;, 中文名：玄奘，是一个支持中文分词的开源全文搜索引擎。其目标是做一个开箱即用，不需要复杂的部署和配置，可以方便的嵌入静态网站的全文搜索引擎。&lt;/p&gt;
+&lt;h2 id=&#34;使用&#34;&gt;使用&lt;/h2&gt;
+&lt;p&gt;Xuanzang 的使用非常简单，只需要在 &lt;a href=&#34;https://github.com/Xuanwo/xuanzang/releases&#34;&gt;releases&lt;/a&gt; 处下载实现编译好的二进制文件。按照要求填写一些配置文件，比如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;host:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;localhost&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;port:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;8080&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;db_path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/project/xuanzang/database&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;index_path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/project/xuanzang/index&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;source:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;sitemap&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;url:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;https://xuanwo.io/sitemap.xml&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;duration:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;3600&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;dictionary:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/project/xuanzang/dictionary.txt&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;stop_tokens:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/project/xuanzang/stop_tokens.txt&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;logger:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;level:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;debug&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;output:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/project/xuanzang/log&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;上述的配置文件将会监听本地的 &lt;code&gt;8080&lt;/code&gt; 端口，并使用 &lt;code&gt;/project/xuanzang/database&lt;/code&gt; 存放数据库，使用 &lt;code&gt;/project/xuanzang/index&lt;/code&gt; 目录存放索引。接下来的 &lt;code&gt;source&lt;/code&gt; 指定了源站的类型和两次抓取的间隔时间。对于个人博客而言，一个小时的抓取间隔已经足够了。下面的 &lt;code&gt;dictionary&lt;/code&gt; 和 &lt;code&gt;stop_tokens&lt;/code&gt; 是 Xuanzang 使用的字典和停止词，如果没有特殊的需求，可以使用项目自带的，在&lt;a href=&#34;https://github.com/Xuanwo/xuanzang/tree/master/data&#34;&gt;此处&lt;/a&gt;下载。&lt;code&gt;logger&lt;/code&gt; 则指定了 log 文件的位置和级别。&lt;/p&gt;
+&lt;p&gt;接下来就只需要启动 Xuanzang：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; xuanzang -c /path/to/config.yaml&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;以搜索我的朋友 &lt;a href=&#34;https://pjw.io/&#34;&gt;Aspire&lt;/a&gt; 为例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; curl &lt;span style=&#34;color:#40a070&#34;&gt;127&lt;/span&gt;.0.0.1:8080?text&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;aspire
+&lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;tokens&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;aspire&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;,&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;docs&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#666&#34;&gt;[{&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;title&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;友情链接 // Xuanwo&amp;#39;s Blog&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;url&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://xuanwo.io/blogroll/&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;content_text&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;}]&lt;/span&gt;,&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;total&amp;#34;&lt;/span&gt;:1&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;接入博客十分容易，只需要通过 Ajax 向 Xuanzang 发出请求，并解析返回的 JSON 插入正确的 DOM，比如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; search() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; text &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;decodeURI&lt;/span&gt;(&lt;span style=&#34;color:#007020&#34;&gt;window&lt;/span&gt;.location.search.substring(&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;).split(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;amp;&amp;#34;&lt;/span&gt;)[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;].split(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;=&amp;#34;&lt;/span&gt;)[&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;]);
+$(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;.archive-category&amp;#34;&lt;/span&gt;).text(&lt;span style=&#34;color:#4070a0&#34;&gt;`&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;${&lt;/span&gt;text&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34; 的搜索结果`&lt;/span&gt;);
+$.getJSON(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/search?text=&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; text, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt;(result) {
+$.each(result.docs, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt;(i, field) {
+$(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;.archives&amp;#34;&lt;/span&gt;).append(&lt;span style=&#34;color:#4070a0&#34;&gt;`&amp;lt;a href=&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;${&lt;/span&gt;field.url&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;${&lt;/span&gt;field.title&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;lt;/a&amp;gt;`&lt;/span&gt;);
+});
+});
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在 Search 页面的 Body 中设置 &lt;code&gt;onload=&amp;quot;search()&amp;quot;&lt;/code&gt; 并在 form 表单中设置 &lt;code&gt;action=&amp;quot;/search_result&amp;quot; method=&amp;quot;get&amp;quot;&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;具体的实现可以参考&lt;a href=&#34;https://github.com/Xuanwo/xuanwo.github.io/commit/3a7049df0a8fb9d685704283cfc0f6fdc264035d&#34;&gt;这个 Commit&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;目前本博客的全文搜索就是通过 Xuanzang 实现的，感兴趣的朋友可以试用一下~&lt;/p&gt;
+&lt;h2 id=&#34;实现&#34;&gt;实现&lt;/h2&gt;
+&lt;p&gt;Xuanzang 解决中文全文搜索的思路非常简单：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;通过事先指定的 sitemap 文件来遍历 &amp;amp; 抓取网页&lt;/li&gt;
+&lt;li&gt;使用一个支持中文分词的全文搜索引擎来做索引&lt;/li&gt;
+&lt;li&gt;对外暴露一个简化的 API 接口&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;接下来我们分别介绍一下这三个部分。&lt;/p&gt;
+&lt;h3 id=&#34;抓取网页&#34;&gt;抓取网页&lt;/h3&gt;
+&lt;p&gt;现在静态网站的生成工具多如牛毛，每个工具采用的模板都不大一样，因此不可能走为每种静态网站生成工具适配模板的道路。那有没有一种方法可以实时的获取到网站内容的变更呢？那就是 &lt;a href=&#34;https://www.sitemaps.org/protocol.html&#34;&gt;Sitemap&lt;/a&gt;，又叫做站点地图。几乎所有的静态网站生成工具都支持生成 Sitemap，这解决了获取网站内容的问题。同时 Sitemap 除了网址以外，还有 &lt;code&gt;lastmod&lt;/code&gt; 属性，可以获取到对应页面的最后修改时间。因此只需要抓取 Sitemap 文件，我们就可以知道整个网站都有哪些页面以及他们上次更新是什么时候了，这样就解决了获取网站内容变更的问题。同时我们可以在本地记录一下索引更新的时间，如果索引更新的时间比网页更新的时间要晚，那就可以直接跳过这个页面，从而避免每次都需要抓取。&lt;/p&gt;
+&lt;h3 id=&#34;中文分词&#34;&gt;中文分词&lt;/h3&gt;
+&lt;p&gt;Xuanzang 底层使用了 &lt;a href=&#34;https://github.com/huichen&#34;&gt;@huichen&lt;/a&gt; 开发的 &lt;a href=&#34;https://github.com/huichen/wukong&#34;&gt;wukong&lt;/a&gt;。中文分词这一块没有做什么大的改进，基本上就是直接拿过来用了。虽说搜索的精度还不是很高，但是马马虎虎还能用，对于个人博客而言已经足够了。&lt;/p&gt;
+&lt;h3 id=&#34;api-接口&#34;&gt;API 接口&lt;/h3&gt;
+&lt;p&gt;目前对外只提供了一个 &lt;code&gt;GET&lt;/code&gt; 接口，返回的数据结构如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Response is the response for search.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Response &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;struct&lt;/span&gt; {
+Tokens []&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;`json:&amp;#34;tokens&amp;#34;`&lt;/span&gt;
+Docs []Document &lt;span style=&#34;color:#4070a0&#34;&gt;`json:&amp;#34;docs&amp;#34;`&lt;/span&gt;
+Total &lt;span style=&#34;color:#902000&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;`json:&amp;#34;total&amp;#34;`&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Document is the document that scored.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Document &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;struct&lt;/span&gt; {
+Title &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;`json:&amp;#34;title&amp;#34;`&lt;/span&gt;
+URL &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;`json:&amp;#34;url&amp;#34;`&lt;/span&gt;
+ContentText &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;`json:&amp;#34;content_text&amp;#34;`&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;预留了 &lt;code&gt;ContentText&lt;/code&gt; 属性，以后会用做提供搜索到的关键字附近的内容。&lt;/p&gt;
+&lt;h2 id=&#34;对比&#34;&gt;对比&lt;/h2&gt;
+&lt;p&gt;接下来简单的讲一讲 Xuanzang 和市面上其它全文搜索工具的区别。&lt;/p&gt;
+&lt;h3 id=&#34;lunr-js&#34;&gt;Lunr.js&lt;/h3&gt;
+&lt;p&gt;Lunr.js 是一个非常 Cool 的项目，但是 Lunr.js 不支持中文分词。不少人通过引入一个分词库并修改 Lunr.js 的 tokenizer 方法解决这个问题，其代价就是不能在浏览器端直接使用，还是需要在服务器端去提供一个服务。从我的角度来看是是已经偏离了它的目标：&lt;code&gt;A bit like Solr, but much smaller and not as bright.&lt;/code&gt; ，因此我的博客没有采用这个方案。其他的基于 js 的方案也都或多或少有这样的问题，比如在本地生成一个索引，然后搜索的时候使用 js 去 load 等等，在使用体验上都不是很好，在网站不是部署在国内时，这个问题尤为严重。&lt;/p&gt;
+&lt;h3 id=&#34;elasticsearch&#34;&gt;Elasticsearch&lt;/h3&gt;
+&lt;p&gt;（首先， Elasticsearch 是 Java 的，我这个 512M 内存的机器咋跑。。。）&lt;/p&gt;
+&lt;p&gt;Elasticsearch 很棒，但是用来做博客的全文搜索，总有一种拿着大炮打蚊子的感觉。我个人只是使用过 API ，没有实际的进行过 ES 的部署和维护，这里就不多说了。&lt;/p&gt;
+&lt;h3 id=&#34;google-site-search&#34;&gt;Google Site Search&lt;/h3&gt;
+&lt;p&gt;这大概是接入最方便的方案了，只需要直接跳转到 google 的 &lt;code&gt;site:xuanwo.io %s&lt;/code&gt; 即可。缺点是无法控制 Google 的索引行为，也没有办法做到实时的抓取和更新。&lt;/p&gt;
+&lt;h3 id=&#34;algolia-etc&#34;&gt;Algolia etc.&lt;/h3&gt;
+&lt;p&gt;还有很多商业化的全文搜索服务，其中最出名的莫过于 &lt;code&gt;Algolia&lt;/code&gt; 和 &lt;code&gt;Swiftype&lt;/code&gt;。之前试用过他们的服务，搜索效果很赞，但是免费用户限制颇多： algolia 的免费服务最多只能有一万条记录，swiftype 则是只提供了一段时间的免费试用，同时还限制了抓取的频率。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;Xuanzang 在前人已有工作的基础上提供了一套简单易用的中文网站全文搜索解决方案，不需要复杂的参数调节和运维工作，按照文档部署即可使用，兼容市面上绝大多数静态网站生成工具，各位朋友了解一下？&lt;/p&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;本周给大家推荐的小说： &lt;a href=&#34;http://book.zongheng.com/showchapter/189169.html&#34;&gt;《雪中悍刀行》&lt;/a&gt;，烽火戏诸侯的作品，布局精细，结构宏大，人物刻画生动，文字功底深厚，适合所有喜欢武侠小说的同学~&lt;/li&gt;
+&lt;li&gt;背后故事：4 月 29 号睡前有了为自己博客增加全文搜索支持的 Idea，30 号写了一天，并于当天的晚上九点发出了第一个 Release。&lt;/li&gt;
+&lt;li&gt;今天去簋街胡大饭馆吃了麻辣小龙虾，麻辣扇贝，馋嘴蛙仔，现在肚子在疯狂的翻腾。。。&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

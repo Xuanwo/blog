@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Node.js on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/node.js/</link><description>Recent content in Node.js on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 21 Apr 2018 07:30:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/node.js/index.xml" rel="self" type="application/rss+xml"/><item><title>为 RSSHub 增加煎蛋无聊图支持</title><link>https://xuanwo.io/2018/04/21/add-jandan-pic-support-for-rsshub/</link><pubDate>Sat, 21 Apr 2018 07:30:00 +0000</pubDate><guid>https://xuanwo.io/2018/04/21/add-jandan-pic-support-for-rsshub/</guid><description>&lt;p&gt;&lt;a href=&#34;https://github.com/DIYgod/RSSHub&#34;&gt;RSSHub&lt;/a&gt; 是 &lt;a href=&#34;https://diygod.me/&#34;&gt;@DIYgod&lt;/a&gt; 开发的一个项目，其目标是：“使用 RSS 连接全世界”，实现的方式是抓取某个网页或者 API 后解析数据并生成符合标准的 RSS Feed。这个项目十分有意思，可以通过 RSS 去订阅 B 站的番剧或者网易云音乐的歌单，比如我最近正在追的一部动漫：&lt;a href=&#34;https://rss.now.sh/bilibili/bangumi/21680&#34;&gt;DARLING in the FRANXX&lt;/a&gt;。我最近为这个项目增加了煎蛋无聊图的支持，这篇文章主要就是讲一讲如何抓取并解析煎蛋无聊图。&lt;/p&gt;
+&lt;h2 id=&#34;准备工作&#34;&gt;准备工作&lt;/h2&gt;
+&lt;p&gt;先了解一下 RSSHub 这个项目的大概构成。RSSHub 基于 &lt;a href=&#34;http://koajs.com/&#34;&gt;Koa&lt;/a&gt; 开发，请求进来之后就会被直接路由到对应的模块，然后每个模块中实现自己的逻辑。如果想增加新的支持，只需要修改 &lt;code&gt;router.js&lt;/code&gt; 并在 &lt;code&gt;routes&lt;/code&gt; 目录中增加对应的模块就可以了。项目中主要使用 &lt;a href=&#34;https://github.com/axios/axios&#34;&gt;axios&lt;/a&gt; 来做异步请求，使用 &lt;a href=&#34;https://aui.github.io/art-template/&#34;&gt;art-template&lt;/a&gt; 来渲染 RSS Feed 的模板，使用 &lt;a href=&#34;https://cheerio.js.org/&#34;&gt;cheerio&lt;/a&gt; 来解析 HTML。其中 axios 和 art-template 使用起来都比较简单，只要模仿其它模块的写法就行了，只有 cheerio 对不怎么熟悉 jQuery 语法的同学来说会比较麻烦一些（对，就是我），需要花一些时间了解一下如何获取自己需要的内容。&lt;/p&gt;
+&lt;h2 id=&#34;抓取无聊图&#34;&gt;抓取无聊图&lt;/h2&gt;
+&lt;p&gt;煎蛋网作为常年被爬的目标，早就已经练就了一身反爬虫的骚操作。在我写这篇文章的时候，煎蛋的反爬策略是这样的：在每个 comment 当中返回一个 &lt;code&gt;img-hash&lt;/code&gt;，同时会生成一个不定期会变的 magic string，在脚本中使用这两个值算出真正的图片链接，再操作 DOM 把 img 标签塞进去。&lt;/p&gt;
+&lt;p&gt;举个例子吧，会有这样的一个 comment（已经去掉了无关的一些元素）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;li&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;comment-3784888&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;row&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;text&amp;#34;&lt;/span&gt;&amp;gt;&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;righttext&amp;#34;&lt;/span&gt;&amp;gt;&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;a&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;href&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;//jandan.net/pic/page-226#comment-3784888&amp;#34;&lt;/span&gt;&amp;gt;3784888&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;a&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;p&lt;/span&gt;&amp;gt;辣个屁&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;br&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;img&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;//img.jandan.net/img/blank.gif&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onload&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;jandan_load_img(this)&amp;#34;&lt;/span&gt; /&amp;gt;&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;img-hash&amp;#34;&lt;/span&gt;&amp;gt;80e6w5mrZ3HEpVzkZXyOhd9DYgF9F2cXvgMQ6PPgofGuHui2Dqrhh9fDcWrRGQEtB7l+GKuPqhQCGsHil1luTUVYNEpXiKUzh3ck/P91sr6ht9gsISFBXQ&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;p&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;li&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;可以看到 img 标签中载入的是 &lt;code&gt;img.jandan.net/img/blank.gif&lt;/code&gt;，然后在加载的时候会去执行 &lt;code&gt;jandan_load_img&lt;/code&gt;。让我们来看一下 &lt;code&gt;jandan_load_img&lt;/code&gt; 这个函数都做了什么：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; jandan_load_img(b) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; d &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; $(b);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; d.next(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;span.img-hash&amp;#34;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; e &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; f.text();
+f.remove();
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; c &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; jdTzcXZnL0V2WZZ8eq9786xeOdkyoBXlDR(e, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;tRoGWVi9aW3cMYuqXmV9S1SweVfNzJf3&amp;#34;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; $(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;a href=&amp;#34;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; c.replace(&lt;span style=&#34;color:#235388&#34;&gt;/(\/\/\w+\.sinaimg\.cn\/)(\w+)(\/.+\.(gif|jpg|jpeg))/&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;$1large$3&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#34; target=&amp;#34;_blank&amp;#34; class=&amp;#34;view_img_link&amp;#34;&amp;gt;[查看原图]&amp;lt;/a&amp;gt;&amp;#39;&lt;/span&gt;);
+d.before(a);
+d.before(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;br&amp;gt;&amp;#34;&lt;/span&gt;);
+d.removeAttr(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;onload&amp;#34;&lt;/span&gt;);
+d.attr(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;src&amp;#34;&lt;/span&gt;, location.protocol &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; c.replace(&lt;span style=&#34;color:#235388&#34;&gt;/(\/\/\w+\.sinaimg\.cn\/)(\w+)(\/.+\.gif)/&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;$1thumb180$3&amp;#34;&lt;/span&gt;));
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#235388&#34;&gt;/\.gif$/&lt;/span&gt;.test(c)) {
+d.attr(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;org_src&amp;#34;&lt;/span&gt;, location.protocol &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; c);
+b.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt;() {
+add_img_loading_mask(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;this&lt;/span&gt;, load_sina_gif)
+}
+}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;抛开跟我们抓取无关的 DOM 操作，很容易发现这个函数实际上就是做了一次 &lt;code&gt;jandan_decode(img_hash, magic_string);&lt;/code&gt;。接下来我们只要搞清楚这里的 &lt;code&gt;jdTzcXZnL0V2WZZ8eq9786xeOdkyoBXlDR&lt;/code&gt; 函数是什么可以了，用 ES6 的语法简单的翻译一下就是下面这样：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;const&lt;/span&gt; jandan_decode &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (m, r) =&amp;gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; q &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;4&lt;/span&gt;;
+r &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; md5(r);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; o &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; md5(r.substr(&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;));
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; n &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; md5(r.substr(&lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;));
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; l &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; m.substr(&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, q);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; c &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; o &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; md5(o &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; l);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; k;
+m &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; m.substr(q);
+k &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; base64_decode(m);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;const&lt;/span&gt; h &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Array&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;256&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; g &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;; g &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;256&lt;/span&gt;; g&lt;span style=&#34;color:#666&#34;&gt;++&lt;/span&gt;) {
+h[g] &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; g;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;const&lt;/span&gt; b &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Array&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;256&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; g &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;; g &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;256&lt;/span&gt;; g&lt;span style=&#34;color:#666&#34;&gt;++&lt;/span&gt;) {
+b[g] &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; c.charCodeAt(g &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; c.length);
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, g &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;; g &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;256&lt;/span&gt;; g&lt;span style=&#34;color:#666&#34;&gt;++&lt;/span&gt;) {
+f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (f &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; h[g] &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; b[g]) &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;256&lt;/span&gt;;
+[h[g], h[f]] &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [h[f], h[g]];
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; t &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;;
+k &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; k.split(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; p &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, g &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;; g &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt; k.length; g&lt;span style=&#34;color:#666&#34;&gt;++&lt;/span&gt;) {
+p &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (p &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;256&lt;/span&gt;;
+f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (f &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; h[p]) &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;256&lt;/span&gt;;
+[h[p], h[f]] &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [h[f], h[p]];
+t &lt;span style=&#34;color:#666&#34;&gt;+=&lt;/span&gt; chr(ord(k[g]) &lt;span style=&#34;color:#666&#34;&gt;^&lt;/span&gt; h[(h[p] &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; h[f]) &lt;span style=&#34;color:#666&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;256&lt;/span&gt;]);
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; ((t.substr(&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;10&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;||&lt;/span&gt; t.substr(&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;10&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt; time() &lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; t.substr(&lt;span style=&#34;color:#40a070&#34;&gt;10&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; md5(t.substr(&lt;span style=&#34;color:#40a070&#34;&gt;26&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; n).substr(&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;)) {
+t &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; t.substr(&lt;span style=&#34;color:#40a070&#34;&gt;26&lt;/span&gt;);
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; t;
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我们并不需要理解这个函数都做了什么，只需要保证我们自己实现的 &lt;code&gt;jandan_decode&lt;/code&gt; 能够跟 &lt;code&gt;jdTzcXZnL0V2WZZ8eq9786xeOdkyoBXlDR&lt;/code&gt; 函数等价。&lt;/p&gt;
+&lt;p&gt;到这里，我们已经可以拿到原图了，接下来只需要按照 RSSHub 的要求填充模板即可。&lt;/p&gt;
+&lt;h2 id=&#34;踩过的坑&#34;&gt;踩过的坑&lt;/h2&gt;
+&lt;h3 id=&#34;会变的-magic-string&#34;&gt;会变的 magic string&lt;/h3&gt;
+&lt;p&gt;一开始以为 magic string 是一个常量，结果睡了一觉之后起床发现昨晚写好的代码不 work 了。查看了一下代码之后发现是煎蛋会不定期的就改这个 magic string 的值，所以我们需要下载最新的 js 文件，并获取写死在里面的那个 magic string。&lt;/p&gt;
+&lt;p&gt;实现的原理也非常简单，首先加载页面，找到最新的 js 文件：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; script_url &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;;
+$(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;script&amp;#39;&lt;/span&gt;).each((index, item) =&amp;gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; s &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; $(item).attr(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;src&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; (s &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; s.startsWith(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;//cdn.jandan.net/static/min/&amp;#39;&lt;/span&gt;)) {
+script_url &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; s;
+}
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后下载这个 js 文件并使用正则找出里面的 magic string：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;const&lt;/span&gt; jandan_magic &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;async&lt;/span&gt; (url) =&amp;gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;const&lt;/span&gt; script &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;await&lt;/span&gt; axios({
+method&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;get&amp;#39;&lt;/span&gt;,
+url&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;http:&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; url,
+headers&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;User-Agent&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; config.ua,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Referer&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;http://jandan.net&amp;#39;&lt;/span&gt;
+}
+});
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;const&lt;/span&gt; regex &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#235388&#34;&gt;/e,&amp;#34;([a-zA-Z0-9]{32})&amp;#34;/&lt;/span&gt;;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; script.data.match(regex)[&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;];
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;windows-atob-的实现&#34;&gt;windows.atob 的实现&lt;/h3&gt;
+&lt;p&gt;这个坑踩了很久。&lt;/p&gt;
+&lt;p&gt;最开始写好了 &lt;code&gt;jandan_decode&lt;/code&gt; 之后发现结果始终是乱码，但是在浏览器端运行的时候却是正常的。这说明逻辑没有问题，但是引用的一些方法可能因为环境差异出了。经过反复的调试之后定位到问题出现在 &lt;code&gt;base64_decode&lt;/code&gt; 这个函数：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;const&lt;/span&gt; base64_decode &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (i) =&amp;gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Buffer(i, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;base64&amp;#39;&lt;/span&gt;).toString();
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;煎蛋的浏览器端实现是这样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; base64_decode(a) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;window&lt;/span&gt;.atob(a)
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;一开始不明白问题出在哪里，直到看到了一个 &lt;a href=&#34;https://gist.github.com/jmshal/b14199f7402c8f3a4568733d8bed0f25&#34;&gt;Node.js 的 windows.atob polyfill&lt;/a&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;module.exports &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; atob(a) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Buffer(a, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;base64&amp;#39;&lt;/span&gt;).toString(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;);
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;原来 Buffer 的 toString 函数默认采用的编码是 &lt;code&gt;utf-8&lt;/code&gt; 但是浏览器端的 &lt;code&gt;atob&lt;/code&gt; 使用的编码却是 &lt;code&gt;binary&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;多年过去了，我的 Node.js 还是一如既往的半吊子，只能借着别人写的项目蹭蹭贡献才能混下去这样子的。&lt;/li&gt;
+&lt;li&gt;目前&lt;a href=&#34;https://github.com/DIYgod/RSSHub/commit/2b91689bd57f83987f10058f7fd6e0e17d328f2d&#34;&gt;这个实现&lt;/a&gt;已经被合并到了 Master 分支，大家可以订阅煎蛋无聊图的 Feed 啦~&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;最近重新开始看猫腻的《间客》，写得真好，看的时候感觉自己也跟许乐一样，永远牛逼，永远正义，永远是那个来自东林的三有青年。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>从浏览器端向 QingStor 对象存储上传文件</title><link>https://xuanwo.io/2017/06/15/upload-to-qingstor-from-browser/</link><pubDate>Thu, 15 Jun 2017 15:44:00 +0000</pubDate><guid>https://xuanwo.io/2017/06/15/upload-to-qingstor-from-browser/</guid><description>&lt;p&gt;从浏览器端向 QingStor 对象存储上传是很多开发者的需求，虽然 QingStor 提供了相关的接口和 SDK，但是仍有很多开发者表示不知道怎么样去调用。本文的目的是系统的展示一下如何从浏览器端上传一个文件到对象存储，从而解决大多数开发者们的需求。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;为了理解本文的内容，读者需要一些基本的 HTML，JavaScript 知识，同时需要对 QingStor 对象存储服务有一些基本的了解。前者可以查看 &lt;a href=&#34;https://developer.mozilla.org/zh-CN/docs/Web&#34;&gt;MDN Web 技术文档&lt;/a&gt;，后者可以查看 &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/common/overview.html&#34;&gt;QingStor 对象存储服务概述&lt;/a&gt; 。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;表单上传&#34;&gt;表单上传&lt;/h2&gt;
+&lt;p&gt;QingStor 对象存储支持通过 HTML 表单上传的方式向存储空间上传一个对象，文档可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/object/post.html&#34;&gt;此处&lt;/a&gt;。根据存储空间的权限设置，主要分为两种情况：匿名可写与匿名不可写，接下来分别介绍一下。&lt;/p&gt;
+&lt;h3 id=&#34;匿名可写&#34;&gt;匿名可写&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;action&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://&amp;lt;bucket&amp;gt;.&amp;lt;zone&amp;gt;.qingstor.com&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;method&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;enctype&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;multipart/form-data&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;Click or Drag a File Here to Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;key&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;submit&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload to QingStor&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 存储空间的名称&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: 存储空间所在的区域&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;key&amp;gt;&lt;/code&gt;: 文件上传后在存储空间中的名字，支持内置变量，比如 &lt;code&gt;${filename}&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;很多人最开始使用这个接口的时候会吐槽为什么 file 一定要放在最后，这是因为我们遵循了现有的 &lt;a href=&#34;http://hc.apache.org/httpclient-3.x/methods/multipartpost.html&#34;&gt;multipart post 方法&lt;/a&gt; 的实现——将表单分成了两个部分： StringPart 与 FilePart ，file 类型之后的全部表单项都会被丢弃，因此 file 这个 input 项一定要放在表单的最后。&lt;/p&gt;
+&lt;p&gt;解决掉 input 顺序这个问题之后，可以发现表单上传是一个非常简单易用的接口：我只需要构建一个 form 表单，指定上传的域名、文件名即可，浏览器会自动处理剩下的所有工作。&lt;/p&gt;
+&lt;h3 id=&#34;匿名不可写&#34;&gt;匿名不可写&lt;/h3&gt;
+&lt;p&gt;更常见的情况是我们需要上传文件到一个私有的存储空间当中，此时我们需要对我们的 POST 请求进行签名。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;action&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://&amp;lt;bucket&amp;gt;.&amp;lt;zone&amp;gt;.qingstor.com&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;method&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;enctype&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;multipart/form-data&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;Click or Drag a File Here to Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;key&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;policy&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;policy&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;access_key_id&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;access_key_id&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;signature&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;signature&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;submit&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload to QingStor&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;policy&amp;gt;&lt;/code&gt;: policy 是一个经过 base64 编码之后的 JSON 字符串，其中的内容包括除了 file， access_key_id， policy，signature 之外的所有表单项。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;access_key_id&amp;gt;&lt;/code&gt;: access_key_id 是用户的 access_key_id&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;signature&amp;gt;&lt;/code&gt;: 用 secret key 对 base64 编码后的 policy 字符串进行 HMAC-SHA256 签名得到的字符串，同样需要进行 base64 编码。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;与匿名上传相比，上传到一个私有空间需要使用请求者的 access_key_id 进行签名。签名流程如下：计算 policy 字符串并进行 base64 编码，使用 secret key 对 policy 字符串进行 HMAC-SHA256 签名并进行 base64 编码。&lt;/p&gt;
+&lt;p&gt;以最简单的上传为例：policy 字符串为 &lt;code&gt;{&amp;quot;key&amp;quot;: &amp;quot;test_key&amp;quot;}&lt;/code&gt; ，经过 base64 编码之后变为 &lt;code&gt;eyJrZXkiOiAidGVzdF9rZXkifQ==&lt;/code&gt;，我们使用 &lt;code&gt;test_secret_key&lt;/code&gt; 作为 secret key 来进行 HMAC-SHA256 签名并进行 base64 编码，可以得到 &lt;code&gt;HfMhlYYA4bgyoq3SDMWqiJ1XWm1/TORTfkZk+WODxag=&lt;/code&gt;。此时，我们本次请求中的 policy 应填写 &lt;code&gt;eyJrZXkiOiAidGVzdF9rZXkifQ==&lt;/code&gt;， 而 signature 则应填写 &lt;code&gt;HfMhlYYA4bgyoq3SDMWqiJ1XWm1/TORTfkZk+WODxag=&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;使用 POST 接口上传比较简单，后端只需要实现简单的签名逻辑即可实现上传到指定对象存储存储空间的功能，后续还可以结合各种上传插件实现上传进度条等功能。适合用在只需要用户上传文件，没有复杂交互的场景，比如论坛附件上传，在线编辑器上传图片等。&lt;/p&gt;
+&lt;h2 id=&#34;直接调用-sdk-上传&#34;&gt;直接调用 SDK 上传&lt;/h2&gt;
+&lt;p&gt;POST 接口虽然方便，但是功能比较弱，为了满足开发者们的需求，QingStor 提供的 &lt;a href=&#34;https://github.com/yunify/qingstor-sdk-js&#34;&gt;qingsotr-js-sdk&lt;/a&gt; 通过 &lt;a href=&#34;http://browserify.org/&#34;&gt;Browserify&lt;/a&gt; 实现了浏览器环境的兼容，开发者只需要引入我们提供的 js 文件即可在浏览器环境中调用接口。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在开始之前，我们需要正确设置 Bucket 的 CORS 使得我们可以顺利的进行跨域请求。详细操作方法可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/guide/index.html#cors&#34;&gt;此处&lt;/a&gt;，其中&lt;code&gt;允许的请求源&lt;/code&gt;和&lt;code&gt;允许 HTTP 请求头&lt;/code&gt;均可以设置为 &lt;code&gt;*&lt;/code&gt; 以方便调试。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk.min.js&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onchange&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; Config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).Config
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; QingStor &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).QingStor;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Config(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;access_key_id&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;secret_access_key&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; bucket &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; QingStor(config).Bucket(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;bucket&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;zone&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; upload() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;).files[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; reader &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; FileReader();
+reader.readAsBinaryString(f);
+reader.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (() =&amp;gt; {
+bucket.putObject(f.name, {
+body&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; reader.result
+});
+});
+}
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;access_key_id&amp;gt;&lt;/code&gt;: 用户的 access_key_id&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;secret_access_key&amp;gt;&lt;/code&gt;: 用户的 secret_access_key&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 需要上传的 bucket name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: bucket 所在的区域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;样例代码逻辑比较简单，主要有以下几个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;脚本中进行了一些初始化的工作，创建了 Config ，QingStor 和 Bucket 对象。&lt;/li&gt;
+&lt;li&gt;file input 监听了 change 事件，只要用户选择了新的文件，就会调用 upload 方法。&lt;/li&gt;
+&lt;li&gt;在 upload 方法中，首先是选取文件列表中的第一项，然后使用 HTML 5 新提供的 FileReader 接口来读取文件内容。&lt;/li&gt;
+&lt;li&gt;在 FileReader 读取完毕后，调用 bucket.putObject 方法来进行文件上传，使用文件名作为上传所使用的 Key。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以看到，直接使用 SDK 进行文件上传也非常简单。跟使用 POST 接口相比，需要引入一个额外的 JS 文件依赖，不需要自行进行容易出错的签名计算。最大的缺点在于：初始化 SDK 时需要暴露自己的 access_key_id 和 secret_access_key，这显然是不可接受的。我们需要寻找到一种方法，使得签名的过程可以服务器端完成，从而不需要暴露自己的密钥信息。&lt;/p&gt;
+&lt;h2 id=&#34;部署签名服务器&#34;&gt;部署签名服务器&lt;/h2&gt;
+&lt;p&gt;之前提到，在服务器端进行签名可以使得敏感的密钥信息不会暴露出去，解决方案就是部署一套签名服务器。我们实现了一个基于 qingstor-js-sdk 的签名服务器 demo，开源在 &lt;a href=&#34;https://github.com/yunify/qingstor-demo-signature-server-nodejs&#34;&gt;https://github.com/yunify/qingstor-demo-signature-server-nodejs&lt;/a&gt; ，同时附有 server 端和 client 端，开发者可以方便的复用其中的逻辑，按照自己的业务需求来实现相关的逻辑。&lt;/p&gt;
+&lt;p&gt;部署签名服务器非常简单，只需要如下几步：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;git clone https://github.com/yunify/qingstor-demo-signature-server-nodejs.git
+&lt;span style=&#34;color:#007020&#34;&gt;cd&lt;/span&gt; qingstor-demo-signature-server-nodejs
+npm install&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后根据 server_config.yaml.example 编辑自己的 server_config.yaml 文件，最后执行 &lt;code&gt;npm run server&lt;/code&gt; 就可以启动我们的签名服务器 Demo。&lt;/p&gt;
+&lt;p&gt;接下来这个实例会展示如何使用签名服务器进行签名，并上传一个文件。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk.min.js&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onchange&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; Config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).Config
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; QingStor &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).QingStor;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Config(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;not_need&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;not_need&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; bucket &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; QingStor(config).Bucket(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;bucket&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;zone&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; upload() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;).files[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; reader &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; FileReader();
+reader.readAsBinaryString(f);
+reader.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (() =&amp;gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; req &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; bucket.putObjectRequest(f.name, {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; f.type
+});
+fetch(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;http://localhost:9000/operation?channel=header&amp;#34;&lt;/span&gt;, {
+method&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;,
+body&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; JSON.stringify(req.operation),
+headers&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;application/json; charset=utf-8&amp;#34;&lt;/span&gt;
+}
+})
+.then(res =&amp;gt; res.json())
+.then(res =&amp;gt; {
+req.operation.headers.Authorization &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; res.authorization;
+req.operation.body &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; reader.result;
+req.send()
+})
+});
+}
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 需要上传的 bucket name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: bucket 所在的区域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;跟直接使用 SDK 上传相比，通过部署签名服务器上传的方案多了向签名服务器发送本次请求并获取签名信息的部署。js sdk 对外暴露了生成 Request 的接口，通过 bucket.putObjectRequest 可以创建一个 Request 实例，并将 Request.operation 发送到签名服务器以进行签名，最后服务器端返回的是签名好的 Authorization 字符串。然后再手动调用 Request 的 send 方法进行实际的上传即可。&lt;/p&gt;
+&lt;p&gt;部署签名服务器的方案比之前的几种都要复杂，但是更贴合用户的使用场景，可以完整的覆盖大多数用户在浏览器端与 QingStor 对象存储进行交互的需求。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;在这里可以对浏览器端几种与 QingStor 对象存储进行交互的方案进行一个简短的总结：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;POST 接口：简单方便，便于与现有的服务器端集成，适用于论坛附件上传，在线编辑器上传图片等场景&lt;/li&gt;
+&lt;li&gt;SDK 上传： 简单方便，但是会暴露出用户的密钥信息，适用于一些 No BackEnd 应用，可以让用户自行填写自己的密钥，比如在线 Markdown 编辑器，可以实现复制进来的图片自动上传这样的功能。&lt;/li&gt;
+&lt;li&gt;部署签名服务器： 比较复杂，适用于大多数场景，密钥信息保存在服务器端，不会泄漏给用户。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;此外，所有的代码都已经上传到 Gist，感兴趣的同学可以自取： &lt;a href=&#34;https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784&#34;&gt;https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784&lt;/a&gt;&lt;/p&gt;</description></item><item><title>nodebb-plugin-html5videoplayer 发布</title><link>https://xuanwo.io/2016/08/22/nodebb-plugin-html5videoplayer/</link><pubDate>Mon, 22 Aug 2016 17:53:25 +0000</pubDate><guid>https://xuanwo.io/2016/08/22/nodebb-plugin-html5videoplayer/</guid><description>&lt;p&gt;[nodebb-plugin-html5videoplayer]() 是一个简单的 NodeBB 插件，可以让 NodeBB 支持在线视频观看。Fork 自 &lt;a href=&#34;https://github.com/ogerly&#34;&gt;@ogerly&lt;/a&gt; 开发的 &lt;a href=&#34;https://github.com/ogerly/nodebb-plugin-videoplayer&#34;&gt;nodebb-plugin-videoplayer&lt;/a&gt;， 在他的基础上做了一些微不足道的贡献，括弧笑。&lt;/p&gt;
+&lt;h1 id=&#34;原理&#34;&gt;原理&lt;/h1&gt;
+&lt;p&gt;原理非常简单，将帖子中出现的：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;a href=&amp;quot;xxx.mp4&amp;quot;&amp;gt;&amp;lt;/a&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;标签转换为&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;video preload controls&amp;gt;
+&amp;lt;source src=&amp;quot;xx.mp4&amp;quot;&amp;gt;
+&amp;lt;/video&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;也就是完全通过 HTML5 提供的 video 标签来实现在线视频的观看功能。&lt;/p&gt;
+&lt;h1 id=&#34;区别&#34;&gt;区别&lt;/h1&gt;
+&lt;p&gt;世上轮子千千万，我为什么要Fork原来的再造一个？&lt;/p&gt;
+&lt;p&gt;最关键的因素在于我跟原作者的理念不太一样，原作者除了插入 video 标签以外，还提供了一个固定在下面下方的播放器控制条。由于版本更迭，这个播放器控制条已经失效，CSS 样式也不再适用。因此我 Fork 了原作者的插件，并上传了一个新的插件，旨在提供更简单的在线视频视频集成功能。&lt;/p&gt;
+&lt;p&gt;跟原来版本的区别主要如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;纯粹的播放器，没有多余的功能，不会修改任何页面外观&lt;/li&gt;
+&lt;li&gt;页面自适应，播放窗体会自适应当前页面大小，提供跨平台一致的体验&lt;/li&gt;
+&lt;li&gt;更强的外链支持，可以引用外部的链接，不需要上传到论坛&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;安装&#34;&gt;安装&lt;/h1&gt;
+&lt;p&gt;目前还不知道怎么提交到 NodeBB 的插件的中心，因此只能通过 npm 手动进行安装：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;npm install nodebb-plugin-html5videopalyer
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;使用&#34;&gt;使用&lt;/h1&gt;
+&lt;p&gt;使用起来非常简单，只需要在帖子中拖动上传视频&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[video](/uploads/files/xyz.mp4)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;或者直接输入引用的视频链接&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[video](//aa.com/bb/cc.mp4)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;目前仅支持&lt;code&gt;mp4&lt;/code&gt;，&lt;code&gt;ogv&lt;/code&gt;,&lt;code&gt;webm&lt;/code&gt;,&lt;code&gt;mov&lt;/code&gt;这四种格式
+引用的外链需要去掉协议头，否则无法正常解析&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;demo&#34;&gt;Demo&lt;/h1&gt;
+&lt;p&gt;最后显示的效果可以参考这个链接： &lt;a href=&#34;https://community.qingcloud.com/topic/556&#34;&gt;https://community.qingcloud.com/topic/556&lt;/a&gt;&lt;/p&gt;</description></item><item><title>NodeBB 升级迁移总结</title><link>https://xuanwo.io/2016/07/08/nodebb-upgrade/</link><pubDate>Fri, 08 Jul 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/07/08/nodebb-upgrade/</guid><description>&lt;p&gt;&lt;a href=&#34;https://community.qingcloud.com/&#34;&gt;青云用户社区&lt;/a&gt;使用了开源的 NodeBB 论坛，部署之初使用&lt;code&gt;0.7&lt;/code&gt;版本，因为没有跟随官方进度进行更新，导致论坛版本长期停滞。一方面无法享受到官方的BUG Fix，另一方面也无法使用很多业务需求的插件。思量再三后决定对社区进行升级迁移，不在原论坛直接升级，而是部署一套新的环境，将原有的数据全部导出。&lt;/p&gt;
+&lt;h1 id=&#34;可行性分析&#34;&gt;可行性分析&lt;/h1&gt;
+&lt;h2 id=&#34;nodebb-升级路径&#34;&gt;NodeBB 升级路径&lt;/h2&gt;
+&lt;p&gt;NodeBB 自0.3版本后就提供了一套独特升级路径，主要有以下几个要点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;NodeBB采用语义化版本号：&lt;code&gt;x.y.z&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;对&lt;code&gt;z&lt;/code&gt;版本号的变动，可以直接升级&lt;/li&gt;
+&lt;li&gt;只有当&lt;code&gt;z&lt;/code&gt;版本号已经是&lt;code&gt;x.y&lt;/code&gt;版本下的最新版本，才能升级到&lt;code&gt;x.y+1&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;数据迁移&#34;&gt;数据迁移&lt;/h2&gt;
+&lt;p&gt;NodeBB在部署的时候就使用了青云平台上的 Redis 缓存和负载均衡器。这样迁移的问题就会变的简单很多，我只需要将 NodeBB 路径下的&lt;code&gt;public/uploads&lt;/code&gt;资源进行打包即可，Redis 缓存和负载均衡器都可以直接使用。&lt;/p&gt;
+&lt;h1 id=&#34;迁移步骤&#34;&gt;迁移步骤&lt;/h1&gt;
+&lt;h2 id=&#34;迁移-nodebb&#34;&gt;迁移 NodeBB&lt;/h2&gt;
+&lt;p&gt;建议在一个新的环境里面创建迁移环境。&lt;/p&gt;
+&lt;h3 id=&#34;node-版本&#34;&gt;Node 版本&lt;/h3&gt;
+&lt;p&gt;同样建议使用 &lt;code&gt;nvm&lt;/code&gt; 来管理版本，避免其他应用对NodeBB环境产生干扰。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;nvm install stable
+nvm use stable
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果不想每一次退出shell后都要执行&lt;code&gt;nvm use stable&lt;/code&gt;，可以手动设置默认版本：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;nvm alias default stable
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;nodebb-版本&#34;&gt;NodeBB 版本&lt;/h3&gt;
+&lt;p&gt;首先下载跟生产环境一致的NodeBB版本：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;git clone -b v0.7.x
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后使用跟生产环境一致的&lt;code&gt;config.json&lt;/code&gt;，NoedBB升级工具会自动更新&lt;code&gt;package.json&lt;/code&gt;，所以无需修改。&lt;/p&gt;
+&lt;p&gt;然后运行&lt;code&gt;./nodebb upgrade&lt;/code&gt;以升级数据结构和依赖并打上所有的补丁。&lt;/p&gt;
+&lt;p&gt;运行完毕后切换到更高版本的分支：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;git fetch
+git checkout v0.8.x
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;同样运行&lt;code&gt;./nodebb upgrade&lt;/code&gt;，以此类推，直至升级到官方最新版本。&lt;/p&gt;
+&lt;h2 id=&#34;迁移数据&#34;&gt;迁移数据&lt;/h2&gt;
+&lt;p&gt;正如之前所说的，Redis已经被直接升级到最新版本，接下来只需要将用户上传的数据导出即可。&lt;/p&gt;
+&lt;p&gt;在生产环境中执行如下命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd /path/to/nodebb/public
+tar -cvf nodebb_assets_backup.tar.gz ./upload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;切换到迁移环境后执行：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd /path/to/nodebb/public
+tar -xvf nodebb_assets_backup.tar.gz
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;注意事项&#34;&gt;注意事项&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;目前NodeBB不支持降级操作，如果担心破坏生产环境，可以在生成一个 Redis 的备份并重新创建资源，不要对原数据库进行操作。&lt;/li&gt;
+&lt;li&gt;由于 Redis 中会保存对原论坛的主题和插件等配置，在迁移到新版本后，有很大可能会产生错误，可以执行&lt;code&gt;./nodebb reset -a&lt;/code&gt;以清除所有主题和插件配置。确认 NodeBB 运行正常后再逐个启用即可。&lt;/li&gt;
+&lt;li&gt;在升级时候会因为Node.js版本的问题导致某些依赖无法安装，建议可以使用&lt;code&gt;0.12&lt;/code&gt;版本进行升级，升级成功后再切换到更新的版本上重新进行&lt;code&gt;npm install --production&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;感悟&#34;&gt;感悟&lt;/h1&gt;
+&lt;h2 id=&#34;nodebb的升级路线设计&#34;&gt;NodeBB的升级路线设计&lt;/h2&gt;
+&lt;p&gt;这次升级迁移其实经历很久的论证过程。
+一开始简单地尝试一下之后认定无法直接进行升级就产生了一些畏难情绪，心里想着不如就让它这样，反正现在线上跑得也挺好的，没有出什么太大的问题。而后种种需求的提出让我有些招架不住了，现有的落后版本缺少很多API和现有的插件，自行开发和维护的成本非唱高。这也是我有一段时间觉得开源在实际应用中并不是那么美好的原因。
+等到我真的沉下心来仔细研究官方的文档，才发现 NodeBB 看似鬼畜坑爹的升级路线设计其实也有着其优雅之处。数据库的结构可以随之版本同步更新，这样可以避免早期数据库结构设计不合理带来的种种弊端，并防止产生版本之间的Breaking Change。抛开API层面的兼容性不谈，NodeBB可以做到我直接使用原来的 Redis 从 &lt;code&gt;0.7.0&lt;/code&gt; 一路升级到 &lt;code&gt;1.0.4&lt;/code&gt;，还能保证我的数据没有出现任何丢失，就冲着这一点，我觉得这个升级路线的设计是有价值的。
+当然，路线是好的，但是在具体实现升级功能的时候还有待商榷之处：不难发现升级过程中有很大一部分的重复操作，其实这些都是可以避免的。每一个&lt;code&gt;x.y&lt;/code&gt;版本号之间的更新操作其实都是一致的，完全可以通过脚本实现。&lt;/p&gt;
+&lt;h2 id=&#34;应用部署的灵活性&#34;&gt;应用部署的灵活性&lt;/h2&gt;
+&lt;p&gt;上线任何应用之前都应该考虑其架构的扩展性和迁移能力。
+很多时候，部署一套应用的目的根本就不是为了去使用他，只是单纯的部署一个玩一玩而已。在这样的心态下，总会干出这样的事情：在一个20G的主机上跑ownCloud；在一个主机上同时跑wordpress，nginx和mysql等应用。当然，这样做并没有什么问题，毕竟是自己的Server，哪怕天天 &lt;code&gt;rm -rf /&lt;/code&gt;都是OK的。
+但是如果是一套需要给别人用的应用，部署时的扩展性和迁移能力就必须考虑在内。这其实是两个很实在的问题：服务器空间耗尽，性能跟不上怎么办？服务器挂了，如何保全自己的数据？自己设计这样一套系统很麻烦，但是如果是在青云上就不一样了。我最喜欢青云的一点就是，青云几乎所有的资源都是可以动态伸缩和扩展的。带宽受限制了，直接扩大；服务器性能不够了，加核心加内存；单个服务器支撑不住了，批量生成十个并使用负载均衡器进行负载均衡操作；想要测试某个最新的特性，直接从线上创建一个Snapshot并生成资源进行测试。
+在本次迁移的过程中，我们就可以看出来，我们可以直接使用 Redis 进行升级，而不是手动导出数据库备份再执行导入操作。同样地，我们也不需要再重新配置一遍 Nginx ，只需要再创建一个负载均衡器即可。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年07月08日 首次发布&lt;/li&gt;
+&lt;li&gt;2016年07月15日 青云社区成功上线&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>新博客上线&amp;Hexo主题开发入门</title><link>https://xuanwo.io/2016/06/29/new-blog-new-life/</link><pubDate>Wed, 29 Jun 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/06/29/new-blog-new-life/</guid><description>&lt;p&gt;曾经看过我的博客的同学大概都会发现，我的博客再一次大变样了~
+这一次的更新其实酝酿了很久，早在刚开始用Hexo的时候就想着要有一个自己的主题。但是那个时候觉得这是一件很难的事情，要懂HTML，CSS，JavaScript，还要懂Swig，Ejs等模板语言，还要懂Hexo的内部原理，于是就一直搁置了。在独立实现了一个&lt;a href=&#34;https://xuanwo.io/2016/06/16/jade_ims/&#34;&gt;完整的项目&lt;/a&gt;之后，我认为自己已经有这样的能力了，于是决定正式开始。
+在我看来的话，Hexo的使用者大概分为三个层次：第一种用别人的主题，第二种模仿现有的主题，第三种自己独立开发。我原来是第一种，在Next的基础上做了很多改动，这一次进入到了第二个层次。我找了一套自我感觉还不错的模板，然后套用它的CSS设定和页面结构，就成了我现在的主题。
+利用两天学习和工作的闲暇时间，我大体上完成了这个主题。做得比较糙，很多细节还有待优化，但是我已经急不可耐地想要正式上线了，笑。在未来的话，我希望能把一些配置都能整理出来，优化一下代码，然后开源这个主题，希望大家能够喜欢~
+庆祝的话已经说的差不多了，下面来讲一讲如何开发一个Hexo主题。&lt;/p&gt;
+&lt;h1 id=&#34;结构&#34;&gt;结构&lt;/h1&gt;
+&lt;h2 id=&#34;主题结构&#34;&gt;主题结构&lt;/h2&gt;
+&lt;p&gt;Hexo主题的结构大体如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;.
+├── _config.yml
+├── languages
+│   ├── default.yml
+│   └── zh-Hans.yml
+├── layout
+│   ├── achieve.swig
+│   ├── category.swig
+│   ├── index.swig
+│   ├── _layout.swig
+│   ├── page.swig
+│   ├── _partials
+│   ├── post.swig
+│   └── tag.swig
+└── &lt;span style=&#34;color:#007020&#34;&gt;source&lt;/span&gt;
+├── css
+├── fonts
+├── img
+├── js
+└── vendors&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;首先有一个&lt;code&gt;_config.yml&lt;/code&gt;负责提供主题级别的配置，可以在&lt;code&gt;layout&lt;/code&gt;中通过&lt;code&gt;theme.xxx&lt;/code&gt;的形式进行调用。
+然后&lt;code&gt;languages&lt;/code&gt;负责实现博客的i18N功能，如果博客没有多语言的需求，只需要实现一个&lt;code&gt;default.yml&lt;/code&gt;即可。
+其次是最为重要的&lt;code&gt;layout&lt;/code&gt;文件夹，这个里面主要存放博客的结构，Hexo 引擎会使用指定的渲染引擎将&lt;code&gt;layout&lt;/code&gt;文件渲染成HTML页面。
+最后是&lt;code&gt;source&lt;/code&gt;，把所有主题需要用到的资源，比如CSS，Fonts，JS等都存放到这个文件夹中。&lt;/p&gt;
+&lt;p&gt;这个主题使用了&lt;a href=&#34;http://paularmstrong.github.io/swig/&#34;&gt;swig&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;页面结构&#34;&gt;页面结构&lt;/h2&gt;
+&lt;p&gt;页面结构分为两个维度，一者是我要呈现哪些页面，二者是每个页面上都有哪些内容。&lt;/p&gt;
+&lt;h3 id=&#34;哪些页面&#34;&gt;哪些页面？&lt;/h3&gt;
+&lt;p&gt;作为一个博客，主要需要的页面有以下这些：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;主页&lt;/li&gt;
+&lt;li&gt;单页&lt;/li&gt;
+&lt;li&gt;归档页面&lt;/li&gt;
+&lt;li&gt;分类页面&lt;/li&gt;
+&lt;li&gt;标签页面&lt;/li&gt;
+&lt;li&gt;文章页&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;哪些内容&#34;&gt;哪些内容？&lt;/h3&gt;
+&lt;p&gt;如果没有什么特别的设计，博客的页面大体上可以分为这几个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;head：头部文件&lt;/li&gt;
+&lt;li&gt;body：主体内容
+&lt;ul&gt;
+&lt;li&gt;header：题图，导航栏等&lt;/li&gt;
+&lt;li&gt;content： 内容&lt;/li&gt;
+&lt;li&gt;footer：尾部的联系方式等&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;实现&#34;&gt;实现&lt;/h1&gt;
+&lt;p&gt;前面讲到了 Hexo 的结构，下面来聊一聊具体的实现。&lt;/p&gt;
+&lt;h2 id=&#34;原理&#34;&gt;原理&lt;/h2&gt;
+&lt;p&gt;Hexo 渲染的入口是&lt;code&gt;_layout.swig&lt;/code&gt;，所以一个主题至少需要实现一个&lt;code&gt;_layout.swig&lt;/code&gt;。
+然后Hexo会遍历Hexo目录下&lt;code&gt;source&lt;/code&gt;文件夹中的所有Markdown文件，根据Markdown文件所指定的layout进行渲染，默认类型为&lt;code&gt;post&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;技巧&#34;&gt;技巧&lt;/h2&gt;
+&lt;h3 id=&#34;layout-swig结构&#34;&gt;_layout.swig结构&lt;/h3&gt;
+&lt;p&gt;整体的结构基本如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+&amp;lt;!doctype html&amp;gt;
+&amp;lt;html&amp;gt;
+&amp;lt;head&amp;gt;
+{% include &amp;#39;_partials/head.swig&amp;#39; %}
+&amp;lt;title&amp;gt;{% block title %}{% endblock %}&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body id=&amp;#34;home&amp;#34;&amp;gt;
+{% include &amp;#39;_partials/menu.swig&amp;#39; %}
+&amp;lt;div id=&amp;#34;wrap&amp;#34;&amp;gt;
+{% include &amp;#39;_partials/nav.swig&amp;#39; %}
+{% include &amp;#39;_partials/header.swig&amp;#39; %}
+&amp;lt;div id=&amp;#34;start&amp;#34; class=&amp;#34;container content&amp;#34;&amp;gt;
+{% block content %}{% endblock %}
+&amp;lt;/div&amp;gt;
+{% include &amp;#39;_partials/footer.swig&amp;#39; %}
+&amp;lt;/div&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;实现文章渲染&#34;&gt;实现文章渲染&lt;/h3&gt;
+&lt;p&gt;这个地方主要是借鉴了NexT主题的设计，实现了一个swig的宏来生成对应的文章。这个宏主要有两个参数，第一个是post对象，第二个是是否为主页。如果是主页就只显示简略的内容，如果不是就输出全文。&lt;/p&gt;
+&lt;p&gt;判断的部分实现如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+{% if is_index %}
+{% if post.excerpt %}
+{{ post.excerpt }}
+&amp;lt;a class=&amp;#34;&amp;#34; href=&amp;#34;{{ url_for(post.path) }}&amp;#34;&amp;gt;Read more&amp;lt;/a&amp;gt;
+{% endif %}
+{% else %}
+{{ post.content }}
+{% endif %}
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;用到的post页的参数可以&lt;a href=&#34;https://hexo.io/zh-cn/docs/variables.html&#34;&gt;我翻译的中文文档&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;分页插件&#34;&gt;分页插件&lt;/h3&gt;
+&lt;p&gt;Hexo 自己实现了一个分页插件，直接使用paginator函数即可。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+{% if page.prev or page.next %}
+&amp;lt;nav class=&amp;#34;pagination&amp;#34;&amp;gt;
+{{ paginator({
+prev_text: &amp;#39;&amp;lt;i class=&amp;#34;fa fa-angle-left&amp;#34;&amp;gt;&amp;lt;/i&amp;gt;&amp;#39;,
+next_text: &amp;#39;&amp;lt;i class=&amp;#34;fa fa-angle-right&amp;#34;&amp;gt;&amp;lt;/i&amp;gt;&amp;#39;,
+mid_size: 1
+}) }}
+&amp;lt;/nav&amp;gt;
+{% endif %}
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;评论系统&#34;&gt;评论系统&lt;/h3&gt;
+&lt;p&gt;对于Hexo来说，评论系统就是调用一个第三方的JS。所以只需要在合适的位置插入代码即可。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+&amp;lt;div id=&amp;#34;disqus_thread&amp;#34;&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;script&amp;gt;
+var disqus_config = function () {
+this.page.url = &amp;#39;{{ page.permalink }}&amp;#39;;
+this.page.identifier = &amp;#39;{{ page.path }}&amp;#39;;
+};
+(function () {
+var d = document, s = d.createElement(&amp;#39;script&amp;#39;);
+s.src = &amp;#39;//abc.disqus.com/embed.js&amp;#39;;
+s.setAttribute(&amp;#39;data-timestamp&amp;#39;, +new Date());
+(d.head || d.body).appendChild(s);
+})();
+&amp;lt;/script&amp;gt;
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;需要注意的坑&#34;&gt;需要注意的坑&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;page.posts&lt;/code&gt;是按照时间排序的，但是&lt;code&gt;site.posts&lt;/code&gt;是无序的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://hexo.io/zh-cn/docs/&#34;&gt;Hexo 官方中文文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年06月30日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>记一次debug的经历及反思</title><link>https://xuanwo.io/2016/02/26/debug-for-hexo-1775/</link><pubDate>Fri, 26 Feb 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/02/26/debug-for-hexo-1775/</guid><description>&lt;h2 id=&#34;起因&#34;&gt;起因&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/hexojs/hexo/issues/1775&#34;&gt;hexojs/hexo #1775&lt;/a&gt;
+BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。&lt;/p&gt;
+&lt;h2 id=&#34;经过&#34;&gt;经过&lt;/h2&gt;
+&lt;p&gt;收到反馈之后，我在我的测试环境中也复现了这个bug。一开始还怀疑是主题的问题，专门测试了next主题，结果发现也存在这样的问题，于是就排除了主题方面的bug。
+首先我们可以初步判断这个url生成出现了问题，参考landscape主题中此处的代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ejs&#34; data-lang=&#34;ejs&#34;&gt;&amp;lt;% for (var i in theme.menu){ %&amp;gt;
+&amp;lt;a class=&amp;#34;main-nav-link&amp;#34; href=&amp;#34;&amp;lt;%- url_for(theme.menu[i]) %&amp;gt;&amp;#34;&amp;gt;&amp;lt;%= i %&amp;gt;&amp;lt;/a&amp;gt;
+&amp;lt;% } %&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里调用了一个&lt;code&gt;url_for&lt;/code&gt;函数来生成超链接，代码如下（去除了与本BUG无关的部分）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nodejs&#34; data-lang=&#34;nodejs&#34;&gt;function urlForHelper(path, options) {
+path = path || &amp;#39;/&amp;#39;;
+if (path[0] === &amp;#39;#&amp;#39; || path.substring(0, 2) === &amp;#39;//&amp;#39;) {
+return path;
+}
+var config = this.config;
+var root = config.root;
+var data = url.parse(path);
+// Exit if this is an external path
+if (data.protocol) {
+return path;
+}
+// Prepend root path
+path = root + path;
+return path.replace(/\/{2,}/g, &amp;#39;/&amp;#39;);
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;直觉告诉我，这个问题很有可能就是这个函数写搓了。&lt;/p&gt;
+&lt;p&gt;然而我仔细研究了一下，发现&lt;code&gt;url_for&lt;/code&gt;的逻辑并没有什么问题。而且根据我脑补的代码执行情况来看，应该生成一个正确的链接才对，但是&lt;code&gt;config.root&lt;/code&gt;偏偏就丢了。
+真的是非常奇怪，一时之间，我完全懵逼展开了，不明白到底发生了什么。&lt;/p&gt;
+&lt;h2 id=&#34;转折&#34;&gt;转折&lt;/h2&gt;
+&lt;p&gt;后来我跟我的朋友聊天的时候提到这个bug，结果他告诉我，这个&lt;code&gt;url_for&lt;/code&gt;写搓了，我点点头，应该就是这样。然后他说，一个判断都没有中，直接返回自身了，还贴了一张图。图中的代码大致如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nodejs&#34; data-lang=&#34;nodejs&#34;&gt;function urlForHelper(path, options){
+/* jshint validthis: true */
+path = path || &amp;#39;/&amp;#39;;
+var config = this.config;
+var root = config.root;
+var data = url.parse(path);
+// Exit if this is an external path
+if (data.protocol || path.substring(0, 2) === &amp;#39;//&amp;#39;){
+return path;
+}
+// Prepend root path
+if (path[0] !== &amp;#39;/&amp;#39;){
+return root + path;
+}
+return path;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;看到图我立马懵逼了，连忙说，不对啊，你这个不是最新版本的代码。他被我这气场吓到，弱弱回复，我是刚安装的hexo&amp;hellip;。
+我顿时明白自己错在哪里了，npm源里面的稳定版还是3.1.1，但是我们github库中的代码已经是3.2beta了。使用最新的代码测试以后，发现这个bug已经不存在了。
+也就是说，我花一个下午的时间，对着最新版的代码找一个已经被fix的bug…&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;这一次的事情非常乌龙，事后想想觉得自己真的太傻逼了。
+吃一堑长一智，以后做debug工作的时候一定要分清楚线上和线下的代码，首先就要明确出问题的是哪个版本，然后再开展相应的分析。
+除此以外，还跟我不重视流程有关系。尽管我总是让人提供各种version信息，但是我却总是在分析问题的时候忽略这些信息，没有把这些关键的信息加入到自己的分析过程中。
+总结起来就是，too young ，姿势水平还有待提高。&lt;/p&gt;
+&lt;h2 id=&#34;更新日志&#34;&gt;更新日志&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年02月26日 初次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

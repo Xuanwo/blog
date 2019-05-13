@@ -1,0 +1,1165 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Code on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/categories/code/</link><description>Recent content in Code on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 30 Mar 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/categories/code/index.xml" rel="self" type="application/rss+xml"/><item><title>在 Google 日历度过的欢乐时光</title><link>https://xuanwo.io/2019/03/30/google-calendar/</link><pubDate>Sat, 30 Mar 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/30/google-calendar/</guid><description>&lt;p&gt;前段时间终于下定决定入了 G Suite，花了点时间进行数据迁移，但是在操作日历的时候错误的把朋友们的生日提醒（每年重复）导入到了我的行程当中。为了将这些提醒删掉，我开始了一次 Google 日历的奇妙探险，找到了批量处理的方法，甚至还发现了一个 BUG。&lt;/p&gt;
+&lt;h2 id=&#34;apps-script-是好文明&#34;&gt;Apps Script 是好文明&lt;/h2&gt;
+&lt;p&gt;首先来明确一下需要解决的问题：删除个人日历中出现的大量形如 “XXX 的生日” 的行程。OK，问题确定之后，可以初步得到几种解决问题的思路：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;手动删&lt;/li&gt;
+&lt;li&gt;现成的工具&lt;/li&gt;
+&lt;li&gt;基于 Google 日历 API 开发脚本&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;首先排除第一种，时间成本过高，而且都是机械操作，毫无乐趣可言。现成的工具有是有，但是你需要授权第三方访问你的全部行程，我实在是不想之后某天被人发现我宣称出差公干其实是去宾馆跟朋友们一起玩俄罗斯方块吃鸡（原帖：&lt;a href=&#34;https://bbs.nga.cn/read.php?tid=16784200&#34;&gt;https://bbs.nga.cn/read.php?tid=16784200&lt;/a&gt;）。所以现成工具的方案也被排除了。&lt;/p&gt;
+&lt;p&gt;所以我又要造轮子了么？不，我们可以用 Apps Script！Apps Script 可以理解成自带 Google 绝大部分套件 SDK 组件的 JavaScript 运行环境，最棒的是它还是可以直接在线运行的。&lt;/p&gt;
+&lt;p&gt;研究一下日历的&lt;a href=&#34;https://developers.google.com/apps-script/reference/calendar/&#34;&gt;文档&lt;/a&gt;，可以知道需要用到的 API 只有 &lt;code&gt;getCalendarsByName&lt;/code&gt;，&lt;code&gt;getEvents&lt;/code&gt;，&lt;code&gt;getTitle&lt;/code&gt; 和 &lt;code&gt;deleteEvent&lt;/code&gt; 这些，剩下的都是些逻辑。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; myFunction()
+{
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; fromDate &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Date&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;2000&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; toDate &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Date&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;2999&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; calendarName &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Personal&amp;#39;&lt;/span&gt;;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; calendar &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; CalendarApp.getCalendarsByName(calendarName)[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; events &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; calendar.getEvents(fromDate, toDate, {search&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;生日&amp;#34;&lt;/span&gt;});
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; i&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;; i&lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;events.length;i&lt;span style=&#34;color:#666&#34;&gt;++&lt;/span&gt;){
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; ev &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; events[i];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; title &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; ev.getTitle();
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; (title.indexOf(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;的生日&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;) {
+ev.deleteEvent();
+}
+}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;一顿操作之后，只需要点击 &lt;code&gt;Run&lt;/code&gt; 就能运行啦，这时候切换到 Google 日历就能看到恼人的行程都已经被删掉了。&lt;/p&gt;
+&lt;h2 id=&#34;google-日历预言的世界末日&#34;&gt;Google 日历预言的世界末日&lt;/h2&gt;
+&lt;p&gt;欢乐时光还没有结束！&lt;/p&gt;
+&lt;p&gt;看到自己的脚本成功运行后自然会想要验证一下，于是我通过修改 URL 的方式访问了 &lt;a href=&#34;https://calendar.google.com/calendar/r/month/2099/1/1&#34;&gt;2099/1/1&lt;/a&gt;。emmmmm，这是咋了，为啥界面全都是空的，Console 还有报错：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;Uncaught TypeError&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; Cannot read property &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Iu&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;of&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;null&lt;/span&gt;
+at vEb (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;404&lt;/span&gt;)
+at EU.HJ (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;404&lt;/span&gt;)
+at CEb.h.kAa (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;408&lt;/span&gt;)
+at R1.Oe (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;ltDFwf,syi2,FsScmc&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;symq,sy1,phtQPb&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;321&lt;/span&gt;)
+at m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;727&lt;/span&gt;
+at xha (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;263&lt;/span&gt;)
+at Ei (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;261&lt;/span&gt;)
+at Ci.addCallback (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;260&lt;/span&gt;)
+at Gya (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;727&lt;/span&gt;)
+at m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;726&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;本来想洗洗睡了的我瞬间来了精神，我很好奇！&lt;/p&gt;
+&lt;p&gt;通过二分的方法，我得到了临界点：&lt;a href=&#34;https://calendar.google.com/calendar/r/day/2051/2/10&#34;&gt;2051/2/10&lt;/a&gt; 。这个日子有什么特别的呢？为什么在它之前都是正常的，从它开始不管显示天，周还是月都无法正常显示呢？我瞬间有了几个猜想，不过需要一一验证。&lt;/p&gt;
+&lt;p&gt;第一个猜想是数据类型的限制。我做了一些简单的计算：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;数据类型&lt;/th&gt;
+&lt;th&gt;最大值&lt;/th&gt;
+&lt;th&gt;对应时间&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;int32&lt;/td&gt;
+&lt;td&gt;2147483647&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;2038/1/19 11:14:7&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;uint32&lt;/td&gt;
+&lt;td&gt;4294967295&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;2106/2/7 14:28:16&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JavaScript 最大精确整数&lt;/td&gt;
+&lt;td&gt;9007199254740991&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;285428751/11/12 7:36:31&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;无论哪一个都无法支持先前的猜想，所以问题肯定不是数据类型的问题。&lt;/p&gt;
+&lt;p&gt;第二个猜想是前端的 BUG。我稍微研究了一下 Google 日历混淆之后的代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; vEb &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt;(a, b) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; [b.Iu &lt;span style=&#34;color:#666&#34;&gt;?&lt;/span&gt; a.T &lt;span style=&#34;color:#666&#34;&gt;?&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u95f0&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u958f&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;, CU[b.month], &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u6708&amp;#34;&lt;/span&gt;].join(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;)
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里有几个 Unicode 字符，转换一下：&lt;code&gt;\u95f0 -&amp;gt; 闰&lt;/code&gt;，&lt;code&gt;\u958f -&amp;gt; 閏&lt;/code&gt;，&lt;code&gt;\u6708 -&amp;gt; 月&lt;/code&gt;。Wow，&lt;code&gt;vEb&lt;/code&gt; 函数的作用就是判断当前月是不是闰月，根据用户的语言还会决定显示简体还是繁体。&lt;code&gt;a.T&lt;/code&gt; 显然是在判断语言，不用考虑。&lt;code&gt;b.Iu&lt;/code&gt; 更加关键一些，它会判断给定的日期（这里的 b？）是否是闰月。&lt;/p&gt;
+&lt;p&gt;接下来只要搞懂 b 是怎么来的，前面肯定有某一步返回的 b 是 null。但是面对 Google 混淆过的代码，想搞懂这个 b 是怎么来的谈何容易。我相信给我足够的时间，我能够缕清楚代码的脉络，最后得出一个结论，但是我现在更倾向于先换个思路，回头再来尝试。&lt;/p&gt;
+&lt;p&gt;下面从代码中跳出来思考，2051 年 2 月 10 日，这个日子到底有什么魔力呢？难道 Google 日历这么早就钦定了世界末日么？我开始试着在 Google 上搜索这个时间，结果还真的有发现。有一篇文章&lt;a href=&#34;http://www.mzwu.com/article.asp?id=1380&#34;&gt;ASP农历与公历互转类&lt;/a&gt;中居然出现完全一样的时间：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&#39;公历转农历(查询日期范围1950-2-17至2051-2-10,格式yyyy-mm-dd)
+&#39; Response.Write NongGong.GongToNong(&amp;quot;1984-12-10&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我下意识的将这个日子转换成了农历：&lt;code&gt;2050年 腊月 廿九 （辛未年 庚寅月 丙寅日）&lt;/code&gt;，我好像明白了什么，但是需要更多的信息来做支撑。&lt;/p&gt;
+&lt;h2 id=&#34;农历编排及其转换&#34;&gt;农历编排及其转换&lt;/h2&gt;
+&lt;p&gt;首先要重新认识一下农历：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;农历，是现今东亚地区民间传统广泛使用的阴阳合历。古代相传为黄帝时代或者夏朝创制，又称黄历、夏历。中华民国成立后，由孙中山宣布采用西方格里历，而华夏传统历法则返称为旧历、传统历。中华人民共和国成立后，以格里历为“公历”，夏历改称“农历”。在汉语，西历也称阳历，因此农历常习惯上称为阴历，然而此历其实为阴阳合历。
+农历是阴阳历：“阳”是地球环绕太阳公转，以冬至回归年为基准确定岁实，配合季节阳光分一岁为二十四节气；“阴”根据月球运行定朔望月。中国现存历书最早是西汉版本之《夏小正》，汉武帝时期制定之《太初历》已经有相当完善之历法规则，自此大都采用“夏正”，即以建寅月为正月；之后定朔定气规则又多次修改。现行农历版本是依据既定基本规则，运用现代天文学成果修订，完全依照天文数据计算得来，为一天文历法（astronomical calendar）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;画重点：&lt;strong&gt;依据既定基本规则，运用现代天文学成果修订，完全依照天文数据计算得来，为一天文历法（astronomical calendar）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;那天文历法是什么呢？&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;天文历法（astronomical calendar）是以天文观测为准的历法，例如使用定气定朔的现代农历、宗教性的伊斯兰历及第二圣殿时的古犹太历。这种历法也称为是以观测为准的的历法，好处是完美而且永远准确，缺点是没有一定的公式，若要回推多久以前某一天的日期比较困难。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;与之相对应的是计算历法(arithmetic calendar)：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;计算历法（arithmetic calendar）是以严格的数学公式计算的历法，例如现在的犹太历，也称为是以规则为准的历法，好处是容易计算特定时间是哪一天，不过和自然变化的精准性就比较差，即使历法本身非常的精准，也会因为地球自转及公转的略为变化，造成其精准性慢慢变差，因此一个计算历法使用的期间有限，可能只有数千年，之后就要用新的历法系统代替。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;实际上关于农历的编排，我们国家甚至还制定了国家标准：&lt;a href=&#34;http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296&#34;&gt;农历的编算和颁行&lt;/a&gt;，标准号 &lt;code&gt;GB/T 33661-2017&lt;/code&gt;。标准里面专门提到了计算模型和精度的问题：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;5.1　太阳和月球的位置按IERS Conventions规定的模型计算。&lt;/p&gt;
+&lt;p&gt;5.2　朔和节气的北京时间计算精度应达到1秒。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr /&gt;
+&lt;p&gt;农历的编排本身就需要依赖外部的天文数据，而从公历向农历的转换自然也需要外部数据的支持。所以 Google 不能显示 2051-2-10 之后时间的原因也就出来了：Google 只存储了到 2050 年的农历数据，过了 2050 年农历的最后一天，后续的农历在转换的时候就报错了。&lt;/p&gt;
+&lt;p&gt;问题解决啦，我的好奇心得到了满足，可以安心睡觉了~&lt;/p&gt;
+&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
+&lt;p&gt;当然比我更有好奇心的读者们肯定还会想到为什么是 &lt;code&gt;2050年 腊月 廿九&lt;/code&gt;，难道不应该是腊月三十嘛？这个就留作课后作业吧，相信你们肯定能搞明白的~&lt;/p&gt;
+&lt;p&gt;下面是日常的挑毛病环节：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;To Google 的国际化团队：&lt;code&gt;农历腊月&lt;/code&gt;不能翻译成&lt;code&gt;农历十二月&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;To 国家市场监督管理总局：9102 年了，国家标准在线预览还要依赖 Flash 插件，怕不是思想不正确哟&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;顺便介绍一下 &lt;a href=&#34;https://thetype.com/&#34;&gt;Type is Beautiful&lt;/a&gt; 的&lt;a href=&#34;https://thetype.com/2019/02/12498/&#34;&gt;孔雀计划&lt;/a&gt;，中文的排版问题和本文反映出来的农历问题其根源是一样的：中国的传统文化要主动向外介绍推广，主动参与标准的置顶，需要整个行业的通力合作。中文排版和农历这样充满了美感的东西理应让更多人了解，而不是被掩盖在女德这种真正糟粕的阴影之下。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86&#34;&gt;农历 - 维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E5%8E%86%E6%B3%95&#34;&gt;历法 - 维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296&#34;&gt;农历的编算和颁行&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>开启 Jetbrains IDE 的全局菜单</title><link>https://xuanwo.io/2019/03/28/jetbrains-ide-global-menu/</link><pubDate>Thu, 28 Mar 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/28/jetbrains-ide-global-menu/</guid><description>&lt;p&gt;最近在想办法提升自己的开发体验，其中有一步就是去掉了不常用和已经使用快捷键代替的按钮和菜单。但是菜单栏没有办法隐藏，导致观感上不是很好。适逢 Jetbrains IDEA 推出了 2019.1 版本，趁着体验新版本功能的时候研究并解决了这个问题。&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本方案应该适用于所有 Jetbrains IDE，包括 Goland 和 Android Studio&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;Help -&amp;gt; Find Action... -&amp;gt; Experimental Features...&lt;/code&gt;，确认 &lt;code&gt;linux.native.menu&lt;/code&gt; 已打开&lt;/li&gt;
+&lt;li&gt;安装 &lt;code&gt;libdbusmenu-glib&lt;/code&gt;，比如 Arch 上只需要 &lt;code&gt;pacman -S libdbusmenu-glib&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;重启 IDE&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr /&gt;
+&lt;p&gt;好，在这个分割线下分享一下自己解决这个问题的全过程。&lt;/p&gt;
+&lt;h2 id=&#34;确认&#34;&gt;确认&lt;/h2&gt;
+&lt;p&gt;首先问题的现象是很明显的，预期 IDEA 的菜单栏出现在 KDE 顶端的全局菜单中，但实际上并没有。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;bug.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;然后开始用 &lt;code&gt;IDEA&lt;/code&gt;，&lt;code&gt;global menu&lt;/code&gt; 等关键词去搜索，可以得到下列这些有用的信息：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在别人那是好的（有人 Po 出了正常的截图）&lt;/li&gt;
+&lt;li&gt;可以通过 &lt;code&gt;Experiment Features&lt;/code&gt; 开启 &lt;code&gt;linux.native.menu&lt;/code&gt; 的支持&lt;/li&gt;
+&lt;li&gt;在 Issue 的评论中，有人提出需要安装 &lt;code&gt;libdbusmenu-glib&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;OK，现在知道问题应该出在本地可能漏了什么依赖，导致全局菜单没有生效，下面需要想办法定位到具体的问题。&lt;del&gt;（实在定位不出来的时候再一把梭试一下）&lt;/del&gt;&lt;/p&gt;
+&lt;h2 id=&#34;定位&#34;&gt;定位&lt;/h2&gt;
+&lt;p&gt;首先通过 &lt;code&gt;Help -&amp;gt; Find Action... -&amp;gt; Experiment Features&lt;/code&gt; 中可以打开实验特性的开关，其中可以确认 &lt;code&gt;linux.native.menu&lt;/code&gt; 已经默认开启了。（真香！）&lt;/p&gt;
+&lt;p&gt;然后查看 IDEA 的 Log，寻找全局菜单没有启用的原因。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;IDEA 的 Log 一般在 &lt;code&gt;~/.IntelliJIdea2019.1/system/log/&lt;/code&gt;，也可以通过 &lt;code&gt;Help -&amp;gt; Show Log In Dolphin&lt;/code&gt; 直接打开所在位置&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code&gt;2019-03-28 11:03:00,342 [ 5755] INFO - penapi.wm.impl.GlobalMenuLinux - disable global-menu integration because some of shared libraries isn&#39;t installed: java.lang.UnsatisfiedLinkError: /opt/intellij-idea-ultimate-edition/bin/libdbm64.so: libdbusmenu-glib.so.4: cannot open shared object file: No such file or directory
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Ooops，原来是因为缺少一个库导致 &lt;code&gt;global-menu&lt;/code&gt; 被禁用了，只需要把这个库装上就可以了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;happy.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;修复&#34;&gt;修复&lt;/h2&gt;
+&lt;p&gt;搜索一下哪个包提供了 &lt;code&gt;libdbusmenu-glib.so.4&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; yay -Fs libdbusmenu-glib.so.4
+community/libdbusmenu-glib &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;.04.0-3
+usr/lib/libdbusmenu-glib.so.4&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;很明显，是 &lt;code&gt;libdbusmenu-glib&lt;/code&gt; （正是上面 Issue 中有人说要装的那个包），甚至还是社区源里面的包，不用犹豫了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; yay -S libdbusmenu-glib&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;重启 IDE 之后就能看到全局菜单正常工作啦：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;fixed.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在水一篇文章之后，我还能做啥呢？给 AUR 留个言，让维护者把 &lt;code&gt;libdbusmenu-glib&lt;/code&gt; 作为一个可选依赖，这样大家在安装或者更新 IDEA 的时候就知道啦：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;comment.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Update: AUR 的维护者已经加上啦：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;New optional dependencies &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; intellij-idea-ultimate-edition
+libdbusmenu-glib: For global menu support &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;installed&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Arch is the best!&lt;/p&gt;
+&lt;h2 id=&#34;后续&#34;&gt;后续&lt;/h2&gt;
+&lt;p&gt;GTK 3 的应用可以通过安装 &lt;code&gt;appmenu-gtk-module&lt;/code&gt; 来获取全局菜单的支持~&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://youtrack.jetbrains.com/issue/IDEA-169904&#34;&gt;Support KDE Global Menu&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/kde/comments/67mnfq/global_menu_in_plasma_59_with_java_intellij_and/&#34;&gt;Global Menu in Plasma 5.9 with Java (Intellij) and Firefox&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>通过 gRPC 传递 Request ID</title><link>https://xuanwo.io/2019/03/10/request-id-in-grpc/</link><pubDate>Sun, 10 Mar 2019 04:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/10/request-id-in-grpc/</guid><description>&lt;p&gt;分布式追踪是 &lt;a href=&#34;https://www.qingcloud.com/products/anybox/&#34;&gt;Anybox&lt;/a&gt; 项目中的重要一环，其中在每个请求的入口处设置一个 Request ID 是分布式追踪的第一步。这篇文章主要介绍如何利用 gRPC 的 Metadata 与 Interceptor 功能来实现 Request ID 在不同服务间的生成与传递。&lt;/p&gt;
+&lt;h2 id=&#34;介绍&#34;&gt;介绍&lt;/h2&gt;
+&lt;h3 id=&#34;tracing&#34;&gt;Tracing&lt;/h3&gt;
+&lt;p&gt;关于 Tracing 的介绍，可以看朋友 P 写的 &lt;a href=&#34;https://pjw.io/articles/2018/05/08/opentracing-explanations/#section-3&#34;&gt;OpenTracing 详解&lt;/a&gt;，看完之后就能大概明白为什么需要设置并传递 Request ID。&lt;/p&gt;
+&lt;h3 id=&#34;metadata&#34;&gt;Metadata&lt;/h3&gt;
+&lt;p&gt;Metadata 可以理解为一个 HTTP 请求的 Header（它的底层实现就是 HTTP/2 的 Header），用户可以通过访问和修改每个 gRPC Call 的 Metadata 来传递额外的信息：比如认证信息，比如本文中提到的 Request ID。&lt;/p&gt;
+&lt;h3 id=&#34;interceptor&#34;&gt;Interceptor&lt;/h3&gt;
+&lt;p&gt;Interceptor 有点类似于我们平时常用的 HTTP Middleware，不同的是它可以用在 Client 端和 Server 端。比如在收到请求之后输出日志，在请求出现错误的时候输出错误信息，比如获取请求中设置的 Request ID。&lt;/p&gt;
+&lt;h2 id=&#34;实现&#34;&gt;实现&lt;/h2&gt;
+&lt;p&gt;Anybox 后端主要使用 Golang 和 Python 开发，因此本文主要介绍这两种语言的使用方式，其他语言的使用方式应该与之类似。&lt;/p&gt;
+&lt;h3 id=&#34;golang&#34;&gt;Golang&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryInvoker is called by UnaryClientInterceptor to complete RPCs.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryInvoker &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, reply &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;ClientConn, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;CallOption) &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryClientInterceptor intercepts the execution of a unary RPC on the client. invoker is the handler to complete the RPC
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// and it is the responsibility of the interceptor to call it.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// This is an EXPERIMENTAL API.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryClientInterceptor &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, reply &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;ClientConn, invoker UnaryInvoker, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;CallOption) &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryHandler defines the handler invoked by UnaryServerInterceptor to complete the normal
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// execution of a unary RPC. If a UnaryHandler returns an error, it should be produced by the
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// status package, or else gRPC will use codes.Unknown as the status code and err.Error() as
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// the status message of the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryHandler &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}) (&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryServerInterceptor provides a hook to intercept the execution of a unary RPC on the server. info
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// contains all the information of this RPC the interceptor can operate on. And handler is the wrapper
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// of the service method implementation. It is the responsibility of the interceptor to invoke handler
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// to complete the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryServerInterceptor &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, info &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;UnaryServerInfo, handler UnaryHandler) (resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Golang 的实现是把 Metadata 塞在了 context 里面，只需要使用 &lt;code&gt;metadata.FromOutgoingContext(ctx)&lt;/code&gt; 和 &lt;code&gt;metadata.FromIncomingContext(ctx)&lt;/code&gt; 就能够访问本次请求的 Metadata。概念清楚之后代码应该非常好写了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;RequestIDClientInterceptor&lt;/span&gt;() grpc.UnaryClientInterceptor {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(
+ctx context.Context,
+method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{},
+cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;grpc.ClientConn, invoker grpc.UnaryInvoker, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;grpc.CallOption,
+) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;) {
+md, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; metadata.&lt;span style=&#34;color:#06287e&#34;&gt;FromOutgoingContext&lt;/span&gt;(ctx)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
+md = metadata.&lt;span style=&#34;color:#06287e&#34;&gt;Pairs&lt;/span&gt;()
+}
+value &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; ctx.&lt;span style=&#34;color:#06287e&#34;&gt;Value&lt;/span&gt;(trace.RequestID)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; requestID, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; value.(&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;); ok &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; requestID &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt; {
+md[&lt;span style=&#34;color:#007020&#34;&gt;string&lt;/span&gt;(trace.RequestID)] = []&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;{requestID}
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;invoker&lt;/span&gt;(metadata.&lt;span style=&#34;color:#06287e&#34;&gt;NewOutgoingContext&lt;/span&gt;(ctx, md), method, req, resp, cc, opts&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;)
+}
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;RequestIDServerInterceptor&lt;/span&gt;() grpc.UnaryServerInterceptor {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(
+ctx context.Context,
+req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, info &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+) (resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;) {
+md, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; metadata.&lt;span style=&#34;color:#06287e&#34;&gt;FromIncomingContext&lt;/span&gt;(ctx)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
+md = metadata.&lt;span style=&#34;color:#06287e&#34;&gt;Pairs&lt;/span&gt;()
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Set request ID for context.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; requestIDs &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; md[&lt;span style=&#34;color:#007020&#34;&gt;string&lt;/span&gt;(trace.RequestID)]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;len&lt;/span&gt;(requestIDs) &lt;span style=&#34;color:#666&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt; {
+ctx = context.&lt;span style=&#34;color:#06287e&#34;&gt;WithValue&lt;/span&gt;(ctx, trace.RequestID, requestIDs[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;handler&lt;/span&gt;(ctx, req)
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Generate request ID and set context if not exists.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; requestID &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; id.&lt;span style=&#34;color:#06287e&#34;&gt;NewHex32&lt;/span&gt;()
+ctx = context.&lt;span style=&#34;color:#06287e&#34;&gt;WithValue&lt;/span&gt;(ctx, trace.RequestID, requestID)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;handler&lt;/span&gt;(ctx, req)
+}
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;python&#34;&gt;Python&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Python 这边相对更蛋疼一些，注释写得不是非常清晰，给的使用样例也十分的晦涩难懂，看了好一会儿源码才明白怎么用。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Python 想要实现一个 Client Interceptor 的话需要继承 &lt;code&gt;grpc.UnaryUnaryClientInterceptor&lt;/code&gt; 并实现 &lt;code&gt;intercept_unary_unary&lt;/code&gt; 方法。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;UnaryUnaryClientInterceptor&lt;/span&gt;(six&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;with_metaclass(abc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;ABCMeta)):
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Affords intercepting unary-unary invocations.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; This is an EXPERIMENTAL API.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@abc.abstractmethod&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;intercept_unary_unary&lt;/span&gt;(self, continuation, client_call_details, request):
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Intercepts a unary-unary invocation asynchronously.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Args:
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; continuation: A function that proceeds with the invocation by
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; executing the next interceptor in chain or invoking the
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; actual RPC on the underlying Channel. It is the interceptor&amp;#39;s
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; responsibility to call it if it decides to move the RPC forward.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; The interceptor can use
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; `response_future = continuation(client_call_details, request)`
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; to continue with the RPC. `continuation` returns an object that is
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; both a Call for the RPC and a Future. In the event of RPC
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; completion, the return Call-Future&amp;#39;s result value will be
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; the response message of the RPC. Should the event terminate
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; with non-OK status, the returned Call-Future&amp;#39;s exception value
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; will be an RpcError.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; client_call_details: A ClientCallDetails object describing the
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; outgoing RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; request: The request value for the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Returns:
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; An object that is both a Call for the RPC and a Future.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; In the event of RPC completion, the return Call-Future&amp;#39;s
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; result value will be the response message of the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Should the event terminate with non-OK status, the returned
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Call-Future&amp;#39;s exception value will be an RpcError.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;raise&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;NotImplementedError&lt;/span&gt;()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;client_call_details.metadata&lt;/code&gt; 是一个 list，里面的每一个 item 都是由 &lt;code&gt;(key, value)&lt;/code&gt; 组成的元组。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;_ClientCallDetails&lt;/span&gt;(
+collections&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;namedtuple(
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;_ClientCallDetails&amp;#39;&lt;/span&gt;,
+(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;method&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;timeout&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;metadata&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;credentials&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;wait_for_ready&amp;#39;&lt;/span&gt;)),
+grpc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;ClientCallDetails):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;pass&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;RequestIDClientInterceptor&lt;/span&gt;(grpc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;UnaryUnaryClientInterceptor):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;intercept_unary_unary&lt;/span&gt;(self, continuation, client_call_details, request):
+rid &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; the_function_to_generate_request_id()
+logger&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;info(f&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Sending RPC request, Method: {client_call_details.method}, Request ID: {rid}.&amp;#34;&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Add request into client call details, aka, metadata.&lt;/span&gt;
+metadata &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; []
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;metadata &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;is&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; None:
+metadata &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;list&lt;/span&gt;(client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;metadata)
+metadata&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append((&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;request_id&amp;#34;&lt;/span&gt;, rid))
+client_call_details &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; _ClientCallDetails(
+client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;method, client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;timeout, metadata,
+client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;credentials, client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;wait_for_ready)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; continuation(client_call_details, request)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在初始化 Channel 的时候在实例化一下即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;channel &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; insecure_channel(f&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;{host}:{port}&amp;#34;&lt;/span&gt;)
+channel &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; intercept_channel(channel, RequestIDClientInterceptor())&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://pjw.io/articles/2018/05/08/opentracing-explanations/&#34;&gt;OpenTracing 详解&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-metadata.md&#34;&gt;grpc-metadata&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/grpc/grpc/tree/master/examples/python/interceptors&#34;&gt;gRPC Python Interceptor Examples&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>记一次 WiFi 断开链接</title><link>https://xuanwo.io/2019/01/04/record-for-wifi-disconnect/</link><pubDate>Fri, 04 Jan 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/01/04/record-for-wifi-disconnect/</guid><description>&lt;p&gt;今天下午的时候我的 WiFi 出现了一次时长大约为两秒的断开链接，当时正在抢回家的车票，面对突如其来的 &lt;code&gt;ERR_ADDRESS_UNREACHABLE&lt;/code&gt; 感到很是愤怒，还在公司的群里问了句刚才 Office 的网络是不是闪断了一下。但是网络组的同事表示监控无异常，较真的我当时就不信了，要不是网络出问题，好端端的电脑怎么会自己断开链接呢？其实结果还真的差不离。。。&lt;/p&gt;
+&lt;h2 id=&#34;致命华彩&#34;&gt;致命华彩&lt;/h2&gt;
+&lt;p&gt;网络组表示他们那边没有看出来什么问题，于是我 &lt;code&gt;journalctl -xe&lt;/code&gt; 看了看，发现了一些可能有关的信息：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:12 thinkpad-x1-carbon kernel: wlp2s0: disassociated from &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;Reason: &lt;span style=&#34;color:#bb60d5&#34;&gt;8&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;DISASSOC_STA_HAS_LEFT&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:12 thinkpad-x1-carbon skypeforlinux&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1944&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: ioctl failed &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; wlan0, &lt;span style=&#34;color:#bb60d5&#34;&gt;errno&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;19&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;No such device&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:12 thinkpad-x1-carbon wpa_actiond&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;864&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Interface &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;wlp2s0&amp;#39;&lt;/span&gt; lost connection to network &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;yunify-ldap&amp;#39;&lt;/span&gt;
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: authenticate with &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: send auth to &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;try &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;/3&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: authenticated
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: associate with &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;try &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;/3&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: RX AssocResp from &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;capab&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;0x1 &lt;span style=&#34;color:#bb60d5&#34;&gt;status&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;aid&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: associated
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon kernel: wlp2s0: Limiting TX power to &lt;span style=&#34;color:#40a070&#34;&gt;27&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;30&lt;/span&gt; - &lt;span style=&#34;color:#40a070&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; dBm as advertised by &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;13&lt;/span&gt;:18:15 thinkpad-x1-carbon wpa_actiond&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;864&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Interface &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;wlp2s0&amp;#39;&lt;/span&gt; reestablished connection to network &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;yunify-ldap&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在 13:18 分的时候突然出现了一次重连，这是为啥呢，明明我在工位上都没有动，为啥网络自己就断开了？我需要搞明白这个 &lt;code&gt;DISASSOC_STA_HAS_LEFT&lt;/code&gt; 是什么意思。外事不决问 Google，简单搜索一下就能找到对这个错误的解释：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Reason&lt;/strong&gt;: Disassociated because sending STA is leaving (or has left) BSS&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Explanation&lt;/strong&gt;: Operating System moved the client to another access point using non-aggressive load balancing.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;emmmm，我现在问题反而更多了，&lt;code&gt;STA&lt;/code&gt; 是啥，&lt;code&gt;BSS&lt;/code&gt; 又是啥，&lt;code&gt;non-aggressive load balancing&lt;/code&gt; 又是啥？&lt;/p&gt;
+&lt;h2 id=&#34;恕瑞玛的传承&#34;&gt;恕瑞玛的传承&lt;/h2&gt;
+&lt;h3 id=&#34;背景知识&#34;&gt;背景知识&lt;/h3&gt;
+&lt;p&gt;想要解决这些问题，需要先补充一些背景知识。&lt;/p&gt;
+&lt;p&gt;首先是耳熟能详的 &lt;code&gt;LAN&lt;/code&gt;，&lt;code&gt;LAN&lt;/code&gt; 是 &lt;code&gt;local area network&lt;/code&gt; 的缩写，中文翻译为局域网，一般用来指有限网络。而 &lt;code&gt;WLAN&lt;/code&gt; 就是 &lt;code&gt;Wireless LAN&lt;/code&gt;，我们常说的无线局域网。我们日常挂在嘴边的 &lt;code&gt;Wi-Fi&lt;/code&gt; 是创建于 &lt;a href=&#34;https://zh.wikipedia.org/wiki/IEEE_802.11&#34;&gt;IEEE 802.11 标准&lt;/a&gt; 的无线局域网技术，有时候看到的 &lt;code&gt;11b&lt;/code&gt;，&lt;code&gt;11n&lt;/code&gt; 就是 &lt;code&gt;IEEE 802.11&lt;/code&gt; 下的不同标准。&lt;/p&gt;
+&lt;p&gt;这里的 &lt;code&gt;STA&lt;/code&gt; 是 &lt;code&gt;Station&lt;/code&gt; 的缩写，表示连接到无线网络中的一个设备，在这里我的电脑就是一个 &lt;code&gt;STA&lt;/code&gt;。而 &lt;code&gt;AP&lt;/code&gt; 则是 &lt;code&gt;Access Point&lt;/code&gt; 的缩写，表示接入点，是无线网络设备中一类特殊节点，无线网络中的其他类型节点可以通过 &lt;code&gt;AP&lt;/code&gt; 与无线网络的内部或者外部进行通信。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;SSID&lt;/code&gt; 大家肯定都很熟悉了，其实这是 &lt;code&gt;Service Set Identifier&lt;/code&gt; 的缩写。&lt;code&gt;Service Set&lt;/code&gt; （服务集）是无线局域网中的一个术语，用来描述 802.11 网络中的构成单位，是一组互相关联的无线设备。服务集有着不同的种类，规范中分别定义了如下三种：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;BSS&lt;/code&gt;（基本服务设置，basic service sets）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;IBSS&lt;/code&gt;（独立基本服务设置，independent BSS）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ESS&lt;/code&gt;（扩展服务设置，extended service sets）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其中 &lt;code&gt;IBSS&lt;/code&gt; 属于对等拓扑模式，也叫做 &lt;code&gt;Ad-Hoc&lt;/code&gt;，各客户端之间直接相互连接而不需要 &lt;code&gt;AP&lt;/code&gt; 协助。而 &lt;code&gt;BSS&lt;/code&gt; 和 &lt;code&gt;ESS&lt;/code&gt; 都属于基础架构模式，所有客户端和一个或多个 &lt;code&gt;AP&lt;/code&gt; 关联，各客户端间的数据传输通过 &lt;code&gt;AP&lt;/code&gt; 中转，各客户端之间不直接相互通信。我们一般家庭中常用的就是 &lt;code&gt;BSS&lt;/code&gt;，只有一个 &lt;code&gt;AP&lt;/code&gt;，所有设备都连接到这个 &lt;code&gt;AP&lt;/code&gt; 上。而在 &lt;code&gt;ESS&lt;/code&gt; 中，会同时存在多个 &lt;code&gt;AP&lt;/code&gt;，他们共享同一个 &lt;code&gt;ESSID&lt;/code&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在这里补充说明一下 &lt;code&gt;ESSID&lt;/code&gt; 与 &lt;code&gt;BSSID&lt;/code&gt;：&lt;code&gt;SSID&lt;/code&gt; 根据标识方式可以细分为两种，其中 &lt;code&gt;BSSID&lt;/code&gt; 是 &lt;code&gt;AP&lt;/code&gt; 的 &lt;code&gt;MAC&lt;/code&gt; 地址，而 &lt;code&gt;ESSID&lt;/code&gt; 是最长 32 字节区分大小写的字符串，我们常说的 &lt;code&gt;SSID&lt;/code&gt; 其实就是 &lt;code&gt;ESSID&lt;/code&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在同一个 &lt;code&gt;ESS&lt;/code&gt; 的不同 &lt;code&gt;BSS&lt;/code&gt; 中间切换的过程叫做漫游。&lt;/p&gt;
+&lt;h3 id=&#34;无线接入&#34;&gt;无线接入&lt;/h3&gt;
+&lt;p&gt;在介绍了一些背景之后，下面需要了解一下 &lt;code&gt;WLAN&lt;/code&gt; 是如何接入的。&lt;/p&gt;
+&lt;p&gt;客户端与 &lt;code&gt;AP&lt;/code&gt; 之间的通信是由 &lt;code&gt;802.11 Mac&lt;/code&gt; 层规定的，大致上分为三步：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Scan&lt;/code&gt;，扫描&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Authentication&lt;/code&gt;，认证&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Association&lt;/code&gt;，关联&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;扫描分为主动扫描和被动扫描：我们手机打开 Wifi 界面时候通常需要等待一会儿才能显示出所有的 &lt;code&gt;SSID&lt;/code&gt;，这个时候手机就是在做主动扫描，手机会在标准规定的 13 个信道中广播一个 &lt;code&gt;Probe Request Frame&lt;/code&gt;，收到这个 &lt;code&gt;Frame&lt;/code&gt; 的 &lt;code&gt;AP&lt;/code&gt; 会根据自己的设置决定是否返回带有自己的 &lt;code&gt;SSID&lt;/code&gt;，加密方式等信息的 &lt;code&gt;Probe Response&lt;/code&gt;。而被动扫描则是侦听 &lt;code&gt;AP&lt;/code&gt; 定时发来的 &lt;code&gt;Beacon Frame&lt;/code&gt;，这个帧提供了 &lt;code&gt;AP&lt;/code&gt; 和所在 &lt;code&gt;BSS&lt;/code&gt; 的信息。&lt;/p&gt;
+&lt;p&gt;现在我们选择了一个 &lt;code&gt;SSID&lt;/code&gt;，手机根据 &lt;code&gt;SSID&lt;/code&gt; 的加密方式会通过不同的方式进行认证，这个阶段就是认证阶段。标准中定义了很多加密方式，我这里就不一一列出来了，我们最常见就是 &lt;code&gt;WPA2-PSK&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;在认证通过之后，&lt;code&gt;AP&lt;/code&gt; 会向 &lt;code&gt;STA&lt;/code&gt; 返回认证响应信息，这时候就会进入关联阶段。&lt;code&gt;STA&lt;/code&gt; 会向 &lt;code&gt;AP&lt;/code&gt; 发起关联请求，而 &lt;code&gt;AP&lt;/code&gt; 则会创建一个 &lt;code&gt;Association ID&lt;/code&gt; 并返回一个成功的关联响应。到了这是，&lt;code&gt;STA&lt;/code&gt; 就已经成功的通过 &lt;code&gt;AP&lt;/code&gt; 连入无线网络了。&lt;/p&gt;
+&lt;p&gt;在连入无线网络之后，&lt;code&gt;STA&lt;/code&gt; 仍然会去侦听 &lt;code&gt;AP&lt;/code&gt; 发来的 &lt;code&gt;Beacon Frame&lt;/code&gt;，&lt;code&gt;STA&lt;/code&gt; 根据相同 &lt;code&gt;SSID&lt;/code&gt; 不同 &lt;code&gt;AP&lt;/code&gt; 发来的 &lt;code&gt;Beacon Frame&lt;/code&gt; 来确定哪个 &lt;code&gt;AP&lt;/code&gt; 信号最强。假设当前连接的是 &lt;code&gt;AP A&lt;/code&gt;，但是 &lt;code&gt;STA&lt;/code&gt; 发现有个 &lt;code&gt;AP B&lt;/code&gt; 跟 &lt;code&gt;AP A&lt;/code&gt; 的 &lt;code&gt;SSID&lt;/code&gt; 相同，但是信号更强，那么 &lt;code&gt;STA&lt;/code&gt; 就会试着向 &lt;code&gt;AP B&lt;/code&gt; 发送关联请求。&lt;code&gt;AP B&lt;/code&gt; 在返回了关联响应之后会通过局域网来通知 &lt;code&gt;AP A&lt;/code&gt;，这个 &lt;code&gt;STA&lt;/code&gt; 已经被我接管了。这就是我们拿着笔记本在办公室中走来走去的过程中发生的故事。&lt;/p&gt;
+&lt;h2 id=&#34;虚空锁敌&#34;&gt;虚空锁敌&lt;/h2&gt;
+&lt;p&gt;好，前面铺垫了那么多，下面终于可以转入正题了。&lt;/p&gt;
+&lt;p&gt;结果就是：&lt;strong&gt;我也不知道确切原因&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;首先有个技术叫做 &lt;code&gt;Client Load Balance&lt;/code&gt;，思科那边称之为 &lt;code&gt;Aggressive Load Balancing&lt;/code&gt;，基本思想是在 &lt;code&gt;STA&lt;/code&gt; 向 &lt;code&gt;AP&lt;/code&gt; 发起关联请求的时候，&lt;code&gt;AP&lt;/code&gt; 根据事先设置好的负载策略（比如最大客户端数量，最大流量等）来决定接受还是拒绝请求。但是这个技术核心要点是只作用于关联阶段，只要成功连上，就不会主动断开你的连接。（有时候在人多的地方死活连不上 WiFi，但是只要连上了就一直能用，就是这么个原因。）因此我的电脑主动断开肯定不是 &lt;code&gt;AP&lt;/code&gt; 的负载均衡问题。&lt;/p&gt;
+&lt;p&gt;我搜索了一下这个 &lt;code&gt;non-aggressive load balancing&lt;/code&gt;，发现只有一处提到，其他的地方基本都是全文引用的。包括思科在内的多家厂商都没有提过这个词，Linux 内核里面也没有搜索到相关信息，而作者给出两个引用都已经 404 了，所以无从得知这个 &lt;code&gt;non-aggressive load balancing&lt;/code&gt; 到底是怎么来的。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;现在的猜想是当时信号不是很稳定，Kernel 认为自己离开了 BSS，于是断开了链接，过了一会儿收到了 Beacon 帧，于是重新连接了上去。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;之前的猜想是这样，但是重新看了下 log 之后发现我的设备会很有规律的每过 300s 就断开重连一次：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;153162&lt;/span&gt;.962047&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; wlp2s0: disassociated from &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;Reason: &lt;span style=&#34;color:#bb60d5&#34;&gt;8&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;DISASSOC_STA_HAS_LEFT&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;153464&lt;/span&gt;.350214&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; wlp2s0: disassociated from &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;Reason: &lt;span style=&#34;color:#bb60d5&#34;&gt;8&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;DISASSOC_STA_HAS_LEFT&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;153766&lt;/span&gt;.738503&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; wlp2s0: disassociated from &lt;span style=&#34;color:#40a070&#34;&gt;06&lt;/span&gt;:69:6c:a9:45:6d &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;Reason: &lt;span style=&#34;color:#bb60d5&#34;&gt;8&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;DISASSOC_STA_HAS_LEFT&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我司的网络设备跟我的 PC 之间大约的确是有点故事了（耸肩，下个星期看看别人的 PC 有没有一样的问题。&lt;/p&gt;
+&lt;h2 id=&#34;答读者问&#34;&gt;答读者问&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;搞什么嘛，研究了半天结果不还是信号不稳定，网络抖动嘛？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;结果本身并不重要，重要的是我在这个过程中获得了乐趣~&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这个不明觉历的小标题是什么意思？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;他们是 LOL 中英雄的技能。&lt;/p&gt;
+&lt;p&gt;其中致命华彩是烬的 W 技能，恕瑞玛的传承是沙皇的被动技能，虚空锁敌是卡莎的 W 技能~&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;说好的日本游记呢？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在写了。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.aboutcher.co.uk/2012/07/linux-wifi-deauthenticated-reason-codes/&#34;&gt;Linux WiFi: Deauthenticated Reason Codes&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.cnblogs.com/pyj63/p/8046181.html&#34;&gt;wifi的基础知识及原理1&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/Wi-Fi&#34;&gt;Wi-Fi&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/IEEE_802.11&#34;&gt;IEEE 802.11&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E6%9C%8D%E5%8A%A1%E9%9B%86_(%E6%97%A0%E7%BA%BF%E5%B1%80%E5%9F%9F%E7%BD%91)&#34;&gt;服务集&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E7%84%A1%E7%B7%9A%E9%9A%A8%E6%84%8F%E7%B6%B2%E8%B7%AF&#34;&gt;Ad-Hoc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://witestlab.poly.edu/blog/802-11-wireless-lan-2/&#34;&gt;Understanding the 802.11 Wireless LAN MAC frame format&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://devopedia.org/wi-fi-mac-layer&#34;&gt;Wi-Fi MAC layer&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://documentation.meraki.com/MR/WiFi_Basics_and_Best_Practices/802.11_Association_process_explained&#34;&gt;802.11 Association process explained&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.juniper.net/documentation/en_US/junos-space-apps/network-director3.1/topics/concept/wireless-scanning.html&#34;&gt;Understanding Wireless Scanning&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.draytek.com/en/faq/faq-wlan/wlan.vigorap/what-is-ap-load-balance/&#34;&gt;What is AP Load Balance?&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>记一次 btrfs 的在线转换</title><link>https://xuanwo.io/2018/11/15/record-for-btrfs-conversion/</link><pubDate>Thu, 15 Nov 2018 13:05:00 +0000</pubDate><guid>https://xuanwo.io/2018/11/15/record-for-btrfs-conversion/</guid><description>&lt;p&gt;在 archcn 群里听 &lt;a href=&#34;https://farseerfc.me/&#34;&gt;fc 教授&lt;/a&gt; 安利了有一段时间了，终于在一个心情不是非常美好的晚上决定上一波 btrfs ，这篇文章主要分享这次转换中遇到的一些有趣的故事~&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2 id=&#34;btrfs-是什么以及为什么&#34;&gt;btrfs 是什么以及为什么？&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Btrfs（B-tree文件系统，通常念成Butter FS，Better FS或B-tree FS），一种支持写入时复制（COW）的文件系统，运行在Linux操作系统，采用GPL授权。Oracle于2007年对外宣布这项计划，并发布源代码，在2014年8月发布稳定版。目标是取代Linux目前的ext3文件系统，改善ext3的限制，特别是单个文件的大小，总文件系统大小或文件检查和加入ext3未支持的功能，像是可写快照（writable snapshots）、快照的快照（snapshots of snapshots）、内建磁盘阵列（RAID），以及子卷（subvolumes）。Btrfs也宣称专注在“容错、修复及易于管理”。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;之所以想要换成 btrfs ，主要是因为以下几个原因：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;btrfs 支持快照，可以方便备份和恢复&lt;/li&gt;
+&lt;li&gt;btrfs 支持透明压缩&lt;/li&gt;
+&lt;li&gt;btrfs 支持子卷，结合快照功能，可以作为启动 &lt;code&gt;systemd-nspawn&lt;/code&gt; 容器的模板&lt;/li&gt;
+&lt;li&gt;btrfs 支持数据和元数据的校验&lt;/li&gt;
+&lt;li&gt;btrfs 支持就地从 ext4 转换&lt;/li&gt;
+&lt;li&gt;那天晚上心情不是很好，需要有个足够好玩的事情来吸引我的注意力&lt;/li&gt;
+&lt;li&gt;这是我自己的电脑，我乐意（&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其实我之前一直是坚定的 ext4 党，觉得 ext4 非常稳定，性能优秀，文件系统的高级功能平时也不怎么会用到，所以并不觉得 btrfs 好，反而经常在别人报告自己的 btrfs 翻车的时候在一旁吃瓜，滑稽的喊两句毫无营养的 &lt;em&gt;我选择 ext4&lt;/em&gt; 。但是后来我的想法慢慢的发生了变化，一方面是 fc 老师的持续安利和讲解，另一方面是自己对事物，或者说世界的看法也在变化：&lt;/p&gt;
+&lt;h3 id=&#34;不要迷醉于虚假的安全之中&#34;&gt;不要迷醉于虚假的安全之中&lt;/h3&gt;
+&lt;p&gt;ext4 可能确实是稳，确实是快，但是这是因为它默认没有开启 checksum 。 &lt;em&gt;（虽然没有横向对比过，但此处应使用肯定语气表示强调，只要你不说出来别人也不会去查）&lt;/em&gt; 如果出现了静默错误，ext4 毫无修复的能力，而 btrfs 则会在读取的时候进行校验并尝试去进行修复。&lt;/p&gt;
+&lt;h3 id=&#34;吃瓜群众没有什么可骄傲的&#34;&gt;吃瓜群众没有什么可骄傲的&lt;/h3&gt;
+&lt;p&gt;以前可能习惯的去当一个吃瓜群众，静静的围观各种事件的反转并自诩 &lt;em&gt;机智如我&lt;/em&gt; ，&lt;em&gt;我就知道会这样&lt;/em&gt; 。但是现在渐渐明白了，吃瓜群众只不过是没脑子罢了，被铺天盖地的信息轰炸的多了，失去了自己去查明真相的能力，只能被动的随着信息的浪潮四处漂游。醒醒吧，世界的发展和技术的进步并不是吃瓜群众推动的，如果我们不亲自下场去尝试，最后留在自己手中的只有瓜皮而已。&lt;/p&gt;
+&lt;h2 id=&#34;匹夫之勇&#34;&gt;匹夫之勇&lt;/h2&gt;
+&lt;p&gt;啊，废话说的有点多了，下面开始正题。&lt;/p&gt;
+&lt;p&gt;首先熟读并背诵 Archwiki 中 btrfs 相关的条目，英文的也都仔细读一遍，防止有什么新的信息被遗漏了。敢于尝试新鲜事物是勇者，但是 archwiki 都不好好看，那就是莽夫了。确认重要的信息都 get 到之后，插上 U 盘进入 live 环境。&lt;/p&gt;
+&lt;p&gt;在开始之前有几个比较重要的 Tips：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;备份&lt;/strong&gt;，&lt;strong&gt;备份&lt;/strong&gt;，&lt;strong&gt;备份&lt;/strong&gt;。如果是在没有条件全盘备份，起码把自己的 &lt;code&gt;ssh_key&lt;/code&gt;，&lt;code&gt;gpg_key&lt;/code&gt; 等重要文件都备份好，数据是你自己的，为了帅这一下，不值得。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;btrfs-convert&lt;/code&gt; 会保留原来 ext4 中的 metadata，并作为一个单独的子卷。因此只要保留着这个子卷，你就可以恢复成 ext4 。但是这是有条件的，显然的，btrfs 不可能去在线维护 btrfs 和 ext4 两个 metadata，在 convert 之后的 btrfs 分区中做出的变更将不会同步到 ext4 的 metadata 中。因此请在确认数据都没有问题的情况下再开机进入系统。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;首先执行一次 fsck，避免带病上阵：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;fsck.ext4 /dev/nvme0n1p2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后深呼吸三次，开始执行 &lt;code&gt;btrfs-convert&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;btrfs-convert /dev/nvme0n1p2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;img src=&#34;convert.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在经过漫长的等待后，convert 没有翻车，已经成功一半啦！&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;success.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;接下来把分区挂在上来，检查一下是否有问题：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;mount /dev/nvme0n1p2 /mnt
+mount /dev/nvme0n1p1 /mnt/boot&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;随机抽查了一些文件发现都 OK 之后，下面开始修改一些引导相关的配置。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;修改 &lt;code&gt;/etc/fstab&lt;/code&gt;，把 &lt;code&gt;type&lt;/code&gt; 修改为 &lt;code&gt;btrfs&lt;/code&gt;，把最后一行的 &lt;code&gt;fs_passno&lt;/code&gt; 修改为 &lt;code&gt;0&lt;/code&gt;，因为 btrfs 不在开机的时候做检查&lt;/li&gt;
+&lt;li&gt;如果使用的是 UUID 之类的话，还可能会需要修改 UUID，不过我是用的 PARTUUID，信息存储在 GPT 分区表中，修改文件系统并不会变化，因此不需要修改&lt;/li&gt;
+&lt;li&gt;因为转换的是根目录，因此还需要执行 &lt;code&gt;mkinitcpio -p linux&lt;/code&gt; 以重建内存盘，我使用的是 &lt;code&gt;linux-zen&lt;/code&gt; 内核，因此我还执行了 &lt;code&gt;mkinitcpio -p linux-zen&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;如果用的是 &lt;code&gt;systemd-boot&lt;/code&gt; 的话，不需要做什么额外的配置，用 grub 的同学要按照 wiki 的指示重新生成 &lt;code&gt;grub.config&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接下来就是我做的一些很勇的事情了，请各位同学不要模仿：为了能够充分用上 btrfs 的透明压缩功能，我对全盘执行了一次压缩并修改了 &lt;code&gt;/etc/fstab&lt;/code&gt; 的挂载参数：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;btrfs filesystem defragment -r -v -clzo /mnt&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;最后提示有两个 failure，只是当时我还没有明白这意味着什么。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;failure.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;弱者之愁&#34;&gt;弱者之愁&lt;/h2&gt;
+&lt;p&gt;在压缩完毕后我重启并成功进入系统，于是高兴的在 archcn 的群中宣扬了一番：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;alive.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;后来 fc 教授提醒我需要删除 &lt;code&gt;ext2_saved&lt;/code&gt; 并执行 &lt;code&gt;balance&lt;/code&gt;，然后真正的故事开始了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1868&lt;/span&gt;.392801&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS warning &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: csum failed root -9 ino &lt;span style=&#34;color:#40a070&#34;&gt;465&lt;/span&gt; off &lt;span style=&#34;color:#40a070&#34;&gt;1048576&lt;/span&gt; csum 0x9302c07f expected csum 0x98f94189 mirror &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1868&lt;/span&gt;.393966&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS warning &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: csum failed root -9 ino &lt;span style=&#34;color:#40a070&#34;&gt;465&lt;/span&gt; off &lt;span style=&#34;color:#40a070&#34;&gt;1048576&lt;/span&gt; csum 0x9302c07f expected csum 0x98f94189 mirror &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我的心情毫无波动，甚至有点想笑。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;csum-failed.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;之后在 fc 教授的指导下，查看了 btrfs 相关的各种信息，最后通过 inode 跟踪到了这个对应的错误文件，那是一个 golang 项目的 vendor 文件，所以我直接把这个文件删掉并执行了 &lt;code&gt;scrub&lt;/code&gt; 任务。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:03 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Started Btrfs scrub on /.
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: ERROR: there are uncorrectable errors
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: scrub &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;done&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; 86fd5394-5a32-43cd-8ef5-5f3fbd46056e
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: scrub started at Wed Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:03 &lt;span style=&#34;color:#40a070&#34;&gt;2018&lt;/span&gt; and finished after &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:00:44
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: total bytes scrubbed: &lt;span style=&#34;color:#40a070&#34;&gt;72&lt;/span&gt;.40GiB with &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt; errors
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: error details: &lt;span style=&#34;color:#bb60d5&#34;&gt;csum&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon btrfs&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;15376&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: corrected errors: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, uncorrectable errors: &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;, unverified errors: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: btrfs-scrub@-.service: Main process exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;code&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;status&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;3&lt;/span&gt;/NOTIMPLEMENTED
+Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:16:47 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: btrfs-scrub@-.service: Failed with result &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;exit-code&amp;#39;&lt;/span&gt;.&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;虽然场面上很慌，但是我的心态出奇的好，感觉非常刺激。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;scrub-failed.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;后来通过 &lt;code&gt;dmesg&lt;/code&gt; 查到了具体的出错信息：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3392&lt;/span&gt;.226163&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS warning &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: checksum error at logical &lt;span style=&#34;color:#40a070&#34;&gt;253848715264&lt;/span&gt; on dev /dev/nvme0n1p2, physical &lt;span style=&#34;color:#40a070&#34;&gt;21546885120&lt;/span&gt;, root &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;, inode &lt;span style=&#34;color:#40a070&#34;&gt;8127262&lt;/span&gt;, offset &lt;span style=&#34;color:#40a070&#34;&gt;3928064&lt;/span&gt;, length &lt;span style=&#34;color:#40a070&#34;&gt;4096&lt;/span&gt;, links &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;path: var/log/journal/22c7d33d64ee4991ab100bf6abeb7ac7/user-1000@00056c232173e076-2815baa2d7d959be.journal~&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3392&lt;/span&gt;.226167&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS error &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: bdev /dev/nvme0n1p2 errs: wr &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, rd &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, flush &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, corrupt &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;, gen &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3392&lt;/span&gt;.226169&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS error &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: unable to fixup &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;regular&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; error at logical &lt;span style=&#34;color:#40a070&#34;&gt;253848715264&lt;/span&gt; on dev /dev/nvme0n1p2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个文件是 &lt;code&gt;systemd&lt;/code&gt; 的一个日志文件，于是直接把这个文件删掉了（解决问题最快的方式就是搞定有问题的那个人~），然后重新执行 &lt;code&gt;scrub&lt;/code&gt; 的任务，但是：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3857&lt;/span&gt;.669742&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS error &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: bdev /dev/nvme0n1p2 errs: wr &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, rd &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, flush &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, corrupt &lt;span style=&#34;color:#40a070&#34;&gt;25&lt;/span&gt;, gen &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3857&lt;/span&gt;.669743&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS error &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: unable to fixup &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;regular&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; error at logical &lt;span style=&#34;color:#40a070&#34;&gt;253848748032&lt;/span&gt; on dev /dev/nvme0n1p2
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;3857&lt;/span&gt;.669861&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; BTRFS warning &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;device nvme0n1p2&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;: checksum error at logical &lt;span style=&#34;color:#40a070&#34;&gt;253848752128&lt;/span&gt; on dev /dev/nvme0n1p2, physical &lt;span style=&#34;color:#40a070&#34;&gt;21546921984&lt;/span&gt;, root &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;, inode &lt;span style=&#34;color:#40a070&#34;&gt;8127262&lt;/span&gt;, offset &lt;span style=&#34;color:#40a070&#34;&gt;3964928&lt;/span&gt;: path resolving failed with &lt;span style=&#34;color:#bb60d5&#34;&gt;ret&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;感觉坏的更严重了，通过 &lt;code&gt;logic number&lt;/code&gt; 和 &lt;code&gt;inode&lt;/code&gt; 号都查不到这个文件的信息：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; sudo btrfs inspect-internal logical-resolve &lt;span style=&#34;color:#40a070&#34;&gt;253848752128&lt;/span&gt; /
+ERROR: logical ino ioctl: No such file or directory
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; sudo btrfs inspect-internal inode-resolve &lt;span style=&#34;color:#40a070&#34;&gt;8127262&lt;/span&gt; /
+ERROR: ino paths ioctl: No such file or directory&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;后来还是 fc 老师点醒了我：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我的意思是，scrub 發現了之後可能已經幫你刪掉了&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;于是我重新执行了一下 &lt;code&gt;scrub&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;scrub &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;done&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; 86fd5394-5a32-43cd-8ef5-5f3fbd46056e
+scrub started at Wed Nov &lt;span style=&#34;color:#40a070&#34;&gt;14&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;23&lt;/span&gt;:35:39 &lt;span style=&#34;color:#40a070&#34;&gt;2018&lt;/span&gt; and finished after &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:00:44
+total bytes scrubbed: &lt;span style=&#34;color:#40a070&#34;&gt;72&lt;/span&gt;.37GiB with &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt; errors&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;哈哈，修好啦！ &lt;strong&gt;btrfs 真香！&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id=&#34;收工之喜&#34;&gt;收工之喜&lt;/h2&gt;
+&lt;p&gt;在全盘检查没有问题之后，我重新执行了 &lt;code&gt;balance&lt;/code&gt;，并且顺利完成了。在庆祝收工之余，还进行了如下配置：&lt;/p&gt;
+&lt;p&gt;启用每月一次的全盘校验任务：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; sudo systemctl &lt;span style=&#34;color:#007020&#34;&gt;enable&lt;/span&gt; btrfs-scrub@-.timer
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; sudo systemctl start btrfs-scrub@-.timer&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;因为我使用了 &lt;a href=&#34;https://wiki.archlinux.org/index.php/TLP&#34;&gt;&lt;code&gt;tlp&lt;/code&gt;&lt;/a&gt;，按照 wiki 上的说法，我需要修改一个配置以避免文件系统损坏：&lt;/p&gt;
+&lt;p&gt;修改 &lt;code&gt;/etc/default/tlp&lt;/code&gt; 文件中的 &lt;code&gt;SATA_LINKPWR_ON_BAT&lt;/code&gt; 属性。wiki 要求是修改成 &lt;code&gt;max_performance&lt;/code&gt;，但是配置文件中的注释提到：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# AHCI link power management (ALPM) for disk devices:
+# min_power, med_power_with_dipm(*), medium_power, max_performance.
+# (*) Kernel &amp;gt;= 4.15 required, then recommended.
+# Multiple values separated with spaces are tried sequentially until success.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;因此我设置成了如下的值：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;SATA_LINKPWR_ON_BAT=&amp;quot;med_power_with_dipm max_performance&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/Btrfs&#34;&gt;Btrfs 维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Btrfs_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)&#34;&gt;Btrfs archwiki&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://btrfs.wiki.kernel.org/index.php/Conversion_from_Ext3&#34;&gt;Conversion from Ext3&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;iG 成功夺得 S8 世界总冠军，恭喜！iG 牛逼！&lt;/li&gt;
+&lt;li&gt;上个周末去了一趟红领巾公园，绕着转了三圈，完成了夜刷红领巾的任务
+&lt;ul&gt;
+&lt;li&gt;第一圈的时候有点蒙圈，因为各种找不到 Po，走了不少回头路&lt;/li&gt;
+&lt;li&gt;第二圈的时候感觉自己超强，身体和大脑都非常巅峰&lt;/li&gt;
+&lt;li&gt;第三圈的时候累成傻逼，唯一的想法就是这任务怎么还没做完 = =&lt;/li&gt;
+&lt;li&gt;后来去了朝阳大悦城，在一堆情侣中一个人吃了顿&lt;a href=&#34;http://www.dianping.com/shop/93355360&#34;&gt;越打星&lt;/a&gt;，我觉得海星&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;这周我的母上来了一趟北京
+&lt;ul&gt;
+&lt;li&gt;我带着我最好的两个朋友过去一起吃了顿&lt;a href=&#34;http://www.dianping.com/shop/10338660&#34;&gt;四季民福&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;期间多次提及找对象，买房，成家立业&lt;/li&gt;
+&lt;li&gt;哎，我觉得我的心理年龄才 16 岁，总觉得结婚买房什么的好遥远啊&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;最近比较迷茫，干什么都有点提不起兴趣，是时候去寻找更好玩的东西了？&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Systemd 的一些小技巧</title><link>https://xuanwo.io/2018/10/30/tips-of-systemd/</link><pubDate>Tue, 30 Oct 2018 12:20:00 +0000</pubDate><guid>https://xuanwo.io/2018/10/30/tips-of-systemd/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;我就是累死，写脚本写到吐，我也绝对不换 &lt;code&gt;底裤D&lt;/code&gt;！&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;底裤D&lt;/code&gt; 真香！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr /&gt;
+&lt;p&gt;现在 systemd 正在日益的变成一个 Linux 内核与发行版之间的一个兼容层，systemd 向下管理了诸多底层组件，向上提供了一致的接口和 API。而作为一个 Arch 用户，更是一边各个群中大喊 &lt;code&gt;systemd 真香&lt;/code&gt;，一边乖乖的把自己的底裤交给了 systemd，由此戏称为 &lt;code&gt;底裤D&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;今天主要就是分享一些自己平时用到的一些 systemd 的小技巧，备忘（&lt;/p&gt;
+&lt;h2 id=&#34;管理自己的-vpn&#34;&gt;管理自己的 VPN&lt;/h2&gt;
+&lt;p&gt;因为现在正在做的一个项目同时支持公有云和私有云的部署，因此就有很多的 VPN，难道要到每个 VPN 的目录下面手动执行 openvpn 么，答案当然是否定的，主要的弊端有以下几点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;最显然的一点：麻烦，每次都切换过去，然后手动执行 openvpn，想想就觉得特别蠢&lt;/li&gt;
+&lt;li&gt;VPN 数量多了之后不好维护
+&lt;ul&gt;
+&lt;li&gt;不知道某个 vpn 开没开&lt;/li&gt;
+&lt;li&gt;不知道某个 vpn 是不是成功的起来了&lt;/li&gt;
+&lt;li&gt;后台运行的情况下 log 查起来也很麻烦，特别是在某些 VPN 的路由有冲突的时候&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;让指定的 VPN 开机启动还需要单独写一个脚本&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当然可以写一个 VPN 管理工具啦，但是何必呢，systemd 已经都帮我们做好啦~&lt;/p&gt;
+&lt;p&gt;只要写一个 &lt;code&gt;service&lt;/code&gt; 文件，并放在 &lt;code&gt;/etc/systemd/system&lt;/code&gt; 下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Unit]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Description&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;OpenVPN tunnel for %I&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;After&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;syslog.target network-online.target&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Wants&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;network-online.target&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Documentation&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;man:openvpn(8)&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Documentation&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;https://community.openvpn.net/openvpn/wiki/Openvpn24ManPage&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Documentation&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;https://community.openvpn.net/openvpn/wiki/HOWTO&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Service]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;notify&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;PrivateTmp&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;WorkingDirectory&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/etc/openvpn/xuanwo/%i&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;ExecStart&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/usr/bin/openvpn --suppress-timestamps --nobind --config config.ovpn&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;CapabilityBoundingSet&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;CAP_IPC_LOCK CAP_NET_ADMIN CAP_NET_RAW CAP_SETGID CAP_SETUID CAP_SYS_CHROOT CAP_DAC_OVERRIDE&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;LimitNPROC&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;10&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DeviceAllow&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/dev/null rw&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DeviceAllow&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/dev/net/tun rw&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;ProtectSystem&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;KillMode&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;process&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Install]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;WantedBy&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;multi-user.target&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个文件基本上是 Copy 自 &lt;code&gt;openvpn-client@.service&lt;/code&gt;，根据我实际的情况做了一些改动：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-diff&#34; data-lang=&#34;diff&#34;&gt;&lt;span style=&#34;color:#a00000&#34;&gt;--- a/usr/lib/systemd/system/openvpn-client@.service
+&lt;/span&gt;&lt;span style=&#34;color:#a00000&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;+++ b/usr/lib/systemd/system/vpn@.service
+&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#800080;font-weight:bold&#34;&gt;@@ -9,14 +9,13 @@ Documentation=https://community.openvpn.net/openvpn/wiki/HOWTO
+&lt;/span&gt;&lt;span style=&#34;color:#800080;font-weight:bold&#34;&gt;&lt;/span&gt; [Service]
+Type=notify
+PrivateTmp=true
+&lt;span style=&#34;color:#a00000&#34;&gt;-WorkingDirectory=/etc/openvpn/client
+&lt;/span&gt;&lt;span style=&#34;color:#a00000&#34;&gt;-ExecStart=/usr/bin/openvpn --suppress-timestamps --nobind --config %i.conf
+&lt;/span&gt;&lt;span style=&#34;color:#a00000&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;+WorkingDirectory=/etc/openvpn/xuanwo/%i
+&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;+ExecStart=/usr/bin/openvpn --suppress-timestamps --nobind --config config.ovpn
+&lt;/span&gt;&lt;span style=&#34;color:#00a000&#34;&gt;&lt;/span&gt; CapabilityBoundingSet=CAP_IPC_LOCK CAP_NET_ADMIN CAP_NET_RAW CAP_SETGID CAP_SETUID CAP_SYS_CHROOT CAP_DAC_OVERRIDE
+LimitNPROC=10
+DeviceAllow=/dev/null rw
+DeviceAllow=/dev/net/tun rw
+ProtectSystem=true
+&lt;span style=&#34;color:#a00000&#34;&gt;-ProtectHome=true
+&lt;/span&gt;&lt;span style=&#34;color:#a00000&#34;&gt;&lt;/span&gt; KillMode=process
+[Install]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这是与源文件的 diff，我针对不同的地方稍微介绍一下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;%i&lt;/code&gt; 是 systemd 中的一个替换标记，表示 &lt;code&gt;已转义的实例名称。对于实例化的单元，就是 &amp;quot;@&amp;quot; 和后缀之间的部分。&lt;/code&gt;，比如 &lt;code&gt;systemctl start vpn@abc&lt;/code&gt;，这个 &lt;code&gt;%i&lt;/code&gt; 就会被替换成 &lt;code&gt;abc&lt;/code&gt;。更多选项可以在参考中查阅。&lt;/li&gt;
+&lt;li&gt;原来的配置文件都是指向一个独立的文件，但是我的 VPN 都会按照文件夹组织起来，所以我把工作目录修改为每个 vpn 独立的目录，并且读取目录下的配置文件 &lt;code&gt;config.ovpn&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ProtectHome=true&lt;/code&gt; 表示 &lt;code&gt;表示对该单元屏蔽 /home, /root, /run/user 目录(内容为空且不可写入)&lt;/code&gt;，此处我知道并且信任这个服务，而且我的 &lt;code&gt;/etc/openvpn/xuanwo&lt;/code&gt; 实际上是一个到 &lt;code&gt;/home/xuanwo/Google/VPN/&lt;/code&gt; 的软链接，我需要它访问 &lt;code&gt;/home&lt;/code&gt; ，因此我去掉了这个配置。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;除此以外，我还配置了两个 systemctl 相关的 alias：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;sys&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;sudo systemctl&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;sus&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;systemctl --user&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;最后的效果是这样的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;我的所有 VPN 配置都放在 &lt;code&gt;/home/xuanwo/Google/VPN&lt;/code&gt; 下并自动加密后同步到 Google Drive&lt;/li&gt;
+&lt;li&gt;每个 VPN 都是一个独立的目录，每个目录下都有这个 vpn 需要的所有文件
+&lt;ul&gt;
+&lt;li&gt;特别的，一些需要密码的 vpn 可以在 &lt;code&gt;config.ovpn&lt;/code&gt; 中配置 &lt;code&gt;auth-user-pass passwd&lt;/code&gt;，并在当前目录下创建一个 &lt;code&gt;passwd&lt;/code&gt; 文件，内容为两行，第一行是用户名，第二行是密码，这样就可以免交互启动 VPN 了。&lt;em&gt;当然了，这样做会导致 VPN 的安全性有所下降，请根据自己的实际情况配置。&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;所有的 vpn 都有了它对应的 service，因此可以做所有 service 支持的操作，比如 start 来启动，stop 来关闭，enable 来设置为开机启动&lt;/li&gt;
+&lt;li&gt;不过现在 systemd 好像没有什么办法能查看指定模板下所有 service 的状态，我一般是用 &lt;code&gt;sys status | grep vpn&lt;/code&gt; 这样来查看（又不是不能用.png）&lt;/li&gt;
+&lt;li&gt;当然也有了 &lt;code&gt;journald&lt;/code&gt; 的支持，我们可以用 &lt;code&gt;journalctl -u vpn@abc -r&lt;/code&gt; 来查看这个 vpn 近期的日志&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;限制某个-service-的内存用量&#34;&gt;限制某个 Service 的内存用量&lt;/h2&gt;
+&lt;p&gt;Systemd 底层使用了 &lt;code&gt;cgroup&lt;/code&gt; 来控制和管理所有的服务，因此我们同样获得了控制服务所使用的内存占用的能力。&lt;/p&gt;
+&lt;p&gt;只需要在 Serivce 的配置文件中增加一行即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;MemoryHigh&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;512M&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里有一些可以选择的配置项：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;MemoryLow&lt;/code&gt;: 尽可能保障该单元中的进程至少可以使用多少内存。如果该单元及其所有父单元的内存用量都低于最低保障线，那么只要还可以从其他未受保护的单元回收内存， 就不会回收该单元占用的内存。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MemoryHigh&lt;/code&gt;: 尽可能限制该单元中的进程最多可以使用多少内存。虽然这是一个允许被突破的柔性限制，但是突破限制后，进程的运行速度将会大打折扣， 并且系统将会尽可能尽快回收超出的内存。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MemoryMax&lt;/code&gt;: 绝对刚性的限制该单元中的进程最多可以使用多少内存。 这是一个不允许突破的刚性限制，触碰此限制会导致进程由于内存不足而被强制杀死。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;比如说我们可以这样来限制 &lt;code&gt;telegram&lt;/code&gt; 的内存使用量（telegram 真垃圾，一个内存泄漏问题至今修不好）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Unit]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Description&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;Telegram&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Service]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;simple&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;ExecStart&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;/usr/bin/telegram-desktop -- %u&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;KillMode&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;process&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Restart&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;on-abnormal&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;RestartSec&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;2&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;MemoryHigh&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;512M&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Install]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;WantedBy&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;multi-user.target&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我们可以覆盖应用自带的 desktop 文件，让它总是通过 systemd 来启动应用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-desktop&#34; data-lang=&#34;desktop&#34;&gt;[Desktop Entry]
+Version=1.0
+Name=Telegram Desktop
+Comment=Official desktop version of Telegram messaging app
+Exec=systemctl --user start telegram.service
+Icon=telegram
+Terminal=false
+StartupWMClass=TelegramDesktop
+Type=Application
+Categories=Network;InstantMessaging;Qt;
+MimeType=x-scheme-handler/tg;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;只要把这个文件命名为 &lt;code&gt;telegramdesktop.desktop&lt;/code&gt; 并放在 &lt;code&gt;~/.local/share/applications&lt;/code&gt; 目录下，我们的启动器就会总是使用这个文件，无缝集成~&lt;/p&gt;
+&lt;p&gt;看起来非常美好，然而并没有什么卵用，因为 systemd 这里的实现有问题，主要是以下的几个原因：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;cgroup v1 无法确保非特权进程安全的使用资源控制器，所以 systemd 用户实例无法使用 cgroup v1，也就是说 systemd 的用户实例无法通过配置 &lt;code&gt;MemoryHigh=512M&lt;/code&gt; 来实现资源控制&lt;/li&gt;
+&lt;li&gt;如果使用系统实例的话，会有如下两个问题
+&lt;ul&gt;
+&lt;li&gt;需要额外配置：&lt;code&gt;Environment=DISPLAY=:0&lt;/code&gt;，否则图形化界面不会正确展示&lt;/li&gt;
+&lt;li&gt;运行一个普通应用要输入 sudo 密码，感觉非常蛋疼&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;如果做一个勇士，通过内核参数设置 &lt;code&gt;systemd.unified_cgroup_hierarchy&lt;/code&gt; 来强制启用 cgroup v2，那么你会面对如下问题：
+&lt;ul&gt;
+&lt;li&gt;docker 啥的全崩了，因为 runc 还不支持 cgroups v2，参见&lt;a href=&#34;https://github.com/opencontainers/runc/issues/654&#34;&gt;这个 issue&lt;/a&gt; ，从社区反馈来看，感觉还遥遥无期&lt;/li&gt;
+&lt;li&gt;~systemd 的 cgroup v2 的资源控制实现有问题，并不能正常工作，在 &lt;a href=&#34;https://github.com/systemd/systemd/pull/10894&#34;&gt;PR&lt;/a&gt;中已经修复，但是暂时还没有 release~&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;虽说暂时还用不上，但是先记录一下，万一修好了呢~&lt;/p&gt;
+&lt;p&gt;已经修好啦，systemd v240 中已经 fix 了 cgroup v2 相关的问题，可以正确控制用户实例的资源占用量啦~&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;为指定的-service-设置环境变量&#34;&gt;为指定的 Service 设置环境变量&lt;/h2&gt;
+&lt;p&gt;这个就比较简单啦，总有一些应用自己不提供代理的配置，我们可以通过 systemd 来启动它并为它设置专门的环境变量：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;Environment&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;no_proxy=&amp;#34;localhost,127.0.0.1,localaddress,.localdomain.com&amp;#34; http_proxy=http://127.0.0.1:1090 https_proxy=http://127.0.0.1:1090&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;说的就是你，Skype！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;解决关机时等待-stop-job-的问题&#34;&gt;解决关机时等待 stop job 的问题&lt;/h2&gt;
+&lt;p&gt;关机的时候总会遇到这种问题：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;A stop job is running for Session xxx of user yyy&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这一般是因为 systemd 给某个服务发送 kill 之后，那个服务没有正确退出，因此 systemd 会等待一段时间，直到 timeout 之后，直接给它发送 &lt;code&gt;kill -9&lt;/code&gt; 来强制关闭。这个时候我们首先要查看 systemd 的相关 log 来定位问题到底出在哪里：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;journalctl -b -1 -r&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;-b&lt;/code&gt; 参数表示显示开机至今的日志，而后面跟上 &lt;code&gt;-1&lt;/code&gt; 表示偏差值为一，&lt;code&gt;-r&lt;/code&gt; 表示逆序显示，连在一起就是逆序展示上次开机的日志。&lt;/p&gt;
+&lt;p&gt;接下来我们需要耐心的查看一下日志，每个人启用的服务和系统的状况都不一样，要根据实际的情况来判断，比如我这边关闭失败的日志是这样的：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: Stopped Skype.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Failed with result &#39;timeout&#39;.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Main process exited, code=killed, status=9/KILL
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Killing process 22768 (D-Bus thread) with signal SIGKILL.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Killing process 22001 (TaskSchedulerFo) with signal SIGKILL.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: Killing process 1478 (skypeforlinux) with signal SIGKILL.
+Oct 29 23:14:57 thinkpad-x1-carbon systemd[547]: skype.service: State &#39;stop-sigterm&#39; timed out. Killing.
+Oct 29 23:13:26 thinkpad-x1-carbon systemd[547]: Stopping Skype...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我们可以看到在等待了 90s 之后，systemd 强行关闭了 skype。后来发现是我的 service 文件写的不太对，KillMode 被错误的设置成了 &lt;code&gt;control-group&lt;/code&gt;，将这个问题修复之后，这个问题搞定了。&lt;/p&gt;
+&lt;p&gt;有时候有些服务的实现上会有问题，导致没有正确关闭，我们在确定 &lt;code&gt;kill -9&lt;/code&gt; 没有问题的前提下，可以将它的 timeout 时间设置的更短一些，比如：&lt;code&gt;TimeoutStopSec=1s&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.jinbuguo.com/systemd/systemd.unit.html#%E6%9B%BF%E6%8D%A2%E6%A0%87%E8%AE%B0&#34;&gt;可以用在单元文件中的替换标记&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.jinbuguo.com/systemd/systemd.resource-control.html&#34;&gt;systemd.resource-control&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.jinbuguo.com/systemd/systemd.kill.html#KillMode=&#34;&gt;KillMode&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/archlinux/comments/4bawf7/a_stop_job_is_running_for_session_c2_of_user/d187683/&#34;&gt;timesyncd can&amp;rsquo;t stop&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;关于 S8 世界总决赛
+&lt;ul&gt;
+&lt;li&gt;气死了，RNG 八强被淘汰，丢人。&lt;/li&gt;
+&lt;li&gt;尽力了，EDG 八强被淘汰，明年再来。&lt;/li&gt;
+&lt;li&gt;太强了，iG 成功进入总决赛，加油！&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;关于游戏
+&lt;ul&gt;
+&lt;li&gt;荒野大镖客 2 已经出来了，然而我还在苦苦守候着我的皇牌空战 = =&lt;/li&gt;
+&lt;li&gt;传送门骑士真的是垃圾游戏，打个一级的小怪都会卡一下，千万不要玩&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;关于动漫
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/play/ss25510/&#34;&gt;刀剑神域 Alicization&lt;/a&gt; 画质炸裂，诚意满满，强烈推荐！&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/play/ss25733/&#34;&gt;青春猪头少年不会梦到兔女郎学姐&lt;/a&gt; 男主各种神级操作，一定要认真学习，我笔记已经记了好几本了。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/play/ss25696/&#34;&gt;弦音 -风舞高中弓道部-&lt;/a&gt; 我知道你们想说什么 - -，但是弓道真的好帅啊，运动番，运动番&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;关于阅读
+&lt;ul&gt;
+&lt;li&gt;金庸先生走了哎，感觉 20 世纪真的逐步远去，&lt;strong&gt;他&lt;/strong&gt;可能也快要走了&lt;/li&gt;
+&lt;li&gt;重读&lt;a href=&#34;https://book.douban.com/subject/20499536/&#34;&gt;时代的稻草人&lt;/a&gt;，大学毕业一年多，我的精英意识已经完全被现实消磨光了，高中的时候满脑子社会变革，自我批判，要做时代的守望者，现在想起来居然觉得有些羞耻&lt;/li&gt;
+&lt;li&gt;我们 Team 买了一本&lt;a href=&#34;https://www.amazon.cn/dp/B07GJ6H3X3&#34;&gt;万物皆数&lt;/a&gt;，挺有意思的，社会精英当不了，搞搞纯粹理性的东西是不是会更快乐一些&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>恢复博客遗失的评论</title><link>https://xuanwo.io/2018/10/15/revocer-lost-blog-comments/</link><pubDate>Mon, 15 Oct 2018 13:35:00 +0000</pubDate><guid>https://xuanwo.io/2018/10/15/revocer-lost-blog-comments/</guid><description>&lt;p&gt;最近发现自己博客的评论少了不少，于是找了一下原因并使用工具做了修复，这篇文章主要就是讲 Hugo 如何正确的配置 Disqus 以及如何使用 Disqus 提供的迁移工具来修复已经出问题的数据。&lt;/p&gt;
+&lt;h2 id=&#34;hugo-sucks&#34;&gt;Hugo sucks&lt;/h2&gt;
+&lt;p&gt;查看自己博客的 Discussions 的时候会看到很多奇奇怪怪的链接：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;https://translate.googleusercontent.com/translate_c?act=url&amp;amp;depth=1&amp;amp;ie=UTF8&amp;amp;prev=_t&amp;amp;sl=auto&amp;amp;sp=nmt4&amp;amp;tl=en&amp;amp;u=https://xuanwo.io/2014/07/16/poj-1011-sticks/
+https://translate.googleusercontent.com/translate_c?depth=1&amp;amp;sl=zh-CN&amp;amp;sp=nmt4&amp;amp;tl=en&amp;amp;u=https://xuanwo.io/2015/02/07/generate-a-ssh-key/&amp;amp;xid=17259,15700022,15700124,15700149,15700168,15700186,15700190,15700201,15700208
+https://webcache.googleusercontent.com/search?q=cache:RMRC2X9nD0EJ:https://xuanwo.io/2017/11/26/enpass-intro/+&amp;amp;cd=1&amp;amp;ct=clnk&amp;amp;gl=jp&amp;amp;lr=lang_zh-CN%7Clang_zh-TW
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;当然啦，自己的博客有外国友人开着 Google 翻译看自然会觉得开心，但是为啥这些奇怪的地址会被作为这篇文章评论的 URL 存入 Disqus 呢？&lt;/p&gt;
+&lt;p&gt;首先看了下网页的源代码中与 disqus 有关的部分：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; disqus_config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; () {
+};
+(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; ([&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;localhost&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;127.0.0.1&amp;#34;&lt;/span&gt;].indexOf(&lt;span style=&#34;color:#007020&#34;&gt;window&lt;/span&gt;.location.hostname) &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;) {
+&lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;disqus_thread&amp;#39;&lt;/span&gt;).innerHTML &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Disqus comments not available by default when the website is previewed locally.&amp;#39;&lt;/span&gt;;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; d &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;, s &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; d.createElement(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;script&amp;#39;&lt;/span&gt;); s.&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;async&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;;
+s.src &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;//&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;only0god&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;.disqus.com/embed.js&amp;#39;&lt;/span&gt;;
+s.setAttribute(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;data-timestamp&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Date&lt;/span&gt;());
+(d.head &lt;span style=&#34;color:#666&#34;&gt;||&lt;/span&gt; d.body).appendChild(s);
+})();
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;可以看到 &lt;code&gt;disqus_config&lt;/code&gt; 是空的，此时首先会感到有些不对劲，接下来看一下 disqus 文档对这个 config 是如何处理的：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;When url or identifier are not defined, the Disqus embed will use the window URL as the main identifier when creating a thread. In other words, each unique URL Disqus loads on will result in a new unique thread. This works well for some sites, however, this method of creating threads can lead to duplicate “split threads” for the same page of content, especially when your site accepts many different URLs for the same page of content.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;所以如果 &lt;code&gt;disqus_config&lt;/code&gt; 是空的，那 disqus 就会取当前的 window URL 创建一个条目。换言之，如果用户通过多个不同的 URL 访问到你这篇博客，那么你的博客就会有多个不一样的评论条目。&lt;/p&gt;
+&lt;p&gt;现在导致 disqus 出现重复的原因知道了，那为什么会这样呢？&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;var disqus_config = function () {
+{{with .GetParam &amp;#34;disqus_identifier&amp;#34; }}this.page.identifier = &amp;#39;{{ . }}&amp;#39;;{{end}}
+{{with .GetParam &amp;#34;disqus_title&amp;#34; }}this.page.title = &amp;#39;{{ . }}&amp;#39;;{{end}}
+{{with .GetParam &amp;#34;disqus_url&amp;#34; }}this.page.url = &amp;#39;{{ . | html }}&amp;#39;;{{end}}
+};&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这是 Hugo 内嵌的 disqus 模板，看得出来，Hugo 为了追求灵活性（总有人想用奇奇怪怪的 URL 作为 disqus 的 url），他选择读取当前页面的参数，而不是直接写死了一个规定的值。这就很坑了，我选择自己改一下这个模板：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;var disqus_config = function () {
+this.page.identifier = &amp;#39;{{ .URL }}&amp;#39;;
+this.page.title = &amp;#39;{{ .Title }}&amp;#39;;
+this.page.url = &amp;#39;{{ .Permalink }}&amp;#39;;
+};&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;URL 是当前页面的相对路径&lt;/li&gt;
+&lt;li&gt;Title 是当前页面的标题&lt;/li&gt;
+&lt;li&gt;Permalink 是当前页面的完整 URL&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;比如说：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; disqus_config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;this&lt;/span&gt;.page.identifier &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;\/2018\/10\/03\/ingress-beijing-central-axis\/&amp;#39;&lt;/span&gt;;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;this&lt;/span&gt;.page.title &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Ingress 北京中轴线噩梦难度一日速刷攻略&amp;#39;&lt;/span&gt;;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;this&lt;/span&gt;.page.url &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https:\/\/xuanwo.io\/2018\/10\/03\/ingress-beijing-central-axis\/&amp;#39;&lt;/span&gt;;
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;此处的 &lt;code&gt;\&lt;/code&gt; 是 JavaScript 的转义，实际的内容中并不包括 &lt;code&gt;\&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;disqus-的-url-mapper&#34;&gt;Disqus 的 URL Mapper&lt;/h2&gt;
+&lt;p&gt;现在已经修复了问题的源头，那现在这个烂摊子如何收拾呢？好在我们有 Disqus 的 URL Mapper，这个工具可以批量的将一组 URL 映射到另外一组 URL 上：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将 A 映射为 B，那么 A 的评论就会迁移到 B 上&lt;/li&gt;
+&lt;li&gt;将 A，B 都映射为 B，那么相当于把 A 和 B 两个页面的评论合并到了 B&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;使用起来也非常简单，访问自己网站的控制面板 &lt;code&gt;TOOLS -&amp;gt; Migration Tools -&amp;gt; URL Mapper&lt;/code&gt;，首先下载一个 csv，里面会包括网站的所有评论链接，然后按照如下规则修改即可：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果想将 A 修改为 B，那么只需要增加一列，写上 B 即可&lt;/li&gt;
+&lt;li&gt;如果想跳过 A，那么直接将 A 这一行删除即可&lt;/li&gt;
+&lt;li&gt;如果 B 为空的话，我也不知道会发生什么，没试过（&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;我是直接将 CSV 上传到了 Google Sheet，然后用它的函数一阵操作搞定了，简单分享一哈：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;LOWER(REPLACE(AXXX,1,4,&amp;quot;https&amp;quot;))&lt;/code&gt; 可以将 protocol 修改为 https 并全部转换为小写&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;REGEXEXTRACT(AXXX, &amp;quot;https://xuanwo.io[\/\w-]*/&amp;quot;)&lt;/code&gt; 可以从 URL 的 Query 中提取出链接&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下面将修改好的 CSV 导出并上传，等到 disqus 异步处理即可。&lt;/p&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://help.disqus.com/troubleshooting/use-configuration-variables-to-avoid-split-threads-and-missing-comments&#34;&gt;Use Configuration Variables to Avoid Split Threads and Missing Comments&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/Xuanwo/xuanwo.github.io/commit/bfb38029cabe8f3a5b1c33f808644e89cb5111b9&#34;&gt;themes: Fix disqus identifier not set correctly&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;RNG 差点在小组赛翻车，最后连续干掉三星和状态火热的 C9，成功以小组第一出线（真的不容易，最后一波团真的是太刺激了），希望 EDG 和 iG 也能顺利出线~&lt;/li&gt;
+&lt;li&gt;不知道为啥突然开始了规律作息，每天 7:30 起床，9 点到公司，感觉很爽，仿佛自己的人生突然多出来一个上午（&lt;/li&gt;
+&lt;li&gt;最近成功加入了 Archlinuxcn 的打包组，并且把我常用的一些包加进了 cn 源，比如 &lt;a href=&#34;https://github.com/archlinuxcn/repo/tree/master/coredns&#34;&gt;coredns&lt;/a&gt;，我这个包可比 AUR 上的那个用心多了，欢迎大家使用并反馈意见~&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>qscamel —— 数据迁移工具</title><link>https://xuanwo.io/2018/09/05/qscamel-intro/</link><pubDate>Wed, 05 Sep 2018 09:00:00 +0000</pubDate><guid>https://xuanwo.io/2018/09/05/qscamel-intro/</guid><description>&lt;p&gt;qscamel 是一个用于在不同的端点 (Endpoint) 中高效迁移数据的工具。&lt;/p&gt;
+&lt;p&gt;作为一个面向用户的数据迁移工具，它必须要满足如下要求：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不丢数据：这是一个数据迁移工具最基本的要求。不能多，不能少，不能错，要支持校验和修复。&lt;/li&gt;
+&lt;li&gt;好用：作为一个给用户使用的工具，它需要足够好用。有完善的日志，不会无故退出，网络波动时能够自动重试，部署 &amp;amp; 配置容易，能够支持断点续传，无需人工干预。&lt;/li&gt;
+&lt;li&gt;高效：数据迁移通常都会有大量的文件传输，工具必须能够高效的使用服务器资源和带宽，节省用户执行迁移所需要的时间。&lt;/li&gt;
+&lt;li&gt;扩展性强：数据迁移所需要的场景千奇百怪，工具必须能够扩展并支持大多数用户的场景，减少后续开发和维护的成本。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;qscamel 正是在这些要求下诞生的产物，它或许还不是那么完美，但是已经可用。目前已经圆满完成了很多数据迁移任务，任务涉及文件数量上亿，文件大小达数百 TB 。这篇文章将会介绍 qscamel 设计，实现和开发过程中的一些小故事，希望能够简单的告诉大家在 QingCloud 我们是如何做产品的，以及为我们的 HR 小姐姐提前打一个招聘的广告:)&lt;/p&gt;
+&lt;h2 id=&#34;设计&#34;&gt;设计&lt;/h2&gt;
+&lt;p&gt;qscamel 只有一个功能，但是为了把这个功能做好，它需要在各个层面上都有一个比较良好的设计。&lt;/p&gt;
+&lt;h3 id=&#34;用户交互&#34;&gt;用户交互&lt;/h3&gt;
+&lt;p&gt;一个好的命令行工具应该如何跟用户交互呢？嗯，抛开使用场景谈好坏都是耍流氓，那我重新组织一下语言：一个给&lt;strong&gt;终端用户&lt;/strong&gt;使用的&lt;strong&gt;数据迁移&lt;/strong&gt;工具应该如何跟用户交互？这里有两个关键点：第一，终端用户意味着使用者不是像我这样的高级用户，他们大多数只有一点甚至是没有使用命令行程序的经验，他们能读一些中文的文档，他们无法自行处理或者理解程序返回的错误，他们记不住程序的参数；第二，数据迁移意味着这个程序可能会运行很长的时间，用户不会一直在边上守着，同时这个程序用户可能不会频繁使用。分析到这里，我们已经能够大概的想象到这个工具应该是什么样子了：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;命令要少，参数要少&lt;/li&gt;
+&lt;li&gt;学习成本要低，迁移成本要低（换个任务类型不需要重新学习配置方法）&lt;/li&gt;
+&lt;li&gt;任务启动后无需用户介入&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;除了需要考虑用户体验之外，我们还需要考虑开发体验。一个数据迁移工具，必然需要能够处理多种不同的数据来源和迁移目标，以及他们各自不一样的复杂参数。如果按照传统开发命令行工具的习惯，每个不同的端点都使用参数来进行配置，那光是参数解析和处理就要写很久。&lt;/p&gt;
+&lt;p&gt;因此，qscamel 最终的交互设计稿是这样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ qscamel run task-name &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; -t /path/to/task/file &lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;
+$ qscamel delete task-name
+$ qscamel status
+$ qscamel clean
+$ qscamel version&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;与之相对比的是 v1 版本的 qscamel：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ qscamel -t s3 -s s3-bucket-name -z us-east-1 -a &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;S3ACCESSKEYID&amp;#34;&lt;/span&gt; -S &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;S3SECRETACCESSKEY&amp;#34;&lt;/span&gt; -b qingstor-bucket-name -d &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;migrate 05&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;同时，我们将复杂的任务配置拆分为三块：qscamel 本身的配置，任务的配置，端点的配置，并将他们分成两个文件：qscamel 本身的配置独立的存储在一个全局的配置文件中，任务和端点的配置放在一个我们定义好的任务配置当中。&lt;/p&gt;
+&lt;p&gt;全局的配置文件形如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;concurrency:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;log_level:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;info&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;pid_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.qscamel/qscamel.pid&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;log_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.qscamel/qscamel.log&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;database_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.qscamel/db&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;而任务的配置文件格式同样是精心设计过的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;copy&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;source:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;fs&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/path/to/source&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;destination:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;qingstor&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/path/to/destination&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;options:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;bucket_name:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;example_bucket&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;access_key_id:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;example_access_key_id&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;secret_access_key:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;example_secret_access_key&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;ignore_existing:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;last_modified&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;每个任务会由 &lt;code&gt;type&lt;/code&gt;，&lt;code&gt;source&lt;/code&gt;，&lt;code&gt;destination&lt;/code&gt; 和任务相关的配置组成。其中 &lt;code&gt;source&lt;/code&gt; 和 &lt;code&gt;destination&lt;/code&gt; 配置格式一样，都由 &lt;code&gt;type&lt;/code&gt;，&lt;code&gt;path&lt;/code&gt; 和 &lt;code&gt;options&lt;/code&gt; 组成。藉由这样的设计，我们希望能够在易用性和扩展性上取得一个统一。用户可以很快的知道自己需要配置的东西，并且能够忽略无关参数的干扰，比如说我要配置从 fs 迁移到 qingstor，我就不需要了解 s3 的配置参数。还有一个好处是，用户只要写一次配置文件，他就能够将其应用到别的场景：比如说进行 &lt;code&gt;delete&lt;/code&gt; 而不是 &lt;code&gt;copy&lt;/code&gt;，比如说从 &lt;code&gt;s3&lt;/code&gt; 迁移到 &lt;code&gt;qingstor&lt;/code&gt; 而不是从 &lt;code&gt;fs&lt;/code&gt;。使用一个格式规范的配置文件对于开发来说更是意义重大，开发者不再需要去维护一份晦涩难懂的参数列表，能够用更加一致的方法来处理所有的端点。&lt;/p&gt;
+&lt;p&gt;下面我们同样用 v1 版本的 qscamel 来做对比：&lt;/p&gt;
+&lt;p&gt;他首先有一个参数列表&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;| short | full | type | required |
+|-------|------------------|--------|----------|
+| -z | --src-zone | string | N |
+| -a | --src-access-key | string | N |
+| -S | --src-secret-key | string | N |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后根据不同的 Source 还需要选择不同参数的组合：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;| platform | require --src-zone | require --src-access-key | require --src-secret-key |
+|----------|--------------------|--------------------------|--------------------------|
+| s3 | Y | Y | Y |
+| qiniu | N | Y | Y |
+| aliyun | Y | Y | Y |
+| upyun | Y | Y | Y |
+| qingstor | Y | Y | Y |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这还没有考虑到不同 Source 各自不同的参数配置呐 (๑•̀ㅂ•́) ✧&lt;/p&gt;
+&lt;h3 id=&#34;整体流程&#34;&gt;整体流程&lt;/h3&gt;
+&lt;p&gt;上面我们说到 qscamel 需要做到&lt;code&gt;任务启动后无需用户介入&lt;/code&gt;，接下来就聊一聊 qscamel 整体的任务流程是怎么样的。&lt;/p&gt;
+&lt;p&gt;启动任务，检查任务文件的内容是否正确，初始化 Source 和 Destination 之后，qscamel 会不断的进行如下循环：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;启动一个 listWorker 不断的从 Source 中遍历 Object
+&lt;ul&gt;
+&lt;li&gt;如果遍历失败将会自动重试&lt;/li&gt;
+&lt;li&gt;如果遍历结束将会关闭任务队列，不再追加新的任务&lt;/li&gt;
+&lt;li&gt;如果获取到新的 Object，则首先会将其保存到数据库，然后再添加到任务队列&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;启动指定数量的 migrateWorker 不断的从任务队列中获取任务
+&lt;ul&gt;
+&lt;li&gt;如果任务执行失败则会重试三次，每次重试的间隔会变长，若还是失败则会跳过&lt;/li&gt;
+&lt;li&gt;如果任务执行成功则会从数据库中删除该任务&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;等到任务队列中所有的任务均已执行完毕，qscamel 将会遍历数据库
+&lt;ul&gt;
+&lt;li&gt;如果数据库中没有未执行完毕的任务，则该迁移任务已成功，退出&lt;/li&gt;
+&lt;li&gt;如果数据库中还有未执行完毕的任务，则重新开始上述流程&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;不难发现，如果因为某些原因，某个 Object 一直在重试，那么 qscamel 将永远不会退出，并一直在输出报错的日志。这个在设计中是作为一个产品特性考虑的，但是根据实际的用户反馈，他们更希望程序能够将这些一直失败的任务在最后的时候统一输出，因此之后重新考虑一下，看如何交互更好。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;分段上传&#34;&gt;分段上传&lt;/h3&gt;
+&lt;p&gt;分段上传并不是什么新奇玩意儿，但是如果要做一个不依赖服务器状态，支持并发上传多个块，支持从断点恢复而且还好看的分段上传，却实打实的花了我整整一个下午的时间。不依赖服务器状态是说我们需要在本地存储分块上传的完成情况，而不是通过调用服务器端的 API 来获取，这样可以减少很多轮查询的开销；支持并发上传多个块就是字面意思，我们需要在分块的级别上做到并发，而不是单线程跑；支持从断点恢复是说已经上传的块需要跳过，只上传还没有完成的块。之前 qscamel 使用的是 qingstor-sdk-go 提供的一个比较简陋的 upload client 封装，只是简单的顺序调用接口，没有异常的处理。直到有一天，一个用户说我要上传一个 11 TB 的单文件到对象存储 (狗头.png)&lt;/p&gt;
+&lt;p&gt;为了将分块上传的逻辑与我们刚才的逻辑可以优雅的结合起来，原来的 Object 和 Job （也就是一个 Folder）被组合并拆分成了三种 Object：DirectoryObject，SingleObject，PartialObject。顾名思义，DirectoryObject 就等同于原来的 Job，SingleObject 表示一个完整的 Object，而 PartialObject 除了有跟 SingleObject 一样的属性之外，它还会携带着与分段上传有关的信息，比如 part number，upload id 等。这样就使得每一个 PartialObject 都可以独立的进行上传，不需要依赖外部的信息。&lt;/p&gt;
+&lt;p&gt;分段上传在实现的过程中最大限度的复用了原有的逻辑，只不过在每一个 Object 开始上传时会做相关的检查：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果是 PartialObject，则会使用 Object 中的信息进行分段上传。&lt;/li&gt;
+&lt;li&gt;如果是 SingleObject，则会根据 Endpoint 是否支持分段和这个 Object 的大小来判断是否需要拆分成 PartialObject：
+&lt;ul&gt;
+&lt;li&gt;如果 Endpoint 不支持分段，或者 Object 的大小不够大，则会直接上传。&lt;/li&gt;
+&lt;li&gt;反之，则会使用 Endpoint 的初始化分段接口进行分片，并将所有的 PartialObject 创建好。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;实现&#34;&gt;实现&lt;/h2&gt;
+&lt;p&gt;刚才我们讲了 qscamel 几处关键部分的设计，下面我们聊一聊 qscamel 的实现。qscamel 在实现过程中保持着对开发者友好的风格，没有使用什么黑科技，也没有使用什么奇怪的 Hack，简单直接，使用的也都是最常见的模型。&lt;/p&gt;
+&lt;h3 id=&#34;生产者-消费者&#34;&gt;生产者-消费者&lt;/h3&gt;
+&lt;p&gt;在绝大部分场景下，列取操作都要比上传和下载操作来得快，因此使用单生产者多消费者的模型更加合适，同时逻辑也会变得更加清晰。实现上我们使用 &lt;code&gt;sync.WaitGroup&lt;/code&gt; 做了一个简单的 &lt;code&gt;goroutine&lt;/code&gt; 池，在初始化的时候会一次性创建完毕，并始终监听 Object Channel，在 channel 关闭后自动退出。&lt;/p&gt;
+&lt;h3 id=&#34;endpoint-中的-interface&#34;&gt;Endpoint 中的 interface&lt;/h3&gt;
+&lt;p&gt;qscamel 要求支持的 endpoint 类型很多，从本地文件系统到各种对象存储，还包括本地文件的列表和 URL 的列表。想要快速开发，便于维护就要求将各个 endpoint 中的公共部分尽可能抽象出来，让 endpoint 实现者只需要关注自己逻辑相关的部分。为了做到这一点，qscamel 将 endpoint 中需要用到的所有方法拆分成了三个 interface，endpoint 实现者可以自行实现自己想要支持的功能。&lt;/p&gt;
+&lt;p&gt;其中，所有 endpoint 都必须要实现的 base interface 中包括如下函数：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Base is the interface that both Source and Destination should implement.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Base &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Name will return the endpoint&amp;#39;s name.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Name&lt;/span&gt;(ctx context.Context) (name &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Stat will get the metadata.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Stat&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (o &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;model.SingleObject, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Read will return a reader.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Read&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (r io.Reader, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// ReadRange will read content with range [offset, offset+size)
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;ReadRange&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, offset, size &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;) (r io.Reader, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果想要作为 Source，则还需要 Source interface：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Source is the interface for source endpoint.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Source &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+Base
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// List will list from the job.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;List&lt;/span&gt;(ctx context.Context, j &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;model.DirectoryObject, fn &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(model.Object)) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Reach will return an accessible url.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Reach&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (url &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Reachable will return whether current endpoint supports reach.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Reachable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中 List 会用来支持列取，而 Reach 则是可选的，这主要是用来支持对象存储的 Object Fetch 功能。&lt;/p&gt;
+&lt;p&gt;如果想要作为一个 Task 的 Destination，则需要实现 Destination interface：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Destination is the interface for destination endpoint.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Destination &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+Base
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Delete will use endpoint to delete the path.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Delete&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Deletable will return whether current endpoint supports delete.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Deletable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Fetch will use endpoint to fetch the url.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Fetch&lt;/span&gt;(ctx context.Context, path, url &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Fetchable will return whether current endpoint supports fetch.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Fetchable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// InitPart will inti a multipart upload.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;InitPart&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, size &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;) (uploadID &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, partSize &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;, partNumbers &lt;span style=&#34;color:#902000&#34;&gt;int&lt;/span&gt;, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UploadPart will upload a part.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;UploadPart&lt;/span&gt;(ctx context.Context, o &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;model.PartialObject, r io.Reader) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Partable will return whether current endpoint supports multipart upload.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Partable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Write will read data from the reader and write to endpoint.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Write&lt;/span&gt;(ctx context.Context, path &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, size &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;, r io.Reader) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Writable will return whether current endpoint supports write.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Writable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在每个 interface 中，开发者对自己不想或者暂时不想实现的功能都可以在对应的 &lt;code&gt;Xxxable()&lt;/code&gt; 函数中返回 &lt;code&gt;false&lt;/code&gt; 即可，qscamel 在初始化任务时会进行对应功能的检查，并在任务要求不满足时报错。&lt;/p&gt;
+&lt;p&gt;这样，我们 qscamel 就能够方便快捷的扩展新 endpoint 了~&lt;/p&gt;
+&lt;h3 id=&#34;leveldb&#34;&gt;LevelDB&lt;/h3&gt;
+&lt;p&gt;qscamel 是我们 QingStor Team 推出的第一款有状态的命令行工具，之前我们做 &lt;code&gt;qingcloud-cli&lt;/code&gt; 和 &lt;code&gt;qsctl&lt;/code&gt; 都只是直接调用对象存储的 API，不会在本地存储持久化的状态。但是 qscamel 作为一款数据迁移工具，它必须在本地维护大量信息以支持任务的断点续传。&lt;/p&gt;
+&lt;p&gt;qscamel 在选型过程中考察了很多方案：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;首先排除掉了所有 Server - Client 模式的数据库，迁移工具要求部署简单，轻量级，如果迁移数据还需要部署一个 MySQL 或者 Redis，那就太滑稽了，因此可选择的一定是嵌入式 DB。&lt;/li&gt;
+&lt;li&gt;然后因为开发者（没错，就是我）的个人偏好，排除掉了所有必须使用 CGO 的嵌入式 DB。RocksDB 非常酷炫，但是因为找不到一个足够好的纯 go 实现，所以被否决了。&lt;/li&gt;
+&lt;li&gt;再次因为 qscamel 规划当中会在 DB 中存储的数据类型不会超过 3 种，同时也不会存在需要 Join 的情况，所以排除掉了所有嵌入式 SQL 数据库。&lt;/li&gt;
+&lt;li&gt;最后在社区那么多嵌入式 K-V 数据库中，我们还需要排除掉所有不靠谱的，没有生产环境实际验证过的，维护状态不佳的，以及看着就不大行的项目。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在筛过好几轮之后，摆在我们面前的可选方案有三个：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/etcd-io/bbolt&#34;&gt;BoltDB&lt;/a&gt; &lt;em&gt;原作者已经不维护了，现在由 coreos team 的人 Fork 并维护了一份，最近转移给了 etcd-io&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/dgraph-io/badger&#34;&gt;Badger&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/syndtr/goleveldb&#34;&gt;LevelDB&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;BoltDB 使用了 B+tree，LevelDB 使用了 LSM tree，而 Badger 则是借鉴了论文 &lt;a href=&#34;https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf&#34;&gt;WiscKey&lt;/a&gt;，论文我没有细看，但大致的思想是将 LSM trees 中的 Key 和 Value 分开，将 Key 存储在 LSM tree 中，而 Value 则存在 value logs 里面。相对的来说，BoltDB 更加适合于读多写少的场景，而基于 LSM tree 的 DB 写入会更有优势。此外，LevelDB 不提供事务，它提供批量写入和读取时的 Snapshot，而 BoltDB 和 Badger 提供了完整的 ACID 事务，其中 BoltDB 不支持并发写事务，而 Badger 则支持。再三权衡之后，我首先放弃了 Badger。虽然特性很多，功能很强，Benchmark 也非常好看，但是它的特性我们基本上都用不到，加上我个人对这个项目的代码还不是很熟悉，可靠性上还有着疑虑，所以放弃了。&lt;/p&gt;
+&lt;p&gt;本着够用就行的想法，我一开始选择了被广泛运用的 BoltDB 。但是事实证明这个选择是错误的，在 qscamel 实际的场景下，剧烈的写事务竞争导致性能很差，并且发现 qscamel 对事务其实并没有什么需求，因此切换成了 LevelDB。&lt;/p&gt;
+&lt;h2 id=&#34;故事&#34;&gt;故事&lt;/h2&gt;
+&lt;h3 id=&#34;遇事不决-黄金切割&#34;&gt;遇事不决，黄金切割&lt;/h3&gt;
+&lt;p&gt;在 qscamel 探索的过程中，有过需要 magic number 的阶段，处于个人偏好，我无一例外的全部选择了黄金切割比。&lt;/p&gt;
+&lt;p&gt;案例一：生产者与消费者比例&lt;/p&gt;
+&lt;p&gt;之前 qscamel 是采用的多生产者，多消费者的方案，每个 worker 从一个统一的任务队列中取任务，又是生产者，又是消费者。看起来很美好，但是运行到某个时点，qscamel 总是会停止响应。当然了，现在回头来看可以知道这个 BUG 是由多种原因导致的。但是当时的一个分析是 Worker 的调度有问题，有可能所有的 Worker 都在生产，没有消费，导致整个任务队列阻塞了。作为一个解决方案，需要人为的固定生产者和消费者的比例，纠结了一会儿，选择了 0.618。&lt;/p&gt;
+&lt;p&gt;事后的测试中发现这个 Fix 完全没有什么用，于是删掉了（&lt;/p&gt;
+&lt;p&gt;案例二：乱搞的文件一致性检验&lt;/p&gt;
+&lt;p&gt;为了加快一致性检验的速度，qscamel 曾经自己乱搞过一个&lt;a href=&#34;https://github.com/yunify/qscamel/commit/5a29fc9346b56b6ab5c6377f58d49675ace49838#diff-77889babdacd806bb9d5b8299a56e9a9&#34;&gt;一致性的算法&lt;/a&gt;。想法非常简单，从文件的头尾和 0.618 处，分别取 3 MB，总计 9 MB，然后计算它们的 MD5 。很快这个想法被毙了，用户开 MD5 的检查就是为了保证自己文件上传没错，搞一个所谓 quickMD5 完全没有实际的意义，要是万一有一个文件 MD5 不对，结果没有检查出来，那就大发了。&lt;/p&gt;
+&lt;p&gt;总的来说，所有引入黄金切割的尝试全都失败了，但是我还在期待着下一个机会（&lt;/p&gt;
+&lt;h3 id=&#34;buffer-的-bytes&#34;&gt;Buffer 的 Bytes&lt;/h3&gt;
+&lt;p&gt;qscamel 很多地方都使用了我朋友 &lt;a href=&#34;https://pjw.io/&#34;&gt;@Aspire&lt;/a&gt; 写的&lt;a href=&#34;https://github.com/pengsrc/go-shared&#34;&gt;库&lt;/a&gt;，但是有一天被坑了一手，因为我发现它的 &lt;code&gt;buffer.Bytes()&lt;/code&gt; 不是线程安全的。因为它是这样实现的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Bytes returns a mutable reference to the underlying byte slice.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (b &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;BytesBuffer) &lt;span style=&#34;color:#06287e&#34;&gt;Bytes&lt;/span&gt;() []&lt;span style=&#34;color:#902000&#34;&gt;byte&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; b.bs
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;他将底层的 byte slice 直接返回，那就有可能在使用到一半的时候这个 buffer 被释放并写入了新的值，从而导致外部的调用者看到了一个错误的值。我提了一个 &lt;a href=&#34;https://github.com/pengsrc/go-shared/pull/3&#34;&gt;PR&lt;/a&gt;，跟 @Aspire 讨论了一下这个问题。虽说当初他实现的时候没有怎么考虑这个问题，但是想了一下他认为这是设计预期的，主要的点有两个：第一，设计这个 buffer 库就是为了复用内存，减少频繁创建 bytes slice 带来的开销，降低 gc 的压力，如果这个地方按照我的 PR 那样返回了一个新的 bytes slice 的话，那这个库就跟它的设计目标相违背了；第二，在 Golang 中，如果没有明确声明并发访问某事物是安全的，那它就不是安全的，比如 Golang 自己 &lt;a href=&#34;https://golang.org/src/bytes/buffer.go&#34;&gt;Buffer 实现&lt;/a&gt;就不是并发安全的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Bytes returns a slice of length b.Len() holding the unread portion of the buffer.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// The slice is valid for use only until the next buffer modification (that is,
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// only until the next call to a method like Read, Write, Reset, or Truncate).
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// The slice aliases the buffer content at least until the next buffer modification,
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// so immediate changes to the slice will affect the result of future reads.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (b &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;Buffer) &lt;span style=&#34;color:#06287e&#34;&gt;Bytes&lt;/span&gt;() []&lt;span style=&#34;color:#902000&#34;&gt;byte&lt;/span&gt; { &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; b.buf[b.off:] }&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;最后的决定是增加一个类似于 &lt;code&gt;SafeBytes()&lt;/code&gt; 的函数，不过因为懒，所以一直没有做，以后再补上吧~&lt;/p&gt;
+&lt;h3 id=&#34;小人物的重构-从早到晚&#34;&gt;小人物的重构，从早到晚&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;语出猫腻《间客》许乐在老虎死后跟随舰队穿越虫洞，手刃卡顿郡王前：“大人物报仇，隐忍十年也不算晚，小人物的复仇，却是从早到晚。”&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;其实 qscamel 的分段上传逻辑写了两遍，最开始是在原来的基础上缝缝补补，为 Object 加了很多新的属性，然后加了很多复杂判断，基本可用之后交付给了售前去做测试。晚上下班回家之后实在不满意那个版本，于是采用新的，也就是现在这样的逻辑重新实现了一遍。性能上有轻微提升，逻辑上变得更加顺畅，更主要的是我更加开心了 ʅ(‾◡◝)ʃ&lt;/p&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;这文章写了好几个月了，都不知道动态该写啥了。。&lt;/li&gt;
+&lt;li&gt;LOL 洲际赛夺冠了，亚运会也夺冠了，又又又是最有希望的一年，希望今年能拿到 S 系列赛的冠军&lt;/li&gt;
+&lt;li&gt;最近在重温《希灵帝国》，还买了微信读书新出的无限卡，每个月可以免费解锁 300 个章节，按照每个章节 0.3 元的均价，每月 19 块还是比较划算的（会计小能手&lt;/li&gt;
+&lt;li&gt;PS 会免了命运 2，跟小伙伴一起突突突了两天，导致接下来的一个星期睡觉都满脑子枪声&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;广告&#34;&gt;广告&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;广告位招租，8 点 17 分发&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;想要加入我们一起来做靠谱的产品吗，快访问 &lt;a href=&#34;https://www.qingcloud.com/jobs&#34;&gt;https://www.qingcloud.com/jobs&lt;/a&gt; 寻找自己中意的岗位并且给我发简历吧~&lt;/p&gt;</description></item><item><title>Tiresias v0.3</title><link>https://xuanwo.io/2018/07/22/tiresias-v0.3/</link><pubDate>Sun, 22 Jul 2018 16:00:00 +0000</pubDate><guid>https://xuanwo.io/2018/07/22/tiresias-v0.3/</guid><description>&lt;p&gt;经过一段时间的摸鱼，Tiresias 发布了 v0.3 。新版本重新实现了 sync 的逻辑并且修复了部分 BUG，完整的 changelog 可以参考: &lt;a href=&#34;https://github.com/Xuanwo/tiresias/blob/master/CHANGELOG.md&#34;&gt;https://github.com/Xuanwo/tiresias/blob/master/CHANGELOG.md&lt;/a&gt; 。这篇文章主要介绍一下新的 sync 逻辑是如何实现的并介绍一下新增的功能。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Tiresias 是一个服务器信息管理工具，其目标是自动化服务器信息管理，取代手工维护的 Hosts 和 SSH Config&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;新的-sync-逻辑&#34;&gt;新的 Sync 逻辑&lt;/h2&gt;
+&lt;p&gt;最开始想做一个简单易用的工具，因此没有引入任何复杂的逻辑，只是简单的从不同的 Source 端点中读取数据并写入到配置好的 Destination 端点中。但是在实际的使用中遇到了这样的一些问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;无法处理 Source 端点不可达的情况，直接报错导致所有的 Source 都更新失败&lt;/li&gt;
+&lt;li&gt;某些 Source 网络不可达（比如这个 Source 是一个在 VPC 中的 Consul 节点），但是 Tiresias 会一直尝试链接并等待&lt;/li&gt;
+&lt;li&gt;Source 的数据没有持久化，导致部分 Source 失败的时候，Destination 中被更新了不完整的数据&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;为了解决上述的问题，Tiresias 在 v0.3 中引入了一个全新的 Sync 逻辑：将 Source 的读取和 Destination 的更新拆开，从 Source 中读取到的数据将会写入本地的 leveldb 当中，而 Destination 更新时也会从 leveldb 中读取。更完整一些的逻辑是这样的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;从 leveldb 中读取所有已经存储 Source，并保存在 StoredSources 当中&lt;/li&gt;
+&lt;li&gt;从配置文件中读取到的所有初始化成功的 Source 将会存储在 ExpectedSources 当中&lt;/li&gt;
+&lt;li&gt;尝试连接所有的 Source，连接失败的会跳过，而连接成功的会存储在 AvailableSources 当中&lt;/li&gt;
+&lt;li&gt;遍历所有的 AvailableSources，更新 db 中的数据&lt;/li&gt;
+&lt;li&gt;从 DB 中读取所有数据，更新所有已配置的 Destinations&lt;/li&gt;
+&lt;li&gt;遍历 StoredSources，删除所有不存在于 ExpectedSources 中的数据&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在新的 Sync 逻辑下，Tiresias 可以更好地处理如下情况：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;初始化失败的 Source 会被忽略并从 DB 中删除&lt;/li&gt;
+&lt;li&gt;连接失败的 Source 将会跳过&lt;/li&gt;
+&lt;li&gt;已经被删除的 Source 将会从 DB 删除&lt;/li&gt;
+&lt;li&gt;有内容更新的 Source 将会完整的进行更新&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;新增的功能&#34;&gt;新增的功能&lt;/h2&gt;
+&lt;p&gt;从上一次发文章到现在，Tiresias 增加了对 fs glob path 的支持：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;src:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;fs&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;options:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/home/xuanwo/.tiresias/server/&lt;span style=&#34;color:#007020&#34;&gt;*.yaml&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这样就可以很舒服的把服务器拆分到多个文件进行管理了（&lt;/p&gt;
+&lt;p&gt;除此以外，还增加了对 Consul 的支持：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;src:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;consul&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;options:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;address:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1.2&lt;/span&gt;.&lt;span style=&#34;color:#40a070&#34;&gt;4.8&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;8500&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;schema:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;http&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;datacenter:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;test&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;prefix:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;test&lt;span style=&#34;color:#4070a0;font-style:italic&#34;&gt;-
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0;font-style:italic&#34;&gt; default:&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;user:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;root&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;identity_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.ssh/key&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;告别手动维护 hosts 和在群里询问 XXX 环境的 IP 是多少的过去（&lt;/p&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;过了一个很平淡的生日，又老了一岁（&lt;/li&gt;
+&lt;li&gt;为自己还能手写 Trie 树感到激动不已&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/media/md102392&#34;&gt;工作细胞&lt;/a&gt; 真香&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/media/md102792&#34;&gt;Angels of Death&lt;/a&gt; 真甜&lt;/li&gt;
+&lt;li&gt;周末把尼尔的六周目给通了（上一个三周目的时候特别感动把存档删了 = =）&lt;/li&gt;
+&lt;li&gt;跟朋友去试了下&lt;a href=&#34;http://www.dianping.com/shop/5864352&#34;&gt;包肉&lt;/a&gt;，第二天肚子疼+拉稀一天，差评&lt;/li&gt;
+&lt;li&gt;终于找到由头又水了一篇，开心&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>文档误读导致的 BUG</title><link>https://xuanwo.io/2018/06/15/bug-caused-by-misreading/</link><pubDate>Fri, 15 Jun 2018 18:00:00 +0000</pubDate><guid>https://xuanwo.io/2018/06/15/bug-caused-by-misreading/</guid><description>&lt;p&gt;之前听说过开发人员&lt;a href=&#34;https://www.theregister.co.uk/2018/05/09/intel_amd_kernel_privilege_escalation_flaws/&#34;&gt;读错 Intel 的文档&lt;/a&gt;导致出现了严重 &lt;a href=&#34;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-8897&#34;&gt;BUG&lt;/a&gt;，但是只是当成玩笑看待，但是等到这种事情发生在自己身上，还影响到了项目在用户生产环境的上线进度的时候，就不是那么好笑了。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本文取材自真实事件的复盘，项目相关信息已经去敏。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;经过&#34;&gt;经过&lt;/h2&gt;
+&lt;p&gt;项目服务上线完毕，但是在上线后的测试中发现后端出现大量 504 错误。通过跟踪日志得知报错问题是后端数据库查询超时，在确定问题稳定复现之后，首先排除了服务器抖动，上线操作失误等问题，将原因锁定在了代码的层面。进一步的，还发现这个问题与后端的某个异步任务组件有关：只要开启该组件，错误就会出现；只要关闭，错误就会消失。该组件最近实施过一次较大的重构，在对代码进行二次 Review 之后，我们发现了可能出问题的点：重构时为了提升性能，组件内部会开多个 Goroutine 并发查询数据库，在业务首次启动时可能会对数据库造成特别大的压力。将并发改成 for 循环之后情况有所好转但是还是会有查询超时，没有修复到位。再次检查该组件中涉及到的数据库操作相关代码，发现有些 Query 操作返回的 row 没有手动做 Close 。在增加手动 Close 的代码后，超时问题消失。&lt;/p&gt;
+&lt;h2 id=&#34;溯源&#34;&gt;溯源&lt;/h2&gt;
+&lt;p&gt;第二天我再回过来看这段代码，发现导致这个错误的根源是我对一段文档的误读：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Close closes the Rows, preventing further enumeration. If Next is called
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// and returns false and there are no further result sets,
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// the Rows are closed automatically and it will suffice to check the
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// result of Err. Close is idempotent and does not affect the result of Err.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (rs &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;Rows) &lt;span style=&#34;color:#06287e&#34;&gt;Close&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; rs.&lt;span style=&#34;color:#007020&#34;&gt;close&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;文档中的描述是：如果 Next 被调用，并返回了 false 而且没有更多结果的时候，rows 将会自动 close。但是我实际上写出来的代码是这样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;value &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; sql.NullInt64{}
+row, err &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; builder.&lt;span style=&#34;color:#06287e&#34;&gt;Select&lt;/span&gt;(db.&lt;span style=&#34;color:#06287e&#34;&gt;Func&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;COUNT&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;?&amp;#34;&lt;/span&gt;)).
+&lt;span style=&#34;color:#06287e&#34;&gt;From&lt;/span&gt;(table).&lt;span style=&#34;color:#06287e&#34;&gt;Where&lt;/span&gt;(cond).&lt;span style=&#34;color:#06287e&#34;&gt;Query&lt;/span&gt;()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; err &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+log.&lt;span style=&#34;color:#06287e&#34;&gt;Errorf&lt;/span&gt;(ctx, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;MySQL error for %v.&amp;#34;&lt;/span&gt;, err)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; row.&lt;span style=&#34;color:#06287e&#34;&gt;Next&lt;/span&gt;() {
+err = row.&lt;span style=&#34;color:#06287e&#34;&gt;Scan&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;value)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; err &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+log.&lt;span style=&#34;color:#06287e&#34;&gt;Errorf&lt;/span&gt;(ctx, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;MySQL scan error for %v.&amp;#34;&lt;/span&gt;, err)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; value.Valid {
+n = &lt;span style=&#34;color:#007020&#34;&gt;int64&lt;/span&gt;(value.Int64)
+}
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;区别在于我将这段文档理解成了：如果调用了 Next，而且没有更多结果的时候，rows 将会自动 close。实际上，Next 在返回 false 的时候后，其对应的 rows 才会 close。我们可以看一下 upperdb Rows 结构体的 Next 函数实现：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Next prepares the next result row for reading with the Scan method. It
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// returns true on success, or false if there is no next result row or an error
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// happened while preparing it. Err should be consulted to distinguish between
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// the two cases.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Every call to Scan, even the first one, must be preceded by a call to Next.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (rs &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;Rows) &lt;span style=&#34;color:#06287e&#34;&gt;Next&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; doClose, ok &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#06287e&#34;&gt;withLock&lt;/span&gt;(rs.closemu.&lt;span style=&#34;color:#06287e&#34;&gt;RLocker&lt;/span&gt;(), &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() {
+doClose, ok = rs.&lt;span style=&#34;color:#06287e&#34;&gt;nextLocked&lt;/span&gt;()
+})
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; doClose {
+rs.&lt;span style=&#34;color:#06287e&#34;&gt;Close&lt;/span&gt;()
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; ok
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (rs &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;Rows) &lt;span style=&#34;color:#06287e&#34;&gt;nextLocked&lt;/span&gt;() (doClose, ok &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; rs.closed {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;false&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;false&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Lock the driver connection before calling the driver interface
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// rowsi to prevent a Tx from rolling back the connection at the same time.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; rs.dc.&lt;span style=&#34;color:#06287e&#34;&gt;Lock&lt;/span&gt;()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;defer&lt;/span&gt; rs.dc.&lt;span style=&#34;color:#06287e&#34;&gt;Unlock&lt;/span&gt;()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; rs.lastcols &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+rs.lastcols = &lt;span style=&#34;color:#007020&#34;&gt;make&lt;/span&gt;([]driver.Value, &lt;span style=&#34;color:#007020&#34;&gt;len&lt;/span&gt;(rs.rowsi.&lt;span style=&#34;color:#06287e&#34;&gt;Columns&lt;/span&gt;()))
+}
+rs.lasterr = rs.rowsi.&lt;span style=&#34;color:#06287e&#34;&gt;Next&lt;/span&gt;(rs.lastcols)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; rs.lasterr &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Close the connection if there is a driver error.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; rs.lasterr &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; io.EOF {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;false&lt;/span&gt;
+}
+nextResultSet, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; rs.rowsi.(driver.RowsNextResultSet)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;false&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// The driver is at the end of the current result set.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Test to see if there is another result set after the current one.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Only close Rows if there is no further result sets to read.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !nextResultSet.&lt;span style=&#34;color:#06287e&#34;&gt;HasNextResultSet&lt;/span&gt;() {
+doClose = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; doClose, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;false&lt;/span&gt;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;false&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;可以看到 Next 只有在 &lt;code&gt;nextLocked&lt;/code&gt; 返回的 &lt;code&gt;doClose&lt;/code&gt; 为 &lt;code&gt;true&lt;/code&gt; 时才会主动调用 &lt;code&gt;rs.Close()&lt;/code&gt;，而按照 &lt;code&gt;nextLocked&lt;/code&gt; 中的逻辑，如果有值的话，会返回 &lt;code&gt;false, true&lt;/code&gt;。也就是说，当 Next 返回 &lt;code&gt;true&lt;/code&gt; 的时候，是不会去 Close rows 的。分析到这里，昨晚上线翻车的原因就很明显了，大量的 count query 的 rows 没有被 close 导致链接无法释放，从而新的请求无法执行以至于超时了。&lt;/p&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;好不容易调整回来的作息被这次上线打回去了，现在很蓝瘦&lt;/li&gt;
+&lt;li&gt;用户环境上一次线就欠别人一顿饭，多上几次我要破产了。。。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.amazon.cn/dp/B00L1VVUTC&#34;&gt;GEB&lt;/a&gt; 虽然看不懂，但是我感觉很有意思&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.qingcloud.com/qingstor/developer_tools/qscamel.html&#34;&gt;qscamel&lt;/a&gt; 在经历了多个大用户的捶打之后终于正式发布了，有机会要写一个系列的文章讲讲自己在开发 qscamel 的时候都学到了啥&lt;/li&gt;
+&lt;li&gt;好久没有发文章了，找个由头水一篇&lt;/li&gt;
+&lt;li&gt;博客在 Linode 上跑了两个月之后，还是乖乖的回到了 gh-pages 的怀抱，真香&lt;/li&gt;
+&lt;li&gt;话说动态这个章节有人看么，如果不讨喜的我考虑一下去掉 = =&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

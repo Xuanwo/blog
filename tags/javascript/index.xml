@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Javascript on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/javascript/</link><description>Recent content in Javascript on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 30 Mar 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/javascript/index.xml" rel="self" type="application/rss+xml"/><item><title>在 Google 日历度过的欢乐时光</title><link>https://xuanwo.io/2019/03/30/google-calendar/</link><pubDate>Sat, 30 Mar 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/30/google-calendar/</guid><description>&lt;p&gt;前段时间终于下定决定入了 G Suite，花了点时间进行数据迁移，但是在操作日历的时候错误的把朋友们的生日提醒（每年重复）导入到了我的行程当中。为了将这些提醒删掉，我开始了一次 Google 日历的奇妙探险，找到了批量处理的方法，甚至还发现了一个 BUG。&lt;/p&gt;
+&lt;h2 id=&#34;apps-script-是好文明&#34;&gt;Apps Script 是好文明&lt;/h2&gt;
+&lt;p&gt;首先来明确一下需要解决的问题：删除个人日历中出现的大量形如 “XXX 的生日” 的行程。OK，问题确定之后，可以初步得到几种解决问题的思路：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;手动删&lt;/li&gt;
+&lt;li&gt;现成的工具&lt;/li&gt;
+&lt;li&gt;基于 Google 日历 API 开发脚本&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;首先排除第一种，时间成本过高，而且都是机械操作，毫无乐趣可言。现成的工具有是有，但是你需要授权第三方访问你的全部行程，我实在是不想之后某天被人发现我宣称出差公干其实是去宾馆跟朋友们一起玩俄罗斯方块吃鸡（原帖：&lt;a href=&#34;https://bbs.nga.cn/read.php?tid=16784200&#34;&gt;https://bbs.nga.cn/read.php?tid=16784200&lt;/a&gt;）。所以现成工具的方案也被排除了。&lt;/p&gt;
+&lt;p&gt;所以我又要造轮子了么？不，我们可以用 Apps Script！Apps Script 可以理解成自带 Google 绝大部分套件 SDK 组件的 JavaScript 运行环境，最棒的是它还是可以直接在线运行的。&lt;/p&gt;
+&lt;p&gt;研究一下日历的&lt;a href=&#34;https://developers.google.com/apps-script/reference/calendar/&#34;&gt;文档&lt;/a&gt;，可以知道需要用到的 API 只有 &lt;code&gt;getCalendarsByName&lt;/code&gt;，&lt;code&gt;getEvents&lt;/code&gt;，&lt;code&gt;getTitle&lt;/code&gt; 和 &lt;code&gt;deleteEvent&lt;/code&gt; 这些，剩下的都是些逻辑。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; myFunction()
+{
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; fromDate &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Date&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;2000&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; toDate &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Date&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;2999&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; calendarName &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Personal&amp;#39;&lt;/span&gt;;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; calendar &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; CalendarApp.getCalendarsByName(calendarName)[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; events &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; calendar.getEvents(fromDate, toDate, {search&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;生日&amp;#34;&lt;/span&gt;});
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; i&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;; i&lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;events.length;i&lt;span style=&#34;color:#666&#34;&gt;++&lt;/span&gt;){
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; ev &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; events[i];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; title &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; ev.getTitle();
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; (title.indexOf(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;的生日&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;) {
+ev.deleteEvent();
+}
+}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;一顿操作之后，只需要点击 &lt;code&gt;Run&lt;/code&gt; 就能运行啦，这时候切换到 Google 日历就能看到恼人的行程都已经被删掉了。&lt;/p&gt;
+&lt;h2 id=&#34;google-日历预言的世界末日&#34;&gt;Google 日历预言的世界末日&lt;/h2&gt;
+&lt;p&gt;欢乐时光还没有结束！&lt;/p&gt;
+&lt;p&gt;看到自己的脚本成功运行后自然会想要验证一下，于是我通过修改 URL 的方式访问了 &lt;a href=&#34;https://calendar.google.com/calendar/r/month/2099/1/1&#34;&gt;2099/1/1&lt;/a&gt;。emmmmm，这是咋了，为啥界面全都是空的，Console 还有报错：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;Uncaught TypeError&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; Cannot read property &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Iu&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;of&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;null&lt;/span&gt;
+at vEb (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;404&lt;/span&gt;)
+at EU.HJ (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;404&lt;/span&gt;)
+at CEb.h.kAa (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;408&lt;/span&gt;)
+at R1.Oe (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;ltDFwf,syi2,FsScmc&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;symq,sy1,phtQPb&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;321&lt;/span&gt;)
+at m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;727&lt;/span&gt;
+at xha (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;263&lt;/span&gt;)
+at Ei (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;261&lt;/span&gt;)
+at Ci.addCallback (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;260&lt;/span&gt;)
+at Gya (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;727&lt;/span&gt;)
+at m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;726&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;本来想洗洗睡了的我瞬间来了精神，我很好奇！&lt;/p&gt;
+&lt;p&gt;通过二分的方法，我得到了临界点：&lt;a href=&#34;https://calendar.google.com/calendar/r/day/2051/2/10&#34;&gt;2051/2/10&lt;/a&gt; 。这个日子有什么特别的呢？为什么在它之前都是正常的，从它开始不管显示天，周还是月都无法正常显示呢？我瞬间有了几个猜想，不过需要一一验证。&lt;/p&gt;
+&lt;p&gt;第一个猜想是数据类型的限制。我做了一些简单的计算：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;数据类型&lt;/th&gt;
+&lt;th&gt;最大值&lt;/th&gt;
+&lt;th&gt;对应时间&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;int32&lt;/td&gt;
+&lt;td&gt;2147483647&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;2038/1/19 11:14:7&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;uint32&lt;/td&gt;
+&lt;td&gt;4294967295&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;2106/2/7 14:28:16&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JavaScript 最大精确整数&lt;/td&gt;
+&lt;td&gt;9007199254740991&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;285428751/11/12 7:36:31&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;无论哪一个都无法支持先前的猜想，所以问题肯定不是数据类型的问题。&lt;/p&gt;
+&lt;p&gt;第二个猜想是前端的 BUG。我稍微研究了一下 Google 日历混淆之后的代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; vEb &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt;(a, b) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; [b.Iu &lt;span style=&#34;color:#666&#34;&gt;?&lt;/span&gt; a.T &lt;span style=&#34;color:#666&#34;&gt;?&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u95f0&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u958f&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;, CU[b.month], &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u6708&amp;#34;&lt;/span&gt;].join(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;)
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里有几个 Unicode 字符，转换一下：&lt;code&gt;\u95f0 -&amp;gt; 闰&lt;/code&gt;，&lt;code&gt;\u958f -&amp;gt; 閏&lt;/code&gt;，&lt;code&gt;\u6708 -&amp;gt; 月&lt;/code&gt;。Wow，&lt;code&gt;vEb&lt;/code&gt; 函数的作用就是判断当前月是不是闰月，根据用户的语言还会决定显示简体还是繁体。&lt;code&gt;a.T&lt;/code&gt; 显然是在判断语言，不用考虑。&lt;code&gt;b.Iu&lt;/code&gt; 更加关键一些，它会判断给定的日期（这里的 b？）是否是闰月。&lt;/p&gt;
+&lt;p&gt;接下来只要搞懂 b 是怎么来的，前面肯定有某一步返回的 b 是 null。但是面对 Google 混淆过的代码，想搞懂这个 b 是怎么来的谈何容易。我相信给我足够的时间，我能够缕清楚代码的脉络，最后得出一个结论，但是我现在更倾向于先换个思路，回头再来尝试。&lt;/p&gt;
+&lt;p&gt;下面从代码中跳出来思考，2051 年 2 月 10 日，这个日子到底有什么魔力呢？难道 Google 日历这么早就钦定了世界末日么？我开始试着在 Google 上搜索这个时间，结果还真的有发现。有一篇文章&lt;a href=&#34;http://www.mzwu.com/article.asp?id=1380&#34;&gt;ASP农历与公历互转类&lt;/a&gt;中居然出现完全一样的时间：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&#39;公历转农历(查询日期范围1950-2-17至2051-2-10,格式yyyy-mm-dd)
+&#39; Response.Write NongGong.GongToNong(&amp;quot;1984-12-10&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我下意识的将这个日子转换成了农历：&lt;code&gt;2050年 腊月 廿九 （辛未年 庚寅月 丙寅日）&lt;/code&gt;，我好像明白了什么，但是需要更多的信息来做支撑。&lt;/p&gt;
+&lt;h2 id=&#34;农历编排及其转换&#34;&gt;农历编排及其转换&lt;/h2&gt;
+&lt;p&gt;首先要重新认识一下农历：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;农历，是现今东亚地区民间传统广泛使用的阴阳合历。古代相传为黄帝时代或者夏朝创制，又称黄历、夏历。中华民国成立后，由孙中山宣布采用西方格里历，而华夏传统历法则返称为旧历、传统历。中华人民共和国成立后，以格里历为“公历”，夏历改称“农历”。在汉语，西历也称阳历，因此农历常习惯上称为阴历，然而此历其实为阴阳合历。
+农历是阴阳历：“阳”是地球环绕太阳公转，以冬至回归年为基准确定岁实，配合季节阳光分一岁为二十四节气；“阴”根据月球运行定朔望月。中国现存历书最早是西汉版本之《夏小正》，汉武帝时期制定之《太初历》已经有相当完善之历法规则，自此大都采用“夏正”，即以建寅月为正月；之后定朔定气规则又多次修改。现行农历版本是依据既定基本规则，运用现代天文学成果修订，完全依照天文数据计算得来，为一天文历法（astronomical calendar）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;画重点：&lt;strong&gt;依据既定基本规则，运用现代天文学成果修订，完全依照天文数据计算得来，为一天文历法（astronomical calendar）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;那天文历法是什么呢？&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;天文历法（astronomical calendar）是以天文观测为准的历法，例如使用定气定朔的现代农历、宗教性的伊斯兰历及第二圣殿时的古犹太历。这种历法也称为是以观测为准的的历法，好处是完美而且永远准确，缺点是没有一定的公式，若要回推多久以前某一天的日期比较困难。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;与之相对应的是计算历法(arithmetic calendar)：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;计算历法（arithmetic calendar）是以严格的数学公式计算的历法，例如现在的犹太历，也称为是以规则为准的历法，好处是容易计算特定时间是哪一天，不过和自然变化的精准性就比较差，即使历法本身非常的精准，也会因为地球自转及公转的略为变化，造成其精准性慢慢变差，因此一个计算历法使用的期间有限，可能只有数千年，之后就要用新的历法系统代替。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;实际上关于农历的编排，我们国家甚至还制定了国家标准：&lt;a href=&#34;http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296&#34;&gt;农历的编算和颁行&lt;/a&gt;，标准号 &lt;code&gt;GB/T 33661-2017&lt;/code&gt;。标准里面专门提到了计算模型和精度的问题：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;5.1　太阳和月球的位置按IERS Conventions规定的模型计算。&lt;/p&gt;
+&lt;p&gt;5.2　朔和节气的北京时间计算精度应达到1秒。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr /&gt;
+&lt;p&gt;农历的编排本身就需要依赖外部的天文数据，而从公历向农历的转换自然也需要外部数据的支持。所以 Google 不能显示 2051-2-10 之后时间的原因也就出来了：Google 只存储了到 2050 年的农历数据，过了 2050 年农历的最后一天，后续的农历在转换的时候就报错了。&lt;/p&gt;
+&lt;p&gt;问题解决啦，我的好奇心得到了满足，可以安心睡觉了~&lt;/p&gt;
+&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
+&lt;p&gt;当然比我更有好奇心的读者们肯定还会想到为什么是 &lt;code&gt;2050年 腊月 廿九&lt;/code&gt;，难道不应该是腊月三十嘛？这个就留作课后作业吧，相信你们肯定能搞明白的~&lt;/p&gt;
+&lt;p&gt;下面是日常的挑毛病环节：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;To Google 的国际化团队：&lt;code&gt;农历腊月&lt;/code&gt;不能翻译成&lt;code&gt;农历十二月&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;To 国家市场监督管理总局：9102 年了，国家标准在线预览还要依赖 Flash 插件，怕不是思想不正确哟&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;顺便介绍一下 &lt;a href=&#34;https://thetype.com/&#34;&gt;Type is Beautiful&lt;/a&gt; 的&lt;a href=&#34;https://thetype.com/2019/02/12498/&#34;&gt;孔雀计划&lt;/a&gt;，中文的排版问题和本文反映出来的农历问题其根源是一样的：中国的传统文化要主动向外介绍推广，主动参与标准的置顶，需要整个行业的通力合作。中文排版和农历这样充满了美感的东西理应让更多人了解，而不是被掩盖在女德这种真正糟粕的阴影之下。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86&#34;&gt;农历 - 维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E5%8E%86%E6%B3%95&#34;&gt;历法 - 维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296&#34;&gt;农历的编算和颁行&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>从浏览器端向 QingStor 对象存储上传文件</title><link>https://xuanwo.io/2017/06/15/upload-to-qingstor-from-browser/</link><pubDate>Thu, 15 Jun 2017 15:44:00 +0000</pubDate><guid>https://xuanwo.io/2017/06/15/upload-to-qingstor-from-browser/</guid><description>&lt;p&gt;从浏览器端向 QingStor 对象存储上传是很多开发者的需求，虽然 QingStor 提供了相关的接口和 SDK，但是仍有很多开发者表示不知道怎么样去调用。本文的目的是系统的展示一下如何从浏览器端上传一个文件到对象存储，从而解决大多数开发者们的需求。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;为了理解本文的内容，读者需要一些基本的 HTML，JavaScript 知识，同时需要对 QingStor 对象存储服务有一些基本的了解。前者可以查看 &lt;a href=&#34;https://developer.mozilla.org/zh-CN/docs/Web&#34;&gt;MDN Web 技术文档&lt;/a&gt;，后者可以查看 &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/common/overview.html&#34;&gt;QingStor 对象存储服务概述&lt;/a&gt; 。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;表单上传&#34;&gt;表单上传&lt;/h2&gt;
+&lt;p&gt;QingStor 对象存储支持通过 HTML 表单上传的方式向存储空间上传一个对象，文档可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/object/post.html&#34;&gt;此处&lt;/a&gt;。根据存储空间的权限设置，主要分为两种情况：匿名可写与匿名不可写，接下来分别介绍一下。&lt;/p&gt;
+&lt;h3 id=&#34;匿名可写&#34;&gt;匿名可写&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;action&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://&amp;lt;bucket&amp;gt;.&amp;lt;zone&amp;gt;.qingstor.com&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;method&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;enctype&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;multipart/form-data&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;Click or Drag a File Here to Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;key&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;submit&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload to QingStor&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 存储空间的名称&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: 存储空间所在的区域&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;key&amp;gt;&lt;/code&gt;: 文件上传后在存储空间中的名字，支持内置变量，比如 &lt;code&gt;${filename}&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;很多人最开始使用这个接口的时候会吐槽为什么 file 一定要放在最后，这是因为我们遵循了现有的 &lt;a href=&#34;http://hc.apache.org/httpclient-3.x/methods/multipartpost.html&#34;&gt;multipart post 方法&lt;/a&gt; 的实现——将表单分成了两个部分： StringPart 与 FilePart ，file 类型之后的全部表单项都会被丢弃，因此 file 这个 input 项一定要放在表单的最后。&lt;/p&gt;
+&lt;p&gt;解决掉 input 顺序这个问题之后，可以发现表单上传是一个非常简单易用的接口：我只需要构建一个 form 表单，指定上传的域名、文件名即可，浏览器会自动处理剩下的所有工作。&lt;/p&gt;
+&lt;h3 id=&#34;匿名不可写&#34;&gt;匿名不可写&lt;/h3&gt;
+&lt;p&gt;更常见的情况是我们需要上传文件到一个私有的存储空间当中，此时我们需要对我们的 POST 请求进行签名。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;action&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://&amp;lt;bucket&amp;gt;.&amp;lt;zone&amp;gt;.qingstor.com&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;method&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;enctype&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;multipart/form-data&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;Click or Drag a File Here to Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;key&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;policy&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;policy&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;access_key_id&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;access_key_id&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;signature&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;signature&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;submit&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload to QingStor&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;policy&amp;gt;&lt;/code&gt;: policy 是一个经过 base64 编码之后的 JSON 字符串，其中的内容包括除了 file， access_key_id， policy，signature 之外的所有表单项。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;access_key_id&amp;gt;&lt;/code&gt;: access_key_id 是用户的 access_key_id&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;signature&amp;gt;&lt;/code&gt;: 用 secret key 对 base64 编码后的 policy 字符串进行 HMAC-SHA256 签名得到的字符串，同样需要进行 base64 编码。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;与匿名上传相比，上传到一个私有空间需要使用请求者的 access_key_id 进行签名。签名流程如下：计算 policy 字符串并进行 base64 编码，使用 secret key 对 policy 字符串进行 HMAC-SHA256 签名并进行 base64 编码。&lt;/p&gt;
+&lt;p&gt;以最简单的上传为例：policy 字符串为 &lt;code&gt;{&amp;quot;key&amp;quot;: &amp;quot;test_key&amp;quot;}&lt;/code&gt; ，经过 base64 编码之后变为 &lt;code&gt;eyJrZXkiOiAidGVzdF9rZXkifQ==&lt;/code&gt;，我们使用 &lt;code&gt;test_secret_key&lt;/code&gt; 作为 secret key 来进行 HMAC-SHA256 签名并进行 base64 编码，可以得到 &lt;code&gt;HfMhlYYA4bgyoq3SDMWqiJ1XWm1/TORTfkZk+WODxag=&lt;/code&gt;。此时，我们本次请求中的 policy 应填写 &lt;code&gt;eyJrZXkiOiAidGVzdF9rZXkifQ==&lt;/code&gt;， 而 signature 则应填写 &lt;code&gt;HfMhlYYA4bgyoq3SDMWqiJ1XWm1/TORTfkZk+WODxag=&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;使用 POST 接口上传比较简单，后端只需要实现简单的签名逻辑即可实现上传到指定对象存储存储空间的功能，后续还可以结合各种上传插件实现上传进度条等功能。适合用在只需要用户上传文件，没有复杂交互的场景，比如论坛附件上传，在线编辑器上传图片等。&lt;/p&gt;
+&lt;h2 id=&#34;直接调用-sdk-上传&#34;&gt;直接调用 SDK 上传&lt;/h2&gt;
+&lt;p&gt;POST 接口虽然方便，但是功能比较弱，为了满足开发者们的需求，QingStor 提供的 &lt;a href=&#34;https://github.com/yunify/qingstor-sdk-js&#34;&gt;qingsotr-js-sdk&lt;/a&gt; 通过 &lt;a href=&#34;http://browserify.org/&#34;&gt;Browserify&lt;/a&gt; 实现了浏览器环境的兼容，开发者只需要引入我们提供的 js 文件即可在浏览器环境中调用接口。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在开始之前，我们需要正确设置 Bucket 的 CORS 使得我们可以顺利的进行跨域请求。详细操作方法可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/guide/index.html#cors&#34;&gt;此处&lt;/a&gt;，其中&lt;code&gt;允许的请求源&lt;/code&gt;和&lt;code&gt;允许 HTTP 请求头&lt;/code&gt;均可以设置为 &lt;code&gt;*&lt;/code&gt; 以方便调试。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk.min.js&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onchange&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; Config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).Config
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; QingStor &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).QingStor;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Config(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;access_key_id&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;secret_access_key&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; bucket &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; QingStor(config).Bucket(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;bucket&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;zone&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; upload() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;).files[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; reader &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; FileReader();
+reader.readAsBinaryString(f);
+reader.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (() =&amp;gt; {
+bucket.putObject(f.name, {
+body&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; reader.result
+});
+});
+}
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;access_key_id&amp;gt;&lt;/code&gt;: 用户的 access_key_id&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;secret_access_key&amp;gt;&lt;/code&gt;: 用户的 secret_access_key&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 需要上传的 bucket name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: bucket 所在的区域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;样例代码逻辑比较简单，主要有以下几个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;脚本中进行了一些初始化的工作，创建了 Config ，QingStor 和 Bucket 对象。&lt;/li&gt;
+&lt;li&gt;file input 监听了 change 事件，只要用户选择了新的文件，就会调用 upload 方法。&lt;/li&gt;
+&lt;li&gt;在 upload 方法中，首先是选取文件列表中的第一项，然后使用 HTML 5 新提供的 FileReader 接口来读取文件内容。&lt;/li&gt;
+&lt;li&gt;在 FileReader 读取完毕后，调用 bucket.putObject 方法来进行文件上传，使用文件名作为上传所使用的 Key。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以看到，直接使用 SDK 进行文件上传也非常简单。跟使用 POST 接口相比，需要引入一个额外的 JS 文件依赖，不需要自行进行容易出错的签名计算。最大的缺点在于：初始化 SDK 时需要暴露自己的 access_key_id 和 secret_access_key，这显然是不可接受的。我们需要寻找到一种方法，使得签名的过程可以服务器端完成，从而不需要暴露自己的密钥信息。&lt;/p&gt;
+&lt;h2 id=&#34;部署签名服务器&#34;&gt;部署签名服务器&lt;/h2&gt;
+&lt;p&gt;之前提到，在服务器端进行签名可以使得敏感的密钥信息不会暴露出去，解决方案就是部署一套签名服务器。我们实现了一个基于 qingstor-js-sdk 的签名服务器 demo，开源在 &lt;a href=&#34;https://github.com/yunify/qingstor-demo-signature-server-nodejs&#34;&gt;https://github.com/yunify/qingstor-demo-signature-server-nodejs&lt;/a&gt; ，同时附有 server 端和 client 端，开发者可以方便的复用其中的逻辑，按照自己的业务需求来实现相关的逻辑。&lt;/p&gt;
+&lt;p&gt;部署签名服务器非常简单，只需要如下几步：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;git clone https://github.com/yunify/qingstor-demo-signature-server-nodejs.git
+&lt;span style=&#34;color:#007020&#34;&gt;cd&lt;/span&gt; qingstor-demo-signature-server-nodejs
+npm install&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后根据 server_config.yaml.example 编辑自己的 server_config.yaml 文件，最后执行 &lt;code&gt;npm run server&lt;/code&gt; 就可以启动我们的签名服务器 Demo。&lt;/p&gt;
+&lt;p&gt;接下来这个实例会展示如何使用签名服务器进行签名，并上传一个文件。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk.min.js&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onchange&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; Config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).Config
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; QingStor &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).QingStor;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Config(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;not_need&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;not_need&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; bucket &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; QingStor(config).Bucket(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;bucket&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;zone&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; upload() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;).files[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; reader &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; FileReader();
+reader.readAsBinaryString(f);
+reader.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (() =&amp;gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; req &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; bucket.putObjectRequest(f.name, {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; f.type
+});
+fetch(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;http://localhost:9000/operation?channel=header&amp;#34;&lt;/span&gt;, {
+method&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;,
+body&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; JSON.stringify(req.operation),
+headers&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;application/json; charset=utf-8&amp;#34;&lt;/span&gt;
+}
+})
+.then(res =&amp;gt; res.json())
+.then(res =&amp;gt; {
+req.operation.headers.Authorization &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; res.authorization;
+req.operation.body &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; reader.result;
+req.send()
+})
+});
+}
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 需要上传的 bucket name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: bucket 所在的区域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;跟直接使用 SDK 上传相比，通过部署签名服务器上传的方案多了向签名服务器发送本次请求并获取签名信息的部署。js sdk 对外暴露了生成 Request 的接口，通过 bucket.putObjectRequest 可以创建一个 Request 实例，并将 Request.operation 发送到签名服务器以进行签名，最后服务器端返回的是签名好的 Authorization 字符串。然后再手动调用 Request 的 send 方法进行实际的上传即可。&lt;/p&gt;
+&lt;p&gt;部署签名服务器的方案比之前的几种都要复杂，但是更贴合用户的使用场景，可以完整的覆盖大多数用户在浏览器端与 QingStor 对象存储进行交互的需求。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;在这里可以对浏览器端几种与 QingStor 对象存储进行交互的方案进行一个简短的总结：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;POST 接口：简单方便，便于与现有的服务器端集成，适用于论坛附件上传，在线编辑器上传图片等场景&lt;/li&gt;
+&lt;li&gt;SDK 上传： 简单方便，但是会暴露出用户的密钥信息，适用于一些 No BackEnd 应用，可以让用户自行填写自己的密钥，比如在线 Markdown 编辑器，可以实现复制进来的图片自动上传这样的功能。&lt;/li&gt;
+&lt;li&gt;部署签名服务器： 比较复杂，适用于大多数场景，密钥信息保存在服务器端，不会泄漏给用户。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;此外，所有的代码都已经上传到 Gist，感兴趣的同学可以自取： &lt;a href=&#34;https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784&#34;&gt;https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784&lt;/a&gt;&lt;/p&gt;</description></item><item><title>nodebb-plugin-html5videoplayer 发布</title><link>https://xuanwo.io/2016/08/22/nodebb-plugin-html5videoplayer/</link><pubDate>Mon, 22 Aug 2016 17:53:25 +0000</pubDate><guid>https://xuanwo.io/2016/08/22/nodebb-plugin-html5videoplayer/</guid><description>&lt;p&gt;[nodebb-plugin-html5videoplayer]() 是一个简单的 NodeBB 插件，可以让 NodeBB 支持在线视频观看。Fork 自 &lt;a href=&#34;https://github.com/ogerly&#34;&gt;@ogerly&lt;/a&gt; 开发的 &lt;a href=&#34;https://github.com/ogerly/nodebb-plugin-videoplayer&#34;&gt;nodebb-plugin-videoplayer&lt;/a&gt;， 在他的基础上做了一些微不足道的贡献，括弧笑。&lt;/p&gt;
+&lt;h1 id=&#34;原理&#34;&gt;原理&lt;/h1&gt;
+&lt;p&gt;原理非常简单，将帖子中出现的：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;a href=&amp;quot;xxx.mp4&amp;quot;&amp;gt;&amp;lt;/a&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;标签转换为&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;video preload controls&amp;gt;
+&amp;lt;source src=&amp;quot;xx.mp4&amp;quot;&amp;gt;
+&amp;lt;/video&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;也就是完全通过 HTML5 提供的 video 标签来实现在线视频的观看功能。&lt;/p&gt;
+&lt;h1 id=&#34;区别&#34;&gt;区别&lt;/h1&gt;
+&lt;p&gt;世上轮子千千万，我为什么要Fork原来的再造一个？&lt;/p&gt;
+&lt;p&gt;最关键的因素在于我跟原作者的理念不太一样，原作者除了插入 video 标签以外，还提供了一个固定在下面下方的播放器控制条。由于版本更迭，这个播放器控制条已经失效，CSS 样式也不再适用。因此我 Fork 了原作者的插件，并上传了一个新的插件，旨在提供更简单的在线视频视频集成功能。&lt;/p&gt;
+&lt;p&gt;跟原来版本的区别主要如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;纯粹的播放器，没有多余的功能，不会修改任何页面外观&lt;/li&gt;
+&lt;li&gt;页面自适应，播放窗体会自适应当前页面大小，提供跨平台一致的体验&lt;/li&gt;
+&lt;li&gt;更强的外链支持，可以引用外部的链接，不需要上传到论坛&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;安装&#34;&gt;安装&lt;/h1&gt;
+&lt;p&gt;目前还不知道怎么提交到 NodeBB 的插件的中心，因此只能通过 npm 手动进行安装：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;npm install nodebb-plugin-html5videopalyer
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;使用&#34;&gt;使用&lt;/h1&gt;
+&lt;p&gt;使用起来非常简单，只需要在帖子中拖动上传视频&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[video](/uploads/files/xyz.mp4)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;或者直接输入引用的视频链接&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[video](//aa.com/bb/cc.mp4)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;目前仅支持&lt;code&gt;mp4&lt;/code&gt;，&lt;code&gt;ogv&lt;/code&gt;,&lt;code&gt;webm&lt;/code&gt;,&lt;code&gt;mov&lt;/code&gt;这四种格式
+引用的外链需要去掉协议头，否则无法正常解析&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;demo&#34;&gt;Demo&lt;/h1&gt;
+&lt;p&gt;最后显示的效果可以参考这个链接： &lt;a href=&#34;https://community.qingcloud.com/topic/556&#34;&gt;https://community.qingcloud.com/topic/556&lt;/a&gt;&lt;/p&gt;</description></item><item><title>NodeBB 升级迁移总结</title><link>https://xuanwo.io/2016/07/08/nodebb-upgrade/</link><pubDate>Fri, 08 Jul 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/07/08/nodebb-upgrade/</guid><description>&lt;p&gt;&lt;a href=&#34;https://community.qingcloud.com/&#34;&gt;青云用户社区&lt;/a&gt;使用了开源的 NodeBB 论坛，部署之初使用&lt;code&gt;0.7&lt;/code&gt;版本，因为没有跟随官方进度进行更新，导致论坛版本长期停滞。一方面无法享受到官方的BUG Fix，另一方面也无法使用很多业务需求的插件。思量再三后决定对社区进行升级迁移，不在原论坛直接升级，而是部署一套新的环境，将原有的数据全部导出。&lt;/p&gt;
+&lt;h1 id=&#34;可行性分析&#34;&gt;可行性分析&lt;/h1&gt;
+&lt;h2 id=&#34;nodebb-升级路径&#34;&gt;NodeBB 升级路径&lt;/h2&gt;
+&lt;p&gt;NodeBB 自0.3版本后就提供了一套独特升级路径，主要有以下几个要点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;NodeBB采用语义化版本号：&lt;code&gt;x.y.z&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;对&lt;code&gt;z&lt;/code&gt;版本号的变动，可以直接升级&lt;/li&gt;
+&lt;li&gt;只有当&lt;code&gt;z&lt;/code&gt;版本号已经是&lt;code&gt;x.y&lt;/code&gt;版本下的最新版本，才能升级到&lt;code&gt;x.y+1&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;数据迁移&#34;&gt;数据迁移&lt;/h2&gt;
+&lt;p&gt;NodeBB在部署的时候就使用了青云平台上的 Redis 缓存和负载均衡器。这样迁移的问题就会变的简单很多，我只需要将 NodeBB 路径下的&lt;code&gt;public/uploads&lt;/code&gt;资源进行打包即可，Redis 缓存和负载均衡器都可以直接使用。&lt;/p&gt;
+&lt;h1 id=&#34;迁移步骤&#34;&gt;迁移步骤&lt;/h1&gt;
+&lt;h2 id=&#34;迁移-nodebb&#34;&gt;迁移 NodeBB&lt;/h2&gt;
+&lt;p&gt;建议在一个新的环境里面创建迁移环境。&lt;/p&gt;
+&lt;h3 id=&#34;node-版本&#34;&gt;Node 版本&lt;/h3&gt;
+&lt;p&gt;同样建议使用 &lt;code&gt;nvm&lt;/code&gt; 来管理版本，避免其他应用对NodeBB环境产生干扰。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;nvm install stable
+nvm use stable
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果不想每一次退出shell后都要执行&lt;code&gt;nvm use stable&lt;/code&gt;，可以手动设置默认版本：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;nvm alias default stable
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;nodebb-版本&#34;&gt;NodeBB 版本&lt;/h3&gt;
+&lt;p&gt;首先下载跟生产环境一致的NodeBB版本：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;git clone -b v0.7.x
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后使用跟生产环境一致的&lt;code&gt;config.json&lt;/code&gt;，NoedBB升级工具会自动更新&lt;code&gt;package.json&lt;/code&gt;，所以无需修改。&lt;/p&gt;
+&lt;p&gt;然后运行&lt;code&gt;./nodebb upgrade&lt;/code&gt;以升级数据结构和依赖并打上所有的补丁。&lt;/p&gt;
+&lt;p&gt;运行完毕后切换到更高版本的分支：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;git fetch
+git checkout v0.8.x
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;同样运行&lt;code&gt;./nodebb upgrade&lt;/code&gt;，以此类推，直至升级到官方最新版本。&lt;/p&gt;
+&lt;h2 id=&#34;迁移数据&#34;&gt;迁移数据&lt;/h2&gt;
+&lt;p&gt;正如之前所说的，Redis已经被直接升级到最新版本，接下来只需要将用户上传的数据导出即可。&lt;/p&gt;
+&lt;p&gt;在生产环境中执行如下命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd /path/to/nodebb/public
+tar -cvf nodebb_assets_backup.tar.gz ./upload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;切换到迁移环境后执行：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd /path/to/nodebb/public
+tar -xvf nodebb_assets_backup.tar.gz
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;注意事项&#34;&gt;注意事项&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;目前NodeBB不支持降级操作，如果担心破坏生产环境，可以在生成一个 Redis 的备份并重新创建资源，不要对原数据库进行操作。&lt;/li&gt;
+&lt;li&gt;由于 Redis 中会保存对原论坛的主题和插件等配置，在迁移到新版本后，有很大可能会产生错误，可以执行&lt;code&gt;./nodebb reset -a&lt;/code&gt;以清除所有主题和插件配置。确认 NodeBB 运行正常后再逐个启用即可。&lt;/li&gt;
+&lt;li&gt;在升级时候会因为Node.js版本的问题导致某些依赖无法安装，建议可以使用&lt;code&gt;0.12&lt;/code&gt;版本进行升级，升级成功后再切换到更新的版本上重新进行&lt;code&gt;npm install --production&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;感悟&#34;&gt;感悟&lt;/h1&gt;
+&lt;h2 id=&#34;nodebb的升级路线设计&#34;&gt;NodeBB的升级路线设计&lt;/h2&gt;
+&lt;p&gt;这次升级迁移其实经历很久的论证过程。
+一开始简单地尝试一下之后认定无法直接进行升级就产生了一些畏难情绪，心里想着不如就让它这样，反正现在线上跑得也挺好的，没有出什么太大的问题。而后种种需求的提出让我有些招架不住了，现有的落后版本缺少很多API和现有的插件，自行开发和维护的成本非唱高。这也是我有一段时间觉得开源在实际应用中并不是那么美好的原因。
+等到我真的沉下心来仔细研究官方的文档，才发现 NodeBB 看似鬼畜坑爹的升级路线设计其实也有着其优雅之处。数据库的结构可以随之版本同步更新，这样可以避免早期数据库结构设计不合理带来的种种弊端，并防止产生版本之间的Breaking Change。抛开API层面的兼容性不谈，NodeBB可以做到我直接使用原来的 Redis 从 &lt;code&gt;0.7.0&lt;/code&gt; 一路升级到 &lt;code&gt;1.0.4&lt;/code&gt;，还能保证我的数据没有出现任何丢失，就冲着这一点，我觉得这个升级路线的设计是有价值的。
+当然，路线是好的，但是在具体实现升级功能的时候还有待商榷之处：不难发现升级过程中有很大一部分的重复操作，其实这些都是可以避免的。每一个&lt;code&gt;x.y&lt;/code&gt;版本号之间的更新操作其实都是一致的，完全可以通过脚本实现。&lt;/p&gt;
+&lt;h2 id=&#34;应用部署的灵活性&#34;&gt;应用部署的灵活性&lt;/h2&gt;
+&lt;p&gt;上线任何应用之前都应该考虑其架构的扩展性和迁移能力。
+很多时候，部署一套应用的目的根本就不是为了去使用他，只是单纯的部署一个玩一玩而已。在这样的心态下，总会干出这样的事情：在一个20G的主机上跑ownCloud；在一个主机上同时跑wordpress，nginx和mysql等应用。当然，这样做并没有什么问题，毕竟是自己的Server，哪怕天天 &lt;code&gt;rm -rf /&lt;/code&gt;都是OK的。
+但是如果是一套需要给别人用的应用，部署时的扩展性和迁移能力就必须考虑在内。这其实是两个很实在的问题：服务器空间耗尽，性能跟不上怎么办？服务器挂了，如何保全自己的数据？自己设计这样一套系统很麻烦，但是如果是在青云上就不一样了。我最喜欢青云的一点就是，青云几乎所有的资源都是可以动态伸缩和扩展的。带宽受限制了，直接扩大；服务器性能不够了，加核心加内存；单个服务器支撑不住了，批量生成十个并使用负载均衡器进行负载均衡操作；想要测试某个最新的特性，直接从线上创建一个Snapshot并生成资源进行测试。
+在本次迁移的过程中，我们就可以看出来，我们可以直接使用 Redis 进行升级，而不是手动导出数据库备份再执行导入操作。同样地，我们也不需要再重新配置一遍 Nginx ，只需要再创建一个负载均衡器即可。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年07月08日 首次发布&lt;/li&gt;
+&lt;li&gt;2016年07月15日 青云社区成功上线&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>新博客上线&amp;Hexo主题开发入门</title><link>https://xuanwo.io/2016/06/29/new-blog-new-life/</link><pubDate>Wed, 29 Jun 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/06/29/new-blog-new-life/</guid><description>&lt;p&gt;曾经看过我的博客的同学大概都会发现，我的博客再一次大变样了~
+这一次的更新其实酝酿了很久，早在刚开始用Hexo的时候就想着要有一个自己的主题。但是那个时候觉得这是一件很难的事情，要懂HTML，CSS，JavaScript，还要懂Swig，Ejs等模板语言，还要懂Hexo的内部原理，于是就一直搁置了。在独立实现了一个&lt;a href=&#34;https://xuanwo.io/2016/06/16/jade_ims/&#34;&gt;完整的项目&lt;/a&gt;之后，我认为自己已经有这样的能力了，于是决定正式开始。
+在我看来的话，Hexo的使用者大概分为三个层次：第一种用别人的主题，第二种模仿现有的主题，第三种自己独立开发。我原来是第一种，在Next的基础上做了很多改动，这一次进入到了第二个层次。我找了一套自我感觉还不错的模板，然后套用它的CSS设定和页面结构，就成了我现在的主题。
+利用两天学习和工作的闲暇时间，我大体上完成了这个主题。做得比较糙，很多细节还有待优化，但是我已经急不可耐地想要正式上线了，笑。在未来的话，我希望能把一些配置都能整理出来，优化一下代码，然后开源这个主题，希望大家能够喜欢~
+庆祝的话已经说的差不多了，下面来讲一讲如何开发一个Hexo主题。&lt;/p&gt;
+&lt;h1 id=&#34;结构&#34;&gt;结构&lt;/h1&gt;
+&lt;h2 id=&#34;主题结构&#34;&gt;主题结构&lt;/h2&gt;
+&lt;p&gt;Hexo主题的结构大体如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;.
+├── _config.yml
+├── languages
+│   ├── default.yml
+│   └── zh-Hans.yml
+├── layout
+│   ├── achieve.swig
+│   ├── category.swig
+│   ├── index.swig
+│   ├── _layout.swig
+│   ├── page.swig
+│   ├── _partials
+│   ├── post.swig
+│   └── tag.swig
+└── &lt;span style=&#34;color:#007020&#34;&gt;source&lt;/span&gt;
+├── css
+├── fonts
+├── img
+├── js
+└── vendors&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;首先有一个&lt;code&gt;_config.yml&lt;/code&gt;负责提供主题级别的配置，可以在&lt;code&gt;layout&lt;/code&gt;中通过&lt;code&gt;theme.xxx&lt;/code&gt;的形式进行调用。
+然后&lt;code&gt;languages&lt;/code&gt;负责实现博客的i18N功能，如果博客没有多语言的需求，只需要实现一个&lt;code&gt;default.yml&lt;/code&gt;即可。
+其次是最为重要的&lt;code&gt;layout&lt;/code&gt;文件夹，这个里面主要存放博客的结构，Hexo 引擎会使用指定的渲染引擎将&lt;code&gt;layout&lt;/code&gt;文件渲染成HTML页面。
+最后是&lt;code&gt;source&lt;/code&gt;，把所有主题需要用到的资源，比如CSS，Fonts，JS等都存放到这个文件夹中。&lt;/p&gt;
+&lt;p&gt;这个主题使用了&lt;a href=&#34;http://paularmstrong.github.io/swig/&#34;&gt;swig&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;页面结构&#34;&gt;页面结构&lt;/h2&gt;
+&lt;p&gt;页面结构分为两个维度，一者是我要呈现哪些页面，二者是每个页面上都有哪些内容。&lt;/p&gt;
+&lt;h3 id=&#34;哪些页面&#34;&gt;哪些页面？&lt;/h3&gt;
+&lt;p&gt;作为一个博客，主要需要的页面有以下这些：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;主页&lt;/li&gt;
+&lt;li&gt;单页&lt;/li&gt;
+&lt;li&gt;归档页面&lt;/li&gt;
+&lt;li&gt;分类页面&lt;/li&gt;
+&lt;li&gt;标签页面&lt;/li&gt;
+&lt;li&gt;文章页&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;哪些内容&#34;&gt;哪些内容？&lt;/h3&gt;
+&lt;p&gt;如果没有什么特别的设计，博客的页面大体上可以分为这几个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;head：头部文件&lt;/li&gt;
+&lt;li&gt;body：主体内容
+&lt;ul&gt;
+&lt;li&gt;header：题图，导航栏等&lt;/li&gt;
+&lt;li&gt;content： 内容&lt;/li&gt;
+&lt;li&gt;footer：尾部的联系方式等&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;实现&#34;&gt;实现&lt;/h1&gt;
+&lt;p&gt;前面讲到了 Hexo 的结构，下面来聊一聊具体的实现。&lt;/p&gt;
+&lt;h2 id=&#34;原理&#34;&gt;原理&lt;/h2&gt;
+&lt;p&gt;Hexo 渲染的入口是&lt;code&gt;_layout.swig&lt;/code&gt;，所以一个主题至少需要实现一个&lt;code&gt;_layout.swig&lt;/code&gt;。
+然后Hexo会遍历Hexo目录下&lt;code&gt;source&lt;/code&gt;文件夹中的所有Markdown文件，根据Markdown文件所指定的layout进行渲染，默认类型为&lt;code&gt;post&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;技巧&#34;&gt;技巧&lt;/h2&gt;
+&lt;h3 id=&#34;layout-swig结构&#34;&gt;_layout.swig结构&lt;/h3&gt;
+&lt;p&gt;整体的结构基本如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+&amp;lt;!doctype html&amp;gt;
+&amp;lt;html&amp;gt;
+&amp;lt;head&amp;gt;
+{% include &amp;#39;_partials/head.swig&amp;#39; %}
+&amp;lt;title&amp;gt;{% block title %}{% endblock %}&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body id=&amp;#34;home&amp;#34;&amp;gt;
+{% include &amp;#39;_partials/menu.swig&amp;#39; %}
+&amp;lt;div id=&amp;#34;wrap&amp;#34;&amp;gt;
+{% include &amp;#39;_partials/nav.swig&amp;#39; %}
+{% include &amp;#39;_partials/header.swig&amp;#39; %}
+&amp;lt;div id=&amp;#34;start&amp;#34; class=&amp;#34;container content&amp;#34;&amp;gt;
+{% block content %}{% endblock %}
+&amp;lt;/div&amp;gt;
+{% include &amp;#39;_partials/footer.swig&amp;#39; %}
+&amp;lt;/div&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;实现文章渲染&#34;&gt;实现文章渲染&lt;/h3&gt;
+&lt;p&gt;这个地方主要是借鉴了NexT主题的设计，实现了一个swig的宏来生成对应的文章。这个宏主要有两个参数，第一个是post对象，第二个是是否为主页。如果是主页就只显示简略的内容，如果不是就输出全文。&lt;/p&gt;
+&lt;p&gt;判断的部分实现如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+{% if is_index %}
+{% if post.excerpt %}
+{{ post.excerpt }}
+&amp;lt;a class=&amp;#34;&amp;#34; href=&amp;#34;{{ url_for(post.path) }}&amp;#34;&amp;gt;Read more&amp;lt;/a&amp;gt;
+{% endif %}
+{% else %}
+{{ post.content }}
+{% endif %}
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;用到的post页的参数可以&lt;a href=&#34;https://hexo.io/zh-cn/docs/variables.html&#34;&gt;我翻译的中文文档&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;分页插件&#34;&gt;分页插件&lt;/h3&gt;
+&lt;p&gt;Hexo 自己实现了一个分页插件，直接使用paginator函数即可。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+{% if page.prev or page.next %}
+&amp;lt;nav class=&amp;#34;pagination&amp;#34;&amp;gt;
+{{ paginator({
+prev_text: &amp;#39;&amp;lt;i class=&amp;#34;fa fa-angle-left&amp;#34;&amp;gt;&amp;lt;/i&amp;gt;&amp;#39;,
+next_text: &amp;#39;&amp;lt;i class=&amp;#34;fa fa-angle-right&amp;#34;&amp;gt;&amp;lt;/i&amp;gt;&amp;#39;,
+mid_size: 1
+}) }}
+&amp;lt;/nav&amp;gt;
+{% endif %}
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;评论系统&#34;&gt;评论系统&lt;/h3&gt;
+&lt;p&gt;对于Hexo来说，评论系统就是调用一个第三方的JS。所以只需要在合适的位置插入代码即可。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swig&#34; data-lang=&#34;swig&#34;&gt;{% raw %}
+&amp;lt;div id=&amp;#34;disqus_thread&amp;#34;&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;script&amp;gt;
+var disqus_config = function () {
+this.page.url = &amp;#39;{{ page.permalink }}&amp;#39;;
+this.page.identifier = &amp;#39;{{ page.path }}&amp;#39;;
+};
+(function () {
+var d = document, s = d.createElement(&amp;#39;script&amp;#39;);
+s.src = &amp;#39;//abc.disqus.com/embed.js&amp;#39;;
+s.setAttribute(&amp;#39;data-timestamp&amp;#39;, +new Date());
+(d.head || d.body).appendChild(s);
+})();
+&amp;lt;/script&amp;gt;
+{% endraw %}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;需要注意的坑&#34;&gt;需要注意的坑&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;page.posts&lt;/code&gt;是按照时间排序的，但是&lt;code&gt;site.posts&lt;/code&gt;是无序的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://hexo.io/zh-cn/docs/&#34;&gt;Hexo 官方中文文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年06月30日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>马可波罗珠宝进销存系统开发手记</title><link>https://xuanwo.io/2016/06/16/jade_ims/</link><pubDate>Thu, 16 Jun 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/06/16/jade_ims/</guid><description>&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/develop/jade-ims-index.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这个项目从我们这个学期开了&lt;strong&gt;系统分析与设计&lt;/strong&gt;这门课之后就开始了，首次创建这个项目是在3月26号，实际上真正的开发时间集中在6月上旬。差不多用两个星期的闲暇时间时间完成了这个简单的进销存系统。这个系统基于Flask框架，使用SQLite3数据库，前端则是使用Bootstrap框架，实现了包括客户，库存，销售，进货等管理子系统。说是管理，其实也就是简单的增加和删除而已。
+前人经常说，不要重复造轮子。既然有类似于Odoo这样强大的ERP系统珠玉在前，我为什么要再自己造一个功能简单，甚至根本不会有人用的轮子呢？从前我确实是这么想的，但是稍微有一点工作经验之后发现再造轮子的原因有两条：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;作为一个处在知识积累阶段的学生而言，再造轮子很有必要。不造一次轮子，你就永远不会明白轮子内部的真实构造。很多技术虽然看起来简单，但是想要有一个完善且健壮的实现却有很多坑需要踩。踩这些坑的过程，也正是一个技术人员成长最快的过程。&lt;/li&gt;
+&lt;li&gt;别人的轮子终究是别人的。你不知道这个轮子最大能承受多少压力，你也不知道这个轮子在什么样的情况下会爆胎。当一个轮子装上企业呼呼向前的列车，再要想把它替换下来是一件很难且成本很高的事情。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接下来，讲讲造这个轮子的一些经历吧~&lt;/p&gt;
+&lt;h1 id=&#34;项目启动&#34;&gt;项目启动&lt;/h1&gt;
+&lt;p&gt;正如前言中说的，这个项目是系统分析与设计这门课的课程设计，也是贯穿着整个学期的一个主旋律。早在这学期开学之初，我们就知道了自己需要做这样的一个系统。经历了上个学期各种技术炫了半天，最后却只是抄袭各种开源项目草草实现的&lt;a href=&#34;https://xuanwo.io/2015/06/30/together-project/&#34;&gt;失败&lt;/a&gt;，这个学期我务实了很多。从最开始的讨论就一直跟组员强调技术的可行性，基本上否决了所有试图增大项目复杂度的建议，把主题定在了一个纯粹的进销存管理系统。之所以如此，是因为我的观念发生了很大的变化：原来觉得技术的先进是最重要的，开发项目一定要用最现代的技术，最炫目的特效；现在觉得哪怕是一个用VB写出来的能稳定运行的丑陋系统都要胜过采用了种种最新潮技术却漏洞百出根本没法运行的“先进”系统。
+在讨论到最极端的时候，我甚至想只做一个仓库的管理系统，只包括进库和出库这样的简单功能。这样的态度曾经闹得有一次讨论直接不欢而散，好在组员都是非常Nice的人，在我主动表达歉意之后大度地表示没什么。经过多次讨论之后，我们终于达成了共识，要做一个进销存系统，功能尽可能简单，在实现基础功能的前提下，再考虑加入新的功能。
+接下来的事情就没有什么大的分歧了，整体系统采用B/S架构，开发语言选用我个人比较喜欢的Python，使用Flask框架，数据库选用无需配置的SQLite。然后服务器选择阿里云的学生机，系统选择成熟稳定的CentOS 7.2，Web Server选用Nginx，也就是我个人目前比较喜欢的开发平台——LESP(Linux, Nginx, SQLite, Python)。&lt;/p&gt;
+&lt;h1 id=&#34;项目细节&#34;&gt;项目细节&lt;/h1&gt;
+&lt;p&gt;下面再介绍一下项目的细节。&lt;/p&gt;
+&lt;h2 id=&#34;设计模式&#34;&gt;设计模式&lt;/h2&gt;
+&lt;p&gt;项目大体上采用了MVC的思想，不过在具体的实现上并没有太过纠结于概念上的东西。所有的网页模板都在&lt;code&gt;templates&lt;/code&gt;文件夹下，静态资源都扔到了&lt;code&gt;static&lt;/code&gt;目录，使用一个&lt;code&gt;models.py&lt;/code&gt;模块来单独存放所有的数据库定义，然后所有的路由以及操作都在&lt;code&gt;views&lt;/code&gt;中实现。对于我来说，快速地实现需求才是头等大事，是不是符合正统的MVC理念并不是十分重要。实际上现在这样的结构开发起来感觉也蛮顺手的，需要调整前端的样式和表单就在&lt;code&gt;templates&lt;/code&gt;文件夹下操作，需要修改程序的逻辑就去&lt;code&gt;views&lt;/code&gt;，他们基本上是一一对应的关系。&lt;a href=&#34;https://spacewander.github.io/explore-flask-zh/4-organizing_your_project.html&#34;&gt;这里&lt;/a&gt;有更加清晰的讲解，值得一看。&lt;/p&gt;
+&lt;h2 id=&#34;项目中的问题-解决方案&#34;&gt;项目中的问题&amp;amp;解决方案&lt;/h2&gt;
+&lt;h3 id=&#34;在flask框架中同时使用蓝图与flask-sqlalchemy&#34;&gt;在Flask框架中同时使用蓝图与Flask_SQLAlchemy&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/q/1010000005640527&#34;&gt;https://segmentfault.com/q/1010000005640527&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;感谢@Ethan和@，他们强有力地向我证明了有师傅带路的好处。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;这个问题纯粹是因为一直以来都是一个脚本Boy，没有系统性的学习过软件开发导致的。很显然，按照我原来的代码去产生实例，就会导致循环导入的错误。想要解决这样的问题，就需要使用工厂函数去生成实例，而不是自己去生成它。&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;__init__.py&lt;/code&gt;中添加一个&lt;code&gt;create_app()&lt;/code&gt;函数，在函数中进行参数配置，初始化和导入蓝图的操作：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;bps &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.dashboard:dashboard&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.install:install&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.login:login&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.sale:sale&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.customer:customer&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.purchase.inputbill:inputbill&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.purchase.supplier:supplier&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.stock.enterstockbill:enterstockbill&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.stock.leavestockbill:leavestockbill&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;jade_ims.views.stock.stock:stock&amp;#39;&lt;/span&gt;
+]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;create_app&lt;/span&gt;():
+app &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; Flask(__name__)
+app&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;config&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;from_object(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;config&amp;#39;&lt;/span&gt;)
+app&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;config&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;from_pyfile(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;config.py&amp;#39;&lt;/span&gt;)
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;init_app(app)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; path &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; bps:
+bp &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; import_string(path)
+app&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;register_blueprint(bp)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; app&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;flask如何优雅地重定向所有未登录用户到登陆界面&#34;&gt;Flask如何优雅地重定向所有未登录用户到登陆界面&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/q/1010000005645821&#34;&gt;https://segmentfault.com/q/1010000005645821&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;感谢@zwillon和@igaozp&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;有一个Feature是想要把所有未登录的用户都重定向到登录页面。当时手头上的技术方案主要有两种：第一种是自己包装一个装饰器，并添加在每一个视图函数中；第二种是使用第三方库&lt;code&gt;Flask-Login&lt;/code&gt;，在视图函数中添加&lt;code&gt;@login_required&lt;/code&gt;。但是感觉姿势都不怎么优雅，因为我需要不断地在视图函数中添加这个装饰器，不太符合DRY(Don&amp;rsquo;t Repeat Yourself)准则。
+SF的老司机给了我一个相当优雅的方案——Hook到app的&lt;code&gt;before_request&lt;/code&gt;方法。也就是这样来实现：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@app.before_request&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;check_need_login&lt;/span&gt;():
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 检查登录的逻辑&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;pass&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我第一次是这样实现的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@app.before_request&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;check_need_login&lt;/span&gt;():
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;logged_in&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; session:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; redirect(url_for(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login.user_login&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这样就带来了一个问题，对于未登录的用户来说，所有页面都会不断地重定向从而导致整个应用崩溃。因此还需要指定在某些情况下停止重定向，所以我们还需要修改一下&lt;code&gt;check_need_login&lt;/code&gt;的逻辑：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@app.before_request&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;check_need_login&lt;/span&gt;():
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;logged_in&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; session &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;and&lt;/span&gt; request&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;endpoint &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; (&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login.user_login&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;static&amp;#39;&lt;/span&gt;):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; redirect(url_for(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login.user_login&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;当&lt;code&gt;session&lt;/code&gt;中没有&lt;code&gt;logged_in&lt;/code&gt;字段且&lt;code&gt;endpoint&lt;/code&gt;不是&lt;code&gt;user_login&lt;/code&gt;和&lt;code&gt;static&lt;/code&gt;的时候就重定向到登录页面，这样就比较优雅地解决了重定向未登录用户到登陆界面的需求。&lt;/p&gt;
+&lt;h3 id=&#34;flask-sqlalchemy-插入数据时发生错误后如何处理&#34;&gt;flask_sqlalchemy 插入数据时发生错误后如何处理&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/q/1010000005647431&#34;&gt;https://segmentfault.com/q/1010000005647431&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;在实际开发的过程中发现，如果&lt;code&gt;db.session&lt;/code&gt;中添加的记录有问题，在commit的时候会出现一个报错。所以我们需要在出错的时候进行一些处理，以保证程序出错之后还能够正常地运行。网友 @学不会编程的永仲 给出的回答是我应该在form中验证数据的正确性。虽然我相信他的理解可能是正确的，但是不太符合我的哲学，我更加倾向于&lt;strong&gt;让它崩溃，然后处理异常&lt;/strong&gt;而不是&lt;strong&gt;事先处理好所有的错误&lt;/strong&gt;。
+通过查阅文档，了解到&lt;code&gt;db.session.rollback()&lt;/code&gt;这一函数可以在出错是进行回滚，于是最后的实现变成了这样：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@supplier.route&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;/purchase/supplier/add&amp;#39;&lt;/span&gt;, methods&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;POST&amp;#39;&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;add_supplier&lt;/span&gt;():
+form &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; request&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;form
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; request&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;method &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;POST&amp;#39;&lt;/span&gt;:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(form)
+supplier &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; Supplier(form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_name&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_constract&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_phone&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_address&amp;#39;&lt;/span&gt;],
+form[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier_remark&amp;#39;&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;try&lt;/span&gt;:
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;session&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;add(supplier)
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;session&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;commit()
+flash(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;供应商添加成功！&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;success&amp;#39;&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;except&lt;/span&gt;:
+db&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;session&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;rollback()
+flash(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;输入不合法，请重新输入！&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;danger&amp;#39;&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; redirect(url_for(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;supplier.list_supplier&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;项目总结&#34;&gt;项目总结&lt;/h1&gt;
+&lt;p&gt;随着答辩的完成，这个项目进入了尾声。因为很多东西需要去学习，有新的东西需要去探索，所以这个项目也很有可能不会再继续维护了。那么这个项目开源出来的价值在哪里呢？我想，这个项目虽然简单，但它毕竟还算是一个完整的Flask项目，除了&lt;code&gt;flask_sqlalchemy&lt;/code&gt;之外没有多余的依赖，非常适合一个跟我一样的Python初学者进行入门学习。如果说有人能够因为这个项目少走一些弯路，少在一些死胡同浪费时间，我想这个项目的价值就已经实现了。如果再往大一点来说，开源的价值也就实现了。
+如果要我自评的话，我觉得这样的项目应该有60分。之所以给一个及格分，是因为这个项目毕竟实现了需求的大多数功能，也有好好地跑在阿里云的服务器上。丢分的话，大体上是因为这个项目毫无注释，没有安装文档，也没有配置手册，很多东西都是硬编码到了代码中。不仅如此，编程的风格也是相当的不佳，在模板部分缺乏良好的顶层设计，出现了大量的重复代码。这些问题希望自己能在下一个项目中得到一些改善。
+Anyway，随着这个项目的结束，我的大三生涯也要结束了。接下来是波澜壮阔的实习阶段，希望自己能够在实习的时候多踩一些坑，多走一些弯路，多
+得到一些来自“长者”的指点。&lt;/p&gt;
+&lt;h1 id=&#34;参考资源&#34;&gt;参考资源&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://docs.jinkan.org/docs/flask/&#34;&gt;Flask 中文文档 &lt;em&gt;文档略有过时，代码以Github上为准&lt;/em&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://spacewander.github.io/explore-flask-zh/index.html&#34;&gt;Flask 之旅&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://docs.jinkan.org/docs/flask-sqlalchemy/index.html&#34;&gt;Flask-SQLALchemy 中文文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年06月17日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>使用Github Pages做博客的新思路——Spring</title><link>https://xuanwo.io/2014/06/11/new-way-blog-spring/</link><pubDate>Wed, 11 Jun 2014 14:00:00 +0000</pubDate><guid>https://xuanwo.io/2014/06/11/new-way-blog-spring/</guid><description>&lt;p&gt;很久之前就有了想要有一个自己的博客的想法，一直没有付诸于实施。整个初中到高中基本上就是在使用一个半死不活的CSDN博客，更新不多，质量不高，还有点嫌弃它丑陋，定制性不佳的界面。
+前两天队长要求我们每个人都必须开通一个博客，于是，我终于开始腾出精力和时间去寻找一个合适的地方来做我的博客。现有的一些博客提供商都被否决了，网易搜狐腾讯之类的并不是适合一个程序猿，文章写出来也得不到反馈与交流，失去了它的意义。随着搜索的进行，Github Pages开始频繁的出现在页面上。之前一直在用Github，但是对它的Pages业务并不了解。根据一些教程（感谢&lt;a href=&#34;http://www.ruanyifeng.com/blog/2012/08/blogging_with_jekyll.html&#34;&gt;阮一峰先生的博客&lt;/a&gt;），我先后使用了&lt;code&gt;Hexo&lt;/code&gt;，&lt;code&gt;Jekyll&lt;/code&gt;，&lt;code&gt;Octopress&lt;/code&gt;等生成网站。网站的风格我很喜欢，只是不停地纠结于怎样的配置更好的问题，反而加重了我自己的负担。
+无意之间，我看到了@zhaoda的博客，使用自己开发的&lt;code&gt;Spring&lt;/code&gt;项目，通过抓取项目的&lt;code&gt;issues&lt;/code&gt;来撰写博客，效果出奇的好。使用Github自带的&lt;code&gt;lables&lt;/code&gt;进行标签管理，&lt;code&gt;issues&lt;/code&gt;的评论功能直接可以当做文章的评论区，操作简单，无需复杂配置，完全符合我的要求。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1 id=&#34;作者本人的介绍&#34;&gt;作者本人的介绍&lt;/h1&gt;
+&lt;p&gt;Spring是一个通过GitHub Issues撰写内容的博客引擎，或者说是一个简单、静态化的建站系统。不需要服务器和数据库支持，你可以把它作为一个GitHub代码仓库，并托管在免费的GitHub Pages上运行，然后在这个仓库的Issues系统里撰写日志。
+你可以在这个仓库的Issues系统里添加labels标签，这些标签会成为博客的分类，然后新建Issues，并用Markdown语法写日志。
+Spring拥有响应式的页面设计，可以在手机、平板和桌面端完美展现；支持IE10+和所有现代浏览器，底端设备做了跳转的降级处理。
+你可以快速的安装并运行这个系统。&lt;/p&gt;
+&lt;h1 id=&#34;构建步骤&#34;&gt;构建步骤&lt;/h1&gt;
+&lt;p&gt;接下来，我简单介绍一下如何应用Spring来构建自己的博客。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Fork仓库&lt;a href=&#34;https://github.com/zhaoda/spring&#34;&gt;Spring&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;修改仓库名称为&lt;code&gt;yourname.github.io&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;修改&lt;code&gt;index.html&lt;/code&gt;文件（可以在Github网页端修改好之后再同步到本地）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;$.extend(spring.config, {
+// my blog title
+---
+title: &#39;Your Blog title&#39;,
+// my blog description
+desc: &amp;quot;A blog engine written by github issues [Fork me on GitHub](https://github.com/zhaoda/spring)&amp;quot;,
+// my github username
+owner: &#39;Your Github username&#39;,
+// creator&#39;s username
+creator: &#39;Your Github username&#39;,
+// the repository name on github for writting issues
+repo: &#39;yourname.github.io&#39;,
+// custom page
+pages: [
+]
+})
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在设置页面中打开&lt;code&gt;Issues&lt;/code&gt;功能，开始写你的博客吧～&lt;/p&gt;
+&lt;h1 id=&#34;添加百度统计代码&#34;&gt;添加百度统计代码&lt;/h1&gt;
+&lt;p&gt;复制百度提供的代码，粘贴到&lt;code&gt;index.html&lt;/code&gt;中&lt;code&gt;&amp;lt;body&amp;gt;&lt;/code&gt;与&lt;code&gt;&amp;lt;\body&amp;gt;&lt;/code&gt;之间即可。
+添加完毕后，可以在百度统计中选择&lt;code&gt;检测代码&lt;/code&gt;来测试自己的代码是否安装成功。
+其他统计代码也是一样。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年06月11日 完成初稿&lt;/li&gt;
+&lt;li&gt;2014年06月12日 完成添加百度统计代码教程&lt;/li&gt;
+&lt;li&gt;2014年07月03日 整体博客迁移至Hexo，此文不再更新&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

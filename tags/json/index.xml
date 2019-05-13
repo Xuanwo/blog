@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Json on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/json/</link><description>Recent content in Json on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Fri, 30 Oct 2015 23:47:23 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/json/index.xml" rel="self" type="application/rss+xml"/><item><title>在Python中使用JSON</title><link>https://xuanwo.io/2015/10/30/python-json/</link><pubDate>Fri, 30 Oct 2015 23:47:23 +0000</pubDate><guid>https://xuanwo.io/2015/10/30/python-json/</guid><description>&lt;h1 id=&#34;json介绍&#34;&gt;JSON介绍&lt;/h1&gt;
+&lt;p&gt;JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。 易于人阅读和编写。同时也易于机器解析和生成。 它基于JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999的一个子集。 JSON采用完全独立于语言的文本格式，但是也使用了类似于C语言家族的习惯（包括C, C++, C#, Java, JavaScript, Perl, Python等）。 这些特性使JSON成为理想的数据交换语言。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;引用自&lt;a href=&#34;http://www.json.org/json-zh.html&#34;&gt;json.org&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;语法&#34;&gt;语法&lt;/h1&gt;
+&lt;h2 id=&#34;结构&#34;&gt;结构&lt;/h2&gt;
+&lt;p&gt;JSON只提供了两种结构——字典和数组。也就是说，JSON可以存储一对一或者一对多的键值对关系。&lt;/p&gt;
+&lt;h2 id=&#34;形式&#34;&gt;形式&lt;/h2&gt;
+&lt;h3 id=&#34;对象&#34;&gt;对象&lt;/h3&gt;
+&lt;p&gt;对象是一个无序的键值对集合。
+一个对象以&lt;code&gt;{&lt;/code&gt;开始，&lt;code&gt;}&lt;/code&gt;结束。每个&lt;code&gt;键&lt;/code&gt;后跟一个&lt;code&gt;:&lt;/code&gt;；键值对之间使用&lt;code&gt;,&lt;/code&gt;分隔。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/object.gif&#34; alt=&#34;object&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;数组&#34;&gt;数组&lt;/h3&gt;
+&lt;p&gt;数组是值的有序集合，一个键可以对应一个数组。
+一个数组以&lt;code&gt;[&lt;/code&gt;开始，&lt;code&gt;]&lt;/code&gt;结束。值之间使用&lt;code&gt;,&lt;/code&gt;分隔。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/array.gif&#34; alt=&#34;array&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;值&#34;&gt;值&lt;/h3&gt;
+&lt;p&gt;值可以是双引号括起来的字符串、数值、true、false、 null、对象或者数组。这些结构可以嵌套。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/value.gif&#34; alt=&#34;value&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;字符串&#34;&gt;字符串&lt;/h3&gt;
+&lt;p&gt;字符串是由双引号包围的任意数量Unicode字符的集合，使用反斜线转义。一个字符即一个单独的字符串。
+字符串与C/C++中的字符串非常相似，包括常见的各种转义符号。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/string.gif&#34; alt=&#34;value&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;数值&#34;&gt;数值&lt;/h3&gt;
+&lt;p&gt;数值与C/C++中的数值非常相似，但没有八进制和十六进制格式。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/number.gif&#34; alt=&#34;number&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;空白&#34;&gt;空白&lt;/h3&gt;
+&lt;p&gt;空白符号（包括空格，Tab以及回车）可以加入到任何符号之间，不会影响JSON的含义&lt;/p&gt;
+&lt;h1 id=&#34;python中的json库&#34;&gt;Python中的JSON库&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;以Python 3为基准&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;编码&#34;&gt;编码&lt;/h2&gt;
+&lt;h3 id=&#34;对应类型&#34;&gt;对应类型&lt;/h3&gt;
+&lt;p&gt;Python | JSON
+&amp;ndash;|&amp;ndash;
+dict | object
+list, tuple | array
+str| string
+int, float| number
+True | true
+False | false
+None | null&lt;/p&gt;
+&lt;h3 id=&#34;函数&#34;&gt;函数&lt;/h3&gt;
+&lt;p&gt;我们使用&lt;code&gt;JSON&lt;/code&gt;库中的&lt;code&gt;dump&lt;/code&gt;以及&lt;code&gt;dumps&lt;/code&gt;函数来进行&lt;code&gt;JSON&lt;/code&gt;编码。&lt;code&gt;dump&lt;/code&gt;和&lt;code&gt;dumps&lt;/code&gt;各项参数含义基本一致，唯一区别在于&lt;code&gt;dump&lt;/code&gt;函数编码产生一个JSON文件流，而&lt;code&gt;dumps&lt;/code&gt;编码产生一个JSON字符串。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dump(obj, fp, skipkeys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False, ensure_ascii&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, check_circular&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, allow_nan&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, cls&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, indent&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, separators&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, default&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, sort_keys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False, &lt;span style=&#34;color:#666&#34;&gt;**&lt;/span&gt;kw)
+json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps(obj, skipkeys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False, ensure_ascii&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, check_circular&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, allow_nan&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True, cls&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, indent&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, separators&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, default&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, sort_keys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False, &lt;span style=&#34;color:#666&#34;&gt;**&lt;/span&gt;kw)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;obj&lt;/code&gt;：编码对象&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;fp&lt;/code&gt;：指定文件流&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;skipkeys&lt;/code&gt;：若skipkeys为真，则非标准类型将会跳过；否则返回&lt;code&gt;TypeError&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ensure_ascii&lt;/code&gt;：若&lt;code&gt;ensure_ascii&lt;/code&gt;为真，则输出时将会确保没有非ASCII字符；否则将会原样输出&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;check_circular&lt;/code&gt;：若&lt;code&gt;check_circular&lt;/code&gt;为真，则将会检测是否存在循环调用；否则会跳过检测&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;allow_nan&lt;/code&gt;：若&lt;code&gt;allow_nan&lt;/code&gt;为真，则将会允许存在空值（无穷大值）；否则会返回&lt;code&gt;ValueError&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cls&lt;/code&gt;：若&lt;code&gt;cls&lt;/code&gt;为空值，则使用&lt;code&gt;JSONEncoder&lt;/code&gt;；否则使用指定子类进行编码&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;indent&lt;/code&gt;：若&lt;code&gt;indent&lt;/code&gt;为空值，则无缩进；否则使用指定值进行缩进&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;separators&lt;/code&gt;：若&lt;code&gt;separators&lt;/code&gt;为空值，则使用&lt;code&gt;(&#39;,&#39;, &#39;: &#39;)&lt;/code&gt;分隔；否则使用指定的元组进行分隔&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;default&lt;/code&gt;：若&lt;code&gt;default&lt;/code&gt;为空值，则使用自带的&lt;code&gt;default&lt;/code&gt;方法；否则使用指定值&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sort_keys&lt;/code&gt;：若&lt;code&gt;sort_keys&lt;/code&gt;为真，则输出将会按照键进行排序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;示范&#34;&gt;示范&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;json&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps([&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;foo&amp;#39;&lt;/span&gt;, {&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;bar&amp;#39;&lt;/span&gt;: (&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;baz&amp;#39;&lt;/span&gt;, None, &lt;span style=&#34;color:#40a070&#34;&gt;1.0&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;)}])
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;[&amp;#34;foo&amp;#34;, {&amp;#34;bar&amp;#34;: [&amp;#34;baz&amp;#34;, null, 1.0, 2]}]&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 排序&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps({&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;c&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;b&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;a&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;}, sort_keys&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;True))
+{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;a&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;b&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;c&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 分隔符&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps([&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;3&lt;/span&gt;,{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;4&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;6&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;7&lt;/span&gt;}], separators&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;,&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;:&amp;#39;&lt;/span&gt;))
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;[1,2,3,{&amp;#34;4&amp;#34;:5,&amp;#34;6&amp;#34;:7}]&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Unicode输出&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;dumps(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#4070a0;font-weight:bold&#34;&gt;\u5317\u4eac&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;, ensure_ascii&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;False)
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;北京&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;解码&#34;&gt;解码&lt;/h2&gt;
+&lt;h3 id=&#34;对应类型-1&#34;&gt;对应类型&lt;/h3&gt;
+&lt;p&gt;JSON | Python
+&amp;ndash; | &amp;ndash;
+object | dict
+array | list
+string | str
+number (int) | int
+number (real) | float
+true | True
+false | False
+null | None&lt;/p&gt;
+&lt;h3 id=&#34;函数-1&#34;&gt;函数&lt;/h3&gt;
+&lt;p&gt;我们使用&lt;code&gt;JSON&lt;/code&gt;库中的&lt;code&gt;load&lt;/code&gt;以及&lt;code&gt;loads&lt;/code&gt;函数来进行&lt;code&gt;JSON&lt;/code&gt;解码。&lt;code&gt;load&lt;/code&gt;和&lt;code&gt;loads&lt;/code&gt;各项参数含义基本一致，唯一区别在于&lt;code&gt;load&lt;/code&gt;函数用于解码JSON文件流，而&lt;code&gt;loads&lt;/code&gt;用于解码JSON字符串。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;load(fp, cls&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, object_hook&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_float&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_int&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_constant&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, object_pairs_hook&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, &lt;span style=&#34;color:#666&#34;&gt;**&lt;/span&gt;kw)
+json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;loads(s, encoding&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, cls&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, object_hook&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_float&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_int&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, parse_constant&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, object_pairs_hook&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None, &lt;span style=&#34;color:#666&#34;&gt;**&lt;/span&gt;kw)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;fp&lt;/code&gt;：指定文件流&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;s&lt;/code&gt;：指定字符串&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;encoding&lt;/code&gt;：指定字符串编码&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cls&lt;/code&gt;：若&lt;code&gt;cls&lt;/code&gt;为空值，则使用&lt;code&gt;JSONEncoder&lt;/code&gt;；否则使用指定子类进行编码&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;object_hook&lt;/code&gt;：若&lt;code&gt;object_hook&lt;/code&gt;为空值，对象则返回解码器&lt;code&gt;dict&lt;/code&gt;；否则使用自定义类型返回&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parse_float&lt;/code&gt;：若&lt;code&gt;parse_float&lt;/code&gt;为空，则JSON浮点数转换为浮点数；否则转换为指定类型&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parse_int&lt;/code&gt;：若&lt;code&gt;parse_int&lt;/code&gt;为空，则JSON整数转换为整数；否则转换为指定类型&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parse_constant&lt;/code&gt;若&lt;code&gt;parse_constant&lt;/code&gt;为空，则不会处理非法输入；否则抛出异常&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;object_pairs_hook&lt;/code&gt;：若&lt;code&gt;object_pairs_hook&lt;/code&gt;为空值，则数组返回解码器&lt;code&gt;dict&lt;/code&gt;；否则使用自定义类型返回&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;示范-1&#34;&gt;示范&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;json&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; json&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;loads(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;[&amp;#34;foo&amp;#34;, {&amp;#34;bar&amp;#34;:[&amp;#34;baz&amp;#34;, null, 1.0, 2]}]&amp;#39;&lt;/span&gt;)
+[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;foo&amp;#39;&lt;/span&gt;, {&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;bar&amp;#39;&lt;/span&gt;: [&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;baz&amp;#39;&lt;/span&gt;, None, &lt;span style=&#34;color:#40a070&#34;&gt;1.0&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;]}]&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年10月30日 初步完成&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

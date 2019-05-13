@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Oracle on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/oracle/</link><description>Recent content in Oracle on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 03 Jan 2016 15:31:32 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/oracle/index.xml" rel="self" type="application/rss+xml"/><item><title>VS2015连接Oracle数据库</title><link>https://xuanwo.io/2016/01/03/vs-oracle-11g/</link><pubDate>Sun, 03 Jan 2016 15:31:32 +0000</pubDate><guid>https://xuanwo.io/2016/01/03/vs-oracle-11g/</guid><description>&lt;h1 id=&#34;开发环境&#34;&gt;开发环境&lt;/h1&gt;
+&lt;p&gt;宿主机：Win10 + VS2015 + ODP.Net for VS2015
+虚拟机：Win7 + Oracle 11g + 桥接&lt;/p&gt;
+&lt;h1 id=&#34;配置odp-net&#34;&gt;配置ODP.Net&lt;/h1&gt;
+&lt;p&gt;首先下载 &lt;a href=&#34;http://www.oracle.com/technetwork/topics/dotnet/downloads/odacmsidownload-2745497.html&#34;&gt;Oracle Developer Tools for Visual Studio 2015&lt;/a&gt; ，下载此文件需要注册Oracle社区账号并接受相关的协议，此文件提供了以下组件：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Oracle Developer Tools for Visual Studio 12.1.0.2.4&lt;/li&gt;
+&lt;li&gt;Oracle Data Provider for .NET 4 12.1.0.2.0&lt;/li&gt;
+&lt;li&gt;Oracle Providers for ASP.NET 4 12.1.0.2.0&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下载完成后运行MSI安装程序进行安装，安装完成后会自动注册VS2015的相关插件，重新启动VS2015后将会看到Oracle的相关命令，比如SQL *PLUS支持等。同时添加数据库时也能看到相应的选项。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ODP.Net支持所有Oracle版本，因此下载时只需要注意VS的版本即可。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;配置tnsnames-ora&#34;&gt;配置tnsnames.ora&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ODP.Net默认使用安装目录下的&lt;code&gt;tnsnames.ora&lt;/code&gt;，若安装目录在Program Files下，可能会遇到无权限等问题，此时使用管理员权限打开命令行，切换到对应目录并使用notepad编辑。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;复制服务器端的tnsnames.ora文件内容，或者自己手动编辑，格式如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;&#34;&gt;数据源别名&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;
+(DESCRIPTION &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;
+(ADDRESS &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (PROTOCOL &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; TCP)(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;HOST&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;&#34;&gt;主机名或&lt;/span&gt;IP&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;)(PORT &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;&#34;&gt;端口号&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;))
+(CONNECT_DATA &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;
+(SERVER &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; DEDICATED)
+(SERVICE_NAME &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;&#34;&gt;数据库服务名&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;)
+)
+)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;添加数据库&#34;&gt;添加数据库&lt;/h1&gt;
+&lt;p&gt;打开&lt;code&gt;工具&lt;/code&gt;-&lt;code&gt;连接到数据库&lt;/code&gt;，数据源修改为&lt;code&gt;Oracle数据库&lt;/code&gt;下的&lt;code&gt;ODP.NET,托管驱动程序&lt;/code&gt;，然后点击&lt;code&gt;确定&lt;/code&gt;，打开&lt;code&gt;添加连接&lt;/code&gt;窗口。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/add-database.png&#34; alt=&#34;添加连接&#34; /&gt;
+填写用户名，密码并选择数据源，然后测试连接，成功的话说明已经连通，点击确定即可。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;使用虚拟机搭建数据库的额外Tips
+根据某网友分析，Oracle的监听器在通过1521端口连接后，会开启另外一个新的随机端口进行数据通讯，因此使用NAT方式虚拟网卡可能会导致连接失败。这种情况下，请使用桥接方式虚拟网卡，并在&lt;code&gt;net manager&lt;/code&gt;中将&lt;code&gt;loaclhost&lt;/code&gt;修改为虚拟机当前的IP。重启监听服务后，再试。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;连接数据库并使用&#34;&gt;连接数据库并使用&lt;/h1&gt;
+&lt;h2 id=&#34;连接数据库&#34;&gt;连接数据库&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-vb&#34; data-lang=&#34;vb&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; oradb &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#902000&#34;&gt;String&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;User ID=system;Password=123456;Data Source=lol&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; conn &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;New&lt;/span&gt; OracleConnection(oradb)
+conn.Open()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; sql &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#902000&#34;&gt;String&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;create table xxx&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; sqlCom &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;New&lt;/span&gt; OracleCommand
+sqlCom.CommandText &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; sql
+sqlCom.Connection &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; conn
+sqlCom.ExecuteNonQuery()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;查询数据&#34;&gt;查询数据&lt;/h2&gt;
+&lt;p&gt;成功配置数据源之后，只需要向界面上拖动&lt;code&gt;DataGridView&lt;/code&gt;，并进行相关配置，选择自己需要的表即可。&lt;/p&gt;
+&lt;h2 id=&#34;插入图片的正确姿势&#34;&gt;插入图片的正确姿势&lt;/h2&gt;
+&lt;p&gt;图片作为二进制数据无法直接拼凑出SQL命令，我们需要使用&lt;code&gt;OracleCommand&lt;/code&gt;自带的&lt;code&gt;Parameters&lt;/code&gt;功能。在SQL命令中用&lt;code&gt;:photo&lt;/code&gt;来代表一个参量，然后使用&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-vb&#34; data-lang=&#34;vb&#34;&gt;sqlCom.Parameters.Add(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;photo&amp;#34;&lt;/span&gt;, OracleDbType.Blob, imgData.Length)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;来分别指定这个参量的类型和所占空间大小&lt;/p&gt;
+&lt;p&gt;最后使用&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-vb&#34; data-lang=&#34;vb&#34;&gt;sqlCom.Parameters(0).Value &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; imgData&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;来指定这个参量的值。&lt;/p&gt;
+&lt;p&gt;整个插入图片过程的代码如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-vb&#34; data-lang=&#34;vb&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; conn &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;New&lt;/span&gt; OracleConnection(oradb)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; imgData(0) &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#902000&#34;&gt;Byte&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; ms &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;New&lt;/span&gt; System.IO.MemoryStream
+PictureBox1.BackgroundImage.Save(ms, PictureBox1.BackgroundImage.RawFormat)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;ReDim&lt;/span&gt; imgData(ms.Length &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt; 1)
+ms.Read(imgData, 0, ms.Length)
+ms.Close()
+conn.Open()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; sql &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#902000&#34;&gt;String&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;insert into hero values&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;(&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt; TextBox1.Text &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;:photo&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;)&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; sqlCom &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;New&lt;/span&gt; OracleCommand
+sqlCom.CommandText &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; sql
+sqlCom.Connection &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; conn
+sqlCom.Parameters.Add(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;photo&amp;#34;&lt;/span&gt;, OracleDbType.Blob, imgData.Length)
+sqlCom.Parameters(0).Value &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; imgData
+sqlCom.ExecuteNonQuery()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;常见错误&#34;&gt;常见错误&lt;/h1&gt;
+&lt;h2 id=&#34;column-not-allowed-here&#34;&gt;column not allowed here&lt;/h2&gt;
+&lt;p&gt;数据类型不符，检查对应项目数据类型是否正确。&lt;/p&gt;
+&lt;h2 id=&#34;missing-comma&#34;&gt;missing comma&lt;/h2&gt;
+&lt;p&gt;命令格式不对，检查一下自己的SQL命令是否有错误，特别是在有字符串的时候，需要使用&lt;code&gt;&amp;quot;&amp;quot;&lt;/code&gt;来代表一个字符串中的&lt;code&gt;&amp;quot;&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;identifier-is-too-long&#34;&gt;identifier is too long&lt;/h2&gt;
+&lt;p&gt;标识符过长（不得超过30字符），不是非常明白原因，不过我取消掉insert命令中指定位置的部分之后，这个错误消失了。&lt;/p&gt;
+&lt;h2 id=&#34;missing-into-keyword&#34;&gt;missing INTO keyword&lt;/h2&gt;
+&lt;p&gt;缺少into关键字（手滑打成了inte），检查一下自己的SQL命令是否有错误。&lt;/p&gt;
+&lt;h2 id=&#34;cannot-insert-null-into-system-hero-herocategoryid&#34;&gt;cannot insert NULL into (&amp;ldquo;SYSTEM&amp;rdquo;.&amp;ldquo;HERO&amp;rdquo;.&amp;ldquo;HEROCATEGORYID&amp;rdquo;)&lt;/h2&gt;
+&lt;p&gt;这些项都指定了非0值，故不能不赋值，为对应项目赋值即可。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年01月03日 初步完成&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

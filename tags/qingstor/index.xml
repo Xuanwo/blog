@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Qingstor on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/qingstor/</link><description>Recent content in Qingstor on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Wed, 05 Sep 2018 09:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/qingstor/index.xml" rel="self" type="application/rss+xml"/><item><title>qscamel —— 数据迁移工具</title><link>https://xuanwo.io/2018/09/05/qscamel-intro/</link><pubDate>Wed, 05 Sep 2018 09:00:00 +0000</pubDate><guid>https://xuanwo.io/2018/09/05/qscamel-intro/</guid><description>&lt;p&gt;qscamel 是一个用于在不同的端点 (Endpoint) 中高效迁移数据的工具。&lt;/p&gt;
+&lt;p&gt;作为一个面向用户的数据迁移工具，它必须要满足如下要求：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不丢数据：这是一个数据迁移工具最基本的要求。不能多，不能少，不能错，要支持校验和修复。&lt;/li&gt;
+&lt;li&gt;好用：作为一个给用户使用的工具，它需要足够好用。有完善的日志，不会无故退出，网络波动时能够自动重试，部署 &amp;amp; 配置容易，能够支持断点续传，无需人工干预。&lt;/li&gt;
+&lt;li&gt;高效：数据迁移通常都会有大量的文件传输，工具必须能够高效的使用服务器资源和带宽，节省用户执行迁移所需要的时间。&lt;/li&gt;
+&lt;li&gt;扩展性强：数据迁移所需要的场景千奇百怪，工具必须能够扩展并支持大多数用户的场景，减少后续开发和维护的成本。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;qscamel 正是在这些要求下诞生的产物，它或许还不是那么完美，但是已经可用。目前已经圆满完成了很多数据迁移任务，任务涉及文件数量上亿，文件大小达数百 TB 。这篇文章将会介绍 qscamel 设计，实现和开发过程中的一些小故事，希望能够简单的告诉大家在 QingCloud 我们是如何做产品的，以及为我们的 HR 小姐姐提前打一个招聘的广告:)&lt;/p&gt;
+&lt;h2 id=&#34;设计&#34;&gt;设计&lt;/h2&gt;
+&lt;p&gt;qscamel 只有一个功能，但是为了把这个功能做好，它需要在各个层面上都有一个比较良好的设计。&lt;/p&gt;
+&lt;h3 id=&#34;用户交互&#34;&gt;用户交互&lt;/h3&gt;
+&lt;p&gt;一个好的命令行工具应该如何跟用户交互呢？嗯，抛开使用场景谈好坏都是耍流氓，那我重新组织一下语言：一个给&lt;strong&gt;终端用户&lt;/strong&gt;使用的&lt;strong&gt;数据迁移&lt;/strong&gt;工具应该如何跟用户交互？这里有两个关键点：第一，终端用户意味着使用者不是像我这样的高级用户，他们大多数只有一点甚至是没有使用命令行程序的经验，他们能读一些中文的文档，他们无法自行处理或者理解程序返回的错误，他们记不住程序的参数；第二，数据迁移意味着这个程序可能会运行很长的时间，用户不会一直在边上守着，同时这个程序用户可能不会频繁使用。分析到这里，我们已经能够大概的想象到这个工具应该是什么样子了：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;命令要少，参数要少&lt;/li&gt;
+&lt;li&gt;学习成本要低，迁移成本要低（换个任务类型不需要重新学习配置方法）&lt;/li&gt;
+&lt;li&gt;任务启动后无需用户介入&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;除了需要考虑用户体验之外，我们还需要考虑开发体验。一个数据迁移工具，必然需要能够处理多种不同的数据来源和迁移目标，以及他们各自不一样的复杂参数。如果按照传统开发命令行工具的习惯，每个不同的端点都使用参数来进行配置，那光是参数解析和处理就要写很久。&lt;/p&gt;
+&lt;p&gt;因此，qscamel 最终的交互设计稿是这样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ qscamel run task-name &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; -t /path/to/task/file &lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;
+$ qscamel delete task-name
+$ qscamel status
+$ qscamel clean
+$ qscamel version&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;与之相对比的是 v1 版本的 qscamel：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ qscamel -t s3 -s s3-bucket-name -z us-east-1 -a &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;S3ACCESSKEYID&amp;#34;&lt;/span&gt; -S &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;S3SECRETACCESSKEY&amp;#34;&lt;/span&gt; -b qingstor-bucket-name -d &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;migrate 05&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;同时，我们将复杂的任务配置拆分为三块：qscamel 本身的配置，任务的配置，端点的配置，并将他们分成两个文件：qscamel 本身的配置独立的存储在一个全局的配置文件中，任务和端点的配置放在一个我们定义好的任务配置当中。&lt;/p&gt;
+&lt;p&gt;全局的配置文件形如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;concurrency:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;log_level:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;info&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;pid_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.qscamel/qscamel.pid&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;log_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.qscamel/qscamel.log&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;database_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.qscamel/db&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;而任务的配置文件格式同样是精心设计过的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;copy&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;source:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;fs&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/path/to/source&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;destination:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;qingstor&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/path/to/destination&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;options:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;bucket_name:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;example_bucket&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;access_key_id:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;example_access_key_id&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;secret_access_key:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;example_secret_access_key&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;ignore_existing:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;last_modified&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;每个任务会由 &lt;code&gt;type&lt;/code&gt;，&lt;code&gt;source&lt;/code&gt;，&lt;code&gt;destination&lt;/code&gt; 和任务相关的配置组成。其中 &lt;code&gt;source&lt;/code&gt; 和 &lt;code&gt;destination&lt;/code&gt; 配置格式一样，都由 &lt;code&gt;type&lt;/code&gt;，&lt;code&gt;path&lt;/code&gt; 和 &lt;code&gt;options&lt;/code&gt; 组成。藉由这样的设计，我们希望能够在易用性和扩展性上取得一个统一。用户可以很快的知道自己需要配置的东西，并且能够忽略无关参数的干扰，比如说我要配置从 fs 迁移到 qingstor，我就不需要了解 s3 的配置参数。还有一个好处是，用户只要写一次配置文件，他就能够将其应用到别的场景：比如说进行 &lt;code&gt;delete&lt;/code&gt; 而不是 &lt;code&gt;copy&lt;/code&gt;，比如说从 &lt;code&gt;s3&lt;/code&gt; 迁移到 &lt;code&gt;qingstor&lt;/code&gt; 而不是从 &lt;code&gt;fs&lt;/code&gt;。使用一个格式规范的配置文件对于开发来说更是意义重大，开发者不再需要去维护一份晦涩难懂的参数列表，能够用更加一致的方法来处理所有的端点。&lt;/p&gt;
+&lt;p&gt;下面我们同样用 v1 版本的 qscamel 来做对比：&lt;/p&gt;
+&lt;p&gt;他首先有一个参数列表&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;| short | full | type | required |
+|-------|------------------|--------|----------|
+| -z | --src-zone | string | N |
+| -a | --src-access-key | string | N |
+| -S | --src-secret-key | string | N |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后根据不同的 Source 还需要选择不同参数的组合：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;| platform | require --src-zone | require --src-access-key | require --src-secret-key |
+|----------|--------------------|--------------------------|--------------------------|
+| s3 | Y | Y | Y |
+| qiniu | N | Y | Y |
+| aliyun | Y | Y | Y |
+| upyun | Y | Y | Y |
+| qingstor | Y | Y | Y |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这还没有考虑到不同 Source 各自不同的参数配置呐 (๑•̀ㅂ•́) ✧&lt;/p&gt;
+&lt;h3 id=&#34;整体流程&#34;&gt;整体流程&lt;/h3&gt;
+&lt;p&gt;上面我们说到 qscamel 需要做到&lt;code&gt;任务启动后无需用户介入&lt;/code&gt;，接下来就聊一聊 qscamel 整体的任务流程是怎么样的。&lt;/p&gt;
+&lt;p&gt;启动任务，检查任务文件的内容是否正确，初始化 Source 和 Destination 之后，qscamel 会不断的进行如下循环：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;启动一个 listWorker 不断的从 Source 中遍历 Object
+&lt;ul&gt;
+&lt;li&gt;如果遍历失败将会自动重试&lt;/li&gt;
+&lt;li&gt;如果遍历结束将会关闭任务队列，不再追加新的任务&lt;/li&gt;
+&lt;li&gt;如果获取到新的 Object，则首先会将其保存到数据库，然后再添加到任务队列&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;启动指定数量的 migrateWorker 不断的从任务队列中获取任务
+&lt;ul&gt;
+&lt;li&gt;如果任务执行失败则会重试三次，每次重试的间隔会变长，若还是失败则会跳过&lt;/li&gt;
+&lt;li&gt;如果任务执行成功则会从数据库中删除该任务&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;等到任务队列中所有的任务均已执行完毕，qscamel 将会遍历数据库
+&lt;ul&gt;
+&lt;li&gt;如果数据库中没有未执行完毕的任务，则该迁移任务已成功，退出&lt;/li&gt;
+&lt;li&gt;如果数据库中还有未执行完毕的任务，则重新开始上述流程&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;不难发现，如果因为某些原因，某个 Object 一直在重试，那么 qscamel 将永远不会退出，并一直在输出报错的日志。这个在设计中是作为一个产品特性考虑的，但是根据实际的用户反馈，他们更希望程序能够将这些一直失败的任务在最后的时候统一输出，因此之后重新考虑一下，看如何交互更好。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;分段上传&#34;&gt;分段上传&lt;/h3&gt;
+&lt;p&gt;分段上传并不是什么新奇玩意儿，但是如果要做一个不依赖服务器状态，支持并发上传多个块，支持从断点恢复而且还好看的分段上传，却实打实的花了我整整一个下午的时间。不依赖服务器状态是说我们需要在本地存储分块上传的完成情况，而不是通过调用服务器端的 API 来获取，这样可以减少很多轮查询的开销；支持并发上传多个块就是字面意思，我们需要在分块的级别上做到并发，而不是单线程跑；支持从断点恢复是说已经上传的块需要跳过，只上传还没有完成的块。之前 qscamel 使用的是 qingstor-sdk-go 提供的一个比较简陋的 upload client 封装，只是简单的顺序调用接口，没有异常的处理。直到有一天，一个用户说我要上传一个 11 TB 的单文件到对象存储 (狗头.png)&lt;/p&gt;
+&lt;p&gt;为了将分块上传的逻辑与我们刚才的逻辑可以优雅的结合起来，原来的 Object 和 Job （也就是一个 Folder）被组合并拆分成了三种 Object：DirectoryObject，SingleObject，PartialObject。顾名思义，DirectoryObject 就等同于原来的 Job，SingleObject 表示一个完整的 Object，而 PartialObject 除了有跟 SingleObject 一样的属性之外，它还会携带着与分段上传有关的信息，比如 part number，upload id 等。这样就使得每一个 PartialObject 都可以独立的进行上传，不需要依赖外部的信息。&lt;/p&gt;
+&lt;p&gt;分段上传在实现的过程中最大限度的复用了原有的逻辑，只不过在每一个 Object 开始上传时会做相关的检查：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果是 PartialObject，则会使用 Object 中的信息进行分段上传。&lt;/li&gt;
+&lt;li&gt;如果是 SingleObject，则会根据 Endpoint 是否支持分段和这个 Object 的大小来判断是否需要拆分成 PartialObject：
+&lt;ul&gt;
+&lt;li&gt;如果 Endpoint 不支持分段，或者 Object 的大小不够大，则会直接上传。&lt;/li&gt;
+&lt;li&gt;反之，则会使用 Endpoint 的初始化分段接口进行分片，并将所有的 PartialObject 创建好。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;实现&#34;&gt;实现&lt;/h2&gt;
+&lt;p&gt;刚才我们讲了 qscamel 几处关键部分的设计，下面我们聊一聊 qscamel 的实现。qscamel 在实现过程中保持着对开发者友好的风格，没有使用什么黑科技，也没有使用什么奇怪的 Hack，简单直接，使用的也都是最常见的模型。&lt;/p&gt;
+&lt;h3 id=&#34;生产者-消费者&#34;&gt;生产者-消费者&lt;/h3&gt;
+&lt;p&gt;在绝大部分场景下，列取操作都要比上传和下载操作来得快，因此使用单生产者多消费者的模型更加合适，同时逻辑也会变得更加清晰。实现上我们使用 &lt;code&gt;sync.WaitGroup&lt;/code&gt; 做了一个简单的 &lt;code&gt;goroutine&lt;/code&gt; 池，在初始化的时候会一次性创建完毕，并始终监听 Object Channel，在 channel 关闭后自动退出。&lt;/p&gt;
+&lt;h3 id=&#34;endpoint-中的-interface&#34;&gt;Endpoint 中的 interface&lt;/h3&gt;
+&lt;p&gt;qscamel 要求支持的 endpoint 类型很多，从本地文件系统到各种对象存储，还包括本地文件的列表和 URL 的列表。想要快速开发，便于维护就要求将各个 endpoint 中的公共部分尽可能抽象出来，让 endpoint 实现者只需要关注自己逻辑相关的部分。为了做到这一点，qscamel 将 endpoint 中需要用到的所有方法拆分成了三个 interface，endpoint 实现者可以自行实现自己想要支持的功能。&lt;/p&gt;
+&lt;p&gt;其中，所有 endpoint 都必须要实现的 base interface 中包括如下函数：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Base is the interface that both Source and Destination should implement.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Base &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Name will return the endpoint&amp;#39;s name.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Name&lt;/span&gt;(ctx context.Context) (name &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Stat will get the metadata.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Stat&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (o &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;model.SingleObject, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Read will return a reader.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Read&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (r io.Reader, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// ReadRange will read content with range [offset, offset+size)
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;ReadRange&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, offset, size &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;) (r io.Reader, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果想要作为 Source，则还需要 Source interface：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Source is the interface for source endpoint.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Source &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+Base
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// List will list from the job.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;List&lt;/span&gt;(ctx context.Context, j &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;model.DirectoryObject, fn &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(model.Object)) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Reach will return an accessible url.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Reach&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (url &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Reachable will return whether current endpoint supports reach.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Reachable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中 List 会用来支持列取，而 Reach 则是可选的，这主要是用来支持对象存储的 Object Fetch 功能。&lt;/p&gt;
+&lt;p&gt;如果想要作为一个 Task 的 Destination，则需要实现 Destination interface：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Destination is the interface for destination endpoint.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; Destination &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+Base
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Delete will use endpoint to delete the path.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Delete&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Deletable will return whether current endpoint supports delete.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Deletable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Fetch will use endpoint to fetch the url.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Fetch&lt;/span&gt;(ctx context.Context, path, url &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Fetchable will return whether current endpoint supports fetch.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Fetchable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// InitPart will inti a multipart upload.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;InitPart&lt;/span&gt;(ctx context.Context, p &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, size &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;) (uploadID &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, partSize &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;, partNumbers &lt;span style=&#34;color:#902000&#34;&gt;int&lt;/span&gt;, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UploadPart will upload a part.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;UploadPart&lt;/span&gt;(ctx context.Context, o &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;model.PartialObject, r io.Reader) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Partable will return whether current endpoint supports multipart upload.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Partable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Write will read data from the reader and write to endpoint.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Write&lt;/span&gt;(ctx context.Context, path &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, size &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;, r io.Reader) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Writable will return whether current endpoint supports write.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Writable&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在每个 interface 中，开发者对自己不想或者暂时不想实现的功能都可以在对应的 &lt;code&gt;Xxxable()&lt;/code&gt; 函数中返回 &lt;code&gt;false&lt;/code&gt; 即可，qscamel 在初始化任务时会进行对应功能的检查，并在任务要求不满足时报错。&lt;/p&gt;
+&lt;p&gt;这样，我们 qscamel 就能够方便快捷的扩展新 endpoint 了~&lt;/p&gt;
+&lt;h3 id=&#34;leveldb&#34;&gt;LevelDB&lt;/h3&gt;
+&lt;p&gt;qscamel 是我们 QingStor Team 推出的第一款有状态的命令行工具，之前我们做 &lt;code&gt;qingcloud-cli&lt;/code&gt; 和 &lt;code&gt;qsctl&lt;/code&gt; 都只是直接调用对象存储的 API，不会在本地存储持久化的状态。但是 qscamel 作为一款数据迁移工具，它必须在本地维护大量信息以支持任务的断点续传。&lt;/p&gt;
+&lt;p&gt;qscamel 在选型过程中考察了很多方案：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;首先排除掉了所有 Server - Client 模式的数据库，迁移工具要求部署简单，轻量级，如果迁移数据还需要部署一个 MySQL 或者 Redis，那就太滑稽了，因此可选择的一定是嵌入式 DB。&lt;/li&gt;
+&lt;li&gt;然后因为开发者（没错，就是我）的个人偏好，排除掉了所有必须使用 CGO 的嵌入式 DB。RocksDB 非常酷炫，但是因为找不到一个足够好的纯 go 实现，所以被否决了。&lt;/li&gt;
+&lt;li&gt;再次因为 qscamel 规划当中会在 DB 中存储的数据类型不会超过 3 种，同时也不会存在需要 Join 的情况，所以排除掉了所有嵌入式 SQL 数据库。&lt;/li&gt;
+&lt;li&gt;最后在社区那么多嵌入式 K-V 数据库中，我们还需要排除掉所有不靠谱的，没有生产环境实际验证过的，维护状态不佳的，以及看着就不大行的项目。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在筛过好几轮之后，摆在我们面前的可选方案有三个：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/etcd-io/bbolt&#34;&gt;BoltDB&lt;/a&gt; &lt;em&gt;原作者已经不维护了，现在由 coreos team 的人 Fork 并维护了一份，最近转移给了 etcd-io&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/dgraph-io/badger&#34;&gt;Badger&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/syndtr/goleveldb&#34;&gt;LevelDB&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;BoltDB 使用了 B+tree，LevelDB 使用了 LSM tree，而 Badger 则是借鉴了论文 &lt;a href=&#34;https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf&#34;&gt;WiscKey&lt;/a&gt;，论文我没有细看，但大致的思想是将 LSM trees 中的 Key 和 Value 分开，将 Key 存储在 LSM tree 中，而 Value 则存在 value logs 里面。相对的来说，BoltDB 更加适合于读多写少的场景，而基于 LSM tree 的 DB 写入会更有优势。此外，LevelDB 不提供事务，它提供批量写入和读取时的 Snapshot，而 BoltDB 和 Badger 提供了完整的 ACID 事务，其中 BoltDB 不支持并发写事务，而 Badger 则支持。再三权衡之后，我首先放弃了 Badger。虽然特性很多，功能很强，Benchmark 也非常好看，但是它的特性我们基本上都用不到，加上我个人对这个项目的代码还不是很熟悉，可靠性上还有着疑虑，所以放弃了。&lt;/p&gt;
+&lt;p&gt;本着够用就行的想法，我一开始选择了被广泛运用的 BoltDB 。但是事实证明这个选择是错误的，在 qscamel 实际的场景下，剧烈的写事务竞争导致性能很差，并且发现 qscamel 对事务其实并没有什么需求，因此切换成了 LevelDB。&lt;/p&gt;
+&lt;h2 id=&#34;故事&#34;&gt;故事&lt;/h2&gt;
+&lt;h3 id=&#34;遇事不决-黄金切割&#34;&gt;遇事不决，黄金切割&lt;/h3&gt;
+&lt;p&gt;在 qscamel 探索的过程中，有过需要 magic number 的阶段，处于个人偏好，我无一例外的全部选择了黄金切割比。&lt;/p&gt;
+&lt;p&gt;案例一：生产者与消费者比例&lt;/p&gt;
+&lt;p&gt;之前 qscamel 是采用的多生产者，多消费者的方案，每个 worker 从一个统一的任务队列中取任务，又是生产者，又是消费者。看起来很美好，但是运行到某个时点，qscamel 总是会停止响应。当然了，现在回头来看可以知道这个 BUG 是由多种原因导致的。但是当时的一个分析是 Worker 的调度有问题，有可能所有的 Worker 都在生产，没有消费，导致整个任务队列阻塞了。作为一个解决方案，需要人为的固定生产者和消费者的比例，纠结了一会儿，选择了 0.618。&lt;/p&gt;
+&lt;p&gt;事后的测试中发现这个 Fix 完全没有什么用，于是删掉了（&lt;/p&gt;
+&lt;p&gt;案例二：乱搞的文件一致性检验&lt;/p&gt;
+&lt;p&gt;为了加快一致性检验的速度，qscamel 曾经自己乱搞过一个&lt;a href=&#34;https://github.com/yunify/qscamel/commit/5a29fc9346b56b6ab5c6377f58d49675ace49838#diff-77889babdacd806bb9d5b8299a56e9a9&#34;&gt;一致性的算法&lt;/a&gt;。想法非常简单，从文件的头尾和 0.618 处，分别取 3 MB，总计 9 MB，然后计算它们的 MD5 。很快这个想法被毙了，用户开 MD5 的检查就是为了保证自己文件上传没错，搞一个所谓 quickMD5 完全没有实际的意义，要是万一有一个文件 MD5 不对，结果没有检查出来，那就大发了。&lt;/p&gt;
+&lt;p&gt;总的来说，所有引入黄金切割的尝试全都失败了，但是我还在期待着下一个机会（&lt;/p&gt;
+&lt;h3 id=&#34;buffer-的-bytes&#34;&gt;Buffer 的 Bytes&lt;/h3&gt;
+&lt;p&gt;qscamel 很多地方都使用了我朋友 &lt;a href=&#34;https://pjw.io/&#34;&gt;@Aspire&lt;/a&gt; 写的&lt;a href=&#34;https://github.com/pengsrc/go-shared&#34;&gt;库&lt;/a&gt;，但是有一天被坑了一手，因为我发现它的 &lt;code&gt;buffer.Bytes()&lt;/code&gt; 不是线程安全的。因为它是这样实现的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Bytes returns a mutable reference to the underlying byte slice.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (b &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;BytesBuffer) &lt;span style=&#34;color:#06287e&#34;&gt;Bytes&lt;/span&gt;() []&lt;span style=&#34;color:#902000&#34;&gt;byte&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; b.bs
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;他将底层的 byte slice 直接返回，那就有可能在使用到一半的时候这个 buffer 被释放并写入了新的值，从而导致外部的调用者看到了一个错误的值。我提了一个 &lt;a href=&#34;https://github.com/pengsrc/go-shared/pull/3&#34;&gt;PR&lt;/a&gt;，跟 @Aspire 讨论了一下这个问题。虽说当初他实现的时候没有怎么考虑这个问题，但是想了一下他认为这是设计预期的，主要的点有两个：第一，设计这个 buffer 库就是为了复用内存，减少频繁创建 bytes slice 带来的开销，降低 gc 的压力，如果这个地方按照我的 PR 那样返回了一个新的 bytes slice 的话，那这个库就跟它的设计目标相违背了；第二，在 Golang 中，如果没有明确声明并发访问某事物是安全的，那它就不是安全的，比如 Golang 自己 &lt;a href=&#34;https://golang.org/src/bytes/buffer.go&#34;&gt;Buffer 实现&lt;/a&gt;就不是并发安全的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Bytes returns a slice of length b.Len() holding the unread portion of the buffer.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// The slice is valid for use only until the next buffer modification (that is,
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// only until the next call to a method like Read, Write, Reset, or Truncate).
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// The slice aliases the buffer content at least until the next buffer modification,
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// so immediate changes to the slice will affect the result of future reads.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (b &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;Buffer) &lt;span style=&#34;color:#06287e&#34;&gt;Bytes&lt;/span&gt;() []&lt;span style=&#34;color:#902000&#34;&gt;byte&lt;/span&gt; { &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; b.buf[b.off:] }&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;最后的决定是增加一个类似于 &lt;code&gt;SafeBytes()&lt;/code&gt; 的函数，不过因为懒，所以一直没有做，以后再补上吧~&lt;/p&gt;
+&lt;h3 id=&#34;小人物的重构-从早到晚&#34;&gt;小人物的重构，从早到晚&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;语出猫腻《间客》许乐在老虎死后跟随舰队穿越虫洞，手刃卡顿郡王前：“大人物报仇，隐忍十年也不算晚，小人物的复仇，却是从早到晚。”&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;其实 qscamel 的分段上传逻辑写了两遍，最开始是在原来的基础上缝缝补补，为 Object 加了很多新的属性，然后加了很多复杂判断，基本可用之后交付给了售前去做测试。晚上下班回家之后实在不满意那个版本，于是采用新的，也就是现在这样的逻辑重新实现了一遍。性能上有轻微提升，逻辑上变得更加顺畅，更主要的是我更加开心了 ʅ(‾◡◝)ʃ&lt;/p&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;这文章写了好几个月了，都不知道动态该写啥了。。&lt;/li&gt;
+&lt;li&gt;LOL 洲际赛夺冠了，亚运会也夺冠了，又又又是最有希望的一年，希望今年能拿到 S 系列赛的冠军&lt;/li&gt;
+&lt;li&gt;最近在重温《希灵帝国》，还买了微信读书新出的无限卡，每个月可以免费解锁 300 个章节，按照每个章节 0.3 元的均价，每月 19 块还是比较划算的（会计小能手&lt;/li&gt;
+&lt;li&gt;PS 会免了命运 2，跟小伙伴一起突突突了两天，导致接下来的一个星期睡觉都满脑子枪声&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;广告&#34;&gt;广告&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;广告位招租，8 点 17 分发&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;想要加入我们一起来做靠谱的产品吗，快访问 &lt;a href=&#34;https://www.qingcloud.com/jobs&#34;&gt;https://www.qingcloud.com/jobs&lt;/a&gt; 寻找自己中意的岗位并且给我发简历吧~&lt;/p&gt;</description></item><item><title>从浏览器端向 QingStor 对象存储上传文件</title><link>https://xuanwo.io/2017/06/15/upload-to-qingstor-from-browser/</link><pubDate>Thu, 15 Jun 2017 15:44:00 +0000</pubDate><guid>https://xuanwo.io/2017/06/15/upload-to-qingstor-from-browser/</guid><description>&lt;p&gt;从浏览器端向 QingStor 对象存储上传是很多开发者的需求，虽然 QingStor 提供了相关的接口和 SDK，但是仍有很多开发者表示不知道怎么样去调用。本文的目的是系统的展示一下如何从浏览器端上传一个文件到对象存储，从而解决大多数开发者们的需求。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;为了理解本文的内容，读者需要一些基本的 HTML，JavaScript 知识，同时需要对 QingStor 对象存储服务有一些基本的了解。前者可以查看 &lt;a href=&#34;https://developer.mozilla.org/zh-CN/docs/Web&#34;&gt;MDN Web 技术文档&lt;/a&gt;，后者可以查看 &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/common/overview.html&#34;&gt;QingStor 对象存储服务概述&lt;/a&gt; 。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;表单上传&#34;&gt;表单上传&lt;/h2&gt;
+&lt;p&gt;QingStor 对象存储支持通过 HTML 表单上传的方式向存储空间上传一个对象，文档可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/object/post.html&#34;&gt;此处&lt;/a&gt;。根据存储空间的权限设置，主要分为两种情况：匿名可写与匿名不可写，接下来分别介绍一下。&lt;/p&gt;
+&lt;h3 id=&#34;匿名可写&#34;&gt;匿名可写&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;action&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://&amp;lt;bucket&amp;gt;.&amp;lt;zone&amp;gt;.qingstor.com&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;method&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;enctype&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;multipart/form-data&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;Click or Drag a File Here to Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;key&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;submit&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload to QingStor&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 存储空间的名称&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: 存储空间所在的区域&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;key&amp;gt;&lt;/code&gt;: 文件上传后在存储空间中的名字，支持内置变量，比如 &lt;code&gt;${filename}&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;很多人最开始使用这个接口的时候会吐槽为什么 file 一定要放在最后，这是因为我们遵循了现有的 &lt;a href=&#34;http://hc.apache.org/httpclient-3.x/methods/multipartpost.html&#34;&gt;multipart post 方法&lt;/a&gt; 的实现——将表单分成了两个部分： StringPart 与 FilePart ，file 类型之后的全部表单项都会被丢弃，因此 file 这个 input 项一定要放在表单的最后。&lt;/p&gt;
+&lt;p&gt;解决掉 input 顺序这个问题之后，可以发现表单上传是一个非常简单易用的接口：我只需要构建一个 form 表单，指定上传的域名、文件名即可，浏览器会自动处理剩下的所有工作。&lt;/p&gt;
+&lt;h3 id=&#34;匿名不可写&#34;&gt;匿名不可写&lt;/h3&gt;
+&lt;p&gt;更常见的情况是我们需要上传文件到一个私有的存储空间当中，此时我们需要对我们的 POST 请求进行签名。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;action&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://&amp;lt;bucket&amp;gt;.&amp;lt;zone&amp;gt;.qingstor.com&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;method&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;enctype&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;multipart/form-data&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;Click or Drag a File Here to Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;key&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;policy&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;policy&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;access_key_id&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;access_key_id&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;signature&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;signature&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;submit&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload to QingStor&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;policy&amp;gt;&lt;/code&gt;: policy 是一个经过 base64 编码之后的 JSON 字符串，其中的内容包括除了 file， access_key_id， policy，signature 之外的所有表单项。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;access_key_id&amp;gt;&lt;/code&gt;: access_key_id 是用户的 access_key_id&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;signature&amp;gt;&lt;/code&gt;: 用 secret key 对 base64 编码后的 policy 字符串进行 HMAC-SHA256 签名得到的字符串，同样需要进行 base64 编码。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;与匿名上传相比，上传到一个私有空间需要使用请求者的 access_key_id 进行签名。签名流程如下：计算 policy 字符串并进行 base64 编码，使用 secret key 对 policy 字符串进行 HMAC-SHA256 签名并进行 base64 编码。&lt;/p&gt;
+&lt;p&gt;以最简单的上传为例：policy 字符串为 &lt;code&gt;{&amp;quot;key&amp;quot;: &amp;quot;test_key&amp;quot;}&lt;/code&gt; ，经过 base64 编码之后变为 &lt;code&gt;eyJrZXkiOiAidGVzdF9rZXkifQ==&lt;/code&gt;，我们使用 &lt;code&gt;test_secret_key&lt;/code&gt; 作为 secret key 来进行 HMAC-SHA256 签名并进行 base64 编码，可以得到 &lt;code&gt;HfMhlYYA4bgyoq3SDMWqiJ1XWm1/TORTfkZk+WODxag=&lt;/code&gt;。此时，我们本次请求中的 policy 应填写 &lt;code&gt;eyJrZXkiOiAidGVzdF9rZXkifQ==&lt;/code&gt;， 而 signature 则应填写 &lt;code&gt;HfMhlYYA4bgyoq3SDMWqiJ1XWm1/TORTfkZk+WODxag=&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;使用 POST 接口上传比较简单，后端只需要实现简单的签名逻辑即可实现上传到指定对象存储存储空间的功能，后续还可以结合各种上传插件实现上传进度条等功能。适合用在只需要用户上传文件，没有复杂交互的场景，比如论坛附件上传，在线编辑器上传图片等。&lt;/p&gt;
+&lt;h2 id=&#34;直接调用-sdk-上传&#34;&gt;直接调用 SDK 上传&lt;/h2&gt;
+&lt;p&gt;POST 接口虽然方便，但是功能比较弱，为了满足开发者们的需求，QingStor 提供的 &lt;a href=&#34;https://github.com/yunify/qingstor-sdk-js&#34;&gt;qingsotr-js-sdk&lt;/a&gt; 通过 &lt;a href=&#34;http://browserify.org/&#34;&gt;Browserify&lt;/a&gt; 实现了浏览器环境的兼容，开发者只需要引入我们提供的 js 文件即可在浏览器环境中调用接口。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在开始之前，我们需要正确设置 Bucket 的 CORS 使得我们可以顺利的进行跨域请求。详细操作方法可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/guide/index.html#cors&#34;&gt;此处&lt;/a&gt;，其中&lt;code&gt;允许的请求源&lt;/code&gt;和&lt;code&gt;允许 HTTP 请求头&lt;/code&gt;均可以设置为 &lt;code&gt;*&lt;/code&gt; 以方便调试。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk.min.js&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onchange&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; Config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).Config
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; QingStor &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).QingStor;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Config(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;access_key_id&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;secret_access_key&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; bucket &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; QingStor(config).Bucket(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;bucket&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;zone&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; upload() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;).files[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; reader &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; FileReader();
+reader.readAsBinaryString(f);
+reader.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (() =&amp;gt; {
+bucket.putObject(f.name, {
+body&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; reader.result
+});
+});
+}
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;access_key_id&amp;gt;&lt;/code&gt;: 用户的 access_key_id&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;secret_access_key&amp;gt;&lt;/code&gt;: 用户的 secret_access_key&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 需要上传的 bucket name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: bucket 所在的区域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;样例代码逻辑比较简单，主要有以下几个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;脚本中进行了一些初始化的工作，创建了 Config ，QingStor 和 Bucket 对象。&lt;/li&gt;
+&lt;li&gt;file input 监听了 change 事件，只要用户选择了新的文件，就会调用 upload 方法。&lt;/li&gt;
+&lt;li&gt;在 upload 方法中，首先是选取文件列表中的第一项，然后使用 HTML 5 新提供的 FileReader 接口来读取文件内容。&lt;/li&gt;
+&lt;li&gt;在 FileReader 读取完毕后，调用 bucket.putObject 方法来进行文件上传，使用文件名作为上传所使用的 Key。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以看到，直接使用 SDK 进行文件上传也非常简单。跟使用 POST 接口相比，需要引入一个额外的 JS 文件依赖，不需要自行进行容易出错的签名计算。最大的缺点在于：初始化 SDK 时需要暴露自己的 access_key_id 和 secret_access_key，这显然是不可接受的。我们需要寻找到一种方法，使得签名的过程可以服务器端完成，从而不需要暴露自己的密钥信息。&lt;/p&gt;
+&lt;h2 id=&#34;部署签名服务器&#34;&gt;部署签名服务器&lt;/h2&gt;
+&lt;p&gt;之前提到，在服务器端进行签名可以使得敏感的密钥信息不会暴露出去，解决方案就是部署一套签名服务器。我们实现了一个基于 qingstor-js-sdk 的签名服务器 demo，开源在 &lt;a href=&#34;https://github.com/yunify/qingstor-demo-signature-server-nodejs&#34;&gt;https://github.com/yunify/qingstor-demo-signature-server-nodejs&lt;/a&gt; ，同时附有 server 端和 client 端，开发者可以方便的复用其中的逻辑，按照自己的业务需求来实现相关的逻辑。&lt;/p&gt;
+&lt;p&gt;部署签名服务器非常简单，只需要如下几步：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;git clone https://github.com/yunify/qingstor-demo-signature-server-nodejs.git
+&lt;span style=&#34;color:#007020&#34;&gt;cd&lt;/span&gt; qingstor-demo-signature-server-nodejs
+npm install&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后根据 server_config.yaml.example 编辑自己的 server_config.yaml 文件，最后执行 &lt;code&gt;npm run server&lt;/code&gt; 就可以启动我们的签名服务器 Demo。&lt;/p&gt;
+&lt;p&gt;接下来这个实例会展示如何使用签名服务器进行签名，并上传一个文件。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk.min.js&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onchange&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; Config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).Config
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; QingStor &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).QingStor;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Config(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;not_need&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;not_need&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; bucket &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; QingStor(config).Bucket(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;bucket&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;zone&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; upload() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;).files[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; reader &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; FileReader();
+reader.readAsBinaryString(f);
+reader.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (() =&amp;gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; req &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; bucket.putObjectRequest(f.name, {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; f.type
+});
+fetch(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;http://localhost:9000/operation?channel=header&amp;#34;&lt;/span&gt;, {
+method&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;,
+body&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; JSON.stringify(req.operation),
+headers&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;application/json; charset=utf-8&amp;#34;&lt;/span&gt;
+}
+})
+.then(res =&amp;gt; res.json())
+.then(res =&amp;gt; {
+req.operation.headers.Authorization &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; res.authorization;
+req.operation.body &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; reader.result;
+req.send()
+})
+});
+}
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 需要上传的 bucket name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: bucket 所在的区域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;跟直接使用 SDK 上传相比，通过部署签名服务器上传的方案多了向签名服务器发送本次请求并获取签名信息的部署。js sdk 对外暴露了生成 Request 的接口，通过 bucket.putObjectRequest 可以创建一个 Request 实例，并将 Request.operation 发送到签名服务器以进行签名，最后服务器端返回的是签名好的 Authorization 字符串。然后再手动调用 Request 的 send 方法进行实际的上传即可。&lt;/p&gt;
+&lt;p&gt;部署签名服务器的方案比之前的几种都要复杂，但是更贴合用户的使用场景，可以完整的覆盖大多数用户在浏览器端与 QingStor 对象存储进行交互的需求。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;在这里可以对浏览器端几种与 QingStor 对象存储进行交互的方案进行一个简短的总结：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;POST 接口：简单方便，便于与现有的服务器端集成，适用于论坛附件上传，在线编辑器上传图片等场景&lt;/li&gt;
+&lt;li&gt;SDK 上传： 简单方便，但是会暴露出用户的密钥信息，适用于一些 No BackEnd 应用，可以让用户自行填写自己的密钥，比如在线 Markdown 编辑器，可以实现复制进来的图片自动上传这样的功能。&lt;/li&gt;
+&lt;li&gt;部署签名服务器： 比较复杂，适用于大多数场景，密钥信息保存在服务器端，不会泄漏给用户。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;此外，所有的代码都已经上传到 Gist，感兴趣的同学可以自取： &lt;a href=&#34;https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784&#34;&gt;https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784&lt;/a&gt;&lt;/p&gt;</description></item></channel></rss>

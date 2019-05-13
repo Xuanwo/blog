@@ -1,0 +1,199 @@
+<!doctype html><html><head><title>POJ 3414 Pots</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content=Technology,Code,Program,Linux,><meta name=author content=Xuanwo><meta property=og:title content="POJ 3414 Pots"><meta property=og:description content="A blog maintained by an interesting programmer."><meta property=og:type content=website><meta property=og:locale content=en_US><meta property=og:url content=https://xuanwo.io/2014/08/24/poj-3414-pots/><link href rel=alternate type=application/rss+xml title="Xuanwo's Blog"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/milligram@1.3.0/dist/milligram.min.css integrity="sha256-Ro/wP8uUi8LR71kwIdilf78atpu8bTEwrK5ZotZo+Zc=" crossorigin=anonymous><link rel=stylesheet href=/css/main.min.css><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.54.0"></head><body><div id=container><header id=header><div id=header-outer class=outer><div id=header-inner class=inner><a id=main-nav-toggle class=nav-icon href=javascript:;><svg width="1em" height="1em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#bars"/></svg></a><a id=logo class=logo-text href=https://xuanwo.io>Xuanwo&#39;s Blog</a><nav id=main-nav><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<a class=main-nav-link href=/about/>关于我</a></nav></div></div></header><section id=main class=outer><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 class=article-title itemprop=name>POJ 3414 Pots</h1></header><div class=article-meta><a href=/2014/08/24/poj-3414-pots/ class=article-date><time datetime=2014-08-24T21:11:39.000&#43;00:00 itemprop=datePublished>2014-08-24</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div><div class=article-comment-link-wrap><a href=/2014/08/24/poj-3414-pots/#disqus_thread class=article-comment-link>Comments</a></div></div><div class=article-entry itemprop=articleBody><h2 id=题目>题目</h2><p>源地址：</p><p><a href="http://poj.org/problem?id=3414">http://poj.org/problem?id=3414</a></p><h1 id=理解>理解</h1><p>因为卡一道题然后整整两天没有做题目什么的太不科学了- -。
+纠结的难点在于，我怎么样把实现操作的路径打印出来。事实上，标记全部的六种状态，然后在bfs的过程中，把每一个状态全都输出到一个数组中去，然后再进行输出。</p><h1 id=代码>代码</h1><pre><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+#include &lt;cmath&gt;
+#include &lt;ctime&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;deque&gt;
+#include &lt;list&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+#include &lt;stack&gt;
+#include &lt;queue&gt;
+#include &lt;numeric&gt;
+#include &lt;iomanip&gt;
+#include &lt;bitset&gt;
+#include &lt;sstream&gt;
+#include &lt;fstream&gt;
+#define debug puts(&quot;-----&quot;)
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1&lt;&lt;28)
+using namespace std;
+
+const int maxn = 110;
+int vis[maxn][maxn];
+int a, b, c;
+int step;
+int flag;
+
+
+struct Status
+{
+    int k1, k2;
+    int op;
+    int step;
+    int pre;
+} q[maxn *maxn];
+int id[maxn *maxn];
+int lastIndex;
+
+void bfs()
+{
+    Status now, next;
+
+    int head, tail;
+    head = tail = 0;
+
+    q[tail].k1 = 0; q[tail].k2 = 0;
+    q[tail].op = 0; q[tail].step = 0; q[tail].pre = 0;
+
+    tail++;
+
+    memset(vis, 0, sizeof(vis));
+    vis[0][0] = 1;
+
+    while (head &lt; tail)
+    {
+        now = q[head];
+        head++;
+
+        if (now.k1 == c || now.k2 == c)
+        {
+            flag = 1;
+            step = now.step;
+            lastIndex = head - 1;
+        }
+
+        for (int i = 1; i &lt;= 6; i++)
+        {
+            if (i == 1)
+            {
+                next.k1 = a;
+                next.k2 = now.k2;
+            }
+            else if (i == 2)
+            {
+                next.k1 = now.k1;
+                next.k2 = b;
+            }
+            else if (i == 3)
+            {
+                next.k1 = 0;
+                next.k2 = now.k2;
+            }
+            else if (i == 4)
+            {
+                next.k1 = now.k1;
+                next.k2 = 0;
+            }
+            else if (i == 5)
+            {
+                if (now.k1 + now.k2 &lt;= b)
+                {
+                    next.k1 = 0;
+                    next.k2 = now.k1 + now.k2;
+                }
+                else
+                {
+                    next.k1 = now.k1 + now.k2 - b;
+                    next.k2 = b;
+                }
+            }
+            else if (i == 6)
+            {
+                if (now.k1 + now.k2 &lt;= a)
+                {
+                    next.k1 = now.k1 + now.k2;
+                    next.k2 = 0;
+                }
+                else
+                {
+                    next.k1 = a;
+                    next.k2 = now.k1 + now.k2 - a;
+                }
+            }
+
+            next.op = i;
+            if (!vis[next.k1][next.k2])
+            {
+                vis[next.k1][next.k2] = 1;
+                next.step = now.step + 1;
+                next.pre = head - 1;
+
+                q[tail].k1 = next.k1; q[tail].k2 = next.k2;
+                q[tail].op = next.op; q[tail].step = next.step; q[tail].pre = next.pre;
+                tail++;
+
+                if (next.k1 == c || next.k2 == c)
+                {
+                    flag = 1;
+                    step = next.step;
+                    lastIndex = tail - 1;
+                    return;
+                }
+            }
+        }
+    }
+
+
+}
+
+int main(int argc, char const *argv[])
+{
+    while (scanf(&quot;%d%d%d&quot;, &amp;a, &amp;b, &amp;c) != EOF)
+    {
+        flag = 0;
+        step = 0;
+
+        bfs();
+        if (flag)
+        {
+            printf(&quot;%d\n&quot;, step);
+
+            id[step] = lastIndex;
+            for (int i = step - 1; i &gt;= 1; i--)
+            {
+                id[i] = q[id[i + 1]].pre;
+            }
+
+            for (int i = 1; i &lt;= step; i++)
+            {
+                if (q[id[i]].op == 1)
+                    printf(&quot;FILL(1)\n&quot;);
+
+                else if (q[id[i]].op == 2)
+                    printf(&quot;FILL(2)\n&quot;);
+
+                else if (q[id[i]].op == 3)
+                    printf(&quot;DROP(1)\n&quot;);
+
+                else if (q[id[i]].op == 4)
+                    printf(&quot;DROP(2)\n&quot;);
+
+                else if (q[id[i]].op == 5)
+                    printf(&quot;POUR(1,2)\n&quot;);
+
+                else if (q[id[i]].op == 6)
+                    printf(&quot;POUR(2,1)\n&quot;);
+            }
+        }
+        else printf(&quot;impossible\n&quot;);
+    }
+    return 0;
+}
+
+</code></pre><h1 id=更新日志>更新日志</h1><ul><li>2014年08月24日 已AC。</li></ul></div><div class=article-toc></div></div><nav id=article-nav><a href=/2014/08/24/poj-3617-best-cow-line/ id=article-nav-newer class=article-nav-link-wrap><div class=article-nav-title><span>&lt;</span>&nbsp;
+POJ 3617 Best Cow Line</div></a><a href=/2014/08/22/poj-1250-tanning-salon/ id=article-nav-older class=article-nav-link-wrap><div class=article-nav-title>POJ 1250 Tanning Salon&nbsp;<span>&gt;</span></div></a></nav></article><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){this.page.identifier='\/2014\/08\/24\/POJ-3414-Pots\/';this.page.title='POJ 3414 Pots';this.page.url='https:\/\/xuanwo.io\/2014\/08\/24\/poj-3414-pots\/';};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return;}
+var d=document,s=d.createElement('script');s.async=true;s.src='//'+"only0god"+'.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></section><footer id=footer><div class=outer><div id=footer-info class=inner>&copy; 2019 Xuanwo&#39;s Blog&nbsp;
+Powered by <a href=https://gohugo.io target=_blank>Hugo</a></div></div><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script src=https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js></script><script>tocbot.init({tocSelector:'.article-toc',contentSelector:'.article-entry',headingSelector:'h1, h2, h3, h4, h5',});</script><script>document.getElementById('main-nav-toggle').addEventListener('click',function(){var header=document.getElementById('header');if(header.classList.contains('mobile-on')){header.classList.remove('mobile-on');}else{header.classList.add('mobile-on');}});</script></footer></div></body></html>

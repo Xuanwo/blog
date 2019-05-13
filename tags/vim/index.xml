@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Vim on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/vim/</link><description>Recent content in Vim on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 12 Mar 2016 00:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/vim/index.xml" rel="self" type="application/rss+xml"/><item><title>Neovim慢速升级攻略</title><link>https://xuanwo.io/2016/03/12/neovim-slow-upgrade/</link><pubDate>Sat, 12 Mar 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/03/12/neovim-slow-upgrade/</guid><description>&lt;p&gt;一直都非常羡慕那些能把vim用得非常溜的人，但是自己总是不情愿去学，总是觉得vim的操作方式非常反人类，难度曲线太陡，不适合我。真正让我下定决心去学的，是因为系统切换到Ubuntu Gnome之后发现，Sublime Text 3 不能原生支持中文输入。同时我也发现，如果我不上来就折腾spf13这样的东西的话，其实vim非常好懂。于是，Neovim的慢速升级攻略就这样诞生了。&lt;/p&gt;
+&lt;h1 id=&#34;安装&#34;&gt;安装&lt;/h1&gt;
+&lt;p&gt;安装可以参考&lt;a href=&#34;https://github.com/neovim/neovim/wiki/Installing-Neovim&#34;&gt;此处&lt;/a&gt;
+如果是Ubuntu 的话，则可以执行如下代码：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo add-apt-repository ppa:neovim-ppa/unstable
+sudo apt-get update
+sudo apt-get install neovim
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;neovim常用操作&#34;&gt;Neovim常用操作&lt;/h1&gt;
+&lt;h2 id=&#34;初步&#34;&gt;初步&lt;/h2&gt;
+&lt;h3 id=&#34;光标移动&#34;&gt;光标移动&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;gg&lt;/code&gt; 移动到文件开头
+&lt;code&gt;G&lt;/code&gt; 移动到文件末尾&lt;/p&gt;
+&lt;h3 id=&#34;文件操作相关&#34;&gt;文件操作相关&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;:w &amp;lt;filename&amp;gt;&lt;/code&gt; 按照&lt;filename&gt;保存文件
+&lt;code&gt;:wq&lt;/code&gt; 保存并退出
+&lt;code&gt;:q!&lt;/code&gt; 退出不保存
+&lt;code&gt;:e&lt;/code&gt; 打开新的文件并关闭当前文件，使用Tab可以补全&lt;/p&gt;
+&lt;h3 id=&#34;文件编辑相关&#34;&gt;文件编辑相关&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;dd&lt;/code&gt; 删除当前行
+&lt;code&gt;y&lt;/code&gt; 复制
+&lt;code&gt;yy&lt;/code&gt; 复制当前行
+&lt;code&gt;yG&lt;/code&gt; 复制光标以上全部行
+&lt;code&gt;ygg&lt;/code&gt; 复制光标以下全部行
+&lt;code&gt;p&lt;/code&gt; 粘贴
+&lt;code&gt;u&lt;/code&gt; 撤销&lt;/p&gt;
+&lt;h2 id=&#34;入门&#34;&gt;入门&lt;/h2&gt;
+&lt;h3 id=&#34;使用内置终端&#34;&gt;使用内置终端&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;:terminal&lt;/code&gt; 打开终端，输入exit并使用&lt;code&gt;esc&lt;/code&gt;或&lt;code&gt;enter&lt;/code&gt;即可退出&lt;/p&gt;
+&lt;h3 id=&#34;与系统剪切板集成&#34;&gt;与系统剪切板集成&lt;/h3&gt;
+&lt;p&gt;这个地方折腾了好久，Neovim默认是支持&lt;code&gt;+&lt;/code&gt;寄存器的，但是我通过&lt;code&gt;&amp;quot;+y&lt;/code&gt;命令调用寄存器时却提示&lt;code&gt;Clipboard No Provider&lt;/code&gt;。通过阅读&lt;a href=&#34;https://github.com/neovim/neovim/blob/master/runtime/doc/nvim_clipboard.txt#L19-L27&#34;&gt;文档&lt;/a&gt;之后，我得知，必须要安装下列三个包中的至少一个，才能正常使用剪切板：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;xclip&lt;/li&gt;
+&lt;li&gt;xsel (newer alternative to xclip)&lt;/li&gt;
+&lt;li&gt;pbcopy/pbpaste (only for Mac OS X)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;安装好之后再打开，就可以正常使用了。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;快速复制全文的技巧： 在Normal模式下，&lt;code&gt;gg&lt;/code&gt;跳转到文章开头，&lt;code&gt;VG&lt;/code&gt;选中全文，&lt;code&gt;&amp;quot;+y&lt;/code&gt;复制到剪切板。&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;neovim插件&#34;&gt;Neovim插件&lt;/h1&gt;
+&lt;h2 id=&#34;vim-airline&#34;&gt;vim-airline&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/vim-airline/vim-airline&#34;&gt;vim-airline&lt;/a&gt;是一个vim的状态栏插件，同样支持neovim。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://github.com/vim-airline/vim-airline/wiki/screenshots/demo.gif&#34; alt=&#34;vim-airline demo&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;安装此插件后启动nvim会报错，自行编译后错误消失，不知道具体的原因。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;smarter-tab-line&#34;&gt;Smarter tab line&lt;/h3&gt;
+&lt;p&gt;在&lt;code&gt;init.vim&lt;/code&gt;中加入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&#39; 开启tabline功能
+let g:airline#extensions#tabline#enabled = 1
+&#39; 设置tabline分隔符
+let g:airline#extensions#tabline#left_sep = &#39; &#39;
+let g:airline#extensions#tabline#left_alt_sep = &#39;|&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;支持的一些快捷操作命令：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;:bn&lt;/code&gt;: 跳转下一个buffer
+&lt;code&gt;:bp&lt;/code&gt;: 往上一个buffer
+&lt;code&gt;:b&amp;lt;n&amp;gt;&lt;/code&gt;: 跳往第n个buffer
+&lt;code&gt;:bd&lt;/code&gt;: 关掉目前buffer&lt;/p&gt;
+&lt;h3 id=&#34;vim-airline-themes&#34;&gt;vim-airline-themes&lt;/h3&gt;
+&lt;p&gt;个人比较偏爱&lt;code&gt;solarized&lt;/code&gt;的暗色皮肤，所以需要使用这个库来安装airline配套的皮肤。
+在&lt;code&gt;init.vim&lt;/code&gt;中添加&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Plug &#39;vim-airline/vim-airline-themes&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后修改：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;let g:airline_theme=&amp;quot;solarized&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;即可&lt;/p&gt;
+&lt;h2 id=&#34;vim-colors-solarized&#34;&gt;vim-colors-solarized&lt;/h2&gt;
+&lt;p&gt;顾名思义，这是&lt;code&gt;solarized for vim&lt;/code&gt;。
+在&lt;code&gt;init.vim&lt;/code&gt;中添加&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Plug &#39;altercation/vim-colors-solarized&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后修改：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;set background=dark
+colorscheme solarized
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;即可&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年03月12日 首次发布&lt;/li&gt;
+&lt;li&gt;2016年03月15日 增加air-line相关内容&lt;/li&gt;
+&lt;li&gt;2016年06月16日 增加主题配置相关内容，并添加了部分常用快捷键&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Learn From Bug on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/series/learn-from-bug/</link><description>Recent content in Learn From Bug on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Fri, 15 Jun 2018 18:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/series/learn-from-bug/index.xml" rel="self" type="application/rss+xml"/><item><title>文档误读导致的 BUG</title><link>https://xuanwo.io/2018/06/15/bug-caused-by-misreading/</link><pubDate>Fri, 15 Jun 2018 18:00:00 +0000</pubDate><guid>https://xuanwo.io/2018/06/15/bug-caused-by-misreading/</guid><description>&lt;p&gt;之前听说过开发人员&lt;a href=&#34;https://www.theregister.co.uk/2018/05/09/intel_amd_kernel_privilege_escalation_flaws/&#34;&gt;读错 Intel 的文档&lt;/a&gt;导致出现了严重 &lt;a href=&#34;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-8897&#34;&gt;BUG&lt;/a&gt;，但是只是当成玩笑看待，但是等到这种事情发生在自己身上，还影响到了项目在用户生产环境的上线进度的时候，就不是那么好笑了。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本文取材自真实事件的复盘，项目相关信息已经去敏。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;经过&#34;&gt;经过&lt;/h2&gt;
+&lt;p&gt;项目服务上线完毕，但是在上线后的测试中发现后端出现大量 504 错误。通过跟踪日志得知报错问题是后端数据库查询超时，在确定问题稳定复现之后，首先排除了服务器抖动，上线操作失误等问题，将原因锁定在了代码的层面。进一步的，还发现这个问题与后端的某个异步任务组件有关：只要开启该组件，错误就会出现；只要关闭，错误就会消失。该组件最近实施过一次较大的重构，在对代码进行二次 Review 之后，我们发现了可能出问题的点：重构时为了提升性能，组件内部会开多个 Goroutine 并发查询数据库，在业务首次启动时可能会对数据库造成特别大的压力。将并发改成 for 循环之后情况有所好转但是还是会有查询超时，没有修复到位。再次检查该组件中涉及到的数据库操作相关代码，发现有些 Query 操作返回的 row 没有手动做 Close 。在增加手动 Close 的代码后，超时问题消失。&lt;/p&gt;
+&lt;h2 id=&#34;溯源&#34;&gt;溯源&lt;/h2&gt;
+&lt;p&gt;第二天我再回过来看这段代码，发现导致这个错误的根源是我对一段文档的误读：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Close closes the Rows, preventing further enumeration. If Next is called
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// and returns false and there are no further result sets,
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// the Rows are closed automatically and it will suffice to check the
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// result of Err. Close is idempotent and does not affect the result of Err.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (rs &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;Rows) &lt;span style=&#34;color:#06287e&#34;&gt;Close&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; rs.&lt;span style=&#34;color:#007020&#34;&gt;close&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;文档中的描述是：如果 Next 被调用，并返回了 false 而且没有更多结果的时候，rows 将会自动 close。但是我实际上写出来的代码是这样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;value &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; sql.NullInt64{}
+row, err &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; builder.&lt;span style=&#34;color:#06287e&#34;&gt;Select&lt;/span&gt;(db.&lt;span style=&#34;color:#06287e&#34;&gt;Func&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;COUNT&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;?&amp;#34;&lt;/span&gt;)).
+&lt;span style=&#34;color:#06287e&#34;&gt;From&lt;/span&gt;(table).&lt;span style=&#34;color:#06287e&#34;&gt;Where&lt;/span&gt;(cond).&lt;span style=&#34;color:#06287e&#34;&gt;Query&lt;/span&gt;()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; err &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+log.&lt;span style=&#34;color:#06287e&#34;&gt;Errorf&lt;/span&gt;(ctx, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;MySQL error for %v.&amp;#34;&lt;/span&gt;, err)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; row.&lt;span style=&#34;color:#06287e&#34;&gt;Next&lt;/span&gt;() {
+err = row.&lt;span style=&#34;color:#06287e&#34;&gt;Scan&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;value)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; err &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+log.&lt;span style=&#34;color:#06287e&#34;&gt;Errorf&lt;/span&gt;(ctx, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;MySQL scan error for %v.&amp;#34;&lt;/span&gt;, err)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; value.Valid {
+n = &lt;span style=&#34;color:#007020&#34;&gt;int64&lt;/span&gt;(value.Int64)
+}
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;区别在于我将这段文档理解成了：如果调用了 Next，而且没有更多结果的时候，rows 将会自动 close。实际上，Next 在返回 false 的时候后，其对应的 rows 才会 close。我们可以看一下 upperdb Rows 结构体的 Next 函数实现：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Next prepares the next result row for reading with the Scan method. It
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// returns true on success, or false if there is no next result row or an error
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// happened while preparing it. Err should be consulted to distinguish between
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// the two cases.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Every call to Scan, even the first one, must be preceded by a call to Next.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (rs &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;Rows) &lt;span style=&#34;color:#06287e&#34;&gt;Next&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; doClose, ok &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+&lt;span style=&#34;color:#06287e&#34;&gt;withLock&lt;/span&gt;(rs.closemu.&lt;span style=&#34;color:#06287e&#34;&gt;RLocker&lt;/span&gt;(), &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() {
+doClose, ok = rs.&lt;span style=&#34;color:#06287e&#34;&gt;nextLocked&lt;/span&gt;()
+})
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; doClose {
+rs.&lt;span style=&#34;color:#06287e&#34;&gt;Close&lt;/span&gt;()
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; ok
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (rs &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;Rows) &lt;span style=&#34;color:#06287e&#34;&gt;nextLocked&lt;/span&gt;() (doClose, ok &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; rs.closed {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;false&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;false&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Lock the driver connection before calling the driver interface
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// rowsi to prevent a Tx from rolling back the connection at the same time.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; rs.dc.&lt;span style=&#34;color:#06287e&#34;&gt;Lock&lt;/span&gt;()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;defer&lt;/span&gt; rs.dc.&lt;span style=&#34;color:#06287e&#34;&gt;Unlock&lt;/span&gt;()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; rs.lastcols &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+rs.lastcols = &lt;span style=&#34;color:#007020&#34;&gt;make&lt;/span&gt;([]driver.Value, &lt;span style=&#34;color:#007020&#34;&gt;len&lt;/span&gt;(rs.rowsi.&lt;span style=&#34;color:#06287e&#34;&gt;Columns&lt;/span&gt;()))
+}
+rs.lasterr = rs.rowsi.&lt;span style=&#34;color:#06287e&#34;&gt;Next&lt;/span&gt;(rs.lastcols)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; rs.lasterr &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Close the connection if there is a driver error.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; rs.lasterr &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; io.EOF {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;false&lt;/span&gt;
+}
+nextResultSet, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; rs.rowsi.(driver.RowsNextResultSet)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;false&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// The driver is at the end of the current result set.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Test to see if there is another result set after the current one.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Only close Rows if there is no further result sets to read.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !nextResultSet.&lt;span style=&#34;color:#06287e&#34;&gt;HasNextResultSet&lt;/span&gt;() {
+doClose = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; doClose, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;false&lt;/span&gt;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;false&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;可以看到 Next 只有在 &lt;code&gt;nextLocked&lt;/code&gt; 返回的 &lt;code&gt;doClose&lt;/code&gt; 为 &lt;code&gt;true&lt;/code&gt; 时才会主动调用 &lt;code&gt;rs.Close()&lt;/code&gt;，而按照 &lt;code&gt;nextLocked&lt;/code&gt; 中的逻辑，如果有值的话，会返回 &lt;code&gt;false, true&lt;/code&gt;。也就是说，当 Next 返回 &lt;code&gt;true&lt;/code&gt; 的时候，是不会去 Close rows 的。分析到这里，昨晚上线翻车的原因就很明显了，大量的 count query 的 rows 没有被 close 导致链接无法释放，从而新的请求无法执行以至于超时了。&lt;/p&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;好不容易调整回来的作息被这次上线打回去了，现在很蓝瘦&lt;/li&gt;
+&lt;li&gt;用户环境上一次线就欠别人一顿饭，多上几次我要破产了。。。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.amazon.cn/dp/B00L1VVUTC&#34;&gt;GEB&lt;/a&gt; 虽然看不懂，但是我感觉很有意思&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.qingcloud.com/qingstor/developer_tools/qscamel.html&#34;&gt;qscamel&lt;/a&gt; 在经历了多个大用户的捶打之后终于正式发布了，有机会要写一个系列的文章讲讲自己在开发 qscamel 的时候都学到了啥&lt;/li&gt;
+&lt;li&gt;好久没有发文章了，找个由头水一篇&lt;/li&gt;
+&lt;li&gt;博客在 Linode 上跑了两个月之后，还是乖乖的回到了 gh-pages 的怀抱，真香&lt;/li&gt;
+&lt;li&gt;话说动态这个章节有人看么，如果不讨喜的我考虑一下去掉 = =&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Python 中的引用与拷贝</title><link>https://xuanwo.io/2018/04/15/reference-and-copy-in-python/</link><pubDate>Sun, 15 Apr 2018 15:07:00 +0000</pubDate><guid>https://xuanwo.io/2018/04/15/reference-and-copy-in-python/</guid><description>&lt;p&gt;用户反馈使用 &lt;a href=&#34;https://github.com/yunify/qsctl&#34;&gt;qsctl&lt;/a&gt; 同步时文件内容不正确，调查后发现是对 Python 字典的错误使用导致了这个问题。这篇文章就来详细的介绍一下 Python 中的引用与拷贝。&lt;/p&gt;
+&lt;h2 id=&#34;定位&#34;&gt;定位&lt;/h2&gt;
+&lt;p&gt;按照用户给出的信息成功的复现出了用户描述的问题，进一步的，还发现当线程数量限制为只有一个时候，这个问题就消失了，因此可以判断是 Python 多线程间共享变量的时候出现了问题。qsctl 本身只是将文件 list 出来并调用 SDK 进行上传，没有做额外的处理，因此可以排除 qsctl 的嫌疑。也就是说，问题出在 Python SDK 上。阅读一下 Python SDK 中 &lt;a href=&#34;https://github.com/yunify/qingstor-sdk-python/blob/master/qingstor/sdk/service/bucket.py#L1148&#34;&gt;PutObject&lt;/a&gt; 相关方法的源代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;put_object_request&lt;/span&gt;(self, object_key, body&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None):
+operation &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;API&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;PutObject&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Method&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;PUT&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;URI&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/&amp;lt;bucket-name&amp;gt;/&amp;lt;object-key&amp;gt;&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Headers&amp;#34;&lt;/span&gt;: {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Host&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;join([self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;properties[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;zone&amp;#34;&lt;/span&gt;], &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;.&amp;#34;&lt;/span&gt;, self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;config&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;host]),
+},
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Properties&amp;#34;&lt;/span&gt;: self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;properties,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Body&amp;#34;&lt;/span&gt;: body
+}
+operation[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Properties&amp;#34;&lt;/span&gt;][&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;object-key&amp;#34;&lt;/span&gt;] &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; object_key
+self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;put_object_validate(operation)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; Request(self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;config, operation)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;put_object&lt;/span&gt;(self, object_key, body&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;None):
+req &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;put_object_request(object_key, body&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;body)
+resp &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; self&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;client&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;send(req&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;sign())
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; Unpacker(resp)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;忽略掉一些无关的代码之后，我们可以得到上面的简化代码。其中 &lt;code&gt;self&lt;/code&gt; 也就是这个 &lt;code&gt;Bucket&lt;/code&gt; 类会在一开始就初始化，之后的所有线程都会共享这一变量。顺着这个思路下去，很快发现一处可能导致出现问题的代码：&lt;code&gt;&amp;quot;Properties&amp;quot;: self.properties&lt;/code&gt;。显然的，在 Python SDK 开发者（其实是我- -）认为，此处将会对 &lt;code&gt;self.properties&lt;/code&gt; 进行一次复制，下面的 &lt;code&gt;operation[&amp;quot;Properties&amp;quot;][&amp;quot;object-key&amp;quot;] = object_key&lt;/code&gt; 操作不会影响其它的线程。那这个想法是否正确？我们需要做个实验。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; {}
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; b &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; a
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; b[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;x&amp;#34;&lt;/span&gt;] &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;y&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a
+{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;x&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;y&amp;#39;&lt;/span&gt;}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;显然，Python SDK 开发者的想法是错误的。此处对 &lt;code&gt;operation[&amp;quot;Properties&amp;quot;]&lt;/code&gt; 将会修改 &lt;code&gt;self.properties&lt;/code&gt;，从而导致多个线程可能会覆盖掉同一个 Object，进而导致上传了错误的内容。&lt;/p&gt;
+&lt;h2 id=&#34;修复&#34;&gt;修复&lt;/h2&gt;
+&lt;p&gt;想要修改这个问题只需要每次创建 operation 字典时传递一个 &lt;code&gt;self.properties&lt;/code&gt; 的副本，保证接下来的修改不会影响到 &lt;code&gt;self.properties&lt;/code&gt; 本身即可。此处使用了 Python 字典提供的 &lt;a href=&#34;file:///home/xuanwo/.local/share/Zeal/Zeal/docsets/Python_3.docset/Contents/Resources/Documents/doc/library/stdtypes.html#dict&#34;&gt;copy 方法&lt;/a&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yunify/qingstor-sdk-python/pull/43/commits/208172502fb72b9be85e7f1a494673810ee2e974&#34;&gt;Fix concurrency issue in object related methods&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;思考&#34;&gt;思考&lt;/h2&gt;
+&lt;p&gt;问题已经解决了，但是思考还在继续。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Python 中的引用和复制是什么关系？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;为了解决这个问题，首先需要知道以下两个关键的事实：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;变量只是用来指代对象的名称 (&lt;em&gt;Variables are simply names that refer to objects.&lt;/em&gt;)&lt;/li&gt;
+&lt;li&gt;List，Dict 是可变对象 (&lt;em&gt;Lists are mutable, which means that you can change their content.&lt;/em&gt;)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;事实-1&#34;&gt;事实 1&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;变量只是用来指代对象的名称 (&lt;em&gt;Variables are simply names that refer to objects.&lt;/em&gt;)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;先来看一段简短的代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; b&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;a
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;(a)
+&lt;span style=&#34;color:#40a070&#34;&gt;9128416&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;(b)
+&lt;span style=&#34;color:#40a070&#34;&gt;9128416&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;a href=&#34;https://docs.python.org/3/library/functions.html#id&#34;&gt;&lt;code&gt;id&lt;/code&gt;&lt;/a&gt; 函数会返回每一个 Object 的唯一 ID，并且保证在这个对象的整个生命周期中保持不变。对于 CPython 的实现而言，这个函数会返回这个对象在内存中的地址。也就是说，如果两个对象的 ID 相同，表示他们是同一个对象。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在类 C 的语言当中，每个变量都代表着一块内存区域；但是在 Python 当中，一切都是对象，变量只是对象的一个名称（a.k.a. 标签，引用），变量本身没有类型信息，类型信息存储在对象当中。上述的代码中 &lt;code&gt;a=2&lt;/code&gt;，实际上是先创建了 Int 对象 &lt;code&gt;2&lt;/code&gt; ，然后将变量 &lt;code&gt;a&lt;/code&gt; 绑定到了 &lt;code&gt;2&lt;/code&gt; 上。接下来的 &lt;code&gt;b=a&lt;/code&gt; 则是在对象 &lt;code&gt;2&lt;/code&gt; 上绑定了一个新的变量 &lt;code&gt;b&lt;/code&gt;。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; {}
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; b &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; a
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;(a)
+&lt;span style=&#34;color:#40a070&#34;&gt;140092073651336&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;(b)
+&lt;span style=&#34;color:#40a070&#34;&gt;140092073651336&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; b[&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;x&amp;#34;&lt;/span&gt;] &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;y&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a
+{&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;x&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;y&amp;#39;&lt;/span&gt;}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在了解上述事实之后，我们就能理解这段代码了：这里的 &lt;code&gt;a&lt;/code&gt; 与 &lt;code&gt;b&lt;/code&gt; 指向了同一个对象，因此通过 &lt;code&gt;b&lt;/code&gt; 进行的修改相当于通过 &lt;code&gt;a&lt;/code&gt; 进行同样的修改。&lt;/p&gt;
+&lt;h3 id=&#34;事实-2&#34;&gt;事实 2&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;List，Dict 是可变对象 (&lt;em&gt;Lists are mutable, which means that you can change their content.&lt;/em&gt;)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;通过事实 1 我们已经明白了 &lt;strong&gt;变量&lt;/strong&gt; 与 &lt;strong&gt;对象&lt;/strong&gt; 的关系，但是还是不够，因为我们无法解释下面这段代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; b&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;a
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; a&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;a&lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;(a)
+&lt;span style=&#34;color:#40a070&#34;&gt;9128448&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;id&lt;/span&gt;(b)
+&lt;span style=&#34;color:#40a070&#34;&gt;9128416&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;按照刚才得出的结论，&lt;code&gt;a&lt;/code&gt; 和 &lt;code&gt;b&lt;/code&gt; 应该指向同一个对象，为什么对 &lt;code&gt;a&lt;/code&gt; 进行的操作没有反应在 &lt;code&gt;b&lt;/code&gt; 上呢？因为 Int 类型是一个不可变对象(immutable)。&lt;/p&gt;
+&lt;p&gt;在 Python 中有两类对象类型：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;可变对象(mutable): list, dict 等&lt;/li&gt;
+&lt;li&gt;不可变对象(immutable): int, string, float, tuple 等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;不可变对象是不变的。在 &lt;code&gt;a=a+1&lt;/code&gt; 这一操作中没有修改 &lt;code&gt;a&lt;/code&gt; 之前对应的对象 &lt;code&gt;2&lt;/code&gt; 的值，而是创建了一个新的对象 &lt;code&gt;3&lt;/code&gt; 并且将 &lt;code&gt;a&lt;/code&gt; 绑定了上去。&lt;/p&gt;
+&lt;p&gt;而可变对象则可以通过某些函数来修改这个对象。需要注意的是，并不是所有的可变对象的操作都是修改可变对象本身。Python 标准库会通过函数是否返回 &lt;code&gt;None&lt;/code&gt; 来区分这个函数是修改了这个对象，还是创建了一个新的对象。比如 List 的 &lt;code&gt;append&lt;/code&gt; 和 &lt;code&gt;sort&lt;/code&gt; 函数返回 &lt;code&gt;None&lt;/code&gt;，这表示它们修改了这个 List 本身；而 &lt;code&gt;sorted()&lt;/code&gt; 函数则是会返回一个排序后的对象，这说明它创建了一个新的对象。&lt;/p&gt;
+&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
+&lt;p&gt;根据对上述两个事实的分析，可以得出以下结论：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对可变对象而言，我们可以修改它并且所有指向它的变量都会观察到这一变更&lt;/li&gt;
+&lt;li&gt;对不可变对象而言，所有指向它的变量都会始终看到同一个值，对它的修改操作总是会创建一个新的对象&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;现在我们就能够解决我们最开始提出的那些问题了：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Python 中的引用和拷贝是什么关系？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;其实没啥关系。对于赋值操作而言，&lt;code&gt;b=a&lt;/code&gt; 实际上是将 &lt;code&gt;b&lt;/code&gt; 绑定到了 &lt;code&gt;a&lt;/code&gt; 所对应的那个对象。而 &lt;code&gt;b=a.copy()&lt;/code&gt; 这是将 &lt;code&gt;b&lt;/code&gt; 绑定到了新创建的与 &lt;code&gt;a&lt;/code&gt; 所对应的那个对象的副本上。特别的，Python 中还有 &lt;code&gt;浅拷贝&lt;/code&gt; 和 &lt;code&gt;深拷贝&lt;/code&gt; 的概念，&lt;code&gt;浅拷贝&lt;/code&gt; 只会复制对象最外层的元素，而 &lt;code&gt;深拷贝&lt;/code&gt; 则会递归的复制整个对象。当对象内的元素全都是不可变对象时，它们两者并没有差异；而当对象内的元素中有可变对象时，&lt;code&gt;浅拷贝&lt;/code&gt; 会创建一个到该可变对象的新绑定，&lt;code&gt;深拷贝&lt;/code&gt; 则会创建一个与该可变对象相同的新对象并对这个可变对象继续做 &lt;code&gt;深拷贝&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;测试&#34;&gt;测试&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;先思考得出答案，然后再实际运行，并做出解释。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;case-1&#34;&gt;Case 1&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;test&lt;/span&gt;(arg):
+arg &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(arg)
+a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;
+test(a)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(a)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;case-2&#34;&gt;Case 2&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;test&lt;/span&gt;(arg):
+arg&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append(&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(arg)
+a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; []
+test(a)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(a)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;case-3&#34;&gt;Case 3&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;test&lt;/span&gt;(arg):
+arg &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; arg &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; [&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(arg)
+a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; []
+test(a)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(a)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;case-4&#34;&gt;Case 4&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;test&lt;/span&gt;(arg):
+arg &lt;span style=&#34;color:#666&#34;&gt;+=&lt;/span&gt; [&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(arg)
+a &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; []
+test(a)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(a)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;case-5&#34;&gt;Case 5&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;test&lt;/span&gt;(arg&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;[]):
+arg&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append(&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;print&lt;/span&gt;(arg)
+test()
+test()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.python.org/3/faq/programming.html#why-did-changing-list-y-also-change-list-x&#34;&gt;Why did changing list ‘y’ also change list ‘x’?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://winterttr.me/2015/10/24/python-passing-arguments-as-value-or-reference/&#34;&gt;Python的函数参数传递：传值？引用？&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://foofish.net/python-function-args.html&#34;&gt;Python 函数中，参数是传值，还是传引用？&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;通关了《尼尔：机械纪元》，最后十分感动地共享出了自己所有的存档，不说了，六周目见。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Python os walk 的坑</title><link>https://xuanwo.io/2018/04/01/python-os-walk/</link><pubDate>Sun, 01 Apr 2018 10:07:00 +0000</pubDate><guid>https://xuanwo.io/2018/04/01/python-os-walk/</guid><description>&lt;p&gt;用户反馈使用在 windows 下使用 &lt;a href=&#34;https://github.com/yunify/qsctl&#34;&gt;qsctl&lt;/a&gt; 上传文件的时候会中断并抛出 &lt;code&gt;UnicodeDecodeError&lt;/code&gt; 异常，经过一番调查之后发现居然是 &lt;code&gt;os.walk&lt;/code&gt; 的坑。&lt;/p&gt;
+&lt;h2 id=&#34;定位&#34;&gt;定位&lt;/h2&gt;
+&lt;p&gt;接到用户的反馈之后，首先尝试进行了复现，最后成功的找到了一个能复现该问题的 case:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt;&amp;gt;&amp;gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# create a file with bad name and sync with qsctl 1.7.0 on python 2.7.13:&lt;/span&gt;
+&amp;gt;&amp;gt;&amp;gt; touch &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;$(&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;echo&lt;/span&gt; -e &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\x8b\x8bThis&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;)&lt;/span&gt;
+&amp;gt;&amp;gt;&amp;gt; qsctl sync ./ qs://xxxxxx&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;抛出来的异常如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Traceback (most recent call last):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/bin/qsctl&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;27&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;
+sys&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;exit&lt;/span&gt;(main())
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/bin/qsctl&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;24&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; main
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; qingstor&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;qsctl&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;driver&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;main()
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/lib/python2.7/site-packages/qingstor/qsctl/driver.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;100&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; main
+command&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;main(args[&lt;span style=&#34;color:#40a070&#34;&gt;2&lt;/span&gt;:])
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/lib/python2.7/site-packages/qingstor/qsctl/commands/base.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;276&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; main
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; cls&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;send_request()
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/lib/python2.7/site-packages/qingstor/qsctl/commands/transfer.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;546&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; send_request
+cls&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;upload_files()
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/lib/python2.7/site-packages/qingstor/qsctl/commands/transfer.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;165&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; upload_files
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; rt, dirs, files &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; os&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;walk(source_path):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/lib/python2.7/os.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;286&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; walk
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; isdir(join(top, name)):
+File &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;/home/xuanwo/.pyenv/versions/2.7.13/lib/python2.7/posixpath.py&amp;#34;&lt;/span&gt;, line &lt;span style=&#34;color:#40a070&#34;&gt;71&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; join
+path &lt;span style=&#34;color:#666&#34;&gt;+=&lt;/span&gt; b
+&lt;span style=&#34;color:#007020&#34;&gt;UnicodeDecodeError&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;ascii&amp;#39;&lt;/span&gt; codec can&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;t decode byte 0x8b in position 0: ordinal not in range(128)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;之前写过的一篇关于 Python 字符串的&lt;a href=&#34;https://xuanwo.io/2017/01/22/encoding-in-python/&#34;&gt;文章&lt;/a&gt; 曾经分析过类似的问题，Python 2 在进行字符串比较、拼接、替换时，会进行隐式的类型转换。通过查看 &lt;code&gt;posixpath.py&lt;/code&gt; 的源码，可以定位到报错的地方：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;join&lt;/span&gt;(a, &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;p):
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Join two or more pathname components, inserting &amp;#39;/&amp;#39; as needed.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; If any component is an absolute path, all previous path components
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; will be discarded. An empty last part will result in a path that
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; ends with a separator.&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+path &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; a
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; b &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; p:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; b&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;startswith(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;/&amp;#39;&lt;/span&gt;):
+path &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; b
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;elif&lt;/span&gt; path &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;or&lt;/span&gt; path&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;endswith(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;/&amp;#39;&lt;/span&gt;):
+path &lt;span style=&#34;color:#666&#34;&gt;+=&lt;/span&gt; b &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# This is line 71.&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;else&lt;/span&gt;:
+path &lt;span style=&#34;color:#666&#34;&gt;+=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;/&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt; b
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; path&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在 Python 2 下，str 与 unicode 相加，str 会做一次 decode() 转换为 unicode 再相加。也就是说此处报错是因为 path 和 b 的类型不一致导致出现了本不该出现的一次 decode()。顺着代码继续分析，path 和 b 是上层传入的 top 和 name，而这一层的调用是在 os 包的内部进行的。也就是说，os.walk 在处理过程中并没有严格遵循保持类型一致的不成文约定，而是在传入 unicode 的情况下，出现了 str 类型。知道了问题出在 &lt;code&gt;os.walk&lt;/code&gt;，接下来再看看 &lt;code&gt;os.walk&lt;/code&gt; 的实现就能明白问题的所在了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;walk&lt;/span&gt;(top, func, arg):
+islink, join, isdir &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; path&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;islink, path&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;join, path&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;isdir
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# We may not have read permission for top, in which case we can&amp;#39;t&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# get a list of the files the directory contains. os.path.walk&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# always suppressed the exception then, rather than blow up for a&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# minor reason when (say) a thousand readable directories are still&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# left to visit. That logic is copied here.&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;try&lt;/span&gt;:
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Note that listdir and error are globals in this module due&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# to earlier import-*.&lt;/span&gt;
+names &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; listdir(top)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;except&lt;/span&gt; error, err:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; onerror &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;is&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; None:
+onerror(err)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+dirs, nondirs &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; [], []
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; name &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; names:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; isdir(join(top, name)):
+dirs&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append(name)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;else&lt;/span&gt;:
+nondirs&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append(name)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; topdown:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;yield&lt;/span&gt; top, dirs, nondirs
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; name &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; dirs:
+new_path &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; join(top, name)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; followlinks &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;or&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; islink(new_path):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; x &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;in&lt;/span&gt; walk(new_path, topdown, onerror, followlinks):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;yield&lt;/span&gt; x
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; topdown:
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;yield&lt;/span&gt; top, dirs, nondirs&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;等到读完 &lt;code&gt;os.walk&lt;/code&gt; 的实现我们就能明白，&lt;code&gt;os.walk&lt;/code&gt; 也是被迫背锅的，那个奇怪的 str 是由 &lt;code&gt;os.listdir&lt;/code&gt; 返回的。但是 &lt;code&gt;os.listdir&lt;/code&gt; 的实现是系统相关的，&lt;code&gt;os.walk&lt;/code&gt; 理应屏蔽掉编码的细节，为用户提供一个行为一致的接口。&lt;/p&gt;
+&lt;h2 id=&#34;修复&#34;&gt;修复&lt;/h2&gt;
+&lt;p&gt;定位到问题之后，修复起来就变得简单了。检查一下 listdir 的返回值，如果类型是 str，我们就试着去做一次 decode。如果报错了的话，我们需要通过 onerror 来处理这个情况然后把这个文件从结果中去掉以保证同步可以继续进行。
+最后通过这两个 commit 对这个问题进行了修复：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yunify/qsctl/commit/f071667b12f8172451a9e7d63dcdd44f9348bf22&#34;&gt;Handle UnicodeDecodeError while use os.walk&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yunify/qsctl/commit/840a97ef8954fbe35659cfc6d457f461dcf2b77d&#34;&gt;Handle illegal characters in a better way&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;接口是开发者与用户的神圣契约，我们要尽量避免不一致的行为。&lt;/li&gt;
+&lt;li&gt;上层接口要尽可能屏蔽下层的细节，不要把本该自己处理的问题扔给用户处理。&lt;/li&gt;
+&lt;li&gt;Python 2 快点死掉吧 = =&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;正如开头所说的，这篇文章是 “Learn From BUG” 系列的第一篇，之后我会不定期的整理和分享一些自己平时遇到的 BUG 解决思路。一方面是为了自己能够从 BUG 中学到更多，另一方面是希望能够帮助到被类似 BUG 困扰的人们。&lt;/li&gt;
+&lt;li&gt;随着再一次的心血来潮，我在 Linode 买了台机器部署并且把 Blog 迁移了过去，去掉了减速 CDN，实测速度比之前快上了不少。&lt;/li&gt;
+&lt;li&gt;《比宇宙更遥远的地方》完结撒花了，我现在唯一的感触就是这次的圣地巡礼可能有点贵 = =&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

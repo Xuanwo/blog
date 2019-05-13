@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Anybox on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/anybox/</link><description>Recent content in Anybox on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 10 Mar 2019 04:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/anybox/index.xml" rel="self" type="application/rss+xml"/><item><title>通过 gRPC 传递 Request ID</title><link>https://xuanwo.io/2019/03/10/request-id-in-grpc/</link><pubDate>Sun, 10 Mar 2019 04:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/10/request-id-in-grpc/</guid><description>&lt;p&gt;分布式追踪是 &lt;a href=&#34;https://www.qingcloud.com/products/anybox/&#34;&gt;Anybox&lt;/a&gt; 项目中的重要一环，其中在每个请求的入口处设置一个 Request ID 是分布式追踪的第一步。这篇文章主要介绍如何利用 gRPC 的 Metadata 与 Interceptor 功能来实现 Request ID 在不同服务间的生成与传递。&lt;/p&gt;
+&lt;h2 id=&#34;介绍&#34;&gt;介绍&lt;/h2&gt;
+&lt;h3 id=&#34;tracing&#34;&gt;Tracing&lt;/h3&gt;
+&lt;p&gt;关于 Tracing 的介绍，可以看朋友 P 写的 &lt;a href=&#34;https://pjw.io/articles/2018/05/08/opentracing-explanations/#section-3&#34;&gt;OpenTracing 详解&lt;/a&gt;，看完之后就能大概明白为什么需要设置并传递 Request ID。&lt;/p&gt;
+&lt;h3 id=&#34;metadata&#34;&gt;Metadata&lt;/h3&gt;
+&lt;p&gt;Metadata 可以理解为一个 HTTP 请求的 Header（它的底层实现就是 HTTP/2 的 Header），用户可以通过访问和修改每个 gRPC Call 的 Metadata 来传递额外的信息：比如认证信息，比如本文中提到的 Request ID。&lt;/p&gt;
+&lt;h3 id=&#34;interceptor&#34;&gt;Interceptor&lt;/h3&gt;
+&lt;p&gt;Interceptor 有点类似于我们平时常用的 HTTP Middleware，不同的是它可以用在 Client 端和 Server 端。比如在收到请求之后输出日志，在请求出现错误的时候输出错误信息，比如获取请求中设置的 Request ID。&lt;/p&gt;
+&lt;h2 id=&#34;实现&#34;&gt;实现&lt;/h2&gt;
+&lt;p&gt;Anybox 后端主要使用 Golang 和 Python 开发，因此本文主要介绍这两种语言的使用方式，其他语言的使用方式应该与之类似。&lt;/p&gt;
+&lt;h3 id=&#34;golang&#34;&gt;Golang&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryInvoker is called by UnaryClientInterceptor to complete RPCs.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryInvoker &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, reply &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;ClientConn, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;CallOption) &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryClientInterceptor intercepts the execution of a unary RPC on the client. invoker is the handler to complete the RPC
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// and it is the responsibility of the interceptor to call it.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// This is an EXPERIMENTAL API.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryClientInterceptor &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, reply &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;ClientConn, invoker UnaryInvoker, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;CallOption) &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryHandler defines the handler invoked by UnaryServerInterceptor to complete the normal
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// execution of a unary RPC. If a UnaryHandler returns an error, it should be produced by the
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// status package, or else gRPC will use codes.Unknown as the status code and err.Error() as
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// the status message of the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryHandler &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}) (&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryServerInterceptor provides a hook to intercept the execution of a unary RPC on the server. info
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// contains all the information of this RPC the interceptor can operate on. And handler is the wrapper
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// of the service method implementation. It is the responsibility of the interceptor to invoke handler
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// to complete the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryServerInterceptor &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, info &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;UnaryServerInfo, handler UnaryHandler) (resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Golang 的实现是把 Metadata 塞在了 context 里面，只需要使用 &lt;code&gt;metadata.FromOutgoingContext(ctx)&lt;/code&gt; 和 &lt;code&gt;metadata.FromIncomingContext(ctx)&lt;/code&gt; 就能够访问本次请求的 Metadata。概念清楚之后代码应该非常好写了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;RequestIDClientInterceptor&lt;/span&gt;() grpc.UnaryClientInterceptor {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(
+ctx context.Context,
+method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{},
+cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;grpc.ClientConn, invoker grpc.UnaryInvoker, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;grpc.CallOption,
+) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;) {
+md, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; metadata.&lt;span style=&#34;color:#06287e&#34;&gt;FromOutgoingContext&lt;/span&gt;(ctx)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
+md = metadata.&lt;span style=&#34;color:#06287e&#34;&gt;Pairs&lt;/span&gt;()
+}
+value &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; ctx.&lt;span style=&#34;color:#06287e&#34;&gt;Value&lt;/span&gt;(trace.RequestID)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; requestID, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; value.(&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;); ok &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; requestID &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt; {
+md[&lt;span style=&#34;color:#007020&#34;&gt;string&lt;/span&gt;(trace.RequestID)] = []&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;{requestID}
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;invoker&lt;/span&gt;(metadata.&lt;span style=&#34;color:#06287e&#34;&gt;NewOutgoingContext&lt;/span&gt;(ctx, md), method, req, resp, cc, opts&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;)
+}
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;RequestIDServerInterceptor&lt;/span&gt;() grpc.UnaryServerInterceptor {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(
+ctx context.Context,
+req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, info &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+) (resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;) {
+md, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; metadata.&lt;span style=&#34;color:#06287e&#34;&gt;FromIncomingContext&lt;/span&gt;(ctx)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
+md = metadata.&lt;span style=&#34;color:#06287e&#34;&gt;Pairs&lt;/span&gt;()
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Set request ID for context.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; requestIDs &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; md[&lt;span style=&#34;color:#007020&#34;&gt;string&lt;/span&gt;(trace.RequestID)]
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;len&lt;/span&gt;(requestIDs) &lt;span style=&#34;color:#666&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt; {
+ctx = context.&lt;span style=&#34;color:#06287e&#34;&gt;WithValue&lt;/span&gt;(ctx, trace.RequestID, requestIDs[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;])
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;handler&lt;/span&gt;(ctx, req)
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Generate request ID and set context if not exists.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; requestID &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; id.&lt;span style=&#34;color:#06287e&#34;&gt;NewHex32&lt;/span&gt;()
+ctx = context.&lt;span style=&#34;color:#06287e&#34;&gt;WithValue&lt;/span&gt;(ctx, trace.RequestID, requestID)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;handler&lt;/span&gt;(ctx, req)
+}
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;python&#34;&gt;Python&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Python 这边相对更蛋疼一些，注释写得不是非常清晰，给的使用样例也十分的晦涩难懂，看了好一会儿源码才明白怎么用。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Python 想要实现一个 Client Interceptor 的话需要继承 &lt;code&gt;grpc.UnaryUnaryClientInterceptor&lt;/code&gt; 并实现 &lt;code&gt;intercept_unary_unary&lt;/code&gt; 方法。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;UnaryUnaryClientInterceptor&lt;/span&gt;(six&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;with_metaclass(abc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;ABCMeta)):
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Affords intercepting unary-unary invocations.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; This is an EXPERIMENTAL API.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@abc.abstractmethod&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;intercept_unary_unary&lt;/span&gt;(self, continuation, client_call_details, request):
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Intercepts a unary-unary invocation asynchronously.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Args:
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; continuation: A function that proceeds with the invocation by
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; executing the next interceptor in chain or invoking the
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; actual RPC on the underlying Channel. It is the interceptor&amp;#39;s
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; responsibility to call it if it decides to move the RPC forward.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; The interceptor can use
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; `response_future = continuation(client_call_details, request)`
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; to continue with the RPC. `continuation` returns an object that is
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; both a Call for the RPC and a Future. In the event of RPC
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; completion, the return Call-Future&amp;#39;s result value will be
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; the response message of the RPC. Should the event terminate
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; with non-OK status, the returned Call-Future&amp;#39;s exception value
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; will be an RpcError.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; client_call_details: A ClientCallDetails object describing the
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; outgoing RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; request: The request value for the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Returns:
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; An object that is both a Call for the RPC and a Future.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; In the event of RPC completion, the return Call-Future&amp;#39;s
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; result value will be the response message of the RPC.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Should the event terminate with non-OK status, the returned
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Call-Future&amp;#39;s exception value will be an RpcError.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;raise&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;NotImplementedError&lt;/span&gt;()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;client_call_details.metadata&lt;/code&gt; 是一个 list，里面的每一个 item 都是由 &lt;code&gt;(key, value)&lt;/code&gt; 组成的元组。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;_ClientCallDetails&lt;/span&gt;(
+collections&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;namedtuple(
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;_ClientCallDetails&amp;#39;&lt;/span&gt;,
+(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;method&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;timeout&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;metadata&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;credentials&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;wait_for_ready&amp;#39;&lt;/span&gt;)),
+grpc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;ClientCallDetails):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;pass&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;RequestIDClientInterceptor&lt;/span&gt;(grpc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;UnaryUnaryClientInterceptor):
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;intercept_unary_unary&lt;/span&gt;(self, continuation, client_call_details, request):
+rid &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; the_function_to_generate_request_id()
+logger&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;info(f&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Sending RPC request, Method: {client_call_details.method}, Request ID: {rid}.&amp;#34;&lt;/span&gt;)
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Add request into client call details, aka, metadata.&lt;/span&gt;
+metadata &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; []
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;metadata &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;is&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; None:
+metadata &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;list&lt;/span&gt;(client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;metadata)
+metadata&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append((&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;request_id&amp;#34;&lt;/span&gt;, rid))
+client_call_details &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; _ClientCallDetails(
+client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;method, client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;timeout, metadata,
+client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;credentials, client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;wait_for_ready)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; continuation(client_call_details, request)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在初始化 Channel 的时候在实例化一下即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;channel &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; insecure_channel(f&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;{host}:{port}&amp;#34;&lt;/span&gt;)
+channel &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; intercept_channel(channel, RequestIDClientInterceptor())&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://pjw.io/articles/2018/05/08/opentracing-explanations/&#34;&gt;OpenTracing 详解&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-metadata.md&#34;&gt;grpc-metadata&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/grpc/grpc/tree/master/examples/python/interceptors&#34;&gt;gRPC Python Interceptor Examples&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

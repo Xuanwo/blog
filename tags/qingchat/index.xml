@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Qingchat on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/qingchat/</link><description>Recent content in Qingchat on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 29 May 2016 20:57:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/qingchat/index.xml" rel="self" type="application/rss+xml"/><item><title>我从Qingchat中学到的教训</title><link>https://xuanwo.io/2016/05/29/learn-from-qingchat/</link><pubDate>Sun, 29 May 2016 20:57:00 +0000</pubDate><guid>https://xuanwo.io/2016/05/29/learn-from-qingchat/</guid><description>&lt;p&gt;之前的一段时间一直在从事&lt;a href=&#34;https://github.com/Xuanwo/qingchat&#34;&gt;Qingchat&lt;/a&gt;的相关开发工作，这个项目是一个基于Mojo-Weixin提供的Rest API开发的一个微信机器人，承担了十余个群，上千人的微信直播活动。秉承着ACM训练出来的“暴力加乱搞”风格，我花了大概一个星期的课余时间，搞出了一个可用的版本。期间也迭代了很多次，既欣慰于Coding的力量，也苦恼于当初设计的不完善带来的种种问题。在这个项目即将大规模重构的前夕，我总结一下开发Qingchat的过程中的经验教训，希望自己能成为一个更好更聪明的Coder。&lt;/p&gt;
+&lt;h1 id=&#34;经验教训&#34;&gt;经验教训&lt;/h1&gt;
+&lt;h2 id=&#34;没有稳定性的世界&#34;&gt;没有稳定性的世界&lt;/h2&gt;
+&lt;p&gt;从最开始Coding的时候，就有着一个根深蒂固的信念：计算机不会出错。1是1，0是0，只要自己的实现是对的，那最后的结果也一定是对的。然后，真相并非如此：我们存在于一个没有稳定性的世界。
+你访问的路径可能是不存在的，你访问的文件可能是不存在或者已经上锁，你期望的服务器响应因为网络环境太差变成了超时。不仅如此，有时候你还会遇到神出鬼没的黑客们，稍有不慎你可能就永远失去了对数据的掌控权（*我测试用的服务器被人暴力尝试登陆34万次*）。
+所以我们在编程的时候就应当完全抛弃“这个服务是稳定的”这种前提，学会在万物皆有可能出错的假设下编程，不要轻视程序的鲁棒性。你永远都不会知道用户会以何种方式使用你的程序，同样的，你也不会知道用户到底会输入什么样的数据。灵活运用“防御式编程”和“让它出错”两种思想，让你的代码更健壮。&lt;/p&gt;
+&lt;h2 id=&#34;拥抱多线程-走向非阻塞&#34;&gt;拥抱多线程，走向非阻塞&lt;/h2&gt;
+&lt;p&gt;现在回过头来看，自己当初实现的群发功能就是一个彻头彻尾的失败品：容错性差，效率低下。这些问题其实是由同一个原因导致的：我使用了一个单线程阻塞式的实现，不仅如此，还没有做任何异常的处理。这样导致的结果就是只要某个环节出错，整个群发任务就会直接退出。速度是跟微信群的数量成正比的，群的数量上升之后，群发速度过慢成了我的同事们经常向我吐嘈的问题。
+开发的时候不计算网络传输延时绝对是一个重大失误——实际上，网络延时是整个系统的关键瓶颈。为了解决这个问题，Node.js 采用了一种单线程非阻塞的设计（一家之言，轻喷）。对于Python来说也是一样的，适度地拥抱多线程开发以提高并行效率，多采用非阻塞式设计以避免单个任务执行时间过长拖慢运行速度。
+在一次去上课的路上，我形象地把这种设计比作“射后不管”，好像是飞毛腿导弹？&lt;/p&gt;
+&lt;h2 id=&#34;开源非万能&#34;&gt;开源非万能&lt;/h2&gt;
+&lt;p&gt;我原来是一个开源的死忠粉，认为开源可以解决一切问题，那个时候每天思考的问题就是为什么Windows不开源？等到真的进入业界，才明白自己的这种想法有多么幼稚。
+除去那些大型的有基金会在背后支撑的项目，绝大多数项目完全依靠开发者个人热情来维持，某些涉及到商业支持的项目更是存在着“人走项目死”的现象。比如我参与管理的&lt;a href=&#34;https://github.com/hexojs&#34;&gt;Hexo&lt;/a&gt;项目在作者tommy开始实习之后就进展缓慢，再比如我接手但是现状非常差的&lt;a href=&#34;https://github.com/staticfile/static&#34;&gt;staticfile&lt;/a&gt;（*很抱歉我并没有能够做出什么正面的贡献，反而让状况变得更加糟糕了*）。
+这些实践都告诉我，开源并不是万能的，真正想要解决一个问题，需要一个完善的制度以及各方面的激励机制。单纯依赖于开发者个人的热情往往不利于一个项目的长远发展，而在自行开发的项目中依赖于一个开源项目往往会带来更多的风险。开发者不一定会开发你期望的功能，开发者也不一定会按照你期望的进度进行开发。
+作为我个人，我依然是一个热爱开源项目，崇尚开源理念的人；然而作为一个产品的开发者，一个服务的提供者，你必须权衡自行开发，采购商业产品以及使用开源项目之间的利弊。不同的选择取决于不同的项目，不同的需求，不同的自主开发能力，不同的后续维护能力。一味的强调开源理念，不顾实际，往往对开源事业的发展有害无益，挫伤人们对开源的信赖。&lt;/p&gt;
+&lt;h1 id=&#34;未来展望&#34;&gt;未来展望&lt;/h1&gt;
+&lt;p&gt;一个项目最具活力与激情的时刻就是在设计之初实现之前，等到实现的时候往往寸步难行，到了后续维护的时候时常想就此了断。我希望这个项目能够存活更长的时间，希望自己向同事们提出的构想都能够一一变为现实。本次重构希望能够实现一个更加稳定更加高效的Qingchat，希望能够进一步减少重复劳动，提高效率。
+最后感谢同事们的不杀之恩，感谢青云QingCloud的自由空间，可以允许我以自己想要的方式完成工作。最后以青云CTO Reno在某次会上说的话自勉：“你们是青云的Devloper，No excuse。”&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年05月30日 初稿&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>docopt——好用的Python命令行参数解释器</title><link>https://xuanwo.io/2016/04/04/docopt-intro/</link><pubDate>Mon, 04 Apr 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/04/04/docopt-intro/</guid><description>&lt;p&gt;&lt;a href=&#34;https://github.com/Xuanwo/qingchat&#34;&gt;&lt;code&gt;Qingchat&lt;/code&gt;&lt;/a&gt; 使用的命令行参数解释器是 &lt;a href=&#34;http://docopt.org/&#34;&gt;&lt;code&gt;docopt&lt;/code&gt;&lt;/a&gt;，用下来感觉非常棒，所以决定介绍一下这个库。（*奉劝各位看官，珍爱生命，远离argparse。*）&lt;/p&gt;
+&lt;h1 id=&#34;介绍&#34;&gt;介绍&lt;/h1&gt;
+&lt;p&gt;docopt 本质上是在 Python 中引入了一种针对命令行参数的形式语言，在代码的最开头使用&lt;code&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/code&gt;文档注释的形式写出符合要求的文档，就会自动生成对应的parse，体验非常赞。&lt;/p&gt;
+&lt;h1 id=&#34;用法&#34;&gt;用法&lt;/h1&gt;
+&lt;h2 id=&#34;样例&#34;&gt;样例&lt;/h2&gt;
+&lt;p&gt;docopt的使用非常简单，以Qingchat为例，你只需要在代码最开头加入：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Qingchat CLI
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;Usage:
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat config ip &amp;lt;ip&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat config port &amp;lt;port&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat config login
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat group list
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat group choose &amp;lt;group_name&amp;gt;...
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat group clean
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat group send -t &amp;lt;content&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat group send -i &amp;lt;media&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; qingchat group send -f &amp;lt;file&amp;gt; [&amp;lt;delaytime&amp;gt;]
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;Options:
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; -h --help Show this screen.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; -v --version Show version.
+&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后在执行代码中加入：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;arguments &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; docopt(__doc__, version&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Qingchat 0.3.2&amp;#39;&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;就会在你的程序中导入一个&lt;code&gt;arguments&lt;/code&gt;字典，这个字典中的内容形如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;{
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;-f&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;-i&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;-t&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;content&amp;gt;&amp;#39;&lt;/span&gt;: None,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;file&amp;gt;&amp;#39;&lt;/span&gt;: None,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;group_name&amp;gt;&amp;#39;&lt;/span&gt;: [],
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;ip&amp;gt;&amp;#39;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;127.0.0.1&amp;#39;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;media&amp;gt;&amp;#39;&lt;/span&gt;: None,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;port&amp;gt;&amp;#39;&lt;/span&gt;: None,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;choose&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;clean&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;config&amp;#39;&lt;/span&gt;: True,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;group&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;ip&amp;#39;&lt;/span&gt;: True,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;list&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;login&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;port&amp;#39;&lt;/span&gt;: False,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;send&amp;#39;&lt;/span&gt;: False
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这样应该就能很容易看出来，我们在文档中写的每一个短语，都被转化为一个对应的类型。只要直接调用&lt;code&gt;arguments[&#39;xxx&#39;]&lt;/code&gt;就可以判断或者使用对应的值，从而实现对应的功能。&lt;/p&gt;
+&lt;h2 id=&#34;详解&#34;&gt;详解&lt;/h2&gt;
+&lt;p&gt;前面我们举了一个例子，下面我们来详细介绍一下如何完成一个符合 &lt;code&gt;docopt&lt;/code&gt; 要求的注释文档。&lt;/p&gt;
+&lt;h3 id=&#34;usage&#34;&gt;Usage&lt;/h3&gt;
+&lt;p&gt;所有出现在&lt;code&gt;usage:&lt;/code&gt;（区分大小写）和一个空行之间的文本都会被识别为一个命令组合，&lt;code&gt;usage&lt;/code&gt;后的第一个字母将会被识别为这个程序的名字，所有命令组合的每一个部分（空格分隔）都会成为字典中的一个key。&lt;/p&gt;
+&lt;h4 id=&#34;参数&#34;&gt;参数&lt;/h4&gt;
+&lt;p&gt;形如 &lt;code&gt;&amp;lt;argument&amp;gt;&lt;/code&gt; 或者 &lt;code&gt;ARGUMENT&lt;/code&gt; 的文本将会被识别为参数。
+在转化后的字典中的取值为 &lt;code&gt;True&lt;/code&gt; 或者 &lt;code&gt;False&lt;/code&gt; 。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;host&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;port&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;选项&#34;&gt;选项&lt;/h4&gt;
+&lt;p&gt;形如 &lt;code&gt;-o&lt;/code&gt; 或者 &lt;code&gt;--option&lt;/code&gt; 的文本将会被识别为选项。
+在转化后的字典中的取值为 &lt;code&gt;True&lt;/code&gt; 或者 &lt;code&gt;False&lt;/code&gt; 。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;f &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;file&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Tips:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;短选项可以组合起来，比如&lt;code&gt;-abc&lt;/code&gt;等价于&lt;code&gt;-a -b -c&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;长选项需要的参数需要使用 &lt;code&gt;=&lt;/code&gt; 或者空格来分隔，&lt;code&gt;--input=ARG&lt;/code&gt; 等价于 &lt;code&gt;--input ARG&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;短选项可以不需要空格， &lt;code&gt;-f FILE&lt;/code&gt; 等价于 &lt;code&gt;-fFILE&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;命令&#34;&gt;命令&lt;/h4&gt;
+&lt;p&gt;其他不满足 &lt;code&gt;--options&lt;/code&gt; 或者 &lt;code&gt;&amp;lt;arguments&amp;gt;&lt;/code&gt; 的文本将会被识别为（子）命令。
+在转化后的字典中取值为 &lt;code&gt;True&lt;/code&gt; 或者 &lt;code&gt;False&lt;/code&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;可选项&#34;&gt;可选项&lt;/h4&gt;
+&lt;p&gt;形如 &lt;code&gt;[optional elements]&lt;/code&gt; 的文本是可选项。
+&lt;code&gt;elements&lt;/code&gt;包括上述的三种类型：参数，选项以及命令。&lt;/p&gt;
+&lt;p&gt;在相同或者不同的括号中都是一样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program [command &lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;option &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;argument&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;]&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;等价于&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program [command] [&lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;option] [&lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;argument&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;]&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;必填项&#34;&gt;必填项&lt;/h4&gt;
+&lt;p&gt;形如 &lt;code&gt;(required elements)&lt;/code&gt; 的文本是必填项。
+上述三种元素默认都是必填项，&lt;code&gt;()&lt;/code&gt;符号用在一些比较特殊的情形下，比如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program (&lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;either&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;this &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;and&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;that&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;or&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;this&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;选择项&#34;&gt;选择项&lt;/h4&gt;
+&lt;p&gt;形如 &lt;code&gt;element|another&lt;/code&gt; 的文本是选择项，你可以从中选择一个值。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program go (&lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;up &lt;span style=&#34;color:#666&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;down &lt;span style=&#34;color:#666&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;left &lt;span style=&#34;color:#666&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;--&lt;/span&gt;right)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&#34;列表项&#34;&gt;列表项&lt;/h4&gt;
+&lt;p&gt;形如 &lt;code&gt;element...&lt;/code&gt; 的文本是列表项，你可以输入多个参数。&lt;/p&gt;
+&lt;p&gt;比如说：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;Usage: my_program &lt;span style=&#34;color:#007020&#34;&gt;open&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#007020&#34;&gt;file&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;...&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后你可以通过&lt;code&gt;arguments[&#39;&amp;lt;file&amp;gt;&#39;]&lt;/code&gt; 来访问这个列表。&lt;/p&gt;
+&lt;h3 id=&#34;option&#34;&gt;Option&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;Option&lt;/code&gt; 部分用于指定某些特殊情形，比如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将某个短参数与长参数关联起来，比如&lt;code&gt;-i &amp;lt;file&amp;gt;, --input &amp;lt;file&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;某个选项有一个参数&lt;/li&gt;
+&lt;li&gt;选项的默认值，比如&lt;code&gt;--coefficient=K The K coefficient [default: 2.95]&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;校验&#34;&gt;校验&lt;/h3&gt;
+&lt;p&gt;如果对自己完成的文档有疑问，可以使用&lt;a href=&#34;http://try.docopt.org/&#34;&gt;在线工具&lt;/a&gt;进行校验。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年04月04日 首次发布&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

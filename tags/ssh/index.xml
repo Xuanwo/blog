@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Ssh on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/ssh/</link><description>Recent content in Ssh on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 22 May 2018 04:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/ssh/index.xml" rel="self" type="application/rss+xml"/><item><title>Tiresias —— 服务器信息管理工具</title><link>https://xuanwo.io/2018/05/22/tiresias-intro/</link><pubDate>Tue, 22 May 2018 04:00:00 +0000</pubDate><guid>https://xuanwo.io/2018/05/22/tiresias-intro/</guid><description>&lt;p&gt;大概从大二的时候开始就有这种困惑：不同的服务器所在的云服务商，数据中心，网段，用户名和私钥各不相同，他们的信息要如何管理？最开始是把所有的服务器信息都存放在了密码管理工具当中，后来知道了使用 &lt;a href=&#34;https://github.com/moul/advanced-ssh-config&#34;&gt;assh&lt;/a&gt; 来生成 &lt;code&gt;ssh_config&lt;/code&gt;，最后是 &lt;a href=&#34;https://pjw.io/&#34;&gt;@Aspire&lt;/a&gt; 提供的一个思路：使用脚本生成 &lt;code&gt;hosts&lt;/code&gt; 文件。于是我顺着 Aspire 的思路开发了一个工具：&lt;a href=&#34;https://github.com/Xuanwo/tiresias&#34;&gt;Tiresias&lt;/a&gt;，它可以读取事先写好的 YAML 配置文件并生成 &lt;code&gt;ssh_config&lt;/code&gt; 和 &lt;code&gt;hosts&lt;/code&gt; 文件。今天这篇文章就主要介绍一下我造的又一个轮子。&lt;/p&gt;
+&lt;h2 id=&#34;介绍&#34;&gt;介绍&lt;/h2&gt;
+&lt;p&gt;Tiresias，一般翻译为&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E7%89%B9%E4%BC%8A%E8%A5%BF%E4%BA%9A%E6%96%AF&#34;&gt;特伊西亚斯&lt;/a&gt;，古希腊神话人物，是一位盲人先知，凭借多种获得信息的能力并对世界进行解释而闻名于世。这个工具取这个名字主要就是采用了盲人先知的意象，希望它可以更好帮助管理众多服务器的信息。&lt;/p&gt;
+&lt;h2 id=&#34;使用&#34;&gt;使用&lt;/h2&gt;
+&lt;p&gt;Tiresias 不需要特别的安装过程，只需要从 &lt;a href=&#34;https://github.com/Xuanwo/tiresias/releases&#34;&gt;release&lt;/a&gt; 处下载编译好的二进制即可使用。&lt;/p&gt;
+&lt;p&gt;Tiresias 运行时需要指定一个配置文件，比如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;src:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;fs&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/path/to/source/file&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;dst:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;ssh_config&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/home/xuanwo/.ssh/config&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;hosts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/etc/hosts&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;src&lt;/code&gt; 目前支持 &lt;code&gt;fs&lt;/code&gt; 类型，可以指向一个 yaml 配置文件：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# production server&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;name:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;production-server&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;address:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1.1&lt;/span&gt;.&lt;span style=&#34;color:#40a070&#34;&gt;1.1&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;user:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;root&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;identity_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.ssh/private_key&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# staging server&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;name:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;staging-server&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;address:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;2.2&lt;/span&gt;.&lt;span style=&#34;color:#40a070&#34;&gt;2.2&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;user:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;root&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;identity_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.ssh/private_key&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;dst&lt;/code&gt; 目前支持 &lt;code&gt;ssh_config&lt;/code&gt; 和 &lt;code&gt;hosts&lt;/code&gt; 类型，可以通过 path 指定生成文件的地址。以刚才的输入为例，将会分别生成如下两个文件：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ssh_config&#34; data-lang=&#34;ssh_config&#34;&gt;# -- Generated by tiresias at 2018-05-22 13:35:35.669119377 +0800 CST m=+0.002915397 --
+Host production-server
+HostName 1.1.1.1
+User root
+IdentityFile ~/.ssh/private_key
+Host staging-server
+HostName 2.2.2.2
+User root
+IdentityFile ~/.ssh/private_key&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-hosts&#34; data-lang=&#34;hosts&#34;&gt;# -- Generated by tiresias at 2018-05-22 13:35:35.669429758 +0800 CST m=+0.003225739 --
+1.1.1.1 production-server
+2.2.2.2 staging-server&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;配合上 shell 提供的自动补全功能，我们就可以这样使用了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ ping production-server
+$ ssh staging-server
+$ redis-cli -h production-server
+$ mysql -h staging-server -u root -p&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;实现&#34;&gt;实现&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Tiresias&lt;/code&gt; 实现上并不复杂，分别定义了 &lt;code&gt;Source&lt;/code&gt; 和 &lt;code&gt;Destnation&lt;/code&gt; 两个 interface，然后从 Source 读取数据并写入到 Destnation。&lt;/p&gt;
+&lt;h2 id=&#34;展望&#34;&gt;展望&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;配合 systemd.path 或者 inotify 可以实现文件变更之后的自动更新&lt;/li&gt;
+&lt;li&gt;支持从更多的 Source 中读取数据，比如一个 url，etcd 或者是 Keyring&lt;/li&gt;
+&lt;li&gt;支持向更多的 Destnation 中写入数据，比如写入到 Keyring 或者密码管理器&lt;/li&gt;
+&lt;li&gt;支持 Server name 的通配符以支持配置批量服务器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Tiresias&lt;/code&gt; 以一种非侵入式的方式实现了服务器信息的管理和应用，使得用户只需要维护一个固定的源就能方便快捷的维护自己的所有服务器，不会产生任何非预期的行为。&lt;/p&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;上个周末一直在看 MSI，时隔三年，LPL 终于再一次拿到了 MSI 的冠军。小狗牛逼，RNG 牛逼，LPL 牛逼！&lt;/li&gt;
+&lt;li&gt;MSI 决赛的第三局 Letme 的一手剑来，让我又想再把 《雪中悍刀行》再看一遍了&lt;/li&gt;
+&lt;li&gt;据说隔壁 Dota 2 项目也得了冠军，西恩军团牛逼！&lt;/li&gt;
+&lt;li&gt;为了庆祝 RNG MSI 夺冠，昨天请好朋友一起吃了日本料理，Excited ！&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>使用Screen管理会话</title><link>https://xuanwo.io/2015/07/01/screen-ssh/</link><pubDate>Wed, 01 Jul 2015 09:49:31 +0000</pubDate><guid>https://xuanwo.io/2015/07/01/screen-ssh/</guid><description>&lt;p&gt;在实现&lt;a href=&#34;http://xuanwo.io/2015/06/30/together-project/&#34;&gt;Together项目&lt;/a&gt;的过程中，有一个需求是需要下载一个500M左右系统镜像包，由于文件源在国内，国外的下载速度简直感人。在经历多次因为SSH超时导致下载意外终止后，我终于决定要解决掉这个问题。&lt;/p&gt;
+&lt;h1 id=&#34;原因&#34;&gt;原因&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;SIGHUP 信号&lt;/strong&gt;
+首先介绍Linux/Unix中的几个概念：
+&amp;gt; [进程组（process group）]()：一个或多个进程的集合，每一个进程组有唯一一个进程组ID，即进程组长进程的ID。
+&amp;gt; [会话期（session）]()：一个或多个进程组的集合，有唯一一个会话期首进程（session leader）。会话期ID为首进程的ID。
+&amp;gt; 会话期可以有一个单独的控制终端（controlling terminal）。与控制终端连接的会话期首进程叫做控制进程（controlling process）。当前与终端交互的进程称为前台进程组。其余进程组称为后台进程组。&lt;/p&gt;
+&lt;p&gt;根据&lt;a href=&#34;https://zh.wikipedia.org/wiki/POSIX&#34;&gt;POSIX.1&lt;/a&gt;定义：
+- 挂断信号（SIGHUP）默认的动作是终止程序。
+- 当终端接口检测到网络连接断开，将挂断信号发送给控制进程（会话期首进程）。
+- 如果会话期首进程终止，则该信号发送到该会话期前台进程组。
+- 一个进程退出导致一个孤儿进程组中产生时，如果任意一个孤儿进程组进程处于STOP状态，发送SIGHUP和SIGCONT信号到该进程组中所有进程。&lt;/p&gt;
+&lt;p&gt;也就是说，一旦putty因为超时产生了SIGHUP信号，那么会连带着当前终端正在运行的程序全部终止。所以，只要避免SIGHUP信号的产生，就可以规避这个问题。&lt;/p&gt;
+&lt;h1 id=&#34;screen&#34;&gt;Screen&lt;/h1&gt;
+&lt;p&gt;简单来说，Screen是一个可以在多个进程之间多路复用一个物理终端的窗口管理器。Screen中有会话的概念，用户可以在一个screen会话中创建多个screen窗口，在每一个screen窗口中就像操作一个真实的telnet/SSH连接窗口那样。&lt;/p&gt;
+&lt;h2 id=&#34;安装&#34;&gt;安装&lt;/h2&gt;
+&lt;p&gt;很多发行版会预装Screen，如果没有（比如Ubuntu），则需要自行安装，以Ubuntu为例：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+sudo apt-get install screen
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;创建&#34;&gt;创建&lt;/h2&gt;
+&lt;h3 id=&#34;直接创建&#34;&gt;直接创建&lt;/h3&gt;
+&lt;p&gt;直接在命令行下输入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+screen
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;之后你会看到几页字，按回车跳过之后，你就来到了一个shell的全屏窗口。你可以执行任意shell程序，就像在ssh窗口中那样。在该窗口中键入exit退出该窗口，如果这是该screen会话的唯一窗口，该screen会话退出，否则screen自动切换到前一个窗口。&lt;/p&gt;
+&lt;h3 id=&#34;快捷键创建新窗口&#34;&gt;快捷键创建新窗口&lt;/h3&gt;
+&lt;p&gt;在已经激活的Screen会话下，使用快捷键&lt;code&gt;Ctrl+A&lt;/code&gt;然后点击&lt;code&gt;C&lt;/code&gt;，screen 在该会话内生成一个新的窗口并切换到该窗口。&lt;/p&gt;
+&lt;h2 id=&#34;暂时中断&#34;&gt;暂时中断&lt;/h2&gt;
+&lt;p&gt;screen还有更高级的功能。你可以不中断screen窗口中程序的运行而暂时断开（detach）screen会话，并在随后时间重新连接（attach）该会话，重新控制各窗口中运行的程序。例如，我们使用wget下载一个文件：
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/ssh-time-out.png&#34; alt=&#34;SSH超时样例&#34; /&gt;
+之后我们想暂时退出做点别的事情，比如出去散散步，那么在screen窗口键入&lt;code&gt;Ctrl+A&lt;/code&gt;然后点击&lt;code&gt;D&lt;/code&gt;，Screen会给出detached提示：
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/screen-detached.png&#34; alt=&#34;Screen Detached&#34; /&gt;
+半个小时之后回来了，找到该screen会话：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+screen -ls
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;重新连接会话：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+screen -r 会话ID
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;一切工作都会完全回来，区别只在于，他可能已经做好了&amp;gt;_&amp;lt;。&lt;/p&gt;
+&lt;h2 id=&#34;键绑定&#34;&gt;键绑定&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;你可能注意到给screen发送命令使用了特殊的键组合&lt;code&gt;Ctrl+A&lt;/code&gt;。这是因为我们在键盘上键入的信息是直接发送给当前screen窗口，必须用其他方式向screen窗口管理器发出命令，默认情况下，screen接收以&lt;code&gt;Ctrl+A&lt;/code&gt;开始的命令。这种命令形式在screen中叫做键绑定（key binding），&lt;code&gt;Ctrl+A&lt;/code&gt;叫做命令字符（command character）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;可以通过&lt;code&gt;Ctrl+A ?&lt;/code&gt;来查看所有的键绑定，常用的键绑定有：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;code&gt;Ctrl+A ?&lt;/code&gt;&lt;/th&gt;
+&lt;th&gt;显示所有键绑定信息&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A w&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;显示所有窗口列表&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A Ctrl+A&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;切换到之前显示的窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A c&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;创建一个新的运行shell的窗口并切换到该窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A n&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;切换到下一个窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A p&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;切换到前一个窗口(与Ctrl+A n相对)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A 0..9&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;切换到窗口0..9&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A a&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;发送 Ctrl+A到当前窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A d&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;暂时断开screen会话&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A k&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;杀掉当前窗口&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Ctrl+A [&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;进入拷贝/回滚模式&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.ibm.com/developerworks/cn/linux/l-cn-screen/index.html&#34;&gt;linux 技巧：使用 screen 管理你的远程会话&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.gnu.org/software/screen/&#34;&gt;GNU Screen&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.slac.stanford.edu/comp/unix/package/epics/extensions/iocConsole/screen.1.html&#34;&gt;Screen的man page提供了最详细的信息&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年07月01日 完成关于Screen的介绍&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Windows on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/windows/</link><description>Recent content in Windows on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 15 Feb 2016 20:15:46 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/windows/index.xml" rel="self" type="application/rss+xml"/><item><title>Chocolatey——Windows下的包管理工具</title><link>https://xuanwo.io/2016/02/15/chocolatey-intro/</link><pubDate>Mon, 15 Feb 2016 20:15:46 +0000</pubDate><guid>https://xuanwo.io/2016/02/15/chocolatey-intro/</guid><description>&lt;p&gt;&lt;a href=&#34;https://chocolatey.org/&#34;&gt;Chocolatey&lt;/a&gt;是一个基于Nuget的Windows包管理工具，截止到我更新此文章的时候，一共有3.7k多个独立包。本文旨在介绍Chocolatey这一工具的安装和用法，希望能有更多人享受到该工具的便利之处。&lt;/p&gt;
+&lt;h1 id=&#34;安装chocolatey&#34;&gt;安装chocolatey&lt;/h1&gt;
+&lt;h2 id=&#34;cmd&#34;&gt;CMD&lt;/h2&gt;
+&lt;p&gt;打开一个具有管理员权限的命令行窗口，执行如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;@powershell&lt;/span&gt; -NoProfile -ExecutionPolicy Bypass -Command &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;iex ((new-object net.webclient).DownloadString(&amp;#39;https://chocolatey.org/install.ps1&amp;#39;))&amp;#34;&lt;/span&gt; &amp;amp;&amp;amp; SET PATH=&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;%&lt;/span&gt;PATH%;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;%&lt;/span&gt;ALLUSERSPROFILE%\chocolatey\bin&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;powershell&#34;&gt;PowerShell&lt;/h2&gt;
+&lt;p&gt;打开一个具有管理员权限的PowerShell窗口，执行如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;iex ((&lt;span style=&#34;color:#007020&#34;&gt;new-object&lt;/span&gt; net.webclient).DownloadString(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https://chocolatey.org/install.ps1&amp;#39;&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;使用chocolatey&#34;&gt;使用chocolatey&lt;/h1&gt;
+&lt;h2 id=&#34;安装包&#34;&gt;安装包&lt;/h2&gt;
+&lt;p&gt;安装包十分的容易，只需要打开管理员权限的命令行即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;choco install &amp;lt;package&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;卸载包&#34;&gt;卸载包&lt;/h2&gt;
+&lt;p&gt;卸载也同样十分简单，打开管理员权限命令行，执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;choco uninstall &amp;lt;package&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;更新包&#34;&gt;更新包&lt;/h2&gt;
+&lt;p&gt;更新包则需要使用如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;choco upgrade &amp;lt;package&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;为chocolatey做贡献&#34;&gt;为chocolatey做贡献&lt;/h1&gt;
+&lt;p&gt;Chocolatey的一个特点就是社区化的环境，每一个人都可以向它提交自己喜爱的包。因为Chocolatey总是从官方下载所需要的包，所以避免了授权等问题。当然，本来收费的软件，同样需要收费，比如JetBrains系列的产品。&lt;/p&gt;
+&lt;h2 id=&#34;注册apikey&#34;&gt;注册APIKey&lt;/h2&gt;
+&lt;p&gt;提交包则会略为复杂一点，首先你需要在&lt;a href=&#34;https://chocolatey.org/&#34;&gt;https://chocolatey.org/&lt;/a&gt; 注册一个账号，并获取跟你账户绑定的唯一APIKey。然后在命令行中执行如下命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;choco apikey -k &amp;lt;your key here&amp;gt; -s https&lt;span style=&#34;&#34;&gt;:&lt;/span&gt;//chocolatey.org&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;新建软件包&#34;&gt;新建软件包&lt;/h2&gt;
+&lt;p&gt;在命令行中运行&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;choco new &amp;lt;package name here&amp;gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# 为方便理解，此处使用test做包名&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;则当前目录下就会自动生成一个名为&lt;code&gt;test&lt;/code&gt;的文件夹，目录结构如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;test.nuspec
+tools
+|--chocolateyinstall.ps1
+|--chocolateyuninstall.ps1
+|--ReadMe.md&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;完善信息&#34;&gt;完善信息&lt;/h2&gt;
+&lt;h3 id=&#34;修改test-nuspec&#34;&gt;修改test.nuspec&lt;/h3&gt;
+&lt;p&gt;自动生成的描述文件在需要填写的位置都有大写英文注释，只需要按照要求一一填写即可，下面我列举一份已经通过审核的Datagrip的描述文件作为参考：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-XML&#34; data-lang=&#34;XML&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;utf-8&amp;#34;?&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. --&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;package&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;xmlns=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;metadata&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!-- Read this before publishing packages to chocolatey.org: https://github.com/chocolatey/chocolatey/wiki/CreatePackages --&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;id&amp;gt;&lt;/span&gt;datagrip&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/id&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;title&amp;gt;&lt;/span&gt;DataGrip&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/title&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;1.0.1&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;authors&amp;gt;&lt;/span&gt;JetBrains&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/authors&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;owners&amp;gt;&lt;/span&gt;Xuanwo&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/owners&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;summary&amp;gt;&lt;/span&gt;Your Swiss Army Knife for Databases and SQL&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/summary&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;description&amp;gt;&lt;/span&gt;## Intelligent query console
+Allows you to execute queries in different modes and provides local history that keeps track of all your activity and protects you from losing your work.
+......(省略)
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/description&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;projectUrl&amp;gt;&lt;/span&gt;https://www.jetbrains.com/datagrip/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/projectUrl&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;packageSourceUrl&amp;gt;&lt;/span&gt;https://github.com/Xuanwo/datagrip-chocolatey-package&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/packageSourceUrl&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!--&amp;lt;projectSourceUrl&amp;gt;&amp;lt;/projectSourceUrl&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt; &amp;lt;docsUrl&amp;gt;&amp;lt;/docsUrl&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt; &amp;lt;mailingListUrl&amp;gt;&amp;lt;/mailingListUrl&amp;gt;--&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;bugTrackerUrl&amp;gt;&lt;/span&gt;https://youtrack.jetbrains.com/issues/DBE&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/bugTrackerUrl&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;tags&amp;gt;&lt;/span&gt;datagrip admin jetbrains trial 30days&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/tags&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;copyright&amp;gt;&lt;/span&gt;Commercial&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/copyright&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!--&amp;lt;licenseUrl&amp;gt;&amp;lt;/licenseUrl&amp;gt;--&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;requireLicenseAcceptance&amp;gt;&lt;/span&gt;false&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/requireLicenseAcceptance&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!--&amp;lt;iconUrl&amp;gt;http://cdn.rawgit.com/__REPLACE_YOUR_REPO__/master/icons/datagrip.png&amp;lt;/iconUrl&amp;gt;--&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!--&amp;lt;dependencies&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt; &amp;lt;dependency id=&amp;#34;&amp;#34; version=&amp;#34;__VERSION__&amp;#34; /&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt; &amp;lt;dependency id=&amp;#34;&amp;#34; /&amp;gt;
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt; &amp;lt;/dependencies&amp;gt;--&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;releaseNotes&amp;gt;&lt;/span&gt;https://confluence.jetbrains.com/display/DBE/DataGrip+1.0.1+Release+Notes&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/releaseNotes&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&amp;lt;!--&amp;lt;provides&amp;gt;&amp;lt;/provides&amp;gt;--&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/metadata&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;files&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;tools\**&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;target=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;tools&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/files&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;lt;/package&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;有一个比较坑的地方是&lt;code&gt;&amp;lt;description&amp;gt;&lt;/code&gt;部分是支持Markdown的，内容直接顶着括号写就OK，不用另起一行，也不用自己加缩进。&lt;/p&gt;
+&lt;h3 id=&#34;补充chocolateyinstall-ps1&#34;&gt;补充chocolateyinstall.ps1&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;chocolateyuninstall&lt;/code&gt;可以没有，但是一定要有&lt;code&gt;chocolateyinstall&lt;/code&gt;脚本。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;chocolateyinstall.ps1&lt;/code&gt;如果点击&lt;code&gt;编辑&lt;/code&gt;打开的话，会自动调用&lt;code&gt;Windows Powershell ISE&lt;/code&gt;编辑器。&lt;/p&gt;
+&lt;p&gt;下面同样列举一份已经填写完成的样例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;$packageName&lt;/span&gt;= &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;datagrip&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#bb60d5&#34;&gt;$installerType&lt;/span&gt; = &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;EXE&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#bb60d5&#34;&gt;$toolsDir&lt;/span&gt; = &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;$(&lt;span style=&#34;color:#007020&#34;&gt;Split-Path&lt;/span&gt; -parent &lt;span style=&#34;color:#bb60d5&#34;&gt;$MyInvocation&lt;/span&gt;.MyCommand.Definition)&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#bb60d5&#34;&gt;$url&lt;/span&gt; = &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https://download.jetbrains.com/datagrip/datagrip-1.0.1.exe&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#bb60d5&#34;&gt;$silentArgs&lt;/span&gt; = &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;/S&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#bb60d5&#34;&gt;$validExitCodes&lt;/span&gt; = @(0)
+Install-ChocolateyPackage &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;$packageName&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;$installerType&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;$silentArgs&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;$url&amp;#34;&lt;/span&gt; -validExitCodes &lt;span style=&#34;color:#bb60d5&#34;&gt;$validExitCodes&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;需要注意的是，填写完毕之后，一定要在Powershell中运行下列代码以删除所有的注释文字：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;$f&lt;/span&gt;=&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;c:\path\to\thisFile.ps1&amp;#39;&lt;/span&gt;
+gc &lt;span style=&#34;color:#bb60d5&#34;&gt;$f&lt;/span&gt; | ? {&lt;span style=&#34;color:#bb60d5&#34;&gt;$_&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;-notmatch&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;^\s*#&amp;#34;&lt;/span&gt;} | % {&lt;span style=&#34;color:#bb60d5&#34;&gt;$_&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;-replace&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;(^.*?)\s*?[^``]#.*&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;$1&amp;#39;&lt;/span&gt;} | &lt;span style=&#34;color:#007020&#34;&gt;Out-File&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;$f&lt;/span&gt;+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;.~&amp;#34;&lt;/span&gt; -en utf8; mv -fo &lt;span style=&#34;color:#bb60d5&#34;&gt;$f&lt;/span&gt;+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;.~&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;$f&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;打包上传&#34;&gt;打包上传&lt;/h3&gt;
+&lt;p&gt;所有的信息填写完成后，在&lt;code&gt;test.nuspec&lt;/code&gt;所在目录下执行&lt;code&gt;choco pack&lt;/code&gt;就会自动进行打包。
+如果有重要的信息没有填写，choco将会报错，并红字提示：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;LicenseUrl cannot be empty.
+ProjectUrl cannot be empty.
+PackageSourceUrl cannot be empty.&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果没有问题，则会有如下提示：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-PowerShell&#34; data-lang=&#34;PowerShell&#34;&gt;Attempting to build package from &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;datagrip.nuspec&amp;#39;&lt;/span&gt;.
+Successfully created package &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;datagrip.1.0.1.nupkg&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;之后执行 &lt;code&gt;choco push datagrip.1.0.1.nupkg&lt;/code&gt;即可将包上传至Chocolatey，通过管理员的审核之后，就会出现在软件列表中供人们下载了。&lt;/p&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://chocolatey.org/&#34;&gt;Chocolatey 官方网站&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://isaachan.github.io/blog/2013/02/07/chocolatey-i-love-you/&#34;&gt;Chocolatey, 我爱你&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年02月15日 初步完成&lt;/li&gt;
+&lt;li&gt;2016年02月20日 修复脚本中的部分错误&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>最佳跨平台PDF阅读解决方案</title><link>https://xuanwo.io/2015/12/23/best-pdf-read-solution/</link><pubDate>Wed, 23 Dec 2015 16:15:20 +0000</pubDate><guid>https://xuanwo.io/2015/12/23/best-pdf-read-solution/</guid><description>&lt;p&gt;最近因为学习需要，要大量阅读纯文字的PDF文档。然后我惊讶地发现市场上居然没有哪家提供一套完整可用的跨平台PDF阅读解决方案，于是我在尝试了市面几乎所有叫得上名字的各类阅读器之后，形成了一套自己的跨平台PDF阅读解决方案。本文记录了这套方案的详细内容，希望会有所益处。&lt;/p&gt;
+&lt;h1 id=&#34;目标&#34;&gt;目标&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;跨平台（目前支持Windows和Android）&lt;/li&gt;
+&lt;li&gt;阅读记录同步&lt;/li&gt;
+&lt;li&gt;支持标准PDF的批注和高亮等功能&lt;/li&gt;
+&lt;li&gt;对PDF文件管理方便&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;思路&#34;&gt;思路&lt;/h1&gt;
+&lt;p&gt;标准PDF的批注和高亮功能是内嵌在PDF文件中的，只要同步了PDF文件，也就同步了所有在PDF文件上的批注和高亮。因此这个问题很大程度上就变成了解决跨平台文件双向同步问题。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;跨平台双向同步在很多人看来是一个已经被Dropbox以及Google Drive解决了问题，但是实际上，它们在PC和移动端的行为是不一样的。PC端是完整的双向同步，而在移动端，为了节省流量和空间，它们都是提供了一个File list，你必须要自己下载指定文件。不仅如此，这个下载下来的文件大多是Read-Only的，用阅读器批注之后，你会发现这个文件无法保存，这样的话，PDF跨平台批注就无从谈起。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;解决方案&#34;&gt;解决方案&lt;/h1&gt;
+&lt;p&gt;按照上面思路中的讨论，我在每一个平台上的解决方案都分成两个部分，第一是解决PDF阅读、批注问题，第二是解决PDF文件双向同步问题。&lt;/p&gt;
+&lt;h2 id=&#34;windows&#34;&gt;Windows&lt;/h2&gt;
+&lt;h3 id=&#34;goodsync&#34;&gt;Goodsync&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/goodsync.png&#34; alt=&#34;Goodsync&#34; /&gt;
+&lt;a href=&#34;http://www.goodsync.com/&#34;&gt;&lt;strong&gt;Goodsync&lt;/strong&gt;&lt;/a&gt;是一款非常强大的同步工具，我们通过它来提供本地到Google Drive的双向同步功能。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如果通过SS艹墙，配置Google Drive时请勾选&lt;code&gt;基于WinInet&lt;/code&gt;，如图：&lt;img src=&#34;https://xuanwo.io/imgs/opinion/goodsync-proxy-setting.png&#34; alt=&#34;Goodsync Proxy Setting&#34; /&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;foxit-reader&#34;&gt;Foxit Reader&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/foxit-reader.png&#34; alt=&#34;Foxit Reader&#34; /&gt;
+&lt;a href=&#34;http://www.foxitsoftware.cn/&#34;&gt;&lt;strong&gt;Foxit Reader&lt;/strong&gt;&lt;/a&gt;，也就是福昕阅读器，不多说了，新版的界面还是可以的。（尽管我觉得颜值没有Adobe Reader DC高）&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;为什么不选Adobe？Adobe最新版本的批注功能在特定的PDF上好像有点问题，我尝试了几个都不能正常保存，总是提示错误110，无奈放弃。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;android&#34;&gt;Android&lt;/h2&gt;
+&lt;h3 id=&#34;flodersync&#34;&gt;Flodersync&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/Flodersync.png&#34; alt=&#34;Flodersync&#34; /&gt;
+&lt;a href=&#34;https://play.google.com/store/apps/details?id=dk.tacit.android.foldersync.lite&#34;&gt;&lt;strong&gt;Flodersync&lt;/strong&gt;&lt;/a&gt;是一款基于安卓平台的非常棒的一款应用，我们通过它来实现安卓平台的双向同步。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;开启双向同步请取消勾选&lt;code&gt;不同步删除&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;moon&#34;&gt;Moon+&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/Moon.png&#34; alt=&#34;Moon+&#34; /&gt;
+&lt;a href=&#34;https://play.google.com/store/apps/details?id=com.flyersoft.moonreader&#34;&gt;&lt;strong&gt;Moon+&lt;/strong&gt;&lt;/a&gt;，静读天下，安卓平台上首屈一指的阅读器，支持格式众多，速度流畅，除了免费版有些功能阉割和广告之外，没有别的问题。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年12月23日 初始发布&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Listary——让文件在指尖流动</title><link>https://xuanwo.io/2015/07/28/listary/</link><pubDate>Tue, 28 Jul 2015 21:48:32 +0000</pubDate><guid>https://xuanwo.io/2015/07/28/listary/</guid><description>&lt;p&gt;今天想为大家介绍的是我使用了两年的神器——&lt;a href=&#34;http://www.listary.com/&#34;&gt;Listary&lt;/a&gt;，作为一款Windows文件浏览增强工具，它为Windows自带的资源管理器添加了很多实用的功能，包括智能命令、最近文档以及收藏功能。与此同时，它还能与很多第三方应用集成，包括鼎鼎大名的Total Commander，还有WinRAR，7zip，FileZilla等等。
+值得一提的是，Listary由国人Channing开发，默认添加了简体中文支持，是不可多得的精品，典型的墙内开花墙外香的典范。可能是由于国人还并不是非常重视效率这个方面，感觉使用Listary的主要人群还是集中在国外，从Listary的论坛上也能看得出来。所以我完成了这样一篇文章，希望我也能为这样的精品应用在国内的推广做出些贡献。
+恩？说我是水军？唔，谁说我不是呢？
+&lt;em&gt;官网上的广告语&lt;code&gt;Keep files at your fingertips&lt;/code&gt;被我翻译成了&lt;code&gt;让文件在指尖流动&lt;/code&gt;，不知道Channing会怎么想~&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;初步使用&#34;&gt;初步使用&lt;/h1&gt;
+&lt;h2 id=&#34;基础配置&#34;&gt;基础配置&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/listary-setting.png&#34; alt=&#34;Listary设置页面&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如果是第一次安装，Listary会有一个引导教程，建议大家都跟着操作一下。在教程的最后会让你设置一个激活Listary的快捷键，这个快捷键的设置完全可以根据自己的喜好来设置，只要不跟系统或者别的软件热键相冲突即可。我使用的是&lt;code&gt;Alt+Q&lt;/code&gt;，感觉十分顺手，推荐大家也这样设置~&lt;/p&gt;
+&lt;h2 id=&#34;基础用法&#34;&gt;基础用法&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/listary-main.png&#34; alt=&#34;Listary主窗体&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在任一窗体下使用快捷键&lt;code&gt;Alt+Q&lt;/code&gt;即可激活Listary，同时光标会自动定位在Listary的输入窗口
+，只要直接开始输入，Listary就自动进行匹配了。使用快捷键&lt;code&gt;Alt+Q&lt;/code&gt;可以在启动程序模式与常规模式间进行切换。
+Listary的匹配总共有三种，分别为命令，路径，启动程序，下面分别介绍一下。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;命令：包括一些常用的系统命令，如打开命令行（基于当前路径）等。&lt;/li&gt;
+&lt;li&gt;路径：返回匹配的文件以及路径（只要是文件或者路径的一部分都可以识别）&lt;/li&gt;
+&lt;li&gt;启动程序：可以启动预先设置的路径中的程序（再次使用快捷键&lt;code&gt;Alt+Q&lt;/code&gt;就可以在启动程序与常规模式间进行切换）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;收藏功能&#34;&gt;收藏功能&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/listary-loves.png&#34; alt=&#34;Listary收藏功能&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;激活Listary之后点击有爱心标识的收藏按钮，就可以打开自己的收藏列表，能够更快捷的打开自己常用的软件或者文件。&lt;/p&gt;
+&lt;h2 id=&#34;历史记录&#34;&gt;历史记录&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/listary-history.png&#34; alt=&#34;Listary历史记录&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;激活Listary之后点击历史记录，就可以打开自己最近打开的文件或者文件夹。&lt;/p&gt;
+&lt;h2 id=&#34;快捷功能&#34;&gt;快捷功能&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/listary-quick.png&#34; alt=&#34;Listary快捷功能&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;激活Listary之后点击快捷功能，就可以弹出一些常用的功能，个人最喜欢的是显示隐藏文件和显示文件扩展名，相当的好用~&lt;/p&gt;
+&lt;h1 id=&#34;常用功能&#34;&gt;常用功能&lt;/h1&gt;
+&lt;h2 id=&#34;智能匹配&#34;&gt;智能匹配&lt;/h2&gt;
+&lt;p&gt;只要输入文件名的一部分就可以找到这个文件，支持中文与英文。
+比如，我输入&lt;code&gt;测试 md&lt;/code&gt;就可以搜索到&lt;code&gt;测XX试OO.md&lt;/code&gt;这个文件。
+自然，输入的越多，返回的结果越精确。随着使用记录的积累，常用的文件或程序会获得更高的优先级。&lt;/p&gt;
+&lt;h2 id=&#34;全盘搜索&#34;&gt;全盘搜索&lt;/h2&gt;
+&lt;p&gt;使用与&lt;a href=&#34;http://www.voidtools.com/&#34;&gt;Everything&lt;/a&gt;相似的原理，通过遍历USN journal更新索引，可以实现秒级的索引建立与搜索反馈（只支持NTFS文件系统，FAT32等不支持）。结合前面的智能匹配功能，你可以轻易地找到在你硬盘中的每一个文件。&lt;/p&gt;
+&lt;h2 id=&#34;快速选择&#34;&gt;快速选择&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/opinion/listary-quick-switch.png&#34; alt=&#34;Listary快速选择&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在任意一个打开的资源管理器界面（焦点需要锁定在资源管理器界面上），输入关键字，光标会自动跳转到当前文件夹中匹配的文件或者目录上。你只要直接回车就可以打开自己想要的文件，而不需要再去使用鼠标双击打开。真正的让文件在指尖舞蹈~&lt;/p&gt;
+&lt;h1 id=&#34;pro版功能&#34;&gt;Pro版功能&lt;/h1&gt;
+&lt;h1 id=&#34;进阶技巧&#34;&gt;进阶技巧&lt;/h1&gt;
+&lt;h1 id=&#34;尾言&#34;&gt;尾言&lt;/h1&gt;
+&lt;p&gt;Channing已经跳票很久了，Listary 5 据说完成度还是不够高，连预览版都木有放出来。这篇文章写在Listary 5 发布之前，希望Channing能够加快速度，早日把这个憋了两年的大招放出来~~&lt;/p&gt;
+&lt;h1 id=&#34;链接&#34;&gt;链接&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.listary.com/download/Listary.exe&#34;&gt;安装版下载&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.listary.com/download/ListaryPortable.zip&#34;&gt;绿色版下载&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://discussion.listary.com/&#34;&gt;官方论坛&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年07月28日 完成初步使用介绍&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>使用Hexo构建项目Wiki</title><link>https://xuanwo.io/2014/07/07/use-hexo-to-bulid-project-wiki/</link><pubDate>Mon, 07 Jul 2014 00:38:09 +0000</pubDate><guid>https://xuanwo.io/2014/07/07/use-hexo-to-bulid-project-wiki/</guid><description>&lt;p&gt;七七事件前一天，我有幸加入了&lt;a href=&#34;https://github.com/cugbacm/oj&#34;&gt;本校OJ2.0&lt;/a&gt;项目组。非常高兴能够为我们学校自己的OJ开源项目做出一份贡献，虽然只是一份整理Wiki的小活儿，但是这是我第一次真正的参与一个源项目。经过谨慎考虑之后，我决定项目的Wiki使用Github Pages来构建。&lt;/p&gt;
+&lt;h1 id=&#34;为什么是github-pages&#34;&gt;为什么是Github Pages？&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;免费，无限流量&lt;/li&gt;
+&lt;li&gt;享受git的版本管理功能，不用担心文章遗失。&lt;/li&gt;
+&lt;li&gt;你只要用自己喜欢的编辑器写文章就可以了，其他事情一概不用操心，都由github处理。
+&lt;em&gt;以上引用自&lt;a href=&#34;http://www.ruanyifeng.com/blog/2012/08/blogging_with_jekyll.html&#34;&gt;阮一峰先生的相关博文&lt;/a&gt;&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;同Github Wiki一样支持多人协作，但是更加便于查阅，特别是在涉及主题繁杂的时候。&lt;/li&gt;
+&lt;li&gt;比Github Wiki拥有更大的控制权限，避免Wiki被错误操作。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;前期准备&#34;&gt;前期准备&lt;/h1&gt;
+&lt;h2 id=&#34;hexo的安装与配置&#34;&gt;Hexo的安装与配置&lt;/h2&gt;
+&lt;h3 id=&#34;windows环境下&#34;&gt;Windows环境下&lt;/h3&gt;
+&lt;p&gt;32位地址:&lt;a href=&#34;http://nodejs.org/dist/v0.10.29/node-v0.10.29-x86.msi&#34;&gt;http://nodejs.org/dist/v0.10.29/node-v0.10.29-x86.msi&lt;/a&gt;
+64位地址:&lt;a href=&#34;http://nodejs.org/dist/v0.10.29/x64/node-v0.10.29-x64.msi&#34;&gt;http://nodejs.org/dist/v0.10.29/x64/node-v0.10.29-x64.msi&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;mac-os环境下&#34;&gt;Mac OS环境下&lt;/h3&gt;
+&lt;p&gt;安装包地址:&lt;a href=&#34;http://nodejs.org/dist/v0.10.29/node-v0.10.29.pkg&#34;&gt;http://nodejs.org/dist/v0.10.29/node-v0.10.29.pkg&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;linux环境下&#34;&gt;Linux环境下&lt;/h3&gt;
+&lt;p&gt;建议使用&lt;code&gt;nvm&lt;/code&gt;来管理nodejs环境
+1. 打开终端，输入&lt;code&gt;wget -qO- https://raw.github.com/creationix/nvm/master/install.sh | sh&lt;/code&gt;
+2. 重启终端之后,输入&lt;code&gt;nvm ls&lt;/code&gt;，则会列出所有的可用版本
+3. 输入&lt;code&gt;nvm install 0.10.29&lt;/code&gt;（此处以最新版为例）
+4. 下面配置nodejs的环境，分别输入&lt;code&gt;nvm use 0.10.29&lt;/code&gt;以及&lt;code&gt;nvm alias default 0.10.29&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;git的安装与配置&#34;&gt;Git的安装与配置&lt;/h2&gt;
+&lt;h3 id=&#34;windows环境下-1&#34;&gt;Windows环境下&lt;/h3&gt;
+&lt;p&gt;不妨使用Github For Windows， 通过添加命令行参数启动环境，无须配置PATH，完全绿色化。（TODO：有待补充）&lt;/p&gt;
+&lt;h3 id=&#34;mac-os环境下-1&#34;&gt;Mac OS环境下&lt;/h3&gt;
+&lt;p&gt;同理，使用Github For Mac即可。&lt;/p&gt;
+&lt;h3 id=&#34;linux环境下-1&#34;&gt;Linux环境下&lt;/h3&gt;
+&lt;p&gt;Ubuntu, Debian：&lt;code&gt;sudo apt-get install git-core&lt;/code&gt;
+Fedora, Red Hat, CentOS：&lt;code&gt;sudo yum install git-core&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;开启ssh-避免重复输入帐号密码&#34;&gt;开启SSH，避免重复输入帐号密码&lt;/h3&gt;
+&lt;p&gt;可以参考&lt;a href=&#34;http://xuanwo.io/2015/02/07/generate-a-ssh-key/&#34;&gt;此处&lt;/a&gt;。&lt;/p&gt;
+&lt;h1 id=&#34;wiki配置&#34;&gt;Wiki配置&lt;/h1&gt;
+&lt;p&gt;感谢&lt;a href=&#34;http://www.hahack.com/&#34;&gt;wzpan&lt;/a&gt;开源的主题，其实还是我主动索要的- -，幸好他非常热情地提供了帮助，在此表示衷心的感谢。
+致谢完毕，下面转入配置的细节。
+1. 在github上建立一个新的仓库，名为&lt;code&gt;yourname.github.io&lt;/code&gt;
+2. 事先建立好准备存放wiki的文件夹，然后在当前目录下打开终端（或者不停地cd进入），然后输入&lt;code&gt;hexo init&lt;/code&gt;，初始化。
+3. 然后输入&lt;code&gt;npm install&lt;/code&gt;，自动下载相关的依赖包，此时一个最基本的框架已经构建完毕了。
+4. 然后输入&lt;code&gt;git clone https://github.com/wzpan/hexo-theme-wixo.git themes/wixo&lt;/code&gt;，下载wiki用的主题。
+5. 然后修改&lt;code&gt;_config.yml&lt;/code&gt;中的&lt;code&gt;theme&lt;/code&gt;条目为&lt;code&gt;wixo&lt;/code&gt;，注意&lt;code&gt;theme&lt;/code&gt;后有一个空格。
+&amp;gt;
+补充一下关于&lt;code&gt;deploy&lt;/code&gt;的设置
+同样是在_config.yml文件夹中，修改&lt;code&gt;deploy&lt;/code&gt;的部分为&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;deploy:
+type: github
+repo: repository url //使用之前创建的那个库，建议使用SSH
+branch: branch //Hexo会自动识别个人wiki还是项目wiki
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;p&gt;6. 进入source文件夹，打开_post文件夹，新建一个md文档，在文档的开头加入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;---
+title: your title //这将会是wiki文档的标题
+date: 2014-03-16 10:17:16 //构建时间，wiki中用不到
+categories: Docs //这将会是本文档所属的类别
+toc: true //默认开启，生成table of contents
+--- //不可省略，敲回车后，下面的内容就自由发挥了～
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;p&gt;7. 保存文档后，返回wiki所在文件夹， 输入&lt;code&gt;hexo d -g&lt;/code&gt;，此时wiki已经自动生成并上传完毕了。&lt;/p&gt;
+&lt;h1 id=&#34;协作注意事项&#34;&gt;协作注意事项&lt;/h1&gt;
+&lt;h2 id=&#34;项目创建者&#34;&gt;项目创建者&lt;/h2&gt;
+&lt;p&gt;按照上述设置，&lt;code&gt;wiki&lt;/code&gt;默认保存在&lt;code&gt;yourname.github.io&lt;/code&gt;的&lt;code&gt;master&lt;/code&gt;分支下。建议另外开启一个&lt;code&gt;source&lt;/code&gt;分支，用来将整个wiki文件夹上传，方便多地编辑以及同步协作。
+&amp;gt;
+一开始可能会发现wiki文件夹不能使用git管理，这是因为主题wixo是使用git管理的。所以在上传wiki文件夹之前，要删除位于wixo文件夹下的.git文件夹。&lt;/p&gt;
+&lt;h2 id=&#34;项目参与者&#34;&gt;项目参与者&lt;/h2&gt;
+&lt;p&gt;让项目创建者在项目的settings中的Collaborators栏目中输入自己的用户名，即可获得对这个项目的控制权。
+环境配置完毕后，fork&lt;code&gt;source&lt;/code&gt;分支，即可开始编辑工作。根据&lt;code&gt;.gitignore&lt;/code&gt;文件的不同，可能还需要进行&lt;code&gt;npm install&lt;/code&gt;以解决依赖问题。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年07月07日 完成&lt;code&gt;前言&lt;/code&gt;和&lt;code&gt;为什么&lt;/code&gt;板块&lt;/li&gt;
+&lt;li&gt;2014年07月24日 完成&lt;code&gt;前期准备&lt;/code&gt;和&lt;code&gt;Wiki配置&lt;/code&gt;以及&lt;code&gt;注意事项&lt;/code&gt;版块，接下来完成免PATH配置的详细步骤以及SSH的配置。此外发现步骤有些混杂不清，下一个版本中将进行修正。&lt;/li&gt;
+&lt;li&gt;2015年04月01日 添加了SSH配置。&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Daily on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/categories/daily/</link><description>Recent content in Daily on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 19 Feb 2019 06:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/categories/daily/index.xml" rel="self" type="application/rss+xml"/><item><title>翻车实况第 1 期</title><link>https://xuanwo.io/2019/02/19/rollover-1st/</link><pubDate>Tue, 19 Feb 2019 06:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/02/19/rollover-1st/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;今天翻车了吗？翻了！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;本次翻车的主角是我小老婆：ThinkPad X1 Carbon，在之前的&lt;a href=&#34;https://xuanwo.io/2018/05/16/thinkpad-x1-carbon-6th/&#34;&gt;开箱手记&lt;/a&gt;曾经爆过照片。用了几个月都没有什么太大的问题，但是自从我春节回家一趟之后，我的 x1 开始了它的频频翻车之旅 = =&lt;/p&gt;
+&lt;h2 id=&#34;大江苏魔法伤害&#34;&gt;大江苏魔法伤害&lt;/h2&gt;
+&lt;p&gt;春节回家之后，电脑就一直放在透气性不大好的背包里面。拿出来的时候发现整个电脑的表面都有一层薄薄的水汽，甚至还能找到一点微妙的水墨画的感觉：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;water.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;想着 ThinkPad 种种键盘洒水问题不大的传说，我完全没有把这点水汽当回事。打开电脑，连上网络，&lt;code&gt;yay&lt;/code&gt; 一把梭。发现内核升级了，随手重启一下，结果翻车了：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;failed-to-start.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这还是我第一次遇到这样的问题，从报错上来看应该跟我的更新没有关系，可能是硬盘有了一些奇怪的问题，中间有些 IO 全部失败了，导致好多服务都起不来了。虽然觉得纳闷，但是还是觉得先重启一下看看，确认一下是否稳定复现。结果问题更加严重了，在滴的一声之后，我的电脑完全没有引导，直接进入了空白的 Boot Menu 页：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;empty-boot.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;噫，这是我整个硬盘都挂掉了的节奏啊。当我准备掏出 archiso 看看还没有救的时候，有人找我有事情，于是我把电脑合上走开了。半个小时回来之后，按下电源键，电脑居然直接正常启动了 = =，我拿着 U 盘一脸懵逼。发生了什么？难道刚才启动不了是因为在启动的一瞬间，硬盘进入了量子态？放置 play 了一会儿之后，它又自己回来了？薛定谔的硬盘？？？&lt;/p&gt;
+&lt;p&gt;稍微琢磨了一下之后，把问题归咎于江苏水汽比较重，电脑长期放在包里面，导致里面的某些部件出现了问题，在开放环境放了一会儿之后就自己好了。（不管你信不信，反正我信了）&lt;/p&gt;
+&lt;h2 id=&#34;帝都的静电攻击&#34;&gt;帝都的静电攻击&lt;/h2&gt;
+&lt;p&gt;我天真的以为翻车事件已经结束了，然而轮胎打滑通常只是真正车祸的前奏（&lt;/p&gt;
+&lt;p&gt;返工的第二天，我普通的起床、普通的上班、普通的进入办公室、普通的坐下、普通的升级系统、普通的重启、普通的接上显示器，普通的，等一下！我的显示器咋不亮了！在那一瞬间，我的大脑瞬间渲染出无数剧情： &lt;em&gt;电脑坏了，送去维修，错过用户大单，被公司开除，孤单一人行走在冬夜空档的大街上，发誓再也不滚系统了。。。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;摇摇头，开始仔细研究发生了什么。&lt;/p&gt;
+&lt;p&gt;显卡是 Intel 提供的集成显卡，驱动用的是 Kernel Mode Setting。正常情况下如果我接上了外接显示器，kernel 会响应并接管这个设备的显示，就像下面这个图一样：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;kms.svg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;每个显示输出设备的连接状态都会都会保存为一个形如 &lt;code&gt;/sys/class/drm/card0-HDMI-A-1/status&lt;/code&gt; 的文件，archwiki 上提供了一个命令来查看电脑上所有输出设备的状态：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; p in /sys/class/drm/*/status; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;con&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;p&lt;/span&gt;%/status&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;}&lt;/span&gt;; &lt;span style=&#34;color:#007020&#34;&gt;echo&lt;/span&gt; -n &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;con&lt;/span&gt;#*/card?-&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;: &amp;#34;&lt;/span&gt;; cat &lt;span style=&#34;color:#bb60d5&#34;&gt;$p&lt;/span&gt;; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;done&lt;/span&gt;
+DP-1: disconnected
+DP-2: disconnected
+eDP-1: connected
+HDMI-A-1: disconnected
+HDMI-A-2: disconnected&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;可以看出来，除了内置的显示屏 &lt;code&gt;eDP-1&lt;/code&gt; 没问题之外，其他的接口都是断开状态的，尽管我的线已经接上去了。噫，照这么看，我的 HDMI 和 Type-C 口都凉了啊，难道只能送修了么？&lt;/p&gt;
+&lt;p&gt;不要放弃治疗，可能是显示器坏了呢！我把同事的电脑拿过来插上发现没有问题；而我的电脑接他的显示器则同样是显示不出来。凉了？不，我还不能就这样放弃治疗，说不定是底裤 D 升级的时候又搞崩了什么东西呢？我选择回滚了一波 systemd，重启，奇迹没有发生。说不定是内核有问题呢？我选择回滚了一波内核，重启，奇迹仍然没有发生。我叹了口气，果然，玄学是不存在的，我的电脑凉了。&lt;/p&gt;
+&lt;p&gt;我都已经放弃治疗准备送修了，我的朋友 P 坚持让我搞个 PE 什么的看看，说不定接口还没坏。反正也不差那么几分钟，为了让我朋友，更为了让我自己死心，我觉得再进行最后一次尝试。我掏出了我的 Archiso 插上，开机，插上 HDMI 线，卧槽，显示器亮了！接口没坏！&lt;/p&gt;
+&lt;p&gt;这可真是&lt;code&gt;踏破铁鞋无觅处，柳暗花明又一村&lt;/code&gt;，我感到自己的人生再次充满了希望，我的大脑中再次闪过无数画面：&lt;em&gt;电脑修好了，完成了后端大规模重构，性能提升 150%，成为了年度优秀员工，找到了三次元老婆，走向人生巅峰。。。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;咳咳咳，冷静。现在的情况是已经排除了是硬件问题，我决定通过 Archlinux Rollback Machine 把电脑回滚到昨天。拔掉 U 盘，开机，我鬼使神差的把线直接接到了电脑上，卧槽，显示器亮了！所以说，既不是硬件问题，也不是软件问题？那还能是啥问题，人品问题么？&lt;/p&gt;
+&lt;p&gt;emmmmmm，仔细想了一下，我觉得不如解释成静电问题，插上 USB 的时候释放掉了机器内部的静电，然后所有的接口都恢复正常了。（不管你信不信，反正我是真的信了）&lt;/p&gt;
+&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
+&lt;p&gt;以上就是本次的翻车实录~&lt;/p&gt;
+&lt;h2 id=&#34;引用资料&#34;&gt;引用资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.kernel.org/doc/html/v4.15/gpu/drm-kms.html&#34;&gt;Kernel Mode Setting (KMS)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/kernel_mode_setting#Forcing_modes&#34;&gt;Kernel mode setting - Archwiki&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>随缘分享第 2 期</title><link>https://xuanwo.io/2019/01/05/share-with-luck-2nd/</link><pubDate>Sat, 05 Jan 2019 05:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/01/05/share-with-luck-2nd/</guid><description>&lt;p&gt;万万没有想到我也有一周双更的时候（，素材攒的太多了，赶紧分享一下~&lt;/p&gt;
+&lt;h2 id=&#34;今天你翻车了吗&#34;&gt;今天你翻车了吗？&lt;/h2&gt;
+&lt;h3 id=&#34;fwupd-翻车&#34;&gt;fwupd 翻车&lt;/h3&gt;
+&lt;p&gt;说起来用 Arch 也有一段时间了，大的翻车没遇到过，小的翻车倒是经常遇到。1 月 2 号晚上睡前日常更新，发现更新了 fwupd 1.2.2 之后就顺手试了一下，结果发现命令行直接 timeout 了，想着可能是我升级之后还没有重启服务，然后 &lt;code&gt;systemd restart fwupd&lt;/code&gt; 结果报错了，于是查了下日志：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;-- Unit fwupd.service has begun starting up.
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon fwupd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;7066&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Failed to get PCR0s: missing executable tpm2_pcrlist in PATH
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon fwupd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;7066&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Failed to load engine: Failed to prepare SQL: no such column: protocol
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: fwupd.service: Main process exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;code&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;status&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;/FAILURE
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: fwupd.service: Failed with result &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;exit-code&amp;#39;&lt;/span&gt;.
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Failed to start Firmware update daemon.
+-- Subject: Unit fwupd.service has failed&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;emmmmm，&lt;code&gt;no such column: protocol&lt;/code&gt; ？这看着是 DB 没做兼容啊，估计是上游翻车了，在 archcn 的群里问了一声没什么回应，于是先睡了，明天再说。&lt;/p&gt;
+&lt;p&gt;第二天早上看了下，已经有人在 arch 这边提了 BUG 了：&lt;a href=&#34;https://bugs.archlinux.org/task/61241?project=5&amp;amp;string=fwupd&#34;&gt;FS#61241 - fwupdmgr Failed to activate service&lt;/a&gt;，但是我感觉应该不是打包的问题，于是直接给上游提了个 BUG：&lt;a href=&#34;https://github.com/hughsie/fwupd/issues/909&#34;&gt;After upgrade to 1.2.2, fwupd failed to start for SQL error&lt;/a&gt;。作者 &lt;a href=&#34;https://github.com/hughsie&#34;&gt;hughsie&lt;/a&gt; 是红帽的员工，维护着不少知名的开源项目。&lt;/p&gt;
+&lt;p&gt;响应速度还算挺快的，考虑我们中间还隔着时差，按照他的要求提供了 &lt;code&gt;pending.db&lt;/code&gt; 之后没多久就加了个修复的 &lt;a href=&#34;https://github.com/hughsie/fwupd/commit/48106951c814f0bee201845fc1cc9cbb0f143faf&#34;&gt;commit&lt;/a&gt;，自行打包了一个 fwupd 测试了一下，确认工作正常并回复了作者。历时大概三天左右，这个 BUG 被修复了。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;说起来，现在嵌入式 DB 领域好像除了 SQLite 之外就没有一个能打的支持 SQL 的选手了啊？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;gitea-升级翻车&#34;&gt;gitea 升级翻车&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;改配置已经很糟心了，这 gitea 甚至还要改运行的用户 = =，我觉得这样不行&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;一波升级之后，gitea 刷了一大波说明出来：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;warning: /etc/gitea/app.ini installed as /etc/gitea/app.ini.pacnew
+gitea now uses its own user/group instead of the git ones.
+Ownership of /var/lib/gitea tree has been changed accordingly.
+You need to update your /etc/gitea/app.ini file to change the
+RUN_USER variable at the top.
+Next step is fixing the SSH configuration. If you have:
+AllowUsers git
+in /etc/ssh/sshd_config, you need to change that to gitea.
+Then restart sshd.service.
+You will need to tell all your users that they have to change
+git@ to gitea@ in their repos clones using git remote set-url.
+If you use a PostgreSQL DB upon Unix socket, you need to fix
+your &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;database&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; configuration and switch USER to gitea.
+Then, you need to change it also in /var/lib/data/pg_hba.conf.
+Finally, as postgres user, run psql and inside it type:
+ALTER USER git RENAME TO gitea;
+&lt;span style=&#34;color:#4070a0;font-weight:bold&#34;&gt;\q&lt;/span&gt;
+Then restart postgresql.service.
+In all cases, you &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;then&lt;/span&gt; need to reload systemd units and
+restart gitea.service.&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;按照要求改了配置，重启了服务。服务是好了- -，但是所有 clone 的 git url 都要改了，有点麻烦。感觉这个变动就很坑了，作为一个后端服务，内部的配置改了就改了，也就是维护起来麻烦一点，但是对外（对用户）暴露的东西不能乱动。得亏我这个 gitea 就自己用用，要是真的有别人在用的话，还得群发个邮件让他们把本地的 remote URL 都改一遍，坑，gitea 好感度减 10。&lt;/p&gt;
+&lt;h3 id=&#34;apfs-翻车&#34;&gt;APFS 翻车&lt;/h3&gt;
+&lt;p&gt;在一个风平浪静的早晨，惠老师突然在水群 Po 了一张图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;rm-failed.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这是啥操作，删除文件提示没空间？&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;open-terminal-failed.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Terminal 也打不开了，2333。&lt;/p&gt;
+&lt;p&gt;后来了解情况的群友解释了一下原因，其实这是两个问题：&lt;/p&gt;
+&lt;p&gt;第一个是采用 CoW 的文件系统固有的问题。我们都知道 CoW 的基本原理是在对数据进行修改的时候，不会直接在原来的数据位置上进行操作，而是重新找个位置修改。那么在磁盘已经完全满了之后就可能会出现问题，问题的起因有两种说法：第一是在删除的时候需要在一个空闲的位置写入一个新的标记，表示这个文件被删除了；第二是文件系统之前有 snapshot，被删除的文件还在被别的 snapshot 引用着，所以不能直接删除，需要加一个标记。所以类似机制的文件系统都可能会出现这样的问题，包括 ZFS 和 Btrfs。&lt;/p&gt;
+&lt;p&gt;第二个是 macOS 在磁盘系统全满的情况下的行为是不可预测的行为，没人知道会发生什么。所以会出现 Terminal 打不开，Finder 打开直接卡住这种事情。&lt;/p&gt;
+&lt;p&gt;最后惠老师进入恢复模式，执行了硬盘急救，最后多了一丢丢，大概 500MB 的空间，终于可以把文件删掉了（&lt;/p&gt;
+&lt;h2 id=&#34;无意义以及其存在的意义&#34;&gt;无意义以及其存在的意义&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;conway-eeeee.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;前一段时间疯狂刷屏的 &lt;a href=&#34;https://github.com/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee&#34;&gt;e98e&lt;/a&gt; 在整个项目被 Archive 进入 read-only 之后热潮消退了。在最开始的时候我非常反感，感觉自己受到了精神污染，甚至想要举报一波，然而并没有找到合适的理由。现在回过头来想一想这个事情，感觉心情非常复杂，总是会去想是不是自己做错了什么，或者说当我在一个公共场合（比如 Telegram 的群中）轻蔑的说某样事情 &lt;strong&gt;无聊&lt;/strong&gt;，&lt;strong&gt;没意义&lt;/strong&gt; 的时候，我是不是真的明白我在说什么。&lt;/p&gt;
+&lt;p&gt;这个问题我琢磨了很久，最后感觉它是由一组复杂的问题组成的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对一个事务的意义判断究竟是谁来做的？&lt;/li&gt;
+&lt;li&gt;无意义的事务有没有存在的意义？&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;不知道是不是受到教育环境的影响，我总是会倾向于去做 &lt;code&gt;有意义&lt;/code&gt; 的事情。那 &lt;code&gt;有意义&lt;/code&gt; 又是意味着什么呢，大多数时候它要 &lt;code&gt;有价值&lt;/code&gt;，而更大多数时候可以概括为 &lt;code&gt;有用&lt;/code&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;玩游戏，就不能浪费时间，玩 1 分钟就要获得 1 分钟的快乐&lt;/li&gt;
+&lt;li&gt;做开源项目就得要出名，要有 Star，要有人关注，要有人用在生产环境上&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;所以说，世界上到底有没有没意义的事情的呢？可能只存在&lt;strong&gt;我认为&lt;/strong&gt;没意义的事情吧。&lt;/p&gt;
+&lt;p&gt;这些问题我可能是想不清楚了，只能一直这么纠结下去，以后遇到所谓的没意义的东西，我大概会选择保持沉默吧：“我觉得你做的事情没意义，但是我尊重你做下去的权利”。&lt;/p&gt;
+&lt;h2 id=&#34;有啥有意思的东西嘛&#34;&gt;有啥有意思的东西嘛？&lt;/h2&gt;
+&lt;p&gt;2018 年最后入手的东西是 OnePlus 6T 和一把宜家的转椅。&lt;/p&gt;
+&lt;p&gt;这么多年过去了，安卓的变化比我想象的还要大，特别是在一加 Oxygen OS 的支持下，感觉到了前所未有的舒畅。虽然国内的生态一如既往的糟糕，但是大多数应用都能用，某些实在流氓或者 Google Play 中没有的应用也直接扔到了 Work Profile 里面。现在基本上是晚上充满电上床看小说，然后第二天直接带去上班，到晚上回家还能有 40% ~ 50% 的电量，已经完全够用了，And 快充也非常给力。用了几个星期，完全不怀念我的 iPhone。&lt;/p&gt;
+&lt;p&gt;之前用的转椅是前同事留在房子里面的，一直凑或用，但是有一天实在忍不了了，决定换一把新的转椅。在朋友 P 的安利下入了宜家的 &lt;a href=&#34;https://www.ikea.cn/cn/zh/catalog/products/50137208/&#34;&gt;MARKUS 马库斯&lt;/a&gt; 转椅，深灰色那款只要 999 元，加上运费总共 1068 元。花了点时间拼了起来，一坐上去整个人就不想起来了，实在是太舒服了。腰部和头部还有手臂都被正好支撑起来，终于不会写着代码感觉自己整个脖子都僵住了。&lt;/p&gt;
+&lt;p&gt;这个椅子支持上下大概 10 cm，向后 30 度左右的调节。配合自己之前买的显示器支架，可以舒舒服服的躺着看动漫，打游戏，生活美滋滋。如果有想换椅子的同学无比留意下~&lt;/p&gt;
+&lt;p&gt;最近还看到一个好玩的 issue： &lt;a href=&#34;https://github.com/antirez/redis/issues/3909&#34;&gt;https://github.com/antirez/redis/issues/3909&lt;/a&gt; ，一个人不小心发了个 issue，然后解释道：“Cat walked over the keyboard sorry guys.”，引发了一场评论区的狂欢。我觉得最好玩的回复是项目的作者回复的：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Observing the keys pressed we can assume the cat was diagonally exploring the keyboard, probably with the front paws oriented towards the &amp;ldquo;/=-[&amp;rdquo; part of the keyboard (right/bottom) since there is more variability there, compared to the (maybe) rear paw staying near the number &amp;ldquo;3&amp;rdquo; (and the other rear paw probably outside the keyboard, in the upper part). However the size of the cat should be very small in that case, or the size of the keyboard should be very large, if we are not willing to assume a reduced-length cat because of attack position or alike.&lt;/p&gt;
+&lt;p&gt;Btw if you could report the &lt;code&gt;INFO&lt;/code&gt; output of your Redis instance, we may be able to perform more educated guesses about the conditions of your cat.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;集段子与安利于一身，是值得我学习的楷模~&lt;/p&gt;
+&lt;h2 id=&#34;最近又看了啥项目&#34;&gt;最近又看了啥项目？&lt;/h2&gt;
+&lt;p&gt;首先简单介绍一下这个 &lt;code&gt;好玩&lt;/code&gt; 和 &lt;code&gt;有用&lt;/code&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;好玩&lt;/code&gt;：是说 &lt;strong&gt;我&lt;/strong&gt; 觉得这个项目很好玩，有意思
+&lt;code&gt;有用&lt;/code&gt;：是说 &lt;strong&gt;我&lt;/strong&gt; 觉得这个项目能派上用场&lt;/p&gt;
+&lt;p&gt;如你所见，只有三个组合，因为又不好玩又没用的项目写它干啥呢？&lt;/p&gt;
+&lt;h3 id=&#34;好玩又有用&#34;&gt;好玩又有用&lt;/h3&gt;
+&lt;h4 id=&#34;vegeta&#34;&gt;Vegeta&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/tsenart/vegeta&#34;&gt;https://github.com/tsenart/vegeta&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;打开这个项目的时候被正面冲过来的贝吉塔吓了一跳，当时就记住了它，然后才反应过来项目名字就是用的贝吉塔的英文：Vegeta。大概寓意着这个项目跟超级塞亚人一样强悍吧，哈哈。&lt;/p&gt;
+&lt;p&gt;这是一个用来做 HTTP 负载测试的库和工具，既可以在代码中调用，也可以直接作为工具使用。项目维护的还不错，以后会考虑用它。&lt;/p&gt;
+&lt;h4 id=&#34;nats&#34;&gt;NATS&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://nats.io/&#34;&gt;https://nats.io/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;NATS 是一个云原生消息系统，是一个 CNCF 项目。它的消息格式很有意思，是一个类似于 Redis 的 text based protocol，我个人很喜欢，简单才是美啊。大概也得益于这么简单的 Protocol 设计，它的吞吐量很大，按照项目给出的评测，它的吞吐量是 Kafka 的两倍，RabbitMQ 的十倍。&lt;/p&gt;
+&lt;p&gt;项目的设计目标给的非常清晰：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Highly performant (fast)&lt;/li&gt;
+&lt;li&gt;Always on and available (dial tone)&lt;/li&gt;
+&lt;li&gt;Extremely lightweight (small footprint)&lt;/li&gt;
+&lt;li&gt;Support for multiple qualities of service (including guaranteed “at-least-once” delivery with NATS Streaming)&lt;/li&gt;
+&lt;li&gt;Support for various messaging models and use cases (flexible)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果有合适的场景，我大概会考虑玩一玩~&lt;/p&gt;
+&lt;h4 id=&#34;uncaptcha2&#34;&gt;uncaptcha2&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/ecthros/uncaptcha2&#34;&gt;https://github.com/ecthros/uncaptcha2&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这是一个今天才看到的段子，思路很有意思，就是输出 Google reCAPTCHA 的语音验证码，然后用 Google 的语音转文字 API 来做识别，然后再填回去，据说识别率还非常不错。&lt;/p&gt;
+&lt;p&gt;哈哈哈，这个真的是现实版的以子之矛，攻子之盾了。&lt;/p&gt;
+&lt;h4 id=&#34;badger&#34;&gt;badger&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/dgraph-io/badger&#34;&gt;https://github.com/dgraph-io/badger&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这是一个很早之前看过的项目了，但是有两个比较有意思的事情：&lt;/p&gt;
+&lt;p&gt;一个是有奖征集数据丢失的场景：&lt;a href=&#34;https://github.com/dgraph-io/badger/issues/601&#34;&gt;Prove that Badger loses data&lt;/a&gt;，只要你能够按照要求给出可复现数据丢失的步骤，就能获得 $1337 。感兴趣的童鞋可以去试试。&lt;/p&gt;
+&lt;p&gt;另一个是 badger 增加了一组 &lt;a href=&#34;https://github.com/dgraph-io/badger/pull/577&#34;&gt;Jepsen-style bank test&lt;/a&gt;，会在他们内部的 CI 平台上运行，可以看&lt;a href=&#34;https://teamcity.dgraph.io/viewType.html?buildTypeId=Badger_BankTest&#34;&gt;现场直播&lt;/a&gt;。&lt;a href=&#34;https://jepsen.io/&#34;&gt;Jepsen&lt;/a&gt; 我是在看 PingCAP 的相关技术分享时候看到的，Jepsen 是一个分布式系统验证的框架，已经成功发现了很多系统的 BUG。&lt;/p&gt;
+&lt;p&gt;之前有个项目技术选型的时候没用 Badger，之后大概可以考虑一下。&lt;/p&gt;
+&lt;p&gt;BTW，他们的项目管理似乎有些问题，依赖管理没做，完全靠 go get，Makefile 也没有，新人想要参与开发感觉是一脸懵逼。Windows 平台上的 CI 一直都是挂的，我还提了个 PR 修了其中的一个：&lt;a href=&#34;https://github.com/dgraph-io/badger/pull/661&#34;&gt;test: Fix TestDropReadOnly failed on windows&lt;/a&gt;，在我这个 PR 之后他们又 Fix 了不少 windows 上的测试，估计再过一段时间就能恢复正常了。他们是怎么忍下去的- -，我完全接受不了一个项目 Master 分支上的 CI 都是挂的，那还不如去掉呢。。。&lt;/p&gt;
+&lt;h3 id=&#34;有用不好玩&#34;&gt;有用不好玩&lt;/h3&gt;
+&lt;h4 id=&#34;gradle&#34;&gt;gradle&lt;/h4&gt;
+&lt;p&gt;Adaptable, fast automation for all &lt;a href=&#34;https://gradle.org&#34;&gt;https://gradle.org&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;以前只是听做 Java 开发同事天天吐槽 gradle，以为只是 Java 生态下的一个工具，定位类似于 npm for node.js，但是今天看了项目才知道原来它的目标是构建自动化并且要支持多语言的开发。&lt;/p&gt;
+&lt;p&gt;这个自动化跟我想要的不太一样。&lt;/p&gt;
+&lt;h4 id=&#34;cloudevents&#34;&gt;cloudevents&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://cloudevents.io/&#34;&gt;https://cloudevents.io/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;有一个定义云消息的规范，还是基于 JSON 的，看起来大概是这个样子：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;specversion&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;0.2&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;type&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;com.github.pull.create&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;source&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://github.com/cloudevents/spec/pull/123&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;id&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;A234-1234-1234&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;time&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;2018-04-05T17:31:00Z&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;comexampleextension1&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;value&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;comexampleextension2&amp;#34;&lt;/span&gt; : {
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;othervalue&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;
+},
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;contenttype&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;text/xml&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;data&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;much wow=\&amp;#34;xml\&amp;#34;/&amp;gt;&amp;#34;&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;无爱。&lt;/p&gt;
+&lt;h3 id=&#34;好玩但没用&#34;&gt;好玩但没用&lt;/h3&gt;
+&lt;h4 id=&#34;lsix&#34;&gt;lsix&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/hackerb9/lsix&#34;&gt;https://github.com/hackerb9/lsix&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;一个为图片设计的 ls，emmm，感觉没有啥特别的用处，虽然确实挺好玩的就是了。&lt;/p&gt;
+&lt;h4 id=&#34;ungoogled-chromium&#34;&gt;ungoogled-chromium&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/Eloston/ungoogled-chromium&#34;&gt;https://github.com/Eloston/ungoogled-chromium&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;清真版本的 Chromium，去掉了 Google 相关的代码，据说非常清真，但是我是 Google 的粉丝，甚至电脑上用的就是 Chrome - -，因此就是围观一下。&lt;/p&gt;
+&lt;h4 id=&#34;citybound&#34;&gt;citybound&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/citybound/citybound&#34;&gt;https://github.com/citybound/citybound&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;一个开源版本的城市模拟，感觉还比较早起，只有一些雏形，还玩不起来，还需要再观察观察。引擎本身是用 rust 写的，前端很有意思，用的是一个叫做 &lt;a href=&#34;https://webflow.com/&#34;&gt;webflow&lt;/a&gt; 产品，交互比较酷炫。可能我这样的前端白痴也有救了？&lt;/p&gt;
+&lt;h2 id=&#34;说点坑爹事情大家开心开心&#34;&gt;说点坑爹事情大家开心开心&lt;/h2&gt;
+&lt;p&gt;偶然发现Chrome 砍掉了 &lt;code&gt;chrome://net-internals/#events&lt;/code&gt; 这个功能。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;坑爹啊！&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The net-internals events viewer and related functionality has been removed. Please use chrome://net-export to save netlogs and the external catapult netlog_viewer to view them.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;现在想要查看 Chrome 的网络交互细节只能打开 &lt;code&gt;chrome://net-export&lt;/code&gt; 点击开始导出，操作完了再结束导出，最后用一个外部工具导入再查看了。&lt;/p&gt;
+&lt;p&gt;Hugging you, Google!&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;以上就是本期随缘分享的全部内容~&lt;/p&gt;</description></item><item><title>随缘分享第 1 期</title><link>https://xuanwo.io/2018/12/15/share-with-luck-1st/</link><pubDate>Sat, 15 Dec 2018 06:05:00 +0000</pubDate><guid>https://xuanwo.io/2018/12/15/share-with-luck-1st/</guid><description>&lt;p&gt;每周分享实在做不到，但是随缘分享还是可以的，内容大体上会跟之前的动态有些交叉~&lt;/p&gt;
+&lt;h2 id=&#34;workflowy-复活&#34;&gt;Workflowy 复活&lt;/h2&gt;
+&lt;p&gt;Workflowy 自从有一个 PM 和设计师之后，感觉整个产品复活了。前端使用 React + TypeScript 彻底重写，有了全新的设计，清理掉了一大堆旧代码，甚至开始提供 &lt;a href=&#34;https://workflowy.com/s/workflowy-extension-api/6ziauXitmUj7idN2&#34;&gt;Extension API&lt;/a&gt; 了！&lt;/p&gt;
+&lt;p&gt;读着他们的博文 &lt;a href=&#34;https://blog.workflowy.com/2018/12/11/new-year-new-code/&#34;&gt;New Year, New Code&lt;/a&gt;，我感到非常激动且开心。激动于一些期待已久的功能终于可以实现，开心于一个快十年的老产品还能够这样焕发生机。&lt;/p&gt;
+&lt;p&gt;Android 和 iOS 的 App 也都重写了，&lt;a href=&#34;https://blog.workflowy.com/2018/12/14/better-daily-digests-a-splash-of-color-in-your-inbox/&#34;&gt;每日推送的摘要&lt;/a&gt; 也支持了类似于 git diff 一样的效果，欢迎各位用过或者没有用过 Workflowy 的童鞋来体验一下，有余力有需求的话也可以买个 WorkFlowy Pro 以最实际的方式支持开发者~&lt;/p&gt;
+&lt;h2 id=&#34;enpass-6-体验&#34;&gt;Enpass 6 体验&lt;/h2&gt;
+&lt;p&gt;最近正好有人请求打包 enpass-beta-bin，于是我就把这个包加到了 archcn 源里面，并将自己本地和 iOS 上的 enpass 都升级了一下。&lt;/p&gt;
+&lt;p&gt;新的版本最大的变化就是支持多个 Vault：每个 Vault 彼此之间完全独立，可以设置不一样的 Master Password。Vault 的同步也是分开的，以 Google Drive 为例，一个 Google 帐号只能同步一个 Vault。同步的实现机制也有变化，原来是单纯的把加密之后的文件同步到一个文件夹下面，现在开始使用各个网盘提供的 App Folders 功能，现在用户以及其他应用已经不能直接访问到同步的文件。可能会有些不太方便，但是更加安全，我还是比较欣赏这个改动的。&lt;/p&gt;
+&lt;p&gt;功能上还有的变化是支持自定义类型和模板，这是用户一直想要的功能，原来受限于软件架构问题无法实现，现在在重写之后的 Enpass 6 里终于有了。Enpass 6 还将只有浏览器有的登录助手带到了桌面上，现在点击图标默认会出现这个助手而不是完整的应用界面。这个改动我不太喜欢，背后的逻辑可能是认为用户的查询操作更加频繁，因此需要一个精简版的入口，但是从我的实际体验上来看，我打开 Enpass 就是想要增加或修改条目，查询基本上只会在浏览器端登录的时候做。&lt;/p&gt;
+&lt;p&gt;对浏览器的支持也重新实现了，现在浏览器插件和主程序之间首次通信会进行一次认证，大体上类似于蓝牙链接一样，主程序这边要生成一个随机的 6 位数字，浏览器插件需要输入一样的数字之后才能连接。这大大提升了浏览器插件这一端的安全性：原有的实现依赖于校验浏览器本身是否可信，在 Linux 上这个功能完全不可用，现在的这种方式可以防止奇怪的浏览器或者插件访问我们敏感的数据了~&lt;/p&gt;
+&lt;p&gt;除了功能之外的大变化就是 UI 和交互了，整体上变得更加时髦了，虽然现在用起来感觉不是非常好用 - -!，相信后续还是会不断改善。最起码现在我用 1password 的朋友们看了新界面之后会说一句不丑，比原来的好多了（。&lt;/p&gt;
+&lt;p&gt;老毛病还是有：对 CJK 字符的支持没有，应该是没有带上 fcitx 的 qt 插件，这个已经跟上游反馈了，或许下次（?）更新就会修好吧。然后因为是 Beta 版本，所以体验上还不是非常好，很多细节的地方都打磨的不太精致。&lt;/p&gt;
+&lt;p&gt;此外在 Archlinux 上配置同步的话可能会遇到一些问题：配置的时候会打开对应网盘的登录界面，进行一次标准的 OAuth2 认证流程，然后会访问一个 &lt;code&gt;enpassauth://&lt;/code&gt; 的链接，但是此时 &lt;code&gt;xdg-open&lt;/code&gt; 会打开一个全新的 enpass 实例，导致之前的那个 enpass 没有办法收到这个回调。&lt;/p&gt;
+&lt;p&gt;跟 Enpass 反馈之后他们表示这是一个实现上的问题，之后会予以修复。一个可行的 workaround 是在命令行使用 &lt;code&gt;xdg-open enpassauth://&lt;/code&gt; 打开 enpass 并配置同步，此时 enpass 可以正确的响应这个回调。&lt;/p&gt;
+&lt;p&gt;Enpass 6 目前还处在 Beta 的阶段，感兴趣的童鞋可以体验一下，在 Archlinux 上使用有问题的话可以反馈给我~&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;安装 Enpass 6 第一次启动会自动升级原有的数据，此升级不可逆，如果还想回去的话，记得备份好数据。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;用 Arch 的同学可以直接安装： &lt;code&gt;pacman -S enpass-beta-bin&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;用 iOS 的同学可以通过 TestFlight 来直接参与测试：&lt;a href=&#34;https://testflight.apple.com/join/hIec0gli&#34;&gt;https://testflight.apple.com/join/hIec0gli&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;还没有用过的同学可以看看这篇&lt;a href=&#34;https://xuanwo.io/2017/11/26/enpass-intro/&#34;&gt;安利文&lt;/a&gt; 了解一下&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;game&#34;&gt;Game&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;最近想完成全弓箭收集的成就，大概保持着每天做半把的节奏，现在做到了尸套龙弓（然后发现自己没钱了），尸套龙还是比较好打，带上龙封力的武器，出门带上闪光弹，路上拣一点松明弹和可燃石基本上没啥问题，只要注意不要被秒&lt;/li&gt;
+&lt;li&gt;有天晚上怎么都连不上集会所，于是玩了一会儿会免的重力异想世界，头有点晕 - -&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;travel&#34;&gt;Travel&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;下周要去日本了，第一次出国，有点紧张&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;miscellaneous&#34;&gt;Miscellaneous&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;现在大家好像都在倡导搁置 code style 的争议，gofmt 和 rustfmt 都是已经成为了各自社区的主流，js 这边也有一个类似的项目： &lt;a href=&#34;https://prettier.io/&#34;&gt;https://prettier.io/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;最近学到一个新词：&lt;code&gt;event storming&lt;/code&gt;，好像一般翻译成事件风暴，用于动态业务流程的分析，&lt;a href=&#34;https://www.eventstorming.com/&#34;&gt;https://www.eventstorming.com/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://openmessaging.cloud/&#34;&gt;OpenMessaging&lt;/a&gt;，名字非常酷炫，是一个阿里牵头搞的云原生，厂商独立的分布式消息规范，schema 我不是非常喜欢，这么搞还不如发 HTTP/2 的包呢&lt;/li&gt;
+&lt;li&gt;隐私在当下成为了一个越来越重要的话题，这里 &lt;a href=&#34;https://ssd.eff.org/en&#34;&gt;https://ssd.eff.org/en&lt;/a&gt; 给出了一些保护自己隐私的方案和实践&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/grafana/loki&#34;&gt;loki&lt;/a&gt; 是 grafana 推出的一个类似于 Prometheus 的日志收集工具，主打的特性是简单便宜，支持从 Prometheus 无缝迁移，提供了对 k8s pod 日志的良好支持，会自动抓取和索引相关的标签，grafana 中会提供原生的支持&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/bazelbuild/starlark&#34;&gt;starlark&lt;/a&gt; 是一个形似于 Python 的配置语言，而 &lt;a href=&#34;https://github.com/google/starlark-go&#34;&gt;starlark-go&lt;/a&gt; 是由 Google 的工作人员推出的 go 实现，用于他们自己的编译工具 bazel&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>博客升级至 v2.0</title><link>https://xuanwo.io/2018/12/03/bump-to-version-2.0/</link><pubDate>Mon, 03 Dec 2018 09:05:00 +0000</pubDate><guid>https://xuanwo.io/2018/12/03/bump-to-version-2.0/</guid><description>&lt;p&gt;Xuanwo&amp;rsquo;s Blog 升级至 2.0 啦&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;停一下，先别动手，我不是标题党，听我解释！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在域名切换成 &lt;code&gt;xuanwo.io&lt;/code&gt; 的时候，我重写了 &lt;a href=&#34;https://xuanwo.io/about/&#34;&gt;About Me&lt;/a&gt;。在写的时候我就在想每个人都会有不同的侧面，与此同时每个人也会有每个人想要看到的侧面。因此我按照归属的次元不同重新组织了一下我的博客：&lt;/p&gt;
+&lt;h2 id=&#34;anime&#34;&gt;Anime&lt;/h2&gt;
+&lt;p&gt;动漫相关的内容，动漫相关的周边相关的内容也会发在这个分类下。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;文章列表：&lt;a href=&#34;https://xuanwo.io/categories/anime/&#34;&gt;https://xuanwo.io/categories/anime/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;RSS 订阅：&lt;a href=&#34;https://xuanwo.io/categories/anime/index.xml&#34;&gt;https://xuanwo.io/categories/anime/index.xml&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;code&#34;&gt;Code&lt;/h2&gt;
+&lt;p&gt;编程/技术相关的内容都会在这个分类下。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;文章列表：&lt;a href=&#34;https://xuanwo.io/categories/code/&#34;&gt;https://xuanwo.io/categories/code/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;RSS 订阅：&lt;a href=&#34;https://xuanwo.io/categories/code/index.xml&#34;&gt;https://xuanwo.io/categories/code/index.xml&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;daily&#34;&gt;Daily&lt;/h2&gt;
+&lt;p&gt;日常（灌水）内容，一些心情相关的无病呻吟也会发在这个分类下，同时这个分类会取代之前每篇文章末尾的动态章节。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;文章列表：&lt;a href=&#34;https://xuanwo.io/categories/daily/&#34;&gt;https://xuanwo.io/categories/daily/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;RSS 订阅：&lt;a href=&#34;https://xuanwo.io/categories/daily/index.xml&#34;&gt;https://xuanwo.io/categories/daily/index.xml&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;game&#34;&gt;Game&lt;/h2&gt;
+&lt;p&gt;游戏相关的内容会进这个分类啦，可能的内容大概会包括自己最近正在玩的游戏和一些感想。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;文章列表：&lt;a href=&#34;https://xuanwo.io/categories/game/&#34;&gt;https://xuanwo.io/categories/game/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;RSS 订阅：&lt;a href=&#34;https://xuanwo.io/categories/game/index.xml&#34;&gt;https://xuanwo.io/categories/game/index.xml&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;p&gt;后续大概还会启用 Novel， Music 这些分类，不过暂时没有什么想写的，就先不提了。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;不管你觉得熟悉还是陌生，他们都是我，区别只是在于你是否知道~&lt;/p&gt;
+&lt;/blockquote&gt;</description></item><item><title>再见，xuanwo.org</title><link>https://xuanwo.io/2018/12/02/goodbye-xuanwo-org/</link><pubDate>Sun, 02 Dec 2018 08:05:00 +0000</pubDate><guid>https://xuanwo.io/2018/12/02/goodbye-xuanwo-org/</guid><description>&lt;p&gt;一句话新闻：启用新域名 &lt;code&gt;xuanwo.io&lt;/code&gt;。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2 id=&#34;影响&#34;&gt;影响&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;个人域名切换到了 &lt;code&gt;xuanwo.io&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;所有指向 &lt;code&gt;xuanwo.org&lt;/code&gt; 请求都会被 301 到 &lt;code&gt;xuanwo.io&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;所有发往 &lt;code&gt;xuanwo.org&lt;/code&gt; 域的邮件暂时不受影响&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;xuanwo.org&lt;/code&gt; 域名有效期到 2019 年末，目前还没有决定是否要续费&lt;/li&gt;
+&lt;li&gt;RSS 订阅用户可能需要修改订阅地址（RSS 订阅会 follow 301 么？）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;其实本来写了长长的告别文，回顾了过去 4 年间 xuanwo.org 的变迁，都快把自己感动哭了，但是在发布之前还是都删了，换个域名而已&lt;/li&gt;
+&lt;li&gt;上周的时候朋友 A 来北京玩
+&lt;ul&gt;
+&lt;li&gt;跟着朋友 D 三人一起吃了顿捞王&lt;/li&gt;
+&lt;li&gt;下午参观了 798，看了不少自己看不懂但是感觉很有意思的展&lt;/li&gt;
+&lt;li&gt;晚上一起去了 tunight，看朋友 H 折腾了一晚上 Sony DPT 的 Android Xposed Hook，很是有意思&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;这周六跟朋友 K 见面，下次尝试了一下电影大串烧
+&lt;ul&gt;
+&lt;li&gt;先是看了《无名之辈》，电影很好看，虽说最后 20 分钟有点崩的厉害，但是并不是非常影响整理观感，最后的同名主题曲也非常好听&lt;/li&gt;
+&lt;li&gt;然后二刷了《无敌破坏王 2》，因为之前看过了，加上晚上没有休息好，所以看到中途的时候还睡着了一会儿（并不是说它不好看啊喂）&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;周日的时候参加了北航办的 !fs ，看到了可爱的 Rynco 酱，还有女装的小姐姐（还上去问了是不是女装大佬，结果发现是真小姐姐，丢人）&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>ThinkPad X1 Carbon 2018 开箱手记</title><link>https://xuanwo.io/2018/05/16/thinkpad-x1-carbon-6th/</link><pubDate>Wed, 16 May 2018 11:30:00 +0000</pubDate><guid>https://xuanwo.io/2018/05/16/thinkpad-x1-carbon-6th/</guid><description>&lt;p&gt;经过了漫长的等待之后，我的新玩具终于到手了。这篇文章主要晒一些照片，并分享一下我这第一次海淘的经历。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;多图预警&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;配置介绍&#34;&gt;配置介绍&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;CPU： Intel i7-8650U vPro&lt;/li&gt;
+&lt;li&gt;内存：16 GB&lt;/li&gt;
+&lt;li&gt;屏幕：14.0 WQHD IPS&lt;/li&gt;
+&lt;li&gt;硬盘：256G SSD&lt;/li&gt;
+&lt;li&gt;电池：3 cell 57Wh&lt;/li&gt;
+&lt;li&gt;预装：Windows 10 Home Plus&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;开箱照&#34;&gt;开箱照&lt;/h2&gt;
+&lt;h3 id=&#34;外包装箱&#34;&gt;外包装箱&lt;/h3&gt;
+&lt;p&gt;外包装箱挺结实的，晒一下配置的截图。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;outer-box.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;内包装箱&#34;&gt;内包装箱&lt;/h3&gt;
+&lt;p&gt;里面的包装箱非常有质感，不过着急着看电脑，没有多拍。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;inter-box.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;顶盖&#34;&gt;顶盖&lt;/h3&gt;
+&lt;p&gt;电脑本体是用一个黑色的袋子套起来放在盒子里面的，就是图片上压在电脑下面的那个袋子。正面非常简单，左上角是 ThinkPad 的标志，右下角的 X1 标志着这台电脑的纯正血统。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;top-cover.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第一眼&#34;&gt;第一眼&lt;/h3&gt;
+&lt;p&gt;14 寸的屏幕，边框比较窄，看起来会比同尺寸的 Macbook Pro 还要大一些。上方的摄像头有一个机械式的开关，可以防止摄像头被意外的开启。标志性的触控板和小红点还在，指纹识别器改成了按压式的（不过 Arch Linux 还不支持 - -）。键盘的手感一如既往的赞，并不会有不适应的感觉。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;first-look.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;接口&#34;&gt;接口&lt;/h3&gt;
+&lt;p&gt;左侧是两个 USB Type C 接口，一个 HDMI 接口和一个 USB Type A 接口，右侧是一个 USB Type A 接口和耳机口。接口的数量不算特别丰富，但是已经可以满足我的需求了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;left-side.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;right-side.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;与-macbook-pro-的对比&#34;&gt;与 Macbook Pro 的对比&lt;/h3&gt;
+&lt;p&gt;整体的厚度其实跟 Macbook Pro 相差无几，但是因为 X1C 曲线的关系，看起来要比 MBP 更薄一些。实际重量也要比 MBP 轻。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;compare-with-macbook-pro.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;与-thinkpad-t460-的对比&#34;&gt;与 ThinkPad T460 的对比&lt;/h3&gt;
+&lt;p&gt;我上一台电脑是公司发的 T460，可以看到 X1C 要薄上不少。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;compare-with-t460.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;hello-arch&#34;&gt;Hello，Arch！&lt;/h3&gt;
+&lt;p&gt;在下单的时候就跟朋友们都说好了，等买了新电脑就要换 Arch。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;hello-arch.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;海淘之旅&#34;&gt;海淘之旅&lt;/h2&gt;
+&lt;p&gt;这是我的 X1C 的环球之旅：&lt;/p&gt;
+&lt;iframe src=&#34;https://www.google.com/maps/d/embed?mid=1Vb4i9bNCBdAD_bk5IkwQ-zyDJwn92k_w&#34; width=&#34;640&#34; height=&#34;480&#34;&gt;&lt;/iframe&gt;
+&lt;blockquote&gt;
+&lt;p&gt;中国合肥生产，寄到美国，然后再寄回来。相同的配置大概便宜了 6000 多块，真不愧是美帝良心想。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;下面分享一些海淘过程中的一些经验吧：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;海淘的周期真的非常长，前前后后大概等了一个月才拿到手，期间还因为贸易战以为自己的电脑被扣了= =。如果着急要用的话，还是不要海淘了。&lt;/li&gt;
+&lt;li&gt;海淘的时候一定要认真的挑选卖家，每个卖家都要跟他聊一聊，看看是否靠谱。上万块的电脑都买了，不要在乎那么几百块钱的差价，找最靠谱的。绝对不要加卖家的微信或者 QQ 聊，直接用网页版的阿里旺旺，这样你们的交流都是有记录的，以后如果有了纠纷可以靠这个去申诉。&lt;/li&gt;
+&lt;li&gt;整体的流程是这样的：
+&lt;ul&gt;
+&lt;li&gt;把自己想要的配置告诉店家，具体的配置可以在 &lt;a href=&#34;https://www3.lenovo.com/us/en/laptops/thinkpad/thinkpad-x/ThinkPad-X1-Carbon-6th-Gen/p/22TP2TXX16G&#34;&gt;美国联想官网定制&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;之后店家会告诉你完整的价格和完整的配置清单，如果确定没有问题的话先付定金，一般是 2000 块。&lt;/li&gt;
+&lt;li&gt;店家收到定金之后就会去官网上下单，然后把订单号告诉你，这样就可以直接在官网查进度。&lt;em&gt;如果店家没有订单号或者不肯告诉你，我觉得可能有问题。&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;等到电脑寄到了店家在美国的仓库，他会要求你支付尾款。收到尾款之后，他就会把电脑直接快递给你。&lt;/li&gt;
+&lt;li&gt;电脑到了海关，邮政局会给你发短信。你可以选择直接微信公众号支付，这样就会通过 EMS 寄给你；也可以选择自己直接去领，这样就可以当场拿走。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;我的电脑这次交了 300 的关税。据朋友说，所有电脑都是按照 2000 元然后征收 15% 的关税来计算的，这个没有证实。如果关税超过 300 块的话，可以让店家帮忙协调一下。&lt;/li&gt;
+&lt;li&gt;海淘的电脑也可以注册联想的全球联保服务，不需要担心电脑坏了没有地方修，不过联想比较傻逼的政策是只有电脑坏了才能注册。。。&lt;/li&gt;
+&lt;li&gt;很多店家不支持信用卡或者花呗，如果要用的话就要自己补手续费，因此尽可能的提前准备好足够的资金。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;使用体验&#34;&gt;使用体验&lt;/h2&gt;
+&lt;p&gt;电脑已经差不多一周，跟我之前的 T460 大概有以下差异：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;续航特别强劲，开着 Goland，PyCharm 和十多个标签的 Chrome 的情况下，可以连续使用八个小时。彻底戒掉了我晚上带电源回家的习惯，可以安心的带着电脑去参加讨论或者会议而不用担心电不够。&lt;/li&gt;
+&lt;li&gt;软件启动特别快。在 SSD 的加持下，我从打开 Goland 到可以开始实际的开发所需要的时间从 2 分钟降低到了 10 秒。&lt;/li&gt;
+&lt;li&gt;高分屏很舒服。习惯了高分屏之后，再回去看原来的屏幕已经完全接受不了了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;坑&#34;&gt;坑 &amp;gt;.&amp;lt;&lt;/h2&gt;
+&lt;p&gt;X1C 使用 Arch Linux 整体上没啥问题，但是在很多细节的地方有比较坑的地方：&lt;/p&gt;
+&lt;h3 id=&#34;支持-s3-待机&#34;&gt;支持 S3 待机&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;X1C 支持 S0i3 待机，但是不支持 S3 待机。两者的区别是在 S0i3 下 CPU 的功耗被降到最低，但仍保持着上电状态，而 S3 则不会。
+&lt;ul&gt;
+&lt;li&gt;X1C 支持 S3 需要 BIOS 的支持，社区中有人通过为 ACPI DSDT Table 打 Patch 来支持，但是这个 Hack 在最新版的 BIOS 中已经失效了，而且这个操作比较危险。因此我选择等待联想官方修复。就像论坛中有人说的那样：“Come on Lonove, show more love for linux users.”&lt;/li&gt;
+&lt;li&gt;而 S0i3 待机需要修改内核参数来提供支持，并且增加该参数后会导致无法打开屏盖来唤醒机器。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;评论区有童鞋说最新版本的固件中已经修复了该问题，我升级了固件发现确实如此。此外，联想已经加入了 LVFS (Linux Vendor Firmware Service)，因此我们可以通过 LVFS 来更新固件。&lt;/p&gt;
+&lt;p&gt;下面简单说一下如何更新固件并开启 S3 支持：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用 Arch 的同学可以通过 pacman 来安装 &lt;a href=&#34;https://www.archlinux.org/packages/community/x86_64/fwupd&#34;&gt;&lt;code&gt;fwupd&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;fwupdmgr get-devices&lt;/code&gt; 获取设备中所有支持固件升级的硬件列表&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;fwupdmgr refresh&lt;/code&gt; 更新 metadata&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;fwupdmgr get-updates&lt;/code&gt; 来检查是不是有更新可用&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;fwupdmgr update&lt;/code&gt; 来进行固件升级
+&lt;ul&gt;
+&lt;li&gt;某些固件可能需要 root 权限&lt;/li&gt;
+&lt;li&gt;某些固件可能需要重启&lt;/li&gt;
+&lt;li&gt;固件升级的时候务必接好电源，同时电池的电量要保持在 60% 以上，最好能充满&lt;/li&gt;
+&lt;li&gt;固件升级的时候可能会把引导项删除，因此最好事先准备一个 live CD，在固件升级完毕之后重新 &lt;code&gt;grub-install&lt;/code&gt; 一下即可&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;固件升级完毕后在 BIOS 的 &lt;code&gt;Config -&amp;gt; Power -&amp;gt; Sleep State&lt;/code&gt; 中将原来的 &lt;code&gt;Windows 10&lt;/code&gt; 修改为 &lt;code&gt;Linux&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;做完上述的操作之后可以通过 &lt;code&gt;dmesg&lt;/code&gt; 来检查是不是已经开启了 S3 的支持：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; dmesg | grep -i &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;acpi: (supports&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;.500484&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; ACPI: &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;supports S0 S3 S4 S5&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;看到 S3 的话，说明已经搞定啦~&lt;/p&gt;
+&lt;h3 id=&#34;已经解决的坑&#34;&gt;已经解决的坑&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;在 KDE + SDDM 的组合下，进入休眠状态后再恢复，会有一定概率出现屏幕一直闪动的情况。重启 SDDM 之后会恢复正常，从 Xorg 的报错日志能看到类似这样的错误：&lt;code&gt;Failed to set drm version: Permission denied&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;最新版本的 KDE + SDDM 中已经修复了&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;尚未解决的坑&#34;&gt;尚未解决的坑&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Xorg + KDE 对不同 DPI 的屏幕支持不太好，导致外接屏幕的时候用起来比较难受。&lt;/li&gt;
+&lt;li&gt;指纹识别器驱动正在&lt;a href=&#34;https://github.com/nmikhailov/Validity90&#34;&gt;开发当中&lt;/a&gt;，暂时还用不了。&lt;/li&gt;
+&lt;li&gt;默认配置下 &lt;code&gt;Thunderbolt BIOS Assist Mode&lt;/code&gt; 是 Disable 的，这会导致 Linux 在 s2idle 下的能耗特别高，需要进 BIOS 将其设置为 Enable。&lt;/li&gt;
+&lt;li&gt;默认配置下，Linux 的 CPU 温度上限是 80 度，而 Windows 下是 97 度。这会导致 Linux 的 CPU 性能比 Windows 下要低，目前有一些 dirty hack，官方还没有修复。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;引用链接&#34;&gt;引用链接&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Lenovo_ThinkPad_X1_Carbon_(Gen_6)&#34;&gt;Lenovo ThinkPad X1 Carbon (Gen 6) - Arch Wiki&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/thinkpad/comments/870u0a/t480s_linux_throttling_bug/&#34;&gt;T480s Linux throttling bug&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://forums.lenovo.com/t5/Linux-Discussion/X1C6-T480s-low-cTDP-and-trip-temperature-in-Linux/td-p/4028489&#34;&gt;low cTDP and trip temperature in Linux&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bbs.archlinux.org/viewtopic.php?id=234913&#34;&gt;Lenovo X1C6 / X1Y3 (2018): No deep sleep (S3)?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://forums.lenovo.com/t5/Linux-Discussion/X1-Carbon-Gen-6-cannot-enter-deep-sleep-S3-state-aka-Suspend-to/td-p/3998182/highlight/true&#34;&gt;X1 Carbon Gen 6 cannot enter deep sleep (S3 state aka Suspend-to-RAM) on Linux&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Fwupd&#34;&gt;fwupd&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;《间客》又看完了，现在在看《北平无战事》，当年追过一阵儿电视剧，但是没有看完，这次看看后续的剧情到底是怎么发展的。&lt;/li&gt;
+&lt;li&gt;上个周末去北大的黑客马拉松当评委，我最看好一个做猫脸识别的团队居然前十都没有进，很是生气。&lt;/li&gt;
+&lt;li&gt;照片都是在公司拍的，背景是我们公司的茶水间和我的工位，对我们公司感兴趣的话欢迎直接甩简历~&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>如何识别真假链接？</title><link>https://xuanwo.io/2016/01/13/how-to-differ-invalid-link/</link><pubDate>Wed, 13 Jan 2016 01:18:51 +0000</pubDate><guid>https://xuanwo.io/2016/01/13/how-to-differ-invalid-link/</guid><description>&lt;p&gt;前两天我的朋友圈被微信公开课活动的链接+截图刷屏，随后一大帮“业内人士”站出来说这个是盗号连接，只要点开，微信钱包和支付宝就会被盗。作为半个业内人士，我不能忍了，决定跟大家谈一谈如何识别真假链接。&lt;/p&gt;
+&lt;h1 id=&#34;域名是什么&#34;&gt;域名是什么？&lt;/h1&gt;
+&lt;p&gt;首先我们来介绍一下域名：域名就是计算机在网络上的名字，免去人们需要记忆IP地址的困扰。
+域名由若干个英文字母和数字组成，由&lt;code&gt;.&lt;/code&gt;分割成几份，形成一个网络上唯一的访问地址。&lt;/p&gt;
+&lt;p&gt;以&lt;code&gt;https://support.weixin.qq.com&lt;/code&gt;为例：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;support.weixin.qq.com&lt;/code&gt;为三级域名&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;weixin.qq.com&lt;/code&gt;为二级域名&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;qq.com&lt;/code&gt;为一级域名&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;.com&lt;/code&gt;是顶级域名后缀&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;链接是什么&#34;&gt;链接是什么？&lt;/h1&gt;
+&lt;p&gt;然后我们来介绍一下&lt;code&gt;链接&lt;/code&gt;，也就是URL，全称为&lt;code&gt;统一资源定位符&lt;/code&gt;，我们也称它们为&lt;code&gt;网址&lt;/code&gt;。链接的标准格式一般如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;协议类型://服务器地址（必要时需加上端口号）/路径/文件名
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;协议类型：常用的有http，https，ftp等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;https意味着什么？
+https又叫做&lt;code&gt;超文本传输安全协议&lt;/code&gt;，使用这个协议意味着你与这个网页的所有交互都是加密的，任何第三方都无法窥探你传输的信息（相对而言的，世上没有绝对的安全），经常被用于万维网上的交易支付和企业信息系统中敏感信息的传输。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;服务器地址：一般都是域名，有时为IP地址&lt;/li&gt;
+&lt;li&gt;端口号：http预设的80端口以及https的443端口可以省略&lt;/li&gt;
+&lt;li&gt;路径：以“/”字元区别路径中的每一个目录名称&lt;/li&gt;
+&lt;li&gt;查询：GET模式的表单参数，以“?”字元为起点，每个参数以“&amp;amp;”隔开，再以“=”分开参数名称与资料，通常以UTF8的URL编码，避开字元冲突的问题&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;如何分析一个链接&#34;&gt;如何分析一个链接？&lt;/h1&gt;
+&lt;p&gt;比如说我们这次微信公开课活动的链接：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;https://support.weixin.qq.com/cgi-bin/xxxxxxxx
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;对于用户而言，有用的信息如下：协议采用https协议，域名为&lt;code&gt;support.weixin.qq.com&lt;/code&gt;。
+采用https协议意味着你的信息是受到保护的，即使你使用了公共的wifi，同一wifi下的可能存在着的黑客也无法窥探你的私人信息。域名&lt;code&gt;support.weixin.qq.com&lt;/code&gt;传递了如下信息，这个网页是归属于&lt;code&gt;qq.com&lt;/code&gt;的，这从源头上保证了这一网页的安全性（如果腾讯没有内鬼的话）。&lt;/p&gt;
+&lt;p&gt;下面我们来看看一个假的链接是怎么样的：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;亲爱的淘宝用户您好，恭喜您在本次活动中获得特等奖iPhone6s一部，请登陆 &lt;a href=&#34;http://www.taoba0.com&#34;&gt;http://www.taoba0.com&lt;/a&gt; 领取您的奖品。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这是一条诈骗短信，我们可以看到骗子给出了这样一个链接&lt;code&gt;http://www.taoba0.com&lt;/code&gt;，一定要看清楚是&lt;code&gt;taoba0&lt;/code&gt;而不是&lt;code&gt;taobao&lt;/code&gt;，然后你就应该明白，这是一条诈骗短信了。值得提醒的是，现在前端技术高度发达，克隆复制一个网页非常容易，所以在网站之间挑战时，一定要确认自己点击的链接是正确的链接，否则极有可能被相似的页面欺骗。&lt;/p&gt;
+&lt;h1 id=&#34;如何保证安全&#34;&gt;如何保证安全？&lt;/h1&gt;
+&lt;p&gt;从上一个链接的分析中，我们可以得出以下几个小技巧：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;尽可能地使用https协议进行访问&lt;/li&gt;
+&lt;li&gt;认清域名，不轻信非官方域名的页面&lt;/li&gt;
+&lt;li&gt;网站之间跳转时，确认自己点击的链接是否正确&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;最后的寄语&#34;&gt;最后的寄语&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;请开启两部验证。国外的账户大多支持Google的两部验证，请启用这一功能。国内的账户的话，QQ请打开设备锁，QQ邮箱请打开独立密码。&lt;/li&gt;
+&lt;li&gt;不要贪小便宜！不要贪小便宜！！不要贪小便宜！！！重要的事情说三遍。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;参考资料&#34;&gt;参考资料&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E5%9F%9F%E5%90%8D&#34;&gt;域名-维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E7%BB%9F%E4%B8%80%E8%B5%84%E6%BA%90%E5%AE%9A%E4%BD%8D%E7%AC%A6&#34;&gt;统一资源定位符-维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年1月13日 首次发布&lt;/li&gt;
+&lt;li&gt;2016年1月14日 更新了域名相关知识&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>断电也能上网！——路由器改造记</title><link>https://xuanwo.io/2015/11/27/surf-with-poweroff/</link><pubDate>Fri, 27 Nov 2015 01:34:33 +0000</pubDate><guid>https://xuanwo.io/2015/11/27/surf-with-poweroff/</guid><description>&lt;h1 id=&#34;介绍&#34;&gt;介绍&lt;/h1&gt;
+&lt;p&gt;前两天我对我们宿舍的路由器进行了小小的改造，使得我们在断电之后也能照常上网。原理非常简单：就是使用充电宝来给路由器供电——因为我们墙上的网口是不会断电的，所以只要解决了路由器没有电的问题，就可以解决断网问题。路由器要求的输入电压为5V，电流为0.3A，恰好跟我们常用的充电宝是一致的，淘宝买一根USB转DV线成功解决问题。&lt;/p&gt;
+&lt;h1 id=&#34;供电方案&#34;&gt;供电方案&lt;/h1&gt;
+&lt;p&gt;我们宿舍现在的路由器供电方案是这样的：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;充电器（A型USB接口）
+||
+充电宝（Micro B型USB接口）
+|内部电路|
+充电宝（A型USB接口）
+||
+路由器（DV接口）
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;达成效果&#34;&gt;达成效果&lt;/h1&gt;
+&lt;p&gt;现在达成的效果是：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;白天：充电器给充电宝充电，充电宝起到了稳流的作用&lt;/li&gt;
+&lt;li&gt;晚上：充电宝为路由器供电&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;优点&#34;&gt;优点&lt;/h2&gt;
+&lt;p&gt;自动循环，自动切换（切换的速度很快，撸啊撸都不会掉线哦~）&lt;/p&gt;
+&lt;h2 id=&#34;缺点&#34;&gt;缺点&lt;/h2&gt;
+&lt;p&gt;充电宝损耗大，不知道我这个已经用了一年的充电宝能坚持多久= =&lt;/p&gt;
+&lt;h1 id=&#34;硬件要求&#34;&gt;硬件要求&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;主流充电宝的电压均为5V1A，有部分充电宝为iPad提供了2A的输出接口，加上充电宝自动限流的功能，所有充电宝这一部分问题不大。
+路由器很显然必须为5V，如果是12V的路由器还需要另外购买升压模块，电流问题不大，充电宝基本都带得动。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;辟谣&#34;&gt;辟谣&lt;/h1&gt;
+&lt;h2 id=&#34;用充电宝网速是不是会变慢&#34;&gt;用充电宝网速是不是会变慢？&lt;/h2&gt;
+&lt;p&gt;实测： &lt;strong&gt;不会&lt;/strong&gt;
+相反的，由于断电之后同时上网的设备数量减少，在延时，最高速率等参数上还有着更加优秀的表现。&lt;/p&gt;
+&lt;h2 id=&#34;用充电宝会导致无法链接wifi&#34;&gt;用充电宝会导致无法链接Wifi？&lt;/h2&gt;
+&lt;p&gt;舍友反馈的，我只说一句： 不要相信玄学。
+路由器换一种供电方式会影响到你电脑上的无线网卡的信号发送？这种说法，我肯定是不相信的- -。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年11月27日 完成初稿&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>我的五样</title><link>https://xuanwo.io/2015/10/08/my-staff/</link><pubDate>Thu, 08 Oct 2015 11:08:16 +0000</pubDate><guid>https://xuanwo.io/2015/10/08/my-staff/</guid><description>&lt;p&gt;此文用以记录自己用过&amp;amp;在用的各类工具及软件，欢迎推荐&lt;/p&gt;
+&lt;h1 id=&#34;pc&#34;&gt;PC&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ThinkPad E531 with Win10 x64&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;聊天&#34;&gt;聊天&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;QQ&lt;/li&gt;
+&lt;li&gt;微信电脑版&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;输入法&#34;&gt;输入法&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;搜狗拼音输入法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;浏览器&#34;&gt;浏览器&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Chrome 64bit&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;下载&#34;&gt;下载&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;迅雷极速版&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;视频&#34;&gt;视频&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Potplayer-64 Bits&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;系统&#34;&gt;系统&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Xshell&lt;/li&gt;
+&lt;li&gt;Xftp&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://xuanwo.io/2015/07/28/listary/&#34;&gt;Listary&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;办公&#34;&gt;办公&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;SumatraPDF&lt;/li&gt;
+&lt;li&gt;XMind 7&lt;/li&gt;
+&lt;li&gt;Microsoft Office 2016&lt;/li&gt;
+&lt;li&gt;Evernote&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;游戏&#34;&gt;游戏&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;英雄联盟&lt;/li&gt;
+&lt;li&gt;龙翼编年史&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;网络&#34;&gt;网络&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;百度云管家&lt;/li&gt;
+&lt;li&gt;Shadowsocks&lt;/li&gt;
+&lt;li&gt;Cow&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;音乐&#34;&gt;音乐&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;QQ音乐&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;编程&#34;&gt;编程&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://xuanwo.io/2014/06/05/sublime-text-3-IDE/&#34;&gt;Sublime Text 3&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Microsoft Visual Studio&lt;/li&gt;
+&lt;li&gt;JetBrains CLion&lt;/li&gt;
+&lt;li&gt;JetBrains PyCharm&lt;/li&gt;
+&lt;li&gt;JetBrains WebStorm&lt;/li&gt;
+&lt;li&gt;JetBrains IDEA&lt;/li&gt;
+&lt;li&gt;Android Studio&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;解压刻录&#34;&gt;解压刻录&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;WinRAR&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;迷之工具&#34;&gt;迷之工具&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;HashCalc&lt;/li&gt;
+&lt;li&gt;Git&lt;/li&gt;
+&lt;li&gt;QTranslate&lt;/li&gt;
+&lt;li&gt;Vagrant&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年10月08日 首次发布&lt;/li&gt;
+&lt;li&gt;2015年11月27日 11月软件更新&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>青云参观计划</title><link>https://xuanwo.io/2015/02/18/event-qingcould-plan/</link><pubDate>Wed, 18 Feb 2015 22:50:33 +0000</pubDate><guid>https://xuanwo.io/2015/02/18/event-qingcould-plan/</guid><description>
+&lt;h1 id=&#34;青云是啥&#34;&gt;青云是啥？&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.36kr.com/p/204836.html&#34;&gt;想做中国的AWS：IaaS提供商QingCloud按“秒”计费实现弹性特征，瞄准中国的DevOps开发市场&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.csdn.net/article/2013-08-20/2816631-IaaS-QingCloud&#34;&gt;国内创业公司QingCloud的魄力：做一个世界级的IaaS服务&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://capital.chinaventure.com.cn/11/7/1389263145.shtml&#34;&gt;青云B轮获2000万美元VC的背后逻辑：用技术超越巨头&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;个人认为对其的了解有助与我们信息管理专业的发展，所以尝试着联系了一下青云的有关人士。后来发现青云那边的人非常nice，非常热心，非常爽快的同意了我们的请求，所以开学后不久我们就可以出发啦。&lt;/p&gt;
+&lt;h1 id=&#34;青云在哪&#34;&gt;青云在哪？&lt;/h1&gt;
+&lt;p&gt;地址：北京市朝阳区北苑路甲13号北辰新纪元大厦2号楼1503
+公交路线：地铁13号线 → 地铁2号线 → 地铁5号线全程约1小时&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;五道口
+3站
+乘坐 地铁13号线(西直门方向), 在 西直门站 下车
+420米
+站内换乘 地铁2号线(内环)
+4站
+乘坐 地铁2号线(内环), 在 雍和宫站 下车
+160米
+站内换乘 地铁5号线(天通苑北方向)
+6站
+乘坐 地铁5号线(天通苑北方向), 在 北苑路北站 下车(A2西北口出)
+350米
+步行至 北辰新纪元2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;去看什么&#34;&gt;去看什么？&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;公司参观&lt;/li&gt;
+&lt;li&gt;员工分享个人经历&lt;/li&gt;
+&lt;li&gt;CEO分享关于云计算的理解&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;啥时候去&#34;&gt;啥时候去？&lt;/h1&gt;
+&lt;p&gt;2015年3月19日14点&lt;/p&gt;
+&lt;h1 id=&#34;有啥收获&#34;&gt;有啥收获？&lt;/h1&gt;
+&lt;p&gt;这个根据看到了什么而定，不过涨姿势肯定是有的~
+&lt;em&gt;我想看看真正的服务器长啥样= =&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年02月18日 发起活动，修正行文格式。&lt;/li&gt;
+&lt;li&gt;2015年03月18日 补充活动更新信息。&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

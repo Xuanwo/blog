@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Rollover Live on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/series/rollover-live/</link><description>Recent content in Rollover Live on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 19 Feb 2019 06:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/series/rollover-live/index.xml" rel="self" type="application/rss+xml"/><item><title>翻车实况第 1 期</title><link>https://xuanwo.io/2019/02/19/rollover-1st/</link><pubDate>Tue, 19 Feb 2019 06:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/02/19/rollover-1st/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;今天翻车了吗？翻了！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;本次翻车的主角是我小老婆：ThinkPad X1 Carbon，在之前的&lt;a href=&#34;https://xuanwo.io/2018/05/16/thinkpad-x1-carbon-6th/&#34;&gt;开箱手记&lt;/a&gt;曾经爆过照片。用了几个月都没有什么太大的问题，但是自从我春节回家一趟之后，我的 x1 开始了它的频频翻车之旅 = =&lt;/p&gt;
+&lt;h2 id=&#34;大江苏魔法伤害&#34;&gt;大江苏魔法伤害&lt;/h2&gt;
+&lt;p&gt;春节回家之后，电脑就一直放在透气性不大好的背包里面。拿出来的时候发现整个电脑的表面都有一层薄薄的水汽，甚至还能找到一点微妙的水墨画的感觉：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;water.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;想着 ThinkPad 种种键盘洒水问题不大的传说，我完全没有把这点水汽当回事。打开电脑，连上网络，&lt;code&gt;yay&lt;/code&gt; 一把梭。发现内核升级了，随手重启一下，结果翻车了：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;failed-to-start.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这还是我第一次遇到这样的问题，从报错上来看应该跟我的更新没有关系，可能是硬盘有了一些奇怪的问题，中间有些 IO 全部失败了，导致好多服务都起不来了。虽然觉得纳闷，但是还是觉得先重启一下看看，确认一下是否稳定复现。结果问题更加严重了，在滴的一声之后，我的电脑完全没有引导，直接进入了空白的 Boot Menu 页：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;empty-boot.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;噫，这是我整个硬盘都挂掉了的节奏啊。当我准备掏出 archiso 看看还没有救的时候，有人找我有事情，于是我把电脑合上走开了。半个小时回来之后，按下电源键，电脑居然直接正常启动了 = =，我拿着 U 盘一脸懵逼。发生了什么？难道刚才启动不了是因为在启动的一瞬间，硬盘进入了量子态？放置 play 了一会儿之后，它又自己回来了？薛定谔的硬盘？？？&lt;/p&gt;
+&lt;p&gt;稍微琢磨了一下之后，把问题归咎于江苏水汽比较重，电脑长期放在包里面，导致里面的某些部件出现了问题，在开放环境放了一会儿之后就自己好了。（不管你信不信，反正我信了）&lt;/p&gt;
+&lt;h2 id=&#34;帝都的静电攻击&#34;&gt;帝都的静电攻击&lt;/h2&gt;
+&lt;p&gt;我天真的以为翻车事件已经结束了，然而轮胎打滑通常只是真正车祸的前奏（&lt;/p&gt;
+&lt;p&gt;返工的第二天，我普通的起床、普通的上班、普通的进入办公室、普通的坐下、普通的升级系统、普通的重启、普通的接上显示器，普通的，等一下！我的显示器咋不亮了！在那一瞬间，我的大脑瞬间渲染出无数剧情： &lt;em&gt;电脑坏了，送去维修，错过用户大单，被公司开除，孤单一人行走在冬夜空档的大街上，发誓再也不滚系统了。。。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;摇摇头，开始仔细研究发生了什么。&lt;/p&gt;
+&lt;p&gt;显卡是 Intel 提供的集成显卡，驱动用的是 Kernel Mode Setting。正常情况下如果我接上了外接显示器，kernel 会响应并接管这个设备的显示，就像下面这个图一样：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;kms.svg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;每个显示输出设备的连接状态都会都会保存为一个形如 &lt;code&gt;/sys/class/drm/card0-HDMI-A-1/status&lt;/code&gt; 的文件，archwiki 上提供了一个命令来查看电脑上所有输出设备的状态：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; p in /sys/class/drm/*/status; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#bb60d5&#34;&gt;con&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;p&lt;/span&gt;%/status&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;}&lt;/span&gt;; &lt;span style=&#34;color:#007020&#34;&gt;echo&lt;/span&gt; -n &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#bb60d5&#34;&gt;con&lt;/span&gt;#*/card?-&lt;span style=&#34;color:#70a0d0;font-style:italic&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;: &amp;#34;&lt;/span&gt;; cat &lt;span style=&#34;color:#bb60d5&#34;&gt;$p&lt;/span&gt;; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;done&lt;/span&gt;
+DP-1: disconnected
+DP-2: disconnected
+eDP-1: connected
+HDMI-A-1: disconnected
+HDMI-A-2: disconnected&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;可以看出来，除了内置的显示屏 &lt;code&gt;eDP-1&lt;/code&gt; 没问题之外，其他的接口都是断开状态的，尽管我的线已经接上去了。噫，照这么看，我的 HDMI 和 Type-C 口都凉了啊，难道只能送修了么？&lt;/p&gt;
+&lt;p&gt;不要放弃治疗，可能是显示器坏了呢！我把同事的电脑拿过来插上发现没有问题；而我的电脑接他的显示器则同样是显示不出来。凉了？不，我还不能就这样放弃治疗，说不定是底裤 D 升级的时候又搞崩了什么东西呢？我选择回滚了一波 systemd，重启，奇迹没有发生。说不定是内核有问题呢？我选择回滚了一波内核，重启，奇迹仍然没有发生。我叹了口气，果然，玄学是不存在的，我的电脑凉了。&lt;/p&gt;
+&lt;p&gt;我都已经放弃治疗准备送修了，我的朋友 P 坚持让我搞个 PE 什么的看看，说不定接口还没坏。反正也不差那么几分钟，为了让我朋友，更为了让我自己死心，我觉得再进行最后一次尝试。我掏出了我的 Archiso 插上，开机，插上 HDMI 线，卧槽，显示器亮了！接口没坏！&lt;/p&gt;
+&lt;p&gt;这可真是&lt;code&gt;踏破铁鞋无觅处，柳暗花明又一村&lt;/code&gt;，我感到自己的人生再次充满了希望，我的大脑中再次闪过无数画面：&lt;em&gt;电脑修好了，完成了后端大规模重构，性能提升 150%，成为了年度优秀员工，找到了三次元老婆，走向人生巅峰。。。&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;咳咳咳，冷静。现在的情况是已经排除了是硬件问题，我决定通过 Archlinux Rollback Machine 把电脑回滚到昨天。拔掉 U 盘，开机，我鬼使神差的把线直接接到了电脑上，卧槽，显示器亮了！所以说，既不是硬件问题，也不是软件问题？那还能是啥问题，人品问题么？&lt;/p&gt;
+&lt;p&gt;emmmmmm，仔细想了一下，我觉得不如解释成静电问题，插上 USB 的时候释放掉了机器内部的静电，然后所有的接口都恢复正常了。（不管你信不信，反正我是真的信了）&lt;/p&gt;
+&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
+&lt;p&gt;以上就是本次的翻车实录~&lt;/p&gt;
+&lt;h2 id=&#34;引用资料&#34;&gt;引用资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.kernel.org/doc/html/v4.15/gpu/drm-kms.html&#34;&gt;Kernel Mode Setting (KMS)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/kernel_mode_setting#Forcing_modes&#34;&gt;Kernel mode setting - Archwiki&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

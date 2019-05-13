@@ -1,0 +1,805 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Database on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/database/</link><description>Recent content in Database on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 05 Jan 2019 05:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/database/index.xml" rel="self" type="application/rss+xml"/><item><title>随缘分享第 2 期</title><link>https://xuanwo.io/2019/01/05/share-with-luck-2nd/</link><pubDate>Sat, 05 Jan 2019 05:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/01/05/share-with-luck-2nd/</guid><description>&lt;p&gt;万万没有想到我也有一周双更的时候（，素材攒的太多了，赶紧分享一下~&lt;/p&gt;
+&lt;h2 id=&#34;今天你翻车了吗&#34;&gt;今天你翻车了吗？&lt;/h2&gt;
+&lt;h3 id=&#34;fwupd-翻车&#34;&gt;fwupd 翻车&lt;/h3&gt;
+&lt;p&gt;说起来用 Arch 也有一段时间了，大的翻车没遇到过，小的翻车倒是经常遇到。1 月 2 号晚上睡前日常更新，发现更新了 fwupd 1.2.2 之后就顺手试了一下，结果发现命令行直接 timeout 了，想着可能是我升级之后还没有重启服务，然后 &lt;code&gt;systemd restart fwupd&lt;/code&gt; 结果报错了，于是查了下日志：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;-- Unit fwupd.service has begun starting up.
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon fwupd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;7066&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Failed to get PCR0s: missing executable tpm2_pcrlist in PATH
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon fwupd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;7066&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Failed to load engine: Failed to prepare SQL: no such column: protocol
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: fwupd.service: Main process exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;code&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;exited, &lt;span style=&#34;color:#bb60d5&#34;&gt;status&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;/FAILURE
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: fwupd.service: Failed with result &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;exit-code&amp;#39;&lt;/span&gt;.
+Jan &lt;span style=&#34;color:#40a070&#34;&gt;02&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;00&lt;/span&gt;:09:21 thinkpad-x1-carbon systemd&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;: Failed to start Firmware update daemon.
+-- Subject: Unit fwupd.service has failed&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;emmmmm，&lt;code&gt;no such column: protocol&lt;/code&gt; ？这看着是 DB 没做兼容啊，估计是上游翻车了，在 archcn 的群里问了一声没什么回应，于是先睡了，明天再说。&lt;/p&gt;
+&lt;p&gt;第二天早上看了下，已经有人在 arch 这边提了 BUG 了：&lt;a href=&#34;https://bugs.archlinux.org/task/61241?project=5&amp;amp;string=fwupd&#34;&gt;FS#61241 - fwupdmgr Failed to activate service&lt;/a&gt;，但是我感觉应该不是打包的问题，于是直接给上游提了个 BUG：&lt;a href=&#34;https://github.com/hughsie/fwupd/issues/909&#34;&gt;After upgrade to 1.2.2, fwupd failed to start for SQL error&lt;/a&gt;。作者 &lt;a href=&#34;https://github.com/hughsie&#34;&gt;hughsie&lt;/a&gt; 是红帽的员工，维护着不少知名的开源项目。&lt;/p&gt;
+&lt;p&gt;响应速度还算挺快的，考虑我们中间还隔着时差，按照他的要求提供了 &lt;code&gt;pending.db&lt;/code&gt; 之后没多久就加了个修复的 &lt;a href=&#34;https://github.com/hughsie/fwupd/commit/48106951c814f0bee201845fc1cc9cbb0f143faf&#34;&gt;commit&lt;/a&gt;，自行打包了一个 fwupd 测试了一下，确认工作正常并回复了作者。历时大概三天左右，这个 BUG 被修复了。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;说起来，现在嵌入式 DB 领域好像除了 SQLite 之外就没有一个能打的支持 SQL 的选手了啊？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;gitea-升级翻车&#34;&gt;gitea 升级翻车&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;改配置已经很糟心了，这 gitea 甚至还要改运行的用户 = =，我觉得这样不行&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;一波升级之后，gitea 刷了一大波说明出来：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;warning: /etc/gitea/app.ini installed as /etc/gitea/app.ini.pacnew
+gitea now uses its own user/group instead of the git ones.
+Ownership of /var/lib/gitea tree has been changed accordingly.
+You need to update your /etc/gitea/app.ini file to change the
+RUN_USER variable at the top.
+Next step is fixing the SSH configuration. If you have:
+AllowUsers git
+in /etc/ssh/sshd_config, you need to change that to gitea.
+Then restart sshd.service.
+You will need to tell all your users that they have to change
+git@ to gitea@ in their repos clones using git remote set-url.
+If you use a PostgreSQL DB upon Unix socket, you need to fix
+your &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;database&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; configuration and switch USER to gitea.
+Then, you need to change it also in /var/lib/data/pg_hba.conf.
+Finally, as postgres user, run psql and inside it type:
+ALTER USER git RENAME TO gitea;
+&lt;span style=&#34;color:#4070a0;font-weight:bold&#34;&gt;\q&lt;/span&gt;
+Then restart postgresql.service.
+In all cases, you &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;then&lt;/span&gt; need to reload systemd units and
+restart gitea.service.&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;按照要求改了配置，重启了服务。服务是好了- -，但是所有 clone 的 git url 都要改了，有点麻烦。感觉这个变动就很坑了，作为一个后端服务，内部的配置改了就改了，也就是维护起来麻烦一点，但是对外（对用户）暴露的东西不能乱动。得亏我这个 gitea 就自己用用，要是真的有别人在用的话，还得群发个邮件让他们把本地的 remote URL 都改一遍，坑，gitea 好感度减 10。&lt;/p&gt;
+&lt;h3 id=&#34;apfs-翻车&#34;&gt;APFS 翻车&lt;/h3&gt;
+&lt;p&gt;在一个风平浪静的早晨，惠老师突然在水群 Po 了一张图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;rm-failed.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这是啥操作，删除文件提示没空间？&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;open-terminal-failed.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Terminal 也打不开了，2333。&lt;/p&gt;
+&lt;p&gt;后来了解情况的群友解释了一下原因，其实这是两个问题：&lt;/p&gt;
+&lt;p&gt;第一个是采用 CoW 的文件系统固有的问题。我们都知道 CoW 的基本原理是在对数据进行修改的时候，不会直接在原来的数据位置上进行操作，而是重新找个位置修改。那么在磁盘已经完全满了之后就可能会出现问题，问题的起因有两种说法：第一是在删除的时候需要在一个空闲的位置写入一个新的标记，表示这个文件被删除了；第二是文件系统之前有 snapshot，被删除的文件还在被别的 snapshot 引用着，所以不能直接删除，需要加一个标记。所以类似机制的文件系统都可能会出现这样的问题，包括 ZFS 和 Btrfs。&lt;/p&gt;
+&lt;p&gt;第二个是 macOS 在磁盘系统全满的情况下的行为是不可预测的行为，没人知道会发生什么。所以会出现 Terminal 打不开，Finder 打开直接卡住这种事情。&lt;/p&gt;
+&lt;p&gt;最后惠老师进入恢复模式，执行了硬盘急救，最后多了一丢丢，大概 500MB 的空间，终于可以把文件删掉了（&lt;/p&gt;
+&lt;h2 id=&#34;无意义以及其存在的意义&#34;&gt;无意义以及其存在的意义&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;conway-eeeee.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;前一段时间疯狂刷屏的 &lt;a href=&#34;https://github.com/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee&#34;&gt;e98e&lt;/a&gt; 在整个项目被 Archive 进入 read-only 之后热潮消退了。在最开始的时候我非常反感，感觉自己受到了精神污染，甚至想要举报一波，然而并没有找到合适的理由。现在回过头来想一想这个事情，感觉心情非常复杂，总是会去想是不是自己做错了什么，或者说当我在一个公共场合（比如 Telegram 的群中）轻蔑的说某样事情 &lt;strong&gt;无聊&lt;/strong&gt;，&lt;strong&gt;没意义&lt;/strong&gt; 的时候，我是不是真的明白我在说什么。&lt;/p&gt;
+&lt;p&gt;这个问题我琢磨了很久，最后感觉它是由一组复杂的问题组成的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对一个事务的意义判断究竟是谁来做的？&lt;/li&gt;
+&lt;li&gt;无意义的事务有没有存在的意义？&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;不知道是不是受到教育环境的影响，我总是会倾向于去做 &lt;code&gt;有意义&lt;/code&gt; 的事情。那 &lt;code&gt;有意义&lt;/code&gt; 又是意味着什么呢，大多数时候它要 &lt;code&gt;有价值&lt;/code&gt;，而更大多数时候可以概括为 &lt;code&gt;有用&lt;/code&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;玩游戏，就不能浪费时间，玩 1 分钟就要获得 1 分钟的快乐&lt;/li&gt;
+&lt;li&gt;做开源项目就得要出名，要有 Star，要有人关注，要有人用在生产环境上&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;所以说，世界上到底有没有没意义的事情的呢？可能只存在&lt;strong&gt;我认为&lt;/strong&gt;没意义的事情吧。&lt;/p&gt;
+&lt;p&gt;这些问题我可能是想不清楚了，只能一直这么纠结下去，以后遇到所谓的没意义的东西，我大概会选择保持沉默吧：“我觉得你做的事情没意义，但是我尊重你做下去的权利”。&lt;/p&gt;
+&lt;h2 id=&#34;有啥有意思的东西嘛&#34;&gt;有啥有意思的东西嘛？&lt;/h2&gt;
+&lt;p&gt;2018 年最后入手的东西是 OnePlus 6T 和一把宜家的转椅。&lt;/p&gt;
+&lt;p&gt;这么多年过去了，安卓的变化比我想象的还要大，特别是在一加 Oxygen OS 的支持下，感觉到了前所未有的舒畅。虽然国内的生态一如既往的糟糕，但是大多数应用都能用，某些实在流氓或者 Google Play 中没有的应用也直接扔到了 Work Profile 里面。现在基本上是晚上充满电上床看小说，然后第二天直接带去上班，到晚上回家还能有 40% ~ 50% 的电量，已经完全够用了，And 快充也非常给力。用了几个星期，完全不怀念我的 iPhone。&lt;/p&gt;
+&lt;p&gt;之前用的转椅是前同事留在房子里面的，一直凑或用，但是有一天实在忍不了了，决定换一把新的转椅。在朋友 P 的安利下入了宜家的 &lt;a href=&#34;https://www.ikea.cn/cn/zh/catalog/products/50137208/&#34;&gt;MARKUS 马库斯&lt;/a&gt; 转椅，深灰色那款只要 999 元，加上运费总共 1068 元。花了点时间拼了起来，一坐上去整个人就不想起来了，实在是太舒服了。腰部和头部还有手臂都被正好支撑起来，终于不会写着代码感觉自己整个脖子都僵住了。&lt;/p&gt;
+&lt;p&gt;这个椅子支持上下大概 10 cm，向后 30 度左右的调节。配合自己之前买的显示器支架，可以舒舒服服的躺着看动漫，打游戏，生活美滋滋。如果有想换椅子的同学无比留意下~&lt;/p&gt;
+&lt;p&gt;最近还看到一个好玩的 issue： &lt;a href=&#34;https://github.com/antirez/redis/issues/3909&#34;&gt;https://github.com/antirez/redis/issues/3909&lt;/a&gt; ，一个人不小心发了个 issue，然后解释道：“Cat walked over the keyboard sorry guys.”，引发了一场评论区的狂欢。我觉得最好玩的回复是项目的作者回复的：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Observing the keys pressed we can assume the cat was diagonally exploring the keyboard, probably with the front paws oriented towards the &amp;ldquo;/=-[&amp;rdquo; part of the keyboard (right/bottom) since there is more variability there, compared to the (maybe) rear paw staying near the number &amp;ldquo;3&amp;rdquo; (and the other rear paw probably outside the keyboard, in the upper part). However the size of the cat should be very small in that case, or the size of the keyboard should be very large, if we are not willing to assume a reduced-length cat because of attack position or alike.&lt;/p&gt;
+&lt;p&gt;Btw if you could report the &lt;code&gt;INFO&lt;/code&gt; output of your Redis instance, we may be able to perform more educated guesses about the conditions of your cat.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;集段子与安利于一身，是值得我学习的楷模~&lt;/p&gt;
+&lt;h2 id=&#34;最近又看了啥项目&#34;&gt;最近又看了啥项目？&lt;/h2&gt;
+&lt;p&gt;首先简单介绍一下这个 &lt;code&gt;好玩&lt;/code&gt; 和 &lt;code&gt;有用&lt;/code&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;好玩&lt;/code&gt;：是说 &lt;strong&gt;我&lt;/strong&gt; 觉得这个项目很好玩，有意思
+&lt;code&gt;有用&lt;/code&gt;：是说 &lt;strong&gt;我&lt;/strong&gt; 觉得这个项目能派上用场&lt;/p&gt;
+&lt;p&gt;如你所见，只有三个组合，因为又不好玩又没用的项目写它干啥呢？&lt;/p&gt;
+&lt;h3 id=&#34;好玩又有用&#34;&gt;好玩又有用&lt;/h3&gt;
+&lt;h4 id=&#34;vegeta&#34;&gt;Vegeta&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/tsenart/vegeta&#34;&gt;https://github.com/tsenart/vegeta&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;打开这个项目的时候被正面冲过来的贝吉塔吓了一跳，当时就记住了它，然后才反应过来项目名字就是用的贝吉塔的英文：Vegeta。大概寓意着这个项目跟超级塞亚人一样强悍吧，哈哈。&lt;/p&gt;
+&lt;p&gt;这是一个用来做 HTTP 负载测试的库和工具，既可以在代码中调用，也可以直接作为工具使用。项目维护的还不错，以后会考虑用它。&lt;/p&gt;
+&lt;h4 id=&#34;nats&#34;&gt;NATS&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://nats.io/&#34;&gt;https://nats.io/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;NATS 是一个云原生消息系统，是一个 CNCF 项目。它的消息格式很有意思，是一个类似于 Redis 的 text based protocol，我个人很喜欢，简单才是美啊。大概也得益于这么简单的 Protocol 设计，它的吞吐量很大，按照项目给出的评测，它的吞吐量是 Kafka 的两倍，RabbitMQ 的十倍。&lt;/p&gt;
+&lt;p&gt;项目的设计目标给的非常清晰：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Highly performant (fast)&lt;/li&gt;
+&lt;li&gt;Always on and available (dial tone)&lt;/li&gt;
+&lt;li&gt;Extremely lightweight (small footprint)&lt;/li&gt;
+&lt;li&gt;Support for multiple qualities of service (including guaranteed “at-least-once” delivery with NATS Streaming)&lt;/li&gt;
+&lt;li&gt;Support for various messaging models and use cases (flexible)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果有合适的场景，我大概会考虑玩一玩~&lt;/p&gt;
+&lt;h4 id=&#34;uncaptcha2&#34;&gt;uncaptcha2&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/ecthros/uncaptcha2&#34;&gt;https://github.com/ecthros/uncaptcha2&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这是一个今天才看到的段子，思路很有意思，就是输出 Google reCAPTCHA 的语音验证码，然后用 Google 的语音转文字 API 来做识别，然后再填回去，据说识别率还非常不错。&lt;/p&gt;
+&lt;p&gt;哈哈哈，这个真的是现实版的以子之矛，攻子之盾了。&lt;/p&gt;
+&lt;h4 id=&#34;badger&#34;&gt;badger&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/dgraph-io/badger&#34;&gt;https://github.com/dgraph-io/badger&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这是一个很早之前看过的项目了，但是有两个比较有意思的事情：&lt;/p&gt;
+&lt;p&gt;一个是有奖征集数据丢失的场景：&lt;a href=&#34;https://github.com/dgraph-io/badger/issues/601&#34;&gt;Prove that Badger loses data&lt;/a&gt;，只要你能够按照要求给出可复现数据丢失的步骤，就能获得 $1337 。感兴趣的童鞋可以去试试。&lt;/p&gt;
+&lt;p&gt;另一个是 badger 增加了一组 &lt;a href=&#34;https://github.com/dgraph-io/badger/pull/577&#34;&gt;Jepsen-style bank test&lt;/a&gt;，会在他们内部的 CI 平台上运行，可以看&lt;a href=&#34;https://teamcity.dgraph.io/viewType.html?buildTypeId=Badger_BankTest&#34;&gt;现场直播&lt;/a&gt;。&lt;a href=&#34;https://jepsen.io/&#34;&gt;Jepsen&lt;/a&gt; 我是在看 PingCAP 的相关技术分享时候看到的，Jepsen 是一个分布式系统验证的框架，已经成功发现了很多系统的 BUG。&lt;/p&gt;
+&lt;p&gt;之前有个项目技术选型的时候没用 Badger，之后大概可以考虑一下。&lt;/p&gt;
+&lt;p&gt;BTW，他们的项目管理似乎有些问题，依赖管理没做，完全靠 go get，Makefile 也没有，新人想要参与开发感觉是一脸懵逼。Windows 平台上的 CI 一直都是挂的，我还提了个 PR 修了其中的一个：&lt;a href=&#34;https://github.com/dgraph-io/badger/pull/661&#34;&gt;test: Fix TestDropReadOnly failed on windows&lt;/a&gt;，在我这个 PR 之后他们又 Fix 了不少 windows 上的测试，估计再过一段时间就能恢复正常了。他们是怎么忍下去的- -，我完全接受不了一个项目 Master 分支上的 CI 都是挂的，那还不如去掉呢。。。&lt;/p&gt;
+&lt;h3 id=&#34;有用不好玩&#34;&gt;有用不好玩&lt;/h3&gt;
+&lt;h4 id=&#34;gradle&#34;&gt;gradle&lt;/h4&gt;
+&lt;p&gt;Adaptable, fast automation for all &lt;a href=&#34;https://gradle.org&#34;&gt;https://gradle.org&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;以前只是听做 Java 开发同事天天吐槽 gradle，以为只是 Java 生态下的一个工具，定位类似于 npm for node.js，但是今天看了项目才知道原来它的目标是构建自动化并且要支持多语言的开发。&lt;/p&gt;
+&lt;p&gt;这个自动化跟我想要的不太一样。&lt;/p&gt;
+&lt;h4 id=&#34;cloudevents&#34;&gt;cloudevents&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://cloudevents.io/&#34;&gt;https://cloudevents.io/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;有一个定义云消息的规范，还是基于 JSON 的，看起来大概是这个样子：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;specversion&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;0.2&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;type&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;com.github.pull.create&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;source&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://github.com/cloudevents/spec/pull/123&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;id&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;A234-1234-1234&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;time&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;2018-04-05T17:31:00Z&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;comexampleextension1&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;value&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;comexampleextension2&amp;#34;&lt;/span&gt; : {
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;othervalue&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;5&lt;/span&gt;
+},
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;contenttype&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;text/xml&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;data&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;much wow=\&amp;#34;xml\&amp;#34;/&amp;gt;&amp;#34;&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;无爱。&lt;/p&gt;
+&lt;h3 id=&#34;好玩但没用&#34;&gt;好玩但没用&lt;/h3&gt;
+&lt;h4 id=&#34;lsix&#34;&gt;lsix&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/hackerb9/lsix&#34;&gt;https://github.com/hackerb9/lsix&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;一个为图片设计的 ls，emmm，感觉没有啥特别的用处，虽然确实挺好玩的就是了。&lt;/p&gt;
+&lt;h4 id=&#34;ungoogled-chromium&#34;&gt;ungoogled-chromium&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/Eloston/ungoogled-chromium&#34;&gt;https://github.com/Eloston/ungoogled-chromium&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;清真版本的 Chromium，去掉了 Google 相关的代码，据说非常清真，但是我是 Google 的粉丝，甚至电脑上用的就是 Chrome - -，因此就是围观一下。&lt;/p&gt;
+&lt;h4 id=&#34;citybound&#34;&gt;citybound&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/citybound/citybound&#34;&gt;https://github.com/citybound/citybound&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;一个开源版本的城市模拟，感觉还比较早起，只有一些雏形，还玩不起来，还需要再观察观察。引擎本身是用 rust 写的，前端很有意思，用的是一个叫做 &lt;a href=&#34;https://webflow.com/&#34;&gt;webflow&lt;/a&gt; 产品，交互比较酷炫。可能我这样的前端白痴也有救了？&lt;/p&gt;
+&lt;h2 id=&#34;说点坑爹事情大家开心开心&#34;&gt;说点坑爹事情大家开心开心&lt;/h2&gt;
+&lt;p&gt;偶然发现Chrome 砍掉了 &lt;code&gt;chrome://net-internals/#events&lt;/code&gt; 这个功能。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;坑爹啊！&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The net-internals events viewer and related functionality has been removed. Please use chrome://net-export to save netlogs and the external catapult netlog_viewer to view them.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;现在想要查看 Chrome 的网络交互细节只能打开 &lt;code&gt;chrome://net-export&lt;/code&gt; 点击开始导出，操作完了再结束导出，最后用一个外部工具导入再查看了。&lt;/p&gt;
+&lt;p&gt;Hugging you, Google!&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;以上就是本期随缘分享的全部内容~&lt;/p&gt;</description></item><item><title>VS2015连接Oracle数据库</title><link>https://xuanwo.io/2016/01/03/vs-oracle-11g/</link><pubDate>Sun, 03 Jan 2016 15:31:32 +0000</pubDate><guid>https://xuanwo.io/2016/01/03/vs-oracle-11g/</guid><description>&lt;h1 id=&#34;开发环境&#34;&gt;开发环境&lt;/h1&gt;
+&lt;p&gt;宿主机：Win10 + VS2015 + ODP.Net for VS2015
+虚拟机：Win7 + Oracle 11g + 桥接&lt;/p&gt;
+&lt;h1 id=&#34;配置odp-net&#34;&gt;配置ODP.Net&lt;/h1&gt;
+&lt;p&gt;首先下载 &lt;a href=&#34;http://www.oracle.com/technetwork/topics/dotnet/downloads/odacmsidownload-2745497.html&#34;&gt;Oracle Developer Tools for Visual Studio 2015&lt;/a&gt; ，下载此文件需要注册Oracle社区账号并接受相关的协议，此文件提供了以下组件：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Oracle Developer Tools for Visual Studio 12.1.0.2.4&lt;/li&gt;
+&lt;li&gt;Oracle Data Provider for .NET 4 12.1.0.2.0&lt;/li&gt;
+&lt;li&gt;Oracle Providers for ASP.NET 4 12.1.0.2.0&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下载完成后运行MSI安装程序进行安装，安装完成后会自动注册VS2015的相关插件，重新启动VS2015后将会看到Oracle的相关命令，比如SQL *PLUS支持等。同时添加数据库时也能看到相应的选项。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ODP.Net支持所有Oracle版本，因此下载时只需要注意VS的版本即可。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;配置tnsnames-ora&#34;&gt;配置tnsnames.ora&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ODP.Net默认使用安装目录下的&lt;code&gt;tnsnames.ora&lt;/code&gt;，若安装目录在Program Files下，可能会遇到无权限等问题，此时使用管理员权限打开命令行，切换到对应目录并使用notepad编辑。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;复制服务器端的tnsnames.ora文件内容，或者自己手动编辑，格式如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;&#34;&gt;数据源别名&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;
+(DESCRIPTION &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;
+(ADDRESS &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (PROTOCOL &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; TCP)(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;HOST&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;&#34;&gt;主机名或&lt;/span&gt;IP&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;)(PORT &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;&#34;&gt;端口号&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;))
+(CONNECT_DATA &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;
+(SERVER &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; DEDICATED)
+(SERVICE_NAME &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;&#34;&gt;数据库服务名&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt;)
+)
+)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;添加数据库&#34;&gt;添加数据库&lt;/h1&gt;
+&lt;p&gt;打开&lt;code&gt;工具&lt;/code&gt;-&lt;code&gt;连接到数据库&lt;/code&gt;，数据源修改为&lt;code&gt;Oracle数据库&lt;/code&gt;下的&lt;code&gt;ODP.NET,托管驱动程序&lt;/code&gt;，然后点击&lt;code&gt;确定&lt;/code&gt;，打开&lt;code&gt;添加连接&lt;/code&gt;窗口。
+&lt;img src=&#34;https://xuanwo.io/imgs/develop/add-database.png&#34; alt=&#34;添加连接&#34; /&gt;
+填写用户名，密码并选择数据源，然后测试连接，成功的话说明已经连通，点击确定即可。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;使用虚拟机搭建数据库的额外Tips
+根据某网友分析，Oracle的监听器在通过1521端口连接后，会开启另外一个新的随机端口进行数据通讯，因此使用NAT方式虚拟网卡可能会导致连接失败。这种情况下，请使用桥接方式虚拟网卡，并在&lt;code&gt;net manager&lt;/code&gt;中将&lt;code&gt;loaclhost&lt;/code&gt;修改为虚拟机当前的IP。重启监听服务后，再试。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;连接数据库并使用&#34;&gt;连接数据库并使用&lt;/h1&gt;
+&lt;h2 id=&#34;连接数据库&#34;&gt;连接数据库&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-vb&#34; data-lang=&#34;vb&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; oradb &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#902000&#34;&gt;String&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;User ID=system;Password=123456;Data Source=lol&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; conn &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;New&lt;/span&gt; OracleConnection(oradb)
+conn.Open()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; sql &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#902000&#34;&gt;String&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;create table xxx&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; sqlCom &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;New&lt;/span&gt; OracleCommand
+sqlCom.CommandText &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; sql
+sqlCom.Connection &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; conn
+sqlCom.ExecuteNonQuery()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;查询数据&#34;&gt;查询数据&lt;/h2&gt;
+&lt;p&gt;成功配置数据源之后，只需要向界面上拖动&lt;code&gt;DataGridView&lt;/code&gt;，并进行相关配置，选择自己需要的表即可。&lt;/p&gt;
+&lt;h2 id=&#34;插入图片的正确姿势&#34;&gt;插入图片的正确姿势&lt;/h2&gt;
+&lt;p&gt;图片作为二进制数据无法直接拼凑出SQL命令，我们需要使用&lt;code&gt;OracleCommand&lt;/code&gt;自带的&lt;code&gt;Parameters&lt;/code&gt;功能。在SQL命令中用&lt;code&gt;:photo&lt;/code&gt;来代表一个参量，然后使用&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-vb&#34; data-lang=&#34;vb&#34;&gt;sqlCom.Parameters.Add(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;photo&amp;#34;&lt;/span&gt;, OracleDbType.Blob, imgData.Length)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;来分别指定这个参量的类型和所占空间大小&lt;/p&gt;
+&lt;p&gt;最后使用&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-vb&#34; data-lang=&#34;vb&#34;&gt;sqlCom.Parameters(0).Value &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; imgData&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;来指定这个参量的值。&lt;/p&gt;
+&lt;p&gt;整个插入图片过程的代码如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-vb&#34; data-lang=&#34;vb&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; conn &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;New&lt;/span&gt; OracleConnection(oradb)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; imgData(0) &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#902000&#34;&gt;Byte&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; ms &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;New&lt;/span&gt; System.IO.MemoryStream
+PictureBox1.BackgroundImage.Save(ms, PictureBox1.BackgroundImage.RawFormat)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;ReDim&lt;/span&gt; imgData(ms.Length &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt; 1)
+ms.Read(imgData, 0, ms.Length)
+ms.Close()
+conn.Open()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; sql &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#902000&#34;&gt;String&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;insert into hero values&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;(&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt; TextBox1.Text &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;:photo&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;)&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;Dim&lt;/span&gt; sqlCom &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;As&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;New&lt;/span&gt; OracleCommand
+sqlCom.CommandText &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; sql
+sqlCom.Connection &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; conn
+sqlCom.Parameters.Add(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;photo&amp;#34;&lt;/span&gt;, OracleDbType.Blob, imgData.Length)
+sqlCom.Parameters(0).Value &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; imgData
+sqlCom.ExecuteNonQuery()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;常见错误&#34;&gt;常见错误&lt;/h1&gt;
+&lt;h2 id=&#34;column-not-allowed-here&#34;&gt;column not allowed here&lt;/h2&gt;
+&lt;p&gt;数据类型不符，检查对应项目数据类型是否正确。&lt;/p&gt;
+&lt;h2 id=&#34;missing-comma&#34;&gt;missing comma&lt;/h2&gt;
+&lt;p&gt;命令格式不对，检查一下自己的SQL命令是否有错误，特别是在有字符串的时候，需要使用&lt;code&gt;&amp;quot;&amp;quot;&lt;/code&gt;来代表一个字符串中的&lt;code&gt;&amp;quot;&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;identifier-is-too-long&#34;&gt;identifier is too long&lt;/h2&gt;
+&lt;p&gt;标识符过长（不得超过30字符），不是非常明白原因，不过我取消掉insert命令中指定位置的部分之后，这个错误消失了。&lt;/p&gt;
+&lt;h2 id=&#34;missing-into-keyword&#34;&gt;missing INTO keyword&lt;/h2&gt;
+&lt;p&gt;缺少into关键字（手滑打成了inte），检查一下自己的SQL命令是否有错误。&lt;/p&gt;
+&lt;h2 id=&#34;cannot-insert-null-into-system-hero-herocategoryid&#34;&gt;cannot insert NULL into (&amp;ldquo;SYSTEM&amp;rdquo;.&amp;ldquo;HERO&amp;rdquo;.&amp;ldquo;HEROCATEGORYID&amp;rdquo;)&lt;/h2&gt;
+&lt;p&gt;这些项都指定了非0值，故不能不赋值，为对应项目赋值即可。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2016年01月03日 初步完成&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>数据库系统概论复习</title><link>https://xuanwo.io/2015/06/12/database-review/</link><pubDate>Fri, 12 Jun 2015 14:33:29 +0000</pubDate><guid>https://xuanwo.io/2015/06/12/database-review/</guid><description>&lt;h1 id=&#34;绪论&#34;&gt;绪论&lt;/h1&gt;
+&lt;h2 id=&#34;数据库系统概述&#34;&gt;数据库系统概述&lt;/h2&gt;
+&lt;p&gt;数据（Data）： 描述事物的符号记录称为数据。
+记录： 计算机中表示和存储数据的一种格式或一种方法。
+数据库（DataBase，简称DB）： 数据库是长期存储在计算机内、有组织的、可共享的大量数据的集合。
+特点：
+- 数据按一定的数据模型组织、描述和存储
+- 可为各种用户共享
+- 冗余度较小
+- 数据独立性较高
+- 易扩展&lt;/p&gt;
+&lt;p&gt;数据库管理系统（DataBase Management System，DBMS）：位于用户与操作系统之间的一层数据管理软件，它为用户或应用程序提供访问DB的方法，包括DB的建立、查询、更新及各种数据控制。
+主要功能如下：
+- 数据定义功能
+- 数据组织、存储和管理
+- 数据操纵功能
+- 数据库的事务管理和运行管理
+- 数据库的建立和维护功能
+- 其他功能&lt;/p&gt;
+&lt;p&gt;数据库系统（DataBase System， DBS）：DBS是实现有组织地、动态地存储大量关联数据、方便多用户访问的计算机硬件、软件和数据资源组成的系统，即它是采用数据库技术的计算机系统。
+组成：
+计算机硬件、数据库、数据库管理系统、应用软件、数据库管理员&lt;/p&gt;
+&lt;p&gt;数据库技术：是研究数据库的结构、存储、设计、管理和使用的一门软件学科。&lt;/p&gt;
+&lt;h2 id=&#34;数据模型&#34;&gt;数据模型&lt;/h2&gt;
+&lt;p&gt;模型： 现实世界特征的模拟和抽象
+数据模型定义：能表示实体类型及实体间联系的模型
+要求：
+- 能比较真实的模拟现实世界
+- 容易为人所理解
+- 便于在计算机上实现&lt;/p&gt;
+&lt;h3 id=&#34;概念数据模型&#34;&gt;概念数据模型&lt;/h3&gt;
+&lt;p&gt;按用户观点对数据建模，是对现实世界的第一层抽象，如ER图。主要用于数据库设计，是数据模型建立的基础。&lt;/p&gt;
+&lt;p&gt;实体：客观存在并可相互区别的事物。
+属性：实体所具有的某一特性称为属性。用属性来刻画实体。
+码：唯一标识实体的属性集，如学号。
+域：属性的取值范围称为该属性的域。
+实体型：具有相同性质的实体必然具有共同的特征和性质。
+实体集：同型实体的集合。
+联系：可分为一对一，一对多，多对多。&lt;/p&gt;
+&lt;h3 id=&#34;逻辑数据模型&#34;&gt;逻辑数据模型&lt;/h3&gt;
+&lt;p&gt;直接面向数据库的逻辑结构，是对现实世界的第二层抽象。可分为：网状、层次、关系、面对对象等；也可分为模糊、时态、空间、时空、概率、粗糙、分形等。组成包括：数据结构、数据操作、数据的约束条件。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;层次数据模型：&lt;/strong&gt;
+层次数据模型对应数据结构中的树形结构：
+- 有且只有一个称为根的结点
+- 当结点数大于1时，除根节点外的结点可以分为M个互相不相交的有限集，其中每一个集合又是一棵数。&lt;/p&gt;
+&lt;p&gt;数据操纵：查询、插入、删除和修改
+数据约束条件：
+- 进行插入操作时，如果没有相应的双亲结点值，不能插入子女结点值。
+- 进行删除操作时，如果删除双亲结点值，则相应的子女结点值也被删除。
+- 进行修改操作时，应修改所有相应记录，以保证数据的一致性。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;网状数据模型：&lt;/strong&gt;
+针对数据结构中的图&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;面向对象的数据模型：&lt;/strong&gt;
+最关键的两个概念：
+对象：现实世界中实体的模型化
+类：对象类型和对这个对象模型进行的操作方法&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/learn/four-data-modal.png&#34; alt=&#34;四种数据模型的比较&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;数据库系统结构&#34;&gt;数据库系统结构&lt;/h2&gt;
+&lt;p&gt;数据库系统的三级模式结构
+- 外模式/模式映像
+- 内模式/模式映像&lt;/p&gt;
+&lt;h2 id=&#34;数据库系统的组成&#34;&gt;数据库系统的组成&lt;/h2&gt;
+&lt;h3 id=&#34;硬件平台及数据库&#34;&gt;硬件平台及数据库&lt;/h3&gt;
+&lt;h3 id=&#34;软件&#34;&gt;软件&lt;/h3&gt;
+&lt;h3 id=&#34;人员&#34;&gt;人员&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;数据库管理员&lt;/li&gt;
+&lt;li&gt;系统分析员和数据库设计人员&lt;/li&gt;
+&lt;li&gt;应用程序员&lt;/li&gt;
+&lt;li&gt;用户&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;关系型数据库理论&#34;&gt;关系型数据库理论&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/learn/relate-database-theory.png&#34; alt=&#34;关系数据库理论概述&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;关系模型概述&#34;&gt;关系模型概述&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/learn/relate-database-modal.png&#34; alt=&#34;关系模型概述&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;关系数据结构&#34;&gt;关系数据结构&lt;/h2&gt;
+&lt;p&gt;域：是一组具有相同数据类型的值的集合
+域的笛卡儿积：给定一组域D1，D2，&amp;hellip;，Dn，其笛卡尔积为：
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/cartesian-product.png&#34; alt=&#34;笛卡儿积&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;关系&#34;&gt;关系&lt;/h3&gt;
+&lt;p&gt;关系：D1×D2×…×Dn的子集叫做在域D1，D2，…，Dn上的关系，记做：R(D1，D2，…，Dn)。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;关系是笛卡尔积的有一定意义、有限的子集。
+关系也是一个二维表，表的每一行对应一个元组，表的每一列对应一个域。
+对每列起一个唯一的名字，称为属性。
+n元关系有n个属性。
+当n=1时，称该关系为单元关系；
+当n=2时，称该关系为二元关系。
+若关系中的某一属性组的值能够唯一地标识一个元组，则称该属性组为候选码。
+若一个关系有多个候选码，则选定其中一个作为主码。
+候选码的诸属性称为主属性。不包含在任何候选码中的属性称为非主属性或非码属性。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;关系的性质：
+- 同质的列
+- 不同属性应该有不同的名称
+- 属性是无序的
+- 元组不能重复
+- 元组无序
+- 分量是原子（即每一个分量都必须是不可分的数据项）&lt;/p&gt;
+&lt;h3 id=&#34;关系模式&#34;&gt;关系模式&lt;/h3&gt;
+&lt;p&gt;在数据库中要区分型和值，型是指关系模式，值是指关系。&lt;/p&gt;
+&lt;p&gt;关系：
+一张二维表格，其中每一行为一元组，每一列为一属性。&lt;/p&gt;
+&lt;p&gt;关系模式：
+关系的描述称为关系模式。它可以形式化的表示为：
+R(U, D, dom, F)
+其中：
+R：关系名
+U：组成该关系的属性集合
+D：属性来自的域
+dom：属性向域的映象集合
+F：属性间数据依赖关系集合&lt;/p&gt;
+&lt;p&gt;关系模式与关系的关系：
+- 关系模式是静态的，稳定的
+- 关系是动态地，随时间不断变化的
+- 关系是关系模式在某一时刻的状态和内容&lt;/p&gt;
+&lt;h2 id=&#34;关系的完整性&#34;&gt;关系的完整性&lt;/h2&gt;
+&lt;p&gt;关系模型的完整性规则是对关系的某种约束条件。&lt;/p&gt;
+&lt;h3 id=&#34;关系的三类完整性约束&#34;&gt;关系的三类完整性约束&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;实体完整性&lt;/li&gt;
+&lt;li&gt;参照完整性&lt;/li&gt;
+&lt;li&gt;用户定义的完整性&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;实体完整性&#34;&gt;实体完整性&lt;/h3&gt;
+&lt;p&gt;若属性A是基本关系R的主属性，则属性A不能取空值。&lt;/p&gt;
+&lt;h3 id=&#34;参照完整性&#34;&gt;参照完整性&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;外码
+设F市基本关系R的一个或一组属性，但不是关系R的码。Ks是基本关系S的主码。如果F与Ks相对应，则称D是R的外码。
+并称基本关系R为参照关系，基本关系S为被参照关系或目标关系。
+&lt;em&gt;关系R和S不一定是不同的关系。&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;若属性（或属性组）F是基本关系R的外码，它与基本关系S的主码Ks相对应（基本关系R和S不一定是不同的关系），则对于R中每个元组在F上的值必须为：
+- 或者取空值（F的每个属性值均为空值）
+- 或者等于S中某个元组的主码值&lt;/p&gt;
+&lt;h3 id=&#34;用户定义的完整性&#34;&gt;用户定义的完整性&lt;/h3&gt;
+&lt;p&gt;针对某一具体关系数据库的约束条件&lt;/p&gt;
+&lt;h2 id=&#34;关系代数&#34;&gt;关系代数&lt;/h2&gt;
+&lt;p&gt;关系代数是一种抽象的查询语言，它用作对关系的运算来表达查询。
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/relate-cal.png&#34; alt=&#34;关系代数运算符&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;传统的集合运算&#34;&gt;传统的集合运算&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;并&lt;/li&gt;
+&lt;li&gt;差&lt;/li&gt;
+&lt;li&gt;交&lt;/li&gt;
+&lt;li&gt;笛卡儿积&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;专门的关系演算&#34;&gt;专门的关系演算&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;选择&lt;/strong&gt;
+从关系R中选取使得逻辑表达式F为真的元组，这是从行的角度进行的运算。
+&lt;strong&gt;投影&lt;/strong&gt;
+从关系R中选取若干属性列组成新的关系，这是从列的角度进行的运算。
+&lt;em&gt;需要消除重复行，因此有可能导致某些元组被取消。&lt;/em&gt;
+&lt;strong&gt;连接&lt;/strong&gt;
+从两个关系的笛卡尔积中选取属性间满足一定条件的元组
+- 等值连接：要求选取的A，B属性组的值相等
+- 自然连接：特殊的等值连接，要求把重复属性列去掉&lt;/p&gt;
+&lt;p&gt;如果把舍弃的元组也保存在结果关系中，而在其他的属性上填空值（NULL），那么这种连接叫做外连接。
+如果只保留左边关系中要舍弃的部分，叫做左外连接；
+如果只保留右边关系中要舍弃的部分，叫做右外连接。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;除&lt;/strong&gt;
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/divide.png&#34; alt=&#34;关系运算-除&#34; /&gt;&lt;/p&gt;
+&lt;h1 id=&#34;sql数据语言&#34;&gt;SQL数据语言&lt;/h1&gt;
+&lt;h2 id=&#34;sql概述&#34;&gt;SQL概述&lt;/h2&gt;
+&lt;h3 id=&#34;产生与发展&#34;&gt;产生与发展&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;1974年由Boyce和Chamberlin提出&lt;/li&gt;
+&lt;li&gt;1975-1979年，IBM的System R上实现&lt;/li&gt;
+&lt;li&gt;1986年，ANSI通过SQL标准&lt;/li&gt;
+&lt;li&gt;后来相继提出SQL-89与SQL-92标准&lt;/li&gt;
+&lt;li&gt;目前，大多数数据库均采用SQL作为共同的数据存取和标准接口&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;sql的特点&#34;&gt;SQL的特点&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;综合统一&lt;/li&gt;
+&lt;li&gt;高度非过程化&lt;/li&gt;
+&lt;li&gt;面向集合的操作方式&lt;/li&gt;
+&lt;li&gt;一种语法结构两种方式&lt;/li&gt;
+&lt;li&gt;语言简洁，易学易用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;sql基本概念&#34;&gt;SQL基本概念&lt;/h3&gt;
+&lt;p&gt;SQL支持关系数据库三级模式结构，其中：
+- 外模式——视图和部分基本表（不能独立存在）
+- 模式——基本表（独立存在，关系-基本表-存储文件一一对应）
+- 内模式——存储文件（存储文件的逻辑结构组成了关系数据库的内模式）&lt;/p&gt;
+&lt;h3 id=&#34;sql对象&#34;&gt;SQL对象&lt;/h3&gt;
+&lt;p&gt;SQL对象包括数据库、表、视图、属性名等，这些对象名符合一定规则：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;SQL SERVER 1-30字符
+ACCESS 64字符
+ORACLE 限制为8个字符&lt;/p&gt;
+&lt;p&gt;应以字母开头，其他字符可以使字母、数字、下划线&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;sql语句&#34;&gt;SQL语句&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;尖括号&amp;rdquo;&amp;lt;&amp;gt;&amp;ldquo;中的内容为实际意义&lt;/li&gt;
+&lt;li&gt;中括号&amp;rdquo;[]&amp;ldquo;中的内容为任选项&lt;/li&gt;
+&lt;li&gt;[,&amp;hellip;]意思是等等&lt;/li&gt;
+&lt;li&gt;大括号&amp;rdquo;{}&amp;ldquo;与竖线&amp;rdquo;|&amp;ldquo;标明此处为选择项，在所列举的各项中仅需选择一项。&lt;/li&gt;
+&lt;li&gt;SQL中的数据项（包括列项、表和视图）分隔符为&amp;rdquo;,&amp;ldquo;；其字符串常数的定界符用单引号&amp;rdquo;&amp;lsquo;&amp;ldquo;表示。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;数据定义&#34;&gt;数据定义&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/learn/SQL-data-define.png&#34; alt=&#34;SQL的数据定义语句&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;数据库的创建与删除&#34;&gt;数据库的创建与删除&lt;/h3&gt;
+&lt;p&gt;创建数据库&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;CREATE DATABASE &amp;lt;数据库名&amp;gt;;
+CREATE DATABASE Mydb;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;删除数据库&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;DROP DATABASE &amp;lt;数据库名&amp;gt; [,&amp;lt;数据库名&amp;gt;] [,...];
+DROP DATABASE Mydb;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;表的创建与删除&#34;&gt;表的创建与删除&lt;/h3&gt;
+&lt;p&gt;创建基本表&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;CREATE TABLE &amp;lt;表名&amp;gt;
+(&amp;lt;列名&amp;gt; &amp;lt;数据类型&amp;gt; [&amp;lt;列级完整性约束条件&amp;gt;] [&amp;lt;列名&amp;gt; &amp;lt;数据类型&amp;gt; [ &amp;lt;列级完整性约束条件&amp;gt; ] [,...] ] [,&amp;lt;表级完整性约束条件&amp;gt;] [,..]);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/learn/main-type.png&#34; alt=&#34;主要数据类型&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;约束条件：
+- 列级完整性约束条件——只能用于列
+- 表级完整性约束条件——只能够用于一张中的多列&lt;/p&gt;
+&lt;p&gt;SQL完整性约束条件
+- NOT NULL或NULL，列级，是否允许为空
+- UNIQUE，列级，唯一性约束
+- DEFAULT，列级，默认值约束
+- CHECK，列级，检验约束，为插入列中的数据指定约束条件
+- PRIMARY KEY，表级，主键约束，使得主键的数值在每一行中各不相同，不能为空
+- FOREIGN KEY，表级，外键约束，是参照完整性约束&lt;/p&gt;
+&lt;p&gt;举例
+创建&lt;code&gt;学生表：Student(sno, sname, sdate, ssex, sdept)&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Create Table Student(
+sno char(5) not null unique,
+sdate date,
+ssex char(2) default &#39;男&#39;,
+sdept char(2)
+Constraint C1 Check (ssex In (&#39;男&#39;, &#39;女&#39;)));
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;删除基本表&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;DROP TABLE &amp;lt;表名&amp;gt;;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;举例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;DROP TABLE Student;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;表结构的修改&#34;&gt;表结构的修改&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;ALTER TABLE &amp;lt;表名&amp;gt;
+[ADD ( &amp;lt;新列名&amp;gt; &amp;lt;数据类型&amp;gt; [&amp;lt;完整性约束条件&amp;gt;][,...])]
+[DROP &amp;lt;完整性约束名&amp;gt;]
+[MODIFY ( &amp;lt;列名&amp;gt; &amp;lt;数据类型&amp;gt; [,...])];
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;举例
+&amp;gt; 在Student表中增加‘籍贯native_place’列，数据类型为字符型&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Alter Table Student
+Add native_place Varchar(50);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;删除Student表中学生姓名必须取唯一值的约束条件&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code&gt;Alter Table Student
+Drop unique(sname);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;修改Student表中sname列的数据类型为定长字符型&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code&gt;Alter Table Student
+Modify sname char(8) unique;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;建立和删除索引&#34;&gt;建立和删除索引&lt;/h3&gt;
+&lt;p&gt;建立索引&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;CREATE [UNIQUE] [CLUSTER] INDEX &amp;lt;索引名&amp;gt;
+ON &amp;lt;表名&amp;gt; (&amp;lt;列名&amp;gt; [&amp;lt;次序&amp;gt;] [, &amp;lt;列名&amp;gt; [&amp;lt;次序&amp;gt;] ] [,…]);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;举例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Create unique Index stusno_ind
+On Student (sno ASC);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;删除索引&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;DROP INDEX &amp;lt;索引名&amp;gt;;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;举例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;DROP INDEX Stusno_Ind;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;数据查询&#34;&gt;数据查询&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;SELECT [ALL|DISTINCT] &amp;lt;目标列表达式&amp;gt; [,&amp;lt;目标列表达式&amp;gt;] [,…]
+[INTO &amp;lt;新表名&amp;gt;]
+FROM &amp;lt;表名/视图名&amp;gt; [,&amp;lt;表名/视图名&amp;gt;] [,…]
+[WHERE &amp;lt;条件表达式&amp;gt;]
+[GROUP BY &amp;lt;列名1&amp;gt;] [HAVING &amp;lt;条件表达式&amp;gt;]]
+[ORDER BY &amp;lt;列名2&amp;gt; [ASC|DESC]];
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;目标列表达式&#34;&gt;目标列表达式&lt;/h3&gt;
+&lt;p&gt;目标列表达式是一个逗号分隔的表达式列表&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[&amp;lt;表名&amp;gt;.]&amp;lt;属性列名表达式&amp;gt; [, [&amp;lt;表名&amp;gt;.] &amp;lt;属性列名表达式&amp;gt;] [, …]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;举例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;//查询单表中全体学生的学号与姓名
+SELECT sno, sname FROM Student;
+//查询单表中的全体学生
+SELECT * FROM Student;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;集函数&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;集函数&amp;gt; ( [ DISTINCT | ALL ] * )
+//集函数：SUM、AVG、COUNT、MAX、MIN
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;举例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;SELECT DISTINCT sname, Year(GetDate())-Year(sdate) AS age FROM Student;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;条件表达式&#34;&gt;条件表达式&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/learn/where.png&#34; alt=&#34;条件表达式&#34; /&gt;
+举例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;//从Student表中，查询男同学
+SELECT * FROM Student WHERE ssex=&#39;男&#39;;
+//从Student表中，查询出生日期在1980年和1990年之间的学生
+SELECT * FROM Student WHERE sdate BETWEEN &#39;1980-01-01&#39; AND &#39;1990-12-31&#39;;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;通配符
+&amp;gt; %：百分号，代表任意长度的字符串
+a%b:ab,acb,addb
+&amp;gt; _：下划线，代表单个字符
+a_b: acb,adb, afb&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;[ ]：表示中括号里面的任意一个字符
+A[BCDE]表示第一个字符为A，第二个字符为B,C,D,E中的任意一个
+[^ ]：表示不在中括号里面的任意一个字符
+A[^BCDE]表示第一个字符为A，第二个字符为不为B,C,D,E的任意一个字符&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;数据操纵&#34;&gt;数据操纵&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;数据插入——INSERT——向数据库中插入新纪录
+数据修改——UPDATE——修改数据库中的某记录
+数据删除——DELETE——删除数据库中的某记录
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;数据插入&#34;&gt;数据插入&lt;/h3&gt;
+&lt;p&gt;插入元组&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;INSERT
+INTO &amp;lt;表名&amp;gt; [( &amp;lt;字段1&amp;gt;[, &amp;lt;字段2&amp;gt;] [,…])]
+VALUES (&amp;lt;常量1&amp;gt; [, &amp;lt;常量2&amp;gt;] [,…]);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;举例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;//将一条新学生记录（所有字段都有值）插入到表中
+Insert Into S
+Values (‘95020’,‘陈东’,‘男’,‘IS’,’18’);
+将一条学生记录（部分字段有值）插入表中
+Insert Into S(Sno,Sname)
+Values (‘95020’,‘陈东’);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;插入子查询
+子查询不仅可以嵌套在SELECT语句中，也可以嵌套在INSERT语句中，用于生成要插入的批量数据。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;INSERT
+INTO &amp;lt;表名&amp;gt; [( &amp;lt;字段1&amp;gt;[, &amp;lt;字段2&amp;gt;] [,…])]
+子查询;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;举例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Insert Into Deptage(Sdept, Avgage)
+Select Sdept, AVG(Sage)
+From S Group By Sdept;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;数据修改&#34;&gt;数据修改&lt;/h3&gt;
+&lt;p&gt;一般格式&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;UPDATE &amp;lt;表名&amp;gt;
+SET &amp;lt;字段名1&amp;gt;＝&amp;lt;表达式1&amp;gt;[, &amp;lt;字段2&amp;gt;= &amp;lt;表达式2&amp;gt;] [,…]]
+[WHERE &amp;lt;条件表达式&amp;gt;];
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;举例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;//修改某一元组的值：如将学生95001的年龄改为22岁
+Update S
+Set Sage=22
+Where Sno=&#39;95001&#39;;
+//修改多个元组的值：如将所有学生的年龄加一岁
+Update S
+Set Sage= Sage+1;
+//带子查询的修改语句：将信息管理系的所有学生成绩置零
+Update SC
+Set Grade=0
+Where &#39;IS&#39;=
+(Select Sdept
+From S
+Where S.Sno=SC.Sno);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;删除数据&#34;&gt;删除数据&lt;/h3&gt;
+&lt;p&gt;一般格式&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;DELETE
+FROM &amp;lt;表名&amp;gt;
+[WHERE &amp;lt;条件表达式&amp;gt;];
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;举例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;//删除某一元组：如删除学号为95001的学生记录
+Delete
+From S
+Where Sno=&#39;95001&#39;;
+//将S表清空
+Delete
+From S;
+//带查询的删除语句：如删除信息系所有学生的选课记录
+Delete
+From SC
+Where &#39;IS&#39;=
+(Select Sdept
+From S
+Where S.Sno=SC.Sno);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;数据控制&#34;&gt;数据控制&lt;/h2&gt;
+&lt;p&gt;共享程度与安全性问题的冲突
+数据控制功能：
+- 事务管理功能
+- 数据保护功能&lt;/p&gt;
+&lt;p&gt;授予权限
+一般格式&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;GRANT &amp;lt;权限&amp;gt; [,&amp;lt;权限&amp;gt;][,…]
+[ON &amp;lt;对象类型&amp;gt; &amp;lt;对象名称&amp;gt;]
+TO &amp;lt;用户&amp;gt; [, &amp;lt;用户&amp;gt;] [,…]
+[WITH GRANT OPTION];
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;举例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;//把查询S表的权限授权给用户U1
+GRANT SELECT
+ON TABLE S
+TO U1;
+//把查询S表和C表的全部权限授权给用户U1和U2
+GRANT ALL PRIVILEGES
+ON TABLE S, C
+TO U1, U2;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;收回权限
+一般格式&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;REVOKE &amp;lt;权限&amp;gt; [,&amp;lt;权限&amp;gt;][,…]
+[ON &amp;lt;对象类型&amp;gt; &amp;lt;对象名称&amp;gt;]
+FROM &amp;lt;用户&amp;gt; [, &amp;lt;用户&amp;gt;] [,…]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;举例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;//把用户U1修改学号的权限收回
+REVOKE UPDATE(Sno)
+ON TABLE S
+FROM U1;
+//收回所有用户对表SC的查询权限
+REVOKE SELECT
+ON TABLE SC
+FROM PUBLIC;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;关系数据库设计&#34;&gt;关系数据库设计&lt;/h1&gt;
+&lt;h2 id=&#34;关系数据库设计理论&#34;&gt;关系数据库设计理论&lt;/h2&gt;
+&lt;h3 id=&#34;关系模式-1&#34;&gt;关系模式&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;R(U , F)&lt;/code&gt;
+当且仅当U上的一个关系r满足F时，r称为关系模式R(U , F)的一个关系&lt;/p&gt;
+&lt;h3 id=&#34;函数依赖定义&#34;&gt;函数依赖定义&lt;/h3&gt;
+&lt;p&gt;定义：
+设R（U）是属性集U上的关系模式。X，Y是U上的子集。
+若R（U）的任意一个可能的关系r，r中不可能存在两个元组在X上的属性值相等而在Y上的属性值不等，则称：
+X函数依赖确定Y或Y函数依赖确定于X，记做&lt;code&gt;X-&amp;gt;Y&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;术语：
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/func-define.png&#34; alt=&#34;函数依赖术语&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第一范式-1nf&#34;&gt;第一范式（1NF）&lt;/h3&gt;
+&lt;p&gt;每一个分量必须是不可分的数据项。
+存在问题：
+数据冗余；插入异常；删除异常。&lt;/p&gt;
+&lt;h3 id=&#34;第二范式-2nf&#34;&gt;第二范式（2NF）&lt;/h3&gt;
+&lt;p&gt;在第一范式的基础上，每一个非主属性完全函数依赖于码。
+存在问题：
+插入异常；删除异常；修改复杂。&lt;/p&gt;
+&lt;h3 id=&#34;第三范式-3nf&#34;&gt;第三范式（3NF）&lt;/h3&gt;
+&lt;p&gt;若关系R（U）的每个非主属性都不部分依赖于也不于传递于码，则称R（U）满足第三范式。&lt;/p&gt;
+&lt;h3 id=&#34;bcnf&#34;&gt;BCNF&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;所有非主属性对每一个码都是完全函数依赖&lt;/li&gt;
+&lt;li&gt;所有的主属性对每一个不包含它的码，是完全函数依赖&lt;/li&gt;
+&lt;li&gt;没有任何属性完全依赖于非码的任何一组属性&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;多值依赖&#34;&gt;多值依赖&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/learn/MVD.png&#34; alt=&#34;多值依赖&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第四范式-4nf&#34;&gt;第四范式（4NF）&lt;/h3&gt;
+&lt;p&gt;关系模式R&lt;U,F&gt;符合第一范式，对于R的每一个非平凡多值依赖，X都含有码，则称关系模式R符合第四范式&lt;/p&gt;
+&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://xuanwo.io/imgs/learn/func-depand-conclusion.png&#34; alt=&#34;函数依赖总结&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;关系数据库设计的步骤&#34;&gt;关系数据库设计的步骤&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;需求分析&lt;/li&gt;
+&lt;li&gt;概念结构设计&lt;/li&gt;
+&lt;li&gt;逻辑结构设计&lt;/li&gt;
+&lt;li&gt;数据库物理设计&lt;/li&gt;
+&lt;li&gt;数据库实施&lt;/li&gt;
+&lt;li&gt;数据库运行和维护&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;需求分析&#34;&gt;需求分析&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;业务流程分析&lt;/li&gt;
+&lt;li&gt;数据流程分析&lt;/li&gt;
+&lt;li&gt;画出ER图&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;概念结构设计&#34;&gt;概念结构设计&lt;/h3&gt;
+&lt;p&gt;特点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;能真实、充分地反映现实世界，包括事物与事物之间的联系&lt;/li&gt;
+&lt;li&gt;易于理解，从而可以用它和不熟悉计算机的用户交换意见&lt;/li&gt;
+&lt;li&gt;易于更改&lt;/li&gt;
+&lt;li&gt;易于向关系、网状、层次等数据模型转换&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;设计方法：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;自顶向下&lt;/li&gt;
+&lt;li&gt;自底向上&lt;/li&gt;
+&lt;li&gt;逐步扩张：核心概念结构，向外扩张&lt;/li&gt;
+&lt;li&gt;混合策略：自顶向下和自底向上相结合&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;数据抽象：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;分类&lt;/li&gt;
+&lt;li&gt;聚集&lt;/li&gt;
+&lt;li&gt;概括&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;任务：
+ER图变为数据库逻辑结构&lt;/p&gt;
+&lt;p&gt;转换原则：
+实体及其属性的转换：
+一个实体型转换为一个关系模式。
+实体的属性就是关系的属性，实体的码就是关系的码。&lt;/p&gt;
+&lt;p&gt;1:1
+可以转换为一个独立模式，也可以与任意一段的对应的关系模式合并
+1:n
+可以转换为一个独立模式，可以与N端对应的关系模式合并
+m:n
+转换为一个独立模式&lt;/p&gt;
+&lt;p&gt;设计用户子模式——视图&lt;/p&gt;
+&lt;h3 id=&#34;数据库的物理设计&#34;&gt;数据库的物理设计&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;存取方法&lt;/li&gt;
+&lt;li&gt;存取结构&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;实施与维护阶段&#34;&gt;实施与维护阶段&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;定义数据库的结构&lt;/li&gt;
+&lt;li&gt;数据装载/编写程序&lt;/li&gt;
+&lt;li&gt;数据库软件试运行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;数据库安全保护&#34;&gt;数据库安全保护&lt;/h1&gt;
+&lt;h2 id=&#34;信息安全综述&#34;&gt;信息安全综述&lt;/h2&gt;
+&lt;p&gt;安全：免于危险的质量和状态
+信息安全：是对信息、系统以及使用、存储和传输信息的硬件的保护
+数据库安全：是指保护数据库以防止不合法的使用所造成的数据泄露、更改或破坏
+访问：一个主题或对象使用、操作、修改或者影响另一个主题或对象的能力
+资产：被保护的机构资源
+安全蓝本：对机构里新的安全措施的实施计划
+漏洞：系统内的弱点或错误，或者是使信息暴露给攻击或破坏的保护性机制&lt;/p&gt;
+&lt;h2 id=&#34;数据库安全性控制&#34;&gt;数据库安全性控制&lt;/h2&gt;
+&lt;p&gt;计算机系统的安全模型
+&lt;img src=&#34;https://xuanwo.io/imgs/learn/safe-modal.png&#34; alt=&#34;计算机系统的安全模型&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;用户标识和鉴别&#34;&gt;用户标识和鉴别&lt;/h3&gt;
+&lt;p&gt;用户标识和鉴别是系统提供的最外层安全保护措施
+举例：校园网登录&lt;/p&gt;
+&lt;h3 id=&#34;存取控制&#34;&gt;存取控制&lt;/h3&gt;
+&lt;p&gt;数据库安全性主要是存取控制机制
+1. 定义用户权限
+1. 合法用户权限检查&lt;/p&gt;
+&lt;h3 id=&#34;审计&#34;&gt;审计&lt;/h3&gt;
+&lt;p&gt;把用户对数据库的所有操作自动记录下来放入审计日志&lt;/p&gt;
+&lt;h3 id=&#34;数据加密&#34;&gt;数据加密&lt;/h3&gt;
+&lt;p&gt;高度敏感性数据，需要采用数据加密技术&lt;/p&gt;
+&lt;h2 id=&#34;统计数据库安全性&#34;&gt;统计数据库安全性&lt;/h2&gt;
+&lt;p&gt;在统计数据库中存在着特殊的安全性问题，需要注意。&lt;/p&gt;
+&lt;h2 id=&#34;sql-server系统安全性&#34;&gt;SQL SERVER系统安全性&lt;/h2&gt;
+&lt;p&gt;简要介绍，略过&lt;/p&gt;
+&lt;h1 id=&#34;版权信息&#34;&gt;版权信息&lt;/h1&gt;
+&lt;p&gt;大部分内容来自于中国地质大学（北京）安海忠老师的授课PPT以及王珊，萨师煊所著的《数据库系统概论》（第四版），可在非商用-署名前提下自由分发。&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2015年06月12日 完成初稿&lt;/li&gt;
+&lt;li&gt;2015年06月14日 修复了一些格式错误&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

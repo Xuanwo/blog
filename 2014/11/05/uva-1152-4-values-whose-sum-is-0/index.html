@@ -1,0 +1,105 @@
+<!doctype html><html><head><title>UVa 1152 4 Values whose Sum is 0</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content=Technology,Code,Program,Linux,><meta name=author content=Xuanwo><meta property=og:title content="UVa 1152 4 Values whose Sum is 0"><meta property=og:description content="A blog maintained by an interesting programmer."><meta property=og:type content=website><meta property=og:locale content=en_US><meta property=og:url content=https://xuanwo.io/2014/11/05/uva-1152-4-values-whose-sum-is-0/><link href rel=alternate type=application/rss+xml title="Xuanwo's Blog"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/milligram@1.3.0/dist/milligram.min.css integrity="sha256-Ro/wP8uUi8LR71kwIdilf78atpu8bTEwrK5ZotZo+Zc=" crossorigin=anonymous><link rel=stylesheet href=/css/main.min.css><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.54.0"></head><body><div id=container><header id=header><div id=header-outer class=outer><div id=header-inner class=inner><a id=main-nav-toggle class=nav-icon href=javascript:;><svg width="1em" height="1em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#bars"/></svg></a><a id=logo class=logo-text href=https://xuanwo.io>Xuanwo&#39;s Blog</a><nav id=main-nav><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<a class=main-nav-link href=/about/>关于我</a></nav></div></div></header><section id=main class=outer><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 class=article-title itemprop=name>UVa 1152 4 Values whose Sum is 0</h1></header><div class=article-meta><a href=/2014/11/05/uva-1152-4-values-whose-sum-is-0/ class=article-date><time datetime=2014-11-05T19:31:30.000&#43;00:00 itemprop=datePublished>2014-11-05</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div><div class=article-comment-link-wrap><a href=/2014/11/05/uva-1152-4-values-whose-sum-is-0/#disqus_thread class=article-comment-link>Comments</a></div></div><div class=article-entry itemprop=articleBody><h2 id=题目>题目</h2><p>源地址：</p><p><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3593">http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3593</a></p><h1 id=理解>理解</h1><p>题意非常清楚，就是在一个矩阵里面找出四个数，使得他们的和为零。
+一开始的想法是DFS，把这个看成一个四层的图，不停搜索就行了。但是DFS写得太搓了，各种姿势挂，后来决定二分暴力乱搞。
+思路是这样，把这个矩阵分成左右两份，然后只要一个两层的for循环，就能用两个数组保存下所有可能出现的数字组合的和。有一个小小的技巧是，第二份在保存的时候保存为他们的负数，这样在后面的二分中，只要判断是不是相等就可以了，减少了计算量。
+最后感慨一下，一千六百万的数组也能开的出来= =。</p><h1 id=代码>代码</h1><pre><code>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+#include &lt;cmath&gt;
+#include &lt;ctime&gt;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;deque&gt;
+#include &lt;list&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+#include &lt;stack&gt;
+#include &lt;queue&gt;
+#include &lt;numeric&gt;
+#include &lt;iomanip&gt;
+#include &lt;bitset&gt;
+#include &lt;sstream&gt;
+#include &lt;fstream&gt;
+#define debug &quot;output for debug\n&quot;
+#define pi (acos(-1.0))
+#define eps (1e-8)
+#define inf (1&lt;&lt;28)
+#define ll long long int
+using namespace std;
+
+#define MAXN 16100000
+
+int a[4][4444],n,t;
+int num1[MAXN],num2[MAXN],c;
+int i,j,ans,casen=0;
+
+
+int bin(int left,int right,int k)
+{
+    while(left&lt;=right)
+    {
+        int mid=(left+right)/2;
+        int num=0;
+        if(num2[mid]==k)
+        {
+            num=1;
+            for(i=mid-1; i&gt;=0&amp;&amp;num2[i]==k; i--)  num++;
+            for(i=mid+1; i&lt;n*n&amp;&amp;num2[i]==k; i++)  num++;
+            return num;
+        }
+        else if(num2[mid]&gt;k)
+            right=mid-1;
+        else left=mid+1;
+    }
+    return 0;
+}
+
+void init()
+{
+    scanf(&quot;%d&quot;,&amp;n);
+    ans=0;
+    c=0;
+    for(i=0; i&lt;n; i++)
+    {
+        scanf(&quot;%d %d %d %d&quot;,&amp;a[0][i],&amp;a[1][i],&amp;a[2][i],&amp;a[3][i]);
+    }
+    for(i=0; i&lt;n; i++)
+    {
+        for(j=0; j&lt;n; j++)
+        {
+            num1[c]=a[2][i]+a[3][j];
+            num2[c++]=-(a[0][i]+a[1][j]);
+        }
+    }
+    sort(num2,num2+c);
+}
+
+int main(int argc, char const *argv[])
+{
+    int i,j;
+    scanf(&quot;%d&quot;, &amp;t);
+    while(t--)
+    {
+        casen++;
+        if(casen&gt;1) printf(&quot;\n&quot;);
+        init();
+        for(i=0; i&lt;c; i++)
+        {
+            ans+=bin(0,n*n-1,num1[i]);
+        }
+        printf(&quot;%d\n&quot;,ans);
+    }
+    return 0;
+}
+
+</code></pre><h1 id=更新日志>更新日志</h1><ul><li>2014年11月5日 已AC。</li></ul></div><div class=article-toc></div></div><nav id=article-nav><a href=/2014/11/05/uva-11054-wine-trading-in-gergovia/ id=article-nav-newer class=article-nav-link-wrap><div class=article-nav-title><span>&lt;</span>&nbsp;
+UVa 11054 Wine trading in Gergovia</div></a><a href=/2014/11/05/uva-1605-building-for-un/ id=article-nav-older class=article-nav-link-wrap><div class=article-nav-title>UVa 1605 Building for UN&nbsp;<span>&gt;</span></div></a></nav></article><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){this.page.identifier='\/2014\/11\/05\/UVa-1152-4-Values-whose-Sum-is-0\/';this.page.title='UVa 1152 4 Values whose Sum is 0';this.page.url='https:\/\/xuanwo.io\/2014\/11\/05\/uva-1152-4-values-whose-sum-is-0\/';};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return;}
+var d=document,s=d.createElement('script');s.async=true;s.src='//'+"only0god"+'.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></section><footer id=footer><div class=outer><div id=footer-info class=inner>&copy; 2019 Xuanwo&#39;s Blog&nbsp;
+Powered by <a href=https://gohugo.io target=_blank>Hugo</a></div></div><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script src=https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js></script><script>tocbot.init({tocSelector:'.article-toc',contentSelector:'.article-entry',headingSelector:'h1, h2, h3, h4, h5',});</script><script>document.getElementById('main-nav-toggle').addEventListener('click',function(){var header=document.getElementById('header');if(header.classList.contains('mobile-on')){header.classList.remove('mobile-on');}else{header.classList.add('mobile-on');}});</script></footer></div></body></html>

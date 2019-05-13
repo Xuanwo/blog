@@ -1,0 +1,94 @@
+<!doctype html><html><head><title>POJ 1002 487-3279</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content=Technology,Code,Program,Linux,><meta name=author content=Xuanwo><meta property=og:title content="POJ 1002 487-3279"><meta property=og:description content="A blog maintained by an interesting programmer."><meta property=og:type content=website><meta property=og:locale content=en_US><meta property=og:url content=https://xuanwo.io/2014/07/03/poj-1002-487-3279/><link href rel=alternate type=application/rss+xml title="Xuanwo's Blog"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/milligram@1.3.0/dist/milligram.min.css integrity="sha256-Ro/wP8uUi8LR71kwIdilf78atpu8bTEwrK5ZotZo+Zc=" crossorigin=anonymous><link rel=stylesheet href=/css/main.min.css><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.54.0"></head><body><div id=container><header id=header><div id=header-outer class=outer><div id=header-inner class=inner><a id=main-nav-toggle class=nav-icon href=javascript:;><svg width="1em" height="1em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#bars"/></svg></a><a id=logo class=logo-text href=https://xuanwo.io>Xuanwo&#39;s Blog</a><nav id=main-nav><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<a class=main-nav-link href=/about/>关于我</a></nav></div></div></header><section id=main class=outer><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 class=article-title itemprop=name>POJ 1002 487-3279</h1></header><div class=article-meta><a href=/2014/07/03/poj-1002-487-3279/ class=article-date><time datetime=2014-07-03T23:21:32.000&#43;00:00 itemprop=datePublished>2014-07-03</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div><div class=article-comment-link-wrap><a href=/2014/07/03/poj-1002-487-3279/#disqus_thread class=article-comment-link>Comments</a></div></div><div class=article-entry itemprop=articleBody><h2 id=题目>题目</h2><p>源地址：</p><p><a href="http://poj.org/problem?id=1002">http://poj.org/problem?id=1002</a></p><h1 id=理解>理解</h1><p>简单一看就是一道关于字典的题目，将ABC等字符转化为对应的数字，从而求出这个字符串所对应的电话号码。
+然后就是我不机智的地方了。我求出的电话号码依然是使用char数组类型保存的，比较的时候使用了strcmp函数，为了降低复杂度，还使用了各种标记，最后就是一团乱麻。在点拨之后才发现，直接转化为int型，然后sort排序，轻松搞定。</p><p>#新技能get
+以前就在困惑使用cout的时候如何控制它的输出形式，解题过程中，在cplusplus上面找到了一个库<a href=http://www.cplusplus.com/reference/iomanip/><code>iomanip</code></a>。通过<a href=http://www.cplusplus.com/reference/iomanip/setfill/><code>setfill</code></a>和<a href=http://www.cplusplus.com/reference/iomanip/setw/><code>setw</code></a>函数的配合，解决了在数字之间插入一个<code>-</code>的问题。</p><h1 id=代码>代码</h1><pre><code># include &lt;iostream&gt;
+# include &lt;algorithm&gt;
+# include &lt;iomanip&gt;
+
+using namespace std;
+
+int normal(char a)
+{
+    {
+        if (a == 'A' || a == 'B' || a == 'C')
+            return 2;
+        if (a == 'D' || a == 'E' || a == 'F')
+            return 3;
+        if (a == 'G' || a == 'H' || a == 'I')
+            return 4;
+        if (a == 'J' || a == 'K' || a == 'L')
+            return 5;
+        if (a == 'M' || a == 'N' || a == 'O')
+            return 6;
+        if (a == 'P' || a == 'R' || a == 'S')
+            return 7;
+        if (a == 'T' || a == 'U' || a == 'V')
+            return 8;
+        if (a == 'W' || a == 'X' || a == 'Y')
+            return 9;
+    }
+}
+
+int time[10000000];
+bool vist[10000000];
+int out[100000];
+
+int main()
+{
+    int n;
+    while (cin &gt;&gt; n)
+    {
+        memset(time, 0, sizeof(time));
+        memset(vist, 0, sizeof(vist));
+        int positive = 0;
+        bool flag = false;
+
+        for (int i = 1; i &lt;= n; i++)
+        {
+            int x = 0;
+            char s[20];
+            cin &gt;&gt; s;
+            for (int j = 0; s[j] != '\0'; j++)
+            {
+                if (s[j] == '-' || s[j] == 'Q' || s[j] == 'Z')
+                    continue;
+                else if (s[j] &lt;= '9')
+                    x = x * 10 + s[j] - '0';
+                else if (s[j] &lt;= 'Z')
+                    x = x * 10 + normal(s[j]);
+            }
+            time[x]++;
+
+            if (!vist[x] &amp;&amp; time[x] &gt;= 2)
+            {
+                flag = true;
+                vist[x] = true;
+                out[positive++] = x;
+            }
+        }
+
+        if (!flag)
+            cout &lt;&lt; &quot;No duplicates.&quot; &lt;&lt; endl;
+        else
+        {
+            sort(out, out + positive);
+            for (int i = 0; i &lt; positive; i++)
+            {
+                cout &lt;&lt; setfill('0') &lt;&lt; setw(3) &lt;&lt; out[i] / 10000;
+                cout &lt;&lt; '-';
+                cout &lt;&lt; setfill('0') &lt;&lt; setw(4) &lt;&lt; out[i] % 10000;
+                cout &lt;&lt; ' ' &lt;&lt; time[ out[i] ] &lt;&lt; endl;
+            }
+        }
+    }
+    return 0;
+}
+
+</code></pre><h1 id=更新日志>更新日志</h1><ul><li>2014年07月03日 完成解题报告</li></ul></div><div class=article-toc></div></div><nav id=article-nav><a href=/2014/07/04/poj-1003-hangover/ id=article-nav-newer class=article-nav-link-wrap><div class=article-nav-title><span>&lt;</span>&nbsp;
+POJ 1003 Hangover</div></a><a href=/2014/07/03/summer-training-plan/ id=article-nav-older class=article-nav-link-wrap><div class=article-nav-title>暑期刷题计划&nbsp;<span>&gt;</span></div></a></nav></article><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){this.page.identifier='\/2014\/07\/03\/POJ-1002-487-3279\/';this.page.title='POJ 1002 487-3279';this.page.url='https:\/\/xuanwo.io\/2014\/07\/03\/poj-1002-487-3279\/';};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return;}
+var d=document,s=d.createElement('script');s.async=true;s.src='//'+"only0god"+'.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></section><footer id=footer><div class=outer><div id=footer-info class=inner>&copy; 2019 Xuanwo&#39;s Blog&nbsp;
+Powered by <a href=https://gohugo.io target=_blank>Hugo</a></div></div><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script src=https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js></script><script>tocbot.init({tocSelector:'.article-toc',contentSelector:'.article-entry',headingSelector:'h1, h2, h3, h4, h5',});</script><script>document.getElementById('main-nav-toggle').addEventListener('click',function(){var header=document.getElementById('header');if(header.classList.contains('mobile-on')){header.classList.remove('mobile-on');}else{header.classList.add('mobile-on');}});</script></footer></div></body></html>

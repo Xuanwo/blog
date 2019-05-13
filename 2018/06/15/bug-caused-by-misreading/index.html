@@ -1,0 +1,82 @@
+<!doctype html><html><head><title>文档误读导致的 BUG</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content=Technology,Code,Program,Linux,><meta name=author content=Xuanwo><meta property=og:title content="文档误读导致的 BUG"><meta property=og:description content="A blog maintained by an interesting programmer."><meta property=og:type content=website><meta property=og:locale content=en_US><meta property=og:url content=https://xuanwo.io/2018/06/15/bug-caused-by-misreading/><link href rel=alternate type=application/rss+xml title="Xuanwo's Blog"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/milligram@1.3.0/dist/milligram.min.css integrity="sha256-Ro/wP8uUi8LR71kwIdilf78atpu8bTEwrK5ZotZo+Zc=" crossorigin=anonymous><link rel=stylesheet href=/css/main.min.css><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.54.0"></head><body><div id=container><header id=header><div id=header-outer class=outer><div id=header-inner class=inner><a id=main-nav-toggle class=nav-icon href=javascript:;><svg width="1em" height="1em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#bars"/></svg></a><a id=logo class=logo-text href=https://xuanwo.io>Xuanwo&#39;s Blog</a><nav id=main-nav><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<a class=main-nav-link href=/about/>关于我</a></nav></div></div></header><section id=main class=outer><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 class=article-title itemprop=name>文档误读导致的 BUG</h1></header><div class=article-meta><a href=/2018/06/15/bug-caused-by-misreading/ class=article-date><time datetime=2018-06-15T18:00:00.000&#43;00:00 itemprop=datePublished>2018-06-15</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div><div class=article-comment-link-wrap><a href=/2018/06/15/bug-caused-by-misreading/#disqus_thread class=article-comment-link>Comments</a></div></div><div class=article-entry itemprop=articleBody><blockquote><p>本文是
+<a href=https://xuanwo.io/series/learn-from-bug>Learn From Bug</a> 系列的第 3 篇文章, 共 3 篇。</p></blockquote><p>之前听说过开发人员<a href=https://www.theregister.co.uk/2018/05/09/intel_amd_kernel_privilege_escalation_flaws/>读错 Intel 的文档</a>导致出现了严重 <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-8897">BUG</a>，但是只是当成玩笑看待，但是等到这种事情发生在自己身上，还影响到了项目在用户生产环境的上线进度的时候，就不是那么好笑了。</p><blockquote><p>本文取材自真实事件的复盘，项目相关信息已经去敏。</p></blockquote><h2 id=经过>经过</h2><p>项目服务上线完毕，但是在上线后的测试中发现后端出现大量 504 错误。通过跟踪日志得知报错问题是后端数据库查询超时，在确定问题稳定复现之后，首先排除了服务器抖动，上线操作失误等问题，将原因锁定在了代码的层面。进一步的，还发现这个问题与后端的某个异步任务组件有关：只要开启该组件，错误就会出现；只要关闭，错误就会消失。该组件最近实施过一次较大的重构，在对代码进行二次 Review 之后，我们发现了可能出问题的点：重构时为了提升性能，组件内部会开多个 Goroutine 并发查询数据库，在业务首次启动时可能会对数据库造成特别大的压力。将并发改成 for 循环之后情况有所好转但是还是会有查询超时，没有修复到位。再次检查该组件中涉及到的数据库操作相关代码，发现有些 Query 操作返回的 row 没有手动做 Close 。在增加手动 Close 的代码后，超时问题消失。</p><h2 id=溯源>溯源</h2><p>第二天我再回过来看这段代码，发现导致这个错误的根源是我对一段文档的误读：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#60a0b0;font-style:italic>// Close closes the Rows, preventing further enumeration. If Next is called
+</span><span style=color:#60a0b0;font-style:italic>// and returns false and there are no further result sets,
+</span><span style=color:#60a0b0;font-style:italic>// the Rows are closed automatically and it will suffice to check the
+</span><span style=color:#60a0b0;font-style:italic>// result of Err. Close is idempotent and does not affect the result of Err.
+</span><span style=color:#60a0b0;font-style:italic></span><span style=color:#007020;font-weight:700>func</span> (rs <span style=color:#666>*</span>Rows) <span style=color:#06287e>Close</span>() <span style=color:#902000>error</span> {
+	<span style=color:#007020;font-weight:700>return</span> rs.<span style=color:#007020>close</span>(<span style=color:#007020;font-weight:700>nil</span>)
+}</code></pre></div><p>文档中的描述是：如果 Next 被调用，并返回了 false 而且没有更多结果的时候，rows 将会自动 close。但是我实际上写出来的代码是这样的：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>value <span style=color:#666>:=</span> sql.NullInt64{}
+row, err <span style=color:#666>:=</span> builder.<span style=color:#06287e>Select</span>(db.<span style=color:#06287e>Func</span>(<span style=color:#4070a0>&#34;COUNT&#34;</span>, <span style=color:#4070a0>&#34;?&#34;</span>)).
+	<span style=color:#06287e>From</span>(table).<span style=color:#06287e>Where</span>(cond).<span style=color:#06287e>Query</span>()
+<span style=color:#007020;font-weight:700>if</span> err <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+	log.<span style=color:#06287e>Errorf</span>(ctx, <span style=color:#4070a0>&#34;MySQL error for %v.&#34;</span>, err)
+	<span style=color:#007020;font-weight:700>return</span>
+}
+<span style=color:#007020;font-weight:700>if</span> row.<span style=color:#06287e>Next</span>() {
+	err = row.<span style=color:#06287e>Scan</span>(<span style=color:#666>&amp;</span>value)
+	<span style=color:#007020;font-weight:700>if</span> err <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+		log.<span style=color:#06287e>Errorf</span>(ctx, <span style=color:#4070a0>&#34;MySQL scan error for %v.&#34;</span>, err)
+		<span style=color:#007020;font-weight:700>return</span>
+	}
+	<span style=color:#007020;font-weight:700>if</span> value.Valid {
+		n = <span style=color:#007020>int64</span>(value.Int64)
+	}
+}</code></pre></div><p>区别在于我将这段文档理解成了：如果调用了 Next，而且没有更多结果的时候，rows 将会自动 close。实际上，Next 在返回 false 的时候后，其对应的 rows 才会 close。我们可以看一下 upperdb Rows 结构体的 Next 函数实现：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#60a0b0;font-style:italic>// Next prepares the next result row for reading with the Scan method. It
+</span><span style=color:#60a0b0;font-style:italic>// returns true on success, or false if there is no next result row or an error
+</span><span style=color:#60a0b0;font-style:italic>// happened while preparing it. Err should be consulted to distinguish between
+</span><span style=color:#60a0b0;font-style:italic>// the two cases.
+</span><span style=color:#60a0b0;font-style:italic>//
+</span><span style=color:#60a0b0;font-style:italic>// Every call to Scan, even the first one, must be preceded by a call to Next.
+</span><span style=color:#60a0b0;font-style:italic></span><span style=color:#007020;font-weight:700>func</span> (rs <span style=color:#666>*</span>Rows) <span style=color:#06287e>Next</span>() <span style=color:#902000>bool</span> {
+	<span style=color:#007020;font-weight:700>var</span> doClose, ok <span style=color:#902000>bool</span>
+	<span style=color:#06287e>withLock</span>(rs.closemu.<span style=color:#06287e>RLocker</span>(), <span style=color:#007020;font-weight:700>func</span>() {
+		doClose, ok = rs.<span style=color:#06287e>nextLocked</span>()
+	})
+	<span style=color:#007020;font-weight:700>if</span> doClose {
+		rs.<span style=color:#06287e>Close</span>()
+	}
+	<span style=color:#007020;font-weight:700>return</span> ok
+}
+
+<span style=color:#007020;font-weight:700>func</span> (rs <span style=color:#666>*</span>Rows) <span style=color:#06287e>nextLocked</span>() (doClose, ok <span style=color:#902000>bool</span>) {
+	<span style=color:#007020;font-weight:700>if</span> rs.closed {
+		<span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>false</span>, <span style=color:#007020;font-weight:700>false</span>
+	}
+
+	<span style=color:#60a0b0;font-style:italic>// Lock the driver connection before calling the driver interface
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#60a0b0;font-style:italic>// rowsi to prevent a Tx from rolling back the connection at the same time.
+</span><span style=color:#60a0b0;font-style:italic></span>	rs.dc.<span style=color:#06287e>Lock</span>()
+	<span style=color:#007020;font-weight:700>defer</span> rs.dc.<span style=color:#06287e>Unlock</span>()
+
+	<span style=color:#007020;font-weight:700>if</span> rs.lastcols <span style=color:#666>==</span> <span style=color:#007020;font-weight:700>nil</span> {
+		rs.lastcols = <span style=color:#007020>make</span>([]driver.Value, <span style=color:#007020>len</span>(rs.rowsi.<span style=color:#06287e>Columns</span>()))
+	}
+
+	rs.lasterr = rs.rowsi.<span style=color:#06287e>Next</span>(rs.lastcols)
+	<span style=color:#007020;font-weight:700>if</span> rs.lasterr <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+		<span style=color:#60a0b0;font-style:italic>// Close the connection if there is a driver error.
+</span><span style=color:#60a0b0;font-style:italic></span>		<span style=color:#007020;font-weight:700>if</span> rs.lasterr <span style=color:#666>!=</span> io.EOF {
+			<span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>true</span>, <span style=color:#007020;font-weight:700>false</span>
+		}
+		nextResultSet, ok <span style=color:#666>:=</span> rs.rowsi.(driver.RowsNextResultSet)
+		<span style=color:#007020;font-weight:700>if</span> !ok {
+			<span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>true</span>, <span style=color:#007020;font-weight:700>false</span>
+		}
+		<span style=color:#60a0b0;font-style:italic>// The driver is at the end of the current result set.
+</span><span style=color:#60a0b0;font-style:italic></span>		<span style=color:#60a0b0;font-style:italic>// Test to see if there is another result set after the current one.
+</span><span style=color:#60a0b0;font-style:italic></span>		<span style=color:#60a0b0;font-style:italic>// Only close Rows if there is no further result sets to read.
+</span><span style=color:#60a0b0;font-style:italic></span>		<span style=color:#007020;font-weight:700>if</span> !nextResultSet.<span style=color:#06287e>HasNextResultSet</span>() {
+			doClose = <span style=color:#007020;font-weight:700>true</span>
+		}
+		<span style=color:#007020;font-weight:700>return</span> doClose, <span style=color:#007020;font-weight:700>false</span>
+	}
+	<span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>false</span>, <span style=color:#007020;font-weight:700>true</span>
+}</code></pre></div><p>可以看到 Next 只有在 <code>nextLocked</code> 返回的 <code>doClose</code> 为 <code>true</code> 时才会主动调用 <code>rs.Close()</code>，而按照 <code>nextLocked</code> 中的逻辑，如果有值的话，会返回 <code>false, true</code>。也就是说，当 Next 返回 <code>true</code> 的时候，是不会去 Close rows 的。分析到这里，昨晚上线翻车的原因就很明显了，大量的 count query 的 rows 没有被 close 导致链接无法释放，从而新的请求无法执行以至于超时了。</p><h2 id=动态>动态</h2><ul><li>好不容易调整回来的作息被这次上线打回去了，现在很蓝瘦</li><li>用户环境上一次线就欠别人一顿饭，多上几次我要破产了。。。</li><li><a href=https://www.amazon.cn/dp/B00L1VVUTC>GEB</a> 虽然看不懂，但是我感觉很有意思</li><li><a href=https://docs.qingcloud.com/qingstor/developer_tools/qscamel.html>qscamel</a> 在经历了多个大用户的捶打之后终于正式发布了，有机会要写一个系列的文章讲讲自己在开发 qscamel 的时候都学到了啥</li><li>好久没有发文章了，找个由头水一篇</li><li>博客在 Linode 上跑了两个月之后，还是乖乖的回到了 gh-pages 的怀抱，真香</li><li>话说动态这个章节有人看么，如果不讨喜的我考虑一下去掉 = =</li></ul></div><div class=article-toc></div><footer class=article-footer><ul class=article-tag-list><li class=article-tag-list-item><a class=article-tag-list-link href=https://xuanwo.io/tags/golang>Golang</a></li></ul></footer></div><nav id=article-nav><a href=/2018/07/22/tiresias-v0.3/ id=article-nav-newer class=article-nav-link-wrap><div class=article-nav-title><span>&lt;</span>&nbsp;
+Tiresias v0.3</div></a><a href=/2018/05/22/tiresias-intro/ id=article-nav-older class=article-nav-link-wrap><div class=article-nav-title>Tiresias —— 服务器信息管理工具&nbsp;<span>&gt;</span></div></a></nav></article><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){this.page.identifier='\/2018\/06\/15\/bug-caused-by-misreading\/';this.page.title='文档误读导致的 BUG';this.page.url='https:\/\/xuanwo.io\/2018\/06\/15\/bug-caused-by-misreading\/';};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return;}
+var d=document,s=d.createElement('script');s.async=true;s.src='//'+"only0god"+'.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></section><footer id=footer><div class=outer><div id=footer-info class=inner>&copy; 2019 Xuanwo&#39;s Blog&nbsp;
+Powered by <a href=https://gohugo.io target=_blank>Hugo</a></div></div><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script src=https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js></script><script>tocbot.init({tocSelector:'.article-toc',contentSelector:'.article-entry',headingSelector:'h1, h2, h3, h4, h5',});</script><script>document.getElementById('main-nav-toggle').addEventListener('click',function(){var header=document.getElementById('header');if(header.classList.contains('mobile-on')){header.classList.remove('mobile-on');}else{header.classList.add('mobile-on');}});</script></footer></div></body></html>

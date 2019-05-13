@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Web on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/web/</link><description>Recent content in Web on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 15 Jun 2017 15:44:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/web/index.xml" rel="self" type="application/rss+xml"/><item><title>从浏览器端向 QingStor 对象存储上传文件</title><link>https://xuanwo.io/2017/06/15/upload-to-qingstor-from-browser/</link><pubDate>Thu, 15 Jun 2017 15:44:00 +0000</pubDate><guid>https://xuanwo.io/2017/06/15/upload-to-qingstor-from-browser/</guid><description>&lt;p&gt;从浏览器端向 QingStor 对象存储上传是很多开发者的需求，虽然 QingStor 提供了相关的接口和 SDK，但是仍有很多开发者表示不知道怎么样去调用。本文的目的是系统的展示一下如何从浏览器端上传一个文件到对象存储，从而解决大多数开发者们的需求。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;为了理解本文的内容，读者需要一些基本的 HTML，JavaScript 知识，同时需要对 QingStor 对象存储服务有一些基本的了解。前者可以查看 &lt;a href=&#34;https://developer.mozilla.org/zh-CN/docs/Web&#34;&gt;MDN Web 技术文档&lt;/a&gt;，后者可以查看 &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/common/overview.html&#34;&gt;QingStor 对象存储服务概述&lt;/a&gt; 。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;表单上传&#34;&gt;表单上传&lt;/h2&gt;
+&lt;p&gt;QingStor 对象存储支持通过 HTML 表单上传的方式向存储空间上传一个对象，文档可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/object/post.html&#34;&gt;此处&lt;/a&gt;。根据存储空间的权限设置，主要分为两种情况：匿名可写与匿名不可写，接下来分别介绍一下。&lt;/p&gt;
+&lt;h3 id=&#34;匿名可写&#34;&gt;匿名可写&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;action&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://&amp;lt;bucket&amp;gt;.&amp;lt;zone&amp;gt;.qingstor.com&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;method&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;enctype&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;multipart/form-data&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;Click or Drag a File Here to Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;key&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;submit&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload to QingStor&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 存储空间的名称&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: 存储空间所在的区域&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;key&amp;gt;&lt;/code&gt;: 文件上传后在存储空间中的名字，支持内置变量，比如 &lt;code&gt;${filename}&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;很多人最开始使用这个接口的时候会吐槽为什么 file 一定要放在最后，这是因为我们遵循了现有的 &lt;a href=&#34;http://hc.apache.org/httpclient-3.x/methods/multipartpost.html&#34;&gt;multipart post 方法&lt;/a&gt; 的实现——将表单分成了两个部分： StringPart 与 FilePart ，file 类型之后的全部表单项都会被丢弃，因此 file 这个 input 项一定要放在表单的最后。&lt;/p&gt;
+&lt;p&gt;解决掉 input 顺序这个问题之后，可以发现表单上传是一个非常简单易用的接口：我只需要构建一个 form 表单，指定上传的域名、文件名即可，浏览器会自动处理剩下的所有工作。&lt;/p&gt;
+&lt;h3 id=&#34;匿名不可写&#34;&gt;匿名不可写&lt;/h3&gt;
+&lt;p&gt;更常见的情况是我们需要上传文件到一个私有的存储空间当中，此时我们需要对我们的 POST 请求进行签名。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;action&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;https://&amp;lt;bucket&amp;gt;.&amp;lt;zone&amp;gt;.qingstor.com&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;method&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;enctype&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;multipart/form-data&amp;#34;&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;Click or Drag a File Here to Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;span&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;key&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;policy&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;policy&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;access_key_id&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;access_key_id&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;hidden&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;signature&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;lt;signature&amp;gt;&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;submit&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Upload to QingStor&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;policy&amp;gt;&lt;/code&gt;: policy 是一个经过 base64 编码之后的 JSON 字符串，其中的内容包括除了 file， access_key_id， policy，signature 之外的所有表单项。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;access_key_id&amp;gt;&lt;/code&gt;: access_key_id 是用户的 access_key_id&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;signature&amp;gt;&lt;/code&gt;: 用 secret key 对 base64 编码后的 policy 字符串进行 HMAC-SHA256 签名得到的字符串，同样需要进行 base64 编码。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;与匿名上传相比，上传到一个私有空间需要使用请求者的 access_key_id 进行签名。签名流程如下：计算 policy 字符串并进行 base64 编码，使用 secret key 对 policy 字符串进行 HMAC-SHA256 签名并进行 base64 编码。&lt;/p&gt;
+&lt;p&gt;以最简单的上传为例：policy 字符串为 &lt;code&gt;{&amp;quot;key&amp;quot;: &amp;quot;test_key&amp;quot;}&lt;/code&gt; ，经过 base64 编码之后变为 &lt;code&gt;eyJrZXkiOiAidGVzdF9rZXkifQ==&lt;/code&gt;，我们使用 &lt;code&gt;test_secret_key&lt;/code&gt; 作为 secret key 来进行 HMAC-SHA256 签名并进行 base64 编码，可以得到 &lt;code&gt;HfMhlYYA4bgyoq3SDMWqiJ1XWm1/TORTfkZk+WODxag=&lt;/code&gt;。此时，我们本次请求中的 policy 应填写 &lt;code&gt;eyJrZXkiOiAidGVzdF9rZXkifQ==&lt;/code&gt;， 而 signature 则应填写 &lt;code&gt;HfMhlYYA4bgyoq3SDMWqiJ1XWm1/TORTfkZk+WODxag=&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;使用 POST 接口上传比较简单，后端只需要实现简单的签名逻辑即可实现上传到指定对象存储存储空间的功能，后续还可以结合各种上传插件实现上传进度条等功能。适合用在只需要用户上传文件，没有复杂交互的场景，比如论坛附件上传，在线编辑器上传图片等。&lt;/p&gt;
+&lt;h2 id=&#34;直接调用-sdk-上传&#34;&gt;直接调用 SDK 上传&lt;/h2&gt;
+&lt;p&gt;POST 接口虽然方便，但是功能比较弱，为了满足开发者们的需求，QingStor 提供的 &lt;a href=&#34;https://github.com/yunify/qingstor-sdk-js&#34;&gt;qingsotr-js-sdk&lt;/a&gt; 通过 &lt;a href=&#34;http://browserify.org/&#34;&gt;Browserify&lt;/a&gt; 实现了浏览器环境的兼容，开发者只需要引入我们提供的 js 文件即可在浏览器环境中调用接口。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在开始之前，我们需要正确设置 Bucket 的 CORS 使得我们可以顺利的进行跨域请求。详细操作方法可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/guide/index.html#cors&#34;&gt;此处&lt;/a&gt;，其中&lt;code&gt;允许的请求源&lt;/code&gt;和&lt;code&gt;允许 HTTP 请求头&lt;/code&gt;均可以设置为 &lt;code&gt;*&lt;/code&gt; 以方便调试。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk.min.js&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onchange&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; Config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).Config
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; QingStor &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).QingStor;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Config(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;access_key_id&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;secret_access_key&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; bucket &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; QingStor(config).Bucket(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;bucket&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;zone&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; upload() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;).files[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; reader &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; FileReader();
+reader.readAsBinaryString(f);
+reader.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (() =&amp;gt; {
+bucket.putObject(f.name, {
+body&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; reader.result
+});
+});
+}
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;access_key_id&amp;gt;&lt;/code&gt;: 用户的 access_key_id&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;secret_access_key&amp;gt;&lt;/code&gt;: 用户的 secret_access_key&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 需要上传的 bucket name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: bucket 所在的区域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;样例代码逻辑比较简单，主要有以下几个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;脚本中进行了一些初始化的工作，创建了 Config ，QingStor 和 Bucket 对象。&lt;/li&gt;
+&lt;li&gt;file input 监听了 change 事件，只要用户选择了新的文件，就会调用 upload 方法。&lt;/li&gt;
+&lt;li&gt;在 upload 方法中，首先是选取文件列表中的第一项，然后使用 HTML 5 新提供的 FileReader 接口来读取文件内容。&lt;/li&gt;
+&lt;li&gt;在 FileReader 读取完毕后，调用 bucket.putObject 方法来进行文件上传，使用文件名作为上传所使用的 Key。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以看到，直接使用 SDK 进行文件上传也非常简单。跟使用 POST 接口相比，需要引入一个额外的 JS 文件依赖，不需要自行进行容易出错的签名计算。最大的缺点在于：初始化 SDK 时需要暴露自己的 access_key_id 和 secret_access_key，这显然是不可接受的。我们需要寻找到一种方法，使得签名的过程可以服务器端完成，从而不需要暴露自己的密钥信息。&lt;/p&gt;
+&lt;h2 id=&#34;部署签名服务器&#34;&gt;部署签名服务器&lt;/h2&gt;
+&lt;p&gt;之前提到，在服务器端进行签名可以使得敏感的密钥信息不会暴露出去，解决方案就是部署一套签名服务器。我们实现了一个基于 qingstor-js-sdk 的签名服务器 demo，开源在 &lt;a href=&#34;https://github.com/yunify/qingstor-demo-signature-server-nodejs&#34;&gt;https://github.com/yunify/qingstor-demo-signature-server-nodejs&lt;/a&gt; ，同时附有 server 端和 client 端，开发者可以方便的复用其中的逻辑，按照自己的业务需求来实现相关的逻辑。&lt;/p&gt;
+&lt;p&gt;部署签名服务器非常简单，只需要如下几步：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;git clone https://github.com/yunify/qingstor-demo-signature-server-nodejs.git
+&lt;span style=&#34;color:#007020&#34;&gt;cd&lt;/span&gt; qingstor-demo-signature-server-nodejs
+npm install&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后根据 server_config.yaml.example 编辑自己的 server_config.yaml 文件，最后执行 &lt;code&gt;npm run server&lt;/code&gt; 就可以启动我们的签名服务器 Demo。&lt;/p&gt;
+&lt;p&gt;接下来这个实例会展示如何使用签名服务器进行签名，并上传一个文件。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk.min.js&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;Upload&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;h3&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;onchange&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;upload()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt; /&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; Config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).Config
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; QingStor &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; require(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;qingstor-sdk&amp;#39;&lt;/span&gt;).QingStor;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; config &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; Config(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;not_need&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;not_need&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; bucket &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; QingStor(config).Bucket(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;bucket&amp;gt;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;&amp;lt;zone&amp;gt;&amp;#39;&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; upload() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; f &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;).files[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; reader &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; FileReader();
+reader.readAsBinaryString(f);
+reader.onload &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; (() =&amp;gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;let&lt;/span&gt; req &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; bucket.putObjectRequest(f.name, {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; f.type
+});
+fetch(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;http://localhost:9000/operation?channel=header&amp;#34;&lt;/span&gt;, {
+method&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;,
+body&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; JSON.stringify(req.operation),
+headers&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; {
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;application/json; charset=utf-8&amp;#34;&lt;/span&gt;
+}
+})
+.then(res =&amp;gt; res.json())
+.then(res =&amp;gt; {
+req.operation.headers.Authorization &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; res.authorization;
+req.operation.body &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; reader.result;
+req.send()
+})
+});
+}
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
+&amp;lt;/&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;bucket&amp;gt;&lt;/code&gt;: 需要上传的 bucket name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;zone&amp;gt;&lt;/code&gt;: bucket 所在的区域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;跟直接使用 SDK 上传相比，通过部署签名服务器上传的方案多了向签名服务器发送本次请求并获取签名信息的部署。js sdk 对外暴露了生成 Request 的接口，通过 bucket.putObjectRequest 可以创建一个 Request 实例，并将 Request.operation 发送到签名服务器以进行签名，最后服务器端返回的是签名好的 Authorization 字符串。然后再手动调用 Request 的 send 方法进行实际的上传即可。&lt;/p&gt;
+&lt;p&gt;部署签名服务器的方案比之前的几种都要复杂，但是更贴合用户的使用场景，可以完整的覆盖大多数用户在浏览器端与 QingStor 对象存储进行交互的需求。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;在这里可以对浏览器端几种与 QingStor 对象存储进行交互的方案进行一个简短的总结：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;POST 接口：简单方便，便于与现有的服务器端集成，适用于论坛附件上传，在线编辑器上传图片等场景&lt;/li&gt;
+&lt;li&gt;SDK 上传： 简单方便，但是会暴露出用户的密钥信息，适用于一些 No BackEnd 应用，可以让用户自行填写自己的密钥，比如在线 Markdown 编辑器，可以实现复制进来的图片自动上传这样的功能。&lt;/li&gt;
+&lt;li&gt;部署签名服务器： 比较复杂，适用于大多数场景，密钥信息保存在服务器端，不会泄漏给用户。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;此外，所有的代码都已经上传到 Gist，感兴趣的同学可以自取： &lt;a href=&#34;https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784&#34;&gt;https://gist.github.com/Xuanwo/425fa071d4601d39fc5c902a12ab5784&lt;/a&gt;&lt;/p&gt;</description></item><item><title>有趣的网页乱码问题</title><link>https://xuanwo.io/2016/11/22/garbled-page/</link><pubDate>Tue, 22 Nov 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/11/22/garbled-page/</guid><description>&lt;p&gt;这是来自segmentfault的一个问题：&lt;a href=&#34;https://segmentfault.com/q/1010000007540588&#34;&gt;node.js中抓取utf-8编码的网页为什么也是乱码&lt;/a&gt;，解答完这个问题之后，决定探讨一下网页乱码这个问题。&lt;/p&gt;
+&lt;p&gt;网页乱码之所以产生，是因为我们处理数据的方式与期待的方式不一致。比如说：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;文本编码不一致&lt;/li&gt;
+&lt;li&gt;数据编码不一致&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下面分别来介绍一下这两种情况：&lt;/p&gt;
+&lt;h2 id=&#34;文本编码不一致&#34;&gt;文本编码不一致&lt;/h2&gt;
+&lt;p&gt;这个问题比较常见，常常发生在一些比较老的网站上，采用&lt;code&gt;gbk&lt;/code&gt;或者&lt;code&gt;gb2312&lt;/code&gt;编码，但是大多数语言都是默认使用&lt;code&gt;utf-8&lt;/code&gt;进行解释，这时就会导致乱码。&lt;/p&gt;
+&lt;p&gt;这种情况解决起来比较容易，只需要使用恰当的编码去解释即可。一个比较稳妥的方案是通过&lt;code&gt;Response Headers&lt;/code&gt;中的&lt;code&gt;Content-Type&lt;/code&gt;去获取内容的&lt;code&gt;charset&lt;/code&gt;。当然，服务器端的开发者首先需要尽可能的遵循规范，统一使用&lt;code&gt;utf-8&lt;/code&gt;编码，其次，就算是采用比较特别的编码，也需要在HTML或者headers中显式指定出来，不要让用户来猜测你的编码类型。&lt;/p&gt;
+&lt;p&gt;最坑爹的一种情况是明明是使用&lt;code&gt;gbk&lt;/code&gt;编码的，却标注为&lt;code&gt;utf-8&lt;/code&gt;，这种坑爹的网站建议不要再使用他们的服务了，迟早要完。&lt;/p&gt;
+&lt;h2 id=&#34;数据编码不一致&#34;&gt;数据编码不一致&lt;/h2&gt;
+&lt;p&gt;数据是文本更为底层的表示，如果数据编解码不正确，那么文本肯定无法正常显示。这里来讲一讲我们遇到的这个问题。&lt;/p&gt;
+&lt;h3 id=&#34;问题介绍&#34;&gt;问题介绍&lt;/h3&gt;
+&lt;p&gt;请求的页面是一个纯的静态页面： &lt;a href=&#34;http://www.runoob.com/nodejs/nodejs-tutorial.html&#34;&gt;http://www.runoob.com/nodejs/nodejs-tutorial.html&lt;/a&gt; ，题主使用了这样的代码来进行抓取：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nodejs&#34; data-lang=&#34;nodejs&#34;&gt;var http=require(&amp;#34;http&amp;#34;);
+var go=require(&amp;#34;iconv-lite&amp;#34;)
+http.get(&amp;#34;http://www.runoob.com/nodejs/nodejs-tutorial.html&amp;#34;,function(res){
+var html=&amp;#34;&amp;#34;;
+res.on(&amp;#34;data&amp;#34;,function(data){
+/* html +=go.decode(data,&amp;#34;gb2312&amp;#34;);*/
+html+=data;
+})
+res.on(&amp;#34;end&amp;#34;,function(){
+console.log(html);
+}).on(&amp;#34;error&amp;#34;,function(){
+console.log(&amp;#34;获取失败&amp;#34;)
+})
+})&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;主要进行了两种尝试，第一种是直接拼接后抓取，第二种是使用了&lt;code&gt;iconv-lite&lt;/code&gt;进行了网页编码的转换。
+实际上，这个网页在&lt;code&gt;&amp;lt;head&amp;gt;&lt;/code&gt;部分已经注明：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;meta&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;http-equiv&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;content&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;text/html; charset=UTF-8&amp;#34;&lt;/span&gt; /&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其实这也是题主困惑的地方，明明编码使用的&lt;code&gt;utf-8&lt;/code&gt;，为什么得不到正确的结果？&lt;/p&gt;
+&lt;h3 id=&#34;问题分析&#34;&gt;问题分析&lt;/h3&gt;
+&lt;p&gt;问题出在&lt;code&gt;Response&lt;/code&gt;的数据编码上，可以通过浏览器查看到&lt;code&gt;Response Headers&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;Connection:keep-alive
+Content-Encoding:gzip
+Content-Length:11902
+Content-Type:text/html; charset=utf-8
+Date:Mon, 21 Nov 2016 23:53:49 GMT
+Server:Tengine&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;可以看到这样一行：&lt;code&gt;Content-Encoding:gzip&lt;/code&gt;，当前网页已经使用&lt;code&gt;gzip&lt;/code&gt;进行了加密。就好比说别人发给你一个rar的压缩包，但是你直接当成&lt;code&gt;utf-8&lt;/code&gt;的文本文件进行解码，当然得不到正确的结果。想要得到正确的结果的话，需要先脱鞋子再脱袜子（先解压缩再进行文本编码）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nodejs&#34; data-lang=&#34;nodejs&#34;&gt;var http = require(&amp;#34;http&amp;#34;);
+var zlib = require(&amp;#39;zlib&amp;#39;);
+http.get(&amp;#34;http://www.runoob.com/nodejs/nodejs-tutorial.html&amp;#34;, function(res) {
+var html = [];
+res.on(&amp;#34;data&amp;#34;, function(data) {
+html.push(data);
+})
+res.on(&amp;#34;end&amp;#34;, function() {
+var buffer = Buffer.concat(html);
+zlib.gunzip(buffer, function(err, decoded) {
+console.log(decoded.toString());
+})
+}).on(&amp;#34;error&amp;#34;, function() {
+console.log(&amp;#34;获取失败&amp;#34;)
+})
+})&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;实际上大多数现代语言内部的字符串都使用了&lt;code&gt;utf-8&lt;/code&gt;编码，所以此处解压缩之后就可以得到自己想要的结果。&lt;/p&gt;
+&lt;h3 id=&#34;问题深入&#34;&gt;问题深入&lt;/h3&gt;
+&lt;p&gt;其实题主的代码中隐藏着这样的一个问题：&lt;/p&gt;
+&lt;p&gt;他认为得到数据已经是文本类型了，所以直接使用&lt;code&gt;html+=data;&lt;/code&gt;这种方式来进行拼接。但实际上，服务器端传递过来的数据是二进制数据，对分块后的二进制数据进行拼接或者是编解码操作，可能会导致最后生成的字符串出现截断。所以正确的方式应该是使用内置的&lt;code&gt;Buffer&lt;/code&gt;类型进行操作。&lt;/p&gt;
+&lt;p&gt;后来题主通过私信问了我这样一个问题：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;为什么网页上都有Content-Encoding:gzip，有的需要解压gzip，而有的不需要？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;我认为要看服务器端是怎么实现的，很多服务器会先检测&lt;code&gt;Request Headers&lt;/code&gt;中的&lt;code&gt;Accept-Encoding&lt;/code&gt;，然后再决定发送什么样的数据。&lt;code&gt;runoob.com&lt;/code&gt;这个网站很有可能就是没有做这样的处理，统一返回的gzip之后的页面。&lt;/p&gt;
+&lt;h3 id=&#34;问题解决&#34;&gt;问题解决&lt;/h3&gt;
+&lt;p&gt;这个问题已经解决了，下面需要考虑的是怎么样去避免这个问题。&lt;/p&gt;
+&lt;p&gt;从客户端开发者的角度来看，如果不能确定访问的网页的数据类型，需要自己做一下判断：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nodejs&#34; data-lang=&#34;nodejs&#34;&gt;var contentEncoding = res.headers[&amp;#34;content-encoding&amp;#34;];
+...
+if (contentEncoding === &amp;#34;gzip&amp;#34;) {
+xxxxx;
+} else if (contentEncoding === &amp;#34;deflate&amp;#34;) {
+xxxxx;
+} else {
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;从服务器端开发者的角度来看，不能假定用户会以我们期待的方式去处理数据，所以一定要显式的指定我们数据的呈现形式。&lt;/p&gt;
+&lt;p&gt;包括但不限于：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在&lt;code&gt;HTML&lt;/code&gt;中显式指定&lt;code&gt;Content-Type&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&amp;lt;&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;meta&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;http-equiv&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;content&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;text/html; charset=UTF-8&amp;#34;&lt;/span&gt; /&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;服务器端返回的&lt;code&gt;Response Headers&lt;/code&gt;中要显式指定内容编码和类型&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;Content-Encoding:gzip
+Content-Type:text/html; charset=utf-8&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;其实在web开发这个领域，规范已经非常详细了，文本的编码，Headers的定义，服务器端的返回值等等。不要把规范当成默认，一定要显式指定规范中描述的参数，不要让用户来猜测你的数据类型。作为开发者，在严格遵守相应规范的同时，也要考虑兼容用户不符合规范的行为。当然，这种兼容也要有一定的尺度，强行兼容所有可能的用户行为往往吃力不讨好，落入了过度设计与提早优化的深渊。&lt;/p&gt;
+&lt;p&gt;个中尺度的把握，往往能够看出一个程序员的火候。&lt;/p&gt;
+&lt;p&gt;以此自勉。&lt;/p&gt;</description></item><item><title>httpbin 介绍</title><link>https://xuanwo.io/2016/11/12/httpbin-intro/</link><pubDate>Sat, 12 Nov 2016 00:00:00 +0000</pubDate><guid>https://xuanwo.io/2016/11/12/httpbin-intro/</guid><description>&lt;p&gt;在所有需要做HTTP请求的开发过程中，总有一个这样的痛点：我发出去的请求到底是什么样子的？特别是在一些需要签名和认证的场合，服务器只会冷冰冰的返回一个&lt;code&gt;40x&lt;/code&gt;错误，你无从得知错误的具体详情。本文旨在介绍&lt;code&gt;httpbin&lt;/code&gt;，看看它是如何解决这个痛点的。&lt;/p&gt;
+&lt;h2 id=&#34;httpbin是什么&#34;&gt;httpbin是什么&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;httpbin&lt;/code&gt;是一个&lt;code&gt;HTTP Request &amp;amp; Response Service&lt;/code&gt;，你可以向他发送请求，然后他会按照指定的规则将你的请求返回。这个类似于&lt;code&gt;echo服务器&lt;/code&gt;，但是功能又比它要更强大一些。
+&lt;code&gt;httpbin&lt;/code&gt;支持HTTP/HTTPS，支持所有的HTTP动词，能模拟302跳转乃至302跳转的次数，还可以返回一个HTML文件或一个XML文件或一个图片文件（还支持指定返回图片的格式）。实在是请求调试中居家必备的良器！&lt;/p&gt;
+&lt;h2 id=&#34;httpbin怎么用&#34;&gt;httpbin怎么用&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;httpbin&lt;/code&gt;的使用方法非常简单，你只需要把请求的地址修改为&lt;code&gt;httpbin.org&lt;/code&gt;即可。
+比如：&lt;/p&gt;
+&lt;h3 id=&#34;获取请求中的user-agent&#34;&gt;获取请求中的user-agent&lt;/h3&gt;
+&lt;p&gt;请求：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;curl http://httpbin.org/user-agent&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;返回：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;user-agent&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;curl/7.19.7 (universal-apple-darwin10.0) libcurl/7.19.7 OpenSSL/0.9.8l zlib/1.2.3&amp;#34;&lt;/span&gt;}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;查看自己的get请求&#34;&gt;查看自己的GET请求&lt;/h3&gt;
+&lt;p&gt;请求：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;curl http://httpbin.org/get&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;返回：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;args&amp;#34;&lt;/span&gt;: {},
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;headers&amp;#34;&lt;/span&gt;: {
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;Accept&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;*/*&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;Connection&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;close&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;Content-Length&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;Host&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;httpbin.org&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;User-Agent&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;curl/7.19.7 (universal-apple-darwin10.0) libcurl/7.19.7 OpenSSL/0.9.8l zlib/1.2.3&amp;#34;&lt;/span&gt;
+},
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;origin&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;24.127.96.129&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;url&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;http://httpbin.org/get&amp;#34;&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;更多的用法可以参考官方的主页： &lt;a href=&#34;https://httpbin.org/&#34;&gt;https://httpbin.org/&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;如何部署在内网&#34;&gt;如何部署在内网&lt;/h2&gt;
+&lt;p&gt;考虑到&lt;code&gt;httpbin&lt;/code&gt;部署在国外，加上业务调试的时候不想跟外部的服务器交互，&lt;code&gt;httpbin&lt;/code&gt;也可以采用自己部署的方式。&lt;/p&gt;
+&lt;h3 id=&#34;从pypi安装并使用&#34;&gt;从Pypi安装并使用&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pip install httpbin gunicorn
+gunicorn httpbin:app&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;从源码安装&#34;&gt;从源码安装&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;git clone https://github.com/Runscope/httpbin.git
+pip install -e httpbin
+python -m httpbin.core &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;--port&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;PORT&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;--host&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;HOST&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://httpbin.org/&#34;&gt;httpbin官方网站&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>大学生网站集合</title><link>https://xuanwo.io/2014/10/25/websitesforstudents/</link><pubDate>Sat, 25 Oct 2014 13:46:37 +0000</pubDate><guid>https://xuanwo.io/2014/10/25/websitesforstudents/</guid><description>&lt;p&gt;即使是在搜索引擎如此发达的今天，依然有很多偏僻但是特别有用的网站被无数SEO们死死地压在身下。比如，直到现场赛的前几天，才从学长们的口中知道了在线数列大全（OEIS）这样神一般的网站。我就不禁想，像这样的网站是不是并不在少数？我们是不是可以把自己积累的一些好网站共享出来，让大家都能在搜寻某方面的信息可以对症下药，而不是用几个关键词翻来覆去地在Google上面盲目的搜寻？于是，这个&lt;a href=&#34;https://github.com/Xuanwo/WebsitesForStudents&#34;&gt;大学生网站集合项目&lt;/a&gt;就诞生了。&lt;/p&gt;
+&lt;h2 id=&#34;简介&#34;&gt;简介&lt;/h2&gt;
+&lt;p&gt;本库旨在建设一个对大学生有益有用的网站集合，欢迎参与编辑。&lt;/p&gt;
+&lt;h2 id=&#34;标准&#34;&gt;标准&lt;/h2&gt;
+&lt;p&gt;有益：大学生就业指导，技能学习。
+有用：常用的一些在线工具或者技巧。&lt;/p&gt;
+&lt;h2 id=&#34;说明&#34;&gt;说明&lt;/h2&gt;
+&lt;p&gt;非商业，不推广，纯收录，不排名。
+来源网站不能违反相关的法律法规，广告尽可能少，访问速度最好要快。
+原则上按专业学科进行分类，难以分类的进入通用类。
+类别较多，请多多使用Ctrl+F。
+不限制网站语言，推荐中文或英文为主。&lt;/p&gt;
+&lt;h2 id=&#34;交流&#34;&gt;交流&lt;/h2&gt;
+&lt;p&gt;欢迎大家将珍藏已久的好网站共享出来，您可以：&lt;/p&gt;
+&lt;p&gt;使用 Issues 以及 Pull Request
+贡献者名单: &lt;a href=&#34;https://github.com/Xuanwo/WebsitesForStudents/graphs/contributors&#34;&gt;https://github.com/Xuanwo/WebsitesForStudents/graphs/contributors&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年10月25日 新增文章。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>深澜HTML登陆——防掉线，开共享</title><link>https://xuanwo.io/2014/10/03/srun/</link><pubDate>Fri, 03 Oct 2014 20:38:27 +0000</pubDate><guid>https://xuanwo.io/2014/10/03/srun/</guid><description>&lt;p&gt;一直以来使用的是老版的SRUN3000.exe客户端，同时也忍受着老版客户端频繁掉线以及莫名卡死等诡异问题。来到实验室之后，老版客户端出现了秒退的现象，刚登陆就提示“检测到代理服务，已自动下线”；使用新版的客户端，则提示“与绑定的IP不一致或开启了共享，balabala”。看来深澜的限制已经影响到我的正常使用了，不如自己捣鼓一下吧。下面直接放出解决方案（地大专用），如果对原理感兴趣的可以继续往下看。&lt;/p&gt;
+&lt;h1 id=&#34;解决方案&#34;&gt;解决方案&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;http://pan.baidu.com/s/1eQgo9bG&#34;&gt;点击下载网页登陆版深澜客户端&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;html源代码&#34;&gt;HTML源代码&lt;/h1&gt;
+&lt;h2 id=&#34;ipv4登陆&#34;&gt;IPv4登陆&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;!DOCTYPE HTML&amp;gt;
+&amp;lt;html&amp;gt;
+&amp;lt;head&amp;gt;
+&amp;lt;meta charset=&amp;quot;utf-8&amp;quot; /&amp;gt;
+&amp;lt;title&amp;gt;Srun Login!&amp;lt;/title&amp;gt;
+&amp;lt;script type=&amp;quot;text/javascript&amp;quot;&amp;gt;
+function submit() {
+document.getElementById(&#39;submit&#39;).click();
+}
+&amp;lt;/script&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body onload=&amp;quot;submit();&amp;quot;&amp;gt;
+&amp;lt;form action=&amp;quot;http://202.204.105.195:3333/cgi-bin/do_login&amp;quot; method=&amp;quot;post&amp;quot;&amp;gt;
+&amp;lt;!--将账号，密码，MAC地址分别填写进value=&amp;quot;&amp;quot;的俩冒号中，例如value=&amp;quot;1234567&amp;quot;--&amp;gt;
+&amp;lt;p&amp;gt;账号：&amp;lt;input name=&amp;quot;username&amp;quot; value=&amp;quot;&amp;quot;&amp;gt;&amp;lt;/p&amp;gt;
+&amp;lt;p&amp;gt;密码：&amp;lt;input type=&amp;quot;password&amp;quot; name=&amp;quot;password&amp;quot; value=&amp;quot;&amp;quot;&amp;gt;&amp;lt;/p&amp;gt;
+&amp;lt;p&amp;gt;MAC：&amp;lt;input name=&amp;quot;mac&amp;quot; type=&amp;quot;hidden&amp;quot; value=&amp;quot;&amp;quot;&amp;gt;&amp;lt;/p&amp;gt;
+&amp;lt;input name=&amp;quot;n&amp;quot; type=&amp;quot;hidden&amp;quot; value=&amp;quot;99&amp;quot;&amp;gt;
+&amp;lt;input name=&amp;quot;type&amp;quot; type=&amp;quot;hidden&amp;quot; value=&amp;quot;3&amp;quot;&amp;gt;
+&amp;lt;p&amp;gt;&amp;lt;input type=&amp;quot;submit&amp;quot; id=&amp;quot;submit&amp;quot; value=&amp;quot;OK&amp;quot; /&amp;gt;&amp;lt;/p&amp;gt;
+&amp;lt;/form&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;ipv6登陆&#34;&gt;IPv6登陆&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;!DOCTYPE HTML&amp;gt;
+&amp;lt;html&amp;gt;
+&amp;lt;head&amp;gt;
+&amp;lt;meta charset=&amp;quot;utf-8&amp;quot; /&amp;gt;
+&amp;lt;title&amp;gt;Srun Login!&amp;lt;/title&amp;gt;
+&amp;lt;script type=&amp;quot;text/javascript&amp;quot;&amp;gt;
+function submit() {
+document.getElementById(&#39;submit&#39;).click();
+}
+&amp;lt;/script&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body onload=&amp;quot;submit();&amp;quot;&amp;gt;
+&amp;lt;form action=&amp;quot;http://[2001:da8:214:102:d6be:d9ff:feaa:422a]/cgi-bin/do_login&amp;quot; method=&amp;quot;post&amp;quot;&amp;gt;
+&amp;lt;!--将账号，密码，MAC地址分别填写进value=&amp;quot;&amp;quot;的俩冒号中，例如value=&amp;quot;1234567&amp;quot;--&amp;gt;
+&amp;lt;p&amp;gt;账号：&amp;lt;input name=&amp;quot;username&amp;quot; value=&amp;quot;&amp;quot;&amp;gt;&amp;lt;/p&amp;gt;
+&amp;lt;p&amp;gt;密码：&amp;lt;input type=&amp;quot;password&amp;quot; name=&amp;quot;password&amp;quot; value=&amp;quot;&amp;quot;&amp;gt;&amp;lt;/p&amp;gt;
+&amp;lt;input name=&amp;quot;n&amp;quot; type=&amp;quot;hidden&amp;quot; value=&amp;quot;100&amp;quot;&amp;gt;
+&amp;lt;input name=&amp;quot;is_pad&amp;quot; value=&amp;quot;1&amp;quot;&amp;gt;
+&amp;lt;input name=&amp;quot;type&amp;quot; type=&amp;quot;hidden&amp;quot; value=&amp;quot;1&amp;quot;&amp;gt;
+&amp;lt;p&amp;gt;&amp;lt;input type=&amp;quot;submit&amp;quot; id=&amp;quot;submit&amp;quot; value=&amp;quot;OK&amp;quot; /&amp;gt;&amp;lt;/p&amp;gt;
+&amp;lt;/form&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;login页面&#34;&gt;login页面&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;!DOCTYPE HTML&amp;gt;
+&amp;lt;html&amp;gt;
+&amp;lt;head&amp;gt;
+&amp;lt;meta charset=&amp;quot;utf-8&amp;quot; /&amp;gt;
+&amp;lt;title&amp;gt;Srun Login!&amp;lt;/title&amp;gt;
+&amp;lt;style type=&amp;quot;text/css&amp;quot;&amp;gt;
+iframe {
+border:none;
+width:100%;
+display:block;
+}
+&amp;lt;/style&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body&amp;gt;
+&amp;lt;iframe src=&amp;quot;ipv6.html&amp;quot;&amp;gt;
+&amp;lt;/iframe&amp;gt;
+&amp;lt;iframe src=&amp;quot;ipv4.html&amp;quot;&amp;gt;
+&amp;lt;/iframe&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;鸣谢&#34;&gt;鸣谢&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://imnerd.org/srun-login-by-html.html&#34;&gt;@Austin Lee&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.freemeepo.com/&#34;&gt;@范神&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;@嘉琦学长&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年10月03日 捣鼓了一天，总算能用了。期间因为对POST的错误理解，还绕了一个大弯子。以后再完善吧，争取做出一个可用的版本，不用复杂的配置，可移植性强。&lt;/li&gt;
+&lt;li&gt;2015年05月06日 当前版本已经失效，仅IPv6可用，替代可用：gate.cugbteam.org&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>跨城公交网站的想法</title><link>https://xuanwo.io/2014/09/10/transport-website/</link><pubDate>Wed, 10 Sep 2014 09:49:15 +0000</pubDate><guid>https://xuanwo.io/2014/09/10/transport-website/</guid><description>
+&lt;h1 id=&#34;功能痛点&#34;&gt;功能痛点&lt;/h1&gt;
+&lt;p&gt;跨城市的公共交通导航&lt;/p&gt;
+&lt;h1 id=&#34;实现途径&#34;&gt;实现途径&lt;/h1&gt;
+&lt;p&gt;调用各大地图服务提供商的API（比如百度）&lt;/p&gt;
+&lt;h1 id=&#34;实现方法&#34;&gt;实现方法&lt;/h1&gt;
+&lt;p&gt;将一条需求的导航路线分成三段：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;出发城市-&amp;gt;城市之间的长途交通（长途汽车，火车，飞机，轮船）-&amp;gt;到达城市
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;根据所选择的交通方式的不同，分别在各自城市内设定起点至对应站点。&lt;/p&gt;
+&lt;h1 id=&#34;可能的具体功能点&#34;&gt;可能的具体功能点&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;最优费用计算&lt;/li&gt;
+&lt;li&gt;最短到达时间&lt;/li&gt;
+&lt;li&gt;行程规划&lt;/li&gt;
+&lt;li&gt;用于旅游导航服务（携程快来收购我，233333）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;盈利方式&#34;&gt;盈利方式&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;关联广告（流量变现）&lt;/li&gt;
+&lt;li&gt;票券代购（收取服务费，感觉不靠谱）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;相关风险&#34;&gt;相关风险&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;没有什么技术难度，很容易被百度地图之类的作为一个小功能加入，难以竞争。&lt;/li&gt;
+&lt;li&gt;地图依赖于服务提供商的更新，上游受到控制，相关API可能被限制调用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年09月10日 简单的完成列举了自己的想法。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>TiddlyWiki中文教程</title><link>https://xuanwo.io/2014/08/29/tiddlywiki-doc-cn/</link><pubDate>Fri, 29 Aug 2014 09:18:06 +0000</pubDate><guid>https://xuanwo.io/2014/08/29/tiddlywiki-doc-cn/</guid><description>
+&lt;p&gt;TiddlyWiki是我见过的配置最为简单的Wiki系统，纯HTML实现，不需要服务器，没有复杂的依赖，使用体验非常赞。但是国内使用的人实在太少，而且TiddlyWiki更新迭代很快，原有的一些文档已经不再适用于最新版本的TiddlyWiki了。&lt;/p&gt;
+&lt;h1 id=&#34;基础教学&#34;&gt;基础教学&lt;/h1&gt;
+&lt;p&gt;下载如下页面:&lt;a href=&#34;http://tiddlywiki.com/empty.html&#34;&gt;http://tiddlywiki.com/empty.html&lt;/a&gt;，保存至自己想要保存的地方。
+做任何修改之后，点击保存，浏览器会自动弹出另存为窗口，覆盖自己原先保存的html文件即可。
+没错，就是这么简单！&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年08月29日 我们的征途，当是星辰大海。&lt;/li&gt;
+&lt;li&gt;2014年09月03日 完成基础教学，接下来会依次补充基于浏览器的高阶用法，以及如何在node.js服务器上使用它，不过快开学了，最近有点忙= =。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Gitbook——你自己的开源电子书</title><link>https://xuanwo.io/2014/08/21/opensource-book/</link><pubDate>Thu, 21 Aug 2014 08:41:49 +0000</pubDate><guid>https://xuanwo.io/2014/08/21/opensource-book/</guid><description>&lt;p&gt;想自己写一本开源电子书，却被各种复杂的配置，环境所困扰？Readthedocs支持的语言用得不如Markdown爽？不想没更新一次都自己构建一遍？或者，你想成就一本辉煌的开源巨著躺着挣钱？Gitbook是你最好的选择——需要配置的项目少，使用Markdown标记语言，每次提交都自动进行构建，可以对自己的书进行定价（还能接受捐赠- -，国内就算了。。）。下面我就来稍微介绍一下Gitbook以及如何进行基本的配置。&lt;/p&gt;
+&lt;h1 id=&#34;介绍&#34;&gt;介绍&lt;/h1&gt;
+&lt;p&gt;Gitbook项目官网：&lt;a href=&#34;http://www.gitbook.io/&#34;&gt;http://www.gitbook.io/&lt;/a&gt;
+GitBook Github地址：&lt;a href=&#34;https://github.com/GitbookIO/gitbook&#34;&gt;https://github.com/GitbookIO/gitbook&lt;/a&gt;
+Gitbook本身是一个命令行工具（基于Node.js），因此我们可以在本地运行，并使用它来生成静态的网页。不过我们今天将要介绍的，是Gitbook所提供的网页服务——通过Github的Webhook功能实现的自动构建，免去了每次修改都需要自己构建的麻烦，而且也为多地协同，异地编辑提供了方便。
+Gitbook也提供了自己的一个编辑器，支持Markdown文件的实时渲染，和方便快捷的目录管理，需要的朋友可以自己去&lt;a href=&#34;https://www.gitbook.io/editor/download&#34;&gt;官网下载&lt;/a&gt;。这个下载是通过Github托管的，而Github又使用了亚马逊S3的云服务器，受到国情限制，下载异常艰难，我重试了N次才成功。因此我再提供一份自己的&lt;a href=&#34;http://www.400gb.com/file/71518805&#34;&gt;备份下载链接&lt;/a&gt;，给需要的朋友。&lt;/p&gt;
+&lt;h1 id=&#34;本地端配置&#34;&gt;本地端配置&lt;/h1&gt;
+&lt;p&gt;最简单的一本Gitbook电子书包括两个文件：&lt;code&gt;README.md&lt;/code&gt;和&lt;code&gt;SUMMARY.md&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;readme-md&#34;&gt;README.md&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;README.md&lt;/code&gt;控制了进入电子书页面的第一页，必须创建，否则会构建失败。内容可为空，一般用作写本书的简介。&lt;/p&gt;
+&lt;h2 id=&#34;summary-md&#34;&gt;SUMMARY.md&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;SUMMARY.md&lt;/code&gt;控制了本书的目录，Gitbook会根据这个文件的内容来搜寻并且创建页面，其格式如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# Summary
+* [介绍](README.md)
+* [几何](geometry/geometry.md)
+* [组合](set/set.md)
+* [结构](structure/structure.md)
+* [树状数组(BinaryIndexedTree)](structure/binary-indexed-tree.md)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;定义很简单，除去一行之外，下面通过&lt;code&gt;* [章节名](此章节MD文件所在相对目录)&lt;/code&gt;这样的形式来定义。如果进行了缩进，说明此章节是上一个章节的子章节。比如上文中的&lt;code&gt;结构&lt;/code&gt;是&lt;code&gt;3&lt;/code&gt;，那&lt;code&gt;树状数组&lt;/code&gt;的编号就是&lt;code&gt;3.1&lt;/code&gt;。值得注意的是，逻辑上的结构跟存储结构是没有关联的，也就是说，你可以把所有MD文件放在同一个文件夹里面。但是如果MD文件很多，建议还是保持逻辑结构和实际存储结构的一致，方便管理。&lt;/p&gt;
+&lt;h1 id=&#34;网页端配置&#34;&gt;网页端配置&lt;/h1&gt;
+&lt;p&gt;简单的注册之后，记得要和Github进行绑定，以便Gitbook能够取得POST的权限。然后在电子书的设置中制定项目库的位置，就会自动进行构建了。电子书的地址一般为&lt;code&gt;http://yourname.gitbooks.io/yourbookname/&lt;/code&gt;这样的形式。&lt;/p&gt;
+&lt;h1 id=&#34;评价&#34;&gt;评价&lt;/h1&gt;
+&lt;p&gt;这样的方法构建出来电子书缺点在于可定制性不强，生成的PDF文件也是异常的丑= =，而且必须使用Gitbook的服务，在国内浏览速度不是很快。不过优点也蛮明显的：只要一个Git+一个可以编辑MD文档的编辑器就可以轻松地对文档进行编辑。最后，大家在新增章节之后千万不要忘记更新&lt;code&gt;SUMMARY.md&lt;/code&gt;文件～&lt;/p&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年08月21日 初步完成Gitbook介绍。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>强大且配置项丰富的在线IDE应用——Cloud9</title><link>https://xuanwo.io/2014/08/07/cloud9/</link><pubDate>Thu, 07 Aug 2014 13:31:00 +0000</pubDate><guid>https://xuanwo.io/2014/08/07/cloud9/</guid><description>&lt;p&gt;废话先不说，首先来一张大图秀一下编辑状态下的页面：
+&lt;img src=&#34;https://xuanwo.io/imgs/opinion/C9-main.png&#34; alt=&#34;C9的主界面&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;下面转入正题，来介绍一下这个基于Node,JavaScript以及HTML5的在线IDE。&lt;/p&gt;
+&lt;h1 id=&#34;介绍&#34;&gt;介绍&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/ajaxorg/cloud9&#34;&gt;Cloud9&lt;/a&gt;是一个托管在Github下的开源项目，开源许可是GPL v3。根据官方的文档来看，C9既可以通过 &lt;a href=&#34;https://c9.io/&#34;&gt;https://c9.io/&lt;/a&gt; 运行，也可以安装在本地（支持Windows和Linux，理论上来说，Mac也是可以的）。当然啦，运行C9的浏览器推荐Chrome，其他的浏览器并没有测试（如果有朋友测试过了，可以反馈给我，我补充进来）。这个项目相当活跃，有能力的朋友也可以加入到开发中去。恩，简单的介绍就到这里，下面来讲一下基本的用法。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1 id=&#34;用法&#34;&gt;用法&lt;/h1&gt;
+&lt;p&gt;本地端没有测试，直接使用 &lt;a href=&#34;https://c9.io/&#34;&gt;https://c9.io/&lt;/a&gt; 运行。&lt;/p&gt;
+&lt;h2 id=&#34;注册&#34;&gt;注册&lt;/h2&gt;
+&lt;p&gt;进入主页，大大的SIGN UP，直接点进去，进入到注册页面，右边介绍了一下免费版和专业版（也就是收费版）之间的区别。
+免费版拥有：
+- 1 Private Workspace
+- 1 FTP Workspace
+- Full Shell Access and Terminal
+- Unlimited Public Workspaces
+- Unlimited Collaborators&lt;/p&gt;
+&lt;p&gt;专业版除了完全拥有免费版的功能之外，还有：
+- 6 Private Workspaces
+- Connect to your own VM
+- Unlimited FTP Workspaces&lt;/p&gt;
+&lt;p&gt;看起来公司很厚道，免费版完全够用，尤其是还提供了完全的Shell权限，这一点非常重要，后面会详细讲，现在先直接Github登录。
+值得一提的是，Github登录之后，C9会添加一个SSH key到Github中，并且会同步你拥有的所有库，以后可以很方便的直接添加到Workplace中，而且操作都会同步，非常赞。除了Github之外，还支持另一个使用广泛的开源平台——Bitbucket。&lt;/p&gt;
+&lt;h2 id=&#34;使用&#34;&gt;使用&lt;/h2&gt;
+&lt;p&gt;注册成功后会进入Dashboard，左边是你拥有的Workplace，中间是一个简单的使用教程，最近的动态，已经绑定的服务（Github），最右边是账户设置。
+下面创建一个&lt;code&gt;demo-project&lt;/code&gt;，点击&lt;code&gt;start editing&lt;/code&gt;，会打开一个新的编辑页面，可以自由选择想要的界面，因为之前就一直使用&lt;code&gt;Sublime&lt;/code&gt;，所以这次也直接选择&lt;code&gt;Sublime&lt;/code&gt;。C9支持很多语言，默认支持的就有&lt;code&gt;Node.js&lt;/code&gt;，&lt;code&gt;Python&lt;/code&gt;，&lt;code&gt;Ruby&lt;/code&gt;，&lt;code&gt;PHP&lt;/code&gt;，&lt;code&gt;Go&lt;/code&gt;，更逆天的是，他还支持数据库，包括&lt;code&gt;MySQL&lt;/code&gt;，&lt;code&gt;MongoDB&lt;/code&gt;，&lt;code&gt;Redis&lt;/code&gt;，&lt;code&gt;SQLite&lt;/code&gt;。
+不过，作为ACMer，更加常用的语言是C/C++，C9虽然可以识别，但是不能直接通过RUN来运行。是不是C9就不能当作一个C/C++的IDE来用呢？非也非也，这时候，C9真正的强大之处就体现出来了。其实，C9不仅仅是一个IDE，而是一个已经配置好了的虚拟机，顺便透露一下系统环境是&lt;code&gt;Ubuntu 14.04 LTS&lt;/code&gt;，而且支持sudo命令。
+所以，如果想要编译并且运行C/C++的代码，只需要在Shell中输入&lt;code&gt;g++ test.cpp -o test&lt;/code&gt;，然后再&lt;code&gt;./test&lt;/code&gt;运行可执行文件，就OK啦～（&lt;del&gt;其实在RUN的窗口下，还支持环境的修改，不过还没有仔细研究，下次再作介绍吧。&lt;/del&gt;貌似有很多方式可以修改，包括修改build system，修改runner，修改系统环境，有空的时候再研究一下）&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1 id=&#34;发现&#34;&gt;发现&lt;/h1&gt;
+&lt;p&gt;搜罗了一些Ubuntu下显示硬件配置的命令，逐个试了一下，感觉挺有意思的，结果如下&lt;/p&gt;
+&lt;h2 id=&#34;硬盘空间&#34;&gt;硬盘空间&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Bash&lt;/code&gt;中输入命令&lt;code&gt;df&lt;/code&gt;查看磁盘空间，结果如下&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Size Used Avail Use%
+1.5G 165M 1.2G 13%
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;C9真心厚道，每个人给了1.5G的空间，已经够用了。
+&amp;gt;
+偷偷的曝光一件我做的不地道的事情，我单开了一个叫做test的workplace，输入命令&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get update
+sudo apt-get install ubuntu-desktop
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;经过漫长的等待之后- -，果然，空间不足了，哈哈哈。
+其实我蛮好奇要是安装成功了会是什么样的，难道真的会有一个桌面跳出来？
+我可以再试试别的轻量一点的桌面，恩。&lt;/p&gt;
+&lt;h2 id=&#34;cpu配置&#34;&gt;CPU配置&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Bash&lt;/code&gt;中输入命令&lt;code&gt;cat /proc/cpuinfo&lt;/code&gt;查看CPU配置,结果如下&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;processor : 0 //核心数从0到7，其他的全都一样
+vendor_id : GenuineIntel
+cpu family : 6
+model : 45
+model name : Intel(R) Xeon(R) CPU @ 2.60GHz
+stepping : 7
+microcode : 0x1
+cpu MHz : 2599.998
+cache size : 20480 KB
+physical id : 0
+siblings : 8
+core id : 0
+cpu cores : 8
+apicid : 0
+initial apicid : 0
+fpu : yes
+fpu_exception : yes
+cpuid level : 13
+wp : yes
+flags : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss syscall nx pdpe1gb rdtscp lm constant_tsc nopl xtopology eagerfpu pni pclmulqdq ssse3 cx16 sse4_1 sse4_2 x2apic popcnt aes xsave avx hypervisor lahf_lm xsaveopt
+bogomips : 5199.99
+clflush size : 64
+cache_alignment : 64
+address sizes : 46 bits physical, 48 bits virtual
+power management:
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我了个擦，着实有点羡慕，八核的至强处理器。不过我猜应该是亚马逊或者Google的云服务器吧，而且我在用的时候没觉得有多快啊= =。&lt;/p&gt;
+&lt;h2 id=&#34;系统版本&#34;&gt;系统版本&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Bash&lt;/code&gt;中输入命令&lt;code&gt;sudo lsb_release -a&lt;/code&gt;查看系统版本,结果如下&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;No LSB modules are available.
+Distributor ID: Ubuntu
+Description: Ubuntu 14.04 LTS
+Release: 14.04
+Codename: trusty
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;果然是最新版，不知道会不会同步更新，应该是不带桌面的server版本。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1 id=&#34;应用场景&#34;&gt;应用场景&lt;/h1&gt;
+&lt;p&gt;虽然Cloud9宣传的时候还是以在线的IDE为主，但是在试用的过程中，我发现C9在一些应用场景下，有着绝妙的用处。&lt;/p&gt;
+&lt;h2 id=&#34;配合hexo和git-用于管理和生成博客&#34;&gt;配合Hexo和Git，用于管理和生成博客&lt;/h2&gt;
+&lt;p&gt;Hexo一类的静态博客生成器有一个很大的问题就是，它的配置不能进行同步，以至于更换一台电脑或者电脑出了意外，基本上就要重头再来。虽然将Blog本身使用Git管理可以部分解决这个问题，但是同样要面临nodejs和git的环境配置，十分麻烦。
+在有了Cloud9之后，这些问题都迎刃而解了。在C9上安装hexo（C9已经将nodejs和git配置好了，无需重新安装），配置完毕后，即可进行在线编辑。常用的电脑上，可以进行环境配置，本地编辑，deply上传，没有区别；在临时电脑上，直接登录C9，进行在线编辑即可～&lt;/p&gt;
+&lt;h2 id=&#34;在线的ubuntu虚拟机&#34;&gt;在线的Ubuntu虚拟机&lt;/h2&gt;
+&lt;p&gt;第一次玩Linux没有经验？怕把电脑弄坏？想试试某个软件或者某个命令，却不敢在本地尝试？快来C9吧，弄坏了只要把那个Workplace删掉就好，也就是说，你拥有了无限个1.5G的在线Ubuntu虚拟机！这还不够赞？&lt;/p&gt;
+&lt;h2 id=&#34;免费的web服务器&#34;&gt;免费的Web服务器&lt;/h2&gt;
+&lt;p&gt;自带了一个服务器的功能，可用于Demo预览，支持直接从外界进行访问。不过不建议真的把自己的应用放在那个上面，首先速度太慢了- -，其次心里过意不去。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1 id=&#34;配置&#34;&gt;配置&lt;/h1&gt;
+&lt;p&gt;TODO（配置项比较多，默认的就很OK，有空的时候再研究。）&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;2014年08月07日 完成C9的&lt;code&gt;介绍&lt;/code&gt;和简单的&lt;code&gt;用法&lt;/code&gt;说明，&lt;code&gt;配置&lt;/code&gt;部分有待完成。&lt;/li&gt;
+&lt;li&gt;2014年08月10日 完成&lt;code&gt;发现&lt;/code&gt;和&lt;code&gt;应用场景模块&lt;/code&gt;，配置部分暂缓更新，等待C9官方issus的回复。&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

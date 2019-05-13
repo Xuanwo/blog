@@ -1,0 +1,84 @@
+<!doctype html><html><head><title>POJ 1013 Counterfeit Dollar</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content=Technology,Code,Program,Linux,><meta name=author content=Xuanwo><meta property=og:title content="POJ 1013 Counterfeit Dollar"><meta property=og:description content="A blog maintained by an interesting programmer."><meta property=og:type content=website><meta property=og:locale content=en_US><meta property=og:url content=https://xuanwo.io/2014/07/10/poj-1013-counterfeit-dollar/><link href rel=alternate type=application/rss+xml title="Xuanwo's Blog"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/milligram@1.3.0/dist/milligram.min.css integrity="sha256-Ro/wP8uUi8LR71kwIdilf78atpu8bTEwrK5ZotZo+Zc=" crossorigin=anonymous><link rel=stylesheet href=/css/main.min.css><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.54.0"></head><body><div id=container><header id=header><div id=header-outer class=outer><div id=header-inner class=inner><a id=main-nav-toggle class=nav-icon href=javascript:;><svg width="1em" height="1em" viewBox="0 0 100 100"><use xlink:href="/svg/fontawesome.svg#bars"/></svg></a><a id=logo class=logo-text href=https://xuanwo.io>Xuanwo&#39;s Blog</a><nav id=main-nav><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<a class=main-nav-link href=/about/>关于我</a></nav></div></div></header><section id=main class=outer><article class="article article-type-post" itemscope itemprop=blogPost><div class=article-inner><header class=article-header><h1 class=article-title itemprop=name>POJ 1013 Counterfeit Dollar</h1></header><div class=article-meta><a href=/2014/07/10/poj-1013-counterfeit-dollar/ class=article-date><time datetime=2014-07-10T14:22:44.000&#43;00:00 itemprop=datePublished>2014-07-10</time></a><div class=post-categories><div class=article-category><a class=article-category-link href=https://xuanwo.io/categories/code>Code</a></div></div><div class=article-comment-link-wrap><a href=/2014/07/10/poj-1013-counterfeit-dollar/#disqus_thread class=article-comment-link>Comments</a></div></div><div class=article-entry itemprop=articleBody><h2 id=题目>题目</h2><p>源地址：</p><p><a href="http://poj.org/problem?id=1013">http://poj.org/problem?id=1013</a></p><h1 id=理解>理解</h1><p>总共有12枚银币，里面有一枚是假货。要求通过三次称量，找出那枚假币，并说出是重了还是轻了。题目中明确指出，三次称量必定能找出那枚假货，使得问题简化了很多。一开始的想法是完全模拟出来，但写到代码的时候感觉过于蛋疼，然后想能不能用一些由计算机来推导的方法。在具体的实现中，发现我很难把问题抽象成计算机可以处理的问题。在一份<a href=http://blog.csdn.net/lyy289065406/article/details/6661421>解题报告</a>的启发下，想到了使用一个数值来度量每个银币可能为假币的可能性的方法。</p><h1 id=代码>代码</h1><pre><code>#include &lt;iostream&gt;
+#include &lt;stdlib.h&gt;
+using namespace std;
+
+int main()
+{
+	int n;
+	cin&gt;&gt;n;
+	while(n--)
+	{
+		char left[3][6],right[3][6],status[3][6];
+
+		int time['L'+1]={0};
+		bool zero['L'+1]={false};
+
+		for(int k=0;k&lt;3;k++)
+			cin&gt;&gt;left[k]&gt;&gt;right[k]&gt;&gt;status[k];
+
+		for(int i=0;i&lt;3;i++)
+		{
+			switch(status[i][0])
+			{
+			    case 'u':
+					{
+						for(int j=0;left[i][j];j++)
+						{
+							time[ left[i][j] ]++;
+							time[ right[i][j] ]--;
+						}
+						break;
+					}
+				case 'd':
+					{
+						for(int j=0;left[i][j];j++)
+						{
+							time[ left[i][j] ]--;
+							time[ right[i][j] ]++;
+						}
+						break;
+					}
+				case 'e':
+					{
+						for(int j=0;left[i][j];j++)
+						{
+							zero[ left[i][j] ]=true;
+							zero[ right[i][j] ]=true;
+						}
+						break;
+					}
+			}
+		}
+
+		int max=-1;
+		char alpha;
+		for(int j='A';j&lt;='L';j++)
+		{
+			if(zero[j])
+				continue;
+
+			if(max&lt;=abs(time[j]))
+			{
+				max=abs(time[j]);
+				alpha=j;
+			}
+		}
+
+		cout&lt;&lt;alpha&lt;&lt;&quot; is the counterfeit coin and it is &quot;;
+		if(time[alpha]&gt;0)
+			cout&lt;&lt;&quot;heavy.&quot;&lt;&lt;endl;
+		else
+			cout&lt;&lt;&quot;light.&quot;&lt;&lt;endl;
+	}
+	return 0;
+}
+
+</code></pre><h1 id=更新日志>更新日志</h1><p>2014年07月10日 已AC(C++下通过，G++下WA)，准备择日修复。</p></div><div class=article-toc></div></div><nav id=article-nav><a href=/2014/07/10/poj-1207-the-3n&#43;1-problem/ id=article-nav-newer class=article-nav-link-wrap><div class=article-nav-title><span>&lt;</span>&nbsp;
+POJ 1207 The 3n &#43; 1 problem</div></a><a href=/2014/07/07/poj-1008-maya-calendar/ id=article-nav-older class=article-nav-link-wrap><div class=article-nav-title>POJ 1008 Maya Calendar&nbsp;<span>&gt;</span></div></a></nav></article><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){this.page.identifier='\/2014\/07\/10\/POJ-1013-Counterfeit-Dollar\/';this.page.title='POJ 1013 Counterfeit Dollar';this.page.url='https:\/\/xuanwo.io\/2014\/07\/10\/poj-1013-counterfeit-dollar\/';};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return;}
+var d=document,s=d.createElement('script');s.async=true;s.src='//'+"only0god"+'.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></section><footer id=footer><div class=outer><div id=footer-info class=inner>&copy; 2019 Xuanwo&#39;s Blog&nbsp;
+Powered by <a href=https://gohugo.io target=_blank>Hugo</a></div></div><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script src=https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js></script><script>tocbot.init({tocSelector:'.article-toc',contentSelector:'.article-entry',headingSelector:'h1, h2, h3, h4, h5',});</script><script>document.getElementById('main-nav-toggle').addEventListener('click',function(){var header=document.getElementById('header');if(header.classList.contains('mobile-on')){header.classList.remove('mobile-on');}else{header.classList.add('mobile-on');}});</script></footer></div></body></html>
