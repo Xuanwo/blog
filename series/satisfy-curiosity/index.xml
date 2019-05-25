@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Satisfy Curiosity on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/series/satisfy-curiosity/</link><description>Recent content in Satisfy Curiosity on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 25 May 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/series/satisfy-curiosity/index.xml" rel="self" type="application/rss+xml"/><item><title>Golang Panic 行为探秘</title><link>https://xuanwo.io/2019/05/25/go-panic/</link><pubDate>Sat, 25 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/25/go-panic/</guid><description>&lt;p&gt;为了满足分布式系统测试的需求，我们经常需要在代码中埋下断点，以便于通过修改编译参数或者注册特定 Hook 的方式来强迫程序走特定的逻辑。这篇文章主要分享了我在实现 BreakPoint 时发现的 Golang Panic &amp;amp;&amp;amp; Recover 的一个好玩行为及其背后的原因。&lt;/p&gt;
+&lt;h2 id=&#34;复现&#34;&gt;复现&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;package&lt;/span&gt; runtime
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; (
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;testing&amp;#34;&lt;/span&gt;
+)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;TestRecover&lt;/span&gt;(t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;testing.T) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;defer&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020&#34;&gt;recover&lt;/span&gt;()
+}()
+&lt;span style=&#34;color:#007020&#34;&gt;panic&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;panic in test&amp;#34;&lt;/span&gt;)
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;TestRecoverInClosure&lt;/span&gt;(t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;testing.T) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;defer&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// This should be the callback function of a break point.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Let&amp;#39;s call them directly for simpler example.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020&#34;&gt;recover&lt;/span&gt;()
+}()
+}()
+&lt;span style=&#34;color:#007020&#34;&gt;panic&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;panic in test&amp;#34;&lt;/span&gt;)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;TestRecover&lt;/code&gt; 演示的是一个比较常见的情况，业务逻辑中可能会出现 panic，我们在 defer 的函数中执行 recover 并做进一步的处理。而 &lt;code&gt;TestRecoverInClosure&lt;/code&gt; 中演示的则是我原本想要实现的逻辑，断点在触发时去调用在注册断点时传入的回调函数，在回调函数中去执行 recover 并获得 panic 的现场内容。但是事实证明这样是行不通的，在 &lt;code&gt;TestRecoverInClosure&lt;/code&gt; 中，panic 并没有被捕获，而是直接抛到了最外层，在闭包中的 recover 也自然是什么都没有拿到，翻车现场如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt;= RUN TestRecoverInClosure
+&lt;span style=&#34;color:#666&#34;&gt;---&lt;/span&gt; FAIL: &lt;span style=&#34;color:#06287e&#34;&gt;TestRecoverInClosure&lt;/span&gt; (&lt;span style=&#34;color:#40a070&#34;&gt;0.00&lt;/span&gt;s)
+panic: panic in test [recovered]
+panic: panic in test
+goroutine &lt;span style=&#34;color:#40a070&#34;&gt;6&lt;/span&gt; [running]:
+testing.tRunner.&lt;span style=&#34;color:#06287e&#34;&gt;func1&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;0xc000138400&lt;/span&gt;)
+&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;usr&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;lib&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;src&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;testing&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;testing.&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;830&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0x392&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;panic&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;0x8c1140&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;0xb4d1a0&lt;/span&gt;)
+&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;usr&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;lib&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;src&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;runtime&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;panic.&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;522&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0x1b5&lt;/span&gt;
+xuanwo&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;playground&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;runtime.&lt;span style=&#34;color:#06287e&#34;&gt;TestRecoverInClosure&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;0xc000138400&lt;/span&gt;)
+&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;home&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;xuanwo&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;Code&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;xuanwo&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;playground&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;runtime&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;panic_test.&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;22&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0x55&lt;/span&gt;
+testing.&lt;span style=&#34;color:#06287e&#34;&gt;tRunner&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;0xc000138400&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;0xad0678&lt;/span&gt;)
+&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;usr&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;lib&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;src&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;testing&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;testing.&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;865&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0xc0&lt;/span&gt;
+created by testing.(&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;T).Run
+&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;usr&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;lib&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;src&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;testing&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;testing.&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;916&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0x35a&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;原因&#34;&gt;原因&lt;/h2&gt;
+&lt;p&gt;为了搞清楚问题的原因，首先需要知道 panic &amp;amp;&amp;amp; defer 是怎么工作。Golang 中 panic 和 defer 实现的相关代码主要是在 &lt;code&gt;/usr/lib/go/src/runtime/panic.go&lt;/code&gt; 中，下文贴出来的代码来自于 Go 1.12.5。&lt;/p&gt;
+&lt;h3 id=&#34;defer&#34;&gt;defer&lt;/h3&gt;
+&lt;p&gt;在了解 panic 之前，首先看看 defer 是如何实现并存储的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Allocate a Defer, usually using per-P pool.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Each defer must be released with freedefer.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// This must not grow the stack because there may be a frame without
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// stack map information when this is called.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//go:nosplit
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;newdefer&lt;/span&gt;(siz &lt;span style=&#34;color:#902000&#34;&gt;int32&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_defer {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; d &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_defer
+sc &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;deferclass&lt;/span&gt;(&lt;span style=&#34;color:#007020&#34;&gt;uintptr&lt;/span&gt;(siz))
+gp &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;getg&lt;/span&gt;()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; sc &amp;lt; &lt;span style=&#34;color:#007020&#34;&gt;uintptr&lt;/span&gt;(&lt;span style=&#34;color:#007020&#34;&gt;len&lt;/span&gt;(p{}.deferpool)) {
+&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Allocate new defer+args.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;systemstack&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() {
+total &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;roundupsize&lt;/span&gt;(&lt;span style=&#34;color:#06287e&#34;&gt;totaldefersize&lt;/span&gt;(&lt;span style=&#34;color:#007020&#34;&gt;uintptr&lt;/span&gt;(siz)))
+d = (&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_defer)(&lt;span style=&#34;color:#06287e&#34;&gt;mallocgc&lt;/span&gt;(total, deferType, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;))
+})
+&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;
+}
+d.siz = siz
+d.link = gp._defer
+gp._defer = d
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; d
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这里的 &lt;code&gt;getg()&lt;/code&gt; 返回的是当前正在执行的 goroutine。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这里可以忽略掉具体的实现细节，只需要关注初始化 defer 和更新 &lt;code&gt;gp._defer&lt;/code&gt; 的过程。不难看出 &lt;code&gt;_defer&lt;/code&gt; 结构体是以链表的形式存储在 gouroutine 中的，下面 panic 的实现会高度依赖这一点。&lt;/p&gt;
+&lt;h3 id=&#34;panic&#34;&gt;panic&lt;/h3&gt;
+&lt;p&gt;下面来看一下 panic 的实现，首先看一下整体的结构，然后挑出一些我认为需要关注的地方展开聊一聊。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// The implementation of the predeclared function panic.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;gopanic&lt;/span&gt;(e &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}) {
+gp &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;getg&lt;/span&gt;()
+&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; p _panic
+p.arg = e
+p.link = gp._panic
+gp._panic = (&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_panic)(&lt;span style=&#34;color:#06287e&#34;&gt;noescape&lt;/span&gt;(unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;p)))
+atomic.&lt;span style=&#34;color:#06287e&#34;&gt;Xadd&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;runningPanicDefers, &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; {
+d &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; gp._defer
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;break&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// If defer was started by earlier panic or Goexit (and, since we&amp;#39;re back here, that triggered a new panic),
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// take defer off list. The earlier panic or Goexit will not continue running.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d.started {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d._panic &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+d._panic.aborted = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+}
+d._panic = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+d.fn = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+gp._defer = d.link
+&lt;span style=&#34;color:#06287e&#34;&gt;freedefer&lt;/span&gt;(d)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;continue&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Mark defer as started, but keep on list, so that traceback
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// can find and update the defer&amp;#39;s argument frame if stack growth
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// or a garbage collection happens before reflectcall starts executing d.fn.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; d.started = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Record the panic that is running the defer.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// If there is a new panic during the deferred call, that panic
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// will find d in the list and will mark d._panic (this panic) aborted.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; d._panic = (&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_panic)(&lt;span style=&#34;color:#06287e&#34;&gt;noescape&lt;/span&gt;(unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;p)))
+p.argp = unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#06287e&#34;&gt;getargp&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;))
+&lt;span style=&#34;color:#06287e&#34;&gt;reflectcall&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;, unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(d.fn), &lt;span style=&#34;color:#06287e&#34;&gt;deferArgs&lt;/span&gt;(d), &lt;span style=&#34;color:#007020&#34;&gt;uint32&lt;/span&gt;(d.siz), &lt;span style=&#34;color:#007020&#34;&gt;uint32&lt;/span&gt;(d.siz))
+p.argp = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;
+pc &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; d.pc
+sp &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(d.sp) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// must be pointer so it gets adjusted during stack copy
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;freedefer&lt;/span&gt;(d)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; p.recovered {
+atomic.&lt;span style=&#34;color:#06287e&#34;&gt;Xadd&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;runningPanicDefers, &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;)
+gp._panic = p.link
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Aborted panics are marked but remain on the g.panic list.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Remove them from the list.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; gp._panic &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; gp._panic.aborted {
+gp._panic = gp._panic.link
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; gp._panic &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; { &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// must be done with signal
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; gp.sig = &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Pass information about recovering frame to recovery.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; gp.sigcode0 = &lt;span style=&#34;color:#007020&#34;&gt;uintptr&lt;/span&gt;(sp)
+gp.sigcode1 = pc
+&lt;span style=&#34;color:#06287e&#34;&gt;mcall&lt;/span&gt;(recovery)
+&lt;span style=&#34;color:#06287e&#34;&gt;throw&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;recovery failed&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// mcall should not return
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; }
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// ran out of deferred calls - old-school panic now
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Because it is unsafe to call arbitrary user code after freezing
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// the world, we call preprintpanics to invoke all necessary Error
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// and String methods to prepare the panic strings before startpanic.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;preprintpanics&lt;/span&gt;(gp._panic)
+&lt;span style=&#34;color:#06287e&#34;&gt;fatalpanic&lt;/span&gt;(gp._panic) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// should not return
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#902000&#34;&gt;int&lt;/span&gt;)(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;) = &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// not reached
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;跟 &lt;code&gt;_defer&lt;/code&gt; 一样，&lt;code&gt;_panic&lt;/code&gt; 结构也是以链表形式存储在 goroutine 中的。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; p _panic
+p.arg = e
+p.link = gp._panic
+gp._panic = (&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_panic)(&lt;span style=&#34;color:#06287e&#34;&gt;noescape&lt;/span&gt;(unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;p)))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;首先取出第一个 panic 节点，然后进入 for 循环。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;d &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; gp._defer
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;break&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;取出对头的第一个 &lt;code&gt;_defer&lt;/code&gt; 结构，开始执行 defer 函数，如果为空的话会直接 break 并抛出错误的堆栈。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// If defer was started by earlier panic or Goexit (and, since we&amp;#39;re back here, that triggered a new panic),
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// take defer off list. The earlier panic or Goexit will not continue running.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d.started {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d._panic &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+d._panic.aborted = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+}
+d._panic = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+d.fn = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+gp._defer = d.link
+&lt;span style=&#34;color:#06287e&#34;&gt;freedefer&lt;/span&gt;(d)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;continue&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Mark defer as started, but keep on list, so that traceback
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// can find and update the defer&amp;#39;s argument frame if stack growth
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// or a garbage collection happens before reflectcall starts executing d.fn.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;d.started = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Record the panic that is running the defer.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// If there is a new panic during the deferred call, that panic
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// will find d in the list and will mark d._panic (this panic) aborted.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;d._panic = (&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_panic)(&lt;span style=&#34;color:#06287e&#34;&gt;noescape&lt;/span&gt;(unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;p)))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;当一个 defer 函数开始执行时会将 &lt;code&gt;started&lt;/code&gt; 标志置为 &lt;code&gt;true&lt;/code&gt;，这样就可以知道是不是在这个 defer 函数执行过程中再次出现了 panic。下面修改 &lt;code&gt;_panic&lt;/code&gt; 指针也是类似的操作，这些与我本次分享主题无关，就不展开叙述了。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;p.argp = unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#06287e&#34;&gt;getargp&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;))
+&lt;span style=&#34;color:#06287e&#34;&gt;reflectcall&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;, unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(d.fn), &lt;span style=&#34;color:#06287e&#34;&gt;deferArgs&lt;/span&gt;(d), &lt;span style=&#34;color:#007020&#34;&gt;uint32&lt;/span&gt;(d.siz), &lt;span style=&#34;color:#007020&#34;&gt;uint32&lt;/span&gt;(d.siz))
+p.argp = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里出现了函数执行逻辑的切换，gopanic 中会调用 &lt;code&gt;reflectcall&lt;/code&gt; 去复制 defer 函数的参数并执行 defer 函数。&lt;/p&gt;
+&lt;p&gt;在 &lt;code&gt;reflectcall&lt;/code&gt; 执行前修改 &lt;code&gt;p.argp&lt;/code&gt; 为 &lt;code&gt;unsafe.Pointer(getargp(0))&lt;/code&gt; ，是当前 defer 函数调用的参数指针，或者说是 defer 函数的内存地址（&lt;strong&gt;这个地方我理解的可能有些问题&lt;/strong&gt;），在 &lt;code&gt;reflectcall&lt;/code&gt; 执行成功后再修改为 nil 避免影响下一次的循环。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; p.recovered {
+atomic.&lt;span style=&#34;color:#06287e&#34;&gt;Xadd&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;runningPanicDefers, &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;)
+&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;
+&lt;span style=&#34;color:#06287e&#34;&gt;mcall&lt;/span&gt;(recovery)
+&lt;span style=&#34;color:#06287e&#34;&gt;throw&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;recovery failed&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// mcall should not return
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在 defer 函数执行成功后，通过 &lt;code&gt;p.recovered&lt;/code&gt; 来判断是否已经成功 recover 并执行 recovery，这里不再展开。&lt;/p&gt;
+&lt;h3 id=&#34;recover&#34;&gt;recover&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;gorecover&lt;/span&gt;(argp &lt;span style=&#34;color:#902000&#34;&gt;uintptr&lt;/span&gt;) &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{} {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Must be in a function running as part of a deferred call during the panic.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Must be called from the topmost function of the call
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// (the function used in the defer statement).
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// p.argp is the argument pointer of that topmost deferred function call.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Compare against argp reported by caller.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// If they match, the caller is the one who can recover.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; gp &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;getg&lt;/span&gt;()
+p &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; gp._panic
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; p &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; !p.recovered &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; argp &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;uintptr&lt;/span&gt;(p.argp) {
+p.recovered = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; p.arg
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;传入 &lt;code&gt;gorecover&lt;/code&gt; 函数的 &lt;code&gt;argp&lt;/code&gt; 是 &lt;code&gt;recover&lt;/code&gt; 这个函数的调用者的地址。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;recover 主要做的事情就是检查当前 goroutine 中是否存在 panic，panic 是否已经被 recover，以及调用者是否一致。如果检查通过的话就修改 &lt;code&gt;p.recovered&lt;/code&gt; 为 true，并返回 panic 创建时传入的参数，否则就直接返回 nil。&lt;/p&gt;
+&lt;h2 id=&#34;解释&#34;&gt;解释&lt;/h2&gt;
+&lt;p&gt;刚才简单分析了一下 defer &amp;amp;&amp;amp; panic &amp;amp;&amp;amp; recover 是如何工作的，下面可以利用刚才了解到的原理来解释我遇到的现象了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;TestRecoverInClosure&lt;/span&gt;(t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;testing.T) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;defer&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() { &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;----&lt;/span&gt; argp: &lt;span style=&#34;color:#40a070&#34;&gt;0x01&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// This should be the callback function of a break point.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Let&amp;#39;s call them directly for simpler example.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020&#34;&gt;recover&lt;/span&gt;() &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;----&lt;/span&gt; argp: &lt;span style=&#34;color:#40a070&#34;&gt;0x02&lt;/span&gt;
+}()
+}()
+&lt;span style=&#34;color:#007020&#34;&gt;panic&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;panic in test&amp;#34;&lt;/span&gt;)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ol&gt;
+&lt;li&gt;将这个 defer 函数加入 goroutine 的 &lt;code&gt;_defer&lt;/code&gt; 列表&lt;/li&gt;
+&lt;li&gt;执行 panic，检查是否存在 defer 函数并执行&lt;/li&gt;
+&lt;li&gt;修改 &lt;code&gt;p.argp&lt;/code&gt; 为 0x01，开始执行内部的匿名函数&lt;/li&gt;
+&lt;li&gt;recover 取到当前的调用者 argp 为 0x02，判断不通过，直接返回 nil&lt;/li&gt;
+&lt;li&gt;此时 &lt;code&gt;p.recovered&lt;/code&gt; 仍然为 &lt;code&gt;false&lt;/code&gt;，又没有更多的 defer 函数，进入 fatalpanic&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;困惑&#34;&gt;困惑&lt;/h2&gt;
+&lt;p&gt;上面对照着分析可以大概解释明白为什么 TestRecoverInClosure 中的 panic 捕获不到，但是很多被忽略的细节还是没有搞明白。&lt;/p&gt;
+&lt;h3 id=&#34;getargp&#34;&gt;getargp&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;getargp&lt;/code&gt; 实现非常简单：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// getargp returns the location where the caller
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// writes outgoing function call arguments.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//go:nosplit
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//go:noinline
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;getargp&lt;/span&gt;(x &lt;span style=&#34;color:#902000&#34;&gt;int&lt;/span&gt;) &lt;span style=&#34;color:#902000&#34;&gt;uintptr&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// x is an argument mainly so that we can return its address.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;uintptr&lt;/span&gt;(&lt;span style=&#34;color:#06287e&#34;&gt;noescape&lt;/span&gt;(unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;x)))
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;为什么这就是当前 defer 函数调用的参数指针呢？&lt;/p&gt;
+&lt;h3 id=&#34;recover-gorecover&#34;&gt;recover &amp;amp;&amp;amp; gorecover&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;recover&lt;/code&gt; 是没有参数的，但是 &lt;code&gt;gorecover&lt;/code&gt; 却有 argp 作为参数，跟下去可以看到这样的调用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#06287e&#34;&gt;mkcall&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;gorecover&amp;#34;&lt;/span&gt;, n.Type, init, &lt;span style=&#34;color:#06287e&#34;&gt;nod&lt;/span&gt;(OADDR, nodfp, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;所以是 &lt;code&gt;nod(OADDR, nodfp, nil)&lt;/code&gt; 取到了调用者的地址么？&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;搞明白这个问题花费的时间比我想象的要更久，一方面是因为我对 go 内部的实现确实不太熟悉，另一方面是因为大多数的分享都集中在如何使用 或者最佳实践之类的，讨论内部实现的文章不是很多。我要特别的推荐一下 &lt;a href=&#34;https://ieevee.com&#34;&gt;@伊布&lt;/a&gt; 的文章，他写的 &lt;a href=&#34;https://ieevee.com/tech/2017/11/23/go-panic.html&#34;&gt;Golang: 深入理解panic and recover&lt;/a&gt; 非常赞，对 panic &amp;amp;&amp;amp; recover 切换和恢复过程具体实现感兴趣的同学不妨一读，定会有所收获。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://go101.org/article/panic-and-recover-more.html&#34;&gt;The Right Places to Call the recover Function&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://draveness.me/golang-function-call&#34;&gt;理解 Golang 中函数调用的原理&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ieevee.com/tech/2017/11/23/go-panic.html&#34;&gt;Golang: 深入理解panic and recover&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>
