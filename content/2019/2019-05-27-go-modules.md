@@ -42,7 +42,7 @@ url: /2019/05/27/go-modules/
 
 到了 2014 年，有人提出了 external packages 的概念，在项目的目录下增加一个 vendor 目录来存放外部的包，同时让 go 的 tools 能够感知到这是一个 vendor。这个草案在 2015 年时被接受，并在 go 1.5 中作为 vendor 作为试验推出，在 go 1.6 中作为默认参数被启用。自此出现
 
-到了 2016 年，一群开发者聚在一起进行了讨论，并成立一个社区组织合作开发出了 dep。dep 后来被 golang 官方接纳为 official experiment，并在很长的一段时间里被认为是有望终结 Golang 混乱的依赖管理工具统治。
+到了 2016 年，一群开发者聚在一起进行了讨论，并成立一个社区组织合作开发出了 dep。dep 后来被 golang 官方接纳为 official experiment，并在很长的一段时间里被认为是有望终结 Golang 依赖管理工具混乱的统治者。
 
 ## Versioned Modules
 
