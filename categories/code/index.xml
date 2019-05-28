@@ -1,4 +1,301 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Code on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/categories/code/</link><description>Recent content in Code on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 25 May 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/categories/code/index.xml" rel="self" type="application/rss+xml"/><item><title>Golang Panic 行为探秘</title><link>https://xuanwo.io/2019/05/25/go-panic/</link><pubDate>Sat, 25 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/25/go-panic/</guid><description>&lt;p&gt;为了满足分布式系统测试的需求，我们经常需要在代码中埋下断点，以便于通过修改编译参数或者注册特定 Hook 的方式来强迫程序走特定的逻辑。这篇文章主要分享了我在实现 BreakPoint 时发现的 Golang Panic &amp;amp;&amp;amp; Recover 的一个好玩行为及其背后的原因。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Code on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/categories/code/</link><description>Recent content in Code on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 27 May 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/categories/code/index.xml" rel="self" type="application/rss+xml"/><item><title>Go Modules 内部分享</title><link>https://xuanwo.io/2019/05/27/go-modules/</link><pubDate>Mon, 27 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/27/go-modules/</guid><description>&lt;p&gt;最近在日常工作之外，我开始负责 Team 内部的工程效率提升。瞄准的第一个目标便是推动 Go Modules 在 Team 内部的普及，一方面是想淘汰祖传的依赖管理脚本，减少浪费在处理依赖问题上的时间，另一方面是为了实现 CI/CD 和可重现构建。这安利是否成功，除了要看个人的奋斗，还要看历史的行程。为了使得大家相信迁移到 Modules 好处多多，我在周一的例会后进行了一次分享，本文就是分享后的整理而成的。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;大家好，今天要跟大家分享是 Go Module。我们首先回顾一下依赖管理及其想要解决的根本问题，然后介绍 Golang 依赖管理工具发展的历史，理解我们是如何走到了如今这个时点，然后再介绍 Go Module 是什么，以及它如何解决我们面对的问题，之后以一个实际的案例来展示 Go Module 如何使用，最后是 Q &amp;amp; A 环节。&lt;/p&gt;
+&lt;h2 id=&#34;依赖管理&#34;&gt;依赖管理&lt;/h2&gt;
+&lt;p&gt;首先大家想一下为什么需要依赖：我们想复用已有的工作成果。而将已有的工作成果加入到我们的项目中作为依赖存在着太多的不确定性：这个包的 API 会变化，这个包内部行为会变化，这个包的依赖会变化，这个包可能已经已经不存在或无法访问，包与包之间的不同依赖相互冲突等等。不仅如此，随着软件开发规模的逐步增大，涉及到的外部依赖越来越多，手动管理的所有依赖愈发不可能。所以我们需要依赖管理，我们需要有个工具或者规范来描述和定义包与包之间的依赖关系，并自动化的去处理、解析和满足这些依赖。&lt;/p&gt;
+&lt;p&gt;依赖管理试图解决的问题我认为（或者 Russ Cox 认为）主要有两个：其一是 API 稳定性，其二是可重现构建。API 稳定性自不用多说，我们都希望我们依赖的 API 是稳定的，不会因为我们更新了一个小版本就要大规模的重写我们的代码。可重现构建在我们依赖管理的领域内可以理解为相同的源码最后能得到同样的二进制或链接库（当然真正的想实现可重现构建还需要一系列配套的工具和特定的参数）。假设我们同事 A 和 B 协同开发，A 依赖了存在 BUG 的 uuid v1.2，而 B 依赖了最新的 uuid v1.3。他们都是使用了相同的代码去构建，但是最后测试的结果却不一致，这为他们进一步的排错增添了无数烦恼。特别是我们本身就在从事着底层存储系统的开发， 如果开发时和最后部署时的二进制不一致，极端情况下可能导致用户数据丢失等极其严重的后果。&lt;/p&gt;
+&lt;h2 id=&#34;回溯历史&#34;&gt;回溯历史&lt;/h2&gt;
+&lt;p&gt;依赖管理如此重要，Golang 社区及其开发者们都采取了哪些手段来解决这些问题呢？我们分别从 API 稳定性和可重现构建的角度来回溯一下历史，理解一下我们当下处于何种位置，这样才能知道我们要往何处去。&lt;/p&gt;
+&lt;h3 id=&#34;api-稳定性&#34;&gt;API 稳定性&lt;/h3&gt;
+&lt;p&gt;在 2011 年 Go 1 发布的时候就没有版本的概念，2013 年时 Golang 团队在 FAQ 中提议开发者需要保证相同的 import path 的兼容性，这个后来成了一纸空文，没有强制措施的倡议是没有人会听的。&lt;/p&gt;
+&lt;p&gt;到了 2014 年，&lt;code&gt;gopkg.in&lt;/code&gt; 出现了。它本质上是一个 github 的重定向工具，将 &lt;code&gt;gopkg.in/yaml.v1&lt;/code&gt; 重定向到 &lt;a href=&#34;https://github.com/go-yaml/yaml&#34;&gt;&lt;code&gt;go-yaml/yaml&lt;/code&gt;&lt;/a&gt; 库的 v1 分支，将 &lt;code&gt;gopkg.in/yaml.v2&lt;/code&gt; 重定向到 v2 分支。它使得同一个包可以有不同的 import path，在遵守 &lt;code&gt;相同的 import path 要向后兼容&lt;/code&gt; 的前提下实现了一定程度的版本化控制，缓解了引入破坏性变更的问题。&lt;/p&gt;
+&lt;p&gt;在 2015 年的时候，有人提出了采用语义化版本的草案，但是并没有被 Golang 团队接受。&lt;/p&gt;
+&lt;h3 id=&#34;可重现构建&#34;&gt;可重现构建&lt;/h3&gt;
+&lt;p&gt;在 Go 1 刚发布的时候，Golang 使用 GOROOT 和 GOPATH 来决定包的位置。GOROOT 和 GOPATH 结构是相似的，只不过 GOROOT 用来指示 Go 的 Root Tree 位置，GOPATH 中则是用户自定义的 Tree。GOPATH 中可以指定多个目录，go get 默认总是会把依赖下载到第一个目录中。而在查找的时候，Go 总是会先查找 GOROOT，然后在按照顺序查找 GOPATH。如果没有自行设置的话，GOROOT 会取 &lt;code&gt;/usr/lib/go&lt;/code&gt; 作为默认值，而 GOPATH 则会取 &lt;code&gt;$HOME/go&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;后来有人想到可以在运行前修改 GOPATH，使得 go get 和 go build 总是能够从一个指定目录中下载或者查找指定的包。很多人可能见过各种教你 &lt;code&gt;export GOPATH=&amp;quot;`pwd`:$GOPATH&amp;quot;&lt;/code&gt; 的奇技淫巧，顺着这种思路发展下去出现一些工具，他们能够自动的设置和修改 GOPATH，我们项目中用到的管理依赖的脚本就是这个思路。&lt;/p&gt;
+&lt;p&gt;到了 2014 年，有人提出了 external packages 的概念，在项目的目录下增加一个 vendor 目录来存放外部的包，同时让 go 的 tools 能够感知到这是一个 vendor。这个草案在 2015 年时被接受，并在 go 1.5 中作为 vendor 作为试验推出，在 go 1.6 中作为默认参数被启用。自此出现&lt;/p&gt;
+&lt;p&gt;到了 2016 年，一群开发者聚在一起进行了讨论，并成立一个社区组织合作开发出了 dep。dep 后来被 golang 官方接纳为 official experiment，并在很长的一段时间里被认为是有望终结 Golang 混乱的依赖管理工具统治。&lt;/p&gt;
+&lt;h2 id=&#34;versioned-modules&#34;&gt;Versioned Modules&lt;/h2&gt;
+&lt;p&gt;就在所有人以为 dep 就将是那个最终的解决方案时，我们的 Russ Cox 同学有不同的想法：我们要引入 Module 的概念，我们要重新定义依赖管理。实际上从一开始 dep 就只是一个试验，用来帮助 Golang 团队积累经验和学习依赖管理，至少 Russ Cox 是这么认为的。这中间的种种故事和花边新闻大家可以去看看 &lt;a href=&#34;https://www.zhihu.com/people/caoqianli_&#34;&gt;@hsiafan&lt;/a&gt; 的文章 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/41627929&#34;&gt;关于Go Module的争吵&lt;/a&gt;，此处我就不多谈了。&lt;/p&gt;
+&lt;h3 id=&#34;模块&#34;&gt;模块&lt;/h3&gt;
+&lt;p&gt;先来看模块。&lt;/p&gt;
+&lt;p&gt;模块是&lt;strong&gt;相关连的包&lt;/strong&gt;作为&lt;strong&gt;一个单元&lt;/strong&gt;被一起&lt;strong&gt;版本化&lt;/strong&gt;后的组合。&lt;/p&gt;
+&lt;p&gt;每个模块都有着确定的依赖要求，并且能够创建可复现的构建。一个仓库里可以有多个模块，一个模块里面可以有多个包。&lt;/p&gt;
+&lt;h3 id=&#34;导入兼容性规则&#34;&gt;导入兼容性规则&lt;/h3&gt;
+&lt;p&gt;我们可以重新阐述一下 FAQ 里面的那个兼容性规则（The Import Compatibility Rule）：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;如果旧包和新包具有相同的导入路径，则新包必须向后兼容旧包。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;换言之，如果他们的导入路径不同，他们就无需保持兼容。&lt;/p&gt;
+&lt;h3 id=&#34;语义导入版本控制&#34;&gt;语义导入版本控制&lt;/h3&gt;
+&lt;p&gt;这就为我们带来了语义导入版本控制（Semantic Import Versioning）。&lt;/p&gt;
+&lt;p&gt;首先所有的模块都必须遵循语义化版本规则：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;impver.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;其次，当主版本号大于等于 &lt;code&gt;v2&lt;/code&gt; 时，这个 Module 的 import path 必须在尾部加上 &lt;code&gt;/vN&lt;/code&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在 go.mod 文件中： &lt;code&gt;module github.com/my/mod/v2&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;在 require 的时候： &lt;code&gt;require github.com/my/mod/v2 v2.0.0&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;在 import 的时候： &lt;code&gt;import &amp;quot;github.com/my/mod/v2/mypkg&amp;quot;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;最后，当主版本号为 &lt;code&gt;v0&lt;/code&gt; 或者 &lt;code&gt;v1&lt;/code&gt; 时，尾部的 &lt;code&gt;/v0&lt;/code&gt; 或 &lt;code&gt;/v1&lt;/code&gt; 可以省略。&lt;/p&gt;
+&lt;p&gt;根据语义化版本的要求，&lt;code&gt;v0&lt;/code&gt; 是不需要保证兼容性的，可以随意的引入破坏性变更，所以不需要显式的写出来；而省略 &lt;code&gt;v1&lt;/code&gt; 更大程度上是现实的考虑，毕竟 99% 的包都不会有 &lt;code&gt;v2&lt;/code&gt;，同时考虑到现有代码库的兼容，省略 &lt;code&gt;v1&lt;/code&gt; 是一个合情合理的决策。&lt;/p&gt;
+&lt;h3 id=&#34;最小版本选择&#34;&gt;最小版本选择&lt;/h3&gt;
+&lt;p&gt;现在我们已经可以定义出一个模块了，但是一个模块具体构建的时候到底选择是哪个版本呢？这就涉及到 Go Module 使用的最小版本选择（Minimal Version Selection）算法。&lt;/p&gt;
+&lt;p&gt;它的工作方式是这样的：我们为每个模块指定的依赖都是可用于构建的最低版本，最后实际选择的版本是所有出现过的最低版本中的最大值。&lt;/p&gt;
+&lt;p&gt;我们现在有这样的一个依赖关系，A 会依赖 B，C，而 B，C 会去依赖 D，D 又会依赖 E。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;version-select-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;那么我们从 A 开始做一个 BFS &lt;em&gt;（仅用于讲解原理，背后实现不一定是这样）&lt;/em&gt; ，把每个模块依赖的版本都找出来，这样我们会首先得到一个粗略的清单。然后相同的模块我们总是取最大的版本，这样就能得到最终的依赖列表。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;version-select-list.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;为什么可以这样呢？&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;导入兼容性规则&lt;/code&gt; 规定了相同的导入路径，新包必须向后兼容旧包，因此只要 D 还是 v1 版本，不管是选择 v1.3 还是 v1.4 都是可以的，不会有破坏性的变更。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;语义导入版本控制&lt;/code&gt; 规定了不同的大版本需要使用不同的导入路径，因此假设 D 升级到了 v2 版本，那就应当选择 &lt;code&gt;D v1.4&lt;/code&gt; 和 &lt;code&gt;D v2.0&lt;/code&gt; 这两个包了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;为什么要这样做呢？&lt;/p&gt;
+&lt;p&gt;为了可重现构建，为了降低复杂度。&lt;/p&gt;
+&lt;p&gt;大多数包管理工具，包括 &lt;code&gt;dep&lt;/code&gt;，&lt;code&gt;cargo&lt;/code&gt; 和 &lt;code&gt;pip&lt;/code&gt; 等，采用的都是总是选择允许的最新版本（&lt;code&gt;use the newest allowed version&lt;/code&gt;）策略。这会带来两个问题：第一，&lt;code&gt;允许的最新版本&lt;/code&gt;可能会随着外部事件而发生变化，比如说在构建的时候，依赖的一个库刚好发布了一个新版本，这会导致可重现构建失效；第二，开发者为了避免依赖在构建期间发生变化，他必须显式的告诉依赖管理工具我不要哪些版本，比如：&lt;code&gt;&amp;gt;= 0.3, &amp;lt;= 0.4&lt;/code&gt;。这会导致依赖管理工具花费大量的时间去计算可用的版本，而最终的结果总是让人感到沮丧，A 依赖需要 &lt;code&gt;Z &amp;gt;= 0.5&lt;/code&gt; 而 B 依赖需要 &lt;code&gt;Z &amp;lt;= 0.4&lt;/code&gt;，关于这一点 Russ Cox 在 &lt;a href=&#34;https://research.swtch.com/version-sat&#34;&gt;Version SAT&lt;/a&gt; 给出了更加规范的论述，感兴趣的同学不妨一观。&lt;/p&gt;
+&lt;p&gt;与总是选择允许的最新版本相反，Go Module 默认采用的是总是使用允许的最旧的版本。我们在 &lt;code&gt;go.mod&lt;/code&gt; 中描述的 &lt;code&gt;vX.Y.Z&lt;/code&gt; 实际上是在告诉编译器：“Hey，我最少需要 &lt;code&gt;vX.Y.Z&lt;/code&gt; 才能被 Build 出来”，编译器听完了所有模块的话之后按照刚才描述的流程就能选择出允许的最旧的那个版本。&lt;/p&gt;
+&lt;h3 id=&#34;go-mod&#34;&gt;go.mod&lt;/h3&gt;
+&lt;p&gt;讲了那么多理论之后，我们下面来聊一些比较实际的东西：&lt;code&gt;go.mod&lt;/code&gt; 应该要怎么写。在目前的版本当中，&lt;code&gt;go.mod&lt;/code&gt; 文件中主要有四个部分组成：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;module&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;用来声明当前 &lt;code&gt;module&lt;/code&gt;，如果当前版本大于 v1 的话，还需要在尾部显式的声明 &lt;code&gt;/vN&lt;/code&gt;。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;module /path/to/your/mod/v2
+module github.com/Xuanwo/go-mod-intro/v2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;require&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;这是最为常用的部分，在 mod 之后可以写任意有效的、能指向一个引用的字符串，比如 Tag，Branch，Commit 或者是使用 &lt;code&gt;latest&lt;/code&gt; 来表示引用最新的 commit。如果对应的引用刚好是一个 Tag 的话，这个字符串会被重写为对应的 tag；如果不是的话，这个字符串会被规范化为形如 &lt;code&gt;v2.0.0-20180128182452-d3ae77c26ac8&lt;/code&gt; 这样的字符串。我们后面会发现这个字符串与底层的 mod 存储形式是相对应的。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;require /your/mod tag/branch/commit
+require github.com/google/go-github/v24 v24.0.1
+require gopkg.in/urfave/cli.v2 v2.0.0-20180128182452-d3ae77c26ac8
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;replace&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;replace&lt;/code&gt; 这边的花样比较多，主要是两种，一个是与 &lt;code&gt;require&lt;/code&gt; 类似，可以指向另外一个 repo，另一种是可以指向本地的一个目录。加了 &lt;code&gt;replace&lt;/code&gt; 的话，go 在编译的时候就会使用对应的项目代码来替换。需要注意的是这个只作用于当前模块的构建，其他模块的 replace 对它不生效，同理，它的 replace 对其他模块也不会生效。&lt;/p&gt;
+&lt;p&gt;需要额外注意的是，如果引用一个本地路径的话，那这个目录下必须要有 &lt;code&gt;go.mod&lt;/code&gt; 文件，这个目录可以是绝对路径，也可以是相对路径。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;replace original_name =&amp;gt; real_name tag/branch/commit
+replace original_name =&amp;gt; local_path
+replace test.dev/common =&amp;gt; git.example.com/bravo/common.git v0.0.0-20190520075948-958a278528f8
+replace test.dev/common =&amp;gt; ../../another-porject/common-go
+replace github.com/qiniu/x =&amp;gt; github.com/Xuanwo/qiniu_x v0.0.0-20190416044656-4dd63e731f37
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;exclude&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;这个用的比较少，主要是为了能在构建的时候排除掉特定的版本，跟 &lt;code&gt;replace&lt;/code&gt; 一样，只能作用于当前模块的构建。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;exclude /your/mod tag/branch/commit
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;实战演练&#34;&gt;实战演练&lt;/h2&gt;
+&lt;p&gt;好，说了那么多，下面我们实际的上手操作一下。&lt;/p&gt;
+&lt;p&gt;在 &lt;code&gt;/tmp&lt;/code&gt; 下创建一个目录 &lt;code&gt;go-mod-intro&lt;/code&gt;，然后输入&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;go mod init github.com/Xuanwo/go-mod-intro&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;此时会有输出：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;go: creating new go.mod: module github.com/Xuanwo/go-mod-intro&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;同时目录下会有一个自动创建的新文件：&lt;code&gt;go.mod&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;module github.com&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;Xuanwo&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;mod&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;intro
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1.12&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这样我们就拥有了一个最小化的模块，尽管它什么用都没有。下面我们来写一些代码，创建一个 &lt;code&gt;main.go&lt;/code&gt; 并写入如下内容：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;package&lt;/span&gt; main
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; (
+v24 &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;github.com/google/go-github/v24/github&amp;#34;&lt;/span&gt;
+v25 &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;github.com/google/go-github/v25/github&amp;#34;&lt;/span&gt;
+)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; (
+_ = v24.Tag{}
+_ = v25.Tag{}
+)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;main&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在当前目录下执行 &lt;code&gt;go build&lt;/code&gt;，看看 go 是如何查找依赖的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; go build
+go: finding github.com/google/go-github/v25/github latest
+go: finding github.com/google/go-github/v24/github latest
+go: finding github.com/google/go-github/v25 v25.0.4
+go: finding github.com/google/go-github/v24 v24.0.1
+go: downloading github.com/google/go-github/v25 v25.0.4
+go: downloading github.com/google/go-github/v24 v24.0.1
+go: extracting github.com/google/go-github/v25 v25.0.4
+go: extracting github.com/google/go-github/v24 v24.0.1
+go: finding github.com/google/go-github v17.0.0+incompatible
+go: finding github.com/google/go-querystring v1.0.0
+go: finding github.com/golang/protobuf v1.2.0
+go: finding golang.org/x/crypto v0.0.0-20180820150726-614d502a4dac
+go: finding golang.org/x/sys v0.0.0-20180824143301-4910a1d54f87
+go: finding golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
+go: finding golang.org/x/net v0.0.0-20180826012351-8a410e7b638d
+go: finding golang.org/x/net v0.0.0-20190311183353-d8887717615a
+go: finding golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6
+go: finding google.golang.org/appengine v1.1.0
+go: finding golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+go: finding golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
+go: finding golang.org/x/text v0.3.0
+go: downloading github.com/google/go-github v17.0.0+incompatible
+go: extracting github.com/google/go-github v17.0.0+incompatible
+go: downloading github.com/google/go-querystring v1.0.0
+go: extracting github.com/google/go-querystring v1.0.0&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;此时，我们的 &lt;code&gt;go.mod&lt;/code&gt; 文件会被自动的重写以反应现在项目的依赖要求，&lt;code&gt;go.sum&lt;/code&gt; 文件也会被自动的创建：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;module github.com&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;Xuanwo&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;mod&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;intro
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1.12&lt;/span&gt;
+&lt;span style=&#34;color:#06287e&#34;&gt;require&lt;/span&gt; (
+github.com&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;google&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;github&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;v24 v24&lt;span style=&#34;color:#40a070&#34;&gt;.0.1&lt;/span&gt;
+github.com&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;google&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;github&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;v25 v25&lt;span style=&#34;color:#40a070&#34;&gt;.0.4&lt;/span&gt;
+)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;大家不难发现，我们可以在同一个文件中引用同一个模块的不同大版本。正如我们前面所说的，它们的导入路径不同，所以被看作两个不同的模块来看待，不同的模块当然可以并存。这一点可以为我们之后的版本迁移带来很多便利，Go Team 也在尝试在 go fix 中利用这个特性来帮助库开发者实现迁移。&lt;/p&gt;
+&lt;p&gt;下面我们稍微修改一下代码，引入 &lt;code&gt;golang.org/x/text&lt;/code&gt;，并尝试修改它的版本：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;package&lt;/span&gt; main
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; (
+v24 &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;github.com/google/go-github/v24/github&amp;#34;&lt;/span&gt;
+v25 &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;github.com/google/go-github/v25/github&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;golang.org/x/text/width&amp;#34;&lt;/span&gt;
+)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; (
+_ = v24.Tag{}
+_ = v25.Tag{}
+_ = width.EastAsianAmbiguous
+)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;main&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;直接构建的话，我们的 go.mod 中会增加一行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;golang.org&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;x&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;text v0&lt;span style=&#34;color:#40a070&#34;&gt;.3.0&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;使用 &lt;code&gt;go list -m all&lt;/code&gt; 可以查看当前模块所有的依赖：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;github.com/Xuanwo/go-mod-intro
+github.com/golang/protobuf v1.2.0
+github.com/google/go-github v17.0.0+incompatible
+github.com/google/go-github/v24 v24.0.1
+github.com/google/go-github/v25 v25.0.4
+github.com/google/go-querystring v1.0.0
+golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+golang.org/x/net v0.0.0-20190311183353-d8887717615a
+golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
+golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6
+golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
+golang.org/x/text v0.3.0
+google.golang.org/appengine v1.1.0&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;下面我们把 &lt;code&gt;golang.org/x/text&lt;/code&gt; 依赖的 &lt;code&gt;v0.3.0&lt;/code&gt; 修改成 &lt;code&gt;v0.2.0&lt;/code&gt;，然后重新执行 &lt;code&gt;go list -m all&lt;/code&gt; 看最后选择的版本：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; go list -m all
+go: finding golang.org/x/text v0.2.0
+github.com/Xuanwo/go-mod-intro
+...
+golang.org/x/text v0.3.0&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;能发现 go 在查找了 &lt;code&gt;golang.org/x/text v0.2.0&lt;/code&gt; 之后实际选择的还是 &lt;code&gt;v0.3.0&lt;/code&gt;，我们可以用 &lt;code&gt;go mod graph | rg text&lt;/code&gt; 来看看谁在依赖这个模块：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; go mod graph | rg text
+github.com/Xuanwo/go-mod-intro golang.org/x/text@v0.3.0
+golang.org/x/net@v0.0.0-20190311183353-d8887717615a golang.org/x/text@v0.3.0&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;因为 &lt;code&gt;golang.org/x/net&lt;/code&gt; 在依赖 &lt;code&gt;golang.org/x/text@v0.3.0&lt;/code&gt;，所以即使我们在 &lt;code&gt;go.mod&lt;/code&gt; 中强行指定了 &lt;code&gt;v0.2.0&lt;/code&gt;，最后还是会选择 &lt;code&gt;v0.3.0&lt;/code&gt; 来进行构建，不仅如此，我们的 &lt;code&gt;go.mod&lt;/code&gt; 文件中依赖也被修改成了 &lt;code&gt;v0.3.0&lt;/code&gt;，因为这才是我们依赖的最终状态。&lt;/p&gt;
+&lt;p&gt;下面我们来试一下如果指定成 &lt;code&gt;v0.3.2&lt;/code&gt; 会如何：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; go list -m all
+go: finding golang.org/x/text v0.3.2
+github.com/Xuanwo/go-mod-intro
+...
+golang.org/x/text v0.3.2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;显然的，&lt;code&gt;v0.3.2 &amp;gt; v0.3.0&lt;/code&gt;，所以最后选择了 &lt;code&gt;v0.3.2&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;注意&#34;&gt;注意&lt;/h2&gt;
+&lt;p&gt;好，在简单的实战演练之后，我们回顾一下需要额外注意的要点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;replace 和 exclude 只作用于当前模块的构建，它们既不会向上继承，也不会向下传递。&lt;/li&gt;
+&lt;li&gt;go 官方的所有工具都有可能在符合语义的前提下自行重写 go mod &amp;amp; sum 文件，比如补充缺失的依赖，重写 commit 为标准的形式等等&lt;/li&gt;
+&lt;li&gt;所有的升级操作都需要人工确认并执行，go 官方的工具不会自动升级&lt;/li&gt;
+&lt;li&gt;模块的依赖是平行的，而不是嵌套的，想象一下 BFS 把所有模块的依赖都扫出来放在一个列表里面&lt;/li&gt;
+&lt;li&gt;跟 vendor 说再见，尽管 go module 对 vendor 提供了支持&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;go.mod&lt;/code&gt; 中只会添加直接的依赖，间接的依赖都是隐含的，下列几种特殊情况会在后面加上 &lt;code&gt;// indirect&lt;/code&gt; 标记出来
+&lt;ul&gt;
+&lt;li&gt;手动指定了更高的依赖版本，比如在不引用 &lt;code&gt;golang.org/x/text&lt;/code&gt; 的前提下通过 &lt;code&gt;go get golang.org/x/text@v0.3.2
+&lt;/code&gt; 升级依赖&lt;/li&gt;
+&lt;li&gt;依赖的库还没有切换到 Go Module，这时候 go 工具链是不知道内部的依赖关系的，所以所有的依赖都会直接添加到当前模块中&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;技巧&#34;&gt;技巧&lt;/h2&gt;
+&lt;p&gt;下面我介绍一些常用的技巧：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;命令&lt;/th&gt;
+&lt;th&gt;作用&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;go list -m all&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;列出当前模块依赖的所有模块&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;go list -u -m all&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;列出当前模块依赖中可升级的模块&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;go get -u&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;升级所有依赖至最新版本&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;go get -u=patch&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;升级所有依赖至最新的修订版本&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;go mod tidy&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;清理未使用/生效的依赖&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;q-a&#34;&gt;Q &amp;amp; A&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;module 的命名有什么最佳实践么？比如我有一个模块确定只会导入其他包，那它能不能叫 core 这样的名字？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;一般来说我们会用一个域名来表示该组织下面的所有模块，比如我们的可以叫做 &lt;code&gt;qingstor.dev&lt;/code&gt;。然后整个组织共享的 common 模块可以叫做 &lt;code&gt;qingstor.dev/common&lt;/code&gt;，项目相关的模块则可以进一步的分层，比如我们的对象存储可以叫做 &lt;code&gt;qingstor.dev/qs/xxx&lt;/code&gt;。为了做到这一点，我们前期可以使用 &lt;code&gt;replace&lt;/code&gt; 来过渡，后续可以自建 GOPROXY，让它来完成重定向的工作。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如果依赖包有了新的小版本会不会自动升级？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;不会。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;vendor 还能不能用？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;go mod 可以开启 vendor 模式，但是从长期来看 vendor 会被去除。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;现有的库如果已经大于等于 v2 了该怎么处理？比如 etcd 已经 v3 了。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;如果这个库已经切换到 Go Module 的话，需要在导入时加 &lt;code&gt;/v3&lt;/code&gt;；如果还没有的话，go mod 会以兼容模式来导入它，此时虽然它的 tag 是 v3.x，但是我们还是把它们当作 v1 的模块来导入，即不需要显示在路径中写 v3。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;能够引用一个具体的 Commit？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;可以，go 工具链会自动的将这个 commit 重写为标准的形式。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;下载下来的 mod 中是否还有 git 信息？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;没有。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;下载下来的 mod 是如何存储的？如何区分不同 commit 的 mod？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code&gt;:) ~/Code/go/pkg/mod/github.com/google
+:) tree -L 2
+.
+├── go-github
+│   ├── v24@v24.0.1
+│   ├── v24@v24.0.2-0.20190418103935-a6b4602a9129
+│   └── v25@v25.0.4
+├── go-github@v13.0.0+incompatible
+├── go-github@v17.0.0+incompatible
+└── go-querystring@v1.0.0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;存储方式和 &lt;code&gt;go.mod&lt;/code&gt; 中规范化后的 tag/commit 是一致的。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;下载下来的 mod 如何清理？这只会清理当前项目用到的 mod 吗？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;可以使用 &lt;code&gt;go clean -modcache&lt;/code&gt;，这会删除所有的 mod，相当于 &lt;code&gt;$GOPATH/pkg/mod&lt;/code&gt; 被删除。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;go.sum&lt;/code&gt; 是干嘛用的？相当于其他语言里面的 lock 文件？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;go.sum&lt;/code&gt; 不是 lock 文件。&lt;/p&gt;
+&lt;p&gt;在其他语言里面 lock 文件用来保证可重现构建，但是在 Go Module 中，只需要有 &lt;code&gt;go.mod&lt;/code&gt; 文件就已经足够支持可重现构建了。&lt;code&gt;go.sum&lt;/code&gt; 文件主要记录了所有在构建过程中访问到的模块的 checksums，用于保证我们的代码在传输过程中没有被纂改。&lt;/p&gt;
+&lt;h2 id=&#34;分享资源&#34;&gt;分享资源&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.google.com/presentation/d/1-q658rf048NrM_ecn_jWcIo87sWcXvgiID3zlih6i94/edit?usp=sharing&#34;&gt;Go Modules&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/Xuanwo/go-mod-intro&#34;&gt;演示 Repo: go-mod-intro&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;本文主要的内容都来自于 Russ Cox 关于 &lt;code&gt;Go &amp;amp; Versioning&lt;/code&gt; 的博文集，图也都是他画的，对细节感兴趣的同学可以去读一读。此外本次分享的主要目的是为了介绍 Go Module，无意于参与哪个工具更好以及什么语言的包管理工具更好的讨论，有更好的想法建议赶着 Go 2 这波车提一个新的草案。&lt;/p&gt;
+&lt;p&gt;以上就是本次分享的全部内容，大家如果对 Go Module 还有什么问题的话可以在评论区提出来，我尽量解答~&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://go.googlesource.com/proposal/+/master/design/24301-versioned-go.md&#34;&gt;Proposal: Versioned Go Modules&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://research.swtch.com/vgo&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/golang/go/wiki/Modules&#34;&gt;Modules - Go Wiki&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/golang/go/issues/24301&#34;&gt;cmd/go: add package version support to Go toolchain&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Golang Panic 行为探秘</title><link>https://xuanwo.io/2019/05/25/go-panic/</link><pubDate>Sat, 25 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/25/go-panic/</guid><description>&lt;p&gt;为了满足分布式系统测试的需求，我们经常需要在代码中埋下断点，以便于通过修改编译参数或者注册特定 Hook 的方式来强迫程序走特定的逻辑。这篇文章主要分享了我在实现 BreakPoint 时发现的 Golang Panic &amp;amp;&amp;amp; Recover 的一个好玩行为及其背后的原因。&lt;/p&gt;
 &lt;h2 id=&#34;复现&#34;&gt;复现&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;package&lt;/span&gt; runtime
 &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; (
@@ -1265,59 +1562,4 @@ Base
 &lt;blockquote&gt;
 &lt;p&gt;广告位招租，8 点 17 分发&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;想要加入我们一起来做靠谱的产品吗，快访问 &lt;a href=&#34;https://www.qingcloud.com/jobs&#34;&gt;https://www.qingcloud.com/jobs&lt;/a&gt; 寻找自己中意的岗位并且给我发简历吧~&lt;/p&gt;</description></item><item><title>Tiresias v0.3</title><link>https://xuanwo.io/2018/07/22/tiresias-v0.3/</link><pubDate>Sun, 22 Jul 2018 16:00:00 +0000</pubDate><guid>https://xuanwo.io/2018/07/22/tiresias-v0.3/</guid><description>&lt;p&gt;经过一段时间的摸鱼，Tiresias 发布了 v0.3 。新版本重新实现了 sync 的逻辑并且修复了部分 BUG，完整的 changelog 可以参考: &lt;a href=&#34;https://github.com/Xuanwo/tiresias/blob/master/CHANGELOG.md&#34;&gt;https://github.com/Xuanwo/tiresias/blob/master/CHANGELOG.md&lt;/a&gt; 。这篇文章主要介绍一下新的 sync 逻辑是如何实现的并介绍一下新增的功能。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;Tiresias 是一个服务器信息管理工具，其目标是自动化服务器信息管理，取代手工维护的 Hosts 和 SSH Config&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id=&#34;新的-sync-逻辑&#34;&gt;新的 Sync 逻辑&lt;/h2&gt;
-&lt;p&gt;最开始想做一个简单易用的工具，因此没有引入任何复杂的逻辑，只是简单的从不同的 Source 端点中读取数据并写入到配置好的 Destination 端点中。但是在实际的使用中遇到了这样的一些问题：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;无法处理 Source 端点不可达的情况，直接报错导致所有的 Source 都更新失败&lt;/li&gt;
-&lt;li&gt;某些 Source 网络不可达（比如这个 Source 是一个在 VPC 中的 Consul 节点），但是 Tiresias 会一直尝试链接并等待&lt;/li&gt;
-&lt;li&gt;Source 的数据没有持久化，导致部分 Source 失败的时候，Destination 中被更新了不完整的数据&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;为了解决上述的问题，Tiresias 在 v0.3 中引入了一个全新的 Sync 逻辑：将 Source 的读取和 Destination 的更新拆开，从 Source 中读取到的数据将会写入本地的 leveldb 当中，而 Destination 更新时也会从 leveldb 中读取。更完整一些的逻辑是这样的：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;从 leveldb 中读取所有已经存储 Source，并保存在 StoredSources 当中&lt;/li&gt;
-&lt;li&gt;从配置文件中读取到的所有初始化成功的 Source 将会存储在 ExpectedSources 当中&lt;/li&gt;
-&lt;li&gt;尝试连接所有的 Source，连接失败的会跳过，而连接成功的会存储在 AvailableSources 当中&lt;/li&gt;
-&lt;li&gt;遍历所有的 AvailableSources，更新 db 中的数据&lt;/li&gt;
-&lt;li&gt;从 DB 中读取所有数据，更新所有已配置的 Destinations&lt;/li&gt;
-&lt;li&gt;遍历 StoredSources，删除所有不存在于 ExpectedSources 中的数据&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;在新的 Sync 逻辑下，Tiresias 可以更好地处理如下情况：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;初始化失败的 Source 会被忽略并从 DB 中删除&lt;/li&gt;
-&lt;li&gt;连接失败的 Source 将会跳过&lt;/li&gt;
-&lt;li&gt;已经被删除的 Source 将会从 DB 删除&lt;/li&gt;
-&lt;li&gt;有内容更新的 Source 将会完整的进行更新&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;新增的功能&#34;&gt;新增的功能&lt;/h2&gt;
-&lt;p&gt;从上一次发文章到现在，Tiresias 增加了对 fs glob path 的支持：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;src:&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;fs&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;options:&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;path:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;/home/xuanwo/.tiresias/server/&lt;span style=&#34;color:#007020&#34;&gt;*.yaml&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;这样就可以很舒服的把服务器拆分到多个文件进行管理了（&lt;/p&gt;
-&lt;p&gt;除此以外，还增加了对 Consul 的支持：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;src:&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;consul&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;options:&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;address:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1.2&lt;/span&gt;.&lt;span style=&#34;color:#40a070&#34;&gt;4.8&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;8500&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;schema:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;http&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;datacenter:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;test&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;prefix:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;test&lt;span style=&#34;color:#4070a0;font-style:italic&#34;&gt;-
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0;font-style:italic&#34;&gt; default:&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;user:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;root&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;identity_file:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;~/.ssh/key&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;告别手动维护 hosts 和在群里询问 XXX 环境的 IP 是多少的过去（&lt;/p&gt;
-&lt;h2 id=&#34;动态&#34;&gt;动态&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;过了一个很平淡的生日，又老了一岁（&lt;/li&gt;
-&lt;li&gt;为自己还能手写 Trie 树感到激动不已&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/media/md102392&#34;&gt;工作细胞&lt;/a&gt; 真香&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.bilibili.com/bangumi/media/md102792&#34;&gt;Angels of Death&lt;/a&gt; 真甜&lt;/li&gt;
-&lt;li&gt;周末把尼尔的六周目给通了（上一个三周目的时候特别感动把存档删了 = =）&lt;/li&gt;
-&lt;li&gt;跟朋友去试了下&lt;a href=&#34;http://www.dianping.com/shop/5864352&#34;&gt;包肉&lt;/a&gt;，第二天肚子疼+拉稀一天，差评&lt;/li&gt;
-&lt;li&gt;终于找到由头又水了一篇，开心&lt;/li&gt;
-&lt;/ul&gt;</description></item></channel></rss>
+&lt;p&gt;想要加入我们一起来做靠谱的产品吗，快访问 &lt;a href=&#34;https://www.qingcloud.com/jobs&#34;&gt;https://www.qingcloud.com/jobs&lt;/a&gt; 寻找自己中意的岗位并且给我发简历吧~&lt;/p&gt;</description></item></channel></rss>
