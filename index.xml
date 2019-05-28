@@ -14,7 +14,7 @@
 &lt;p&gt;在 Go 1 刚发布的时候，Golang 使用 GOROOT 和 GOPATH 来决定包的位置。GOROOT 和 GOPATH 结构是相似的，只不过 GOROOT 用来指示 Go 的 Root Tree 位置，GOPATH 中则是用户自定义的 Tree。GOPATH 中可以指定多个目录，go get 默认总是会把依赖下载到第一个目录中。而在查找的时候，Go 总是会先查找 GOROOT，然后在按照顺序查找 GOPATH。如果没有自行设置的话，GOROOT 会取 &lt;code&gt;/usr/lib/go&lt;/code&gt; 作为默认值，而 GOPATH 则会取 &lt;code&gt;$HOME/go&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;后来有人想到可以在运行前修改 GOPATH，使得 go get 和 go build 总是能够从一个指定目录中下载或者查找指定的包。很多人可能见过各种教你 &lt;code&gt;export GOPATH=&amp;quot;`pwd`:$GOPATH&amp;quot;&lt;/code&gt; 的奇技淫巧，顺着这种思路发展下去出现一些工具，他们能够自动的设置和修改 GOPATH，我们项目中用到的管理依赖的脚本就是这个思路。&lt;/p&gt;
 &lt;p&gt;到了 2014 年，有人提出了 external packages 的概念，在项目的目录下增加一个 vendor 目录来存放外部的包，同时让 go 的 tools 能够感知到这是一个 vendor。这个草案在 2015 年时被接受，并在 go 1.5 中作为 vendor 作为试验推出，在 go 1.6 中作为默认参数被启用。自此出现&lt;/p&gt;
-&lt;p&gt;到了 2016 年，一群开发者聚在一起进行了讨论，并成立一个社区组织合作开发出了 dep。dep 后来被 golang 官方接纳为 official experiment，并在很长的一段时间里被认为是有望终结 Golang 混乱的依赖管理工具统治。&lt;/p&gt;
+&lt;p&gt;到了 2016 年，一群开发者聚在一起进行了讨论，并成立一个社区组织合作开发出了 dep。dep 后来被 golang 官方接纳为 official experiment，并在很长的一段时间里被认为是有望终结 Golang 依赖管理工具混乱的统治者。&lt;/p&gt;
 &lt;h2 id=&#34;versioned-modules&#34;&gt;Versioned Modules&lt;/h2&gt;
 &lt;p&gt;就在所有人以为 dep 就将是那个最终的解决方案时，我们的 Russ Cox 同学有不同的想法：我们要引入 Module 的概念，我们要重新定义依赖管理。实际上从一开始 dep 就只是一个试验，用来帮助 Golang 团队积累经验和学习依赖管理，至少 Russ Cox 是这么认为的。这中间的种种故事和花边新闻大家可以去看看 &lt;a href=&#34;https://www.zhihu.com/people/caoqianli_&#34;&gt;@hsiafan&lt;/a&gt; 的文章 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/41627929&#34;&gt;关于Go Module的争吵&lt;/a&gt;，此处我就不多谈了。&lt;/p&gt;
 &lt;h3 id=&#34;模块&#34;&gt;模块&lt;/h3&gt;
