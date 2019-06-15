@@ -4,12 +4,11 @@ date: 2019-06-13T01:00:00Z
 tags:
 - systemd
 - archlinux
-title: "从 netctl 切换 systemd-networkd"
+title: "从 netctl 切换到 systemd-networkd"
 url: /2019/06/13/switch-to-systemd-networkd/
 ---
 
 晚上的时候临时起意决定把网络管理器从 `netctl` 切换到 `systemd-networkd`，切换的过程意外的顺畅。本文记录了一下切换的过程并简单介绍一下 `systemd-networkd` + `iwd` 的组合如何使用。
-
 
 <!--more-->
 
