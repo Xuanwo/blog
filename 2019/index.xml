@@ -1,4 +1,116 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>2019s on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/2019/</link><description>Recent content in 2019s on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 27 May 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/2019/index.xml" rel="self" type="application/rss+xml"/><item><title>Go Modules 内部分享</title><link>https://xuanwo.io/2019/05/27/go-modules/</link><pubDate>Mon, 27 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/27/go-modules/</guid><description>&lt;p&gt;最近在日常工作之外，我开始负责 Team 内部的工程效率提升。瞄准的第一个目标便是推动 Go Modules 在 Team 内部的普及，一方面是想淘汰祖传的依赖管理脚本，减少浪费在处理依赖问题上的时间，另一方面是为了实现 CI/CD 和可重现构建。这安利是否成功，除了要看个人的奋斗，还要看历史的行程。为了使得大家相信迁移到 Modules 好处多多，我在周一的例会后进行了一次分享，本文就是分享后的整理而成的。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>2019s on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/2019/</link><description>Recent content in 2019s on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 13 Jun 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/2019/index.xml" rel="self" type="application/rss+xml"/><item><title>从 netctl 切换 systemd-networkd</title><link>https://xuanwo.io/2019/06/13/switch-to-systemd-networkd/</link><pubDate>Thu, 13 Jun 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/06/13/switch-to-systemd-networkd/</guid><description>&lt;p&gt;晚上的时候临时起意决定把网络管理器从 &lt;code&gt;netctl&lt;/code&gt; 切换到 &lt;code&gt;systemd-networkd&lt;/code&gt;，切换的过程意外的顺畅。本文记录了一下切换的过程并简单介绍一下 &lt;code&gt;systemd-networkd&lt;/code&gt; + &lt;code&gt;iwd&lt;/code&gt; 的组合如何使用。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2 id=&#34;出场人物介绍&#34;&gt;出场人物介绍&lt;/h2&gt;
+&lt;h3 id=&#34;netctl&#34;&gt;netctl&lt;/h3&gt;
+&lt;p&gt;netctl 是 archlinux 的亲儿子，上游就在 &lt;a href=&#34;https://git.archlinux.org/netctl.git/&#34;&gt;https://git.archlinux.org/netctl.git/&lt;/a&gt;，也是除了 &lt;code&gt;systemd-networkd&lt;/code&gt; 之外（这是 systemd 钦定的），唯一一个进入 base 组的网络管理工具，说是官方钦定也不为过。netcl 依赖 dhcpcd 或者 dhclient 来获取动态 IP 地址，通过 &lt;code&gt;wpa_supplicant&lt;/code&gt; 来访问加密的 WiFi，提供了 &lt;code&gt;wifi-menu&lt;/code&gt; 供用户在命令行下交互式地选择热点并输入密码。同时还提供了一系列的 systemd service 文件（&lt;code&gt;netctl@.service&lt;/code&gt;，&lt;code&gt;netctl-ifplugd@.service&lt;/code&gt;，&lt;code&gt;netctl-auto@.service&lt;/code&gt;）来帮助用户进行配置，比如在开启了 &lt;code&gt;netctl-auto@&amp;lt;interface&amp;gt;.service&lt;/code&gt; 之后，你的网卡就能在可选的 profile 中自动切换。&lt;/p&gt;
+&lt;h3 id=&#34;systemd-networkd&#34;&gt;systemd-networkd&lt;/h3&gt;
+&lt;p&gt;正如它的名字所暗示的，这是 systemd 全家桶的一员。它主要负责的是检测并配置网络设备，特别的是它还能够用来配置 &lt;code&gt;systemd-nspawn&lt;/code&gt; 启动的容器的网络。&lt;/p&gt;
+&lt;h3 id=&#34;iwd&#34;&gt;iwd&lt;/h3&gt;
+&lt;p&gt;iwd (iNet wireless daemon) 是 Intel 开发，用于取代 &lt;code&gt;wpa_supplicant&lt;/code&gt; 的 WiFi 后端。它的主要目标是通过不依赖任何外部库而是最大限度的利用 Linux 内核提供的功能来优化资源利用率。iwd 可以很好的跟 systemd-network 配合使用。&lt;/p&gt;
+&lt;h2 id=&#34;使用场景介绍&#34;&gt;使用场景介绍&lt;/h2&gt;
+&lt;p&gt;平时只需要连接 3 个 Wi-Fi：家里的，公司的，手机的，没有频繁切换/增加/修改/删除 Wi-Fi 配置的需求，所以我不需要一个常驻通知区域的服务来进行切换。此外，我的 VPN 已经全部通过 systemd 来进行管理了，所以也不需要网络管理工具替我做这些操作。我需要的是这样的一个工具组合：一个负责管理网络设备，一个负责连接 WiFi 并进行认证。之前的组合是 &lt;code&gt;netctl&lt;/code&gt; + &lt;code&gt;wpa_supplicant&lt;/code&gt;，现在我有了新欢：&lt;code&gt;systemd-networkd&lt;/code&gt; + &lt;code&gt;iwd&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;如何使用&#34;&gt;如何使用&lt;/h2&gt;
+&lt;h3 id=&#34;停用-netctl&#34;&gt;停用 netctl&lt;/h3&gt;
+&lt;p&gt;首先需要停用 netctl 的相关服务，避免多个网络管理工具在一起打架。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl stop netctl-auto@&amp;lt;interface&amp;gt;.service
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl disable netctl-auto@&amp;lt;interface&amp;gt;.service&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;配置网卡&#34;&gt;配置网卡&lt;/h3&gt;
+&lt;p&gt;然后按照 Wiki 的指示写无线网卡的配置，放在 &lt;code&gt;/etc/systemd/network&lt;/code&gt; 下。&lt;/p&gt;
+&lt;p&gt;对无线网卡来说，最小化的配置是这样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Match]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;wlp2s0&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Network]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DHCP&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;ipv4&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Match&lt;/code&gt; 主要是用于匹配管理的设备，可以通过设备名，MAC 地址等来选择&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Network&lt;/code&gt; 用来做网络相关的具体配置，比如 DHCP，DNS 等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;我的本地开启了 coredns 作为 DNS 服务，所以我需要额外加一些配置来通过 DHCP 来获取 IPv4 地址，但是不使用 DHCP 下发的 DNS。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Match]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;wlan0&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Network]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DHCP&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;ipv4&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DNS&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;127.0.0.1&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[DHCP]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;UseDNS&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;false&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;iwd 启动的时候似乎会修改网络设备的名字，我的网卡被修改成了 wlan0&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在配置写好之后就可以启动 &lt;code&gt;systemd-networkd&lt;/code&gt; 的服务啦：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl start systemd-netword&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果修改了网络配置，只需要 restrart 即可。&lt;/p&gt;
+&lt;p&gt;更具体的配置可以参阅 ArchWiki 或者 &lt;code&gt;man systemd-networkd&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;配置-iwd&#34;&gt;配置 iwd&lt;/h3&gt;
+&lt;p&gt;iwd 不是自带的软件包，所以首先需要自行安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; pacman -S iwd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在开始使用之前，我们需要 start 并且 enable iwd 服务：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl start iwd
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl &lt;span style=&#34;color:#007020&#34;&gt;enable&lt;/span&gt; iwd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后就可以用 &lt;code&gt;iwctl&lt;/code&gt; 进行管理啦，iwctl 默认会进入一个交互式的命令行界面，使用体验还是很赞的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; iwctl
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;#&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;此时输入 help 会返回支持的所有命令，各个命令都比较直观，只要对 WiFi 的相关技术名词稍有了解就能很快上手，此外这个界面所有命令都支持自动补全，好评。&lt;/p&gt;
+&lt;p&gt;首先先看看我们有哪些设备：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# device list&lt;/span&gt;
+Devices *
+--------------------------------------------------------------------------------
+Name Address Powered Adapter Mode
+--------------------------------------------------------------------------------
+wlan0 xx:xx:xx:xx:xx:xx on phy0 station&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个界面是动态的，右上角的 &lt;code&gt;*&lt;/code&gt; 会不断闪烁表明这个界面是实时的。&lt;/p&gt;
+&lt;p&gt;然后我们可以手动触发一次 STA 扫描：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# station wlan0 scan&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;之后就可以查看有哪些能连接 WiFi 热点了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# station wlan0 get-networks&lt;/span&gt;
+Available networks *
+--------------------------------------------------------------------------------
+Network name Security Signal
+--------------------------------------------------------------------------------
+CU_SNZQ psk ****
+xjzy psk ****
+Tenda_30BDD0 psk ****
+TP-LINK_D82B80 psk ****
+TP-LINK_lee psk ****
+ziroom201 psk ****
+mhshome psk ****
+TP-LINK_he psk ****
+TP-LINK_450C psk ****
+yuzhe psk ****
+z212-202 psk ****
+Bill&lt;span style=&#34;&#34;&gt;&amp;#39;&lt;/span&gt;s Router psk ****
+tcs psk ****
+&amp;gt; XXXXXXXXXXX psk ****&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个界面同样是动态的，可以查看当前能连接网络机器信号强度。&lt;/p&gt;
+&lt;p&gt;最后就能够选择想要连接 SSID 连接网络了，如果需要输入密码的话，iwd 还会出现一个提示要求输入密码。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# station wlan0 connect XXXXXXXXXXX&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里有个需要提出来的点：iwd 通过交互式界面成功连接上网络之后，就会自动的在 &lt;code&gt;/var/lib/iwd&lt;/code&gt; 下生成对应的配置文件，之后 iwd 自动的进行连接。所以一方面是不需要自己手动的去写配置文件，另一方面是切换过程也是自动的，不需要人工干预。&lt;/p&gt;
+&lt;p&gt;iwd 生成的配置文件名是有一定规则的，用 SSID 作为文件名，然后以加密方式作为后缀，比如 &lt;code&gt;*.open&lt;/code&gt; 表示这是一个开放网络，&lt;code&gt;*.psk&lt;/code&gt; 表示这是一个使用 PSK 加密的网络。&lt;/p&gt;
+&lt;h3 id=&#34;检查状态&#34;&gt;检查状态&lt;/h3&gt;
+&lt;p&gt;全部配置好之后可以分别查看一下 WiFi 和网卡的状态：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; iwctl device wlan0 show
+Device: wlan0
+--------------------------------------------------------------------------------
+Settable Property Value
+--------------------------------------------------------------------------------
+Name wlan0
+* Mode station
+* Powered on
+Address xx:xx:xx:xx:xx:xx
+* WDS off
+Adapter phy0
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; networkctl status
+● State: routable
+Address: &lt;span style=&#34;color:#40a070&#34;&gt;192&lt;/span&gt;.168.0.103 on wlan0
+xxxx::xxxx:xxxx:xxxx:xxxx on wlan0
+Gateway: &lt;span style=&#34;color:#40a070&#34;&gt;192&lt;/span&gt;.168.0.1 &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;TP-LINK TECHNOLOGIES CO.,LTD.&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; on wlan0
+DNS: &lt;span style=&#34;color:#40a070&#34;&gt;127&lt;/span&gt;.0.0.1&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;systemd 真香，上交底裤我光荣！天灭 networkmanager ！&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Systemd-networkd&#34;&gt;systemd-networkd - ArchWiki&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Iwd&#34;&gt;iwd - ArchWiki&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Go Modules 内部分享</title><link>https://xuanwo.io/2019/05/27/go-modules/</link><pubDate>Mon, 27 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/27/go-modules/</guid><description>&lt;p&gt;最近在日常工作之外，我开始负责 Team 内部的工程效率提升。瞄准的第一个目标便是推动 Go Modules 在 Team 内部的普及，一方面是想淘汰祖传的依赖管理脚本，减少浪费在处理依赖问题上的时间，另一方面是为了实现 CI/CD 和可重现构建。这安利是否成功，除了要看个人的奋斗，还要看历史的行程。为了使得大家相信迁移到 Modules 好处多多，我在周一的例会后进行了一次分享，本文就是分享后的整理而成的。&lt;/p&gt;
 &lt;hr /&gt;
 &lt;p&gt;大家好，今天要跟大家分享是 Go Module。我们首先回顾一下依赖管理及其想要解决的根本问题，然后介绍 Golang 依赖管理工具发展的历史，理解我们是如何走到了如今这个时点，然后再介绍 Go Module 是什么，以及它如何解决我们面对的问题，之后以一个实际的案例来展示 Go Module 如何使用，最后是 Q &amp;amp; A 环节。&lt;/p&gt;
 &lt;h2 id=&#34;依赖管理&#34;&gt;依赖管理&lt;/h2&gt;
@@ -957,137 +1069,4 @@ libdbusmenu-glib: For global menu support &lt;span style=&#34;color:#666&#34;&gt
 &lt;p&gt;&lt;img src=&#34;monster-hunter.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;当时十分心动，想买，但是考虑到明天就要去秋叶原了，肯定还会有的，于是没有当场买下来。（真相是后来再也没看到过，导致啥都没有买着，哭了）回国之后顿悟了一个道理：别动心，要是动了，就立刻行动，不要给自己后悔的机会。（此条八毛，微信，支付宝，比特币均可）&lt;/p&gt;
 &lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
-&lt;p&gt;这看都看了，不说点什么么？&lt;/p&gt;</description></item><item><title>通过 gRPC 传递 Request ID</title><link>https://xuanwo.io/2019/03/10/request-id-in-grpc/</link><pubDate>Sun, 10 Mar 2019 04:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/10/request-id-in-grpc/</guid><description>&lt;p&gt;分布式追踪是 &lt;a href=&#34;https://www.qingcloud.com/products/anybox/&#34;&gt;Anybox&lt;/a&gt; 项目中的重要一环，其中在每个请求的入口处设置一个 Request ID 是分布式追踪的第一步。这篇文章主要介绍如何利用 gRPC 的 Metadata 与 Interceptor 功能来实现 Request ID 在不同服务间的生成与传递。&lt;/p&gt;
-&lt;h2 id=&#34;介绍&#34;&gt;介绍&lt;/h2&gt;
-&lt;h3 id=&#34;tracing&#34;&gt;Tracing&lt;/h3&gt;
-&lt;p&gt;关于 Tracing 的介绍，可以看朋友 P 写的 &lt;a href=&#34;https://pjw.io/articles/2018/05/08/opentracing-explanations/#section-3&#34;&gt;OpenTracing 详解&lt;/a&gt;，看完之后就能大概明白为什么需要设置并传递 Request ID。&lt;/p&gt;
-&lt;h3 id=&#34;metadata&#34;&gt;Metadata&lt;/h3&gt;
-&lt;p&gt;Metadata 可以理解为一个 HTTP 请求的 Header（它的底层实现就是 HTTP/2 的 Header），用户可以通过访问和修改每个 gRPC Call 的 Metadata 来传递额外的信息：比如认证信息，比如本文中提到的 Request ID。&lt;/p&gt;
-&lt;h3 id=&#34;interceptor&#34;&gt;Interceptor&lt;/h3&gt;
-&lt;p&gt;Interceptor 有点类似于我们平时常用的 HTTP Middleware，不同的是它可以用在 Client 端和 Server 端。比如在收到请求之后输出日志，在请求出现错误的时候输出错误信息，比如获取请求中设置的 Request ID。&lt;/p&gt;
-&lt;h2 id=&#34;实现&#34;&gt;实现&lt;/h2&gt;
-&lt;p&gt;Anybox 后端主要使用 Golang 和 Python 开发，因此本文主要介绍这两种语言的使用方式，其他语言的使用方式应该与之类似。&lt;/p&gt;
-&lt;h3 id=&#34;golang&#34;&gt;Golang&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryInvoker is called by UnaryClientInterceptor to complete RPCs.
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryInvoker &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, reply &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;ClientConn, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;CallOption) &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;
-&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryClientInterceptor intercepts the execution of a unary RPC on the client. invoker is the handler to complete the RPC
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// and it is the responsibility of the interceptor to call it.
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// This is an EXPERIMENTAL API.
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryClientInterceptor &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, reply &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;ClientConn, invoker UnaryInvoker, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;CallOption) &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;
-&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryHandler defines the handler invoked by UnaryServerInterceptor to complete the normal
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// execution of a unary RPC. If a UnaryHandler returns an error, it should be produced by the
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// status package, or else gRPC will use codes.Unknown as the status code and err.Error() as
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// the status message of the RPC.
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryHandler &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}) (&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)
-&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// UnaryServerInterceptor provides a hook to intercept the execution of a unary RPC on the server. info
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// contains all the information of this RPC the interceptor can operate on. And handler is the wrapper
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// of the service method implementation. It is the responsibility of the interceptor to invoke handler
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// to complete the RPC.
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; UnaryServerInterceptor &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(ctx context.Context, req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, info &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;UnaryServerInfo, handler UnaryHandler) (resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Golang 的实现是把 Metadata 塞在了 context 里面，只需要使用 &lt;code&gt;metadata.FromOutgoingContext(ctx)&lt;/code&gt; 和 &lt;code&gt;metadata.FromIncomingContext(ctx)&lt;/code&gt; 就能够访问本次请求的 Metadata。概念清楚之后代码应该非常好写了：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;RequestIDClientInterceptor&lt;/span&gt;() grpc.UnaryClientInterceptor {
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(
-ctx context.Context,
-method &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, req, resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{},
-cc &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;grpc.ClientConn, invoker grpc.UnaryInvoker, opts &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;grpc.CallOption,
-) (err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;) {
-md, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; metadata.&lt;span style=&#34;color:#06287e&#34;&gt;FromOutgoingContext&lt;/span&gt;(ctx)
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
-md = metadata.&lt;span style=&#34;color:#06287e&#34;&gt;Pairs&lt;/span&gt;()
-}
-value &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; ctx.&lt;span style=&#34;color:#06287e&#34;&gt;Value&lt;/span&gt;(trace.RequestID)
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; requestID, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; value.(&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;); ok &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; requestID &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt; {
-md[&lt;span style=&#34;color:#007020&#34;&gt;string&lt;/span&gt;(trace.RequestID)] = []&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;{requestID}
-}
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;invoker&lt;/span&gt;(metadata.&lt;span style=&#34;color:#06287e&#34;&gt;NewOutgoingContext&lt;/span&gt;(ctx, md), method, req, resp, cc, opts&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;)
-}
-}
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;RequestIDServerInterceptor&lt;/span&gt;() grpc.UnaryServerInterceptor {
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(
-ctx context.Context,
-req &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, info &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;grpc.UnaryServerInfo, handler grpc.UnaryHandler,
-) (resp &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}, err &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;) {
-md, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; metadata.&lt;span style=&#34;color:#06287e&#34;&gt;FromIncomingContext&lt;/span&gt;(ctx)
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
-md = metadata.&lt;span style=&#34;color:#06287e&#34;&gt;Pairs&lt;/span&gt;()
-}
-&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Set request ID for context.
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; requestIDs &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; md[&lt;span style=&#34;color:#007020&#34;&gt;string&lt;/span&gt;(trace.RequestID)]
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;len&lt;/span&gt;(requestIDs) &lt;span style=&#34;color:#666&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt; {
-ctx = context.&lt;span style=&#34;color:#06287e&#34;&gt;WithValue&lt;/span&gt;(ctx, trace.RequestID, requestIDs[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;])
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;handler&lt;/span&gt;(ctx, req)
-}
-&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Generate request ID and set context if not exists.
-&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; requestID &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; id.&lt;span style=&#34;color:#06287e&#34;&gt;NewHex32&lt;/span&gt;()
-ctx = context.&lt;span style=&#34;color:#06287e&#34;&gt;WithValue&lt;/span&gt;(ctx, trace.RequestID, requestID)
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;handler&lt;/span&gt;(ctx, req)
-}
-}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;h3 id=&#34;python&#34;&gt;Python&lt;/h3&gt;
-&lt;blockquote&gt;
-&lt;p&gt;Python 这边相对更蛋疼一些，注释写得不是非常清晰，给的使用样例也十分的晦涩难懂，看了好一会儿源码才明白怎么用。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Python 想要实现一个 Client Interceptor 的话需要继承 &lt;code&gt;grpc.UnaryUnaryClientInterceptor&lt;/code&gt; 并实现 &lt;code&gt;intercept_unary_unary&lt;/code&gt; 方法。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;UnaryUnaryClientInterceptor&lt;/span&gt;(six&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;with_metaclass(abc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;ABCMeta)):
-&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Affords intercepting unary-unary invocations.
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; This is an EXPERIMENTAL API.
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#555;font-weight:bold&#34;&gt;@abc.abstractmethod&lt;/span&gt;
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;intercept_unary_unary&lt;/span&gt;(self, continuation, client_call_details, request):
-&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Intercepts a unary-unary invocation asynchronously.
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Args:
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; continuation: A function that proceeds with the invocation by
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; executing the next interceptor in chain or invoking the
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; actual RPC on the underlying Channel. It is the interceptor&amp;#39;s
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; responsibility to call it if it decides to move the RPC forward.
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; The interceptor can use
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; `response_future = continuation(client_call_details, request)`
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; to continue with the RPC. `continuation` returns an object that is
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; both a Call for the RPC and a Future. In the event of RPC
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; completion, the return Call-Future&amp;#39;s result value will be
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; the response message of the RPC. Should the event terminate
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; with non-OK status, the returned Call-Future&amp;#39;s exception value
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; will be an RpcError.
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; client_call_details: A ClientCallDetails object describing the
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; outgoing RPC.
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; request: The request value for the RPC.
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Returns:
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; An object that is both a Call for the RPC and a Future.
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; In the event of RPC completion, the return Call-Future&amp;#39;s
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; result value will be the response message of the RPC.
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Should the event terminate with non-OK status, the returned
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; Call-Future&amp;#39;s exception value will be an RpcError.
-&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt; &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;raise&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;NotImplementedError&lt;/span&gt;()&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;code&gt;client_call_details.metadata&lt;/code&gt; 是一个 list，里面的每一个 item 都是由 &lt;code&gt;(key, value)&lt;/code&gt; 组成的元组。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;_ClientCallDetails&lt;/span&gt;(
-collections&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;namedtuple(
-&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;_ClientCallDetails&amp;#39;&lt;/span&gt;,
-(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;method&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;timeout&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;metadata&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;credentials&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;wait_for_ready&amp;#39;&lt;/span&gt;)),
-grpc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;ClientCallDetails):
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;pass&lt;/span&gt;
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;RequestIDClientInterceptor&lt;/span&gt;(grpc&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;UnaryUnaryClientInterceptor):
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;intercept_unary_unary&lt;/span&gt;(self, continuation, client_call_details, request):
-rid &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; the_function_to_generate_request_id()
-logger&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;info(f&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Sending RPC request, Method: {client_call_details.method}, Request ID: {rid}.&amp;#34;&lt;/span&gt;)
-&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# Add request into client call details, aka, metadata.&lt;/span&gt;
-metadata &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; []
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;metadata &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;is&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;not&lt;/span&gt; None:
-metadata &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;list&lt;/span&gt;(client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;metadata)
-metadata&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;append((&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;request_id&amp;#34;&lt;/span&gt;, rid))
-client_call_details &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; _ClientCallDetails(
-client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;method, client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;timeout, metadata,
-client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;credentials, client_call_details&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;wait_for_ready)
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; continuation(client_call_details, request)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;在初始化 Channel 的时候在实例化一下即可：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;channel &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; insecure_channel(f&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;{host}:{port}&amp;#34;&lt;/span&gt;)
-channel &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; intercept_channel(channel, RequestIDClientInterceptor())&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://pjw.io/articles/2018/05/08/opentracing-explanations/&#34;&gt;OpenTracing 详解&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-metadata.md&#34;&gt;grpc-metadata&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/grpc/grpc/tree/master/examples/python/interceptors&#34;&gt;gRPC Python Interceptor Examples&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description></item></channel></rss>
+&lt;p&gt;这看都看了，不说点什么么？&lt;/p&gt;</description></item></channel></rss>

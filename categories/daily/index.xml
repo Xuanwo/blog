@@ -1,4 +1,116 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Daily on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/categories/daily/</link><description>Recent content in Daily on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 13 May 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/categories/daily/index.xml" rel="self" type="application/rss+xml"/><item><title>翻车实况第 2 期</title><link>https://xuanwo.io/2019/05/13/rollover-2nd/</link><pubDate>Mon, 13 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/13/rollover-2nd/</guid><description>&lt;blockquote&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Daily on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/categories/daily/</link><description>Recent content in Daily on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 13 Jun 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/categories/daily/index.xml" rel="self" type="application/rss+xml"/><item><title>从 netctl 切换 systemd-networkd</title><link>https://xuanwo.io/2019/06/13/switch-to-systemd-networkd/</link><pubDate>Thu, 13 Jun 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/06/13/switch-to-systemd-networkd/</guid><description>&lt;p&gt;晚上的时候临时起意决定把网络管理器从 &lt;code&gt;netctl&lt;/code&gt; 切换到 &lt;code&gt;systemd-networkd&lt;/code&gt;，切换的过程意外的顺畅。本文记录了一下切换的过程并简单介绍一下 &lt;code&gt;systemd-networkd&lt;/code&gt; + &lt;code&gt;iwd&lt;/code&gt; 的组合如何使用。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2 id=&#34;出场人物介绍&#34;&gt;出场人物介绍&lt;/h2&gt;
+&lt;h3 id=&#34;netctl&#34;&gt;netctl&lt;/h3&gt;
+&lt;p&gt;netctl 是 archlinux 的亲儿子，上游就在 &lt;a href=&#34;https://git.archlinux.org/netctl.git/&#34;&gt;https://git.archlinux.org/netctl.git/&lt;/a&gt;，也是除了 &lt;code&gt;systemd-networkd&lt;/code&gt; 之外（这是 systemd 钦定的），唯一一个进入 base 组的网络管理工具，说是官方钦定也不为过。netcl 依赖 dhcpcd 或者 dhclient 来获取动态 IP 地址，通过 &lt;code&gt;wpa_supplicant&lt;/code&gt; 来访问加密的 WiFi，提供了 &lt;code&gt;wifi-menu&lt;/code&gt; 供用户在命令行下交互式地选择热点并输入密码。同时还提供了一系列的 systemd service 文件（&lt;code&gt;netctl@.service&lt;/code&gt;，&lt;code&gt;netctl-ifplugd@.service&lt;/code&gt;，&lt;code&gt;netctl-auto@.service&lt;/code&gt;）来帮助用户进行配置，比如在开启了 &lt;code&gt;netctl-auto@&amp;lt;interface&amp;gt;.service&lt;/code&gt; 之后，你的网卡就能在可选的 profile 中自动切换。&lt;/p&gt;
+&lt;h3 id=&#34;systemd-networkd&#34;&gt;systemd-networkd&lt;/h3&gt;
+&lt;p&gt;正如它的名字所暗示的，这是 systemd 全家桶的一员。它主要负责的是检测并配置网络设备，特别的是它还能够用来配置 &lt;code&gt;systemd-nspawn&lt;/code&gt; 启动的容器的网络。&lt;/p&gt;
+&lt;h3 id=&#34;iwd&#34;&gt;iwd&lt;/h3&gt;
+&lt;p&gt;iwd (iNet wireless daemon) 是 Intel 开发，用于取代 &lt;code&gt;wpa_supplicant&lt;/code&gt; 的 WiFi 后端。它的主要目标是通过不依赖任何外部库而是最大限度的利用 Linux 内核提供的功能来优化资源利用率。iwd 可以很好的跟 systemd-network 配合使用。&lt;/p&gt;
+&lt;h2 id=&#34;使用场景介绍&#34;&gt;使用场景介绍&lt;/h2&gt;
+&lt;p&gt;平时只需要连接 3 个 Wi-Fi：家里的，公司的，手机的，没有频繁切换/增加/修改/删除 Wi-Fi 配置的需求，所以我不需要一个常驻通知区域的服务来进行切换。此外，我的 VPN 已经全部通过 systemd 来进行管理了，所以也不需要网络管理工具替我做这些操作。我需要的是这样的一个工具组合：一个负责管理网络设备，一个负责连接 WiFi 并进行认证。之前的组合是 &lt;code&gt;netctl&lt;/code&gt; + &lt;code&gt;wpa_supplicant&lt;/code&gt;，现在我有了新欢：&lt;code&gt;systemd-networkd&lt;/code&gt; + &lt;code&gt;iwd&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;如何使用&#34;&gt;如何使用&lt;/h2&gt;
+&lt;h3 id=&#34;停用-netctl&#34;&gt;停用 netctl&lt;/h3&gt;
+&lt;p&gt;首先需要停用 netctl 的相关服务，避免多个网络管理工具在一起打架。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl stop netctl-auto@&amp;lt;interface&amp;gt;.service
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl disable netctl-auto@&amp;lt;interface&amp;gt;.service&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;配置网卡&#34;&gt;配置网卡&lt;/h3&gt;
+&lt;p&gt;然后按照 Wiki 的指示写无线网卡的配置，放在 &lt;code&gt;/etc/systemd/network&lt;/code&gt; 下。&lt;/p&gt;
+&lt;p&gt;对无线网卡来说，最小化的配置是这样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Match]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;wlp2s0&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Network]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DHCP&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;ipv4&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Match&lt;/code&gt; 主要是用于匹配管理的设备，可以通过设备名，MAC 地址等来选择&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Network&lt;/code&gt; 用来做网络相关的具体配置，比如 DHCP，DNS 等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;我的本地开启了 coredns 作为 DNS 服务，所以我需要额外加一些配置来通过 DHCP 来获取 IPv4 地址，但是不使用 DHCP 下发的 DNS。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Match]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;wlan0&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Network]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DHCP&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;ipv4&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DNS&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;127.0.0.1&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[DHCP]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;UseDNS&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;false&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;iwd 启动的时候似乎会修改网络设备的名字，我的网卡被修改成了 wlan0&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在配置写好之后就可以启动 &lt;code&gt;systemd-networkd&lt;/code&gt; 的服务啦：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl start systemd-netword&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果修改了网络配置，只需要 restrart 即可。&lt;/p&gt;
+&lt;p&gt;更具体的配置可以参阅 ArchWiki 或者 &lt;code&gt;man systemd-networkd&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;配置-iwd&#34;&gt;配置 iwd&lt;/h3&gt;
+&lt;p&gt;iwd 不是自带的软件包，所以首先需要自行安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; pacman -S iwd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在开始使用之前，我们需要 start 并且 enable iwd 服务：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl start iwd
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl &lt;span style=&#34;color:#007020&#34;&gt;enable&lt;/span&gt; iwd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后就可以用 &lt;code&gt;iwctl&lt;/code&gt; 进行管理啦，iwctl 默认会进入一个交互式的命令行界面，使用体验还是很赞的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; iwctl
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;#&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;此时输入 help 会返回支持的所有命令，各个命令都比较直观，只要对 WiFi 的相关技术名词稍有了解就能很快上手，此外这个界面所有命令都支持自动补全，好评。&lt;/p&gt;
+&lt;p&gt;首先先看看我们有哪些设备：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# device list&lt;/span&gt;
+Devices *
+--------------------------------------------------------------------------------
+Name Address Powered Adapter Mode
+--------------------------------------------------------------------------------
+wlan0 xx:xx:xx:xx:xx:xx on phy0 station&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个界面是动态的，右上角的 &lt;code&gt;*&lt;/code&gt; 会不断闪烁表明这个界面是实时的。&lt;/p&gt;
+&lt;p&gt;然后我们可以手动触发一次 STA 扫描：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# station wlan0 scan&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;之后就可以查看有哪些能连接 WiFi 热点了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# station wlan0 get-networks&lt;/span&gt;
+Available networks *
+--------------------------------------------------------------------------------
+Network name Security Signal
+--------------------------------------------------------------------------------
+CU_SNZQ psk ****
+xjzy psk ****
+Tenda_30BDD0 psk ****
+TP-LINK_D82B80 psk ****
+TP-LINK_lee psk ****
+ziroom201 psk ****
+mhshome psk ****
+TP-LINK_he psk ****
+TP-LINK_450C psk ****
+yuzhe psk ****
+z212-202 psk ****
+Bill&lt;span style=&#34;&#34;&gt;&amp;#39;&lt;/span&gt;s Router psk ****
+tcs psk ****
+&amp;gt; XXXXXXXXXXX psk ****&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个界面同样是动态的，可以查看当前能连接网络机器信号强度。&lt;/p&gt;
+&lt;p&gt;最后就能够选择想要连接 SSID 连接网络了，如果需要输入密码的话，iwd 还会出现一个提示要求输入密码。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# station wlan0 connect XXXXXXXXXXX&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里有个需要提出来的点：iwd 通过交互式界面成功连接上网络之后，就会自动的在 &lt;code&gt;/var/lib/iwd&lt;/code&gt; 下生成对应的配置文件，之后 iwd 自动的进行连接。所以一方面是不需要自己手动的去写配置文件，另一方面是切换过程也是自动的，不需要人工干预。&lt;/p&gt;
+&lt;p&gt;iwd 生成的配置文件名是有一定规则的，用 SSID 作为文件名，然后以加密方式作为后缀，比如 &lt;code&gt;*.open&lt;/code&gt; 表示这是一个开放网络，&lt;code&gt;*.psk&lt;/code&gt; 表示这是一个使用 PSK 加密的网络。&lt;/p&gt;
+&lt;h3 id=&#34;检查状态&#34;&gt;检查状态&lt;/h3&gt;
+&lt;p&gt;全部配置好之后可以分别查看一下 WiFi 和网卡的状态：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; iwctl device wlan0 show
+Device: wlan0
+--------------------------------------------------------------------------------
+Settable Property Value
+--------------------------------------------------------------------------------
+Name wlan0
+* Mode station
+* Powered on
+Address xx:xx:xx:xx:xx:xx
+* WDS off
+Adapter phy0
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; networkctl status
+● State: routable
+Address: &lt;span style=&#34;color:#40a070&#34;&gt;192&lt;/span&gt;.168.0.103 on wlan0
+xxxx::xxxx:xxxx:xxxx:xxxx on wlan0
+Gateway: &lt;span style=&#34;color:#40a070&#34;&gt;192&lt;/span&gt;.168.0.1 &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;TP-LINK TECHNOLOGIES CO.,LTD.&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; on wlan0
+DNS: &lt;span style=&#34;color:#40a070&#34;&gt;127&lt;/span&gt;.0.0.1&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;systemd 真香，上交底裤我光荣！天灭 networkmanager ！&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Systemd-networkd&#34;&gt;systemd-networkd - ArchWiki&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Iwd&#34;&gt;iwd - ArchWiki&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>翻车实况第 2 期</title><link>https://xuanwo.io/2019/05/13/rollover-2nd/</link><pubDate>Mon, 13 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/13/rollover-2nd/</guid><description>&lt;blockquote&gt;
 &lt;p&gt;这文档里面都说过的事情，哪能算翻车！&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h2 id=&#34;fcitx-快捷键与-rime-冲突&#34;&gt;fcitx 快捷键与 rime 冲突&lt;/h2&gt;
@@ -572,83 +684,4 @@ https又叫做&lt;code&gt;超文本传输安全协议&lt;/code&gt;，使用这�
 &lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;2015年11月27日 完成初稿&lt;/li&gt;
-&lt;/ul&gt;</description></item><item><title>我的五样</title><link>https://xuanwo.io/2015/10/08/my-staff/</link><pubDate>Thu, 08 Oct 2015 11:08:16 +0000</pubDate><guid>https://xuanwo.io/2015/10/08/my-staff/</guid><description>&lt;p&gt;此文用以记录自己用过&amp;amp;在用的各类工具及软件，欢迎推荐&lt;/p&gt;
-&lt;h1 id=&#34;pc&#34;&gt;PC&lt;/h1&gt;
-&lt;blockquote&gt;
-&lt;p&gt;ThinkPad E531 with Win10 x64&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id=&#34;聊天&#34;&gt;聊天&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;QQ&lt;/li&gt;
-&lt;li&gt;微信电脑版&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;输入法&#34;&gt;输入法&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;搜狗拼音输入法&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;浏览器&#34;&gt;浏览器&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Chrome 64bit&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;下载&#34;&gt;下载&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;迅雷极速版&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;视频&#34;&gt;视频&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Potplayer-64 Bits&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;系统&#34;&gt;系统&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Xshell&lt;/li&gt;
-&lt;li&gt;Xftp&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://xuanwo.io/2015/07/28/listary/&#34;&gt;Listary&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;办公&#34;&gt;办公&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;SumatraPDF&lt;/li&gt;
-&lt;li&gt;XMind 7&lt;/li&gt;
-&lt;li&gt;Microsoft Office 2016&lt;/li&gt;
-&lt;li&gt;Evernote&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;游戏&#34;&gt;游戏&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;英雄联盟&lt;/li&gt;
-&lt;li&gt;龙翼编年史&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;网络&#34;&gt;网络&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;百度云管家&lt;/li&gt;
-&lt;li&gt;Shadowsocks&lt;/li&gt;
-&lt;li&gt;Cow&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;音乐&#34;&gt;音乐&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;QQ音乐&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;编程&#34;&gt;编程&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://xuanwo.io/2014/06/05/sublime-text-3-IDE/&#34;&gt;Sublime Text 3&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Microsoft Visual Studio&lt;/li&gt;
-&lt;li&gt;JetBrains CLion&lt;/li&gt;
-&lt;li&gt;JetBrains PyCharm&lt;/li&gt;
-&lt;li&gt;JetBrains WebStorm&lt;/li&gt;
-&lt;li&gt;JetBrains IDEA&lt;/li&gt;
-&lt;li&gt;Android Studio&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;解压刻录&#34;&gt;解压刻录&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;WinRAR&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;迷之工具&#34;&gt;迷之工具&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;HashCalc&lt;/li&gt;
-&lt;li&gt;Git&lt;/li&gt;
-&lt;li&gt;QTranslate&lt;/li&gt;
-&lt;li&gt;Vagrant&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&#34;更新日志&#34;&gt;更新日志&lt;/h1&gt;
-&lt;ul&gt;
-&lt;li&gt;2015年10月08日 首次发布&lt;/li&gt;
-&lt;li&gt;2015年11月27日 11月软件更新&lt;/li&gt;
 &lt;/ul&gt;</description></item></channel></rss>
