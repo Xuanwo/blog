@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Storage on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/storage/</link><description>Recent content in Storage on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 27 Jun 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/storage/index.xml" rel="self" type="application/rss+xml"/><item><title>QingStor 对象存储对接指北</title><link>https://xuanwo.io/2019/06/27/develop-with-object-storage/</link><pubDate>Thu, 27 Jun 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/06/27/develop-with-object-storage/</guid><description>&lt;p&gt;在工作中接触到过很多不了解对象存储的开发者在对接上遇到了很多问题，这篇文章旨在从核心概念出发介绍 QingStor 对象存储，然后介绍 API 和 SDK 及其注意事项，最后总结一下遇到的常见问题，希望能解决大多数人的困惑。&lt;/p&gt;
+&lt;h2 id=&#34;核心概念&#34;&gt;核心概念&lt;/h2&gt;
+&lt;h3 id=&#34;service&#34;&gt;Service&lt;/h3&gt;
+&lt;p&gt;对象存储服务的顶层命名空间。在同一个命名空间下，Bucket Name 是唯一的。每个对象存储 Serivce 都会有一个独立的 Host，比如青云 QingStor 对象存储的 Host 是 &lt;code&gt;qingstor.com&lt;/code&gt;。私有云用户在接入时需要将 Host 修改为对应的环境配置的 Host。&lt;/p&gt;
+&lt;h3 id=&#34;zone&#34;&gt;Zone&lt;/h3&gt;
+&lt;p&gt;每个对象存储 Service 都会至少有一个 Zone，每个 Zone 会有一个唯一的标识。比如青云公有云目前线上运维的对象存储 Zone 包括：&lt;code&gt;pek3a&lt;/code&gt;，&lt;code&gt;pek3b&lt;/code&gt;，&lt;code&gt;sh1a&lt;/code&gt; 和 &lt;code&gt;gd2&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;bucket&#34;&gt;Bucket&lt;/h3&gt;
+&lt;p&gt;Bucket 是用户申请的存储空间，每个 Bucket 都会属于一个 Zone，每个 Bucket 在同一个 Service 下都是全局唯一的，每个 Bucket 彼此之间完全隔离。&lt;/p&gt;
+&lt;p&gt;Bucket 将会是域名的一部分，因此 Bucket 在命名时需要遵守以下规则：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;遵守 DNS 命名规则&lt;/li&gt;
+&lt;li&gt;长度在 6 ~ 63 之间&lt;/li&gt;
+&lt;li&gt;只能包含小写字母，数字和连接字符 &lt;code&gt;-&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;开头和结尾只能是小写字母或数字&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;object&#34;&gt;Object&lt;/h3&gt;
+&lt;p&gt;Object 是用户访问数据的最小单元，每个 Object 都会属于一个 Bucket，每个 Object 在同一个 Bucket 下都是唯一的。单个 Object 最大 50TB。&lt;/p&gt;
+&lt;p&gt;Object 将会是 URL 的一部分，因此 Object 在命名需要遵守以下规则：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;长度须在 1-1023 字节之间&lt;/li&gt;
+&lt;li&gt;第一个字符不能是反斜杠 &lt;code&gt;/&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;须用 UTF-8 编码&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在发送请求的时候，Object Key 部分需要进行 URL 编码。&lt;/p&gt;
+&lt;h2 id=&#34;api-介绍&#34;&gt;API 介绍&lt;/h2&gt;
+&lt;p&gt;对象存储对外暴露的是 RESTful 风格的 API。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;GET /?delimiter=/&amp;amp;limit=4 HTTP/1.1
+Host: mybucket.pek3a.qingstor.com
+Date: Sun, 16 Aug 2015 09:05:00 GMT
+Authorization: authorization string
+HTTP/1.1 200 OK
+Server: QingStor
+Date: Sun, 16 Aug 2015 09:05:00 GMT
+Content-Length: 559
+Connection: close
+x-qs-request-id: aa08cf7a43f611e5886952542e6ce14b
+{
+&amp;quot;name&amp;quot;: &amp;quot;mybucket&amp;quot;,
+&amp;quot;keys&amp;quot;: [
+{
+&amp;quot;created&amp;quot;: &amp;quot;2016-08-22T15:03:32.000Z&amp;quot;,
+&amp;quot;modified&amp;quot;: 1471878212,
+&amp;quot;encrypted&amp;quot;: true,
+&amp;quot;storage_class&amp;quot;: &amp;quot;STANDARD&amp;quot;,
+&amp;quot;etag&amp;quot;: &amp;quot;\&amp;quot;4f44b10f5cb83777fea4ef88a3f7b3c4\&amp;quot;&amp;quot;,
+&amp;quot;key&amp;quot;: &amp;quot;api.txt&amp;quot;,
+&amp;quot;mime_type&amp;quot;: &amp;quot;text/plain&amp;quot;,
+&amp;quot;size&amp;quot;: 38970
+},
+{
+&amp;quot;created&amp;quot;: &amp;quot;2016-08-22T15:09:52.000Z&amp;quot;,
+&amp;quot;modified&amp;quot;: 1471878592,
+&amp;quot;encrypted&amp;quot;: false,
+&amp;quot;storage_class&amp;quot;: &amp;quot;STANDARD_IA&amp;quot;,
+&amp;quot;etag&amp;quot;: &amp;quot;\&amp;quot;9f1cd921dbb6656c2c9e57f83f73d70e\&amp;quot;&amp;quot;,
+&amp;quot;key&amp;quot;: &amp;quot;bigtable-osdi06.pdf&amp;quot;,
+&amp;quot;mime_type&amp;quot;: &amp;quot;application/pdf&amp;quot;,
+&amp;quot;size&amp;quot;: 221214
+}
+],
+&amp;quot;prefix&amp;quot;: &amp;quot;&amp;quot;,
+&amp;quot;owner&amp;quot;: {
+&amp;quot;id&amp;quot;: &amp;quot;usr-DxWdNcCr&amp;quot;,
+&amp;quot;name&amp;quot;: &amp;quot;william&amp;quot;
+},
+&amp;quot;delimiter&amp;quot;: &amp;quot;/&amp;quot;,
+&amp;quot;limit&amp;quot;: 4,
+&amp;quot;marker&amp;quot;: &amp;quot;&amp;quot;,
+&amp;quot;next_marker&amp;quot;: &amp;quot;bigtable-osdi06.pdf&amp;quot;,
+&amp;quot;has_more&amp;quot;: true,
+&amp;quot;common_prefixes&amp;quot;: [
+&amp;quot;QCI/&amp;quot;,
+&amp;quot;Screenshot/&amp;quot;
+]
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;正如上面这个样例展示的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;通过 HTTP 动词来区分语义，GET 表示获取资源，PUT 表示上传整个资源等&lt;/li&gt;
+&lt;li&gt;通过返回标准的 HTTP Status Code 来标识本次请求的状态，比如 200 表示正常，401 表示认证失败等，详细的 error code 可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/common/error_code&#34;&gt;此处&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;输入和输出均为 JSON 格式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;此外，API 请求时还有如下需要关注的点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;所有请求返回的 Response 都会带有 &lt;code&gt;x-qs-request-id&lt;/code&gt; Header，在请求遇到问题时在工单中附上 &lt;code&gt;request-id&lt;/code&gt; 将有助于我们更快的定位问题&lt;/li&gt;
+&lt;li&gt;所有请求发送时都需要携带正确的 Date 和 Host，其中 Date 采用 UTC 时间，格式由 &lt;a href=&#34;https://www.ietf.org/rfc/rfc822.txt&#34;&gt;RFC 822&lt;/a&gt; 定义，该时间误差不能超过 15 分钟&lt;/li&gt;
+&lt;li&gt;除非访问公开的 Bucket，所有的请求都需要认证，认证文档参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/common/signature&#34;&gt;此处&lt;/a&gt;，无特殊需求请使用官方提供的 SDK&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;QingStor 对象存储同时支持通过 HTTP 和 HTTPS 协议访问，使用的都是标准端口。&lt;/p&gt;
+&lt;p&gt;支持通过两种风格访问：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Virtual-host Style&lt;/code&gt;: &lt;code&gt;&amp;lt;bucket_name&amp;gt;.&amp;lt;zone_id&amp;gt;.qingstor.com/&amp;lt;object_key&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Path Style&lt;/code&gt;: &lt;code&gt;&amp;lt;zone_id&amp;gt;.qingstor.com/&amp;lt;bucket_name&amp;gt;/&amp;lt;object_key&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;比如上传 &lt;code&gt;arch-is-the-best.png&lt;/code&gt; 到位于 &lt;code&gt;pek3b&lt;/code&gt; 的 &lt;code&gt;linux&lt;/code&gt; Bucket 下，请求应当形如：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;PUT https://linux.pek3b.qingstor.com/arch-is-the-best.png
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;QingStor 对象存储支持 S3 兼容模式，访问形式为每个 Zone 提供一个 s3 的子域：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Virtual-host Style&lt;/code&gt;: &lt;code&gt;&amp;lt;bucket_name&amp;gt;.s3.&amp;lt;zone_id&amp;gt;.qingstor.com/&amp;lt;object_key&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Path Style&lt;/code&gt;: &lt;code&gt;s3.&amp;lt;zone_id&amp;gt;.qingstor.com/&amp;lt;bucket_name&amp;gt;/&amp;lt;object_key&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;sdk-介绍&#34;&gt;SDK 介绍&lt;/h2&gt;
+&lt;p&gt;QingStor 对象存储目前提供了绝大部分语言的 SDK，他们都共用相似的逻辑：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;首先初始化 Config&lt;/li&gt;
+&lt;li&gt;然后创建 Service 实例&lt;/li&gt;
+&lt;li&gt;通过 Service 实例可以初始化出一个 Bucket 实例&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;所有的 API 可分为三类：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Service: &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/service/&#34;&gt;https://docs.qingcloud.com/qingstor/api/service/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Bucket: &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/bucket/&#34;&gt;https://docs.qingcloud.com/qingstor/api/bucket/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Object: &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/object/&#34;&gt;https://docs.qingcloud.com/qingstor/api/object/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其中 Service 实例可以处理 Serivce 级别的 API，而 Bucket 实例可以处理 Bucket 和 Object 级别的 API。&lt;/p&gt;
+&lt;p&gt;所有 SDK 均通过 API Specs 自动生成，采用与语言主流风格相似的命名逻辑，比如 Golang 中 &lt;code&gt;ListObjects&lt;/code&gt;，Python 中是 &lt;code&gt;list_objects&lt;/code&gt;，Node.js 中是 &lt;code&gt;listObjects&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;常见问题&#34;&gt;常见问题&lt;/h2&gt;
+&lt;p&gt;在总结我见过的常见问题之前，首先分享几个关于工单的小秘密：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;提工单之前首先检查自己有没有什么低级错误（要不然这个单子会很没意思）&lt;/li&gt;
+&lt;li&gt;提工单的时候提供完整的信息会有助于问题的快速解决（在对象存储这边就是 Zone，Bucket，SDK，最最最重要的是请带上 &lt;code&gt;request_id&lt;/code&gt;）&lt;/li&gt;
+&lt;li&gt;在工单里面发脾气是没用的（在哪里都没用，做个大人吧）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;如何做断点续传&#34;&gt;如何做断点续传？&lt;/h3&gt;
+&lt;p&gt;断点续传分成上传和下载，下载使用标准的 HTTP Range Header 来下载指定的部分，上传则需要使用分段上传的接口，具体的流程可以参考 &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/object/multipart/index.html&#34;&gt;Multipart 分段上传过程&lt;/a&gt;。在分段上传完成后，它就是一个完整的 Object，无法再获取到分段的信息。&lt;/p&gt;
+&lt;h3 id=&#34;如何上传超大文件&#34;&gt;如何上传超大文件？&lt;/h3&gt;
+&lt;p&gt;超大文件需要使用分段上传接口，单个分段最大 5GB，与 PutObject 的限制一致，单文件最大可到 50TB。&lt;/p&gt;
+&lt;h3 id=&#34;如何访问上传的文件&#34;&gt;如何访问上传的文件？&lt;/h3&gt;
+&lt;p&gt;正如上面提到的，对象存储提供的是 RESTful 的 API 接口，上传时用 PUT，下载就用 GET，删除用 DELETE。&lt;/p&gt;
+&lt;h3 id=&#34;如何创建文件夹&#34;&gt;如何创建文件夹？&lt;/h3&gt;
+&lt;p&gt;对象存储没有层次结构，因此也没有文件夹的概念。&lt;/p&gt;
+&lt;p&gt;但是对象存储支持指定一个分隔符，把带有相同分隔符的 Object 组织到一起，可以模拟出文件夹。比如：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ubuntu/my-patch-is-so-good.patch
+ubuntu/this-apt-has-super-power.png
+centos/my-gcc-is-5.txt
+centos/my-kernel-is-3-10.jpg
+arch/my-gcc-is-going-to-9.gif
+i-use-systemd.txt
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果指定 &lt;code&gt;delimiter&lt;/code&gt; 为 &lt;code&gt;/&lt;/code&gt;，则我们会得到形如这样的结果：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;common_prefixes&amp;#34;&lt;/span&gt;: [
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;ubuntu/&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;centos/&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;arch/&amp;#34;&lt;/span&gt;
+],
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;keys&amp;#34;&lt;/span&gt;: [
+{
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;created&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;2016-08-22T15:03:32.000Z&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;modified&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;1471878212&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;encrypted&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;storage_class&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;STANDARD&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;etag&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\&amp;#34;4f44b10f5cb83777fea4ef88a3f7b3c4\&amp;#34;&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;i-use-systemd.txt&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;mime_type&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;text/plain&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;size&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;38970&lt;/span&gt;
+}
+]
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;common_prefixes&lt;/code&gt; 就是那些有共同前缀的 Key，而 &lt;code&gt;keys&lt;/code&gt; 则是当前 prefix 下不带有指定 &lt;code&gt;delimiter&lt;/code&gt; 的 Key。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;delimiter&lt;/code&gt; 可以是任意 Char，不过我们一般指定为 &lt;code&gt;/&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;如何下载文件夹&#34;&gt;如何下载文件夹？&lt;/h3&gt;
+&lt;p&gt;List 指定 Prefix，然后下载所有的 Key。&lt;/p&gt;
+&lt;p&gt;也可以使用命令行工具，比如 &lt;a href=&#34;https://github.com/yunify/qsctl&#34;&gt;&lt;code&gt;qsctl&lt;/code&gt;&lt;/a&gt;，&lt;a href=&#34;https://github.com/yunify/qscamel&#34;&gt;&lt;code&gt;qscamel&lt;/code&gt;&lt;/a&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;如何批量删除文件&#34;&gt;如何批量删除文件？&lt;/h3&gt;
+&lt;p&gt;List 指定 Prefix，然后逐个删除或使用 &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/bucket/delete_multiple&#34;&gt;&lt;code&gt;DeleteMultipleObjects&lt;/code&gt;&lt;/a&gt; 接口。&lt;/p&gt;
+&lt;h3 id=&#34;内网访问&#34;&gt;内网访问&lt;/h3&gt;
+&lt;p&gt;青云 IaaS 与同一个 Zone 的对象存储是内网互通的，因此在青云 IaaS 中访问对象存储不收取公网流量费用。对象存储的 &lt;code&gt;Service Global Server&lt;/code&gt; 可能部署在其他区域，因此没有绑定公网 IP 的机器可能无法访问，此时可以直接指定 Bucket 所在的 Zone，避免工具或者 SDK 访问 Global Server 来自动检测 Bucket 的 Zone。&lt;/p&gt;
+&lt;p&gt;如果担心 DNS 解析结果不正确导致走公网的话，可以 &lt;code&gt;dig &amp;lt;zone_id&amp;gt;.qingstor.com&lt;/code&gt;：如果返回的是 &lt;code&gt;10.x&lt;/code&gt; 开头的内网 IP，则说明访问会走内网；如果返回的是 &lt;code&gt;139.198.x&lt;/code&gt; 开头的公网 IP，则说明访问会走公网。&lt;/p&gt;
+&lt;h3 id=&#34;request-expired-是什么问题&#34;&gt;request_expired 是什么问题？&lt;/h3&gt;
+&lt;p&gt;QingStor 对象存储服务会通过 Date 来检查签名的时间，如果服务器收到请求的时间与 Date 相差过大，则会返回该错误。在确定网络没有明显拥堵的情况下，请检查服务器本身的时间是否已经校准。&lt;/p&gt;
+&lt;h3 id=&#34;浏览器访问遇到-cors-报错&#34;&gt;浏览器访问遇到 CORS 报错&lt;/h3&gt;
+&lt;p&gt;在浏览器端访问对象存储的时候经常会遇到 CORS 相关的报错，请正确配置 Bucket 的 CORS。&lt;/p&gt;
+&lt;h3 id=&#34;浏览器端如何避免密钥泄漏&#34;&gt;浏览器端如何避免密钥泄漏&lt;/h3&gt;
+&lt;p&gt;访问对象存储服务需要 &lt;code&gt;Access Key ID&lt;/code&gt; 和 &lt;code&gt;Secret Access Key&lt;/code&gt;，这两个值不能直接暴露在浏览器中，否则会导致密钥泄漏。此时需要自行搭建签名服务器，在后端校验请求后在本地进行请求的签名，并将签名的结果返回给前端。整体的访问流程如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;浏览器请求签名服务器&lt;/li&gt;
+&lt;li&gt;签名服务器返回签名后的结果&lt;/li&gt;
+&lt;li&gt;浏览器发送签名后的请求&lt;/li&gt;
+&lt;li&gt;对象存储服务器响应&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;签名服务器与业务耦合比较紧密，因此只提供了一个 demo 作为参考：&lt;a href=&#34;https://github.com/yunify/qingstor-demo-signature-server-nodejs&#34;&gt;QingStor Demo - Signature Server (NodeJS)&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.qingcloud.com/qingstor/&#34;&gt;QingStor 对象存储文档&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS&#34;&gt;HTTP访问控制（CORS）&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>
