@@ -1,4 +1,73 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Develop on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/categories/develop/</link><description>Recent content in Develop on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 27 Jun 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/categories/develop/index.xml" rel="self" type="application/rss+xml"/><item><title>QingStor 对象存储对接指北</title><link>https://xuanwo.io/2019/06/27/develop-with-object-storage/</link><pubDate>Thu, 27 Jun 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/06/27/develop-with-object-storage/</guid><description>&lt;p&gt;在工作中接触到过很多不了解对象存储的开发者在对接上遇到了很多问题，这篇文章旨在从核心概念出发介绍 QingStor 对象存储，然后介绍 API 和 SDK 及其注意事项，最后总结一下遇到的常见问题，希望能解决大多数人的困惑。本文主要介绍的是 QingStor 对象存储，但是其他的对象存储概念应当相似，同样可以参考。&lt;/p&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Develop on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/categories/develop/</link><description>Recent content in Develop on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 08 Jul 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/categories/develop/index.xml" rel="self" type="application/rss+xml"/><item><title>beancollect —— beancount 账单导入工具</title><link>https://xuanwo.io/2019/07/08/intro-beancollect/</link><pubDate>Mon, 08 Jul 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/07/08/intro-beancollect/</guid><description>&lt;p&gt;每一个 beancount 的使用者最终都会写一个自己的账单导入工具，我当然也不例外。&lt;/p&gt;
+&lt;h2 id=&#34;what&#34;&gt;What&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/Xuanwo/beancollect&#34;&gt;&lt;code&gt;beancollect&lt;/code&gt;&lt;/a&gt; 是一个为 &lt;code&gt;beancount&lt;/code&gt; 开发的账单导入工具，其设计目标是：简单，可靠。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;beancollect&lt;/code&gt; 不会直接修改用户的账单&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;beancollect&lt;/code&gt; 总是显式的执行操作&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;beancollect&lt;/code&gt; 不预测或依赖用户的特定行为或输入&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;why&#34;&gt;Why&lt;/h2&gt;
+&lt;p&gt;beancount 的账单导入工具很多，为什么要自己写一个呢？&lt;/p&gt;
+&lt;p&gt;首先是因为我主要是用微信支付，而目前没有支持微信支付的账单导入工具；其次是我不喜欢大多数账单导入工具的设计，包括 beancount 原生自带的那一套。&lt;/p&gt;
+&lt;h2 id=&#34;how&#34;&gt;How&lt;/h2&gt;
+&lt;h3 id=&#34;setup&#34;&gt;Setup&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;beancollect&lt;/code&gt; 被设计用来与 &lt;code&gt;beancount&lt;/code&gt; 一起工作，因此它需要在 &lt;code&gt;main.bean&lt;/code&gt; 的项目文件夹中工作。&lt;/p&gt;
+&lt;p&gt;目前 &lt;code&gt;beancollect&lt;/code&gt; 会去搜索当前目录下的 &lt;code&gt;collect&lt;/code&gt; 目录，并读取其中的配置文件来完成初始化。推荐的结构如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;├── account
+│ ├── assets.bean
+│ ├── equity.bean
+│ ├── expenses.bean
+│ ├── incomes.bean
+│ └── liabilities.bean
+├── collect
+│ ├── global.yaml
+│ └── wechat.yaml
+├── main.bean
+└── transactions
+└── 2019
+├── 03.bean
+├── 04.bean
+├── 05.bean
+├── 06.bean
+└── 07.bean
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;config&#34;&gt;Config&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;beancollect&lt;/code&gt; 目前支持如下配置：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;account:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;招商银行(XXXX)&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Liabilities:Credit:CMB&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;招商银行&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Assets:Deposit:CMB:CardXXXX&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;零钱通&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Assets:Deposit:WeChat&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;零钱&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Assets:Deposit:WeChat&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;rules:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;猫眼/格瓦拉生活&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Recreation:Movie&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;北京麦当劳食品有限公司&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Intake:FastFood&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;滴滴出行&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Transport:Taxi&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;摩拜单车&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Transport:Bicycle&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中 &lt;code&gt;account&lt;/code&gt; 部分配置的是给定账单与实际账户的映射，&lt;code&gt;rules&lt;/code&gt; 部分配置的是对符合条件的账单进行的操作。&lt;/p&gt;
+&lt;h3 id=&#34;schema&#34;&gt;Schema&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;beancollect&lt;/code&gt; 目前仅支持 &lt;code&gt;wechat&lt;/code&gt;，每种 &lt;code&gt;schema&lt;/code&gt; 会有自己独立的配置，如果存在的话将会覆盖 &lt;code&gt;global.yaml&lt;/code&gt; 中的配置。&lt;/p&gt;
+&lt;h3 id=&#34;rules&#34;&gt;Rules&lt;/h3&gt;
+&lt;p&gt;目前仅支持增加账户：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;摩拜单车&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Transport:Bicycle&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果 &lt;code&gt;payee&lt;/code&gt; 是 &lt;code&gt;摩拜单车&lt;/code&gt; 的话，就在 &lt;code&gt;posting&lt;/code&gt; 中增加账户 &lt;code&gt;Expenses:Transport:Bicycle&lt;/code&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;项目地址在 &lt;a href=&#34;https://github.com/Xuanwo/beancollect&#34;&gt;https://github.com/Xuanwo/beancollect&lt;/a&gt;，欢迎大家提需求和反馈 BUG。&lt;/p&gt;</description></item><item><title>QingStor 对象存储对接指北</title><link>https://xuanwo.io/2019/06/27/develop-with-object-storage/</link><pubDate>Thu, 27 Jun 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/06/27/develop-with-object-storage/</guid><description>&lt;p&gt;在工作中接触到过很多不了解对象存储的开发者在对接上遇到了很多问题，这篇文章旨在从核心概念出发介绍 QingStor 对象存储，然后介绍 API 和 SDK 及其注意事项，最后总结一下遇到的常见问题，希望能解决大多数人的困惑。本文主要介绍的是 QingStor 对象存储，但是其他的对象存储概念应当相似，同样可以参考。&lt;/p&gt;
 &lt;h2 id=&#34;核心概念&#34;&gt;核心概念&lt;/h2&gt;
 &lt;h3 id=&#34;service&#34;&gt;Service&lt;/h3&gt;
 &lt;p&gt;对象存储服务的顶层命名空间。在同一个命名空间下，Bucket Name 是唯一的。每个对象存储 Serivce 都会有一个独立的 Host，比如青云 QingStor 对象存储的 Host 是 &lt;code&gt;qingstor.com&lt;/code&gt;。私有云用户在接入时需要将 Host 修改为对应的环境配置的 Host。&lt;/p&gt;

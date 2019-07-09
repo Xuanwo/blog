@@ -1,4 +1,73 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>2019s on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/2019/</link><description>Recent content in 2019s on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 27 Jun 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/2019/index.xml" rel="self" type="application/rss+xml"/><item><title>QingStor 对象存储对接指北</title><link>https://xuanwo.io/2019/06/27/develop-with-object-storage/</link><pubDate>Thu, 27 Jun 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/06/27/develop-with-object-storage/</guid><description>&lt;p&gt;在工作中接触到过很多不了解对象存储的开发者在对接上遇到了很多问题，这篇文章旨在从核心概念出发介绍 QingStor 对象存储，然后介绍 API 和 SDK 及其注意事项，最后总结一下遇到的常见问题，希望能解决大多数人的困惑。本文主要介绍的是 QingStor 对象存储，但是其他的对象存储概念应当相似，同样可以参考。&lt;/p&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>2019s on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/2019/</link><description>Recent content in 2019s on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 08 Jul 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/2019/index.xml" rel="self" type="application/rss+xml"/><item><title>beancollect —— beancount 账单导入工具</title><link>https://xuanwo.io/2019/07/08/intro-beancollect/</link><pubDate>Mon, 08 Jul 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/07/08/intro-beancollect/</guid><description>&lt;p&gt;每一个 beancount 的使用者最终都会写一个自己的账单导入工具，我当然也不例外。&lt;/p&gt;
+&lt;h2 id=&#34;what&#34;&gt;What&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/Xuanwo/beancollect&#34;&gt;&lt;code&gt;beancollect&lt;/code&gt;&lt;/a&gt; 是一个为 &lt;code&gt;beancount&lt;/code&gt; 开发的账单导入工具，其设计目标是：简单，可靠。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;beancollect&lt;/code&gt; 不会直接修改用户的账单&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;beancollect&lt;/code&gt; 总是显式的执行操作&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;beancollect&lt;/code&gt; 不预测或依赖用户的特定行为或输入&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;why&#34;&gt;Why&lt;/h2&gt;
+&lt;p&gt;beancount 的账单导入工具很多，为什么要自己写一个呢？&lt;/p&gt;
+&lt;p&gt;首先是因为我主要是用微信支付，而目前没有支持微信支付的账单导入工具；其次是我不喜欢大多数账单导入工具的设计，包括 beancount 原生自带的那一套。&lt;/p&gt;
+&lt;h2 id=&#34;how&#34;&gt;How&lt;/h2&gt;
+&lt;h3 id=&#34;setup&#34;&gt;Setup&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;beancollect&lt;/code&gt; 被设计用来与 &lt;code&gt;beancount&lt;/code&gt; 一起工作，因此它需要在 &lt;code&gt;main.bean&lt;/code&gt; 的项目文件夹中工作。&lt;/p&gt;
+&lt;p&gt;目前 &lt;code&gt;beancollect&lt;/code&gt; 会去搜索当前目录下的 &lt;code&gt;collect&lt;/code&gt; 目录，并读取其中的配置文件来完成初始化。推荐的结构如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;├── account
+│ ├── assets.bean
+│ ├── equity.bean
+│ ├── expenses.bean
+│ ├── incomes.bean
+│ └── liabilities.bean
+├── collect
+│ ├── global.yaml
+│ └── wechat.yaml
+├── main.bean
+└── transactions
+└── 2019
+├── 03.bean
+├── 04.bean
+├── 05.bean
+├── 06.bean
+└── 07.bean
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;config&#34;&gt;Config&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;beancollect&lt;/code&gt; 目前支持如下配置：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;account:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;招商银行(XXXX)&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Liabilities:Credit:CMB&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;招商银行&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Assets:Deposit:CMB:CardXXXX&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;零钱通&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Assets:Deposit:WeChat&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;零钱&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Assets:Deposit:WeChat&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;rules:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;猫眼/格瓦拉生活&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Recreation:Movie&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;北京麦当劳食品有限公司&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Intake:FastFood&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;滴滴出行&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Transport:Taxi&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;摩拜单车&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Transport:Bicycle&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中 &lt;code&gt;account&lt;/code&gt; 部分配置的是给定账单与实际账户的映射，&lt;code&gt;rules&lt;/code&gt; 部分配置的是对符合条件的账单进行的操作。&lt;/p&gt;
+&lt;h3 id=&#34;schema&#34;&gt;Schema&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;beancollect&lt;/code&gt; 目前仅支持 &lt;code&gt;wechat&lt;/code&gt;，每种 &lt;code&gt;schema&lt;/code&gt; 会有自己独立的配置，如果存在的话将会覆盖 &lt;code&gt;global.yaml&lt;/code&gt; 中的配置。&lt;/p&gt;
+&lt;h3 id=&#34;rules&#34;&gt;Rules&lt;/h3&gt;
+&lt;p&gt;目前仅支持增加账户：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;摩拜单车&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Transport:Bicycle&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果 &lt;code&gt;payee&lt;/code&gt; 是 &lt;code&gt;摩拜单车&lt;/code&gt; 的话，就在 &lt;code&gt;posting&lt;/code&gt; 中增加账户 &lt;code&gt;Expenses:Transport:Bicycle&lt;/code&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;项目地址在 &lt;a href=&#34;https://github.com/Xuanwo/beancollect&#34;&gt;https://github.com/Xuanwo/beancollect&lt;/a&gt;，欢迎大家提需求和反馈 BUG。&lt;/p&gt;</description></item><item><title>QingStor 对象存储对接指北</title><link>https://xuanwo.io/2019/06/27/develop-with-object-storage/</link><pubDate>Thu, 27 Jun 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/06/27/develop-with-object-storage/</guid><description>&lt;p&gt;在工作中接触到过很多不了解对象存储的开发者在对接上遇到了很多问题，这篇文章旨在从核心概念出发介绍 QingStor 对象存储，然后介绍 API 和 SDK 及其注意事项，最后总结一下遇到的常见问题，希望能解决大多数人的困惑。本文主要介绍的是 QingStor 对象存储，但是其他的对象存储概念应当相似，同样可以参考。&lt;/p&gt;
 &lt;h2 id=&#34;核心概念&#34;&gt;核心概念&lt;/h2&gt;
 &lt;h3 id=&#34;service&#34;&gt;Service&lt;/h3&gt;
 &lt;p&gt;对象存储服务的顶层命名空间。在同一个命名空间下，Bucket Name 是唯一的。每个对象存储 Serivce 都会有一个独立的 Host，比如青云 QingStor 对象存储的 Host 是 &lt;code&gt;qingstor.com&lt;/code&gt;。私有云用户在接入时需要将 Host 修改为对应的环境配置的 Host。&lt;/p&gt;
@@ -1185,38 +1254,4 @@ libdbusmenu-glib: For global menu support &lt;span style=&#34;color:#666&#34;&gt
 &lt;h2 id=&#34;今日彩蛋&#34;&gt;今日彩蛋&lt;/h2&gt;
 &lt;p&gt;晚上回去的时候本来想找个网吧坐坐，结果被复杂的各种套餐和工作人员的蜜汁英文劝退了，于是走了回去。在回去的路上拍了一波夜景就不多说啦，最让我感到印象深刻的是这个：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;emmm.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;emmmmm，如果想歪了那肯定是你自己的错，跟我取景的方式/角度/内容没有任何关系。&lt;/p&gt;</description></item><item><title>日访富士圣山，夜探歌舞伎町</title><link>https://xuanwo.io/2019/03/18/the-way-to-mount-fuji/</link><pubDate>Mon, 18 Mar 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/18/the-way-to-mount-fuji/</guid><description>&lt;blockquote&gt;
-&lt;p&gt;人为什么要去爬山？因为山在那里！&lt;/p&gt;
-&lt;p&gt;为什么到山脚就停？因为来过，吃过，拍过。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id=&#34;富士急行線&#34;&gt;富士急行線&lt;/h2&gt;
-&lt;p&gt;第一次来日本的游客总是难免需要去富士山打个卡，我们都是俗人，自然难以免俗。&lt;/p&gt;
-&lt;p&gt;慢悠悠的起床，在家附近的一家 711 买了早餐，在店门口吃完，然后坐车前往大月站，准备坐富士急行线。等我们一路换乘坐到大月站之后，已经是上午十点半了。很遗憾买不到&lt;a href=&#34;http://tc.fujikyu-railway.jp/train/&#34;&gt;富士登山電車&lt;/a&gt;的票，只能坐普通的特快，不过景色依然很赞，虽然大多数都在睡觉（我后来也睡着了= =），所以也不要期待有怎么样的观光效果啦。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;first_view.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;h2 id=&#34;小作&#34;&gt;小作&lt;/h2&gt;
-&lt;p&gt;其实我们来富士山并不是真的来看富士山的（认真）。&lt;/p&gt;
-&lt;p&gt;在制定行程的时候，朋友 P 不知道为啥对&lt;a href=&#34;http://you.ctrip.com/food/fujikawaguchiko60548/10986195.html&#34;&gt;小作&lt;/a&gt;特别着迷，吵嚷着一定要去吃熊肉刺身。因此我们定下了早上去富士山，吃熊肉刺身，然后返程的计划。可惜我们公交车坐过了站，我们下车之后走了有一段距离。好在路上风景非常不错，马路整洁开阔，时不时还有学生下课回家（这是最气的，万恶的资本主义）。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;xiaozuo.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;小作门口就是一大片停车场，大概自驾来玩会非常方便停车。店门口的右边是个水车，不过并没有什么实际的作用，倒是很多有在水车前合影留念（我们也一样），看来店家还是懂人心。有攻略上晚上来会非常好看，我们没这个条件，只能脑补一下了。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;in_xiaozuo.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;小作店里面如我们想的一样非常日式，进门需要换鞋，踩在软软的垫子上，非常舒服。在开始聊吃的之前我还想说一下小作有些特别的卫生间设计：我们都已经脱鞋了，那上卫生间咋办呢？他们准备了好几双拖鞋，笑。不仅如此，他们还同时提供了坐便和蹲便！不太清楚日本其他地方的公共场所是否也是如此，但是小作这个还是我印象最深刻的。（咳咳，我为啥要关注这种东西）&lt;/p&gt;
-&lt;p&gt;常看我博客的朋友们应该不难想到，我们去吃的时候，熊肉刺身&lt;strong&gt;果然&lt;/strong&gt;没了。最后我们选择了点了一份马肉刺身，鳗鱼饭，还有天妇罗之类的东西，也算是吃得比较开心，没有白来。&lt;/p&gt;
-&lt;h2 id=&#34;八木崎公园&#34;&gt;八木崎公园&lt;/h2&gt;
-&lt;p&gt;吃完饭之后的时间有些鸡肋，直接回去吧有些可惜，再往山上走吧来不及，简单商量了一下，决定去八木崎公园转转再走。八木崎公园没有什么人，有三四个小孩在踢球，他们欢笑声染透了半个公园，以至于整个下午我的耳边都回荡着他们快活的倒数声：“san，ni，ichi……”&lt;/p&gt;
-&lt;p&gt;除了我们之外还有三个看起来就很专业的小姐姐带着行李箱和单反在取景，我在远处抓住了小姐姐举起单反的那个瞬间。她们的话，肯定能理解这种想把此刻拍下来的冲动的吧？&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;sisters.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;打消了上去跟小姐姐搭讪的念头（我要有这本事还能单身到现在么？），沿着河口湖的边缘一直向前走。拍了好多湖中央的小岛，拍了好多湖对面连绵的山峦，拍了好多整个湖泊的全景，但是始终感觉少了点灵魂。哎，突然涌起强烈的想要脱单的心情，以后要是有对象了，我一定把她抓过来用同样的角度全都补上一张。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;lake.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;走过一个小小的山坡之后，能看到有个老人坐在前方坡顶的一块石头上专注的看着远处的富士山。他会想些什么呢？当年的辉煌岁月？歌颂富士山的恢宏与壮丽？抑或是在为最近菜价又涨了两毛发愁？我经常在想住在景区的人面对那些被无数有人拍来拍去的景点会想些什么，可能就跟看我们老家后头的小山包一样吧，山包大了些，来的人多了些，除此以外并无不同。我还在跟朋友们打趣以后老了就在富士山脚下买个屋子，每天都看看，看一眼就赚一趟来回北京来回东京的机票钱，朋友们就回怼，别傻了，那时候你还惦记机票钱么？也是，我要是有钱了，我就买三套路人女主，一套收藏，一套安利，一套自己看。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;goodbye.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;太阳快下山了，我最后又连着拍了好几张富士山，感谢它给我提供了这么多胡思乱想的素材。&lt;/p&gt;
-&lt;h2 id=&#34;shinjuku&#34;&gt;Shinjuku&lt;/h2&gt;
-&lt;p&gt;从富士山回来之后我们就去了新宿，据说是东京年轻人最多的地方，特别繁华，那个有名的歌舞伎町也在这里。小伙伴们去采购，我在四处乱逛。&lt;/p&gt;
-&lt;p&gt;这里的游戏厅简直震撼，从地下三层到楼上两层（？）都是游戏机，在门外还只能听到轰隆隆的声音，一推开门走进去就会感到一股强大的声浪迎面而来。我来的这个店大多都是玩的战姬绝唱，AKB48 之类的游戏，他们推开门，找空位坐下，插上自己的 ID 卡，然后就拿出大把的现金往里塞，玩得特别专注，完全注意不到我在他们背后逡巡。我本来也想体验一把，但是一方面自己身上并没有多少日元现金，另一方面是自己看着别人玩了好一会儿也没有看懂到底是怎么玩的，所以放弃治疗了。&lt;/p&gt;
-&lt;p&gt;除了我看不懂的游戏机之外，马路对面还有一家娃娃机专门店。各种你想得到的，想不到的东西都能做成娃娃机。我进门的时候看到两个小姐姐正在试图抓一个超大的龙猫，她们一个人负责操控方向杆，一个人负责操控下落的按钮。她们念念有词，大概是什么幸运的咒语，然后在爪子放下之后围着机器大喊加油（大概）。最后龙猫&lt;strong&gt;果然&lt;/strong&gt;成功的掉了下来，她们顾不上把龙猫拿出来，就欢呼着抱在一起跳了起来。后来似乎是注意到了我这个陌生人的凝视，她们有些不好意思的吐了吐舌头，把龙猫拿出来笑着跑开了。喂，你们真的不考虑教教我怎么抓么？我也想整一个啊！&lt;/p&gt;
-&lt;p&gt;正在我犹豫要不要出手的时候，边上的店员正在给两位小哥讲解如何抓一个正方体样式的高达模型。只见他熟练的控制着爪子，然后按下按钮，爪子在正方体的一个角落上叩了一下，那个模型就被直接捅了下来。然后他当着我们三个人的面打开机器，把那个模型放了进去（放了进去- -），再锁上，然后说了些就是这样，你们也来试试吧这样的话。那两个小哥果然天赋异禀，尝试了两三次之后成功的搞定一个。这我哪里忍得住啊，抄起自己的西瓜卡就开搞，最后&lt;strong&gt;果然&lt;/strong&gt;沉了，以至于朋友 P 后来问我干啥去了，为啥卡里都没钱了。我嘴角抽了抽，电子竞技，菜是原罪。&lt;/p&gt;
-&lt;p&gt;后来我们一起去逛了歌舞伎町，我们一直口嗨说要进去体验一下，但是最后啥都没干就出来了。（回国之后我才知道，就算想干嘛也是干不了的，因为不给外国人提供服务）我们回地铁站的时候还看到了格拉斯麗新宿酒店楼顶的超大哥斯拉的头，当然免不了抓拍几张。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;godzilla.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;我在很久很久之后才知道画面上这个小姑娘叫做战斗天使阿丽塔 = =&lt;/p&gt;
-&lt;/blockquote&gt;</description></item></channel></rss>
+&lt;p&gt;emmmmm，如果想歪了那肯定是你自己的错，跟我取景的方式/角度/内容没有任何关系。&lt;/p&gt;</description></item></channel></rss>
