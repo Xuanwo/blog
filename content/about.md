@@ -1,6 +1,7 @@
 ---
-title: About
-type: single
+title: 关于我
+type: page
+layout: about
 ---
 
 ## Area of interest

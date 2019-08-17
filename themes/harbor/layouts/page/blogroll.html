@@ -1,27 +1,28 @@
 {{ partial "head.html" . }}
+
 <body>
 {{ partial "header.html" . }}
 
 <main id="main-content">
     <div class="container">
-        <h1>
-            <u>{{ .Title }}</u>
-        </h1>
+        <h1>{{ .Title }}</h1>
         <section class="posts">
-            {{ range .Paginator.Pages }}
-            <a href="{{ .RelPermalink }}">
+            {{ range .Site.Data.blogroll }}
+            {{ range sort . "url" }}
+            <a href="{{ .url }}">
                 <div class="each">
                     <div>
-                        <h2>{{ .Title }}</h2>
-                        <div class="excerpt">{{ .Date.Format "2006 Jan 2" }}</div>
+                        <h2>{{ .name }}</h2>
+                        <div class="excerpt">{{ .description }}</div>
                     </div>
                 </div>
             </a>
+            <!--            {{ . }}-->
+            {{ end }}
             {{ end }}
         </section>
     </div>
 </main>
-
 {{ partial "footer.html" . }}
-</body>
+</body>chrh
 </html>

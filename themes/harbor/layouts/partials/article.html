@@ -1,33 +1,29 @@
-<article class="article article-type-post" itemscope itemprop="blogPost">
-    {{ $Site := .Site }}
-    <div class="article-inner">
-        {{ if .Title }}
-        <header class="article-header">
-            <h1 class="article-title" itemprop="name">{{ .Title }}</h1>
-        </header>
-        {{ end }}
-        <div class="article-meta">
-            {{ if ne (.Date.Format "2006-01-02") "0001-01-01" }}
-            <a href="{{ .RelPermalink }}" class="article-date">
-                <time datetime='{{ .Date.Format "2006-01-02T15:04:05.000-07:00" }}' itemprop="datePublished">{{ .Date.Format "2006-01-02" }}</time>
-            </a>
-            {{ if .Params.categories }}
-            <div class="post-categories">
-                <div class="article-category">
-                    {{ $e := .Params.categories }}
-                    <a class="article-category-link" href="{{ $Site.BaseURL }}/categories/{{ $e | urlize }}">{{ $e }}</a>
+<main id="main-content">
+    <article class="single container">
+        {{ $Site := .Site }}
+        <header class="single-header">
+            <div class="flex">
+                <h1>{{ .Title }}</h1>
+
+                <div class="post-meta">
+                    <time class="date" datetime='{{ .Date.Format "2006-01-02T15:04:05.000-07:00" }}' itemprop="datePublished">{{ .Date.Format "2006-01-02" }}</time>
+                    {{ if .Site.DisqusShortname }}
+                    /
+                    <span>
+                        <a href="#disqus_thread" class="comment-link">Comments</a>
+                    </span>
+                    {{ end }}
+                </div>
+                <div class="tag-container">
+                    {{ range .Params.tags }}
+                    <a style="text-decoration:none" href="{{ $Site.BaseURL}}/tags/{{ . | urlize }}">
+                        <span>{{ . }}</span>
+                    </a>
+                    {{ end }}
                 </div>
             </div>
-            {{ end }}
-            {{ if .Site.DisqusShortname }}
-            <div class="article-comment-link-wrap">
-                <a href="{{ .RelPermalink }}#disqus_thread" class="article-comment-link">Comments</a>
-            </div>
-            {{ end }}
-            {{ end }}
-        </div>
-
-        <div class="article-entry" itemprop="articleBody">
+        </header>
+        <div class="post">
             {{ if .Params.series }}
             <blockquote>
                 {{ $e := .Params.series }}
@@ -38,27 +34,6 @@
             {{ end }}
             {{ .Content }}
         </div>
-
-        {{ if not .Params.notoc }}
-        {{ if .TableOfContents }}
-        <div class="article-toc"></div>
-        {{ end }}
-        {{ end }}
-
-        {{ if .Params.tags }}
-        <footer class="article-footer">
-            <ul class="article-tag-list">
-                {{ range .Params.tags }}
-                <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="{{ $Site.BaseURL}}/tags/{{ . | urlize }}">{{ . }}
-                    </a>
-                </li>
-                {{ end }}
-            </ul>
-        </footer>
-        {{ end }}
-    </div>
-    {{ if not .Params.Type }}
-    {{ partial "nav.html" . }}
-    {{ end }}
-</article>
+        {{ partial "disqus.html" . }}
+    </article>
+</main>
