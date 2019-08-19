@@ -7,7 +7,8 @@
     {{ partial "og.html" . }}
 
     <link rel="shortcut icon" href="/favicon.ico">
-    <link rel="stylesheet" href="/css/main.min.css">
+    {{ $style := resources.Get "css/main.sass" | resources.ToCSS | resources.Minify | resources.Fingerprint }}
+    <link rel="stylesheet" href="{{ $style.Permalink }}" integrity="{{ $style.Data.Integrity }}">
     <link href="http://gmpg.org/xfn/11" rel="profile">
 
     {{ hugo.Generator }}
