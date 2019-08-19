@@ -1,98 +1,1311 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Osaka on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/osaka/</link><description>Recent content in Osaka on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 16 Feb 2019 06:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/osaka/index.xml" rel="self" type="application/rss+xml"/><item><title>大阪——风起雨落夜将至</title><link>https://xuanwo.io/2019/02/16/second-day-at-osaka/</link><pubDate>Sat, 16 Feb 2019 06:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/02/16/second-day-at-osaka/</guid><description>&lt;blockquote&gt;
-&lt;p&gt;出去玩七天，这游记能写半年啊- -，我都想放弃治疗了，但是坑都开了，还是得填完。。。&lt;/p&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Osaka on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/osaka/</link><description>Recent content in Osaka on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 16 Feb 2019 06:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/osaka/index.xml" rel="self" type="application/rss+xml"/><item><title>开放容器标准(OCI) 内部分享</title><link>https://xuanwo.io/2019/08/06/oci-intro/</link><pubDate>Tue, 06 Aug 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/08/06/oci-intro/</guid><description>&lt;p&gt;研究工程效率提升必然逃不开容器化，容器化能够屏蔽不同项目的细节，大幅度降低构建持续集成系统的难度，只需要专注于提供平台服务即可，这对我们 Team 来说尤为重要：项目历史包袱重，开发周期长，依赖众多，还正在经历主力开发语言从 &lt;code&gt;Python&lt;/code&gt; 到 &lt;code&gt;Golang&lt;/code&gt; 到 &lt;code&gt;Rust&lt;/code&gt; 的转变。而正式发布于 2017 年的开放容器标准（OCI）的出现使得整个容器社区都在朝着标准化的方向发展，为社区注入了新的动力，很多依托于新标准的项目涌现了出来。在这样的背景下，我在例会之后进行了分享，介绍开放容器标准以及社区向着标准靠拢的努力，然后介绍一些基于标准开发的工具，最后做一些个人的展望。&lt;/p&gt;
+&lt;h2 id=&#34;oci-是什么&#34;&gt;OCI 是什么？&lt;/h2&gt;
+&lt;p&gt;OCI，&lt;a href=&#34;https://www.opencontainers.org&#34;&gt;Open Container Initiative&lt;/a&gt;，是一个轻量级，开放的治理结构（项目），在 Linux 基金会的支持下成立，致力于围绕容器格式和运行时创建开放的行业标准。OCI 项目由 Docker，CoreOS（后来被 Red Hat 收购了，相应的席位被 Red Hat 继承）和容器行业中的其他领导者在 2015 年 6 月的时候启动。OCI 的技术委员会成员包括 Red Hat，Microsoft，Docker，&lt;a href=&#34;https://getcruise.com/&#34;&gt;Cruise&lt;/a&gt;，IBM，Google，Red Hat 和 SUSE，其中 Docker 公司有两名成员，且其中的一位是现任主席，具体的细节可以查看 &lt;a href=&#34;https://github.com/opencontainers/tob&#34;&gt;OCI Technical Oversight Board&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;OCI 目前提出的规范有如下这些：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;名称&lt;/th&gt;
+&lt;th&gt;版本&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href=&#34;https://github.com/opencontainers/runtime-spec&#34;&gt;Runtime Specification&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;v1.0.1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href=&#34;https://github.com/opencontainers/image-spec&#34;&gt;Image Format&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;v1.0.1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href=&#34;https://github.com/opencontainers/distribution-spec&#34;&gt;Distribution Specification&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;v1.0.0-rc0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;其中 runtime 和 image 的规范都已经正式发布，而 distribution 的还在工作之中。runtime 规范中介绍了如何运行解压缩到磁盘上的 &lt;a href=&#34;https://github.com/opencontainers/runtime-spec/blob/master/bundle.md&#34;&gt;&lt;code&gt;Filesystem Bundle&lt;/code&gt;&lt;/a&gt;。在 OCI 标准下，运行一个容器的过程就是下载一个 OCI 的镜像，将其解压到某个 &lt;code&gt;Filesystem Bundle&lt;/code&gt; 中，然后某个 OCI Runtime 就会运行这个 Bundle。细节此处不再展开，感兴趣的同学可以直接阅读 Spec。&lt;/p&gt;
+&lt;h2 id=&#34;社区演进&#34;&gt;社区演进&lt;/h2&gt;
+&lt;p&gt;标准如果没有人支持的话就只是个 Markdown 文件而已，整个容器社区为了 OCI 标准成为真正的行业标准付出了艰辛的努力。接下来我从几个侧面展开一下容器领域的各个关键组件是如何一步步走向 OCI 标准的，这个过程中也会捋清楚各个组件之间的关系。&lt;/p&gt;
+&lt;h3 id=&#34;oci-in-docker&#34;&gt;OCI in docker&lt;/h3&gt;
+&lt;p&gt;自从 2013 年 docker 发布之后，docker 项目本身逐渐成为了一个庞然大物。为了能够降低项目维护的成本，内部代码能够回馈社区，docker 公司提出了 “基础设施管道宣言” (Infrastructure Plumbing Manifesto)：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;只要有可能，重新使用现有的管道并提供改进：当您需要创建新的管道时，可以轻松地重复使用并提供改进。 这增加了可用组件的公共池，每个人都受益。&lt;/li&gt;
+&lt;li&gt;遵循 UNIX 原则：几个简单的组件比一个复杂的组件要好&lt;/li&gt;
+&lt;li&gt;定义标准接口：可用于将许多简单组件组合到更复杂的系统中&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;docker 开始自行拆分自己项目中的管道代码并形成一个个新的开源项目：他们于 2014 年开源了 &lt;a href=&#34;https://github.com/docker/libcontainer&#34;&gt;libcontainer&lt;/a&gt;，并在随后的几年中陆续开源了 &lt;a href=&#34;https://github.com/docker/libnetwork&#34;&gt;libnetwork&lt;/a&gt;, &lt;a href=&#34;https://github.com/docker/notary&#34;&gt;notary&lt;/a&gt;, &lt;a href=&#34;https://github.com/docker/hyperkit&#34;&gt;hyperkit&lt;/a&gt; 等项目。在 OCI 项目启动后，docker 公司将 &lt;code&gt;libcontainer&lt;/code&gt; 的实现移动到 &lt;a href=&#34;https://github.com/opencontainers/runc&#34;&gt;runC&lt;/a&gt; 并捐赠给了 OCI。此时，容器社区有了第一个 OCI Runtime 的参考实现。runC 是一个轻量可移植的容器运行时，包括了所有之前 docker 所使用的容器相关的与系统特性的代码，它的目标是：&lt;code&gt;make standard containers available everywhere&lt;/code&gt;。随后在 2016 年，docker 开源并将 &lt;a href=&#34;https://github.com/containerd/containerd&#34;&gt;containerd&lt;/a&gt; 捐赠给了 CNCF，containerd 几乎囊括了单机运行一个容器运行时所需要的一切：执行，分发，监控，网络，构建，日志等。为了能够支持多种 OCI Runtime，containerd 内部使用 &lt;code&gt;containerd-shim&lt;/code&gt;，每启动一个容器都会创建一个新的 &lt;code&gt;containerd-shim&lt;/code&gt; 进程，指定容器 ID，Bundle 目录，运行时的二进制（比如 runc）。&lt;/p&gt;
+&lt;p&gt;于是，现代 docker 启动一个标准化容器需要经历这样的流程：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;docker-to-oci.svg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;oci-in-kubernetes&#34;&gt;OCI in Kubernetes&lt;/h3&gt;
+&lt;p&gt;Kubernetes 最初只支持 docker 作为运行时，为了能够让 Kubernetes 变得更具有可扩展性，在 1.5 版本增加了 &lt;a href=&#34;https://github.com/kubernetes/kubernetes/blob/242a97307b34076d5d8f5bbeb154fa4d97c9ef1d/docs/devel/container-runtime-interface.md&#34;&gt;CRI: the Container Runtime Interface&lt;/a&gt;，在随后的演进中，CRI 被抽出来做成了独立的项目：&lt;a href=&#34;https://github.com/kubernetes/cri-api/&#34;&gt;https://github.com/kubernetes/cri-api/&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;CRI 是一套通过 protocol buffers 定义的 API，如下图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;cri.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;kubelet 实现了 client 端，CRI shim 实现 server 端。只要实现了对应的接口，就能接入 k8s 作为 Container Runtime。&lt;/p&gt;
+&lt;p&gt;k8s 1.5 中自己实现了 &lt;a href=&#34;https://github.com/kubernetes/kubernetes/tree/release-1.5/pkg/kubelet/dockershim&#34;&gt;docker CRI shim&lt;/a&gt;，此时启动容器的流程如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;cri-docker.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;从 containerd 1.0 开始，为了能够减少一层调用的开销，containerd 开发了一个新的 daemon，叫做 CRI-Containerd，直接与 containerd 通信，从而取代了 dockershim：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;cri-containerd.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;但是这仍然多了一个独立的 daemon，从 containerd 1.1 开始，社区选择在 containerd 中直接内建 CRI plugin，通过方法调用来进行交互，从而减少一层 gRPC 的开销，最终的容器启动流程如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;containerd-built-in-plugin.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;最终的结果是 k8s 的 Pod 启动延迟得到了降低，CPU 和内存占用率都有不同程度的降低。&lt;/p&gt;
+&lt;p&gt;但是这还不是终点，为了能够直接对接 OCI 的 runtime 而不是 containerd，社区孵化了 &lt;a href=&#34;https://github.com/cri-o/cri-o&#34;&gt;CRI-O&lt;/a&gt; 并加入了 CNCF。CRI-O 的目标是让 kubelet 与运行时直接对接，减少任何不必要的中间层开销。CRI-O 运行时可以替换为任意 OCI 兼容的 Runtime，镜像管理，存储管理和网络均使用标准化的实现，目前还在积极开发中，前途无量。&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://xuxinkun.github.io/&#34;&gt;@xuxinkun&lt;/a&gt; 的文章中有个图将他们之间的关系描绘的很清楚：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;kubelet.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;项目介绍&#34;&gt;项目介绍&lt;/h2&gt;
+&lt;p&gt;接下来会介绍一些支持 OCI 或者 OCI 相关的开源项目，为读者们提供一些新选择。&lt;/p&gt;
+&lt;h3 id=&#34;runtime&#34;&gt;Runtime&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/opencontainers/runc&#34;&gt;opencontainers/runc&lt;/a&gt;：前面已经提到过很多次了，是 OCI Runtime 的参考实现。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/kata-containers/runtime&#34;&gt;kata-containers/runtime&lt;/a&gt;：容器标准反攻虚拟机，前身是 &lt;a href=&#34;https://github.com/clearcontainers/runtime&#34;&gt;clearcontainers/runtime&lt;/a&gt; 与 &lt;a href=&#34;https://github.com/hyperhq/runv&#34;&gt;hyperhq/runv&lt;/a&gt;，通过 &lt;a href=&#34;https://github.com/kata-containers/runtime/tree/master/virtcontainers&#34;&gt;virtcontainers&lt;/a&gt; 提供高性能 OCI 标准兼容的硬件虚拟化容器，Linux Only，且需要特定硬件。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/google/gvisor&#34;&gt;google/gvisor&lt;/a&gt;：gVisor 是一个 Go 实现的用户态内核，包含了一个 OCI 兼容的 Runtime 实现，目标是提供一个可运行非受信代码的容器运行时沙盒，目前是 Linux Only，其他架构可能会支持。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;image-build&#34;&gt;Image Build&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/moby/buildkit&#34;&gt;moby/buildkit&lt;/a&gt;：从 docker build 拆分出来的项目，支持自动 GC，多种输入和输出格式，并发依赖解析，分布式 Worker 和 Rootless 执行等特性&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/genuinetools/img&#34;&gt;genuinetools/img&lt;/a&gt;：对 buildkit 的一层封装，单独的二进制，没有 daemon，支持 Rootless 执行，会自动创建 SUBUID，比 buildkit 使用起来更加容易&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/uber/makisu&#34;&gt;uber/makisu&lt;/a&gt;：uber 开源的内部镜像构建工具，目标是在 Mesos 或 Kubernetes 上进行 Rootless 构建，支持的 Dockerfile 有些许不兼容，在非容器环境下运行会有问题，比如 &lt;a href=&#34;https://github.com/uber/makisu/issues/233&#34;&gt;Image failed to build without modifyfs &lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/GoogleContainerTools/kaniko&#34;&gt;GoogleContainerTools/kaniko&lt;/a&gt;：Google 出品，目标是 Daemon free build on Kubernetes，要求运行镜像 &lt;code&gt;gcr.io/kaniko-project/executor&lt;/code&gt; 进行构建，直接在别的镜像中使用二进制可能会不工作，很蠢&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/containers/buildah&#34;&gt;containers/buildah&lt;/a&gt;：开源组织 &lt;a href=&#34;https://github.com/containers&#34;&gt;Containers&lt;/a&gt; 推出的项目，目标是构建 OCI 容器镜像，Daemon free，支持 Rootless 构建&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;tools&#34;&gt;Tools&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/containers/skopeo&#34;&gt;containers/skopeo&lt;/a&gt;：这是一个用来查看容器镜像信息的工具，可以在不用下载到本地的前提下查看远端 Registry 中的镜像信息&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/containers/libpod&#34;&gt;containers/libpod&lt;/a&gt;：二进制名为 &lt;code&gt;podman&lt;/code&gt;，支持管理 Pod，容器，镜像和存储卷，命令行与 docker CLI 完全兼容，基本上能视为 docker CLI 的 drop-in replace，镜像部分的代码主要使用了 buildah，未来还会支持 cgroups v2，人类文明之光&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;未来展望&#34;&gt;未来展望&lt;/h2&gt;
+&lt;p&gt;技术的发展永远看不到尽头，也没有人知道会不会横空出现一个 docker 硬生生改变了 PaaS 平台发展的轨迹，企图当预言家的人最后都被刀了。这里列出来的是容器未来发展方向中我比较感兴趣的方面，他们更多的是现在进行时，而不是将来时，未来一年内可能就会落地。&lt;/p&gt;
+&lt;h3 id=&#34;oci-artifacts&#34;&gt;OCI Artifacts&lt;/h3&gt;
+&lt;p&gt;伴随着 image spec 与 distribution spec 的演化，人们开始逐步认识到除了 Container Images 之外，Registries 还能够用来分发 Kubernetes Deployment Files, Helm Charts, docker-compose, &lt;a href=&#34;https://cnab.io/&#34;&gt;CNAB&lt;/a&gt; 等产物。它们可以共用同一套 API，同一套存储，将 Registries 作为一个云存储系统。这就为带来了 OCI Artifacts 的概念，用户能够把所有的产物都存储在 OCI 兼容的 Registiry 当中并进行分发。为此，Microsoft 将 &lt;a href=&#34;https://github.com/deislabs/oras&#34;&gt;oras&lt;/a&gt; 作为一个 client 端实现捐赠给了社区，包括 Harbor 在内的多个项目都在积极的参与。&lt;/p&gt;
+&lt;p&gt;到目前为止， 2.7+ 版本 Docker Distribution 和 &lt;a href=&#34;https://aka.ms/acr/docs&#34;&gt;Azure Container Registry&lt;/a&gt; 已经支持， quay.io 也在跟进。&lt;/p&gt;
+&lt;h3 id=&#34;rootless-container&#34;&gt;Rootless Container&lt;/h3&gt;
+&lt;p&gt;因为 Linux 下的 user namespace 过于复杂，所以 docker 刚发布的时候就没有做支持，docker 运行需要 root 权限，带来了大量的安全问题。在之后的几年中 userns 的支持被逐渐实现，尽管现在的配置还比较复杂，需要升级 runc 到特定版本，要设置 sysctl，需要安装特定的二进制，包括 newuidmap，newgidmap，还要 &lt;a href=&#34;https://github.com/rootless-containers/slirp4netns&#34;&gt;slirp4netns&lt;/a&gt; 来提供用户态网络栈支持。社区也在努力提升 Rootless Container 的体验和性能，未来大部分的工作负载都将会运行在 Rootless Container 当中。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我最近的一项工作就是在 CentOS 7.5 上实现对 Rootless Container 的支持，目前我们 QingStor Team 的 CI 全部由 Rootless Container 来完成，相关的介绍将会单独成文与大家分享。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id=&#34;清晨的帝国&#34;&gt;清晨的帝国&lt;/h2&gt;
-&lt;p&gt;尽管昨夜 High 到了黎明（我不说你们是不是都快忘了我昨晚赢了一把大乱斗？），但是今天仍然起得很早。时间还早，于是没有叫我的朋友们起床，决定还是跟之前一样，自己先出去走走。打开地图发现我们住的地方附近有个公园，打算先过去看看，然后找个地方吃早饭。&lt;/p&gt;
-&lt;p&gt;依然是沿途一阵乱拍，比较好玩的事情可能就是沿途有很多“灾难时避难所”的指示。地方不远，很快就到了，但是我对着地图确认了很久，因为眼前的景色一点都不像是一个公园：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;on-bridge.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;就这么大点地方，也能叫公园吗？给大妈们跳广场舞都不够哎= =&lt;/p&gt;
-&lt;h2 id=&#34;凛冬之湖&#34;&gt;凛冬之湖&lt;/h2&gt;
-&lt;p&gt;接受了现实的我只能继续往前走，地图告诉我前方有个大大的湖心岛，我决定从远处看看。途中路过了今桥，然后还知道了这条小河叫做东横堀川，甚至还头一次知道了大阪又叫做水之都= =。终于来到了河边，这时候已经可以清楚的看到河心岛上的景色了：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;river.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;站在桥上拍了几张近处的河心岛，此时已经有点饿了，决定先找个地方解决早饭，然后回酒店准备出发。回去的途中还看到了卡普空的大楼，时间还在，里面一点人都没有，不知道怪物猎人世界是不是就是在这里做出来的。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;capcom.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;本来想在日本尝试一下饺子，但是他们还没有开门，只能吃他边上开的一家牛丼店：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;breakfast.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;吃过早饭之后朋友们也起床了，去对面的全家买了些吃的带了回去。&lt;/p&gt;
-&lt;h2 id=&#34;多事之秋&#34;&gt;多事之秋&lt;/h2&gt;
-&lt;p&gt;按照昨天规划好的路线，我们先去大阪城。路上有点冷，然后就看到几个可爱的小孩子三五成群，上半身是正装，下半身穿着黑色的及膝短裤，黑色的靴子，手里还提着一把伞，一路蹦达过去了，日本的小孩抗冻真的是从小练出来的哎。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;osaka-castle.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;今天朋友 P 化身摄影大师，全程教朋友 F 摄影技巧，光线，角度，距离等等- -，我在一旁伸出手掌按在着据说是古代留下来的石头上，试图呼应出蕴藏在里面的不屈意志。但是还没等我呼应出来，就已经招呼去下一个地方了，有点遗憾。&lt;/p&gt;
-&lt;p&gt;我们简单的沿着游览路线转了一圈，原来是护城河的地方已经长满了叫不出名字的花花草草和青苔。朋友 P 把 F 拉去进行摄影特训，我则是在一棵大树下面坐下歇息。期间还被人叫“帅哥”（别想了，没有艳遇的），帮几个漂亮妹子拍了合影。&lt;/p&gt;
-&lt;h2 id=&#34;垂暮之年&#34;&gt;垂暮之年&lt;/h2&gt;
-&lt;p&gt;下一站是天王寺动物园，不知道为啥，我总是会看成天王山动物园- -&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;tennoji-zoo.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;萌物镇楼：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;moe.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;可能是因为冬天实在比较冷的缘故，不少动物都没啥活力，有些动物还因为过于年老，身上很多地方的毛都脱落了，露出了光光的皮肤。看到老迈的北极熊在不停的把装食物的桶套在头上，大概以为会有吃的掉下来，感觉还是太残酷了，不适合观光。（虽然当时觉得蠢萌蠢萌的，甚至还笑得很开心，但是事后看看当时拍下的照片，感觉挺伤感，不多提了）&lt;/p&gt;
-&lt;h2 id=&#34;神来之笔&#34;&gt;神来之笔&lt;/h2&gt;
-&lt;p&gt;回酒店休息一下之后，我们再度出发，这次的目标是大阪海游馆，据说是世界最大级别的水族馆。边上还有个超大的天保山摩天轮，不过我们这次没有坐，可惜可惜。&lt;/p&gt;
-&lt;p&gt;走到了第一个通道，整个人都兴奋起来了。整个通道都是此起彼伏哇哇叫的惊叹声，我就不一样了，我在执着地抓拍蠢萌蠢萌的笑脸。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;smile.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;我们先是走到整个建筑物的最高处，然后一路向下。刚好遇到工作人员在喂食：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;feed.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;（这是海豹还是海狮？突然有点傻傻分不清了。。）看到它吃完东西之后还想要，但是工作人员用手掌拍了拍它的嘴表示到此为止，然后它就萌萌的向右翻滚了一圈，滚进了水里。&lt;/p&gt;
-&lt;p&gt;看到了一条超大超大的鱼，浑身跟化石一样，以至于我们一直在讨论它到底是不是活的，是不是石头= =，直到它真的游走了才相信这是一条活鱼。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;big-fish.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;这个鱼朝我飞过来的时候我顿时想起小时候看过的动画片猛兽侠里面的一个角色，到家之后用自己还记得大猩猩队长之类的关键词搜索了半天才想起来叫做急先锋。（搭配这个视频服用，效果更佳： &lt;a href=&#34;https://v.qq.com/x/page/e0337omdgol.html&#34;&gt;https://v.qq.com/x/page/e0337omdgol.html&lt;/a&gt; ，在找了好久呢 - -）&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;pioneer.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;还看到了真实版本的 HTML5 性能测试之 3D 鱼缸：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;fish-tank.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;啊，海洋馆真的是太有意思了！&lt;/p&gt;
-&lt;h2 id=&#34;忽然之间&#34;&gt;忽然之间&lt;/h2&gt;
-&lt;p&gt;我们在海游馆大概逛了一个多小时，在附近的天保山商场的 KFC 中解决了晚餐，然后决定出发去道顿堀血拼。&lt;/p&gt;
-&lt;p&gt;血拼活动我自然是没有参与啦，在附近随便逛了逛，结果下起了小雨，在蒙蒙的细雨中吃烤串感觉相当有意思。有个好玩的事情是他们不允许边走边吃东西，小吃必须要在买的地方吃完，包装，竹棍之类的要扔在店里的垃圾桶里才能走。这个很有意思，一方面避免了边吃边走容易在人群中蹭到别人身上的尴尬事件，另一方面也降低了保洁工作的负担。还有就是路上没有垃圾桶，想带走你就必须一直拎着垃圾袋。&lt;/p&gt;
-&lt;p&gt;在回酒店的路上顺便逛了逛日本的书店。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;bookshop.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;看到了当时正在热播的兔女郎学姐，正冲动想买来的时候想起来我还不会日语，打住打住。&lt;/p&gt;
-&lt;p&gt;起风啦，下雨啦，天黑啦，早些归家。&lt;/p&gt;
-&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
-&lt;p&gt;所有的标题都来自《将夜》，与内容无关~&lt;/p&gt;</description></item><item><title>大阪——波澜不惊的日常</title><link>https://xuanwo.io/2019/01/26/first-day-at-osaka/</link><pubDate>Sat, 26 Jan 2019 06:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/01/26/first-day-at-osaka/</guid><description>&lt;blockquote&gt;
-&lt;p&gt;真的猛士，敢于直面惨淡的人生，敢于正视淋漓的鲜血，敢于表演丢人的剧本。&lt;/p&gt;
+&lt;h3 id=&#34;dockerd-free-build&#34;&gt;dockerd free build&lt;/h3&gt;
+&lt;p&gt;随着 docker 进入越来越多企业的生产和测试环境，依赖 &lt;code&gt;dockerd&lt;/code&gt; 来进行容器构建的机制带来的问题变得越来越严重，人们开始不断寻找和开发出不依赖 dockerd 进行构建的项目。容器镜像构建最复杂的地方在于如何处理 &lt;code&gt;RUN&lt;/code&gt; 指令，之前有些项目选择放在容器或者新的 namespace 中执行，但是随着 rootless container 的逐步完善，大家开始选择创建一个新的 userns 来执行命令，比如 buildah。&lt;/p&gt;
+&lt;p&gt;我预计未来绝大多数容器构建都将会脱离 dockerd，转而使用 buildah 或者 buildkit 之类的方案。至于 kaniko 和 makisu 那种方案，我觉得没有什么发展的空间，论方便好用拼不过 buildah，论功能全面打不过 buildkit，迟早凉凉。&lt;/p&gt;
+&lt;h3 id=&#34;cgroups-v2&#34;&gt;cgroups v2&lt;/h3&gt;
+&lt;p&gt;容器社区与 systemd &amp;amp;&amp;amp; cgroups 的爱恨情仇简直能写成一本书，而 cgroups v2 就像是《怪物猎人：世界》雪原 这样的超大型扩充 DLC。&lt;/p&gt;
+&lt;p&gt;早在 2016 年 3 月，&lt;a href=&#34;https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=34a9304a96d6351c2d35dcdc9293258378fc0bd8&#34;&gt;Linux 4.5 内核&lt;/a&gt;（cgroups v2 become official）发布后没多久，就有人提出要求支持 cgroups v2：&lt;a href=&#34;https://github.com/opencontainers/runc/issues/654&#34;&gt;support cgroup v2 (unified hierarchy)&lt;/a&gt;。然而至今进展缓慢，最开始是因为 cgroups v2 本身功能不太完善，无法满足 runc 的要求，后来是因为发行版(或者直接说是 systemd) 还没有实现真正的 cgroups v2 支持，现在是卡在了 OCI 标准强依赖于 cgroups v1 的某些实现，社区需要更新 OCI 标准来适应 cgroups v2 的变更。&lt;/p&gt;
+&lt;p&gt;困难是有的，但是我还是抱有期待，相信明年的今天 &lt;em&gt;(#flag)&lt;/em&gt; 我就能用上支持 cgroups v2 的 runtime。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;这篇文章只是简单了介绍了开放容器标准和相关的一些项目，没有涉及到过多的细节，各位读者可以针对感兴趣的点向下继续探索。此外，除了附上引用地址和参考资料的片段外，其余观点均是我一家之言，各位读者请自行判断成色。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://blog.docker.com/2015/06/runc/&#34;&gt;Introducing runC: a lightweight universal container runtime&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://blog.docker.com/2015/06/open-container-project-foundation/&#34;&gt;Docker and Broad Industry Coalition Unite to Create Open Container Project&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.docker.com/docker-news-and-press/docker-extracts-and-donates-containerd-its-core-container-runtime-accelerate&#34;&gt;Docker Extracts and Donates containerd, its Core Container Runtime, to Accelerate Innovation Across the Container Ecosystem&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://blog.docker.com/2017/07/demystifying-open-container-initiative-oci-specifications/&#34;&gt;Demystifying the Open Container Initiative (OCI) Specifications&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://kubernetes.io/blog/2016/12/container-runtime-interface-cri-in-kubernetes/&#34;&gt;Introducing Container Runtime Interface (CRI) in Kubernetes&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://kubernetes.io/blog/2018/05/24/kubernetes-containerd-integration-goes-ga/&#34;&gt;Kubernetes Containerd Integration Goes GA&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://stevelasker.blog/2019/01/25/cloud-native-artifact-stores-evolve-from-container-registries/&#34;&gt;Cloud Native Artifact Registries evolve from Docker Container Registries&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/systemd/systemd/blob/master/docs/CGROUP_DELEGATION.md#three-scenarios&#34;&gt;Control Group APIs and Delegation - Three Scenarios&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.redhat.com/en/blog/preview-running-containers-without-root-rhel-76&#34;&gt;A preview of running containers without root in RHEL 7.6&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://xuxinkun.github.io/2017/12/12/docker-oci-runc-and-kubernetes/&#34;&gt;docker、oci、runc以及kubernetes梳理&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>beancollect —— beancount 账单导入工具</title><link>https://xuanwo.io/2019/07/08/intro-beancollect/</link><pubDate>Mon, 08 Jul 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/07/08/intro-beancollect/</guid><description>&lt;p&gt;每一个 beancount 的使用者最终都会写一个自己的账单导入工具，我当然也不例外。&lt;/p&gt;
+&lt;h2 id=&#34;what&#34;&gt;What&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/Xuanwo/beancollect&#34;&gt;&lt;code&gt;beancollect&lt;/code&gt;&lt;/a&gt; 是一个为 &lt;code&gt;beancount&lt;/code&gt; 开发的账单导入工具，其设计目标是：简单，可靠。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;beancollect&lt;/code&gt; 不会直接修改用户的账单&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;beancollect&lt;/code&gt; 总是显式的执行操作&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;beancollect&lt;/code&gt; 不预测或依赖用户的特定行为或输入&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;why&#34;&gt;Why&lt;/h2&gt;
+&lt;p&gt;beancount 的账单导入工具很多，为什么要自己写一个呢？&lt;/p&gt;
+&lt;p&gt;首先是因为我主要是用微信支付，而目前没有支持微信支付的账单导入工具；其次是我不喜欢大多数账单导入工具的设计，包括 beancount 原生自带的那一套。&lt;/p&gt;
+&lt;h2 id=&#34;how&#34;&gt;How&lt;/h2&gt;
+&lt;h3 id=&#34;setup&#34;&gt;Setup&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;beancollect&lt;/code&gt; 被设计用来与 &lt;code&gt;beancount&lt;/code&gt; 一起工作，因此它需要在 &lt;code&gt;main.bean&lt;/code&gt; 的项目文件夹中工作。&lt;/p&gt;
+&lt;p&gt;目前 &lt;code&gt;beancollect&lt;/code&gt; 会去搜索当前目录下的 &lt;code&gt;collect&lt;/code&gt; 目录，并读取其中的配置文件来完成初始化。推荐的结构如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;├── account
+│ ├── assets.bean
+│ ├── equity.bean
+│ ├── expenses.bean
+│ ├── incomes.bean
+│ └── liabilities.bean
+├── collect
+│ ├── global.yaml
+│ └── wechat.yaml
+├── main.bean
+└── transactions
+└── 2019
+├── 03.bean
+├── 04.bean
+├── 05.bean
+├── 06.bean
+└── 07.bean
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;config&#34;&gt;Config&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;beancollect&lt;/code&gt; 目前支持如下配置：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;account:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;招商银行(XXXX)&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Liabilities:Credit:CMB&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;招商银行&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Assets:Deposit:CMB:CardXXXX&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;零钱通&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Assets:Deposit:WeChat&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;零钱&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Assets:Deposit:WeChat&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;rules:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;猫眼/格瓦拉生活&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Recreation:Movie&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;北京麦当劳食品有限公司&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Intake:FastFood&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;滴滴出行&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Transport:Taxi&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;摩拜单车&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Transport:Bicycle&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中 &lt;code&gt;account&lt;/code&gt; 部分配置的是给定账单与实际账户的映射，&lt;code&gt;rules&lt;/code&gt; 部分配置的是对符合条件的账单进行的操作。&lt;/p&gt;
+&lt;h3 id=&#34;schema&#34;&gt;Schema&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;beancollect&lt;/code&gt; 目前仅支持 &lt;code&gt;wechat&lt;/code&gt;，每种 &lt;code&gt;schema&lt;/code&gt; 会有自己独立的配置，如果存在的话将会覆盖 &lt;code&gt;global.yaml&lt;/code&gt; 中的配置。&lt;/p&gt;
+&lt;h3 id=&#34;rules&#34;&gt;Rules&lt;/h3&gt;
+&lt;p&gt;目前仅支持增加账户：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;-&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;type:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;add_accounts&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;condition:&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;payee:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;摩拜单车&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;value:&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Expenses:Transport:Bicycle&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果 &lt;code&gt;payee&lt;/code&gt; 是 &lt;code&gt;摩拜单车&lt;/code&gt; 的话，就在 &lt;code&gt;posting&lt;/code&gt; 中增加账户 &lt;code&gt;Expenses:Transport:Bicycle&lt;/code&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;项目地址在 &lt;a href=&#34;https://github.com/Xuanwo/beancollect&#34;&gt;https://github.com/Xuanwo/beancollect&lt;/a&gt;，欢迎大家提需求和反馈 BUG。&lt;/p&gt;</description></item><item><title>QingStor 对象存储对接指北</title><link>https://xuanwo.io/2019/06/27/develop-with-object-storage/</link><pubDate>Thu, 27 Jun 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/06/27/develop-with-object-storage/</guid><description>&lt;p&gt;在工作中接触到过很多不了解对象存储的开发者在对接上遇到了很多问题，这篇文章旨在从核心概念出发介绍 QingStor 对象存储，然后介绍 API 和 SDK 及其注意事项，最后总结一下遇到的常见问题，希望能解决大多数人的困惑。本文主要介绍的是 QingStor 对象存储，但是其他的对象存储概念应当相似，同样可以参考。&lt;/p&gt;
+&lt;h2 id=&#34;核心概念&#34;&gt;核心概念&lt;/h2&gt;
+&lt;h3 id=&#34;service&#34;&gt;Service&lt;/h3&gt;
+&lt;p&gt;对象存储服务的顶层命名空间。在同一个命名空间下，Bucket Name 是唯一的。每个对象存储 Serivce 都会有一个独立的 Host，比如青云 QingStor 对象存储的 Host 是 &lt;code&gt;qingstor.com&lt;/code&gt;。私有云用户在接入时需要将 Host 修改为对应的环境配置的 Host。&lt;/p&gt;
+&lt;h3 id=&#34;zone&#34;&gt;Zone&lt;/h3&gt;
+&lt;p&gt;每个对象存储 Service 都会至少有一个 Zone，每个 Zone 会有一个唯一的标识。比如青云公有云目前线上运维的对象存储 Zone 包括：&lt;code&gt;pek3a&lt;/code&gt;，&lt;code&gt;pek3b&lt;/code&gt;，&lt;code&gt;sh1a&lt;/code&gt; 和 &lt;code&gt;gd2&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;bucket&#34;&gt;Bucket&lt;/h3&gt;
+&lt;p&gt;Bucket 是用户申请的存储空间，每个 Bucket 都会属于一个 Zone，每个 Bucket 在同一个 Service 下都是全局唯一的，每个 Bucket 彼此之间完全隔离。&lt;/p&gt;
+&lt;p&gt;Bucket 将会是域名的一部分，因此 Bucket 在命名时需要遵守以下规则：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;遵守 DNS 命名规则&lt;/li&gt;
+&lt;li&gt;长度在 6 ~ 63 之间&lt;/li&gt;
+&lt;li&gt;只能包含小写字母，数字和连接字符 &lt;code&gt;-&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;开头和结尾只能是小写字母或数字&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;object&#34;&gt;Object&lt;/h3&gt;
+&lt;p&gt;Object 是用户访问数据的最小单元，每个 Object 都会属于一个 Bucket，每个 Object 在同一个 Bucket 下都是唯一的。单个 Object 最大 50TB。&lt;/p&gt;
+&lt;p&gt;Object 将会是 URL 的一部分，因此 Object 在命名需要遵守以下规则：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;长度须在 1-1023 字节之间&lt;/li&gt;
+&lt;li&gt;第一个字符不能是反斜杠 &lt;code&gt;/&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;须用 UTF-8 编码&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在发送请求的时候，Object Key 部分需要进行 URL 编码。&lt;/p&gt;
+&lt;h2 id=&#34;api-介绍&#34;&gt;API 介绍&lt;/h2&gt;
+&lt;p&gt;对象存储对外暴露的是 RESTful 风格的 API。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;GET /?delimiter=/&amp;amp;limit=4 HTTP/1.1
+Host: mybucket.pek3a.qingstor.com
+Date: Sun, 16 Aug 2015 09:05:00 GMT
+Authorization: authorization string
+HTTP/1.1 200 OK
+Server: QingStor
+Date: Sun, 16 Aug 2015 09:05:00 GMT
+Content-Length: 559
+Connection: close
+x-qs-request-id: aa08cf7a43f611e5886952542e6ce14b
+{
+&amp;quot;name&amp;quot;: &amp;quot;mybucket&amp;quot;,
+&amp;quot;keys&amp;quot;: [
+{
+&amp;quot;created&amp;quot;: &amp;quot;2016-08-22T15:03:32.000Z&amp;quot;,
+&amp;quot;modified&amp;quot;: 1471878212,
+&amp;quot;encrypted&amp;quot;: true,
+&amp;quot;storage_class&amp;quot;: &amp;quot;STANDARD&amp;quot;,
+&amp;quot;etag&amp;quot;: &amp;quot;\&amp;quot;4f44b10f5cb83777fea4ef88a3f7b3c4\&amp;quot;&amp;quot;,
+&amp;quot;key&amp;quot;: &amp;quot;api.txt&amp;quot;,
+&amp;quot;mime_type&amp;quot;: &amp;quot;text/plain&amp;quot;,
+&amp;quot;size&amp;quot;: 38970
+},
+{
+&amp;quot;created&amp;quot;: &amp;quot;2016-08-22T15:09:52.000Z&amp;quot;,
+&amp;quot;modified&amp;quot;: 1471878592,
+&amp;quot;encrypted&amp;quot;: false,
+&amp;quot;storage_class&amp;quot;: &amp;quot;STANDARD_IA&amp;quot;,
+&amp;quot;etag&amp;quot;: &amp;quot;\&amp;quot;9f1cd921dbb6656c2c9e57f83f73d70e\&amp;quot;&amp;quot;,
+&amp;quot;key&amp;quot;: &amp;quot;bigtable-osdi06.pdf&amp;quot;,
+&amp;quot;mime_type&amp;quot;: &amp;quot;application/pdf&amp;quot;,
+&amp;quot;size&amp;quot;: 221214
+}
+],
+&amp;quot;prefix&amp;quot;: &amp;quot;&amp;quot;,
+&amp;quot;owner&amp;quot;: {
+&amp;quot;id&amp;quot;: &amp;quot;usr-DxWdNcCr&amp;quot;,
+&amp;quot;name&amp;quot;: &amp;quot;william&amp;quot;
+},
+&amp;quot;delimiter&amp;quot;: &amp;quot;/&amp;quot;,
+&amp;quot;limit&amp;quot;: 4,
+&amp;quot;marker&amp;quot;: &amp;quot;&amp;quot;,
+&amp;quot;next_marker&amp;quot;: &amp;quot;bigtable-osdi06.pdf&amp;quot;,
+&amp;quot;has_more&amp;quot;: true,
+&amp;quot;common_prefixes&amp;quot;: [
+&amp;quot;QCI/&amp;quot;,
+&amp;quot;Screenshot/&amp;quot;
+]
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;正如上面这个样例展示的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;通过 HTTP 动词来区分语义，GET 表示获取资源，PUT 表示上传整个资源等&lt;/li&gt;
+&lt;li&gt;通过返回标准的 HTTP Status Code 来标识本次请求的状态，比如 200 表示正常，401 表示认证失败等，详细的 error code 可以参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/common/error_code&#34;&gt;此处&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;输入和输出均为 JSON 格式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;此外，API 请求时还有如下需要关注的点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;所有请求返回的 Response 都会带有 &lt;code&gt;x-qs-request-id&lt;/code&gt; Header，在请求遇到问题时在工单中附上 &lt;code&gt;request-id&lt;/code&gt; 将有助于我们更快的定位问题&lt;/li&gt;
+&lt;li&gt;所有请求发送时都需要携带正确的 Date 和 Host，其中 Date 采用 UTC 时间，格式由 &lt;a href=&#34;https://www.ietf.org/rfc/rfc822.txt&#34;&gt;RFC 822&lt;/a&gt; 定义，该时间误差不能超过 15 分钟&lt;/li&gt;
+&lt;li&gt;除非访问公开的 Bucket，所有的请求都需要认证，认证文档参考&lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/common/signature&#34;&gt;此处&lt;/a&gt;，无特殊需求请使用官方提供的 SDK&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;QingStor 对象存储同时支持通过 HTTP 和 HTTPS 协议访问，使用的都是标准端口。&lt;/p&gt;
+&lt;p&gt;支持通过两种风格访问：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Virtual-host Style&lt;/code&gt;: &lt;code&gt;&amp;lt;bucket_name&amp;gt;.&amp;lt;zone_id&amp;gt;.qingstor.com/&amp;lt;object_key&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Path Style&lt;/code&gt;: &lt;code&gt;&amp;lt;zone_id&amp;gt;.qingstor.com/&amp;lt;bucket_name&amp;gt;/&amp;lt;object_key&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;比如上传 &lt;code&gt;arch-is-the-best.png&lt;/code&gt; 到位于 &lt;code&gt;pek3b&lt;/code&gt; 的 &lt;code&gt;linux&lt;/code&gt; Bucket 下，请求应当形如：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;PUT https://linux.pek3b.qingstor.com/arch-is-the-best.png
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;QingStor 对象存储支持 S3 兼容模式，访问形式为每个 Zone 提供一个 s3 的子域：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Virtual-host Style&lt;/code&gt;: &lt;code&gt;&amp;lt;bucket_name&amp;gt;.s3.&amp;lt;zone_id&amp;gt;.qingstor.com/&amp;lt;object_key&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Path Style&lt;/code&gt;: &lt;code&gt;s3.&amp;lt;zone_id&amp;gt;.qingstor.com/&amp;lt;bucket_name&amp;gt;/&amp;lt;object_key&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;sdk-介绍&#34;&gt;SDK 介绍&lt;/h2&gt;
+&lt;p&gt;QingStor 对象存储目前提供了绝大部分语言的 SDK，他们都共用相似的逻辑：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;首先初始化 Config&lt;/li&gt;
+&lt;li&gt;然后创建 Service 实例&lt;/li&gt;
+&lt;li&gt;通过 Service 实例可以初始化出一个 Bucket 实例&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;所有的 API 可分为三类：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Service: &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/service/&#34;&gt;https://docs.qingcloud.com/qingstor/api/service/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Bucket: &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/bucket/&#34;&gt;https://docs.qingcloud.com/qingstor/api/bucket/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Object: &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/object/&#34;&gt;https://docs.qingcloud.com/qingstor/api/object/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其中 Service 实例可以处理 Serivce 级别的 API，而 Bucket 实例可以处理 Bucket 和 Object 级别的 API。&lt;/p&gt;
+&lt;p&gt;所有 SDK 均通过 API Specs 自动生成，采用与语言主流风格相似的命名逻辑，比如 Golang 中 &lt;code&gt;ListObjects&lt;/code&gt;，Python 中是 &lt;code&gt;list_objects&lt;/code&gt;，Node.js 中是 &lt;code&gt;listObjects&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;常见问题&#34;&gt;常见问题&lt;/h2&gt;
+&lt;p&gt;在总结我见过的常见问题之前，首先分享几个关于工单的小秘密：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;提工单之前首先检查自己有没有什么低级错误（要不然这个单子会很没意思）&lt;/li&gt;
+&lt;li&gt;提工单的时候提供完整的信息会有助于问题的快速解决（在对象存储这边就是 Zone，Bucket，SDK，最最最重要的是请带上 &lt;code&gt;request_id&lt;/code&gt;）&lt;/li&gt;
+&lt;li&gt;在工单里面发脾气是没用的（在哪里都没用，做个大人吧）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;如何做断点续传&#34;&gt;如何做断点续传？&lt;/h3&gt;
+&lt;p&gt;断点续传分成上传和下载，下载使用标准的 HTTP Range Header 来下载指定的部分，上传则需要使用分段上传的接口，具体的流程可以参考 &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/object/multipart/index.html&#34;&gt;Multipart 分段上传过程&lt;/a&gt;。在分段上传完成后，它就是一个完整的 Object，无法再获取到分段的信息。&lt;/p&gt;
+&lt;h3 id=&#34;如何上传超大文件&#34;&gt;如何上传超大文件？&lt;/h3&gt;
+&lt;p&gt;超大文件需要使用分段上传接口，单个分段最大 5GB，与 PutObject 的限制一致，单文件最大可到 50TB。&lt;/p&gt;
+&lt;h3 id=&#34;如何访问上传的文件&#34;&gt;如何访问上传的文件？&lt;/h3&gt;
+&lt;p&gt;正如上面提到的，对象存储提供的是 RESTful 的 API 接口，上传时用 PUT，下载就用 GET，删除用 DELETE。&lt;/p&gt;
+&lt;h3 id=&#34;如何创建文件夹&#34;&gt;如何创建文件夹？&lt;/h3&gt;
+&lt;p&gt;对象存储没有层次结构，因此也没有文件夹的概念。&lt;/p&gt;
+&lt;p&gt;但是对象存储支持指定一个分隔符，把带有相同分隔符的 Object 组织到一起，可以模拟出文件夹。比如：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ubuntu/my-patch-is-so-good.patch
+ubuntu/this-apt-has-super-power.png
+centos/my-gcc-is-5.txt
+centos/my-kernel-is-3-10.jpg
+arch/my-gcc-is-going-to-9.gif
+i-use-systemd.txt
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果指定 &lt;code&gt;delimiter&lt;/code&gt; 为 &lt;code&gt;/&lt;/code&gt;，则我们会得到形如这样的结果：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;common_prefixes&amp;#34;&lt;/span&gt;: [
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;ubuntu/&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;centos/&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;arch/&amp;#34;&lt;/span&gt;
+],
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;keys&amp;#34;&lt;/span&gt;: [
+{
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;created&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;2016-08-22T15:03:32.000Z&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;modified&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;1471878212&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;encrypted&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;storage_class&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;STANDARD&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;etag&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\&amp;#34;4f44b10f5cb83777fea4ef88a3f7b3c4\&amp;#34;&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;key&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;i-use-systemd.txt&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;mime_type&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;text/plain&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;size&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#40a070&#34;&gt;38970&lt;/span&gt;
+}
+]
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;common_prefixes&lt;/code&gt; 就是那些有共同前缀的 Key，而 &lt;code&gt;keys&lt;/code&gt; 则是当前 prefix 下不带有指定 &lt;code&gt;delimiter&lt;/code&gt; 的 Key。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;delimiter&lt;/code&gt; 可以是任意 Char，不过我们一般指定为 &lt;code&gt;/&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;如何下载文件夹&#34;&gt;如何下载文件夹？&lt;/h3&gt;
+&lt;p&gt;List 指定 Prefix，然后下载所有的 Key。&lt;/p&gt;
+&lt;p&gt;也可以使用命令行工具，比如 &lt;a href=&#34;https://github.com/yunify/qsctl&#34;&gt;&lt;code&gt;qsctl&lt;/code&gt;&lt;/a&gt;，&lt;a href=&#34;https://github.com/yunify/qscamel&#34;&gt;&lt;code&gt;qscamel&lt;/code&gt;&lt;/a&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;如何批量删除文件&#34;&gt;如何批量删除文件？&lt;/h3&gt;
+&lt;p&gt;List 指定 Prefix，然后逐个删除或使用 &lt;a href=&#34;https://docs.qingcloud.com/qingstor/api/bucket/delete_multiple&#34;&gt;&lt;code&gt;DeleteMultipleObjects&lt;/code&gt;&lt;/a&gt; 接口。&lt;/p&gt;
+&lt;h3 id=&#34;内网访问&#34;&gt;内网访问&lt;/h3&gt;
+&lt;p&gt;青云 IaaS 与同一个 Zone 的对象存储是内网互通的，因此在青云 IaaS 中访问对象存储不收取公网流量费用。对象存储的 &lt;code&gt;Service Global Server&lt;/code&gt; 可能部署在其他区域，因此没有绑定公网 IP 的机器可能无法访问，此时可以直接指定 Bucket 所在的 Zone，避免工具或者 SDK 访问 Global Server 来自动检测 Bucket 的 Zone。&lt;/p&gt;
+&lt;p&gt;如果担心 DNS 解析结果不正确导致走公网的话，可以 &lt;code&gt;dig &amp;lt;zone_id&amp;gt;.qingstor.com&lt;/code&gt;：如果返回的是 &lt;code&gt;10.x&lt;/code&gt; 开头的内网 IP，则说明访问会走内网；如果返回的是 &lt;code&gt;139.198.x&lt;/code&gt; 开头的公网 IP，则说明访问会走公网。&lt;/p&gt;
+&lt;h3 id=&#34;request-expired-是什么问题&#34;&gt;request_expired 是什么问题？&lt;/h3&gt;
+&lt;p&gt;QingStor 对象存储服务会通过 Date 来检查签名的时间，如果服务器收到请求的时间与 Date 相差过大，则会返回该错误。在确定网络没有明显拥堵的情况下，请检查服务器本身的时间是否已经校准。&lt;/p&gt;
+&lt;h3 id=&#34;浏览器访问遇到-cors-报错&#34;&gt;浏览器访问遇到 CORS 报错&lt;/h3&gt;
+&lt;p&gt;在浏览器端访问对象存储的时候经常会遇到 CORS 相关的报错，请正确配置 Bucket 的 CORS。&lt;/p&gt;
+&lt;h3 id=&#34;浏览器端如何避免密钥泄漏&#34;&gt;浏览器端如何避免密钥泄漏&lt;/h3&gt;
+&lt;p&gt;访问对象存储服务需要 &lt;code&gt;Access Key ID&lt;/code&gt; 和 &lt;code&gt;Secret Access Key&lt;/code&gt;，这两个值不能直接暴露在浏览器中，否则会导致密钥泄漏。此时需要自行搭建签名服务器，在后端校验请求后在本地进行请求的签名，并将签名的结果返回给前端。整体的访问流程如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;浏览器请求签名服务器&lt;/li&gt;
+&lt;li&gt;签名服务器返回签名后的结果&lt;/li&gt;
+&lt;li&gt;浏览器发送签名后的请求&lt;/li&gt;
+&lt;li&gt;对象存储服务器响应&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;签名服务器与业务耦合比较紧密，因此只提供了一个 demo 作为参考：&lt;a href=&#34;https://github.com/yunify/qingstor-demo-signature-server-nodejs&#34;&gt;QingStor Demo - Signature Server (NodeJS)&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.qingcloud.com/qingstor/&#34;&gt;QingStor 对象存储文档&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS&#34;&gt;HTTP访问控制（CORS）&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>从 netctl 切换到 systemd-networkd</title><link>https://xuanwo.io/2019/06/13/switch-to-systemd-networkd/</link><pubDate>Thu, 13 Jun 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/06/13/switch-to-systemd-networkd/</guid><description>&lt;p&gt;晚上的时候临时起意决定把网络管理器从 &lt;code&gt;netctl&lt;/code&gt; 切换到 &lt;code&gt;systemd-networkd&lt;/code&gt;，切换的过程意外的顺畅。本文记录了一下切换的过程并简单介绍一下 &lt;code&gt;systemd-networkd&lt;/code&gt; + &lt;code&gt;iwd&lt;/code&gt; 的组合如何使用。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2 id=&#34;出场人物介绍&#34;&gt;出场人物介绍&lt;/h2&gt;
+&lt;h3 id=&#34;netctl&#34;&gt;netctl&lt;/h3&gt;
+&lt;p&gt;netctl 是 archlinux 的亲儿子，上游就在 &lt;a href=&#34;https://git.archlinux.org/netctl.git/&#34;&gt;https://git.archlinux.org/netctl.git/&lt;/a&gt;，也是除了 &lt;code&gt;systemd-networkd&lt;/code&gt; 之外（这是 systemd 钦定的），唯一一个进入 base 组的网络管理工具，说是官方钦定也不为过。netcl 依赖 dhcpcd 或者 dhclient 来获取动态 IP 地址，通过 &lt;code&gt;wpa_supplicant&lt;/code&gt; 来访问加密的 WiFi，提供了 &lt;code&gt;wifi-menu&lt;/code&gt; 供用户在命令行下交互式地选择热点并输入密码。同时还提供了一系列的 systemd service 文件（&lt;code&gt;netctl@.service&lt;/code&gt;，&lt;code&gt;netctl-ifplugd@.service&lt;/code&gt;，&lt;code&gt;netctl-auto@.service&lt;/code&gt;）来帮助用户进行配置，比如在开启了 &lt;code&gt;netctl-auto@&amp;lt;interface&amp;gt;.service&lt;/code&gt; 之后，你的网卡就能在可选的 profile 中自动切换。&lt;/p&gt;
+&lt;h3 id=&#34;systemd-networkd&#34;&gt;systemd-networkd&lt;/h3&gt;
+&lt;p&gt;正如它的名字所暗示的，这是 systemd 全家桶的一员。它主要负责的是检测并配置网络设备，特别的是它还能够用来配置 &lt;code&gt;systemd-nspawn&lt;/code&gt; 启动的容器的网络。&lt;/p&gt;
+&lt;h3 id=&#34;iwd&#34;&gt;iwd&lt;/h3&gt;
+&lt;p&gt;iwd (iNet wireless daemon) 是 Intel 开发，用于取代 &lt;code&gt;wpa_supplicant&lt;/code&gt; 的 WiFi 后端。它的主要目标是通过不依赖任何外部库而是最大限度的利用 Linux 内核提供的功能来优化资源利用率。iwd 可以很好的跟 systemd-network 配合使用。&lt;/p&gt;
+&lt;h2 id=&#34;使用场景介绍&#34;&gt;使用场景介绍&lt;/h2&gt;
+&lt;p&gt;平时只需要连接 3 个 Wi-Fi：家里的，公司的，手机的，没有频繁切换/增加/修改/删除 Wi-Fi 配置的需求，所以我不需要一个常驻通知区域的服务来进行切换。此外，我的 VPN 已经全部通过 systemd 来进行管理了，所以也不需要网络管理工具替我做这些操作。我需要的是这样的一个工具组合：一个负责管理网络设备，一个负责连接 WiFi 并进行认证。之前的组合是 &lt;code&gt;netctl&lt;/code&gt; + &lt;code&gt;wpa_supplicant&lt;/code&gt;，现在我有了新欢：&lt;code&gt;systemd-networkd&lt;/code&gt; + &lt;code&gt;iwd&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;如何使用&#34;&gt;如何使用&lt;/h2&gt;
+&lt;h3 id=&#34;停用-netctl&#34;&gt;停用 netctl&lt;/h3&gt;
+&lt;p&gt;首先需要停用 netctl 的相关服务，避免多个网络管理工具在一起打架。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl stop netctl-auto@&amp;lt;interface&amp;gt;.service
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl disable netctl-auto@&amp;lt;interface&amp;gt;.service&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;配置网卡&#34;&gt;配置网卡&lt;/h3&gt;
+&lt;p&gt;然后按照 Wiki 的指示写无线网卡的配置，放在 &lt;code&gt;/etc/systemd/network&lt;/code&gt; 下。&lt;/p&gt;
+&lt;p&gt;对无线网卡来说，最小化的配置是这样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Match]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;wlp2s0&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Network]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DHCP&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;ipv4&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Match&lt;/code&gt; 主要是用于匹配管理的设备，可以通过设备名，MAC 地址等来选择&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Network&lt;/code&gt; 用来做网络相关的具体配置，比如 DHCP，DNS 等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;我的本地开启了 coredns 作为 DNS 服务，所以我需要额外加一些配置来通过 DHCP 来获取 IPv4 地址，但是不使用 DHCP 下发的 DNS。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-ini&#34; data-lang=&#34;ini&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Match]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;Name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;wlan0&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[Network]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DHCP&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;ipv4&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;DNS&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;127.0.0.1&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;[DHCP]&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;UseDNS&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;false&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;iwd 启动的时候似乎会修改网络设备的名字，我的网卡被修改成了 wlan0&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id=&#34;one-one-one&#34;&gt;One，One，One&lt;/h2&gt;
-&lt;p&gt;我醒的时候，天还没有全亮，朋友还没起床。房间里面也没有什么娱乐设施，于是决定出去走走。东京的清晨有点凉，衣服穿的不太够的我不由得用力的裹了裹。街上的行人很少，不过走的都很快，大概他们也很冷吧。街头的灯还亮着，似乎没有从昨夜的喧嚣中醒来。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;streets-that-no-awake.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;天空中一直回荡着乌鸦的叫声，或许是因为清晨的关系，鸟叫声传的很远，近处与远处交相回响，有了点音乐的感觉。旅行中的人总是更具包容，此时并不觉得吵，反而觉得很有意思，尽管可能回家之后听到同样的叫声免不了要抱怨几句：“吵死了”。&lt;/p&gt;
-&lt;p&gt;天渐渐的变亮，而我的身体却愈发觉得冷，看到街旁有一个热饮店便去买了杯热红茶。（事实证明这是个错误的决定，因为喝完之后我一直想吐，难受了很久= =）双手抱着热茶，我继续饶有兴致的做一个观察者。哪怕是街头的各种标语都觉得新鲜：比如路上喫煙禁止，自転車放置禁止这些。&lt;/p&gt;
-&lt;p&gt;一路走来拍了很多莫名其妙的照片，就不放出来荼毒大家了，唯一一个我觉得有意思的照片是这样的：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;magic.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;拍的时候是乱拍的，但是回家之后翻到这一张觉得非常迷幻。本身隔着玻璃橱窗拍的，店里面还有一个镜子，重重倒影之后，散落在我脚旁是店家们扔出来的生活垃圾，仿佛在提醒我真实的世界在何方。&lt;/p&gt;
-&lt;p&gt;又逛了一会儿之后收到了朋友的消息，他们已经出门了，便跟他们汇合一起去筑地市场。事先就打听过，筑地市场特别火，排队的人很多，所以要早点去。去了之后发现好像跟我们想像的不太一样，相比于饮食街，它更像是一个海鲜批发市场。我们随便找了个店面进去吃了一会儿，但是感觉没啥大的差别，于是没有多吃就出来了。然后现场查攻略，才知道筑底市场分为场内和场外，那些名店大多都在场内。&lt;/p&gt;
-&lt;p&gt;稍微讨论了一下，我们决定做公交车去场内吃大和寿司，这来都来了，不打个卡岂不是亏了。场内市场在一个小岛上，我们头一次在日本感受到了什么叫开阔：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;tsukiji.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;这里大概是装货卸货的地方吧，一大块地上啥都没有，感觉意外的奢侈。按照导航的指引，没多久就到了目的地：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;daiwasushi.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;跟我们差不多时候到的还有一群扛着长枪短炮的摄影师们，后来隐约明白他们是国外来的一个团队，来采访大和寿司的店长。我当时心里一阵不妙，这个店这么厉害的么，怕不是要吃不起。&lt;/p&gt;
-&lt;p&gt;进去之后发现有点像回转寿司，一个厨师负责三到四人的样子，坐下来之后才发现这个店没有菜单- -。能吃的东西都放在面前的玻璃柜中，顾客说自己要什么，厨师直接拿出来做好就直接吃了。真正的新鲜，没有中间商赚差价！我选中了一个看起来像是三文鱼的东西，想告诉厨师我们一人一个，但是一时想不起来咋说，于是一边手指着我们三，一边说出了那句如果我能穿越回去就算是掐死自己也不让说出来的禁句：&lt;strong&gt;“One, One, One”&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;场面一阵安静，我的额头上似乎凌空冒出了三条黑线，我们的朋友在忍住不要发出爆笑，我面前的小哥哥愣了一下之后笑着点头示意：“OK, OK, One, One, One.”。啊，我要疯了= =，漩涡酱大危机，前所未有的丢脸时刻。不行，我得稳住，假装无事发生过，之后每一次点新的寿司我都来一遍 One，One，One，假装这是常见用法。大丈夫です，我能行的。&lt;/p&gt;
-&lt;p&gt;我能稳，但是厨师不让我稳- -。只见他一边切寿司一边跟边上的同事说笑，虽然听不懂，但是时不时冒出来的 “One，One，One” 在疯狂暗示他们说笑的内容。喂，你们这样不行吧，你们知不知道你们在调笑来自异国他乡的客人啊，岂可修！我只能假装认真拍照来掩饰我心中的惊涛骇浪：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;one,one,one.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;别笑了，你看这三文鱼多新鲜！&lt;/p&gt;
-&lt;h2 id=&#34;走-走-走&#34;&gt;走，走，走&lt;/h2&gt;
-&lt;p&gt;吃完寿司之后我们就坐电车回到酒店收拾行囊准备去大阪了，不过因为上午耽搁的比较久，直接坐到大阪的话可能要饿死了，所以决定先坐到名古屋，在名古屋吃完中饭之后再去大阪。&lt;/p&gt;
-&lt;p&gt;经过了有点纠结的换票之后，我们终于看到了新干线的列车：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;shinkansen.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;wow，帅到，这就是铁胆火车侠的本体么！&lt;/p&gt;
-&lt;p&gt;虽说是新干线，但是感觉跟平时坐电车没差，只不过距离远了一些。车上的体验跟国内高铁差不多，相对更安静一点。无聊的我无声哼着无聊的 disco 在无聊的乱拍，直到途中有一段似乎经过了海边：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;oversea.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;列车远离海岸线之后我也困了起来，在车上睡着了。再醒来的时候到了名古屋，已经是中午饭点了，我们决定出去随便吃点然后回来接着坐到大阪。可是车站边上有啥吃的呢？出站之后我们有些懵逼的环顾着四周。啊，有了，我们去吃吉野家！在克服了最初的违和感之后，我们都吃的非常满意，以至于之后的几天都念念不忘吃了好几顿。他们这里叫做牛丼，我们那边叫做牛肉饭的玩意儿是这样子的：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;gyudon.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;我就是饿死，从新干线上跳下去，我也不吃什么吉野家！真香，再来一碗！&lt;/p&gt;
-&lt;h2 id=&#34;买-买-买&#34;&gt;买，买，买&lt;/h2&gt;
-&lt;p&gt;终于吃饱之后，我们换了从名古屋到大阪的票，继续出发。&lt;/p&gt;
-&lt;p&gt;到大阪的时候已经下午三点了，我们决定从地铁站直接走到酒店。我开着导航在前方带队，途中发现了一个特别有意思的事情：这大阪的街道为何这么整齐？&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;streets-in-osaka.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;以至于我们一路上都在讨论一个 7 * 8 的方格，从左下角走到右上角有多少种不同的路线。&lt;/p&gt;
-&lt;p&gt;一路说着闲话，终于到了被我们称为 “日本全季” 的 WBF 北浜店。在 WBF 住的这两天是我们住的最舒服的两天，离开的时候都有些留恋，琢磨着是不是在东京也找个 WBF 住。进门就能看到一个空气净化器，桌上立着几份资料，从里面找到了一份成人节目的列表，偷偷拍了一张，恪守伦理的 “伦理君” 当然是没有看的啦（太贵了）。&lt;/p&gt;
-&lt;p&gt;稍微修整一下之后便朝着心斋桥出发了，此时下午五点，天色渐暗，有点好看：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;night-in-osaka.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;心斋桥附近的街上正好有个灯展，还有个 Apple Store，去观摩了一波。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;light.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;接下来就是买买买时间，我在边上当了一个忠实的吃瓜群众。看着他们熟练的出入各种药妆店，嘴里吞吐着各种我听不懂的术语，这大概就是次元壁吧，我想。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;ruo.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;晚餐吃了一顿温野菜，对着他们的菜单研究了很久。跟国内不太一样的是，日本这边似乎会分成很多套餐，高级的套餐会比低级多一些肉类（日本真的很喜欢各种各样的套餐哎。。），最后决定吃最低级的那种，因为我们吃不了多少，也吃不出来不同种类的牛肉有啥差别。果然没有吃多少就撤了- -，战斗力不强的话就是这个样子啦。&lt;/p&gt;
-&lt;p&gt;回酒店的时候由于我的指挥失误，我们多走了整整 10 分钟，小伙伴们连砍我的力气都没有了，只会无力的问我：还有多久到？嘛，快到了，快到了。我故作欢快地回答，一边把导航的音量调低。&lt;/p&gt;
-&lt;p&gt;到了酒店之后洗了个舒服的热水澡，我们联袂上演了一场惊天地泣鬼神的大翻盘，可以点击&lt;a href=&#34;https://photos.app.goo.gl/tC3zoSu91BwAnMRw6&#34;&gt;这里&lt;/a&gt;查看录像，那位走位飘逸，操作风骚的 &lt;code&gt;qsIndex&lt;/code&gt; 就是我啦~&lt;/p&gt;
+&lt;p&gt;在配置写好之后就可以启动 &lt;code&gt;systemd-networkd&lt;/code&gt; 的服务啦：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl start systemd-netword&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;如果修改了网络配置，只需要 restrart 即可。&lt;/p&gt;
+&lt;p&gt;更具体的配置可以参阅 ArchWiki 或者 &lt;code&gt;man systemd-networkd&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;配置-iwd&#34;&gt;配置 iwd&lt;/h3&gt;
+&lt;p&gt;iwd 不是自带的软件包，所以首先需要自行安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; pacman -S iwd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在开始使用之前，我们需要 start 并且 enable iwd 服务：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl start iwd
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; systemctl &lt;span style=&#34;color:#007020&#34;&gt;enable&lt;/span&gt; iwd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后就可以用 &lt;code&gt;iwctl&lt;/code&gt; 进行管理啦，iwctl 默认会进入一个交互式的命令行界面，使用体验还是很赞的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; iwctl
+&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;#&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;此时输入 help 会返回支持的所有命令，各个命令都比较直观，只要对 WiFi 的相关技术名词稍有了解就能很快上手，此外这个界面所有命令都支持自动补全，好评。&lt;/p&gt;
+&lt;p&gt;首先先看看我们有哪些设备：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# device list&lt;/span&gt;
+Devices *
+--------------------------------------------------------------------------------
+Name Address Powered Adapter Mode
+--------------------------------------------------------------------------------
+wlan0 xx:xx:xx:xx:xx:xx on phy0 station&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个界面是动态的，右上角的 &lt;code&gt;*&lt;/code&gt; 会不断闪烁表明这个界面是实时的。&lt;/p&gt;
+&lt;p&gt;然后我们可以手动触发一次 STA 扫描：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# station wlan0 scan&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;之后就可以查看有哪些能连接 WiFi 热点了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# station wlan0 get-networks&lt;/span&gt;
+Available networks *
+--------------------------------------------------------------------------------
+Network name Security Signal
+--------------------------------------------------------------------------------
+CU_SNZQ psk ****
+xjzy psk ****
+Tenda_30BDD0 psk ****
+TP-LINK_D82B80 psk ****
+TP-LINK_lee psk ****
+ziroom201 psk ****
+mhshome psk ****
+TP-LINK_he psk ****
+TP-LINK_450C psk ****
+yuzhe psk ****
+z212-202 psk ****
+Bill&lt;span style=&#34;&#34;&gt;&amp;#39;&lt;/span&gt;s Router psk ****
+tcs psk ****
+&amp;gt; XXXXXXXXXXX psk ****&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这个界面同样是动态的，可以查看当前能连接网络机器信号强度。&lt;/p&gt;
+&lt;p&gt;最后就能够选择想要连接 SSID 连接网络了，如果需要输入密码的话，iwd 还会出现一个提示要求输入密码。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;iwd&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;# station wlan0 connect XXXXXXXXXXX&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里有个需要提出来的点：iwd 通过交互式界面成功连接上网络之后，就会自动的在 &lt;code&gt;/var/lib/iwd&lt;/code&gt; 下生成对应的配置文件，之后 iwd 自动的进行连接。所以一方面是不需要自己手动的去写配置文件，另一方面是切换过程也是自动的，不需要人工干预。&lt;/p&gt;
+&lt;p&gt;iwd 生成的配置文件名是有一定规则的，用 SSID 作为文件名，然后以加密方式作为后缀，比如 &lt;code&gt;*.open&lt;/code&gt; 表示这是一个开放网络，&lt;code&gt;*.psk&lt;/code&gt; 表示这是一个使用 PSK 加密的网络。&lt;/p&gt;
+&lt;h3 id=&#34;检查状态&#34;&gt;检查状态&lt;/h3&gt;
+&lt;p&gt;全部配置好之后可以分别查看一下 WiFi 和网卡的状态：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; iwctl device wlan0 show
+Device: wlan0
+--------------------------------------------------------------------------------
+Settable Property Value
+--------------------------------------------------------------------------------
+Name wlan0
+* Mode station
+* Powered on
+Address xx:xx:xx:xx:xx:xx
+* WDS off
+Adapter phy0
+:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; networkctl status
+● State: routable
+Address: &lt;span style=&#34;color:#40a070&#34;&gt;192&lt;/span&gt;.168.0.103 on wlan0
+xxxx::xxxx:xxxx:xxxx:xxxx on wlan0
+Gateway: &lt;span style=&#34;color:#40a070&#34;&gt;192&lt;/span&gt;.168.0.1 &lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;TP-LINK TECHNOLOGIES CO.,LTD.&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; on wlan0
+DNS: &lt;span style=&#34;color:#40a070&#34;&gt;127&lt;/span&gt;.0.0.1&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;systemd 真香，上交底裤我光荣！天灭 networkmanager ！&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Systemd-networkd&#34;&gt;systemd-networkd - ArchWiki&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/index.php/Iwd&#34;&gt;iwd - ArchWiki&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Go Modules 内部分享</title><link>https://xuanwo.io/2019/05/27/go-modules/</link><pubDate>Mon, 27 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/27/go-modules/</guid><description>&lt;p&gt;最近在日常工作之外，我开始负责 Team 内部的工程效率提升。瞄准的第一个目标便是推动 Go Modules 在 Team 内部的普及，一方面是想淘汰祖传的依赖管理脚本，减少浪费在处理依赖问题上的时间，另一方面是为了实现 CI/CD 和可重现构建。这安利是否成功，除了要看个人的奋斗，还要看历史的行程。为了使得大家相信迁移到 Modules 好处多多，我在周一的例会后进行了一次分享，本文就是分享后的整理而成的。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;大家好，今天要跟大家分享是 Go Module。我们首先回顾一下依赖管理及其想要解决的根本问题，然后介绍 Golang 依赖管理工具发展的历史，理解我们是如何走到了如今这个时点，然后再介绍 Go Module 是什么，以及它如何解决我们面对的问题，之后以一个实际的案例来展示 Go Module 如何使用，最后是 Q &amp;amp; A 环节。&lt;/p&gt;
+&lt;h2 id=&#34;依赖管理&#34;&gt;依赖管理&lt;/h2&gt;
+&lt;p&gt;首先大家想一下为什么需要依赖：我们想复用已有的工作成果。而将已有的工作成果加入到我们的项目中作为依赖存在着太多的不确定性：这个包的 API 会变化，这个包内部行为会变化，这个包的依赖会变化，这个包可能已经已经不存在或无法访问，包与包之间的不同依赖相互冲突等等。不仅如此，随着软件开发规模的逐步增大，涉及到的外部依赖越来越多，手动管理的所有依赖愈发不可能。所以我们需要依赖管理，我们需要有个工具或者规范来描述和定义包与包之间的依赖关系，并自动化的去处理、解析和满足这些依赖。&lt;/p&gt;
+&lt;p&gt;依赖管理试图解决的问题我认为（或者 Russ Cox 认为）主要有两个：其一是 API 稳定性，其二是可重现构建。API 稳定性自不用多说，我们都希望我们依赖的 API 是稳定的，不会因为我们更新了一个小版本就要大规模的重写我们的代码。可重现构建在我们依赖管理的领域内可以理解为相同的源码最后能得到同样的二进制或链接库（当然真正的想实现可重现构建还需要一系列配套的工具和特定的参数）。假设我们同事 A 和 B 协同开发，A 依赖了存在 BUG 的 uuid v1.2，而 B 依赖了最新的 uuid v1.3。他们都是使用了相同的代码去构建，但是最后测试的结果却不一致，这为他们进一步的排错增添了无数烦恼。特别是我们本身就在从事着底层存储系统的开发， 如果开发时和最后部署时的二进制不一致，极端情况下可能导致用户数据丢失等极其严重的后果。&lt;/p&gt;
+&lt;h2 id=&#34;回溯历史&#34;&gt;回溯历史&lt;/h2&gt;
+&lt;p&gt;依赖管理如此重要，Golang 社区及其开发者们都采取了哪些手段来解决这些问题呢？我们分别从 API 稳定性和可重现构建的角度来回溯一下历史，理解一下我们当下处于何种位置，这样才能知道我们要往何处去。&lt;/p&gt;
+&lt;h3 id=&#34;api-稳定性&#34;&gt;API 稳定性&lt;/h3&gt;
+&lt;p&gt;在 2011 年 Go 1 发布的时候就没有版本的概念，2013 年时 Golang 团队在 FAQ 中提议开发者需要保证相同的 import path 的兼容性，这个后来成了一纸空文，没有强制措施的倡议是没有人会听的。&lt;/p&gt;
+&lt;p&gt;到了 2014 年，&lt;code&gt;gopkg.in&lt;/code&gt; 出现了。它本质上是一个 github 的重定向工具，将 &lt;code&gt;gopkg.in/yaml.v1&lt;/code&gt; 重定向到 &lt;a href=&#34;https://github.com/go-yaml/yaml&#34;&gt;&lt;code&gt;go-yaml/yaml&lt;/code&gt;&lt;/a&gt; 库的 v1 分支，将 &lt;code&gt;gopkg.in/yaml.v2&lt;/code&gt; 重定向到 v2 分支。它使得同一个包可以有不同的 import path，在遵守 &lt;code&gt;相同的 import path 要向后兼容&lt;/code&gt; 的前提下实现了一定程度的版本化控制，缓解了引入破坏性变更的问题。&lt;/p&gt;
+&lt;p&gt;在 2015 年的时候，有人提出了采用语义化版本的草案，但是并没有被 Golang 团队接受。&lt;/p&gt;
+&lt;h3 id=&#34;可重现构建&#34;&gt;可重现构建&lt;/h3&gt;
+&lt;p&gt;在 Go 1 刚发布的时候，Golang 使用 GOROOT 和 GOPATH 来决定包的位置。GOROOT 和 GOPATH 结构是相似的，只不过 GOROOT 用来指示 Go 的 Root Tree 位置，GOPATH 中则是用户自定义的 Tree。GOPATH 中可以指定多个目录，go get 默认总是会把依赖下载到第一个目录中。而在查找的时候，Go 总是会先查找 GOROOT，然后在按照顺序查找 GOPATH。如果没有自行设置的话，GOROOT 会取 &lt;code&gt;/usr/lib/go&lt;/code&gt; 作为默认值，而 GOPATH 则会取 &lt;code&gt;$HOME/go&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;后来有人想到可以在运行前修改 GOPATH，使得 go get 和 go build 总是能够从一个指定目录中下载或者查找指定的包。很多人可能见过各种教你 &lt;code&gt;export GOPATH=&amp;quot;`pwd`:$GOPATH&amp;quot;&lt;/code&gt; 的奇技淫巧，顺着这种思路发展下去出现一些工具，他们能够自动的设置和修改 GOPATH，我们项目中用到的管理依赖的脚本就是这个思路。&lt;/p&gt;
+&lt;p&gt;到了 2014 年，有人提出了 external packages 的概念，在项目的目录下增加一个 vendor 目录来存放外部的包，同时让 go 的 tools 能够感知到这是一个 vendor。这个草案在 2015 年时被接受，并在 go 1.5 中作为 vendor 作为试验推出，在 go 1.6 中作为默认参数被启用。自此出现&lt;/p&gt;
+&lt;p&gt;到了 2016 年，一群开发者聚在一起进行了讨论，并成立一个社区组织合作开发出了 dep。dep 后来被 golang 官方接纳为 official experiment，并在很长的一段时间里被认为是有望终结 Golang 依赖管理工具混乱的统治者。&lt;/p&gt;
+&lt;h2 id=&#34;versioned-modules&#34;&gt;Versioned Modules&lt;/h2&gt;
+&lt;p&gt;就在所有人以为 dep 就将是那个最终的解决方案时，我们的 Russ Cox 同学有不同的想法：我们要引入 Module 的概念，我们要重新定义依赖管理。实际上从一开始 dep 就只是一个试验，用来帮助 Golang 团队积累经验和学习依赖管理，至少 Russ Cox 是这么认为的。这中间的种种故事和花边新闻大家可以去看看 &lt;a href=&#34;https://www.zhihu.com/people/caoqianli_&#34;&gt;@hsiafan&lt;/a&gt; 的文章 &lt;a href=&#34;https://zhuanlan.zhihu.com/p/41627929&#34;&gt;关于Go Module的争吵&lt;/a&gt;，此处我就不多谈了。&lt;/p&gt;
+&lt;h3 id=&#34;模块&#34;&gt;模块&lt;/h3&gt;
+&lt;p&gt;先来看模块。&lt;/p&gt;
+&lt;p&gt;模块是&lt;strong&gt;相关连的包&lt;/strong&gt;作为&lt;strong&gt;一个单元&lt;/strong&gt;被一起&lt;strong&gt;版本化&lt;/strong&gt;后的组合。&lt;/p&gt;
+&lt;p&gt;每个模块都有着确定的依赖要求，并且能够创建可复现的构建。一个仓库里可以有多个模块，一个模块里面可以有多个包。&lt;/p&gt;
+&lt;h3 id=&#34;导入兼容性规则&#34;&gt;导入兼容性规则&lt;/h3&gt;
+&lt;p&gt;我们可以重新阐述一下 FAQ 里面的那个兼容性规则（The Import Compatibility Rule）：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;如果旧包和新包具有相同的导入路径，则新包必须向后兼容旧包。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;换言之，如果他们的导入路径不同，他们就无需保持兼容。&lt;/p&gt;
+&lt;h3 id=&#34;语义导入版本控制&#34;&gt;语义导入版本控制&lt;/h3&gt;
+&lt;p&gt;这就为我们带来了语义导入版本控制（Semantic Import Versioning）。&lt;/p&gt;
+&lt;p&gt;首先所有的模块都必须遵循语义化版本规则：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;impver.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;其次，当主版本号大于等于 &lt;code&gt;v2&lt;/code&gt; 时，这个 Module 的 import path 必须在尾部加上 &lt;code&gt;/vN&lt;/code&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在 go.mod 文件中： &lt;code&gt;module github.com/my/mod/v2&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;在 require 的时候： &lt;code&gt;require github.com/my/mod/v2 v2.0.0&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;在 import 的时候： &lt;code&gt;import &amp;quot;github.com/my/mod/v2/mypkg&amp;quot;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;最后，当主版本号为 &lt;code&gt;v0&lt;/code&gt; 或者 &lt;code&gt;v1&lt;/code&gt; 时，尾部的 &lt;code&gt;/v0&lt;/code&gt; 或 &lt;code&gt;/v1&lt;/code&gt; 可以省略。&lt;/p&gt;
+&lt;p&gt;根据语义化版本的要求，&lt;code&gt;v0&lt;/code&gt; 是不需要保证兼容性的，可以随意的引入破坏性变更，所以不需要显式的写出来；而省略 &lt;code&gt;v1&lt;/code&gt; 更大程度上是现实的考虑，毕竟 99% 的包都不会有 &lt;code&gt;v2&lt;/code&gt;，同时考虑到现有代码库的兼容，省略 &lt;code&gt;v1&lt;/code&gt; 是一个合情合理的决策。&lt;/p&gt;
+&lt;h3 id=&#34;最小版本选择&#34;&gt;最小版本选择&lt;/h3&gt;
+&lt;p&gt;现在我们已经可以定义出一个模块了，但是一个模块具体构建的时候到底选择是哪个版本呢？这就涉及到 Go Module 使用的最小版本选择（Minimal Version Selection）算法。&lt;/p&gt;
+&lt;p&gt;它的工作方式是这样的：我们为每个模块指定的依赖都是可用于构建的最低版本，最后实际选择的版本是所有出现过的最低版本中的最大值。&lt;/p&gt;
+&lt;p&gt;我们现在有这样的一个依赖关系，A 会依赖 B，C，而 B，C 会去依赖 D，D 又会依赖 E。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;version-select-1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;那么我们从 A 开始做一个 BFS &lt;em&gt;（仅用于讲解原理，背后实现不一定是这样）&lt;/em&gt; ，把每个模块依赖的版本都找出来，这样我们会首先得到一个粗略的清单。然后相同的模块我们总是取最大的版本，这样就能得到最终的依赖列表。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;version-select-list.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;为什么可以这样呢？&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;导入兼容性规则&lt;/code&gt; 规定了相同的导入路径，新包必须向后兼容旧包，因此只要 D 还是 v1 版本，不管是选择 v1.3 还是 v1.4 都是可以的，不会有破坏性的变更。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;语义导入版本控制&lt;/code&gt; 规定了不同的大版本需要使用不同的导入路径，因此假设 D 升级到了 v2 版本，那就应当选择 &lt;code&gt;D v1.4&lt;/code&gt; 和 &lt;code&gt;D v2.0&lt;/code&gt; 这两个包了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;为什么要这样做呢？&lt;/p&gt;
+&lt;p&gt;为了可重现构建，为了降低复杂度。&lt;/p&gt;
+&lt;p&gt;大多数包管理工具，包括 &lt;code&gt;dep&lt;/code&gt;，&lt;code&gt;cargo&lt;/code&gt; 和 &lt;code&gt;pip&lt;/code&gt; 等，采用的都是总是选择允许的最新版本（&lt;code&gt;use the newest allowed version&lt;/code&gt;）策略。这会带来两个问题：第一，&lt;code&gt;允许的最新版本&lt;/code&gt;可能会随着外部事件而发生变化，比如说在构建的时候，依赖的一个库刚好发布了一个新版本，这会导致可重现构建失效；第二，开发者为了避免依赖在构建期间发生变化，他必须显式的告诉依赖管理工具我不要哪些版本，比如：&lt;code&gt;&amp;gt;= 0.3, &amp;lt;= 0.4&lt;/code&gt;。这会导致依赖管理工具花费大量的时间去计算可用的版本，而最终的结果总是让人感到沮丧，A 依赖需要 &lt;code&gt;Z &amp;gt;= 0.5&lt;/code&gt; 而 B 依赖需要 &lt;code&gt;Z &amp;lt;= 0.4&lt;/code&gt;，关于这一点 Russ Cox 在 &lt;a href=&#34;https://research.swtch.com/version-sat&#34;&gt;Version SAT&lt;/a&gt; 给出了更加规范的论述，感兴趣的同学不妨一观。&lt;/p&gt;
+&lt;p&gt;与总是选择允许的最新版本相反，Go Module 默认采用的是总是使用允许的最旧的版本。我们在 &lt;code&gt;go.mod&lt;/code&gt; 中描述的 &lt;code&gt;vX.Y.Z&lt;/code&gt; 实际上是在告诉编译器：“Hey，我最少需要 &lt;code&gt;vX.Y.Z&lt;/code&gt; 才能被 Build 出来”，编译器听完了所有模块的话之后按照刚才描述的流程就能选择出允许的最旧的那个版本。&lt;/p&gt;
+&lt;h3 id=&#34;go-mod&#34;&gt;go.mod&lt;/h3&gt;
+&lt;p&gt;讲了那么多理论之后，我们下面来聊一些比较实际的东西：&lt;code&gt;go.mod&lt;/code&gt; 应该要怎么写。在目前的版本当中，&lt;code&gt;go.mod&lt;/code&gt; 文件中主要有四个部分组成：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;module&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;用来声明当前 &lt;code&gt;module&lt;/code&gt;，如果当前版本大于 v1 的话，还需要在尾部显式的声明 &lt;code&gt;/vN&lt;/code&gt;。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;module /path/to/your/mod/v2
+module github.com/Xuanwo/go-mod-intro/v2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;require&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;这是最为常用的部分，在 mod 之后可以写任意有效的、能指向一个引用的字符串，比如 Tag，Branch，Commit 或者是使用 &lt;code&gt;latest&lt;/code&gt; 来表示引用最新的 commit。如果对应的引用刚好是一个 Tag 的话，这个字符串会被重写为对应的 tag；如果不是的话，这个字符串会被规范化为形如 &lt;code&gt;v2.0.0-20180128182452-d3ae77c26ac8&lt;/code&gt; 这样的字符串。我们后面会发现这个字符串与底层的 mod 存储形式是相对应的。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;require /your/mod tag/branch/commit
+require github.com/google/go-github/v24 v24.0.1
+require gopkg.in/urfave/cli.v2 v2.0.0-20180128182452-d3ae77c26ac8
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;replace&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;replace&lt;/code&gt; 这边的花样比较多，主要是两种，一个是与 &lt;code&gt;require&lt;/code&gt; 类似，可以指向另外一个 repo，另一种是可以指向本地的一个目录。加了 &lt;code&gt;replace&lt;/code&gt; 的话，go 在编译的时候就会使用对应的项目代码来替换。需要注意的是这个只作用于当前模块的构建，其他模块的 replace 对它不生效，同理，它的 replace 对其他模块也不会生效。&lt;/p&gt;
+&lt;p&gt;需要额外注意的是，如果引用一个本地路径的话，那这个目录下必须要有 &lt;code&gt;go.mod&lt;/code&gt; 文件，这个目录可以是绝对路径，也可以是相对路径。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;replace original_name =&amp;gt; real_name tag/branch/commit
+replace original_name =&amp;gt; local_path
+replace test.dev/common =&amp;gt; git.example.com/bravo/common.git v0.0.0-20190520075948-958a278528f8
+replace test.dev/common =&amp;gt; ../../another-porject/common-go
+replace github.com/qiniu/x =&amp;gt; github.com/Xuanwo/qiniu_x v0.0.0-20190416044656-4dd63e731f37
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;exclude&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;这个用的比较少，主要是为了能在构建的时候排除掉特定的版本，跟 &lt;code&gt;replace&lt;/code&gt; 一样，只能作用于当前模块的构建。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;exclude /your/mod tag/branch/commit
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;实战演练&#34;&gt;实战演练&lt;/h2&gt;
+&lt;p&gt;好，说了那么多，下面我们实际的上手操作一下。&lt;/p&gt;
+&lt;p&gt;在 &lt;code&gt;/tmp&lt;/code&gt; 下创建一个目录 &lt;code&gt;go-mod-intro&lt;/code&gt;，然后输入&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;go mod init github.com/Xuanwo/go-mod-intro&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;此时会有输出：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;go: creating new go.mod: module github.com/Xuanwo/go-mod-intro&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;同时目录下会有一个自动创建的新文件：&lt;code&gt;go.mod&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;module github.com&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;Xuanwo&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;mod&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;intro
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1.12&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这样我们就拥有了一个最小化的模块，尽管它什么用都没有。下面我们来写一些代码，创建一个 &lt;code&gt;main.go&lt;/code&gt; 并写入如下内容：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;package&lt;/span&gt; main
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; (
+v24 &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;github.com/google/go-github/v24/github&amp;#34;&lt;/span&gt;
+v25 &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;github.com/google/go-github/v25/github&amp;#34;&lt;/span&gt;
+)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; (
+_ = v24.Tag{}
+_ = v25.Tag{}
+)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;main&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在当前目录下执行 &lt;code&gt;go build&lt;/code&gt;，看看 go 是如何查找依赖的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; go build
+go: finding github.com/google/go-github/v25/github latest
+go: finding github.com/google/go-github/v24/github latest
+go: finding github.com/google/go-github/v25 v25.0.4
+go: finding github.com/google/go-github/v24 v24.0.1
+go: downloading github.com/google/go-github/v25 v25.0.4
+go: downloading github.com/google/go-github/v24 v24.0.1
+go: extracting github.com/google/go-github/v25 v25.0.4
+go: extracting github.com/google/go-github/v24 v24.0.1
+go: finding github.com/google/go-github v17.0.0+incompatible
+go: finding github.com/google/go-querystring v1.0.0
+go: finding github.com/golang/protobuf v1.2.0
+go: finding golang.org/x/crypto v0.0.0-20180820150726-614d502a4dac
+go: finding golang.org/x/sys v0.0.0-20180824143301-4910a1d54f87
+go: finding golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
+go: finding golang.org/x/net v0.0.0-20180826012351-8a410e7b638d
+go: finding golang.org/x/net v0.0.0-20190311183353-d8887717615a
+go: finding golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6
+go: finding google.golang.org/appengine v1.1.0
+go: finding golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+go: finding golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
+go: finding golang.org/x/text v0.3.0
+go: downloading github.com/google/go-github v17.0.0+incompatible
+go: extracting github.com/google/go-github v17.0.0+incompatible
+go: downloading github.com/google/go-querystring v1.0.0
+go: extracting github.com/google/go-querystring v1.0.0&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;此时，我们的 &lt;code&gt;go.mod&lt;/code&gt; 文件会被自动的重写以反应现在项目的依赖要求，&lt;code&gt;go.sum&lt;/code&gt; 文件也会被自动的创建：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;module github.com&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;Xuanwo&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;mod&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;intro
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt; &lt;span style=&#34;color:#40a070&#34;&gt;1.12&lt;/span&gt;
+&lt;span style=&#34;color:#06287e&#34;&gt;require&lt;/span&gt; (
+github.com&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;google&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;github&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;v24 v24&lt;span style=&#34;color:#40a070&#34;&gt;.0.1&lt;/span&gt;
+github.com&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;google&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;github&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;v25 v25&lt;span style=&#34;color:#40a070&#34;&gt;.0.4&lt;/span&gt;
+)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;大家不难发现，我们可以在同一个文件中引用同一个模块的不同大版本。正如我们前面所说的，它们的导入路径不同，所以被看作两个不同的模块来看待，不同的模块当然可以并存。这一点可以为我们之后的版本迁移带来很多便利，Go Team 也在尝试在 go fix 中利用这个特性来帮助库开发者实现迁移。&lt;/p&gt;
+&lt;p&gt;下面我们稍微修改一下代码，引入 &lt;code&gt;golang.org/x/text&lt;/code&gt;，并尝试修改它的版本：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;package&lt;/span&gt; main
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; (
+v24 &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;github.com/google/go-github/v24/github&amp;#34;&lt;/span&gt;
+v25 &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;github.com/google/go-github/v25/github&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;golang.org/x/text/width&amp;#34;&lt;/span&gt;
+)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; (
+_ = v24.Tag{}
+_ = v25.Tag{}
+_ = width.EastAsianAmbiguous
+)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;main&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;直接构建的话，我们的 go.mod 中会增加一行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;golang.org&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;x&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;text v0&lt;span style=&#34;color:#40a070&#34;&gt;.3.0&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;使用 &lt;code&gt;go list -m all&lt;/code&gt; 可以查看当前模块所有的依赖：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;github.com/Xuanwo/go-mod-intro
+github.com/golang/protobuf v1.2.0
+github.com/google/go-github v17.0.0+incompatible
+github.com/google/go-github/v24 v24.0.1
+github.com/google/go-github/v25 v25.0.4
+github.com/google/go-querystring v1.0.0
+golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+golang.org/x/net v0.0.0-20190311183353-d8887717615a
+golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
+golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6
+golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
+golang.org/x/text v0.3.0
+google.golang.org/appengine v1.1.0&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;下面我们把 &lt;code&gt;golang.org/x/text&lt;/code&gt; 依赖的 &lt;code&gt;v0.3.0&lt;/code&gt; 修改成 &lt;code&gt;v0.2.0&lt;/code&gt;，然后重新执行 &lt;code&gt;go list -m all&lt;/code&gt; 看最后选择的版本：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; go list -m all
+go: finding golang.org/x/text v0.2.0
+github.com/Xuanwo/go-mod-intro
+...
+golang.org/x/text v0.3.0&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;能发现 go 在查找了 &lt;code&gt;golang.org/x/text v0.2.0&lt;/code&gt; 之后实际选择的还是 &lt;code&gt;v0.3.0&lt;/code&gt;，我们可以用 &lt;code&gt;go mod graph | rg text&lt;/code&gt; 来看看谁在依赖这个模块：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; go mod graph | rg text
+github.com/Xuanwo/go-mod-intro golang.org/x/text@v0.3.0
+golang.org/x/net@v0.0.0-20190311183353-d8887717615a golang.org/x/text@v0.3.0&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;因为 &lt;code&gt;golang.org/x/net&lt;/code&gt; 在依赖 &lt;code&gt;golang.org/x/text@v0.3.0&lt;/code&gt;，所以即使我们在 &lt;code&gt;go.mod&lt;/code&gt; 中强行指定了 &lt;code&gt;v0.2.0&lt;/code&gt;，最后还是会选择 &lt;code&gt;v0.3.0&lt;/code&gt; 来进行构建，不仅如此，我们的 &lt;code&gt;go.mod&lt;/code&gt; 文件中依赖也被修改成了 &lt;code&gt;v0.3.0&lt;/code&gt;，因为这才是我们依赖的最终状态。&lt;/p&gt;
+&lt;p&gt;下面我们来试一下如果指定成 &lt;code&gt;v0.3.2&lt;/code&gt; 会如何：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; go list -m all
+go: finding golang.org/x/text v0.3.2
+github.com/Xuanwo/go-mod-intro
+...
+golang.org/x/text v0.3.2&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;显然的，&lt;code&gt;v0.3.2 &amp;gt; v0.3.0&lt;/code&gt;，所以最后选择了 &lt;code&gt;v0.3.2&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;注意&#34;&gt;注意&lt;/h2&gt;
+&lt;p&gt;好，在简单的实战演练之后，我们回顾一下需要额外注意的要点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;replace 和 exclude 只作用于当前模块的构建，它们既不会向上继承，也不会向下传递。&lt;/li&gt;
+&lt;li&gt;go 官方的所有工具都有可能在符合语义的前提下自行重写 go mod &amp;amp; sum 文件，比如补充缺失的依赖，重写 commit 为标准的形式等等&lt;/li&gt;
+&lt;li&gt;所有的升级操作都需要人工确认并执行，go 官方的工具不会自动升级&lt;/li&gt;
+&lt;li&gt;模块的依赖是平行的，而不是嵌套的，想象一下 BFS 把所有模块的依赖都扫出来放在一个列表里面&lt;/li&gt;
+&lt;li&gt;跟 vendor 说再见，尽管 go module 对 vendor 提供了支持&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;go.mod&lt;/code&gt; 中只会添加直接的依赖，间接的依赖都是隐含的，下列几种特殊情况会在后面加上 &lt;code&gt;// indirect&lt;/code&gt; 标记出来
+&lt;ul&gt;
+&lt;li&gt;手动指定了更高的依赖版本，比如在不引用 &lt;code&gt;golang.org/x/text&lt;/code&gt; 的前提下通过 &lt;code&gt;go get golang.org/x/text@v0.3.2
+&lt;/code&gt; 升级依赖&lt;/li&gt;
+&lt;li&gt;依赖的库还没有切换到 Go Module，这时候 go 工具链是不知道内部的依赖关系的，所以所有的依赖都会直接添加到当前模块中&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;技巧&#34;&gt;技巧&lt;/h2&gt;
+&lt;p&gt;下面我介绍一些常用的技巧：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;命令&lt;/th&gt;
+&lt;th&gt;作用&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;go list -m all&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;列出当前模块依赖的所有模块&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;go list -u -m all&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;列出当前模块依赖中可升级的模块&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;go get -u&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;升级所有依赖至最新版本&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;go get -u=patch&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;升级所有依赖至最新的修订版本&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;go mod tidy&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;清理未使用/生效的依赖&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;q-a&#34;&gt;Q &amp;amp; A&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;module 的命名有什么最佳实践么？比如我有一个模块确定只会导入其他包，那它能不能叫 core 这样的名字？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;一般来说我们会用一个域名来表示该组织下面的所有模块，比如我们的可以叫做 &lt;code&gt;qingstor.dev&lt;/code&gt;。然后整个组织共享的 common 模块可以叫做 &lt;code&gt;qingstor.dev/common&lt;/code&gt;，项目相关的模块则可以进一步的分层，比如我们的对象存储可以叫做 &lt;code&gt;qingstor.dev/qs/xxx&lt;/code&gt;。为了做到这一点，我们前期可以使用 &lt;code&gt;replace&lt;/code&gt; 来过渡，后续可以自建 GOPROXY，让它来完成重定向的工作。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如果依赖包有了新的小版本会不会自动升级？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;不会。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;vendor 还能不能用？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;go mod 可以开启 vendor 模式，但是从长期来看 vendor 会被去除。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;现有的库如果已经大于等于 v2 了该怎么处理？比如 etcd 已经 v3 了。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;如果这个库已经切换到 Go Module 的话，需要在导入时加 &lt;code&gt;/v3&lt;/code&gt;；如果还没有的话，go mod 会以兼容模式来导入它，此时虽然它的 tag 是 v3.x，但是我们还是把它们当作 v1 的模块来导入，即不需要显示在路径中写 v3。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;能够引用一个具体的 Commit？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;可以，go 工具链会自动的将这个 commit 重写为标准的形式。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;下载下来的 mod 中是否还有 git 信息？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;没有。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;下载下来的 mod 是如何存储的？如何区分不同 commit 的 mod？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code&gt;:) ~/Code/go/pkg/mod/github.com/google
+:) tree -L 2
+.
+├── go-github
+│   ├── v24@v24.0.1
+│   ├── v24@v24.0.2-0.20190418103935-a6b4602a9129
+│   └── v25@v25.0.4
+├── go-github@v13.0.0+incompatible
+├── go-github@v17.0.0+incompatible
+└── go-querystring@v1.0.0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;存储方式和 &lt;code&gt;go.mod&lt;/code&gt; 中规范化后的 tag/commit 是一致的。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;下载下来的 mod 如何清理？这只会清理当前项目用到的 mod 吗？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;可以使用 &lt;code&gt;go clean -modcache&lt;/code&gt;，这会删除所有的 mod，相当于 &lt;code&gt;$GOPATH/pkg/mod&lt;/code&gt; 被删除。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;go.sum&lt;/code&gt; 是干嘛用的？相当于其他语言里面的 lock 文件？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;go.sum&lt;/code&gt; 不是 lock 文件。&lt;/p&gt;
+&lt;p&gt;在其他语言里面 lock 文件用来保证可重现构建，但是在 Go Module 中，只需要有 &lt;code&gt;go.mod&lt;/code&gt; 文件就已经足够支持可重现构建了。&lt;code&gt;go.sum&lt;/code&gt; 文件主要记录了所有在构建过程中访问到的模块的 checksums，用于保证我们的代码在传输过程中没有被纂改。&lt;/p&gt;
+&lt;h2 id=&#34;分享资源&#34;&gt;分享资源&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.google.com/presentation/d/1-q658rf048NrM_ecn_jWcIo87sWcXvgiID3zlih6i94/edit?usp=sharing&#34;&gt;Go Modules&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/Xuanwo/go-mod-intro&#34;&gt;演示 Repo: go-mod-intro&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;本文主要的内容都来自于 Russ Cox 关于 &lt;code&gt;Go &amp;amp; Versioning&lt;/code&gt; 的博文集，图也都是他画的，对细节感兴趣的同学可以去读一读。此外本次分享的主要目的是为了介绍 Go Module，无意于参与哪个工具更好以及什么语言的包管理工具更好的讨论，有更好的想法建议赶着 Go 2 这波车提一个新的草案。&lt;/p&gt;
+&lt;p&gt;以上就是本次分享的全部内容，大家如果对 Go Module 还有什么问题的话可以在评论区提出来，我尽量解答~&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://go.googlesource.com/proposal/+/master/design/24301-versioned-go.md&#34;&gt;Proposal: Versioned Go Modules&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://research.swtch.com/vgo&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/golang/go/wiki/Modules&#34;&gt;Modules - Go Wiki&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/golang/go/issues/24301&#34;&gt;cmd/go: add package version support to Go toolchain&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Golang Panic 行为探秘</title><link>https://xuanwo.io/2019/05/25/go-panic/</link><pubDate>Sat, 25 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/25/go-panic/</guid><description>&lt;p&gt;为了满足分布式系统测试的需求，我们经常需要在代码中埋下断点，以便于通过修改编译参数或者注册特定 Hook 的方式来强迫程序走特定的逻辑。这篇文章主要分享了我在实现 BreakPoint 时发现的 Golang Panic &amp;amp;&amp;amp; Recover 的一个好玩行为及其背后的原因。&lt;/p&gt;
+&lt;h2 id=&#34;复现&#34;&gt;复现&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;package&lt;/span&gt; runtime
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; (
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;testing&amp;#34;&lt;/span&gt;
+)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;TestRecover&lt;/span&gt;(t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;testing.T) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;defer&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020&#34;&gt;recover&lt;/span&gt;()
+}()
+&lt;span style=&#34;color:#007020&#34;&gt;panic&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;panic in test&amp;#34;&lt;/span&gt;)
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;TestRecoverInClosure&lt;/span&gt;(t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;testing.T) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;defer&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// This should be the callback function of a break point.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Let&amp;#39;s call them directly for simpler example.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020&#34;&gt;recover&lt;/span&gt;()
+}()
+}()
+&lt;span style=&#34;color:#007020&#34;&gt;panic&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;panic in test&amp;#34;&lt;/span&gt;)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;TestRecover&lt;/code&gt; 演示的是一个比较常见的情况，业务逻辑中可能会出现 panic，我们在 defer 的函数中执行 recover 并做进一步的处理。而 &lt;code&gt;TestRecoverInClosure&lt;/code&gt; 中演示的则是我原本想要实现的逻辑，断点在触发时去调用在注册断点时传入的回调函数，在回调函数中去执行 recover 并获得 panic 的现场内容。但是事实证明这样是行不通的，在 &lt;code&gt;TestRecoverInClosure&lt;/code&gt; 中，panic 并没有被捕获，而是直接抛到了最外层，在闭包中的 recover 也自然是什么都没有拿到，翻车现场如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt;= RUN TestRecoverInClosure
+&lt;span style=&#34;color:#666&#34;&gt;---&lt;/span&gt; FAIL: &lt;span style=&#34;color:#06287e&#34;&gt;TestRecoverInClosure&lt;/span&gt; (&lt;span style=&#34;color:#40a070&#34;&gt;0.00&lt;/span&gt;s)
+panic: panic in test [recovered]
+panic: panic in test
+goroutine &lt;span style=&#34;color:#40a070&#34;&gt;6&lt;/span&gt; [running]:
+testing.tRunner.&lt;span style=&#34;color:#06287e&#34;&gt;func1&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;0xc000138400&lt;/span&gt;)
+&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;usr&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;lib&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;src&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;testing&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;testing.&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;830&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0x392&lt;/span&gt;
+&lt;span style=&#34;color:#007020&#34;&gt;panic&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;0x8c1140&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;0xb4d1a0&lt;/span&gt;)
+&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;usr&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;lib&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;src&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;runtime&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;panic.&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;522&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0x1b5&lt;/span&gt;
+xuanwo&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;playground&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;runtime.&lt;span style=&#34;color:#06287e&#34;&gt;TestRecoverInClosure&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;0xc000138400&lt;/span&gt;)
+&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;home&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;xuanwo&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;Code&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;xuanwo&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;playground&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;runtime&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;panic_test.&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;22&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0x55&lt;/span&gt;
+testing.&lt;span style=&#34;color:#06287e&#34;&gt;tRunner&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;0xc000138400&lt;/span&gt;, &lt;span style=&#34;color:#40a070&#34;&gt;0xad0678&lt;/span&gt;)
+&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;usr&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;lib&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;src&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;testing&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;testing.&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;865&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0xc0&lt;/span&gt;
+created by testing.(&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;T).Run
+&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;usr&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;lib&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;src&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;testing&lt;span style=&#34;color:#666&#34;&gt;/&lt;/span&gt;testing.&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;go&lt;/span&gt;:&lt;span style=&#34;color:#40a070&#34;&gt;916&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0x35a&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;原因&#34;&gt;原因&lt;/h2&gt;
+&lt;p&gt;为了搞清楚问题的原因，首先需要知道 panic &amp;amp;&amp;amp; defer 是怎么工作。Golang 中 panic 和 defer 实现的相关代码主要是在 &lt;code&gt;/usr/lib/go/src/runtime/panic.go&lt;/code&gt; 中，下文贴出来的代码来自于 Go 1.12.5。&lt;/p&gt;
+&lt;h3 id=&#34;defer&#34;&gt;defer&lt;/h3&gt;
+&lt;p&gt;在了解 panic 之前，首先看看 defer 是如何实现并存储的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Allocate a Defer, usually using per-P pool.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Each defer must be released with freedefer.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// This must not grow the stack because there may be a frame without
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// stack map information when this is called.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//go:nosplit
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;newdefer&lt;/span&gt;(siz &lt;span style=&#34;color:#902000&#34;&gt;int32&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_defer {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; d &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_defer
+sc &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;deferclass&lt;/span&gt;(&lt;span style=&#34;color:#007020&#34;&gt;uintptr&lt;/span&gt;(siz))
+gp &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;getg&lt;/span&gt;()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; sc &amp;lt; &lt;span style=&#34;color:#007020&#34;&gt;uintptr&lt;/span&gt;(&lt;span style=&#34;color:#007020&#34;&gt;len&lt;/span&gt;(p{}.deferpool)) {
+&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Allocate new defer+args.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;systemstack&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() {
+total &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;roundupsize&lt;/span&gt;(&lt;span style=&#34;color:#06287e&#34;&gt;totaldefersize&lt;/span&gt;(&lt;span style=&#34;color:#007020&#34;&gt;uintptr&lt;/span&gt;(siz)))
+d = (&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_defer)(&lt;span style=&#34;color:#06287e&#34;&gt;mallocgc&lt;/span&gt;(total, deferType, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;))
+})
+&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;
+}
+d.siz = siz
+d.link = gp._defer
+gp._defer = d
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; d
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这里的 &lt;code&gt;getg()&lt;/code&gt; 返回的是当前正在执行的 goroutine。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这里可以忽略掉具体的实现细节，只需要关注初始化 defer 和更新 &lt;code&gt;gp._defer&lt;/code&gt; 的过程。不难看出 &lt;code&gt;_defer&lt;/code&gt; 结构体是以链表的形式存储在 gouroutine 中的，下面 panic 的实现会高度依赖这一点。&lt;/p&gt;
+&lt;h3 id=&#34;panic&#34;&gt;panic&lt;/h3&gt;
+&lt;p&gt;下面来看一下 panic 的实现，首先看一下整体的结构，然后挑出一些我认为需要关注的地方展开聊一聊。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// The implementation of the predeclared function panic.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;gopanic&lt;/span&gt;(e &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{}) {
+gp &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;getg&lt;/span&gt;()
+&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; p _panic
+p.arg = e
+p.link = gp._panic
+gp._panic = (&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_panic)(&lt;span style=&#34;color:#06287e&#34;&gt;noescape&lt;/span&gt;(unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;p)))
+atomic.&lt;span style=&#34;color:#06287e&#34;&gt;Xadd&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;runningPanicDefers, &lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; {
+d &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; gp._defer
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;break&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// If defer was started by earlier panic or Goexit (and, since we&amp;#39;re back here, that triggered a new panic),
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// take defer off list. The earlier panic or Goexit will not continue running.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d.started {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d._panic &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+d._panic.aborted = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+}
+d._panic = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+d.fn = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+gp._defer = d.link
+&lt;span style=&#34;color:#06287e&#34;&gt;freedefer&lt;/span&gt;(d)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;continue&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Mark defer as started, but keep on list, so that traceback
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// can find and update the defer&amp;#39;s argument frame if stack growth
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// or a garbage collection happens before reflectcall starts executing d.fn.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; d.started = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Record the panic that is running the defer.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// If there is a new panic during the deferred call, that panic
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// will find d in the list and will mark d._panic (this panic) aborted.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; d._panic = (&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_panic)(&lt;span style=&#34;color:#06287e&#34;&gt;noescape&lt;/span&gt;(unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;p)))
+p.argp = unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#06287e&#34;&gt;getargp&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;))
+&lt;span style=&#34;color:#06287e&#34;&gt;reflectcall&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;, unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(d.fn), &lt;span style=&#34;color:#06287e&#34;&gt;deferArgs&lt;/span&gt;(d), &lt;span style=&#34;color:#007020&#34;&gt;uint32&lt;/span&gt;(d.siz), &lt;span style=&#34;color:#007020&#34;&gt;uint32&lt;/span&gt;(d.siz))
+p.argp = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;
+pc &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; d.pc
+sp &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(d.sp) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// must be pointer so it gets adjusted during stack copy
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;freedefer&lt;/span&gt;(d)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; p.recovered {
+atomic.&lt;span style=&#34;color:#06287e&#34;&gt;Xadd&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;runningPanicDefers, &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;)
+gp._panic = p.link
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Aborted panics are marked but remain on the g.panic list.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Remove them from the list.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; gp._panic &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; gp._panic.aborted {
+gp._panic = gp._panic.link
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; gp._panic &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; { &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// must be done with signal
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; gp.sig = &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Pass information about recovering frame to recovery.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; gp.sigcode0 = &lt;span style=&#34;color:#007020&#34;&gt;uintptr&lt;/span&gt;(sp)
+gp.sigcode1 = pc
+&lt;span style=&#34;color:#06287e&#34;&gt;mcall&lt;/span&gt;(recovery)
+&lt;span style=&#34;color:#06287e&#34;&gt;throw&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;recovery failed&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// mcall should not return
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; }
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// ran out of deferred calls - old-school panic now
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Because it is unsafe to call arbitrary user code after freezing
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// the world, we call preprintpanics to invoke all necessary Error
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// and String methods to prepare the panic strings before startpanic.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;preprintpanics&lt;/span&gt;(gp._panic)
+&lt;span style=&#34;color:#06287e&#34;&gt;fatalpanic&lt;/span&gt;(gp._panic) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// should not return
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#902000&#34;&gt;int&lt;/span&gt;)(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;) = &lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// not reached
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;跟 &lt;code&gt;_defer&lt;/code&gt; 一样，&lt;code&gt;_panic&lt;/code&gt; 结构也是以链表形式存储在 goroutine 中的。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; p _panic
+p.arg = e
+p.link = gp._panic
+gp._panic = (&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_panic)(&lt;span style=&#34;color:#06287e&#34;&gt;noescape&lt;/span&gt;(unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;p)))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;首先取出第一个 panic 节点，然后进入 for 循环。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;d &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; gp._defer
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;break&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;取出对头的第一个 &lt;code&gt;_defer&lt;/code&gt; 结构，开始执行 defer 函数，如果为空的话会直接 break 并抛出错误的堆栈。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// If defer was started by earlier panic or Goexit (and, since we&amp;#39;re back here, that triggered a new panic),
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// take defer off list. The earlier panic or Goexit will not continue running.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d.started {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; d._panic &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+d._panic.aborted = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+}
+d._panic = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+d.fn = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+gp._defer = d.link
+&lt;span style=&#34;color:#06287e&#34;&gt;freedefer&lt;/span&gt;(d)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;continue&lt;/span&gt;
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Mark defer as started, but keep on list, so that traceback
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// can find and update the defer&amp;#39;s argument frame if stack growth
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// or a garbage collection happens before reflectcall starts executing d.fn.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;d.started = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Record the panic that is running the defer.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// If there is a new panic during the deferred call, that panic
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// will find d in the list and will mark d._panic (this panic) aborted.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;d._panic = (&lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;_panic)(&lt;span style=&#34;color:#06287e&#34;&gt;noescape&lt;/span&gt;(unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;p)))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;当一个 defer 函数开始执行时会将 &lt;code&gt;started&lt;/code&gt; 标志置为 &lt;code&gt;true&lt;/code&gt;，这样就可以知道是不是在这个 defer 函数执行过程中再次出现了 panic。下面修改 &lt;code&gt;_panic&lt;/code&gt; 指针也是类似的操作，这些与我本次分享主题无关，就不展开叙述了。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;p.argp = unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#06287e&#34;&gt;getargp&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;))
+&lt;span style=&#34;color:#06287e&#34;&gt;reflectcall&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;, unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(d.fn), &lt;span style=&#34;color:#06287e&#34;&gt;deferArgs&lt;/span&gt;(d), &lt;span style=&#34;color:#007020&#34;&gt;uint32&lt;/span&gt;(d.siz), &lt;span style=&#34;color:#007020&#34;&gt;uint32&lt;/span&gt;(d.siz))
+p.argp = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里出现了函数执行逻辑的切换，gopanic 中会调用 &lt;code&gt;reflectcall&lt;/code&gt; 去复制 defer 函数的参数并执行 defer 函数。&lt;/p&gt;
+&lt;p&gt;在 &lt;code&gt;reflectcall&lt;/code&gt; 执行前修改 &lt;code&gt;p.argp&lt;/code&gt; 为 &lt;code&gt;unsafe.Pointer(getargp(0))&lt;/code&gt; ，是当前 defer 函数调用的参数指针，或者说是 defer 函数的内存地址（&lt;strong&gt;这个地方我理解的可能有些问题&lt;/strong&gt;），在 &lt;code&gt;reflectcall&lt;/code&gt; 执行成功后再修改为 nil 避免影响下一次的循环。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; p.recovered {
+atomic.&lt;span style=&#34;color:#06287e&#34;&gt;Xadd&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;runningPanicDefers, &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;)
+&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;
+&lt;span style=&#34;color:#06287e&#34;&gt;mcall&lt;/span&gt;(recovery)
+&lt;span style=&#34;color:#06287e&#34;&gt;throw&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;recovery failed&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// mcall should not return
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在 defer 函数执行成功后，通过 &lt;code&gt;p.recovered&lt;/code&gt; 来判断是否已经成功 recover 并执行 recovery，这里不再展开。&lt;/p&gt;
+&lt;h3 id=&#34;recover&#34;&gt;recover&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;gorecover&lt;/span&gt;(argp &lt;span style=&#34;color:#902000&#34;&gt;uintptr&lt;/span&gt;) &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt;{} {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Must be in a function running as part of a deferred call during the panic.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Must be called from the topmost function of the call
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// (the function used in the defer statement).
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// p.argp is the argument pointer of that topmost deferred function call.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Compare against argp reported by caller.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// If they match, the caller is the one who can recover.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; gp &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;getg&lt;/span&gt;()
+p &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; gp._panic
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; p &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; !p.recovered &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; argp &lt;span style=&#34;color:#666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;uintptr&lt;/span&gt;(p.argp) {
+p.recovered = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; p.arg
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;传入 &lt;code&gt;gorecover&lt;/code&gt; 函数的 &lt;code&gt;argp&lt;/code&gt; 是 &lt;code&gt;recover&lt;/code&gt; 这个函数的调用者的地址。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;recover 主要做的事情就是检查当前 goroutine 中是否存在 panic，panic 是否已经被 recover，以及调用者是否一致。如果检查通过的话就修改 &lt;code&gt;p.recovered&lt;/code&gt; 为 true，并返回 panic 创建时传入的参数，否则就直接返回 nil。&lt;/p&gt;
+&lt;h2 id=&#34;解释&#34;&gt;解释&lt;/h2&gt;
+&lt;p&gt;刚才简单分析了一下 defer &amp;amp;&amp;amp; panic &amp;amp;&amp;amp; recover 是如何工作的，下面可以利用刚才了解到的原理来解释我遇到的现象了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;TestRecoverInClosure&lt;/span&gt;(t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;testing.T) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;defer&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() { &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;----&lt;/span&gt; argp: &lt;span style=&#34;color:#40a070&#34;&gt;0x01&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// This should be the callback function of a break point.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Let&amp;#39;s call them directly for simpler example.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020&#34;&gt;recover&lt;/span&gt;() &lt;span style=&#34;color:#666&#34;&gt;&amp;lt;----&lt;/span&gt; argp: &lt;span style=&#34;color:#40a070&#34;&gt;0x02&lt;/span&gt;
+}()
+}()
+&lt;span style=&#34;color:#007020&#34;&gt;panic&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;panic in test&amp;#34;&lt;/span&gt;)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ol&gt;
+&lt;li&gt;将这个 defer 函数加入 goroutine 的 &lt;code&gt;_defer&lt;/code&gt; 列表&lt;/li&gt;
+&lt;li&gt;执行 panic，检查是否存在 defer 函数并执行&lt;/li&gt;
+&lt;li&gt;修改 &lt;code&gt;p.argp&lt;/code&gt; 为 0x01，开始执行内部的匿名函数&lt;/li&gt;
+&lt;li&gt;recover 取到当前的调用者 argp 为 0x02，判断不通过，直接返回 nil&lt;/li&gt;
+&lt;li&gt;此时 &lt;code&gt;p.recovered&lt;/code&gt; 仍然为 &lt;code&gt;false&lt;/code&gt;，又没有更多的 defer 函数，进入 fatalpanic&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;困惑&#34;&gt;困惑&lt;/h2&gt;
+&lt;p&gt;上面对照着分析可以大概解释明白为什么 TestRecoverInClosure 中的 panic 捕获不到，但是很多被忽略的细节还是没有搞明白。&lt;/p&gt;
+&lt;h3 id=&#34;getargp&#34;&gt;getargp&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;getargp&lt;/code&gt; 实现非常简单：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// getargp returns the location where the caller
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// writes outgoing function call arguments.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//go:nosplit
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//go:noinline
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;getargp&lt;/span&gt;(x &lt;span style=&#34;color:#902000&#34;&gt;int&lt;/span&gt;) &lt;span style=&#34;color:#902000&#34;&gt;uintptr&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// x is an argument mainly so that we can return its address.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;uintptr&lt;/span&gt;(&lt;span style=&#34;color:#06287e&#34;&gt;noescape&lt;/span&gt;(unsafe.&lt;span style=&#34;color:#06287e&#34;&gt;Pointer&lt;/span&gt;(&lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;x)))
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;为什么这就是当前 defer 函数调用的参数指针呢？&lt;/p&gt;
+&lt;h3 id=&#34;recover-gorecover&#34;&gt;recover &amp;amp;&amp;amp; gorecover&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;recover&lt;/code&gt; 是没有参数的，但是 &lt;code&gt;gorecover&lt;/code&gt; 却有 argp 作为参数，跟下去可以看到这样的调用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-golang&#34; data-lang=&#34;golang&#34;&gt;&lt;span style=&#34;color:#06287e&#34;&gt;mkcall&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;gorecover&amp;#34;&lt;/span&gt;, n.Type, init, &lt;span style=&#34;color:#06287e&#34;&gt;nod&lt;/span&gt;(OADDR, nodfp, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;所以是 &lt;code&gt;nod(OADDR, nodfp, nil)&lt;/code&gt; 取到了调用者的地址么？&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;搞明白这个问题花费的时间比我想象的要更久，一方面是因为我对 go 内部的实现确实不太熟悉，另一方面是因为大多数的分享都集中在如何使用 或者最佳实践之类的，讨论内部实现的文章不是很多。我要特别的推荐一下 &lt;a href=&#34;https://ieevee.com&#34;&gt;@伊布&lt;/a&gt; 的文章，他写的 &lt;a href=&#34;https://ieevee.com/tech/2017/11/23/go-panic.html&#34;&gt;Golang: 深入理解panic and recover&lt;/a&gt; 非常赞，对 panic &amp;amp;&amp;amp; recover 切换和恢复过程具体实现感兴趣的同学不妨一读，定会有所收获。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://go101.org/article/panic-and-recover-more.html&#34;&gt;The Right Places to Call the recover Function&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://draveness.me/golang-function-call&#34;&gt;理解 Golang 中函数调用的原理&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ieevee.com/tech/2017/11/23/go-panic.html&#34;&gt;Golang: 深入理解panic and recover&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>翻车实况第 2 期</title><link>https://xuanwo.io/2019/05/13/rollover-2nd/</link><pubDate>Mon, 13 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/13/rollover-2nd/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;这文档里面都说过的事情，哪能算翻车！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;fcitx-快捷键与-rime-冲突&#34;&gt;fcitx 快捷键与 rime 冲突&lt;/h2&gt;
+&lt;p&gt;从很久之前开始就隐隐感觉 fcitx 和 rime 中间有些微妙的不对付，具体现象是使用 &lt;code&gt;L Shift&lt;/code&gt; 切换中英文之后会出现 rime 在中英文间疯狂切换导致无法正常输入。以前一直都是重新 Deploy 一下 rime 将就一下，直到有一天终于忍不住了，在 Archlinuxcn 的群里问了一下，&lt;a href=&#34;https://t.me/archlinuxcn_group/1397962&#34;&gt;传送门&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;rime.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;哦吼，有位群友指出 rime 和 fcitx 都有自己的中英文切换键，所以在默认配置下会出现快捷键的冲突。后来我按照群友的指示把 fcitx 的快捷键关掉，只用 rime 的切换（因为我只需要输入中文和英文，而且我只有 rime 这一个输入法）。&lt;/p&gt;
+&lt;p&gt;果然好了！困扰了我大半年的毛病十秒钟就被解决了= =&lt;/p&gt;
+&lt;h2 id=&#34;tmux-2-9-配置变更&#34;&gt;tmux 2.9 配置变更&lt;/h2&gt;
+&lt;p&gt;前一段时间 tmux 上了 2.9，导致 &lt;code&gt;window-status-bg&lt;/code&gt;，&lt;code&gt;message-fg&lt;/code&gt; 这种常用的配置参数都失效了。&lt;/p&gt;
+&lt;p&gt;tmux 的 CHANGES 文件中有提到如何迁移： &lt;a href=&#34;https://github.com/tmux/tmux/blob/master/CHANGES#L89-L90&#34;&gt;https://github.com/tmux/tmux/blob/master/CHANGES#L89-L90&lt;/a&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;* The individual -fg, -bg and -attr options have been removed; they
+were superseded by -style options in tmux 1.9.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;具体的来说就是把形如 &lt;code&gt;status-bg colour235&lt;/code&gt; 的参数替换为 &lt;code&gt;status-style bg=colour235&lt;/code&gt;，比如&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;set-option -g status-bg colour235
+set-option -g status-fg colour136
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;替换为：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;set-option -g status-style fg=colour136,bg=colour235
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我在用的主题是 &lt;a href=&#34;https://github.com/seebi/tmux-colors-solarized&#34;&gt;tmux-colors-solarized&lt;/a&gt;，已经有人贡献了一个修复 tmux 2.9 兼容的 &lt;a href=&#34;https://github.com/seebi/tmux-colors-solarized/pull/23&#34;&gt;PR&lt;/a&gt;，其他主题参考一下即可。&lt;/p&gt;
+&lt;h2 id=&#34;go-get-failed&#34;&gt;go get failed&lt;/h2&gt;
+&lt;p&gt;有一天用 go get 去访问托管在自建的 gitea 的时候突然发现会出现这样的报错：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;:) go get git.xuanwo.io/let-go-mod-happy/logrus
+package git.xuanwo.io/let-go-mod-happy/logrus: unrecognized import path &amp;quot;git.xuanwo.io/let-go-mod-happy/logrus&amp;quot; (https fetch: Get https://git.xuanwo.io/let-go-mod-happy/logrus?go-get=1: x509: certificate signed by unknown authority)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;一开始感觉有点奇怪，因为浏览器访问是正常的，随后用 curl 测试了一下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;:) curl https://git.xuanwo.io/let-go-mod-happy/logrus -v
+* Trying xxx.xxx.xxx.xxx...
+* TCP_NODELAY set
+* Connected to git.xuanwo.io (xxx.xxx.xxx.xxx) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+* CAfile: /etc/ssl/certs/ca-certificates.crt
+CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (OUT), TLS alert, unknown CA (560):
+* SSL certificate problem: unable to get local issuer certificate
+* Closing connection 0
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+More details here: https://curl.haxx.se/docs/sslcerts.html
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;emmmm，&lt;code&gt;unknown CA&lt;/code&gt;，这可能跟我的 nginx 的 SSL 配置有关。检查了一下果然如此：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ssl_certificate /etc/nginx/certs/git.xuanwo.io/cert;
+ssl_certificate_key /etc/nginx/certs/git.xuanwo.io/key;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我配置的证书并不是完整的链，所以导致 TLS 在握手的时候失败了，将选用的证书修改为 fullchain 即可。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ssl_certificate /etc/nginx/certs/git.xuanwo.io/fullchain;
+ssl_certificate_key /etc/nginx/certs/git.xuanwo.io/key;
+&lt;/code&gt;&lt;/pre&gt;</description></item><item><title>在 Google 日历度过的欢乐时光</title><link>https://xuanwo.io/2019/03/30/google-calendar/</link><pubDate>Sat, 30 Mar 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/30/google-calendar/</guid><description>&lt;p&gt;前段时间终于下定决定入了 G Suite，花了点时间进行数据迁移，但是在操作日历的时候错误的把朋友们的生日提醒（每年重复）导入到了我的行程当中。为了将这些提醒删掉，我开始了一次 Google 日历的奇妙探险，找到了批量处理的方法，甚至还发现了一个 BUG。&lt;/p&gt;
+&lt;h2 id=&#34;apps-script-是好文明&#34;&gt;Apps Script 是好文明&lt;/h2&gt;
+&lt;p&gt;首先来明确一下需要解决的问题：删除个人日历中出现的大量形如 “XXX 的生日” 的行程。OK，问题确定之后，可以初步得到几种解决问题的思路：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;手动删&lt;/li&gt;
+&lt;li&gt;现成的工具&lt;/li&gt;
+&lt;li&gt;基于 Google 日历 API 开发脚本&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;首先排除第一种，时间成本过高，而且都是机械操作，毫无乐趣可言。现成的工具有是有，但是你需要授权第三方访问你的全部行程，我实在是不想之后某天被人发现我宣称出差公干其实是去宾馆跟朋友们一起玩俄罗斯方块吃鸡（原帖：&lt;a href=&#34;https://bbs.nga.cn/read.php?tid=16784200&#34;&gt;https://bbs.nga.cn/read.php?tid=16784200&lt;/a&gt;）。所以现成工具的方案也被排除了。&lt;/p&gt;
+&lt;p&gt;所以我又要造轮子了么？不，我们可以用 Apps Script！Apps Script 可以理解成自带 Google 绝大部分套件 SDK 组件的 JavaScript 运行环境，最棒的是它还是可以直接在线运行的。&lt;/p&gt;
+&lt;p&gt;研究一下日历的&lt;a href=&#34;https://developers.google.com/apps-script/reference/calendar/&#34;&gt;文档&lt;/a&gt;，可以知道需要用到的 API 只有 &lt;code&gt;getCalendarsByName&lt;/code&gt;，&lt;code&gt;getEvents&lt;/code&gt;，&lt;code&gt;getTitle&lt;/code&gt; 和 &lt;code&gt;deleteEvent&lt;/code&gt; 这些，剩下的都是些逻辑。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; myFunction()
+{
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; fromDate &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Date&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;2000&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; toDate &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Date&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;2999&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;);
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; calendarName &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Personal&amp;#39;&lt;/span&gt;;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; calendar &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; CalendarApp.getCalendarsByName(calendarName)[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; events &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; calendar.getEvents(fromDate, toDate, {search&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;生日&amp;#34;&lt;/span&gt;});
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; i&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;; i&lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;events.length;i&lt;span style=&#34;color:#666&#34;&gt;++&lt;/span&gt;){
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; ev &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; events[i];
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; title &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; ev.getTitle();
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; (title.indexOf(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;的生日&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;) {
+ev.deleteEvent();
+}
+}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;一顿操作之后，只需要点击 &lt;code&gt;Run&lt;/code&gt; 就能运行啦，这时候切换到 Google 日历就能看到恼人的行程都已经被删掉了。&lt;/p&gt;
+&lt;h2 id=&#34;google-日历预言的世界末日&#34;&gt;Google 日历预言的世界末日&lt;/h2&gt;
+&lt;p&gt;欢乐时光还没有结束！&lt;/p&gt;
+&lt;p&gt;看到自己的脚本成功运行后自然会想要验证一下，于是我通过修改 URL 的方式访问了 &lt;a href=&#34;https://calendar.google.com/calendar/r/month/2099/1/1&#34;&gt;2099/1/1&lt;/a&gt;。emmmmm，这是咋了，为啥界面全都是空的，Console 还有报错：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;Uncaught TypeError&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; Cannot read property &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Iu&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;of&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;null&lt;/span&gt;
+at vEb (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;404&lt;/span&gt;)
+at EU.HJ (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;404&lt;/span&gt;)
+at CEb.h.kAa (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;408&lt;/span&gt;)
+at R1.Oe (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;ltDFwf,syi2,FsScmc&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;symq,sy1,phtQPb&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;321&lt;/span&gt;)
+at m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;727&lt;/span&gt;
+at xha (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;263&lt;/span&gt;)
+at Ei (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;261&lt;/span&gt;)
+at Ci.addCallback (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;260&lt;/span&gt;)
+at Gya (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;727&lt;/span&gt;)
+at m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;726&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;本来想洗洗睡了的我瞬间来了精神，我很好奇！&lt;/p&gt;
+&lt;p&gt;通过二分的方法，我得到了临界点：&lt;a href=&#34;https://calendar.google.com/calendar/r/day/2051/2/10&#34;&gt;2051/2/10&lt;/a&gt; 。这个日子有什么特别的呢？为什么在它之前都是正常的，从它开始不管显示天，周还是月都无法正常显示呢？我瞬间有了几个猜想，不过需要一一验证。&lt;/p&gt;
+&lt;p&gt;第一个猜想是数据类型的限制。我做了一些简单的计算：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;数据类型&lt;/th&gt;
+&lt;th&gt;最大值&lt;/th&gt;
+&lt;th&gt;对应时间&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;int32&lt;/td&gt;
+&lt;td&gt;2147483647&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;2038/1/19 11:14:7&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;uint32&lt;/td&gt;
+&lt;td&gt;4294967295&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;2106/2/7 14:28:16&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JavaScript 最大精确整数&lt;/td&gt;
+&lt;td&gt;9007199254740991&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;285428751/11/12 7:36:31&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;无论哪一个都无法支持先前的猜想，所以问题肯定不是数据类型的问题。&lt;/p&gt;
+&lt;p&gt;第二个猜想是前端的 BUG。我稍微研究了一下 Google 日历混淆之后的代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; vEb &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt;(a, b) {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; [b.Iu &lt;span style=&#34;color:#666&#34;&gt;?&lt;/span&gt; a.T &lt;span style=&#34;color:#666&#34;&gt;?&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u95f0&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u958f&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;, CU[b.month], &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u6708&amp;#34;&lt;/span&gt;].join(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;)
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里有几个 Unicode 字符，转换一下：&lt;code&gt;\u95f0 -&amp;gt; 闰&lt;/code&gt;，&lt;code&gt;\u958f -&amp;gt; 閏&lt;/code&gt;，&lt;code&gt;\u6708 -&amp;gt; 月&lt;/code&gt;。Wow，&lt;code&gt;vEb&lt;/code&gt; 函数的作用就是判断当前月是不是闰月，根据用户的语言还会决定显示简体还是繁体。&lt;code&gt;a.T&lt;/code&gt; 显然是在判断语言，不用考虑。&lt;code&gt;b.Iu&lt;/code&gt; 更加关键一些，它会判断给定的日期（这里的 b？）是否是闰月。&lt;/p&gt;
+&lt;p&gt;接下来只要搞懂 b 是怎么来的，前面肯定有某一步返回的 b 是 null。但是面对 Google 混淆过的代码，想搞懂这个 b 是怎么来的谈何容易。我相信给我足够的时间，我能够缕清楚代码的脉络，最后得出一个结论，但是我现在更倾向于先换个思路，回头再来尝试。&lt;/p&gt;
+&lt;p&gt;下面从代码中跳出来思考，2051 年 2 月 10 日，这个日子到底有什么魔力呢？难道 Google 日历这么早就钦定了世界末日么？我开始试着在 Google 上搜索这个时间，结果还真的有发现。有一篇文章&lt;a href=&#34;http://www.mzwu.com/article.asp?id=1380&#34;&gt;ASP农历与公历互转类&lt;/a&gt;中居然出现完全一样的时间：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&#39;公历转农历(查询日期范围1950-2-17至2051-2-10,格式yyyy-mm-dd)
+&#39; Response.Write NongGong.GongToNong(&amp;quot;1984-12-10&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我下意识的将这个日子转换成了农历：&lt;code&gt;2050年 腊月 廿九 （辛未年 庚寅月 丙寅日）&lt;/code&gt;，我好像明白了什么，但是需要更多的信息来做支撑。&lt;/p&gt;
+&lt;h2 id=&#34;农历编排及其转换&#34;&gt;农历编排及其转换&lt;/h2&gt;
+&lt;p&gt;首先要重新认识一下农历：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;农历，是现今东亚地区民间传统广泛使用的阴阳合历。古代相传为黄帝时代或者夏朝创制，又称黄历、夏历。中华民国成立后，由孙中山宣布采用西方格里历，而华夏传统历法则返称为旧历、传统历。中华人民共和国成立后，以格里历为“公历”，夏历改称“农历”。在汉语，西历也称阳历，因此农历常习惯上称为阴历，然而此历其实为阴阳合历。
+农历是阴阳历：“阳”是地球环绕太阳公转，以冬至回归年为基准确定岁实，配合季节阳光分一岁为二十四节气；“阴”根据月球运行定朔望月。中国现存历书最早是西汉版本之《夏小正》，汉武帝时期制定之《太初历》已经有相当完善之历法规则，自此大都采用“夏正”，即以建寅月为正月；之后定朔定气规则又多次修改。现行农历版本是依据既定基本规则，运用现代天文学成果修订，完全依照天文数据计算得来，为一天文历法（astronomical calendar）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;画重点：&lt;strong&gt;依据既定基本规则，运用现代天文学成果修订，完全依照天文数据计算得来，为一天文历法（astronomical calendar）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;那天文历法是什么呢？&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;天文历法（astronomical calendar）是以天文观测为准的历法，例如使用定气定朔的现代农历、宗教性的伊斯兰历及第二圣殿时的古犹太历。这种历法也称为是以观测为准的的历法，好处是完美而且永远准确，缺点是没有一定的公式，若要回推多久以前某一天的日期比较困难。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;与之相对应的是计算历法(arithmetic calendar)：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;计算历法（arithmetic calendar）是以严格的数学公式计算的历法，例如现在的犹太历，也称为是以规则为准的历法，好处是容易计算特定时间是哪一天，不过和自然变化的精准性就比较差，即使历法本身非常的精准，也会因为地球自转及公转的略为变化，造成其精准性慢慢变差，因此一个计算历法使用的期间有限，可能只有数千年，之后就要用新的历法系统代替。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;实际上关于农历的编排，我们国家甚至还制定了国家标准：&lt;a href=&#34;http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296&#34;&gt;农历的编算和颁行&lt;/a&gt;，标准号 &lt;code&gt;GB/T 33661-2017&lt;/code&gt;。标准里面专门提到了计算模型和精度的问题：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;5.1　太阳和月球的位置按IERS Conventions规定的模型计算。&lt;/p&gt;
+&lt;p&gt;5.2　朔和节气的北京时间计算精度应达到1秒。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr /&gt;
+&lt;p&gt;农历的编排本身就需要依赖外部的天文数据，而从公历向农历的转换自然也需要外部数据的支持。所以 Google 不能显示 2051-2-10 之后时间的原因也就出来了：Google 只存储了到 2050 年的农历数据，过了 2050 年农历的最后一天，后续的农历在转换的时候就报错了。&lt;/p&gt;
+&lt;p&gt;问题解决啦，我的好奇心得到了满足，可以安心睡觉了~&lt;/p&gt;
 &lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
-&lt;p&gt;到现在已经两天过去啦，按照目前这进度，在我下次出去玩之前应该能写完的吧？。。。&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;当然比我更有好奇心的读者们肯定还会想到为什么是 &lt;code&gt;2050年 腊月 廿九&lt;/code&gt;，难道不应该是腊月三十嘛？这个就留作课后作业吧，相信你们肯定能搞明白的~&lt;/p&gt;
+&lt;p&gt;下面是日常的挑毛病环节：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;To Google 的国际化团队：&lt;code&gt;农历腊月&lt;/code&gt;不能翻译成&lt;code&gt;农历十二月&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;To 国家市场监督管理总局：9102 年了，国家标准在线预览还要依赖 Flash 插件，怕不是思想不正确哟&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;顺便介绍一下 &lt;a href=&#34;https://thetype.com/&#34;&gt;Type is Beautiful&lt;/a&gt; 的&lt;a href=&#34;https://thetype.com/2019/02/12498/&#34;&gt;孔雀计划&lt;/a&gt;，中文的排版问题和本文反映出来的农历问题其根源是一样的：中国的传统文化要主动向外介绍推广，主动参与标准的置顶，需要整个行业的通力合作。中文排版和农历这样充满了美感的东西理应让更多人了解，而不是被掩盖在女德这种真正糟粕的阴影之下。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86&#34;&gt;农历 - 维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E5%8E%86%E6%B3%95&#34;&gt;历法 - 维基百科&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296&#34;&gt;农历的编算和颁行&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>开启 Jetbrains IDE 的全局菜单</title><link>https://xuanwo.io/2019/03/28/jetbrains-ide-global-menu/</link><pubDate>Thu, 28 Mar 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/28/jetbrains-ide-global-menu/</guid><description>&lt;p&gt;最近在想办法提升自己的开发体验，其中有一步就是去掉了不常用和已经使用快捷键代替的按钮和菜单。但是菜单栏没有办法隐藏，导致观感上不是很好。适逢 Jetbrains IDEA 推出了 2019.1 版本，趁着体验新版本功能的时候研究并解决了这个问题。&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本方案应该适用于所有 Jetbrains IDE，包括 Goland 和 Android Studio&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;Help -&amp;gt; Find Action... -&amp;gt; Experimental Features...&lt;/code&gt;，确认 &lt;code&gt;linux.native.menu&lt;/code&gt; 已打开&lt;/li&gt;
+&lt;li&gt;安装 &lt;code&gt;libdbusmenu-glib&lt;/code&gt;，比如 Arch 上只需要 &lt;code&gt;pacman -S libdbusmenu-glib&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;重启 IDE&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr /&gt;
+&lt;p&gt;好，在这个分割线下分享一下自己解决这个问题的全过程。&lt;/p&gt;
+&lt;h2 id=&#34;确认&#34;&gt;确认&lt;/h2&gt;
+&lt;p&gt;首先问题的现象是很明显的，预期 IDEA 的菜单栏出现在 KDE 顶端的全局菜单中，但实际上并没有。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;bug.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;然后开始用 &lt;code&gt;IDEA&lt;/code&gt;，&lt;code&gt;global menu&lt;/code&gt; 等关键词去搜索，可以得到下列这些有用的信息：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在别人那是好的（有人 Po 出了正常的截图）&lt;/li&gt;
+&lt;li&gt;可以通过 &lt;code&gt;Experiment Features&lt;/code&gt; 开启 &lt;code&gt;linux.native.menu&lt;/code&gt; 的支持&lt;/li&gt;
+&lt;li&gt;在 Issue 的评论中，有人提出需要安装 &lt;code&gt;libdbusmenu-glib&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;OK，现在知道问题应该出在本地可能漏了什么依赖，导致全局菜单没有生效，下面需要想办法定位到具体的问题。&lt;del&gt;（实在定位不出来的时候再一把梭试一下）&lt;/del&gt;&lt;/p&gt;
+&lt;h2 id=&#34;定位&#34;&gt;定位&lt;/h2&gt;
+&lt;p&gt;首先通过 &lt;code&gt;Help -&amp;gt; Find Action... -&amp;gt; Experiment Features&lt;/code&gt; 中可以打开实验特性的开关，其中可以确认 &lt;code&gt;linux.native.menu&lt;/code&gt; 已经默认开启了。（真香！）&lt;/p&gt;
+&lt;p&gt;然后查看 IDEA 的 Log，寻找全局菜单没有启用的原因。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;IDEA 的 Log 一般在 &lt;code&gt;~/.IntelliJIdea2019.1/system/log/&lt;/code&gt;，也可以通过 &lt;code&gt;Help -&amp;gt; Show Log In Dolphin&lt;/code&gt; 直接打开所在位置&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code&gt;2019-03-28 11:03:00,342 [ 5755] INFO - penapi.wm.impl.GlobalMenuLinux - disable global-menu integration because some of shared libraries isn&#39;t installed: java.lang.UnsatisfiedLinkError: /opt/intellij-idea-ultimate-edition/bin/libdbm64.so: libdbusmenu-glib.so.4: cannot open shared object file: No such file or directory
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Ooops，原来是因为缺少一个库导致 &lt;code&gt;global-menu&lt;/code&gt; 被禁用了，只需要把这个库装上就可以了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;happy.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;修复&#34;&gt;修复&lt;/h2&gt;
+&lt;p&gt;搜索一下哪个包提供了 &lt;code&gt;libdbusmenu-glib.so.4&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; yay -Fs libdbusmenu-glib.so.4
+community/libdbusmenu-glib &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;.04.0-3
+usr/lib/libdbusmenu-glib.so.4&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;很明显，是 &lt;code&gt;libdbusmenu-glib&lt;/code&gt; （正是上面 Issue 中有人说要装的那个包），甚至还是社区源里面的包，不用犹豫了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; yay -S libdbusmenu-glib&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;重启 IDE 之后就能看到全局菜单正常工作啦：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;fixed.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在水一篇文章之后，我还能做啥呢？给 AUR 留个言，让维护者把 &lt;code&gt;libdbusmenu-glib&lt;/code&gt; 作为一个可选依赖，这样大家在安装或者更新 IDEA 的时候就知道啦：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;comment.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Update: AUR 的维护者已经加上啦：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;New optional dependencies &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; intellij-idea-ultimate-edition
+libdbusmenu-glib: For global menu support &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;installed&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Arch is the best!&lt;/p&gt;
+&lt;h2 id=&#34;后续&#34;&gt;后续&lt;/h2&gt;
+&lt;p&gt;GTK 3 的应用可以通过安装 &lt;code&gt;appmenu-gtk-module&lt;/code&gt; 来获取全局菜单的支持~&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://youtrack.jetbrains.com/issue/IDEA-169904&#34;&gt;Support KDE Global Menu&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/kde/comments/67mnfq/global_menu_in_plasma_59_with_java_intellij_and/&#34;&gt;Global Menu in Plasma 5.9 with Java (Intellij) and Firefox&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>东京——圣地巡礼</title><link>https://xuanwo.io/2019/03/25/holy-land-cruise/</link><pubDate>Mon, 25 Mar 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/25/holy-land-cruise/</guid><description>&lt;p&gt;&lt;img src=&#34;do-not-laugh.jpeg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;一个假御宅进行&lt;del&gt;伪&lt;/del&gt;圣地巡礼的一天&lt;/p&gt;
+&lt;h2 id=&#34;侦探坡上的一阵风&#34;&gt;侦探坡上的一阵风&lt;/h2&gt;
+&lt;p&gt;念叨了很久的圣地巡礼终于要开始了，今天的首要目标是圣人惠与伦也相遇的侦探坡。&lt;/p&gt;
+&lt;p&gt;按照导航坐到了&lt;a href=&#34;https://www.google.com/maps/place/%E3%81%AE%E3%81%9E%E3%81%8D%E5%9D%82/@35.7176303,139.7139021,19z/data=!4m9!1m3!11m2!2s_gdWZMxKFvyT939NEjGPMVVl5fLx5g!3e2!3m4!1s0x60188d15b20ad283:0xe876c38539a950e2!8m2!3d35.7176303!4d139.7139021&#34;&gt;のぞき坂&lt;/a&gt;，这个原本应该默默无名的小街道居然有着 4.3 星的评分，还有 92 个评论。最快的方式是坐到副都心线 (Fukutoshin Line) 的雑司が谷駅 (Zoshigaya Station)，然后从 3 号出口出，正对着地铁出口的小道前方就是侦探坡。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;entry.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;虽说没有什么人，但是偶尔还是会有车速很快的出租车经过，所以一定要注意来往的车辆，特别是在坡下面的时候。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;往前走两步就能看到标着坡度 22 度的标志，继续向前就能看到整个坡啦：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;slope.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;顺着坡跑下去还能捡到惠的小圆帽：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;hat.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如果选择回头看的话，还能看到圣人惠在坡顶等你：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;megumi.webp&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;咳咳，这当然只是一个死宅的幻想而已。现实生活中哪来的野生妹纸在大马路上给你捡呢？&lt;/p&gt;
+&lt;p&gt;我坐在伦也曾经坐过的台阶上休息，并没有妹纸向我伸出双手，只有几位大妈背着手路过。她们似乎是见多了像我这样的游客，并没有投来好奇的目光。偶尔有几位路人奋力的骑车上坡，还有力有未逮的几位不得不中途下了车开始推着走。后来还出现了一位装束跟我相似的背包客，端着数码相机在各种大家都懂的位置取景，看来也是一位来圣地巡礼的游客。&lt;/p&gt;
+&lt;p&gt;离开了侦探坡，我还去看了片头曲中大家都会走过的铁轨，做了荒川线到面影桥，然后走了回来。可惜绿色的电车似乎已经退休了，没有办法拍到惠和伦也一起做过的长椅。&lt;/p&gt;
+&lt;p&gt;虽说来之前总是吵着喊着要圣地巡礼，但是真的来了之后反而并没有多么的上心。没有做攻略，没有看别人的分享，只是简单的到了这里，按照自己的记忆取了几张景。就算后来发现跟动漫中的角度和距离都相差甚远也没有什么遗憾的感觉，反而是在喜气洋洋的强调：这个地方我去过。想去的哪里是三次元的圣地，分明就是二次元中幸福世界。所谓的圣地巡礼，大概就是寻找的这么一种感觉吧，大概。（好气啊，为啥三次元就没有圣人惠当老婆！）&lt;/p&gt;
+&lt;h2 id=&#34;你的名字&#34;&gt;你的名字&lt;/h2&gt;
+&lt;p&gt;从侦探坡出来之后有点迷茫，不知道要去哪里，几番纠结之后决定刷一波 Ingress 任务暨圣地巡礼。然而等到任务真的开始刷起来之后，就完全顾不上圣地巡礼了。满脑子只关心下一个任务 Po 在什么地方，距离多远，怎么过去。再加上刷的你的名字过于久远，早已不记得里面的各种细节，因此更谈不上什么圣地巡礼了。不过抛开这个噱头不看的话，其实这趟旅程还是很有意思的。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;helicopter.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;从新宿出发，路上还遇到了一个消防博物馆，领了一个入馆证，进去兜了一圈。这个馆挺大的，大约四五层楼的样子，每层楼都是不同年代的展览。展品丰富，各个年代的消防衣，一比一的消防摩托模型，当然也少不了各种交互式的体验项目：比如模拟水枪的一个小游戏，要在指定时间内用水枪灭火，跟生化危机的街机版本差不多，只不过怪兽变成了火灾，手枪变成了水枪。现场还有模拟消防直升机和消防车体验，还能穿着消防衣用灭火器灭火。我非常想去玩，但是在玩的都是大概小学一二年级的小朋友，实在是不好意思排进去，只能默默溜了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;suga-slope.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;须贺神社的附近也有一个这样的小坡，可惜同样没有圣人惠，也没有三叶。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;suga-step.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;最后三叶和泷相遇的台阶，我到的时候有一组 Coser 正在凹造型，我在一旁默默的看着，没有偷拍（真的）。等到她们终于离开之后，我也在台阶上用三叶和泷的角度拍了两张，PS 难度过高，我就不 P 上人物再放出来了。上面那个圣人惠已经是我 PS 能力的极限了。&lt;/p&gt;
+&lt;p&gt;之后做地铁来到明治神宫附近，发现现场好多人穿着圣诞老人的服装。后来搜了搜当地新闻才知道他们在举办 2018 圣诞老人跑活动，嘛，我可能错失了发布第一手现场报道的好机会。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;red-riding.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;一路刷回歌舞伎町附近，你的名字的任务就算是刷完了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;your_name.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;言叶之庭&#34;&gt;言叶之庭&lt;/h2&gt;
+&lt;p&gt;刷完你的名字之后才下午两点，我打算体验一下东京的电影院，于是就转身进了附近的 TOHO 电影院。挑选了半天之后选择了 18 点开始的《来る》，这个电影有不少故事可以讲，不过先继续我的行程吧，等一下再来分享这些故事。买完票才两点半，还有不少时间，我决定再去刷个言叶之庭的拼图任务。&lt;/p&gt;
+&lt;p&gt;步行走到新宿御苑的新宿门，200 日元买了张门票就进去了。下午的时候就下了一点小雨，地上落满了银杏叶。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;ginkgo-on-board.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;继续往里走就能看到言叶之庭中出现的那片湖：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;lake.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;湖边的小亭也非常好看，可惜一直有人在，所以没有取景。本打算回来的时候再拍，然而后来就忘记了，所以很遗憾的没有巡礼成功。&lt;/p&gt;
+&lt;p&gt;说来也巧，我刚走过一个小桥，就下起了小雨，等到我出园的时候，雨就停了。这贼老天也知道给我渲染气氛么……&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;lake_in_the_rain.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;任务刷到中途还解锁了一个成就牌：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;ingress.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;任务刷完啦！&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;ingress-task-2.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;等到任务做完准备出园的时候，天色已经渐渐暗了下来，我走的这个方向更是一个人都没有。园里面还响起了英日双语的语音播报，说是要 4:30 闭院，而现在已经 4:20 了，于是我加快脚步往出口走。在出口的地方我遇到了一位老奶奶，一开始用日语问了我一句什么，我摆摆手表示没有听懂，于是她就换成英语问我那边还有没有人，我表示过来的路上没看到人。她就低声念叨着 &amp;ldquo;too strange&amp;rdquo; 跟我一起朝出口走，在出去的路上她问我从哪里来，我说中国，她十分感兴趣，问 which city，我回答是北京。她听了之后就开始用发音有些奇怪的中文说：“你好”，然后告诉我她在学中文，她每天会听半个小时的广播，还说她曾经去过北京。哇，真的是太厉害了，会三国语言的老奶奶！我夸她中文说的很好（不太清楚外国人说中文的水平咋评价，但是我能一下子就听懂，应该很强了吧 - -），她很开心，跟我聊了好一会儿，期间我还用中文跟她来了几句简单的对话。后来我们就愉快的告别了，老奶奶很 nice 的问我是否需要什么帮助，我拜拜手说 I&amp;rsquo;m OK，让她回家路上小心。&lt;/p&gt;
+&lt;p&gt;等我走的时候才想起来应该要跟这么可爱的老奶奶合个影才是，哎，遗憾。&lt;/p&gt;
+&lt;h2 id=&#34;赤鸡的电影体验&#34;&gt;赤鸡的电影体验&lt;/h2&gt;
+&lt;p&gt;新宿御苑出来之后我就回电影院准备看电影啦，电影票花了 1800 日元，可以直接刷信用卡。电影开场之前还有不少时间，我在电影院里面乱逛。&lt;/p&gt;
+&lt;p&gt;看到了 Fate Stay Night Heaven&amp;rsquo;s Feel 的第二部剧场版宣传单，我酸了，我第一部都没看上，东京人一月份就能看上第二部。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;fate.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;羡慕死了 = =&lt;/p&gt;
+&lt;p&gt;在我吃完无数个柠檬后，我买的电影终于开场了。进去之后感觉跟国内的电影院也没啥差别，只不过提示你禁止吸烟，手机静音都是用日语的而已。坐在我右边的是个小姐姐，一坐下来就脱下了自己的长筒靴，然后开始脱丝袜。玛雅，我的小心脏咚咚的跳，在日本看电影这么赤鸡？小姐姐脱下丝袜之后取出自己带的毯子盖在了腿上，然后开始跟边上同行的小姐姐用日语轻声聊天，应该不是在说我 Hentai 吧= =&lt;/p&gt;
+&lt;p&gt;没多久电影院就坐满了，电影也准时开始播放。开始之后没过几分钟，我就感觉有点不对，这个电影好像有点渗人啊，啥情况。看了半个小时，我终于看懂了，尼玛，这是恐怖片啊！我当时就想直接退场了，因为想象力过于丰富的关系，每次看完恐怖片，我的脑内小剧场都能演成一个三部曲，能吓得我不敢半夜上厕所。但是这是我第一次在东京看电影，着实不容易，所以我犹豫再三还是选择留在原地看完。&lt;/p&gt;
+&lt;p&gt;幸亏我日语不咋地，只能听懂一些基础对话，很多对话和关键信息都获取不到，所以我的带入感也没有那么强烈。几个最为恐怖和吓人的场景对我来说也没有那么可怖，只不过是声音大了点，血流的多了点，还好还好，万幸万幸。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;对电影感兴趣的同学可以做直通车 -&amp;gt; &lt;a href=&#34;https://movie.douban.com/subject/30140229/&#34;&gt;《来る》&lt;/a&gt;，反正我是真的不知道讲的啥，也不想知道……&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
+&lt;p&gt;在三个月之后，日本游记总算是写完了。七天的行程可以写成七篇流水帐真的是有些意想不到，游记这种速食作品可以写整整三个月也是有些意想不到。中间好多次想就这样弃坑算了，但是感谢朋友们的鼓励和支持，我还是成功写完了。&lt;/p&gt;
+&lt;p&gt;写游记本是为了传达自己当时的所思所感所想所为，但是受到自己的能力限制，还是写成了干巴巴的流水帐。生产型御宅果然不好当，还是要继续努力。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Visited from 2018-12-17 to 2018-12-24&lt;/em&gt;&lt;/p&gt;</description></item></channel></rss>
