@@ -1,0 +1,12 @@
+on: push
+name: Deploy to GitHub Pages
+jobs:
+  gh-pages:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: gh-pages
+      uses: ./.github/actions/hugo
+      env:
+        GIT_BRANCH: master
+        GIT_DEPLOY_KEY: ${{ secrets.GIT_DEPLOY_KEY }}
