@@ -16,7 +16,9 @@ git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 mkdir -p public && cd public \
 && git init \
 && git remote add deploy $REMOTE_REPO \
-&& git fetch deploy && git checkout $REMOTE_BRANCH
+&& git fetch deploy \
+&& git checkout $REMOTE_BRANCH \
+&& rm ./* -r
 
 cd .. && HUGO_ENV=production hugo --minify
 
