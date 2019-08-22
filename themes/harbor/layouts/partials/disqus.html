@@ -1,6 +1,4 @@
-{{- $pc := .Page.Site.Config.Privacy.Disqus -}}
-{{- if not $pc.Disable -}}
-{{ if .Site.DisqusShortname }}
+{{ if (and .Site.DisqusShortname (not .Site.IsServer)) }}
 <div id="disqus_thread"></div>
 <script type="application/javascript">
   let disqus_config = function () {
@@ -9,11 +7,6 @@
     this.page.url = '{{ .Permalink }}';
   };
   (function () {
-    if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) !== -1) {
-      document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
-      return;
-    }
-
     let d = document, s = d.createElement('script');
     s.async = true;
     s.src = '//{{ .Site.DisqusShortname }}.disqus.com/embed.js';
@@ -21,5 +14,5 @@
     (d.head || d.body).appendChild(s);
   })();
 </script>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>{{end}}
-{{- end -}}
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+{{end}}
