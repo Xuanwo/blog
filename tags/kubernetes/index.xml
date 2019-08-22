@@ -1,4 +1,125 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kubernetes on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/kubernetes/</link><description>Recent content in Kubernetes on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 06 Aug 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/kubernetes/index.xml" rel="self" type="application/rss+xml"/><item><title>开放容器标准(OCI) 内部分享</title><link>https://xuanwo.io/2019/08/06/oci-intro/</link><pubDate>Tue, 06 Aug 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/08/06/oci-intro/</guid><description>&lt;p&gt;研究工程效率提升必然逃不开容器化，容器化能够屏蔽不同项目的细节，大幅度降低构建持续集成系统的难度，只需要专注于提供平台服务即可，这对我们 Team 来说尤为重要：项目历史包袱重，开发周期长，依赖众多，还正在经历主力开发语言从 &lt;code&gt;Python&lt;/code&gt; 到 &lt;code&gt;Golang&lt;/code&gt; 到 &lt;code&gt;Rust&lt;/code&gt; 的转变。而正式发布于 2017 年的开放容器标准（OCI）的出现使得整个容器社区都在朝着标准化的方向发展，为社区注入了新的动力，很多依托于新标准的项目涌现了出来。在这样的背景下，我在例会之后进行了分享，介绍开放容器标准以及社区向着标准靠拢的努力，然后介绍一些基于标准开发的工具，最后做一些个人的展望。&lt;/p&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kubernetes on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/kubernetes/</link><description>Recent content in Kubernetes on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 06 Aug 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/kubernetes/index.xml" rel="self" type="application/rss+xml"/><item><title>Go Modules 迁移实战经验</title><link>https://xuanwo.io/2019/08/22/go-modules-migrate/</link><pubDate>Thu, 22 Aug 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/08/22/go-modules-migrate/</guid><description>
+&lt;p&gt;自从上次 &lt;a href=&#34;https://xuanwo.io/2019/05/27/go-modules/&#34;&gt;Go Modules 分享&lt;/a&gt;以来，我们 Team 的所有 Golang 项目在逐步的切换到 Go Modules，但是在实际执行的操作中遇到了很多问题。本文首先分享我们实际的迁移方案，然后分享我们遇到的问题及其解决方案，最后会谈谈现在还存在的一些问题。&lt;/p&gt;
+&lt;h2 id=&#34;迁移方案&#34;&gt;迁移方案&lt;/h2&gt;
+&lt;h3 id=&#34;现状&#34;&gt;现状&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;所有地址和项目均为虚构，并未实际使用，仅用于说明&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;公司内部的 gitlab 地址是 &lt;code&gt;git.enterprise.dev&lt;/code&gt;，team 内部现在同时进行着 &lt;code&gt;alpha&lt;/code&gt;, &lt;code&gt;beta&lt;/code&gt;, &lt;code&gt;gamma&lt;/code&gt;, &lt;code&gt;delta&lt;/code&gt; 等多个项目，他们分散在 gitlab 的不同组织下。然后 &lt;code&gt;alpha&lt;/code&gt; 作为最早的项目，它还包括了 &lt;code&gt;common-go&lt;/code&gt;这样一个被所有项目都引用的基础库，此外还有大量的 fork 自第三方且内部进行了定制化的开源项目。项目之前的命名均采用 &lt;code&gt;alpha-io&lt;/code&gt;， &lt;code&gt;alpha-common&lt;/code&gt; 这样的形式。&lt;/p&gt;
+&lt;p&gt;之前没有统一过 Team 内部的项目依赖管理工具，因此 Team 内的项目同时存在着自己写的脚本，&lt;a href=&#34;https://github.com/Masterminds/glide&#34;&gt;glide&lt;/a&gt;, &lt;a href=&#34;https://github.com/golang/dep&#34;&gt;dep&lt;/a&gt; 等多种依赖管理工具。由于依赖管理工具的混乱，也导致了构建步骤的混乱。很多项目的 &lt;code&gt;Makefile&lt;/code&gt; 中会修改 &lt;code&gt;GOPATH&lt;/code&gt; 为 &lt;code&gt;&amp;lt;project_path&amp;gt;/build&lt;/code&gt;，并在构建打包的时候把整个 build 都复制到远程的 Builder 上进行构建。整个构建流程的结果无法复现，不同人打包的结果可能完全是不一致的。&lt;/p&gt;
+&lt;h3 id=&#34;方案&#34;&gt;方案&lt;/h3&gt;
+&lt;p&gt;首先我们确定了项目统一的命名规则：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;所有项目都放在 &lt;code&gt;git.team.dev&lt;/code&gt; 下&lt;/li&gt;
+&lt;li&gt;按照所属项目的不同来划分 namespace
+&lt;ul&gt;
+&lt;li&gt;每个项目拥有自己独立的 namespace，比如 &lt;code&gt;git.team.dev/alpha&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;global&lt;/code&gt; 存放 team 全局的项目，比如 &lt;code&gt;common-go&lt;/code&gt;： &lt;code&gt;git.team.dev/global/common&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;external&lt;/code&gt; 存放所有 fork 自第三方的项目，比如 &lt;code&gt;teapot&lt;/code&gt;: &lt;code&gt;git.team.dev/external/teapot&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;取消所有用来区分项目的前缀
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;git.enterprise.dev/team/alpha-io&lt;/code&gt; -&amp;gt; &lt;code&gt;git.team.dev/alpha/io&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;然后我们基于 &lt;a href=&#34;https://github.com/gomods/athens&#34;&gt;Athens&lt;/a&gt; 搭建了 Team 共用的 GOPROXY： &lt;code&gt;https://goproxy.team.dev&lt;/code&gt;，主要做了如下配置：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;配置了到我们内网的 VPN，使得它网络上到我们内网 gitlab 是通的&lt;/li&gt;
+&lt;li&gt;配置了科学上网的代理，使得它可以顺畅的访问外部资源&lt;/li&gt;
+&lt;li&gt;在 gitlab 上创建了专门的 robot 帐号，并配置 SSH key，授予它所有项目的 Read Only 权限&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;最后是完成对项目的 Replace。这个部分我们走了一些弯路，一开始是依赖大家在项目中自行做 replace，但是引发了很多问题，因此我开发了 &lt;a href=&#34;https://github.com/Xuanwo/go-mod-redirect&#34;&gt;go-mod-redirect&lt;/a&gt; 来完成项目 import 路径的映射。&lt;/p&gt;
+&lt;h3 id=&#34;步骤&#34;&gt;步骤&lt;/h3&gt;
+&lt;p&gt;刚才介绍的是整体的迁移方案，下面就谈一谈我们完成迁移执行的具体步骤：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;升级本地的 Golang 版本至 1.11.3，最好是 1.12.x&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;export GO111MODULE=on&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;go mod init&lt;/code&gt; 或者 &lt;code&gt;echo &amp;quot;module git.team.dev/&amp;lt;namespace&amp;gt;/&amp;lt;project&amp;gt;&amp;quot; &amp;gt; go.mod&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;批量替换项目中的 import 路径&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;go mod tidy&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;调整并修改依赖&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;go build&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Tips:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果项目本身存在依赖管理系统的话，go module 会尝试读取已有的依赖，否则会自动拉取最新的依赖。&lt;/li&gt;
+&lt;li&gt;如果自动生成的依赖不符合项目构建的要求，可以自行修改，支持 tag, branch, commit id 等，修改完毕后 &lt;code&gt;go.mod&lt;/code&gt; 文件会被自动更新&lt;/li&gt;
+&lt;li&gt;由于 Go Module 的&lt;a href=&#34;https://xuanwo.io/2019/05/27/go-modules/&#34;&gt;最小版本选择&lt;/a&gt;机制，强制指定一个旧版本可能无法生效，此时可以 &lt;code&gt;go mod why &amp;lt;module&amp;gt;&lt;/code&gt; 来看谁依赖了这个模块&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;go mod tidy&lt;/code&gt; 完毕后可能会出现一些项目的间接依赖，这是因为依赖库中存在还没有切换到 &lt;code&gt;Go Module&lt;/code&gt; 的项目，go 工具链需要有一个地方存放这个间接依赖的版本，会使用 &lt;code&gt;//indirect&lt;/code&gt; 注释出来&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;常见问题及其解决&#34;&gt;常见问题及其解决&lt;/h2&gt;
+&lt;h3 id=&#34;go-module-的启用时机&#34;&gt;GO Module 的启用时机&lt;/h3&gt;
+&lt;p&gt;符合下列任一一种情况时 Go Module 机制将会被启用&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;GO111MODULE&lt;/code&gt; 被设置为 &lt;code&gt;on&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;当前路径不在 &lt;code&gt;GOPATH&lt;/code&gt; 下，且目录下或者上级目录中存在有效的 &lt;code&gt;go.mod&lt;/code&gt; 文件，且 &lt;code&gt;GO111MODULE&lt;/code&gt; 未空或 &lt;code&gt;auto&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;环境变量设置不正确&#34;&gt;环境变量设置不正确&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;GO111MODULE&lt;/code&gt; 设置不正确会导致 &lt;code&gt;go get&lt;/code&gt; 或者 &lt;code&gt;go build&lt;/code&gt; 没有使用 module 的形式来获取包，&lt;code&gt;GOPROXY&lt;/code&gt; 设置不正确会导致网络请求没有走我们的 &lt;code&gt;GOPROXY&lt;/code&gt;，从而出现一系列的超时现象。此外错误的配置了 &lt;code&gt;HTTP_PROXY&lt;/code&gt; 等代理同样会导致 GOPROXY 连接失败，此类问题可以按照如下顺序排查：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;go get -v &amp;lt;module&amp;gt;&lt;/code&gt;，此时会输出完整的请求的历史，比如&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;:) go get -v gopkg.in/yaml.v2
+Fetching https://gopkg.in/yaml.v2?go-get=1
+Parsing meta tags from https://gopkg.in/yaml.v2?go-get=1 (status code 200)
+get &amp;quot;gopkg.in/yaml.v2&amp;quot;: found meta tag get.metaImport{Prefix:&amp;quot;gopkg.in/yaml.v2&amp;quot;, VCS:&amp;quot;git&amp;quot;, RepoRoot:&amp;quot;https://gopkg.in/yaml.v2&amp;quot;} at https://gopkg.in/yaml.v2?go-get=1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果访问的地址不是 &lt;code&gt;GOPROXY&lt;/code&gt;，说明 &lt;code&gt;GO111MODULE&lt;/code&gt; 和 &lt;code&gt;GOPROXY&lt;/code&gt; 的配置有问题。&lt;/p&gt;
+&lt;p&gt;如果访问 &lt;code&gt;GOPROXY&lt;/code&gt; 有问题，可以 curl 看一下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;:) curl https://goproxy.team.dev -v
+* Uses proxy env variable no_proxy == &#39;localhost,127.0.0.1,localaddress,.localdomain.com&#39;
+* Uses proxy env variable https_proxy == &#39;http://127.0.0.1:1090&#39;
+* Trying 127.0.0.1:1090...
+* TCP_NODELAY set
+* Connected to 127.0.0.1 (127.0.0.1) port 1090 (#0)
+* allocate connect buffer!
+* Establish HTTP proxy tunnel to goproxy.team.dev:443
+&amp;gt; CONNECT goproxy.team.dev:443 HTTP/1.1
+&amp;gt; Host: goproxy.team.dev:443
+&amp;gt; User-Agent: curl/7.65.3
+&amp;gt; Proxy-Connection: Keep-Alive
+&amp;gt;
+&amp;lt; HTTP/1.1 200 Connection established
+&amp;lt;
+* Proxy replied 200 to CONNECT request
+* CONNECT phase completed!
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+* CAfile: /etc/ssl/certs/ca-certificates.crt
+CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* CONNECT phase completed!
+* CONNECT phase completed!
+* OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to goproxy.team.dev:443
+* Closing connection 0
+curl: (35) OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to goproxy.team.dev:443
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;比如这种情况说明代理访问失败了，我们可以把这个域名加进 &lt;code&gt;NO_PROXY&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;export no_proxy=localhost,127.0.0.1,localaddress,.localdomain.com,team.dev
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;athens-500-internal-server-error-报错&#34;&gt;Athens 500 Internal Server Error 报错&lt;/h3&gt;
+&lt;p&gt;Athens 本质上还是会用 &lt;code&gt;go get&lt;/code&gt; 来下载包，如果 &lt;code&gt;go get&lt;/code&gt; 命令执行失败就会返回 500 错误，这个情况需要具体分析，我遇到的有以下这些情况：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;go get gopkg.in/Shopify/sarama.v1: unexpected status (https://goproxy.team.dev/gopkg.in/Shopify/sarama.v1/@v/v1.23.1.info): 500 Internal Server Error
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;目标项目不存在：这种情况多见于项目本身改名，或者 import 路径发生了修改。比如说 &lt;a href=&#34;https://github.com/Shopify/sarama&#34;&gt;Shopify/sarama&lt;/a&gt; 的 import 路径由 &lt;code&gt;gopkg.in/Shopify/sarama.v1&lt;/code&gt; 修改为了 &lt;code&gt;github.com/Shopify/sarama&lt;/code&gt;，需要调整项目中的 import。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;go: git.team.dev/global/common@v0.0.0: unexpected status (https://goproxy.team.dev/git.team.dev/global/common/@v/v0.0.0.info): 500 Internal Server Error
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;目标 Commit 不存在：这种一般是因为上游进行了 force-push，导致这个 commit 已经不存在了。还有种比较特殊的情况是依赖的项目中做了 replace，而本项目中没有，从而导致构建的时候访问到了错误的 tag。这种问题比较难排查，建议 &lt;code&gt;go mod why &amp;lt;module&amp;gt;&lt;/code&gt; 查看一下依赖关系，然后确定依赖的模块中 version 没有写错。&lt;/p&gt;
+&lt;h3 id=&#34;replace-不会继承&#34;&gt;Replace 不会继承&lt;/h3&gt;
+&lt;p&gt;go moudle 的 replace 和 exclude 都只针对当前构建生效，不会扩散到其他项目中。这导致如果有依赖写成了这样：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;require github.com/ownauX/lol v0.0.0
+replace github.com/ownauX/lol =&amp;gt; github.com/Xuanwo/lol v1.0.1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;那下游所有的项目都会需要进行 replace，因为直接进行构建会因为找不到 &lt;code&gt;github.com/ownauX/lol@v0.0.0&lt;/code&gt; 而报错。&lt;/p&gt;
+&lt;p&gt;所以：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;replace 建议只作为临时的 workaround 使用，即使要用，原来的 version 也要写对，否则会影响其他项目构建&lt;/li&gt;
+&lt;li&gt;公司内部项目需要做批量做 replace 可以使用我的 &lt;a href=&#34;https://github.com/Xuanwo/go-mod-redirect&#34;&gt;go-mod-redirect&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;尚未解决的问题&#34;&gt;尚未解决的问题&lt;/h2&gt;
+&lt;h3 id=&#34;无法直接安装二进制&#34;&gt;无法直接安装二进制&lt;/h3&gt;
+&lt;p&gt;在切换到 Go Module 之后，&lt;code&gt;go get&lt;/code&gt; 都是 module-aware 的操作，像之前一样去 &lt;code&gt;go get github.com/tinylib/msgp&lt;/code&gt; 来安装二进制会导致 msgp 进入 &lt;code&gt;go.mod&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;无法跟踪指定分支&#34;&gt;无法跟踪指定分支&lt;/h3&gt;
+&lt;p&gt;开发中常见的一种情况是每次构建都需要这个依赖的某个分支最新 commit，go moudle 支持写 branch name。但是为了可重现构建，&lt;code&gt;go get&lt;/code&gt; 每次都会将 branch 重写为对应的 commit id，这导致如果项目中如果有正在活跃开发且需要跟进最新提交的依赖会非常麻烦。目前的 workaround 是在 Makefile 中修改 build target，每次构建之前都执行一次 &lt;code&gt;go get -u &amp;lt;module&amp;gt;@develop&lt;/code&gt; 来更新。&lt;/p&gt;</description></item><item><title>开放容器标准(OCI) 内部分享</title><link>https://xuanwo.io/2019/08/06/oci-intro/</link><pubDate>Tue, 06 Aug 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/08/06/oci-intro/</guid><description>&lt;p&gt;研究工程效率提升必然逃不开容器化，容器化能够屏蔽不同项目的细节，大幅度降低构建持续集成系统的难度，只需要专注于提供平台服务即可，这对我们 Team 来说尤为重要：项目历史包袱重，开发周期长，依赖众多，还正在经历主力开发语言从 &lt;code&gt;Python&lt;/code&gt; 到 &lt;code&gt;Golang&lt;/code&gt; 到 &lt;code&gt;Rust&lt;/code&gt; 的转变。而正式发布于 2017 年的开放容器标准（OCI）的出现使得整个容器社区都在朝着标准化的方向发展，为社区注入了新的动力，很多依托于新标准的项目涌现了出来。在这样的背景下，我在例会之后进行了分享，介绍开放容器标准以及社区向着标准靠拢的努力，然后介绍一些基于标准开发的工具，最后做一些个人的展望。&lt;/p&gt;
 &lt;h2 id=&#34;oci-是什么&#34;&gt;OCI 是什么？&lt;/h2&gt;
 &lt;p&gt;OCI，&lt;a href=&#34;https://www.opencontainers.org&#34;&gt;Open Container Initiative&lt;/a&gt;，是一个轻量级，开放的治理结构（项目），在 Linux 基金会的支持下成立，致力于围绕容器格式和运行时创建开放的行业标准。OCI 项目由 Docker，CoreOS（后来被 Red Hat 收购了，相应的席位被 Red Hat 继承）和容器行业中的其他领导者在 2015 年 6 月的时候启动。OCI 的技术委员会成员包括 Red Hat，Microsoft，Docker，&lt;a href=&#34;https://getcruise.com/&#34;&gt;Cruise&lt;/a&gt;，IBM，Google，Red Hat 和 SUSE，其中 Docker 公司有两名成员，且其中的一位是现任主席，具体的细节可以查看 &lt;a href=&#34;https://github.com/opencontainers/tob&#34;&gt;OCI Technical Oversight Board&lt;/a&gt;。&lt;/p&gt;
 &lt;p&gt;OCI 目前提出的规范有如下这些：&lt;/p&gt;
@@ -1248,64 +1369,4 @@ libdbusmenu-glib: For global menu support &lt;span style=&#34;color:#666&#34;&gt
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://youtrack.jetbrains.com/issue/IDEA-169904&#34;&gt;Support KDE Global Menu&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/kde/comments/67mnfq/global_menu_in_plasma_59_with_java_intellij_and/&#34;&gt;Global Menu in Plasma 5.9 with Java (Intellij) and Firefox&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description></item><item><title>东京——圣地巡礼</title><link>https://xuanwo.io/2019/03/25/holy-land-cruise/</link><pubDate>Mon, 25 Mar 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/25/holy-land-cruise/</guid><description>&lt;p&gt;&lt;img src=&#34;do-not-laugh.jpeg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;一个假御宅进行&lt;del&gt;伪&lt;/del&gt;圣地巡礼的一天&lt;/p&gt;
-&lt;h2 id=&#34;侦探坡上的一阵风&#34;&gt;侦探坡上的一阵风&lt;/h2&gt;
-&lt;p&gt;念叨了很久的圣地巡礼终于要开始了，今天的首要目标是圣人惠与伦也相遇的侦探坡。&lt;/p&gt;
-&lt;p&gt;按照导航坐到了&lt;a href=&#34;https://www.google.com/maps/place/%E3%81%AE%E3%81%9E%E3%81%8D%E5%9D%82/@35.7176303,139.7139021,19z/data=!4m9!1m3!11m2!2s_gdWZMxKFvyT939NEjGPMVVl5fLx5g!3e2!3m4!1s0x60188d15b20ad283:0xe876c38539a950e2!8m2!3d35.7176303!4d139.7139021&#34;&gt;のぞき坂&lt;/a&gt;，这个原本应该默默无名的小街道居然有着 4.3 星的评分，还有 92 个评论。最快的方式是坐到副都心线 (Fukutoshin Line) 的雑司が谷駅 (Zoshigaya Station)，然后从 3 号出口出，正对着地铁出口的小道前方就是侦探坡。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;entry.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;虽说没有什么人，但是偶尔还是会有车速很快的出租车经过，所以一定要注意来往的车辆，特别是在坡下面的时候。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;往前走两步就能看到标着坡度 22 度的标志，继续向前就能看到整个坡啦：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;slope.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;顺着坡跑下去还能捡到惠的小圆帽：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;hat.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;如果选择回头看的话，还能看到圣人惠在坡顶等你：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;megumi.webp&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;咳咳，这当然只是一个死宅的幻想而已。现实生活中哪来的野生妹纸在大马路上给你捡呢？&lt;/p&gt;
-&lt;p&gt;我坐在伦也曾经坐过的台阶上休息，并没有妹纸向我伸出双手，只有几位大妈背着手路过。她们似乎是见多了像我这样的游客，并没有投来好奇的目光。偶尔有几位路人奋力的骑车上坡，还有力有未逮的几位不得不中途下了车开始推着走。后来还出现了一位装束跟我相似的背包客，端着数码相机在各种大家都懂的位置取景，看来也是一位来圣地巡礼的游客。&lt;/p&gt;
-&lt;p&gt;离开了侦探坡，我还去看了片头曲中大家都会走过的铁轨，做了荒川线到面影桥，然后走了回来。可惜绿色的电车似乎已经退休了，没有办法拍到惠和伦也一起做过的长椅。&lt;/p&gt;
-&lt;p&gt;虽说来之前总是吵着喊着要圣地巡礼，但是真的来了之后反而并没有多么的上心。没有做攻略，没有看别人的分享，只是简单的到了这里，按照自己的记忆取了几张景。就算后来发现跟动漫中的角度和距离都相差甚远也没有什么遗憾的感觉，反而是在喜气洋洋的强调：这个地方我去过。想去的哪里是三次元的圣地，分明就是二次元中幸福世界。所谓的圣地巡礼，大概就是寻找的这么一种感觉吧，大概。（好气啊，为啥三次元就没有圣人惠当老婆！）&lt;/p&gt;
-&lt;h2 id=&#34;你的名字&#34;&gt;你的名字&lt;/h2&gt;
-&lt;p&gt;从侦探坡出来之后有点迷茫，不知道要去哪里，几番纠结之后决定刷一波 Ingress 任务暨圣地巡礼。然而等到任务真的开始刷起来之后，就完全顾不上圣地巡礼了。满脑子只关心下一个任务 Po 在什么地方，距离多远，怎么过去。再加上刷的你的名字过于久远，早已不记得里面的各种细节，因此更谈不上什么圣地巡礼了。不过抛开这个噱头不看的话，其实这趟旅程还是很有意思的。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;helicopter.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;从新宿出发，路上还遇到了一个消防博物馆，领了一个入馆证，进去兜了一圈。这个馆挺大的，大约四五层楼的样子，每层楼都是不同年代的展览。展品丰富，各个年代的消防衣，一比一的消防摩托模型，当然也少不了各种交互式的体验项目：比如模拟水枪的一个小游戏，要在指定时间内用水枪灭火，跟生化危机的街机版本差不多，只不过怪兽变成了火灾，手枪变成了水枪。现场还有模拟消防直升机和消防车体验，还能穿着消防衣用灭火器灭火。我非常想去玩，但是在玩的都是大概小学一二年级的小朋友，实在是不好意思排进去，只能默默溜了。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;suga-slope.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;须贺神社的附近也有一个这样的小坡，可惜同样没有圣人惠，也没有三叶。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;suga-step.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;最后三叶和泷相遇的台阶，我到的时候有一组 Coser 正在凹造型，我在一旁默默的看着，没有偷拍（真的）。等到她们终于离开之后，我也在台阶上用三叶和泷的角度拍了两张，PS 难度过高，我就不 P 上人物再放出来了。上面那个圣人惠已经是我 PS 能力的极限了。&lt;/p&gt;
-&lt;p&gt;之后做地铁来到明治神宫附近，发现现场好多人穿着圣诞老人的服装。后来搜了搜当地新闻才知道他们在举办 2018 圣诞老人跑活动，嘛，我可能错失了发布第一手现场报道的好机会。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;red-riding.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;一路刷回歌舞伎町附近，你的名字的任务就算是刷完了。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;your_name.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;h2 id=&#34;言叶之庭&#34;&gt;言叶之庭&lt;/h2&gt;
-&lt;p&gt;刷完你的名字之后才下午两点，我打算体验一下东京的电影院，于是就转身进了附近的 TOHO 电影院。挑选了半天之后选择了 18 点开始的《来る》，这个电影有不少故事可以讲，不过先继续我的行程吧，等一下再来分享这些故事。买完票才两点半，还有不少时间，我决定再去刷个言叶之庭的拼图任务。&lt;/p&gt;
-&lt;p&gt;步行走到新宿御苑的新宿门，200 日元买了张门票就进去了。下午的时候就下了一点小雨，地上落满了银杏叶。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;ginkgo-on-board.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;继续往里走就能看到言叶之庭中出现的那片湖：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;lake.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;湖边的小亭也非常好看，可惜一直有人在，所以没有取景。本打算回来的时候再拍，然而后来就忘记了，所以很遗憾的没有巡礼成功。&lt;/p&gt;
-&lt;p&gt;说来也巧，我刚走过一个小桥，就下起了小雨，等到我出园的时候，雨就停了。这贼老天也知道给我渲染气氛么……&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;lake_in_the_rain.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;任务刷到中途还解锁了一个成就牌：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;ingress.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;任务刷完啦！&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;ingress-task-2.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;等到任务做完准备出园的时候，天色已经渐渐暗了下来，我走的这个方向更是一个人都没有。园里面还响起了英日双语的语音播报，说是要 4:30 闭院，而现在已经 4:20 了，于是我加快脚步往出口走。在出口的地方我遇到了一位老奶奶，一开始用日语问了我一句什么，我摆摆手表示没有听懂，于是她就换成英语问我那边还有没有人，我表示过来的路上没看到人。她就低声念叨着 &amp;ldquo;too strange&amp;rdquo; 跟我一起朝出口走，在出去的路上她问我从哪里来，我说中国，她十分感兴趣，问 which city，我回答是北京。她听了之后就开始用发音有些奇怪的中文说：“你好”，然后告诉我她在学中文，她每天会听半个小时的广播，还说她曾经去过北京。哇，真的是太厉害了，会三国语言的老奶奶！我夸她中文说的很好（不太清楚外国人说中文的水平咋评价，但是我能一下子就听懂，应该很强了吧 - -），她很开心，跟我聊了好一会儿，期间我还用中文跟她来了几句简单的对话。后来我们就愉快的告别了，老奶奶很 nice 的问我是否需要什么帮助，我拜拜手说 I&amp;rsquo;m OK，让她回家路上小心。&lt;/p&gt;
-&lt;p&gt;等我走的时候才想起来应该要跟这么可爱的老奶奶合个影才是，哎，遗憾。&lt;/p&gt;
-&lt;h2 id=&#34;赤鸡的电影体验&#34;&gt;赤鸡的电影体验&lt;/h2&gt;
-&lt;p&gt;新宿御苑出来之后我就回电影院准备看电影啦，电影票花了 1800 日元，可以直接刷信用卡。电影开场之前还有不少时间，我在电影院里面乱逛。&lt;/p&gt;
-&lt;p&gt;看到了 Fate Stay Night Heaven&amp;rsquo;s Feel 的第二部剧场版宣传单，我酸了，我第一部都没看上，东京人一月份就能看上第二部。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;fate.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;羡慕死了 = =&lt;/p&gt;
-&lt;p&gt;在我吃完无数个柠檬后，我买的电影终于开场了。进去之后感觉跟国内的电影院也没啥差别，只不过提示你禁止吸烟，手机静音都是用日语的而已。坐在我右边的是个小姐姐，一坐下来就脱下了自己的长筒靴，然后开始脱丝袜。玛雅，我的小心脏咚咚的跳，在日本看电影这么赤鸡？小姐姐脱下丝袜之后取出自己带的毯子盖在了腿上，然后开始跟边上同行的小姐姐用日语轻声聊天，应该不是在说我 Hentai 吧= =&lt;/p&gt;
-&lt;p&gt;没多久电影院就坐满了，电影也准时开始播放。开始之后没过几分钟，我就感觉有点不对，这个电影好像有点渗人啊，啥情况。看了半个小时，我终于看懂了，尼玛，这是恐怖片啊！我当时就想直接退场了，因为想象力过于丰富的关系，每次看完恐怖片，我的脑内小剧场都能演成一个三部曲，能吓得我不敢半夜上厕所。但是这是我第一次在东京看电影，着实不容易，所以我犹豫再三还是选择留在原地看完。&lt;/p&gt;
-&lt;p&gt;幸亏我日语不咋地，只能听懂一些基础对话，很多对话和关键信息都获取不到，所以我的带入感也没有那么强烈。几个最为恐怖和吓人的场景对我来说也没有那么可怖，只不过是声音大了点，血流的多了点，还好还好，万幸万幸。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;对电影感兴趣的同学可以做直通车 -&amp;gt; &lt;a href=&#34;https://movie.douban.com/subject/30140229/&#34;&gt;《来る》&lt;/a&gt;，反正我是真的不知道讲的啥，也不想知道……&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
-&lt;p&gt;在三个月之后，日本游记总算是写完了。七天的行程可以写成七篇流水帐真的是有些意想不到，游记这种速食作品可以写整整三个月也是有些意想不到。中间好多次想就这样弃坑算了，但是感谢朋友们的鼓励和支持，我还是成功写完了。&lt;/p&gt;
-&lt;p&gt;写游记本是为了传达自己当时的所思所感所想所为，但是受到自己的能力限制，还是写成了干巴巴的流水帐。生产型御宅果然不好当，还是要继续努力。&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;Visited from 2018-12-17 to 2018-12-24&lt;/em&gt;&lt;/p&gt;</description></item></channel></rss>
+&lt;/ul&gt;</description></item></channel></rss>
