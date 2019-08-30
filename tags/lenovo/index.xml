@@ -1,4 +1,253 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Lenovo on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/lenovo/</link><description>Recent content in Lenovo on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 19 Feb 2019 06:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/lenovo/index.xml" rel="self" type="application/rss+xml"/><item><title>Go Modules 迁移实战经验</title><link>https://xuanwo.io/2019/08/22/go-modules-migrate/</link><pubDate>Thu, 22 Aug 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/08/22/go-modules-migrate/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Lenovo on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/lenovo/</link><description>Recent content in Lenovo on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 19 Feb 2019 06:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/lenovo/index.xml" rel="self" type="application/rss+xml"/><item><title>Jenkins Pipeline 介绍</title><link>https://xuanwo.io/2019/08/30/jenkins-pipeline-intro/</link><pubDate>Fri, 30 Aug 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/08/30/jenkins-pipeline-intro/</guid><description>
+&lt;p&gt;前一段时间推动整个 Team 都转向了 Go Modules，最近一段时间的工作主要是在推动自动化构建与测试。我们最后选定的方案是 &lt;code&gt;Jenkins&lt;/code&gt; + &lt;code&gt;Multibranch Pipelines&lt;/code&gt;，本文将会简单介绍一下 Jenkins Pipeline 以及常用的技巧。&lt;/p&gt;
+&lt;h2 id=&#34;pipeline-是什么&#34;&gt;Pipeline 是什么&lt;/h2&gt;
+&lt;p&gt;Jenkins Pipeline 实际上是基于 Groovy 实现的 CI/CD 领域特定语言（DSL），主要分为两类，一类叫做 &lt;code&gt;Declarative Pipeline&lt;/code&gt;，一类叫做 &lt;code&gt;Scripted Pipeline&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Declarative Pipeline&lt;/code&gt; 体验上更接近于我们熟知的 &lt;code&gt;travis CI&lt;/code&gt; 的 &lt;code&gt;travis.yml&lt;/code&gt;，通过声明自己要做的事情来规范流程，形如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;pipeline &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+agent any
+stages &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Build&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+steps &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Test&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+steps &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Deploy&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+steps &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;而 &lt;code&gt;Scripted Pipeline&lt;/code&gt; 则是旧版本中 Jenkins 支持的 Pipeline 模式，主要是写一些 groovy 的代码来制定流程：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;node &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Build&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Test&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Deploy&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;//
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;一般情况下声明式的流水线已经可以满足我们的需要，只有在复杂的情况下才会需要脚本式流水线的参与。&lt;/p&gt;
+&lt;p&gt;过去大家经常在 Jenkins 的界面上直接写脚本来实现自动化，但是现在更鼓励大家通过在项目中增加 &lt;code&gt;Jenkinsfile&lt;/code&gt; 的方式把流水线固定下来，实现 &lt;code&gt;Pipeline As Code&lt;/code&gt;，Jenkins 的 Pipeline 插件将会自动发现并执行它。&lt;/p&gt;
+&lt;h2 id=&#34;语法&#34;&gt;语法&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Declarative Pipeline&lt;/code&gt; 最外层有个 &lt;code&gt;pipeline&lt;/code&gt; 表明它是一个声明式流水线，下面会有 4 个主要的部分：
+&lt;code&gt;agent&lt;/code&gt;，&lt;code&gt;post&lt;/code&gt;，&lt;code&gt;stages&lt;/code&gt;，&lt;code&gt;steps&lt;/code&gt;，我会逐一介绍一下。&lt;/p&gt;
+&lt;h3 id=&#34;agent&#34;&gt;Agent&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;agent&lt;/code&gt; 主要用于描述整个 Pipeline 或者指定的 Stage 由什么规则来选择节点执行。Pipeline 级别的 agent 可以视为 Stage 级别的默认值，如果 stage 中没有指定，将会使用与 Pipeline 一致的规则。在最新的 Jenkins 版本中，可以支持指定任意节点(&lt;code&gt;any&lt;/code&gt;)，不指定(&lt;code&gt;none&lt;/code&gt;)，标签(&lt;code&gt;label&lt;/code&gt;)，节点(&lt;code&gt;node&lt;/code&gt;)，&lt;code&gt;docker&lt;/code&gt;，&lt;code&gt;dockerfile&lt;/code&gt; 和 &lt;code&gt;kubernetes&lt;/code&gt; 等，具体的配置细节可以查看文档，下面是一个使用 docker 的样例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;agent &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+docker &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+image &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;myregistry.com/node&amp;#39;&lt;/span&gt;
+label &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;my-defined-label&amp;#39;&lt;/span&gt;
+registryUrl &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;https://myregistry.com/&amp;#39;&lt;/span&gt;
+registryCredentialsId &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;myPredefinedCredentialsInJenkins&amp;#39;&lt;/span&gt;
+args &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;-v /tmp:/tmp&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Tips:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果 Pipeline 选择了 none，那么 stage 必须要指定一个有效的 agent，否则无法执行&lt;/li&gt;
+&lt;li&gt;Jenkins 总是会使用 master 来执行 scan multibranch 之类的操作，即使 master 配置了 0 executors&lt;/li&gt;
+&lt;li&gt;agent 指定的是规则而不是具体的节点，如果 stage 各自配置了自己的 agent，需要注意是不是在同一个节点执行的&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;stages-stage&#34;&gt;Stages &amp;amp;&amp;amp; Stage&lt;/h3&gt;
+&lt;p&gt;Stages 是 Pipeline 中最主要的组成部分，Jenkins 将会按照 Stages 中描述的顺序从上往下的执行。Stages 中可以包括任意多个 Stage，而 Stage 与 Stages 又能互相嵌套，除此以外还有 &lt;code&gt;parallel&lt;/code&gt; 指令可以让内部的 Stage 并行运行。实际上可以把 Stage 当作最小单元，Stages 指定的是顺序运行，而 parallel 指定的是并行运行。&lt;/p&gt;
+&lt;p&gt;接下来的这个 case 很好的说明了这一点：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;pipeline &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+agent none
+stages &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Sequential&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+stages &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;In Sequential 1&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+steps &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+echo &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;In Sequential 1&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;In Sequential 2&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+steps &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+echo &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;In Sequential 2&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Parallel In Sequential&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+parallel &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;In Parallel 1&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+steps &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+echo &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;In Parallel 1&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;In Parallel 2&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+steps &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+echo &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;In Parallel 2&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;除了指定 Stage 之间的顺序关系之外，我们还可以通过 &lt;code&gt;when&lt;/code&gt; 来指定某个 Stage 指定与否：比如要配置只有在 Master 分支上才执行 push，其他分支上都只运行 build&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;stages &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Build&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+when &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+not &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt; branch &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;master&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+steps &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+sh &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;./scripts/run.py build&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Run&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+when &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+branch &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;master&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+steps &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+sh &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;./scripts/run.py push&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;还能在 Stage 的级别设置 &lt;code&gt;environment&lt;/code&gt;，这些就不展开了，文档里有更详细的描述。&lt;/p&gt;
+&lt;h3 id=&#34;steps&#34;&gt;Steps&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;steps&lt;/code&gt; 是 Pipeline 中最核心的部分，每个 Stage 都需要指定 Steps。Steps 内部可以执行一系列的操作，任意操作执行出错都会返回错误。完整的 Steps 操作列表可以参考 &lt;a href=&#34;https://jenkins.io/doc/pipeline/steps/&#34;&gt;Pipeline Steps Reference&lt;/a&gt;，这里只说一些使用时需要注意的点。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;groovy 语法中有不同的字符串类型，其中 &lt;code&gt;&#39;abc&#39;&lt;/code&gt; 是 Plain 字符串，不会转义 &lt;code&gt;${WROKSPACE}&lt;/code&gt; 这样的变量，而 &lt;code&gt;&amp;quot;abc&amp;quot;&lt;/code&gt; 会做这样的转换。此外还有 &lt;code&gt;&#39;&#39;&#39; xxx &#39;&#39;&#39;&lt;/code&gt; 支持跨行字符串，&lt;code&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/code&gt; 同理。&lt;/li&gt;
+&lt;li&gt;调用函数的 &lt;code&gt;()&lt;/code&gt; 可以省略，使得函数调用形如 &lt;code&gt;updateGitlabCommitStatus name: &#39;build&#39;, state: &#39;success&#39;&lt;/code&gt;，通过 &lt;code&gt;,&lt;/code&gt; 来分割不同的参数，支持换行。&lt;/li&gt;
+&lt;li&gt;可以在声明式流水线中通过 &lt;code&gt;script&lt;/code&gt; 来插入一段 groovy 脚本&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;post&#34;&gt;Post&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;post&lt;/code&gt; 部分将会在 pipeline 的最后执行，经常用于一些测试完毕后的清理和通知操作。文档中给出了一系列的情况，比较常用的是 &lt;code&gt;always&lt;/code&gt;，&lt;code&gt;success&lt;/code&gt; 和 &lt;code&gt;failure&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;比如说下面的脚本将会在成功和失败的时候更新 gitlab 的状态，在失败的时候发送通知邮件：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;post &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+failure &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+updateGitlabCommitStatus &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;name:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;build&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;state:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;failed&amp;#39;&lt;/span&gt;
+emailext &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;body:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;$DEFAULT_CONTENT&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;recipientProviders:&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;culprits&lt;span style=&#34;color:#666&#34;&gt;()],&lt;/span&gt; &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;subject:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;$DEFAULT_SUBJECT&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+success &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+updateGitlabCommitStatus &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;name:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;build&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;state:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;success&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;每个状态其实都相当于于一个 &lt;code&gt;steps&lt;/code&gt;，都能够执行一系列的操作，不同状态的执行顺序是事先规定好的，就是文档中列出的顺序。&lt;/p&gt;
+&lt;h2 id=&#34;shared-libraries&#34;&gt;Shared Libraries&lt;/h2&gt;
+&lt;p&gt;同一个 Team 产出的不同项目往往会有着相似的流程，比如 golang 的大部分项目都会执行同样的命令。这就导致了人们经常需要在不同的项目间复制同样的流程，而 Shared Libraries 就解决了这个问题。通过在 Pipeline 中引入共享库，把常用的流程抽象出来变成一个的指令，简化了大量重复的操作。&lt;/p&gt;
+&lt;p&gt;在配置好 lib 之后，Jenkins 会在每个 Pipeline 启动前去检查 lib 是否更新并 pull 到本地，根据配置决定是否直接加载。&lt;/p&gt;
+&lt;p&gt;所有的 Shared Libraries 都要遵循相同的项目结构：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;(root)
++- src # Groovy source files
+| +- org
+| +- foo
+| +- Bar.groovy # for org.foo.Bar class
++- vars
+| +- foo.groovy # for global &#39;foo&#39; variable
+| +- foo.txt # help for &#39;foo&#39; variable
++- resources # resource files (external libraries only)
+| +- org
+| +- foo
+| +- bar.json # static helper data for org.foo.Bar
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;目前我们的使用比较低级，所以只用到了 &lt;code&gt;vars&lt;/code&gt; 来存储全局的变量。&lt;/p&gt;
+&lt;p&gt;vars 下的每一个 &lt;code&gt;foo.groovy&lt;/code&gt; 文件都是一个独立的 namespace，在 Pipeline 中可以以 &lt;code&gt;foo.XXX&lt;/code&gt; 的形式来导入。比如我们有 &lt;code&gt;vars/log.groovy&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;&lt;span style=&#34;color:#902000&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;info&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;message&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+echo &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;INFO: ${message}&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#902000&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;warning&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;message&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+echo &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;WARNING: ${message}&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;那么 Jenkinsfile 中就可以这样调用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Jenkinsfile
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;steps &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+log&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;info&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Starting&amp;#39;&lt;/span&gt;
+log&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;warning&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Nothing to do!&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;大家可能已经注意到了，在 &lt;code&gt;groovy&lt;/code&gt; 文件中，我们可以直接像在 &lt;code&gt;steps&lt;/code&gt; 中一样调用已有的方法，比如 &lt;code&gt;echo&lt;/code&gt; 和 &lt;code&gt;sh&lt;/code&gt; 等。&lt;/p&gt;
+&lt;p&gt;我们也能在 &lt;code&gt;groovy&lt;/code&gt; 文件中去引用 Java 的库并返回一个变量，比如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;#!/usr/bin/env groovy&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0e84b5;font-weight:bold&#34;&gt;java.util.Random&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;;&lt;/span&gt;
+&lt;span style=&#34;color:#902000&#34;&gt;def&lt;/span&gt; String &lt;span style=&#34;color:#06287e&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;color:#902000&#34;&gt;def&lt;/span&gt; rand &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;Random&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;()&lt;/span&gt;
+&lt;span style=&#34;color:#902000&#34;&gt;def&lt;/span&gt; t &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; rand&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1000&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; String&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;valueOf&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;t&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这样就能够在 &lt;code&gt;JenkinsFile&lt;/code&gt; 中去设置一个环境变量：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Jenkinsfile
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;environment &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+NAME &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; random&lt;span style=&#34;color:#666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;()&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;除了定义方法之外，我们还能让这个文件本身就能被调用，只需要定义一个 call 方法：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;#!/usr/bin/env groovy&lt;/span&gt;
+&lt;span style=&#34;color:#902000&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;call&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+sh &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;hello, world&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;还能够定义一个新的 section，接受一个 Block：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;&lt;span style=&#34;color:#902000&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;call&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;Closure body&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+node&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;windows&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+body&lt;span style=&#34;color:#666&#34;&gt;()&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这样可以让指定的 Body 在 windows 节点上调用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Jenkinsfile
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;windows &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+bat &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;cmd /?&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;常用技巧&#34;&gt;常用技巧&lt;/h2&gt;
+&lt;h3 id=&#34;发送邮件通知&#34;&gt;发送邮件通知&lt;/h3&gt;
+&lt;p&gt;主要使用 &lt;code&gt;emailext&lt;/code&gt;，需要在 Jenkins 的配置界面事先配置好，可用的环境变量和参数可以参考文档 &lt;a href=&#34;https://wiki.jenkins.io/display/JENKINS/Email-ext+plugin#Email-extplugin-Globalconfiguration&#34;&gt;Email-ext plugin&lt;/a&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;emailext &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;body:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;$DEFAULT_CONTENT&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;recipientProviders:&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;culprits&lt;span style=&#34;color:#666&#34;&gt;(),&lt;/span&gt;developers&lt;span style=&#34;color:#666&#34;&gt;()],&lt;/span&gt; &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;subject:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;$DEFAULT_SUBJECT&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;结果同步到-gitlab&#34;&gt;结果同步到 gitlab&lt;/h3&gt;
+&lt;p&gt;同样需要配置好 gitlab 插件，在 Pipeline 中指定 &lt;code&gt;options&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Jenkisfile
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;options &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+gitLabConnection&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;gitlab&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后就可以在 post 中根据不同的状态来更新 gitlab 了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Jenkisfile
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;failure &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+updateGitlabCommitStatus &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;name:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;build&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;state:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;failed&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+success &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+updateGitlabCommitStatus &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;name:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;build&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#002070;font-weight:bold&#34;&gt;state:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;success&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;文档参考：&lt;a href=&#34;https://github.com/jenkinsci/gitlab-plugin#build-status-configuration&#34;&gt;Build status configuration&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;构建过程中可用的环境变量列表&#34;&gt;构建过程中可用的环境变量列表&lt;/h3&gt;
+&lt;p&gt;Jenkins 会提供一个完整的列表，只需要访问 &lt;code&gt;&amp;lt;your-jenkins-url&amp;gt;/env-vars.html/&lt;/code&gt; 即可，别忘了需要使用 &lt;code&gt;&amp;quot;${WORKSPACE}&amp;quot;&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;在-checkout-前执行自定义操作&#34;&gt;在 checkout 前执行自定义操作&lt;/h3&gt;
+&lt;p&gt;在 Multibranch Pipeline 的默认流程中会在 checkout 之前和之后执行 &lt;code&gt;git clean -fdx&lt;/code&gt;，如果在测试中以 root 权限创建了文件，那么 jenkins 会因为这个命令执行失败而报错。所以我们需要在 checkout 之前执行自定义的任务：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;&lt;span style=&#34;color:#007020&#34;&gt;#!/usr/bin/env groovy&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// var/pre.groovy
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#902000&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;call&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;Closure body&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+body&lt;span style=&#34;color:#666&#34;&gt;()&lt;/span&gt;
+checkout scm
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在 Jenkinsfile 中配置以跳过默认的 checkout 行为：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Jenkisfile
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;options &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+skipDefaultCheckout &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在每个 stage 中执行自定义的任务即可：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-groovy&#34; data-lang=&#34;groovy&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Jenkisfile
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;stage&lt;span style=&#34;color:#666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Compile&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+agent any
+steps &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+pre &lt;span style=&#34;color:#666&#34;&gt;{&lt;/span&gt;
+sh &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;pre compile&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+sh &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;real compile&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#666&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;Jenkins 作为使用最为广泛的 CI/CD 平台，网上流传着无数的脚本和攻略，在学习和开发的时候一定要从基本出发，了解内部原理，多看官方的文档，不要拿到一段代码就开始用，这样才能不会迷失在各式各样的脚本之中。&lt;/p&gt;
+&lt;p&gt;更重要的是要结合自己的业务需求，开发和定制属于自己的流程，不要被 Jenkins 的框架限制住。比如我们是否可以定义一个自己的 YAML 配置文件，然后根据 YAML 来生成 Pipeline，不需要业务自己写 Pipeline 脚本，规范使用，提前检查不合法的脚本，核心的模块共同升级，避免了一个流程小改动需要所有项目组同步更新。这是我现在正在做的事情，有机会再跟大家分享～&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://jenkins.io/doc/book/pipeline/syntax/&#34;&gt;Pipeline Syntax&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://groovy-lang.org/syntax.html&#34;&gt;Groovy Syntax&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://jenkins.io/doc/book/pipeline/shared-libraries/&#34;&gt;Extending with Shared Libraries&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Go Modules 迁移实战经验</title><link>https://xuanwo.io/2019/08/22/go-modules-migrate/</link><pubDate>Thu, 22 Aug 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/08/22/go-modules-migrate/</guid><description>
 &lt;p&gt;自从上次 &lt;a href=&#34;https://xuanwo.io/2019/05/27/go-modules/&#34;&gt;Go Modules 分享&lt;/a&gt;以来，我们 Team 的所有 Golang 项目在逐步的切换到 Go Modules，但是在实际执行的操作中遇到了很多问题。本文首先分享我们实际的迁移方案，然后分享我们遇到的问题及其解决方案，最后会谈谈现在还存在的一些问题。&lt;/p&gt;
 &lt;h2 id=&#34;迁移方案&#34;&gt;迁移方案&lt;/h2&gt;
 &lt;h3 id=&#34;现状&#34;&gt;现状&lt;/h3&gt;
@@ -1316,57 +1565,4 @@ at m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34
 &lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86&#34;&gt;农历 - 维基百科&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E5%8E%86%E6%B3%95&#34;&gt;历法 - 维基百科&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296&#34;&gt;农历的编算和颁行&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description></item><item><title>开启 Jetbrains IDE 的全局菜单</title><link>https://xuanwo.io/2019/03/28/jetbrains-ide-global-menu/</link><pubDate>Thu, 28 Mar 2019 12:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/28/jetbrains-ide-global-menu/</guid><description>&lt;p&gt;最近在想办法提升自己的开发体验，其中有一步就是去掉了不常用和已经使用快捷键代替的按钮和菜单。但是菜单栏没有办法隐藏，导致观感上不是很好。适逢 Jetbrains IDEA 推出了 2019.1 版本，趁着体验新版本功能的时候研究并解决了这个问题。&lt;/p&gt;
-&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
-&lt;blockquote&gt;
-&lt;p&gt;本方案应该适用于所有 Jetbrains IDE，包括 Goland 和 Android Studio&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;code&gt;Help -&amp;gt; Find Action... -&amp;gt; Experimental Features...&lt;/code&gt;，确认 &lt;code&gt;linux.native.menu&lt;/code&gt; 已打开&lt;/li&gt;
-&lt;li&gt;安装 &lt;code&gt;libdbusmenu-glib&lt;/code&gt;，比如 Arch 上只需要 &lt;code&gt;pacman -S libdbusmenu-glib&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;重启 IDE&lt;/li&gt;
-&lt;/ol&gt;
-&lt;hr /&gt;
-&lt;p&gt;好，在这个分割线下分享一下自己解决这个问题的全过程。&lt;/p&gt;
-&lt;h2 id=&#34;确认&#34;&gt;确认&lt;/h2&gt;
-&lt;p&gt;首先问题的现象是很明显的，预期 IDEA 的菜单栏出现在 KDE 顶端的全局菜单中，但实际上并没有。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;bug.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;然后开始用 &lt;code&gt;IDEA&lt;/code&gt;，&lt;code&gt;global menu&lt;/code&gt; 等关键词去搜索，可以得到下列这些有用的信息：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;在别人那是好的（有人 Po 出了正常的截图）&lt;/li&gt;
-&lt;li&gt;可以通过 &lt;code&gt;Experiment Features&lt;/code&gt; 开启 &lt;code&gt;linux.native.menu&lt;/code&gt; 的支持&lt;/li&gt;
-&lt;li&gt;在 Issue 的评论中，有人提出需要安装 &lt;code&gt;libdbusmenu-glib&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;OK，现在知道问题应该出在本地可能漏了什么依赖，导致全局菜单没有生效，下面需要想办法定位到具体的问题。&lt;del&gt;（实在定位不出来的时候再一把梭试一下）&lt;/del&gt;&lt;/p&gt;
-&lt;h2 id=&#34;定位&#34;&gt;定位&lt;/h2&gt;
-&lt;p&gt;首先通过 &lt;code&gt;Help -&amp;gt; Find Action... -&amp;gt; Experiment Features&lt;/code&gt; 中可以打开实验特性的开关，其中可以确认 &lt;code&gt;linux.native.menu&lt;/code&gt; 已经默认开启了。（真香！）&lt;/p&gt;
-&lt;p&gt;然后查看 IDEA 的 Log，寻找全局菜单没有启用的原因。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;IDEA 的 Log 一般在 &lt;code&gt;~/.IntelliJIdea2019.1/system/log/&lt;/code&gt;，也可以通过 &lt;code&gt;Help -&amp;gt; Show Log In Dolphin&lt;/code&gt; 直接打开所在位置&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;pre&gt;&lt;code&gt;2019-03-28 11:03:00,342 [ 5755] INFO - penapi.wm.impl.GlobalMenuLinux - disable global-menu integration because some of shared libraries isn&#39;t installed: java.lang.UnsatisfiedLinkError: /opt/intellij-idea-ultimate-edition/bin/libdbm64.so: libdbusmenu-glib.so.4: cannot open shared object file: No such file or directory
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Ooops，原来是因为缺少一个库导致 &lt;code&gt;global-menu&lt;/code&gt; 被禁用了，只需要把这个库装上就可以了。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;happy.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;h2 id=&#34;修复&#34;&gt;修复&lt;/h2&gt;
-&lt;p&gt;搜索一下哪个包提供了 &lt;code&gt;libdbusmenu-glib.so.4&lt;/code&gt;：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; yay -Fs libdbusmenu-glib.so.4
-community/libdbusmenu-glib &lt;span style=&#34;color:#40a070&#34;&gt;16&lt;/span&gt;.04.0-3
-usr/lib/libdbusmenu-glib.so.4&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;很明显，是 &lt;code&gt;libdbusmenu-glib&lt;/code&gt; （正是上面 Issue 中有人说要装的那个包），甚至还是社区源里面的包，不用犹豫了：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;:&lt;span style=&#34;color:#666&#34;&gt;)&lt;/span&gt; yay -S libdbusmenu-glib&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;重启 IDE 之后就能看到全局菜单正常工作啦：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;fixed.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;在水一篇文章之后，我还能做啥呢？给 AUR 留个言，让维护者把 &lt;code&gt;libdbusmenu-glib&lt;/code&gt; 作为一个可选依赖，这样大家在安装或者更新 IDEA 的时候就知道啦：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;comment.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Update: AUR 的维护者已经加上啦：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;New optional dependencies &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt; intellij-idea-ultimate-edition
-libdbusmenu-glib: For global menu support &lt;span style=&#34;color:#666&#34;&gt;[&lt;/span&gt;installed&lt;span style=&#34;color:#666&#34;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Arch is the best!&lt;/p&gt;
-&lt;h2 id=&#34;后续&#34;&gt;后续&lt;/h2&gt;
-&lt;p&gt;GTK 3 的应用可以通过安装 &lt;code&gt;appmenu-gtk-module&lt;/code&gt; 来获取全局菜单的支持~&lt;/p&gt;
-&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://youtrack.jetbrains.com/issue/IDEA-169904&#34;&gt;Support KDE Global Menu&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.reddit.com/r/kde/comments/67mnfq/global_menu_in_plasma_59_with_java_intellij_and/&#34;&gt;Global Menu in Plasma 5.9 with Java (Intellij) and Firefox&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;</description></item></channel></rss>
