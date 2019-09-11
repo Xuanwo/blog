@@ -35,7 +35,7 @@ url: /2015/03/26/hexo-intor/
 根据自己的Windows版本选择相应的安装文件，要是不知道，就安装32-bit的吧- -。
 如图所示：
 
-![Node.js安装界面](/imgs/opinion/Nodejs-install.png)
+![Node.js安装界面](/imgs/opinion/nodejs-install.png)
 
 保持默认设置即可，一路Next，安装很快就结束了。
 然后我们检查一下是不是要求的组件都安装好了，同时按下`Win`和`R`，打开运行窗口：
@@ -52,7 +52,7 @@ npm -v
 
 如果结果如下图所示，则说明安装正确，可以进行下一步了，如果不正确，则需要回头检查自己的安装过程。
 
-![Node.js安装测试](/imgs/opinion/Nodejs-test.png)
+![Node.js安装测试](/imgs/opinion/nodejs-test.png)
 
 ### 配置Git环境
 
@@ -62,11 +62,11 @@ npm -v
 
 然后就进入了Git的安装界面，如图：
 
-![Git安装界面](/imgs/opinion/Git-install.png)
+![Git安装界面](/imgs/opinion/git-install.png)
 
 和Node.js一样，大部分设置都只需要保持默认，但是出于我们操作方便考虑，建议PATH选项按照下图选择：
 
-![Git PATH设置](/imgs/opinion/Git-path-setting.png)
+![Git PATH设置](/imgs/opinion/git-path-setting.png)
 
 > 这是对上图的解释，不需要了解请直接跳过
 > Git的默认设置下，出于安全考虑，只有在Git Bash中才能进行Git的相关操作。按照上图进行的选择，将会使得Git安装程序在系统PATH中加入Git的相关路径，使得你可以在CMD界面下调用Git，不用打开Git Bash了。
@@ -79,7 +79,7 @@ git --version
 
 如果结果如下图所示，则说明安装正确，可以进行下一步了，如果不正确，则需要回头检查自己的安装过程。
 
-![Git安装测试](/imgs/opinion/Git-test.png)
+![Git安装测试](/imgs/opinion/git-test.png)
 
 ## Linux
 
