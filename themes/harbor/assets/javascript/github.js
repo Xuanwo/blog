@@ -1,74 +1,37 @@
 const fn = async () => {
-  const title = document.createElement('h2')
-  title.innerText = '最近动态'
-
-  const innerSection = document.createElement('section')
-  innerSection.setAttribute('class', 'posts simple')
+  const innerSection = document.createElement('ul')
 
   const data = await fetch('https://api.github.com/users/Xuanwo/events').then((res) => res.json())
 
   for (let i = 0; i < 10; i++) {
     const event = data[i]
 
-    const x = document.createElement('a')
+    const x = document.createElement('li')
     innerSection.appendChild(x)
 
     let content = ''
     switch (event.type) {
       case 'WatchEvent':
-        content = `<a href="https://github.com/${event.repo.name}">
-                    <div class="each">
-                        <div>
-                            <h2> 关注了 <b>${event.repo.name}</b> 项目</h2>
-                        </div>
-                    </div>
-                </a>`
+        content = `关注了 <a href="https://github.com/${event.repo.name}">${event.repo.name}</a> 项目`
         break
       case 'IssueCommentEvent':
-        content = `<a href="${event.payload.issue.html_url}">
-                    <div class="each">
-                        <div>
-                            <h2> 评论了 <b>${event.repo.name}</b> 项目的 Issue</h2>
-                        </div>
-                    </div>
-                </a>`
+        content = `评论了 <a href="${event.payload.issue.html_url}">${event.repo.name}</a> 项目的 Issue</h2>`
         break
       case 'IssuesEvent':
-        content = `<a href="${event.payload.issue.html_url}">
-                    <div class="each">
-                        <div>
-                            <h2> 创建了 <b>${event.repo.name}</b> 项目的 Issue </h2>
-                        </div>
-                    </div>
-                </a>`
+        content = `创建了 <a href="${event.payload.issue.html_url}">${event.repo.name}</a> 项目的 Issue`
         break
       case 'PushEvent':
-        content = `<a href="https://github.com/${event.repo.name}">
-                    <div class="each">
-                        <div>
-                            <h2> 推送了 <b>${event.repo.name}</b> 项目的 Commit</h2>
-                        </div>
-                    </div>
-                </a>`
+        content = `推送了 <a href="https://github.com/${event.repo.name}">${event.repo.name}</a> 项目的 Commit`
         break
       case 'PullRequestEvent':
       case 'PullRequestReviewCommentEvent':
-        content = `<a href="${event.payload.pull_request.html_url}">
-                    <div class="each">
-                        <div>
-                            <h2> 审阅了 <b>${event.repo.name}</b> 项目的 Pull Request</h2>
-                        </div>
-                    </div>
-                </a>`
+        content = `审阅了 <a href="${event.payload.pull_request.html_url}">${event.repo.name}</a> 项目的 Pull Request`
         break
     }
-    x.outerHTML = content
+    x.outerHTML = `<li>${content}</li>`
   }
 
-  const section = document.createElement('section')
-  section.setAttribute('class', 'section')
-  section.appendChild(title)
-  section.appendChild(innerSection)
-  document.querySelector('#main-content > div.container.front-page').appendChild(section)
+  const working = document.querySelector('#working')
+  document.querySelector('#main-content > div > div').insertBefore(innerSection, working)
 }
 fn()

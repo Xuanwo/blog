@@ -12,10 +12,12 @@
         </div>
     </div>
     <div class="container front-page">
+        {{ $categories := slice "Code" "Daily" "Game" "Travel" }}
+        {{ range $value := $categories }}
         <section class="section">
-            <h2>最新文章</h2>
+            <h2>Articles on {{ $value }}</h2>
             <section class="posts simple">
-                {{ range first 10 .Site.RegularPages }}
+                {{range first 5 (where $.Site.Pages "Params.categories" $value) }}
                 <a href="{{ .RelPermalink }}">
                     <div class="each">
                         <div>
@@ -23,21 +25,14 @@
                         </div>
                     </div>
                 </a>
-
                 {{ end }}
             </section>
         </section>
+        {{ end }}
     </div>
 </main>
 
 {{ partial "footer.html" . }}
-
-{{ $github := resources.Get "javascript/github.js" | resources.Minify | resources.Fingerprint }}
-{{ if .Site.IsServer }}
-<script src="{{ $github.Permalink }}" defer></script>
-{{ else }}
-<script src="{{ $github.Permalink }}" integrity="{{ $github.Data.Integrity }}" defer></script>
-{{ end }}
 
 </body>
 </html>

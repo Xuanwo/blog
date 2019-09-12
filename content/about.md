@@ -4,7 +4,7 @@ type: page
 layout: about
 ---
 
-## Area of interest
+## Area
 
 - [A]utomation
 - [B]ackend Services
@@ -13,14 +13,16 @@ layout: about
 
 ## Coding
 
-<https://github.com/Xuanwo>
+Coding [@github](https://github.com/Xuanwo)
 
 ## Working
+
+Working [@qingcloud](https://www.qingcloud.com/)
 
 - [青云QingCloud](https://www.qingcloud.com/) 市场专员，负责自动化脚本 & 工具开发，社区运营
 - [青云QingCloud](https://www.qingcloud.com/) 对象存储研发工程师，负责对象存储 SDK 及其周边工具开发
 - [青云QingCloud](https://www.qingcloud.com/) 企业网盘研发工程师，负责后端开发
-- [青云QingCloud](https://www.qingcloud.com/) 对象存储效率研发工程师，负责内部研发效率提升
+- [青云QingCloud](https://www.qingcloud.com/) 存储研发部效率研发工程师，负责内部研发效率提升
 
 ## Social
 
