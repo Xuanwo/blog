@@ -1,4 +1,59 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>2018s on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/2018/</link><description>Recent content in 2018s on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 27 Dec 2018 02:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/2018/index.xml" rel="self" type="application/rss+xml"/><item><title>Jenkins Pipeline 介绍</title><link>https://xuanwo.io/2019/08/30/jenkins-pipeline-intro/</link><pubDate>Fri, 30 Aug 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/08/30/jenkins-pipeline-intro/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>2018s on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/2018/</link><description>Recent content in 2018s on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 27 Dec 2018 02:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/2018/index.xml" rel="self" type="application/rss+xml"/><item><title>Archlinux 连接并使用打印机</title><link>https://xuanwo.io/2019/09/19/archlinux-cups-connect/</link><pubDate>Thu, 19 Sep 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/09/19/archlinux-cups-connect/</guid><description>
+&lt;p&gt;一直觉得折腾打印机很麻烦，所以每次都是让朋友 F 帮我打印各种材料。但是现在朋友 F 已经离职了，所以只能自己想办法搞了。本文会首先介绍操作系统与打印机通讯的原理，然后讲解如何在 Archlinux 连接并使用打印机，最后介绍常见的故障排除手段。&lt;/p&gt;
+&lt;h2 id=&#34;打印系统&#34;&gt;打印系统&lt;/h2&gt;
+&lt;h3 id=&#34;假脱机-spool&#34;&gt;假脱机(spool)&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在信息学中，假脱机（外部设备联机并行操作，SPOOL,Simultaneous Peripheral Operations On-line）是一种数据缓冲，指传输数据的过程中，将数据存放在临时工作区中。其它程序可以在之后的任意时间点对其存取。通常英语动词 spool 可以指储存设备的行为，具体表现为物理意义上的缠或卷，就比如说磁带机。最常见的假脱机的应用是打印缓存，即把打印任务加入到队列。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;UNIX 和 Linux 系统会为每一个打印机创建一个任务队列，交由一个假脱机程序来管理。其他程序将打印任务提交给这个假脱机程序，然后它就会进行一系列的过滤操作最后发送到打印机上。最初大家都是用的 BSD 打印子系统，其中包含一个守护进程 lpd 和客户端命令 lpr。这个系统由 IETF 实现标准化，成为 &lt;a href=&#34;https://www.ietf.org/rfc/rfc1179.txt&#34;&gt;RFC 1179&lt;/a&gt; 中所述的行式打印机守护程序协议。随着打印技术的不断发展，大家也在不断的对打印系统做改进，比如 &lt;a href=&#34;http://lprng.sourceforge.net/&#34;&gt;LPRng&lt;/a&gt; 和 &lt;a href=&#34;https://www.cups.org/&#34;&gt;CUPS&lt;/a&gt;，可以支持在同一个页面上使用不同字体，支持打印图像，支持打印变宽字体，支持字距调整和连字等。&lt;/p&gt;
+&lt;p&gt;目前使用最广泛的打印系统是 CUPS，也是 Archlinux 和很多其他 Liunx 发行版缺省的打印系统。&lt;/p&gt;
+&lt;h3 id=&#34;postscript&#34;&gt;PostScript&lt;/h3&gt;
+&lt;p&gt;PostScript 是主要用于电子产业和桌面出版领域的一种页面描述语言和编程语言，在 1984 年由 Adobe 开发并推向市场，在乔布斯的敦促下被改进为驱动激光打印机的语言，后来加入到 Conon 打印机中，带来了 &lt;a href=&#34;https://en.wikipedia.org/wiki/LaserWriter&#34;&gt;Apple LaserWriter&lt;/a&gt;，引发了二十世纪八十年代中期的桌面印刷革命，并由此成为业界标准。其后继者是同样由 Adobe 开发的 &lt;a href=&#34;https://en.wikipedia.org/wiki/PDF&#34;&gt;PDF(Portable Document Format)&lt;/a&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;cups&#34;&gt;CUPS&lt;/h3&gt;
+&lt;p&gt;CUPS 打印系统会在本地启动一个名为 cupsd 的守护进程，它将会维护打印机和打印队列，自带 Web 管理工具(&lt;a href=&#34;http://localhost:631)。&#34;&gt;http://localhost:631)。&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;CUPS 通过 AppSocket，IPP，LPD 等多种协议来连接到打印机并创建任务队列，之后应用程序将文件发送给 CUPS 守护进程，CUPS 通过 MIME 类型来确定文件的转换过滤器，将输入文件转换为 PostScript 格式或者其他类型，然后再发送给打印机。&lt;/p&gt;
+&lt;h2 id=&#34;连接并使用&#34;&gt;连接并使用&lt;/h2&gt;
+&lt;h3 id=&#34;安装-cups&#34;&gt;安装 CUPS&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;pacman -S cups&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;可选择安装的其他包：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.archlinux.org/packages/extra/x86_64/cups-pdf/&#34;&gt;&lt;code&gt;cups-pdf&lt;/code&gt;&lt;/a&gt; 包可以在本地启动一个打印为 PDF 的虚拟打印机。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.archlinux.org/packages/extra/x86_64/print-manager/&#34;&gt;&lt;code&gt;print-manager&lt;/code&gt;&lt;/a&gt; 是 KDE 提供的打印机和打印任务图形化管理界面&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.archlinux.org/packages/extra/x86_64/system-config-printer/&#34;&gt;&lt;code&gt;system-config-printer&lt;/code&gt;&lt;/a&gt; 是 GTK 下的图形化管理界面，还有 applet 支持&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;启动守护进程&#34;&gt;启动守护进程&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;systemctl start org.cups.cupsd.service&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;默认情况下无需其他配置，可以访问 localhost:631 来查看服务是否正常启动&lt;/p&gt;
+&lt;h3 id=&#34;添加打印机&#34;&gt;添加打印机&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;以 KDE 下使用 print-manager 为例，其他的平台应该大同小异&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;点击添加打印机开始添加，第一步是选择打印机协议和输入 IP 地址，根据自己打印机的实际情况进行选择：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;1st.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;第二步选择打印机驱动：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;2nd.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;没有找到对应的驱动，则需要自行安装，可以按照如下顺序寻找：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://aur.archlinux.org/&#34;&gt;AUR&lt;/a&gt;，google 搜索 &lt;code&gt;AUR + 设备型号&lt;/code&gt; 一般就能找到&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.openprinting.org/printers&#34;&gt;Printer Listings&lt;/a&gt;，OpenPrinting 提供的打印机驱动，放在 &lt;code&gt;/usr/share/cups/model/&lt;/code&gt; 下&lt;/li&gt;
+&lt;li&gt;设备供应商网站，放在 &lt;code&gt;/usr/share/cups/model/&lt;/code&gt; 下&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;最后填写一些打印机的相关描述信息即可，建议写清楚一些，以免以后分不清不同打印机的位置：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;3rd.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;打印机添加完毕后可以选择打印测试页来进行测试。&lt;/p&gt;
+&lt;h3 id=&#34;使用打印机&#34;&gt;使用打印机&lt;/h3&gt;
+&lt;p&gt;只需要在应用程序的菜单中点击打印然后选择刚才添加的打印机即可。&lt;/p&gt;
+&lt;h2 id=&#34;常见故障&#34;&gt;常见故障&lt;/h2&gt;
+&lt;h3 id=&#34;无法连接上打印机&#34;&gt;无法连接上打印机&lt;/h3&gt;
+&lt;p&gt;检查网络，防火墙等配置，检查 IP 地址是否输入错误。&lt;/p&gt;
+&lt;h3 id=&#34;连接上打印机-但是提交任务时报错-print-job-was-not-accepted&#34;&gt;连接上打印机，但是提交任务时报错 &amp;ldquo;Print job was not accepted.&amp;rdquo;&lt;/h3&gt;
+&lt;p&gt;首先检查自己选择的协议是否正确，然后检查自己选择的驱动是否正确&lt;/p&gt;
+&lt;h2 id=&#34;相关资料&#34;&gt;相关资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.ibm.com/developerworks/cn/linux/l-lpic1-108-4/index.html&#34;&gt;学习 Linux，101: 管理打印机和打印&lt;/a&gt; 教程从 &lt;a href=&#34;http://www.lpi.org/&#34;&gt;LPIC-1&lt;/a&gt; 备考的角度介绍了管理和使用打印机的相关知识&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.linuxfoundation.org/openprinting/start&#34;&gt;OpenPrinting&lt;/a&gt; 提供了驱动程序，打印机支持等资源和信息&lt;/li&gt;
+&lt;li&gt;维基百科词条 &lt;a href=&#34;https://zh.wikipedia.org/wiki/PostScript&#34;&gt;PostScript&lt;/a&gt; 详细地介绍了 PostScript 的前世今生&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Jenkins Pipeline 介绍</title><link>https://xuanwo.io/2019/08/30/jenkins-pipeline-intro/</link><pubDate>Fri, 30 Aug 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/08/30/jenkins-pipeline-intro/</guid><description>
 &lt;p&gt;前一段时间推动整个 Team 都转向了 Go Modules，最近一段时间的工作主要是在推动自动化构建与测试。我们最后选定的方案是 &lt;code&gt;Jenkins&lt;/code&gt; + &lt;code&gt;Multibranch Pipelines&lt;/code&gt;，本文将会简单介绍一下 Jenkins Pipeline 以及常用的技巧。&lt;/p&gt;
 &lt;h2 id=&#34;pipeline-是什么&#34;&gt;Pipeline 是什么&lt;/h2&gt;
 &lt;p&gt;Jenkins Pipeline 实际上是基于 Groovy 实现的 CI/CD 领域特定语言（DSL），主要分为两类，一类叫做 &lt;code&gt;Declarative Pipeline&lt;/code&gt;，一类叫做 &lt;code&gt;Scripted Pipeline&lt;/code&gt;。&lt;/p&gt;
@@ -1444,125 +1499,4 @@ ssl_certificate_key /etc/nginx/certs/git.xuanwo.io/key;
 &lt;p&gt;我配置的证书并不是完整的链，所以导致 TLS 在握手的时候失败了，将选用的证书修改为 fullchain 即可。&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;ssl_certificate /etc/nginx/certs/git.xuanwo.io/fullchain;
 ssl_certificate_key /etc/nginx/certs/git.xuanwo.io/key;
-&lt;/code&gt;&lt;/pre&gt;</description></item><item><title>在 Google 日历度过的欢乐时光</title><link>https://xuanwo.io/2019/03/30/google-calendar/</link><pubDate>Sat, 30 Mar 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/03/30/google-calendar/</guid><description>&lt;p&gt;前段时间终于下定决定入了 G Suite，花了点时间进行数据迁移，但是在操作日历的时候错误的把朋友们的生日提醒（每年重复）导入到了我的行程当中。为了将这些提醒删掉，我开始了一次 Google 日历的奇妙探险，找到了批量处理的方法，甚至还发现了一个 BUG。&lt;/p&gt;
-&lt;h2 id=&#34;apps-script-是好文明&#34;&gt;Apps Script 是好文明&lt;/h2&gt;
-&lt;p&gt;首先来明确一下需要解决的问题：删除个人日历中出现的大量形如 “XXX 的生日” 的行程。OK，问题确定之后，可以初步得到几种解决问题的思路：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;手动删&lt;/li&gt;
-&lt;li&gt;现成的工具&lt;/li&gt;
-&lt;li&gt;基于 Google 日历 API 开发脚本&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;首先排除第一种，时间成本过高，而且都是机械操作，毫无乐趣可言。现成的工具有是有，但是你需要授权第三方访问你的全部行程，我实在是不想之后某天被人发现我宣称出差公干其实是去宾馆跟朋友们一起玩俄罗斯方块吃鸡（原帖：&lt;a href=&#34;https://bbs.nga.cn/read.php?tid=16784200&#34;&gt;https://bbs.nga.cn/read.php?tid=16784200&lt;/a&gt;）。所以现成工具的方案也被排除了。&lt;/p&gt;
-&lt;p&gt;所以我又要造轮子了么？不，我们可以用 Apps Script！Apps Script 可以理解成自带 Google 绝大部分套件 SDK 组件的 JavaScript 运行环境，最棒的是它还是可以直接在线运行的。&lt;/p&gt;
-&lt;p&gt;研究一下日历的&lt;a href=&#34;https://developers.google.com/apps-script/reference/calendar/&#34;&gt;文档&lt;/a&gt;，可以知道需要用到的 API 只有 &lt;code&gt;getCalendarsByName&lt;/code&gt;，&lt;code&gt;getEvents&lt;/code&gt;，&lt;code&gt;getTitle&lt;/code&gt; 和 &lt;code&gt;deleteEvent&lt;/code&gt; 这些，剩下的都是些逻辑。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt; myFunction()
-{
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; fromDate &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Date&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;2000&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;);
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; toDate &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#007020&#34;&gt;Date&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;2999&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;);
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; calendarName &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Personal&amp;#39;&lt;/span&gt;;
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; calendar &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; CalendarApp.getCalendarsByName(calendarName)[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;];
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; events &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; calendar.getEvents(fromDate, toDate, {search&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;生日&amp;#34;&lt;/span&gt;});
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;for&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; i&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;; i&lt;span style=&#34;color:#666&#34;&gt;&amp;lt;&lt;/span&gt;events.length;i&lt;span style=&#34;color:#666&#34;&gt;++&lt;/span&gt;){
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; ev &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; events[i];
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; title &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; ev.getTitle();
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; (title.indexOf(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;的生日&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#666&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;1&lt;/span&gt;) {
-ev.deleteEvent();
-}
-}
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;一顿操作之后，只需要点击 &lt;code&gt;Run&lt;/code&gt; 就能运行啦，这时候切换到 Google 日历就能看到恼人的行程都已经被删掉了。&lt;/p&gt;
-&lt;h2 id=&#34;google-日历预言的世界末日&#34;&gt;Google 日历预言的世界末日&lt;/h2&gt;
-&lt;p&gt;欢乐时光还没有结束！&lt;/p&gt;
-&lt;p&gt;看到自己的脚本成功运行后自然会想要验证一下，于是我通过修改 URL 的方式访问了 &lt;a href=&#34;https://calendar.google.com/calendar/r/month/2099/1/1&#34;&gt;2099/1/1&lt;/a&gt;。emmmmm，这是咋了，为啥界面全都是空的，Console 还有报错：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;Uncaught TypeError&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; Cannot read property &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#39;Iu&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;of&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;null&lt;/span&gt;
-at vEb (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;404&lt;/span&gt;)
-at EU.HJ (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;404&lt;/span&gt;)
-at CEb.h.kAa (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;sy78,syou,xDNx2e,w&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;ypy,sypz,rBHmpf&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;408&lt;/span&gt;)
-at R1.Oe (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;ltDFwf,syi2,FsScmc&lt;span style=&#34;&#34;&gt;…&lt;/span&gt;symq,sy1,phtQPb&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;321&lt;/span&gt;)
-at m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;727&lt;/span&gt;
-at xha (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;263&lt;/span&gt;)
-at Ei (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;261&lt;/span&gt;)
-at Ci.addCallback (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;260&lt;/span&gt;)
-at Gya (m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;727&lt;/span&gt;)
-at m&lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt;base&lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#40a070&#34;&gt;726&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;本来想洗洗睡了的我瞬间来了精神，我很好奇！&lt;/p&gt;
-&lt;p&gt;通过二分的方法，我得到了临界点：&lt;a href=&#34;https://calendar.google.com/calendar/r/day/2051/2/10&#34;&gt;2051/2/10&lt;/a&gt; 。这个日子有什么特别的呢？为什么在它之前都是正常的，从它开始不管显示天，周还是月都无法正常显示呢？我瞬间有了几个猜想，不过需要一一验证。&lt;/p&gt;
-&lt;p&gt;第一个猜想是数据类型的限制。我做了一些简单的计算：&lt;/p&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;数据类型&lt;/th&gt;
-&lt;th&gt;最大值&lt;/th&gt;
-&lt;th&gt;对应时间&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;int32&lt;/td&gt;
-&lt;td&gt;2147483647&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;2038/1/19 11:14:7&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;uint32&lt;/td&gt;
-&lt;td&gt;4294967295&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;2106/2/7 14:28:16&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;JavaScript 最大精确整数&lt;/td&gt;
-&lt;td&gt;9007199254740991&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;285428751/11/12 7:36:31&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;无论哪一个都无法支持先前的猜想，所以问题肯定不是数据类型的问题。&lt;/p&gt;
-&lt;p&gt;第二个猜想是前端的 BUG。我稍微研究了一下 Google 日历混淆之后的代码：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;var&lt;/span&gt; vEb &lt;span style=&#34;color:#666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;function&lt;/span&gt;(a, b) {
-&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; [b.Iu &lt;span style=&#34;color:#666&#34;&gt;?&lt;/span&gt; a.T &lt;span style=&#34;color:#666&#34;&gt;?&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u95f0&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u958f&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;, CU[b.month], &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;\u6708&amp;#34;&lt;/span&gt;].join(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;)
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;这里有几个 Unicode 字符，转换一下：&lt;code&gt;\u95f0 -&amp;gt; 闰&lt;/code&gt;，&lt;code&gt;\u958f -&amp;gt; 閏&lt;/code&gt;，&lt;code&gt;\u6708 -&amp;gt; 月&lt;/code&gt;。Wow，&lt;code&gt;vEb&lt;/code&gt; 函数的作用就是判断当前月是不是闰月，根据用户的语言还会决定显示简体还是繁体。&lt;code&gt;a.T&lt;/code&gt; 显然是在判断语言，不用考虑。&lt;code&gt;b.Iu&lt;/code&gt; 更加关键一些，它会判断给定的日期（这里的 b？）是否是闰月。&lt;/p&gt;
-&lt;p&gt;接下来只要搞懂 b 是怎么来的，前面肯定有某一步返回的 b 是 null。但是面对 Google 混淆过的代码，想搞懂这个 b 是怎么来的谈何容易。我相信给我足够的时间，我能够缕清楚代码的脉络，最后得出一个结论，但是我现在更倾向于先换个思路，回头再来尝试。&lt;/p&gt;
-&lt;p&gt;下面从代码中跳出来思考，2051 年 2 月 10 日，这个日子到底有什么魔力呢？难道 Google 日历这么早就钦定了世界末日么？我开始试着在 Google 上搜索这个时间，结果还真的有发现。有一篇文章&lt;a href=&#34;http://www.mzwu.com/article.asp?id=1380&#34;&gt;ASP农历与公历互转类&lt;/a&gt;中居然出现完全一样的时间：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;&#39;公历转农历(查询日期范围1950-2-17至2051-2-10,格式yyyy-mm-dd)
-&#39; Response.Write NongGong.GongToNong(&amp;quot;1984-12-10&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;我下意识的将这个日子转换成了农历：&lt;code&gt;2050年 腊月 廿九 （辛未年 庚寅月 丙寅日）&lt;/code&gt;，我好像明白了什么，但是需要更多的信息来做支撑。&lt;/p&gt;
-&lt;h2 id=&#34;农历编排及其转换&#34;&gt;农历编排及其转换&lt;/h2&gt;
-&lt;p&gt;首先要重新认识一下农历：&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;农历，是现今东亚地区民间传统广泛使用的阴阳合历。古代相传为黄帝时代或者夏朝创制，又称黄历、夏历。中华民国成立后，由孙中山宣布采用西方格里历，而华夏传统历法则返称为旧历、传统历。中华人民共和国成立后，以格里历为“公历”，夏历改称“农历”。在汉语，西历也称阳历，因此农历常习惯上称为阴历，然而此历其实为阴阳合历。
-农历是阴阳历：“阳”是地球环绕太阳公转，以冬至回归年为基准确定岁实，配合季节阳光分一岁为二十四节气；“阴”根据月球运行定朔望月。中国现存历书最早是西汉版本之《夏小正》，汉武帝时期制定之《太初历》已经有相当完善之历法规则，自此大都采用“夏正”，即以建寅月为正月；之后定朔定气规则又多次修改。现行农历版本是依据既定基本规则，运用现代天文学成果修订，完全依照天文数据计算得来，为一天文历法（astronomical calendar）。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;画重点：&lt;strong&gt;依据既定基本规则，运用现代天文学成果修订，完全依照天文数据计算得来，为一天文历法（astronomical calendar）&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;那天文历法是什么呢？&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;天文历法（astronomical calendar）是以天文观测为准的历法，例如使用定气定朔的现代农历、宗教性的伊斯兰历及第二圣殿时的古犹太历。这种历法也称为是以观测为准的的历法，好处是完美而且永远准确，缺点是没有一定的公式，若要回推多久以前某一天的日期比较困难。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;与之相对应的是计算历法(arithmetic calendar)：&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;计算历法（arithmetic calendar）是以严格的数学公式计算的历法，例如现在的犹太历，也称为是以规则为准的历法，好处是容易计算特定时间是哪一天，不过和自然变化的精准性就比较差，即使历法本身非常的精准，也会因为地球自转及公转的略为变化，造成其精准性慢慢变差，因此一个计算历法使用的期间有限，可能只有数千年，之后就要用新的历法系统代替。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;实际上关于农历的编排，我们国家甚至还制定了国家标准：&lt;a href=&#34;http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296&#34;&gt;农历的编算和颁行&lt;/a&gt;，标准号 &lt;code&gt;GB/T 33661-2017&lt;/code&gt;。标准里面专门提到了计算模型和精度的问题：&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;5.1　太阳和月球的位置按IERS Conventions规定的模型计算。&lt;/p&gt;
-&lt;p&gt;5.2　朔和节气的北京时间计算精度应达到1秒。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;hr /&gt;
-&lt;p&gt;农历的编排本身就需要依赖外部的天文数据，而从公历向农历的转换自然也需要外部数据的支持。所以 Google 不能显示 2051-2-10 之后时间的原因也就出来了：Google 只存储了到 2050 年的农历数据，过了 2050 年农历的最后一天，后续的农历在转换的时候就报错了。&lt;/p&gt;
-&lt;p&gt;问题解决啦，我的好奇心得到了满足，可以安心睡觉了~&lt;/p&gt;
-&lt;h2 id=&#34;后记&#34;&gt;后记&lt;/h2&gt;
-&lt;p&gt;当然比我更有好奇心的读者们肯定还会想到为什么是 &lt;code&gt;2050年 腊月 廿九&lt;/code&gt;，难道不应该是腊月三十嘛？这个就留作课后作业吧，相信你们肯定能搞明白的~&lt;/p&gt;
-&lt;p&gt;下面是日常的挑毛病环节：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;To Google 的国际化团队：&lt;code&gt;农历腊月&lt;/code&gt;不能翻译成&lt;code&gt;农历十二月&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;To 国家市场监督管理总局：9102 年了，国家标准在线预览还要依赖 Flash 插件，怕不是思想不正确哟&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;顺便介绍一下 &lt;a href=&#34;https://thetype.com/&#34;&gt;Type is Beautiful&lt;/a&gt; 的&lt;a href=&#34;https://thetype.com/2019/02/12498/&#34;&gt;孔雀计划&lt;/a&gt;，中文的排版问题和本文反映出来的农历问题其根源是一样的：中国的传统文化要主动向外介绍推广，主动参与标准的置顶，需要整个行业的通力合作。中文排版和农历这样充满了美感的东西理应让更多人了解，而不是被掩盖在女德这种真正糟粕的阴影之下。&lt;/p&gt;
-&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86&#34;&gt;农历 - 维基百科&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://zh.wikipedia.org/wiki/%E5%8E%86%E6%B3%95&#34;&gt;历法 - 维基百科&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296&#34;&gt;农历的编算和颁行&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description></item></channel></rss>
+&lt;/code&gt;&lt;/pre&gt;</description></item></channel></rss>
