@@ -1,4 +1,222 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Automation on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/automation/</link><description>Recent content in Automation on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 14 Jan 2018 10:07:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/automation/index.xml" rel="self" type="application/rss+xml"/><item><title>Archlinux 连接并使用打印机</title><link>https://xuanwo.io/2019/09/19/archlinux-cups-connect/</link><pubDate>Thu, 19 Sep 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/09/19/archlinux-cups-connect/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Automation on Xuanwo&#39;s Blog</title><link>https://xuanwo.io/tags/automation/</link><description>Recent content in Automation on Xuanwo&#39;s Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 14 Jan 2018 10:07:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/automation/index.xml" rel="self" type="application/rss+xml"/><item><title>Go 模板元编程及其在 qsctl 中的实践</title><link>https://xuanwo.io/2019/11/10/go-template-meta-coding-in-qsctl2/</link><pubDate>Sun, 10 Nov 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/11/10/go-template-meta-coding-in-qsctl2/</guid><description>
+&lt;p&gt;有一段时间没有写博客了，最近主要在做的是事情是重新设计并跟小伙伴 &lt;a href=&#34;https://github.com/Prnyself&#34;&gt;Lance&lt;/a&gt; 一起了实现 QingStor 对象存储的命令行工具 &lt;a href=&#34;https://github.com/yunify/qsctl&#34;&gt;qsctl&lt;/a&gt;。经过一段时间的开发，qsctl 终于发布了首个 beta 版本，我也终于有时间能够跟大家聊一聊&lt;del&gt;（吹嘘）&lt;/del&gt;一下这个产品。在这周五我们公司的 Think Friday 分享中，我分享了《数据驱动编程及其在 qsctl 中的实践》，本文是这次分享修改了标题并补充了部分内容后的事后总结。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;大家好，我是漩涡，我是 QingStor 存储研发部的研发工程师（aka QingStor 首席 Go Template 研发工程师，逃）。我对自己的定位是效率研发工程师，我的工作职责是提升我们团队，我们的研发同事，还有调用我们服务的开发者和使用我们服务的用户的工作效率。今天的分享主要就是介绍影响我们用户工作效率的关键工具——qsctl 的重构实践。&lt;/p&gt;
+&lt;p&gt;本次分享主要分为下面六个部分：首先为不熟悉 QingStor 对象存储周边产品生态的同学介绍 qsctl 是什么，然后介绍 qsctl 在实际的运用和维护中面临的困境。接下来介绍 qsctl 2 研发初期定下的目标，然后分享 qsctl 2 是如何运用 Go 模板元编程的。在最后会介绍实践中的一些经验和最后的实际应用。&lt;/p&gt;
+&lt;h2 id=&#34;qsctl-是什么&#34;&gt;qsctl 是什么&lt;/h2&gt;
+&lt;p&gt;在介绍 qsctl 是什么之前，我们需要先了解 QingStor 对象存储是什么。按照官方口径，QingStor™ 对象存储为用户提供可无限扩展的通用数据存储服务，具有安全可靠、简单易用、高性能、低成本等特点。抛开这些宣传话术，从开发者的角度来看，对象存储实际上可以视作一个通过 HTTP 接口对外提供服务的超大 Key-Value 数据库，每个文件的元数据都与它自身的内容存储在一起，只能通过一个全局唯一的 Key 来访问。&lt;/p&gt;
+&lt;p&gt;显然的，对象存储提供的接口与传统的 POSIX 接口是完全不同的，所以为了方便用户使用对象存储，除了开发各个语言的 SDK 之外，我们还需要提供各种工具：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yunify/qsftpd&#34;&gt;qsftpd&lt;/a&gt;: 将 QingStor 对象存储作为后端存储的 FTP 服务&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yunify/qscamel&#34;&gt;qscamel&lt;/a&gt;: 用于在不同的端点 (Endpoint) 中高效迁移数据的工具&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yunify/qsfs-fuse&#34;&gt;qsfs&lt;/a&gt; &amp;amp;&amp;amp; &lt;a href=&#34;https://docs.qingcloud.com/qingstor/developer_tools/local_fs_tools/elastic_drive/index.html&#34;&gt;ElasticDrive&lt;/a&gt;: Linux &amp;amp;&amp;amp; Windows 端将对象存储挂载到本地的工具&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在这些所有的工具之中，qsctl 是用户最多，也是功能最全面的，它提供了 Bucket 和 Object 创建，查看，删除的管理功能，提供了批量上传和下载 &amp;amp;&amp;amp; 增量上传和下载的功能，还有类似于生成一次性访问链接这样的便利小功能。&lt;/p&gt;
+&lt;p&gt;它的使用是如此广泛，以至于它成为了 QingStor 私有云部署验收环节中的一部分：使用 qsctl 创建，查看，删除 Object 以测试服务是否正常。大量的 QingStor 对象存储用户将 qsctl 工具纳入了他们的工作流程之中：他们在各种各样的脚本中调用 qsctl 命令行来访问对象存储。&lt;/p&gt;
+&lt;h2 id=&#34;qsctl-的困境&#34;&gt;qsctl 的困境&lt;/h2&gt;
+&lt;p&gt;使用如此广泛的 qsctl 从 2018 年 12 月起就再也没有任何更新了，没有新增功能，没有 BUG 修复，更别提代码重构和性能优化。Why？因为我们遇到了很多问题，人手不足固然是一方面，但是 qsctl 本身的问题才是更致命的。&lt;/p&gt;
+&lt;p&gt;首先我们遇到的是开发语言特性与日渐增长的用户需求不匹配的矛盾。&lt;/p&gt;
+&lt;p&gt;qsctl 开发始于 2016 年，对标的产品是 &lt;a href=&#34;https://github.com/s3tools/s3cmd&#34;&gt;s3cmd&lt;/a&gt;，当时我们着重需要解决的问题是人有我无的问题，因此我们选择使用 Python 快速开发出一个可用的命令行工具。要知道，那时候我们甚至连一个好用的 Python SDK 都没有。我们当时对 qsctl 的期待是它能够满足用户的轻度使用需求，更加重载和生产级别的需求会引导用户基于我们的 API 来进行开发。&lt;/p&gt;
+&lt;p&gt;我们的期望是错误的。用户从来都不会以我们期望的方式来使用工具，用户从来都不会主动调用我们的 API 来进行开发。只要你提供了工具，用户就会在生产环境中使用，并将其视作服务可用性的一部分。于是大家逐渐的发现，qsctl 太慢了。单线程的上传和下载在大量小文件的场景下完全不可用，删除一个百万 Key 的 Bucket 需要好几天，为此还有用户愤怒的提交工单要求将这几天的收费全部免除。&lt;/p&gt;
+&lt;p&gt;不仅如此，Python 带来的另一个问题是静态部署很难。第一用户不一定有 Python，经常有用户提工单询问 Python 怎么安装，pip 是什么东西；第二用户不一定有我们需要的版本，有一次我修复过一个 Python 2.6 下 os.Walk 的 BUG；第三用户不一定有网络，曾经以为的 pip install 一把梭变成了支配我们很久的梦魇，逼迫我们提供一个所谓的 qsctl-offline。&lt;/p&gt;
+&lt;p&gt;除此之外，还有 Python 2 始终阴魂不散。Python 2 会在 2020 年退役，但是我怀疑一直到 2030 年，用户的 CentOS 5.x 都不会退役，我们需要一直提供 Python 2 的技术支持。&lt;/p&gt;
+&lt;p&gt;其次，我们还遇到了项目的陈旧架构不能满足复杂功能需求的矛盾。&lt;/p&gt;
+&lt;p&gt;以 Copy 为例：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;qsctl-trouble.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这些复杂的判断都是在一个文件中完成的，没有单元测试，没有代码覆盖率的检查，只有一个简单的脚本来测试 copy 之后文件数量是否正确。&lt;/p&gt;
+&lt;p&gt;在过去了几个月之后，我已经完全不敢去动这些代码了，更别提没有维护过 qsctl 的其他同事了。&lt;/p&gt;
+&lt;h2 id=&#34;qsctl-2-的目标&#34;&gt;qsctl 2 的目标&lt;/h2&gt;
+&lt;p&gt;光提问题不说方案不是 QingStor 的风格，在我们团队来了一位新同事之后，我们终于下定决定重写 qsctl，彻底解决所有的历史遗留问题。现在我得到了一次机会来重新设计和实现 qsctl，我要怎么做呢？&lt;/p&gt;
+&lt;p&gt;我要做 &lt;strong&gt;QingStor 有史以来最棒的命令行工具&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;最棒的含义是正确性，可维护性和性能兼备。在我看来，正确性是所有服务的根基，尤其是存储领域的服务。应用挂了能恢复，数据写错就是事故了。正确性决定了程序能不能用。而可维护性决定了这个程序能活多久，像旧版的 qsctl 已经在事实上死去了。在兼具了正确性和可维护性之后，我们会努力的去提升这个应用的性能。&lt;/p&gt;
+&lt;p&gt;为了保障 qsctl 2 的正确性和可维护性，我们决定采用全新的方式来开发它，也就是标题中提到的 Go 模板元编程。这次分享不会过多的涉及元编程的理论和实现，主要介绍我们的实际应用。&lt;/p&gt;
+&lt;h2 id=&#34;qsctl-2-的模板&#34;&gt;qsctl 2 的模板&lt;/h2&gt;
+&lt;p&gt;一个最简单而朴素的想法是将所有的调用抽象为一个任务，这样我们在设计的时候就只需要考虑任务与任务之间的抽象关系，不需要考虑任务的具体实现。以初始化分段上传为例：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;./init-segment.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;InitSegment&lt;/code&gt;任务需要的 &lt;code&gt;Input&lt;/code&gt; 有 &lt;code&gt;PartSize&lt;/code&gt;，&lt;code&gt;Storager&lt;/code&gt; 和 &lt;code&gt;Path&lt;/code&gt;，&lt;code&gt;Output&lt;/code&gt; 有初始化分段后得到的 &lt;code&gt;SegmentID&lt;/code&gt;。我们首先确定有哪些任务，然后确定任务与任务之间的依赖，划分出不同的任务，之后再确定每个任务有哪些 &lt;code&gt;Input&lt;/code&gt; 和 &lt;code&gt;Output&lt;/code&gt;。但是我们并不把这些任务的关系通过函数调用的方式显式暴露出来，我们只提供一个任务互相调用的机制，即 《Unix 编程艺术》中所说的 &lt;code&gt;提供机制，而不是策略&lt;/code&gt;。在这些 Value 都确定之后，我们就能够以一种统一的抽象来描述每个任务：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;SegmentInit&amp;#34;&lt;/span&gt;: {
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;description&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;init a segment upload&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;input&amp;#34;&lt;/span&gt;: [
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;PartSize&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Path&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Storage&amp;#34;&lt;/span&gt;
+],
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;output&amp;#34;&lt;/span&gt;: [
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;SegmentID&amp;#34;&lt;/span&gt;
+]
+}
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;type-system&#34;&gt;Type System&lt;/h3&gt;
+&lt;p&gt;上层抽象已经确定，下面需要考虑如何去实现。为了保证整体服务的正确性，我们期望这个任务中的所有 Value 都是强类型的，在编译期决定的，这样我们的 IDE 和编译器就能为我们免除大量的低级错误。所以我们设计了一套类型系统：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;PartSize&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;int64&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;Path&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;string&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;Storage&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;storage.Storager&amp;#34;&lt;/span&gt;,
+&lt;span style=&#34;color:#062873;font-weight:bold&#34;&gt;&amp;#34;SegmentID&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;string&amp;#34;&lt;/span&gt;
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我们通过一个 JSON 文件来描述实际使用的 Type Name 和内部的类型，这样就可以通过模板来生成对应的结构体：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; PartSize &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;struct&lt;/span&gt; {
+valid &lt;span style=&#34;color:#902000&#34;&gt;bool&lt;/span&gt;
+v &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;
+l sync.RWMutex
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我们还能够借此生成对应的 &lt;code&gt;Getter&lt;/code&gt;，&lt;code&gt;Setter&lt;/code&gt; 和 &lt;code&gt;Validator&lt;/code&gt;，以 &lt;code&gt;Getter&lt;/code&gt; 为例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; PartSizeGetter &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+&lt;span style=&#34;color:#06287e&#34;&gt;GetPartSize&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (o &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;PartSize) &lt;span style=&#34;color:#06287e&#34;&gt;GetPartSize&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt; {
+o.l.&lt;span style=&#34;color:#06287e&#34;&gt;RLock&lt;/span&gt;()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;defer&lt;/span&gt; o.l.&lt;span style=&#34;color:#06287e&#34;&gt;RUnlock&lt;/span&gt;()
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !o.valid {
+&lt;span style=&#34;color:#007020&#34;&gt;panic&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;PartSize value is not valid&amp;#34;&lt;/span&gt;)
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; o.v
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;我们能够实现自动的加锁和解锁，还能够检查这个值是否有效，如果这个值无效，但是后续的代码中还是尝试去 &lt;code&gt;Get&lt;/code&gt; 了，我们将其认为是开发者的问题，直接 &lt;code&gt;panic&lt;/code&gt; 掉。不仅如此，我们还能实现任务与任务之间的 Value 自动传递：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;LoadPartSize&lt;/span&gt;(t navvy.Task, v PartSizeSetter) {
+x, ok &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; t.(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;interface&lt;/span&gt; {
+PartSizeGetter
+PartSizeValidator
+})
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !ok {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !x.&lt;span style=&#34;color:#06287e&#34;&gt;ValidatePartSize&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+}
+v.&lt;span style=&#34;color:#06287e&#34;&gt;SetPartSize&lt;/span&gt;(x.&lt;span style=&#34;color:#06287e&#34;&gt;GetPartSize&lt;/span&gt;())
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;task-system&#34;&gt;Task System&lt;/h3&gt;
+&lt;p&gt;在前述 Type System 的基础上，我们可以实现我们的 Task 类型了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// SegmentInitTask will init a segment upload.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;type&lt;/span&gt; SegmentInitTask &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;struct&lt;/span&gt; {
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Predefined value
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Input value
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; types.PartSize
+types.Path
+types.Storage
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Output value
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; types.SegmentID
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;由于每个 Task 的 &lt;code&gt;Input&lt;/code&gt; 和 &lt;code&gt;Output&lt;/code&gt; 在编译阶段就已经知道了，所以我们可以做很多事情，比如在初始化任务的时候自动载入父任务中已经存在的值：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// loadInput will check and load all input before new task.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;SegmentInitTask) &lt;span style=&#34;color:#06287e&#34;&gt;loadInput&lt;/span&gt;(task navvy.Task) {
+&lt;span style=&#34;color:#666&#34;&gt;...&lt;/span&gt;
+types.&lt;span style=&#34;color:#06287e&#34;&gt;LoadPartSize&lt;/span&gt;(task, t)
+types.&lt;span style=&#34;color:#06287e&#34;&gt;LoadPath&lt;/span&gt;(task, t)
+types.&lt;span style=&#34;color:#06287e&#34;&gt;LoadStorage&lt;/span&gt;(task, t)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;比如在 Task 运行之前去校验所有的 &lt;code&gt;Input&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// validateInput will validate all input before run task.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;SegmentInitTask) &lt;span style=&#34;color:#06287e&#34;&gt;validateInput&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !t.&lt;span style=&#34;color:#06287e&#34;&gt;ValidatePartSize&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020&#34;&gt;panic&lt;/span&gt;(fmt.&lt;span style=&#34;color:#06287e&#34;&gt;Errorf&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Task SegmentInit value PartSize is invalid&amp;#34;&lt;/span&gt;))
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !t.&lt;span style=&#34;color:#06287e&#34;&gt;ValidatePath&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020&#34;&gt;panic&lt;/span&gt;(fmt.&lt;span style=&#34;color:#06287e&#34;&gt;Errorf&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Task SegmentInit value Path is invalid&amp;#34;&lt;/span&gt;))
+}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; !t.&lt;span style=&#34;color:#06287e&#34;&gt;ValidateStorage&lt;/span&gt;() {
+&lt;span style=&#34;color:#007020&#34;&gt;panic&lt;/span&gt;(fmt.&lt;span style=&#34;color:#06287e&#34;&gt;Errorf&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Task SegmentInit value Storage is invalid&amp;#34;&lt;/span&gt;))
+}
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;比如自动生成这个任务的 Debug 信息：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// String will implement Stringer interface.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;SegmentInitTask) &lt;span style=&#34;color:#06287e&#34;&gt;String&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; fmt.&lt;span style=&#34;color:#06287e&#34;&gt;Sprintf&lt;/span&gt;(
+&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;SegmentInitTask {PartSize: %v, Path: %v, Storage: %v}&amp;#34;&lt;/span&gt;,
+t.&lt;span style=&#34;color:#06287e&#34;&gt;GetPartSize&lt;/span&gt;(), t.&lt;span style=&#34;color:#06287e&#34;&gt;GetPath&lt;/span&gt;(), t.&lt;span style=&#34;color:#06287e&#34;&gt;GetStorage&lt;/span&gt;(),
+)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;初始化和接口的实现也可以自动生成：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// NewSegmentInit will create a SegmentInitTask struct and fetch inherited data from parent task.
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;NewSegmentInit&lt;/span&gt;(task navvy.Task) &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;SegmentInitTask {
+t &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#666&#34;&gt;&amp;amp;&lt;/span&gt;SegmentInitTask{}
+t.&lt;span style=&#34;color:#06287e&#34;&gt;SetID&lt;/span&gt;(uuid.&lt;span style=&#34;color:#06287e&#34;&gt;New&lt;/span&gt;().&lt;span style=&#34;color:#06287e&#34;&gt;String&lt;/span&gt;())
+t.&lt;span style=&#34;color:#06287e&#34;&gt;loadInput&lt;/span&gt;(task)
+t.&lt;span style=&#34;color:#06287e&#34;&gt;SetScheduler&lt;/span&gt;(schedule.&lt;span style=&#34;color:#06287e&#34;&gt;NewScheduler&lt;/span&gt;(t.&lt;span style=&#34;color:#06287e&#34;&gt;GetPool&lt;/span&gt;()))
+t.&lt;span style=&#34;color:#007020&#34;&gt;new&lt;/span&gt;() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// What we need to implement
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; t
+}
+&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// Run implement navvy.Task
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;SegmentInitTask) &lt;span style=&#34;color:#06287e&#34;&gt;Run&lt;/span&gt;() {
+t.&lt;span style=&#34;color:#06287e&#34;&gt;validateInput&lt;/span&gt;()
+log.&lt;span style=&#34;color:#06287e&#34;&gt;Debugf&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Started %s&amp;#34;&lt;/span&gt;, t)
+t.&lt;span style=&#34;color:#06287e&#34;&gt;run&lt;/span&gt;() &lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;// What we need to implement
+&lt;/span&gt;&lt;span style=&#34;color:#60a0b0;font-style:italic&#34;&gt;&lt;/span&gt; t.&lt;span style=&#34;color:#06287e&#34;&gt;GetScheduler&lt;/span&gt;().&lt;span style=&#34;color:#06287e&#34;&gt;Wait&lt;/span&gt;()
+log.&lt;span style=&#34;color:#06287e&#34;&gt;Debugf&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;Finished %s&amp;#34;&lt;/span&gt;, t)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在所有的非业务逻辑代码都被自动生成之后，我们只需要专注于自己的任务即可，实现 &lt;code&gt;InitSemgnet&lt;/code&gt; 变成一件非常容易的事情：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;SegmentInitTask) &lt;span style=&#34;color:#007020&#34;&gt;new&lt;/span&gt;() {}
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; (t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;SegmentInitTask) &lt;span style=&#34;color:#06287e&#34;&gt;run&lt;/span&gt;() {
+id, err &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; t.&lt;span style=&#34;color:#06287e&#34;&gt;GetStorage&lt;/span&gt;().&lt;span style=&#34;color:#06287e&#34;&gt;InitSegment&lt;/span&gt;(t.&lt;span style=&#34;color:#06287e&#34;&gt;GetPath&lt;/span&gt;(),
+typ.&lt;span style=&#34;color:#06287e&#34;&gt;WithPartSize&lt;/span&gt;(t.&lt;span style=&#34;color:#06287e&#34;&gt;GetPartSize&lt;/span&gt;()))
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;if&lt;/span&gt; err &lt;span style=&#34;color:#666&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt; {
+t.&lt;span style=&#34;color:#06287e&#34;&gt;TriggerFault&lt;/span&gt;(types.&lt;span style=&#34;color:#06287e&#34;&gt;NewErrUnhandled&lt;/span&gt;(err))
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt;
+}
+t.&lt;span style=&#34;color:#06287e&#34;&gt;SetSegmentID&lt;/span&gt;(id)
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;每个 Task 都是独立，不需要关心谁会调用它，只要实现自己的逻辑即可。这一点使得测试变得同样容易且清晰：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#06287e&#34;&gt;TestSegmentInitTask_run&lt;/span&gt;(t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;testing.T) {
+ctrl &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; gomock.&lt;span style=&#34;color:#06287e&#34;&gt;NewController&lt;/span&gt;(t)
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;defer&lt;/span&gt; ctrl.&lt;span style=&#34;color:#06287e&#34;&gt;Finish&lt;/span&gt;()
+t.&lt;span style=&#34;color:#06287e&#34;&gt;Run&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;normal&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;testing.T) {
+store &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; mock.&lt;span style=&#34;color:#06287e&#34;&gt;NewMockStorager&lt;/span&gt;(ctrl)
+path &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; uuid.&lt;span style=&#34;color:#06287e&#34;&gt;New&lt;/span&gt;().&lt;span style=&#34;color:#06287e&#34;&gt;String&lt;/span&gt;()
+segmentID &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; uuid.&lt;span style=&#34;color:#06287e&#34;&gt;New&lt;/span&gt;().&lt;span style=&#34;color:#06287e&#34;&gt;String&lt;/span&gt;()
+task &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; SegmentInitTask{}
+task.&lt;span style=&#34;color:#06287e&#34;&gt;SetStorage&lt;/span&gt;(store)
+task.&lt;span style=&#34;color:#06287e&#34;&gt;SetPath&lt;/span&gt;(path)
+task.&lt;span style=&#34;color:#06287e&#34;&gt;SetPartSize&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;1000&lt;/span&gt;)
+store.&lt;span style=&#34;color:#06287e&#34;&gt;EXPECT&lt;/span&gt;().&lt;span style=&#34;color:#06287e&#34;&gt;InitSegment&lt;/span&gt;(gomock.&lt;span style=&#34;color:#06287e&#34;&gt;Any&lt;/span&gt;(), gomock.&lt;span style=&#34;color:#06287e&#34;&gt;Any&lt;/span&gt;()).&lt;span style=&#34;color:#06287e&#34;&gt;DoAndReturn&lt;/span&gt;(
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(inputPath &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, pairs &lt;span style=&#34;color:#666&#34;&gt;...*&lt;/span&gt;typ.Pair) (&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;) {
+assert.&lt;span style=&#34;color:#06287e&#34;&gt;Equal&lt;/span&gt;(t, inputPath, path)
+assert.&lt;span style=&#34;color:#06287e&#34;&gt;Equal&lt;/span&gt;(t, pairs[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;].Value.(&lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;), &lt;span style=&#34;color:#007020&#34;&gt;int64&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;1000&lt;/span&gt;))
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; segmentID, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;nil&lt;/span&gt;
+},
+)
+task.&lt;span style=&#34;color:#06287e&#34;&gt;run&lt;/span&gt;()
+assert.&lt;span style=&#34;color:#06287e&#34;&gt;Equal&lt;/span&gt;(t, segmentID, task.&lt;span style=&#34;color:#06287e&#34;&gt;GetSegmentID&lt;/span&gt;())
+})
+t.&lt;span style=&#34;color:#06287e&#34;&gt;Run&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;init segment returned error&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(t &lt;span style=&#34;color:#666&#34;&gt;*&lt;/span&gt;testing.T) {
+store &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; mock.&lt;span style=&#34;color:#06287e&#34;&gt;NewMockStorager&lt;/span&gt;(ctrl)
+path &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; uuid.&lt;span style=&#34;color:#06287e&#34;&gt;New&lt;/span&gt;().&lt;span style=&#34;color:#06287e&#34;&gt;String&lt;/span&gt;()
+task &lt;span style=&#34;color:#666&#34;&gt;:=&lt;/span&gt; SegmentInitTask{}
+task.&lt;span style=&#34;color:#06287e&#34;&gt;SetFault&lt;/span&gt;(fault.&lt;span style=&#34;color:#06287e&#34;&gt;New&lt;/span&gt;())
+task.&lt;span style=&#34;color:#06287e&#34;&gt;SetStorage&lt;/span&gt;(store)
+task.&lt;span style=&#34;color:#06287e&#34;&gt;SetPath&lt;/span&gt;(path)
+task.&lt;span style=&#34;color:#06287e&#34;&gt;SetPartSize&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;1000&lt;/span&gt;)
+store.&lt;span style=&#34;color:#06287e&#34;&gt;EXPECT&lt;/span&gt;().&lt;span style=&#34;color:#06287e&#34;&gt;String&lt;/span&gt;().&lt;span style=&#34;color:#06287e&#34;&gt;DoAndReturn&lt;/span&gt;(&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;() &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt; {
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;test storager&amp;#34;&lt;/span&gt;
+})
+store.&lt;span style=&#34;color:#06287e&#34;&gt;EXPECT&lt;/span&gt;().&lt;span style=&#34;color:#06287e&#34;&gt;InitSegment&lt;/span&gt;(gomock.&lt;span style=&#34;color:#06287e&#34;&gt;Any&lt;/span&gt;(), gomock.&lt;span style=&#34;color:#06287e&#34;&gt;Any&lt;/span&gt;()).&lt;span style=&#34;color:#06287e&#34;&gt;DoAndReturn&lt;/span&gt;(
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;func&lt;/span&gt;(inputPath &lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, pairs &lt;span style=&#34;color:#666&#34;&gt;...*&lt;/span&gt;typ.Pair) (&lt;span style=&#34;color:#902000&#34;&gt;string&lt;/span&gt;, &lt;span style=&#34;color:#902000&#34;&gt;error&lt;/span&gt;) {
+assert.&lt;span style=&#34;color:#06287e&#34;&gt;Equal&lt;/span&gt;(t, inputPath, path)
+assert.&lt;span style=&#34;color:#06287e&#34;&gt;Equal&lt;/span&gt;(t, pairs[&lt;span style=&#34;color:#40a070&#34;&gt;0&lt;/span&gt;].Value.(&lt;span style=&#34;color:#902000&#34;&gt;int64&lt;/span&gt;), &lt;span style=&#34;color:#007020&#34;&gt;int64&lt;/span&gt;(&lt;span style=&#34;color:#40a070&#34;&gt;1000&lt;/span&gt;))
+&lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;, errors.&lt;span style=&#34;color:#06287e&#34;&gt;New&lt;/span&gt;(&lt;span style=&#34;color:#4070a0&#34;&gt;&amp;#34;test&amp;#34;&lt;/span&gt;)
+},
+)
+task.&lt;span style=&#34;color:#06287e&#34;&gt;run&lt;/span&gt;()
+assert.&lt;span style=&#34;color:#06287e&#34;&gt;False&lt;/span&gt;(t, task.&lt;span style=&#34;color:#06287e&#34;&gt;ValidateSegmentID&lt;/span&gt;())
+assert.&lt;span style=&#34;color:#06287e&#34;&gt;True&lt;/span&gt;(t, task.&lt;span style=&#34;color:#06287e&#34;&gt;GetFault&lt;/span&gt;().&lt;span style=&#34;color:#06287e&#34;&gt;HasError&lt;/span&gt;())
+})
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;每个任务的测试都不需要提前设置父任务，只需要设置对应的 &lt;code&gt;Input&lt;/code&gt; 即可。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;By the way，qsctl 2.0 昨天发布了首个 Beta 版本：&lt;a href=&#34;https://github.com/yunify/qsctl/tree/v2.0.0-beta.1&#34;&gt;v2.0.0-beta.1&lt;/a&gt; ，欢迎大家体验并反馈 BUG。&lt;/p&gt;
+&lt;h2 id=&#34;一些总结&#34;&gt;一些总结&lt;/h2&gt;
+&lt;p&gt;这一段时间的实践带给我的是思路的转变：&lt;strong&gt;为实际的问题寻找一个合适的抽象，并针对抽象而不是实际的逻辑编程&lt;/strong&gt;。模板元编程的助力在于减少试错的成本，在 qsctl 2 的开发过程中，Task System 的抽象及其实现进行过三次大规模的重构，大多数时间都花在思考和测试上，整体的业务逻辑迁移起来并不困难。&lt;/p&gt;
+&lt;p&gt;银弹当然不存在，并不是所有项目都适合搞模板元编程，但是如果你的项目中有大量的重复逻辑和确定的输入输出，不妨尝试一下。&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yunify/qsctl/pull/107&#34;&gt;qsctl PR: New task execution framework&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yunify/qsctl/pull/146&#34;&gt;qsctl PR: *: Refactor task scheduler system&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yunify/qsctl/pull/151&#34;&gt;qsctl PR: *: Refactor task type system&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.google.com/presentation/d/1DrGBNIFXRZbMehPWygF1fsgGXypmpF83NzBxSpUBk4o/edit?usp=sharing&#34;&gt;数据驱动编程及其在 qsctl 中的实践&lt;/a&gt; 的 Slides&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Archlinux 连接并使用打印机</title><link>https://xuanwo.io/2019/09/19/archlinux-cups-connect/</link><pubDate>Thu, 19 Sep 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/09/19/archlinux-cups-connect/</guid><description>
 &lt;p&gt;一直觉得折腾打印机很麻烦，所以每次都是让朋友 F 帮我打印各种材料。但是现在朋友 F 已经离职了，所以只能自己想办法搞了。本文会首先介绍操作系统与打印机通讯的原理，然后讲解如何在 Archlinux 连接并使用打印机，最后介绍常见的故障排除手段。&lt;/p&gt;
 &lt;h2 id=&#34;打印系统&#34;&gt;打印系统&lt;/h2&gt;
 &lt;h3 id=&#34;假脱机-spool&#34;&gt;假脱机(spool)&lt;/h3&gt;
@@ -1443,60 +1661,4 @@ p.recovered = &lt;span style=&#34;color:#007020;font-weight:bold&#34;&gt;true&lt
 &lt;li&gt;&lt;a href=&#34;https://go101.org/article/panic-and-recover-more.html&#34;&gt;The Right Places to Call the recover Function&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://draveness.me/golang-function-call&#34;&gt;理解 Golang 中函数调用的原理&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://ieevee.com/tech/2017/11/23/go-panic.html&#34;&gt;Golang: 深入理解panic and recover&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description></item><item><title>翻车实况第 2 期</title><link>https://xuanwo.io/2019/05/13/rollover-2nd/</link><pubDate>Mon, 13 May 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/05/13/rollover-2nd/</guid><description>&lt;blockquote&gt;
-&lt;p&gt;这文档里面都说过的事情，哪能算翻车！&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id=&#34;fcitx-快捷键与-rime-冲突&#34;&gt;fcitx 快捷键与 rime 冲突&lt;/h2&gt;
-&lt;p&gt;从很久之前开始就隐隐感觉 fcitx 和 rime 中间有些微妙的不对付，具体现象是使用 &lt;code&gt;L Shift&lt;/code&gt; 切换中英文之后会出现 rime 在中英文间疯狂切换导致无法正常输入。以前一直都是重新 Deploy 一下 rime 将就一下，直到有一天终于忍不住了，在 Archlinuxcn 的群里问了一下，&lt;a href=&#34;https://t.me/archlinuxcn_group/1397962&#34;&gt;传送门&lt;/a&gt;。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;rime.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;哦吼，有位群友指出 rime 和 fcitx 都有自己的中英文切换键，所以在默认配置下会出现快捷键的冲突。后来我按照群友的指示把 fcitx 的快捷键关掉，只用 rime 的切换（因为我只需要输入中文和英文，而且我只有 rime 这一个输入法）。&lt;/p&gt;
-&lt;p&gt;果然好了！困扰了我大半年的毛病十秒钟就被解决了= =&lt;/p&gt;
-&lt;h2 id=&#34;tmux-2-9-配置变更&#34;&gt;tmux 2.9 配置变更&lt;/h2&gt;
-&lt;p&gt;前一段时间 tmux 上了 2.9，导致 &lt;code&gt;window-status-bg&lt;/code&gt;，&lt;code&gt;message-fg&lt;/code&gt; 这种常用的配置参数都失效了。&lt;/p&gt;
-&lt;p&gt;tmux 的 CHANGES 文件中有提到如何迁移： &lt;a href=&#34;https://github.com/tmux/tmux/blob/master/CHANGES#L89-L90&#34;&gt;https://github.com/tmux/tmux/blob/master/CHANGES#L89-L90&lt;/a&gt;&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;* The individual -fg, -bg and -attr options have been removed; they
-were superseded by -style options in tmux 1.9.
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;具体的来说就是把形如 &lt;code&gt;status-bg colour235&lt;/code&gt; 的参数替换为 &lt;code&gt;status-style bg=colour235&lt;/code&gt;，比如&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;set-option -g status-bg colour235
-set-option -g status-fg colour136
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;替换为：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;set-option -g status-style fg=colour136,bg=colour235
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;我在用的主题是 &lt;a href=&#34;https://github.com/seebi/tmux-colors-solarized&#34;&gt;tmux-colors-solarized&lt;/a&gt;，已经有人贡献了一个修复 tmux 2.9 兼容的 &lt;a href=&#34;https://github.com/seebi/tmux-colors-solarized/pull/23&#34;&gt;PR&lt;/a&gt;，其他主题参考一下即可。&lt;/p&gt;
-&lt;h2 id=&#34;go-get-failed&#34;&gt;go get failed&lt;/h2&gt;
-&lt;p&gt;有一天用 go get 去访问托管在自建的 gitea 的时候突然发现会出现这样的报错：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;:) go get git.xuanwo.io/let-go-mod-happy/logrus
-package git.xuanwo.io/let-go-mod-happy/logrus: unrecognized import path &amp;quot;git.xuanwo.io/let-go-mod-happy/logrus&amp;quot; (https fetch: Get https://git.xuanwo.io/let-go-mod-happy/logrus?go-get=1: x509: certificate signed by unknown authority)
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;一开始感觉有点奇怪，因为浏览器访问是正常的，随后用 curl 测试了一下：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;:) curl https://git.xuanwo.io/let-go-mod-happy/logrus -v
-* Trying xxx.xxx.xxx.xxx...
-* TCP_NODELAY set
-* Connected to git.xuanwo.io (xxx.xxx.xxx.xxx) port 443 (#0)
-* ALPN, offering h2
-* ALPN, offering http/1.1
-* successfully set certificate verify locations:
-* CAfile: /etc/ssl/certs/ca-certificates.crt
-CApath: none
-* TLSv1.3 (OUT), TLS handshake, Client hello (1):
-* TLSv1.3 (IN), TLS handshake, Server hello (2):
-* TLSv1.2 (IN), TLS handshake, Certificate (11):
-* TLSv1.2 (OUT), TLS alert, unknown CA (560):
-* SSL certificate problem: unable to get local issuer certificate
-* Closing connection 0
-curl: (60) SSL certificate problem: unable to get local issuer certificate
-More details here: https://curl.haxx.se/docs/sslcerts.html
-curl failed to verify the legitimacy of the server and therefore could not
-establish a secure connection to it. To learn more about this situation and
-how to fix it, please visit the web page mentioned above.
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;emmmm，&lt;code&gt;unknown CA&lt;/code&gt;，这可能跟我的 nginx 的 SSL 配置有关。检查了一下果然如此：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;ssl_certificate /etc/nginx/certs/git.xuanwo.io/cert;
-ssl_certificate_key /etc/nginx/certs/git.xuanwo.io/key;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;我配置的证书并不是完整的链，所以导致 TLS 在握手的时候失败了，将选用的证书修改为 fullchain 即可。&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;ssl_certificate /etc/nginx/certs/git.xuanwo.io/fullchain;
-ssl_certificate_key /etc/nginx/certs/git.xuanwo.io/key;
-&lt;/code&gt;&lt;/pre&gt;</description></item></channel></rss>
+&lt;/ul&gt;</description></item></channel></rss>
