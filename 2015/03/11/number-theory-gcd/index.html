@@ -1,24 +1,24 @@
-<!doctype html><html><head><title>数论——欧几里得算法</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="数论——欧几里得算法"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2015/03/11/number-theory-gcd/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.6f166dd4629db44cf32d758a0f86bfced24018c4dbbac9d1dc82a754c665e17b.css integrity="sha256-bxZt1GKdtEzzLXWKD4a/ztJAGMTbusnR3IKnVMZl4Xs="><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.59.1"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo&#39;s Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
+<!doctype html><html><head><title>数论——欧几里得算法</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="数论——欧几里得算法"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2015/03/11/number-theory-gcd/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.6f166dd4629db44cf32d758a0f86bfced24018c4dbbac9d1dc82a754c665e17b.css integrity="sha256-bxZt1GKdtEzzLXWKD4a/ztJAGMTbusnR3IKnVMZl4Xs="><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.60.0"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo&#39;s Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
 <a class=main-nav-link href=/posts/>文章</a></div></div></nav><main id=main-content><article class="single container"><header class=single-header><div class=flex><h1>数论——欧几里得算法</h1><div class=post-meta><time class=date datetime=2015-03-11T10:32:31.000&#43;00:00 itemprop=datePublished>2015-03-11</time>
 /
-<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container></div></div></header><div class=post><h1 id=欧几里得算法>欧几里得算法</h1><h2 id=介绍>介绍</h2><p>欧几里得算法，又名辗转相除法，是求最大公约数的算法。两个整数的最大公约数是能够同时整除它们的最大的正整数。辗转相除法基于如下原理：两个整数的最大公约数等于其中较小的数和两数的差的最大公约数。例如，252和105的最大公约数是21（252 = 21 × 12；105 = 21 × 5）；因为252 − 105 = 147，所以147和105的最大公约数也是21。在这个过程中，较大的数缩小了，所以继续进行同样的计算可以不断缩小这两个数直至其中一个变成零。这时，所剩下的还没有变成零的数就是两数的最大公约数。
+<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container></div></div></header><div class=post><h1 id=heading>欧几里得算法</h1><h2 id=heading1>介绍</h2><p>欧几里得算法，又名辗转相除法，是求最大公约数的算法。两个整数的最大公约数是能够同时整除它们的最大的正整数。辗转相除法基于如下原理：两个整数的最大公约数等于其中较小的数和两数的差的最大公约数。例如，252和105的最大公约数是21（252 = 21 × 12；105 = 21 × 5）；因为252 − 105 = 147，所以147和105的最大公约数也是21。在这个过程中，较大的数缩小了，所以继续进行同样的计算可以不断缩小这两个数直至其中一个变成零。这时，所剩下的还没有变成零的数就是两数的最大公约数。
 <img src=/imgs/summary/Euclidean_algorithm_252_105_animation_flipped.gif alt=辗转相除法的演示动画>
-参考辗转相除法的演示动画：两条线段分别表示252和105，其中每一段表示21。动画演示了循环从大数中减去小数，直到其中一段的长度为0，此时剩下的一条线段的长度就是252和105的最大公约数。</p><h2 id=关于最大公约数>关于最大公约数</h2><ul><li><strong>基础定义</strong></li></ul><p>欧几里得的辗转相除法计算的是两个自然数a和b的最大公约数g，意思是能够同时整除a和b的自然数中最大的一个。两个数的最大公约数通常写成gcd(a, b)，如果有gcd(a, b)==1，则有a，b互质。
+参考辗转相除法的演示动画：两条线段分别表示252和105，其中每一段表示21。动画演示了循环从大数中减去小数，直到其中一段的长度为0，此时剩下的一条线段的长度就是252和105的最大公约数。</p><h2 id=heading2>关于最大公约数</h2><ul><li><strong>基础定义</strong></li></ul><p>欧几里得的辗转相除法计算的是两个自然数a和b的最大公约数g，意思是能够同时整除a和b的自然数中最大的一个。两个数的最大公约数通常写成gcd(a, b)，如果有gcd(a, b)==1，则有a，b互质。
 <img src=/imgs/summary/150px-Square_tiling_24x60.svg.png alt=最大公约数>
-参考最大公约数的演示动画：一个24×60的长方形正好被十个12×12的方格填满，其中12是24和60的最大公约数。一般地，当且仅当c是a和b的公约数时，a×b尺寸的长方形可被边长c的正方形正好填满。</p><ul><li><strong>环论定义</strong></li></ul><p>在数学中，尤其是高等数学的环论中，最大公约数有一个更加巧妙的定义：a和b的最大公约数g是a和b的线性和中（绝对值）最小的一个，即所有形如ua + vb（其中u和v是整数）的数中（绝对值）最小的数。所有ua + vb都是g的整数倍（ua + vb = mg，其中m是整数）。</p><h2 id=举例>举例</h2><p>例如，计算a = 1071和b = 462的最大公约数的过程如下：从1071中不断减去462直到小于462（可以减2次，即商q0 = 2），余数是147：
+参考最大公约数的演示动画：一个24×60的长方形正好被十个12×12的方格填满，其中12是24和60的最大公约数。一般地，当且仅当c是a和b的公约数时，a×b尺寸的长方形可被边长c的正方形正好填满。</p><ul><li><strong>环论定义</strong></li></ul><p>在数学中，尤其是高等数学的环论中，最大公约数有一个更加巧妙的定义：a和b的最大公约数g是a和b的线性和中（绝对值）最小的一个，即所有形如ua + vb（其中u和v是整数）的数中（绝对值）最小的数。所有ua + vb都是g的整数倍（ua + vb = mg，其中m是整数）。</p><h2 id=heading3>举例</h2><p>例如，计算a = 1071和b = 462的最大公约数的过程如下：从1071中不断减去462直到小于462（可以减2次，即商q0 = 2），余数是147：
 1071 = 2 × 462 + 147.
 然后从462中不断减去147直到小于147（可以减3次，即q1 = 3），余数是21：
 462 = 3 × 147 + 21.
 再从147中不断减去21直到小于21（可以减7次，即q2 = 7），没有余数：
 147 = 7 × 21 + 0.
-此时，余数是0，所以1071和462的最大公约数是21。</p><h2 id=算法>算法</h2><h3 id=递归>递归</h3><pre><code>int Gcd(int a, int b)
+此时，余数是0，所以1071和462的最大公约数是21。</p><h2 id=heading4>算法</h2><h3 id=heading5>递归</h3><pre><code>int Gcd(int a, int b)
 {
     if(b == 0)
         return a;
     return Gcd(b, a % b);
 }
 
-</code></pre><h3 id=迭代>迭代</h3><pre><code>int Gcd(int a, int b)
+</code></pre><h3 id=heading6>迭代</h3><pre><code>int Gcd(int a, int b)
 {
     while(b != 0)
     {
@@ -29,7 +29,7 @@
     return a;
 }
 
-</code></pre><h1 id=扩展欧几里得算法>扩展欧几里得算法</h1><h2 id=介绍-1>介绍</h2><p>扩展欧几里德算法是用来在已知a, b求解一组p，q使得<code>p*a+q*b=Gcd(a,b)</code>(根据数论中的相关定理解一定存在，不展开叙述)。扩展欧几里德常用在求解模线性方程及方程组中。</p><h2 id=算法-1>算法</h2><pre><code>int exGcd(int a, int b, int &amp;x, int &amp;y)
+</code></pre><h1 id=heading7>扩展欧几里得算法</h1><h2 id=heading8>介绍</h2><p>扩展欧几里德算法是用来在已知a, b求解一组p，q使得<code>p*a+q*b=Gcd(a,b)</code>(根据数论中的相关定理解一定存在，不展开叙述)。扩展欧几里德常用在求解模线性方程及方程组中。</p><h2 id=heading9>算法</h2><pre><code>int exGcd(int a, int b, int &amp;x, int &amp;y)
 {
     if(b == 0)
     {
@@ -45,7 +45,7 @@
     return r;
 }
 
-</code></pre><h2 id=理解>理解</h2><p>把这个实现和Gcd的递归实现相比，发现多了下面的x,y赋值过程，这就是扩展欧几里德算法的精髓。
+</code></pre><h2 id=heading10>理解</h2><p>把这个实现和Gcd的递归实现相比，发现多了下面的x,y赋值过程，这就是扩展欧几里德算法的精髓。
 可以这样思考:
 对于<code>a' =b</code> , <code>b' =a%b</code> 而言，我们求得x, y使得<code>a' x+b' y=Gcd(a', b')</code>
 由于<code>b' = a % b = a - a / b * b</code>
@@ -55,15 +55,7 @@ bx + (a - a/b *b)y = Gcd(a' , b') = Gcd(a, b)  //注意到这里的/是C语言�
 ===&gt;
 ay + b(x- a/b *y) = Gcd(a, b)
 
-</code></pre><p>因此对于a和b而言，他们的相对应的p，q分别是 y和(x-a/b*y)</p><h1 id=stein算法>Stein算法</h1><h2 id=介绍-2>介绍</h2><p>Stein算法由J. Stein 1961年提出，这个方法也是计算两个数的最大公约数。和欧几里德算法 算法不同的是，Stein算法只有整数的移位和加减法，因此对于大素数Stein将更有优势。</p><h2 id=描述>描述</h2><p>注意到如下结论：
-1. 如果A=0，B是最大公约数，算法结束
-2. 如果B=0，A是最大公约数，算法结束
-3. 设置A1=A、B1=B和C1=1
-4. 如果An和Bn都是偶数，则An+1=An&gt;&gt;1，Bn+1=Bn&gt;&gt;1，Cn+1=Cn&lt;<1
-5. 如果An是偶数，Bn不是偶数，则An+1=An>&gt;1，Bn+1=Bn，Cn+1=Cn(很显然，2不是奇数的约数)
-6. 如果Bn是偶数，An不是偶数，则Bn+1=B&gt;&gt;1，An+1=An，Cn+1=Cn(很显然，2不是奇数的约数)
-7. 如果An和Bn都不是偶数，则An+1=|An-Bn|&gt;&gt;1，Bn+1=min(An,Bn)，Cn+1=Cn
-8. n加1，转1</p><h2 id=算法-2>算法</h2><pre><code>int Gcd(int a, int b)
+</code></pre><p>因此对于a和b而言，他们的相对应的p，q分别是 y和(x-a/b*y)</p><h1 id=stein>Stein算法</h1><h2 id=heading11>介绍</h2><p>Stein算法由J. Stein 1961年提出，这个方法也是计算两个数的最大公约数。和欧几里德算法 算法不同的是，Stein算法只有整数的移位和加减法，因此对于大素数Stein将更有优势。</p><h2 id=heading12>描述</h2><p>注意到如下结论：</p><ol><li>如果A=0，B是最大公约数，算法结束</li><li>如果B=0，A是最大公约数，算法结束</li><li>设置A1=A、B1=B和C1=1</li><li>如果An和Bn都是偶数，则An+1=An&raquo;1，Bn+1=Bn&raquo;1，Cn+1=Cn&laquo;1</li><li>如果An是偶数，Bn不是偶数，则An+1=An&raquo;1，Bn+1=Bn，Cn+1=Cn(很显然，2不是奇数的约数)</li><li>如果Bn是偶数，An不是偶数，则Bn+1=B&raquo;1，An+1=An，Cn+1=Cn(很显然，2不是奇数的约数)</li><li>如果An和Bn都不是偶数，则An+1=|An-Bn|&raquo;1，Bn+1=min(An,Bn)，Cn+1=Cn</li><li>n加1，转1</li></ol><h2 id=heading13>算法</h2><pre><code>int Gcd(int a, int b)
 {
     if(a == 0) return b;
     if(b == 0) return a;
@@ -73,9 +65,9 @@ ay + b(x- a/b *y) = Gcd(a, b)
     else return gcd(abs(a - b), Min(a, b));
 }
 
-</code></pre><h1 id=应用>应用</h1><ul><li><strong>求解不定方程</strong></li></ul><p>对于不定整数方程pa+qb=c，若 c mod Gcd(p, q)=0,则该方程存在整数解，否则不存在整数解。
+</code></pre><h1 id=heading14>应用</h1><ul><li><strong>求解不定方程</strong></li></ul><p>对于不定整数方程pa+qb=c，若 c mod Gcd(p, q)=0,则该方程存在整数解，否则不存在整数解。
 上面已经列出找一个整数解的方法，在找到p * a+q * b = Gcd(p, q)的一组解p0,q0后，p * a+q * b = Gcd(p, q)的其他整数解满足：</p><ol><li>p = p0 + b/Gcd(p, q) * t</li><li>q = q0 - a/Gcd(p, q) * t(其中t为任意整数)</li></ol><p>至于pa+qb=c的整数解，只需将p * a+q * b = Gcd(p, q)的每个解乘上 c/Gcd(p, q) 即可。
-在找到p * a+q * b = Gcd(a, b)的一组解p0,q0后，应该是得到p * a+q * b = c的一组解p1 = p0<em>(c/Gcd(a,b)),q1 = q0</em>(c/Gcd(a,b))，p * a+q * b = c的其他整数解满足：</p><ol><li>p = p1 + b/Gcd(a, b) * t</li><li>q = q1 - a/Gcd(a, b) * t(其中t为任意整数)</li></ol><p>此处的p 、q就是p * a+q * b = c的所有整数解。</p><ul><li><strong>求解模线性方程（线性同余方程）</strong></li></ul><p>同余方程 ax≡b (mod n)对于未知数 x 有解，当且仅当 gcd(a,n) | b。且方程有解时，方程有 gcd(a,n) 个解。
+在找到p * a+q * b = Gcd(a, b)的一组解p0,q0后，应该是得到p * a+q * b = c的一组解p1 = p0*(c/Gcd(a,b)),q1 = q0*(c/Gcd(a,b))，p * a+q * b = c的其他整数解满足：</p><ol><li>p = p1 + b/Gcd(a, b) * t</li><li>q = q1 - a/Gcd(a, b) * t(其中t为任意整数)</li></ol><p>此处的p 、q就是p * a+q * b = c的所有整数解。</p><ul><li><strong>求解模线性方程（线性同余方程）</strong></li></ul><p>同余方程 ax≡b (mod n)对于未知数 x 有解，当且仅当 gcd(a,n) | b。且方程有解时，方程有 gcd(a,n) 个解。
 求解方程 ax≡b (mod n) 相当于求解方程 ax+ ny= b, (x, y为整数)。
 设 d= gcd(a,n)，假如整数 x 和 y，满足 d= ax+ ny(用扩展欧几里德得出)。如果 d| b，则方程a* x0+ n* y0= d， 方程两边乘以 b/ d，(因为 d|b，所以能够整除)，得到 a* x0* b/ d+ n* y0* b/ d= b。
 所以 x= x0* b/ d，y= y0* b/ d 为 ax+ ny= b 的一个解，所以 x= x0* b/ d 为 ax= b (mod n ) 的解。
@@ -83,7 +75,7 @@ ax≡b (mod n)的一个解为 x0= x* (b/ d ) mod n，且方程的 d 个解分别
 设ans=x*(b/d),s=n/d;
 方程ax≡b (mod n)的最小整数解为：(ans%s+s)%s;</p><ul><li><strong>求解模的逆元</strong></li></ul><p>同余方程ax≡b (mod n)，如果 gcd(a,n)== 1，则方程只有唯一解。
 在这种情况下，如果 b== 1，同余方程就是 ax=1 (mod n ),gcd(a,n)= 1。这时称求出的 x 为 a 的对模 n 乘法的逆元。
-对于同余方程 ax= 1(mod n )， gcd(a,n)= 1 的求解就是求解方程ax+ ny= 1，x, y 为整数。这个可用扩展欧几里德算法求出，原同余方程的唯一解就是用扩展欧几里德算法得出的 x 。</p><h1 id=引用>引用</h1><ul><li><a href=http://www.cnblogs.com/drizzlecrj/archive/2007/09/14/892340.html>最大公约数(Gcd)两种算法(Euclid &amp;&amp; Stein) [整理]</a></li><li><a href=http://zh.wikipedia.org/wiki/%E8%BC%BE%E8%BD%89%E7%9B%B8%E9%99%A4%E6%B3%95>辗转相除法</a></li><li><a href=http://blog.csdn.net/suool/article/details/14094255>ACM 进阶学习第一课&mdash;-同余相关之欧几里得算法及其扩展（2）</a></li></ul><h1 id=更新日志>更新日志</h1><ul><li>2015年03月18日 拖了这么久，总算写完了= =。</li><li>2015年03月19日 补充了扩展欧几里得算法的一些应用。</li></ul></div><div id=disqus_thread></div><script type=application/javascript>let disqus_config=function(){this.page.identifier='\/2015\/03\/11\/number-theory-gcd\/';this.page.title='数论——欧几里得算法';this.page.url='https:\/\/xuanwo.io\/2015\/03\/11\/number-theory-gcd\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
+对于同余方程 ax= 1(mod n )， gcd(a,n)= 1 的求解就是求解方程ax+ ny= 1，x, y 为整数。这个可用扩展欧几里德算法求出，原同余方程的唯一解就是用扩展欧几里德算法得出的 x 。</p><h1 id=heading15>引用</h1><ul><li><a href=http://www.cnblogs.com/drizzlecrj/archive/2007/09/14/892340.html>最大公约数(Gcd)两种算法(Euclid &amp;&amp; Stein) [整理]</a></li><li><a href=http://zh.wikipedia.org/wiki/%E8%BC%BE%E8%BD%89%E7%9B%B8%E9%99%A4%E6%B3%95>辗转相除法</a></li><li><a href=http://blog.csdn.net/suool/article/details/14094255>ACM 进阶学习第一课&mdash;-同余相关之欧几里得算法及其扩展（2）</a></li></ul><h1 id=heading16>更新日志</h1><ul><li>2015年03月18日 拖了这么久，总算写完了= =。</li><li>2015年03月19日 补充了扩展欧几里得算法的一些应用。</li></ul></div><div id=disqus_thread></div><script type=application/javascript>let disqus_config=function(){this.page.identifier='\/2015\/03\/11\/number-theory-gcd\/';this.page.title='数论——欧几里得算法';this.page.url='https:\/\/xuanwo.io\/2015\/03\/11\/number-theory-gcd\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
 <a class=main-nav-link href=/tags/>标签</a>
 <a class=main-nav-link href=/series/>专题</a>
 <a class=main-nav-link href=/blogroll/>友链</a>

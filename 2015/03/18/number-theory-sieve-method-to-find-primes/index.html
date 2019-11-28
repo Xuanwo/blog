@@ -1,7 +1,7 @@
-<!doctype html><html><head><title>数论——筛法求素数</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="数论——筛法求素数"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2015/03/18/number-theory-sieve-method-to-find-primes/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.6f166dd4629db44cf32d758a0f86bfced24018c4dbbac9d1dc82a754c665e17b.css integrity="sha256-bxZt1GKdtEzzLXWKD4a/ztJAGMTbusnR3IKnVMZl4Xs="><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.59.1"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo&#39;s Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
+<!doctype html><html><head><title>数论——筛法求素数</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="数论——筛法求素数"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2015/03/18/number-theory-sieve-method-to-find-primes/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.6f166dd4629db44cf32d758a0f86bfced24018c4dbbac9d1dc82a754c665e17b.css integrity="sha256-bxZt1GKdtEzzLXWKD4a/ztJAGMTbusnR3IKnVMZl4Xs="><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.60.0"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo&#39;s Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
 <a class=main-nav-link href=/posts/>文章</a></div></div></nav><main id=main-content><article class="single container"><header class=single-header><div class=flex><h1>数论——筛法求素数</h1><div class=post-meta><time class=date datetime=2015-03-18T17:16:01.000&#43;00:00 itemprop=datePublished>2015-03-18</time>
 /
-<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container></div></div></header><div class=post><h1 id=暴力瞎搞求素数>暴力瞎搞求素数</h1><p>首先，我们需要个判断是否为素数的算法：</p><pre><code>bool IsPrime(unsigned n)  //此处n是一个大于2的整数
+<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container></div></div></header><div class=post><h1 id=heading>暴力瞎搞求素数</h1><p>首先，我们需要个判断是否为素数的算法：</p><pre><code>bool IsPrime(unsigned n)  //此处n是一个大于2的整数
 {
     for (unsigned i = 2; i &lt; n / 2 + 1; ++i)
     {
@@ -15,7 +15,7 @@
 
 </code></pre><p>然后，在for循环中逐个判断。。。。。。
 <em>你写写看啊，- -，看看队友会不会打扁你。。。</em>
-显然，这个方法太傻逼了= =，我们需要一个效率更高，更为机智算法。</p><h1 id=一般的线性筛法>一般的线性筛法</h1><p>下面进入正题，我们来介绍一下求素数的线性筛法。</p><h2 id=代码>代码</h2><pre><code>void make_prime()
+显然，这个方法太傻逼了= =，我们需要一个效率更高，更为机智算法。</p><h1 id=heading1>一般的线性筛法</h1><p>下面进入正题，我们来介绍一下求素数的线性筛法。</p><h2 id=heading2>代码</h2><pre><code>void make_prime()
 {
     memset(prime, 1, sizeof(prime));
     prime[0] = false;
@@ -32,8 +32,8 @@
 }
 
 </code></pre><p>这种方法比较好理解:
-初始时，假设全部都是素数，当找到一个素数时，显然这个素数乘上另外一个数之后都是合数(注意上面的 i*i , 比 i*2 要快点 )，把这些合数都筛掉，即算法名字的由来。
-但仔细分析能发现，这种方法会造成重复筛除合数，影响效率。比如10，在i=2的时候，k=2*15筛了一次；在i=5，k=5*6 的时候又筛了一次。所以，也就有了快速线性筛法。</p><h1 id=快速线性筛法>快速线性筛法</h1><p>快速线性筛法没有冗余，不会重复筛除一个数，所以“几乎”是线性的，虽然从代码上分析，时间复杂度并不是O(n)。</p><h2 id=代码-1>代码</h2><pre><code>const long N = 200000;
+初始时，假设全部都是素数，当找到一个素数时，显然这个素数乘上另外一个数之后都是合数(注意上面的 i<em>i , 比 i</em>2 要快点 )，把这些合数都筛掉，即算法名字的由来。
+但仔细分析能发现，这种方法会造成重复筛除合数，影响效率。比如10，在i=2的时候，k=2<em>15筛了一次；在i=5，k=5</em>6 的时候又筛了一次。所以，也就有了快速线性筛法。</p><h1 id=heading3>快速线性筛法</h1><p>快速线性筛法没有冗余，不会重复筛除一个数，所以“几乎”是线性的，虽然从代码上分析，时间复杂度并不是O(n)。</p><h2 id=heading4>代码</h2><pre><code>const long N = 200000;
 long prime[N] = {0}, num_prime = 0;
 int isNotPrime[N] = {1, 1};
 int main()
@@ -53,11 +53,11 @@ int main()
     return 0;
 }
 
-</code></pre><h2 id=理解>理解</h2><p>首先，先明确一个条件，任何合数都能表示成一系列素数的积。
+</code></pre><h2 id=heading5>理解</h2><p>首先，先明确一个条件，任何合数都能表示成一系列素数的积。
 不管 i 是否是素数，都会执行到“关键处1”。</p><ol><li><p>如果 i 都是是素数的话，那简单，一个大的素数 i 乘以不大于 i 的素数，这样筛除的数跟之前的是不会重复的。筛出的数都是 N=p1*p2的形式, p1，p2之间不相等</p></li><li><p>如果 i 是合数，此时 i 可以表示成递增素数相乘 i=p1<em>p2</em>&hellip;*pn, pi都是素数（2&lt;=i&lt;=n）， pi&lt;=pj ( i&lt;=j )
 p1是最小的系数。</p></li></ol><p>根据“关键处2”的定义，当p1==prime[j] 的时候，筛除就终止了，也就是说，只能筛出不大于p1的质数*i。</p><p>我们可以直观地举个例子：<code>i=2*3*5</code>
-此时能筛除 2*i ,不能筛除 3*i，
-如果能筛除3*i 的话，当 i&rsquo; 等于 i&rsquo;=3*3*5 时，筛除2*i&rsquo; 就和前面重复了。</p><h1 id=引用>引用</h1><ul><li><a href=http://blog.csdn.net/dinosoft/article/details/5829550>一般筛法求素数+快速线性筛法求素数</a></li><li><a href=http://coolshell.cn/articles/3738.html>打印质数的各种算法</a></li></ul><h1 id=更新日子>更新日子</h1><ul><li>2015年03月18日 首次完成。</li></ul></div><div id=disqus_thread></div><script type=application/javascript>let disqus_config=function(){this.page.identifier='\/2015\/03\/18\/number-theory-sieve-method-to-find-primes\/';this.page.title='数论——筛法求素数';this.page.url='https:\/\/xuanwo.io\/2015\/03\/18\/number-theory-sieve-method-to-find-primes\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
+此时能筛除 2<em>i ,不能筛除 3</em>i，
+如果能筛除3<em>i 的话，当 i&rsquo; 等于 i'=3</em>3<em>5 时，筛除2</em>i&rsquo; 就和前面重复了。</p><h1 id=heading6>引用</h1><ul><li><a href=http://blog.csdn.net/dinosoft/article/details/5829550>一般筛法求素数+快速线性筛法求素数</a></li><li><a href=http://coolshell.cn/articles/3738.html>打印质数的各种算法</a></li></ul><h1 id=heading7>更新日子</h1><ul><li>2015年03月18日 首次完成。</li></ul></div><div id=disqus_thread></div><script type=application/javascript>let disqus_config=function(){this.page.identifier='\/2015\/03\/18\/number-theory-sieve-method-to-find-primes\/';this.page.title='数论——筛法求素数';this.page.url='https:\/\/xuanwo.io\/2015\/03\/18\/number-theory-sieve-method-to-find-primes\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
 <a class=main-nav-link href=/tags/>标签</a>
 <a class=main-nav-link href=/series/>专题</a>
 <a class=main-nav-link href=/blogroll/>友链</a>

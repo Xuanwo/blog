@@ -1,24 +1,24 @@
-<!doctype html><html><head><title>VPS搭配Github Webhook实现Hexo自动发布</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="VPS搭配Github Webhook实现Hexo自动发布"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2015/02/05/vps-hexo-autodeploy/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.6f166dd4629db44cf32d758a0f86bfced24018c4dbbac9d1dc82a754c665e17b.css integrity="sha256-bxZt1GKdtEzzLXWKD4a/ztJAGMTbusnR3IKnVMZl4Xs="><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.59.1"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo&#39;s Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
+<!doctype html><html><head><title>VPS搭配Github Webhook实现Hexo自动发布</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="VPS搭配Github Webhook实现Hexo自动发布"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2015/02/05/vps-hexo-autodeploy/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.6f166dd4629db44cf32d758a0f86bfced24018c4dbbac9d1dc82a754c665e17b.css integrity="sha256-bxZt1GKdtEzzLXWKD4a/ztJAGMTbusnR3IKnVMZl4Xs="><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.60.0"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo&#39;s Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
 <a class=main-nav-link href=/posts/>文章</a></div></div></nav><main id=main-content><article class="single container"><header class=single-header><div class=flex><h1>VPS搭配Github Webhook实现Hexo自动发布</h1><div class=post-meta><time class=date datetime=2015-02-05T23:22:30.000&#43;00:00 itemprop=datePublished>2015-02-05</time>
 /
 <span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container><a style=text-decoration:none href=https://xuanwo.io/tags/blog><span>Blog</span></a>
 <a style=text-decoration:none href=https://xuanwo.io/tags/github-pages><span>Github-Pages</span></a>
 <a style=text-decoration:none href=https://xuanwo.io/tags/vps><span>VPS</span></a>
-<a style=text-decoration:none href=https://xuanwo.io/tags/hexo><span>Hexo</span></a></div></div></header><div class=post><p>自从买了VPS之后，我的人生就多了一个需要思考的问题——我的VPS还能用来干嘛？然后想到Github有一个Webhook的功能，可以在每一次提交之后发送一个POST到指定的URL。那么，只要找一个办法获取这个POST，再执行指定的命令，可以实现Hexo的自动发布功能了。从此以后，不管在哪里，我只要修改我的md文件，push之后我的服务器就能自动进行编译并且部署了。</p><h1 id=配置nginx>配置Nginx</h1><h2 id=安装nginx>安装Nginx</h2><p>使用apt-get程序来安装nginx</p><pre><code>
+<a style=text-decoration:none href=https://xuanwo.io/tags/hexo><span>Hexo</span></a></div></div></header><div class=post><p>自从买了VPS之后，我的人生就多了一个需要思考的问题——我的VPS还能用来干嘛？然后想到Github有一个Webhook的功能，可以在每一次提交之后发送一个POST到指定的URL。那么，只要找一个办法获取这个POST，再执行指定的命令，可以实现Hexo的自动发布功能了。从此以后，不管在哪里，我只要修改我的md文件，push之后我的服务器就能自动进行编译并且部署了。</p><h1 id=nginx>配置Nginx</h1><h2 id=nginx1>安装Nginx</h2><p>使用apt-get程序来安装nginx</p><pre><code>
 apt-get update
 apt-get install nginx
 
-</code></pre><p>在浏览器中访问<a href=http://your-ip-address>http://your-ip-address</a> or domain/， 如果看到<code>Welcome to nginx!</code>字样，说明Nginx已经安装成功了。</p><h2 id=配置nginx-1>配置Nginx</h2><p>修改<code>/etc/nginx/sites-available/default</code>文件，在<code>serve</code>的框里面的空行中输入：</p><pre><code>
+</code></pre><p>在浏览器中访问http://your-ip-address or domain/， 如果看到<code>Welcome to nginx!</code>字样，说明Nginx已经安装成功了。</p><h2 id=nginx2>配置Nginx</h2><p>修改<code>/etc/nginx/sites-available/default</code>文件，在<code>serve</code>的框里面的空行中输入：</p><pre><code>
 location /update {
 proxy_pass http://127.0.0.1:1111;
 }
 
-</code></pre><p>这样设置之后<code>http://your-ip-address or domain/update</code>访问就会被重定向到1111端口。</p><h2 id=重启nginx>重启Nginx</h2><p>输入：
-<code>/etc/init.d/nginx restart</code></p><h1 id=配置git>配置Git</h1><h2 id=安装git>安装Git</h2><p>输入：
-<code>apt-get install git</code></p><h2 id=下载自己的代码库>下载自己的代码库</h2><p>输入：
-<code>git clone yourgit yourdir</code></p><h1 id=配置python>配置Python</h1><h2 id=安装python环境>安装Python环境</h2><p>输入：
+</code></pre><p>这样设置之后<code>http://your-ip-address or domain/update</code>访问就会被重定向到1111端口。</p><h2 id=nginx3>重启Nginx</h2><p>输入：
+<code>/etc/init.d/nginx restart</code></p><h1 id=git>配置Git</h1><h2 id=git1>安装Git</h2><p>输入：
+<code>apt-get install git</code></p><h2 id=heading>下载自己的代码库</h2><p>输入：
+<code>git clone yourgit yourdir</code></p><h1 id=python>配置Python</h1><h2 id=python1>安装Python环境</h2><p>输入：
 <code>apt-get install python-pip</code>
-然后系统会自动完成相关的配置。</p><h2 id=编辑python文件>编辑Python文件</h2><p>输入：</p><pre><code>
+然后系统会自动完成相关的配置。</p><h2 id=python2>编辑Python文件</h2><p>输入：</p><pre><code>
 cd ~/yourdir
 vi hook.py
 
@@ -91,7 +91,7 @@ if __name__ == '__main__':
     httpd = HTTPServer(('127.0.0.1',port),HttpHandler)
     httpd.serve_forever()
 
-</code></pre><p>编辑完成后，输入<code>:wq</code>退出vi。</p><h1 id=编辑sh文件>编辑sh文件</h1><p>切换到yourdir，然后输入：
+</code></pre><p>编辑完成后，输入<code>:wq</code>退出vi。</p><h1 id=sh>编辑sh文件</h1><p>切换到yourdir，然后输入：
 <code>vi build.sh</code>
 在打开的vi界面中，点击<code>i</code>进入编辑模式，然后输入：</p><pre><code>
 #!/bin/bash
@@ -104,9 +104,9 @@ hexo clean
 hexo d -g
 echo &quot;built successfully&quot;
 
-</code></pre><p>编辑完成后，输入<code>:wq</code>退出vi。</p><h1 id=后台运行python脚本进行监视>后台运行Python脚本进行监视</h1><p>运行：
+</code></pre><p>编辑完成后，输入<code>:wq</code>退出vi。</p><h1 id=python3>后台运行Python脚本进行监视</h1><p>运行：
 <code>nohup python3 ~/xuanwo/hook.py &gt;&gt; /tmp/hook.log 2&gt;&amp;1 &amp;</code>
-<strong>每次重启VPS后，貌似都需要运行一次</strong></p><h1 id=更新日志>更新日志</h1><ul><li>2015年2月6日 首次发布</li></ul></div><div id=disqus_thread></div><script type=application/javascript>let disqus_config=function(){this.page.identifier='\/2015\/02\/05\/vps-hexo-autodeploy\/';this.page.title='VPS搭配Github Webhook实现Hexo自动发布';this.page.url='https:\/\/xuanwo.io\/2015\/02\/05\/vps-hexo-autodeploy\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
+<strong>每次重启VPS后，貌似都需要运行一次</strong></p><h1 id=heading1>更新日志</h1><ul><li>2015年2月6日 首次发布</li></ul></div><div id=disqus_thread></div><script type=application/javascript>let disqus_config=function(){this.page.identifier='\/2015\/02\/05\/vps-hexo-autodeploy\/';this.page.title='VPS搭配Github Webhook实现Hexo自动发布';this.page.url='https:\/\/xuanwo.io\/2015\/02\/05\/vps-hexo-autodeploy\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
 <a class=main-nav-link href=/tags/>标签</a>
 <a class=main-nav-link href=/series/>专题</a>
 <a class=main-nav-link href=/blogroll/>友链</a>

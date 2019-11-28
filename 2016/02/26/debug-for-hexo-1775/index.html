@@ -1,16 +1,17 @@
-<!doctype html><html><head><title>记一次debug的经历及反思</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="记一次debug的经历及反思"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2016/02/26/debug-for-hexo-1775/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.6f166dd4629db44cf32d758a0f86bfced24018c4dbbac9d1dc82a754c665e17b.css integrity="sha256-bxZt1GKdtEzzLXWKD4a/ztJAGMTbusnR3IKnVMZl4Xs="><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.59.1"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo&#39;s Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
+<!doctype html><html><head><title>记一次debug的经历及反思</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="记一次debug的经历及反思"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2016/02/26/debug-for-hexo-1775/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.6f166dd4629db44cf32d758a0f86bfced24018c4dbbac9d1dc82a754c665e17b.css integrity="sha256-bxZt1GKdtEzzLXWKD4a/ztJAGMTbusnR3IKnVMZl4Xs="><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.60.0"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo&#39;s Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
 <a class=main-nav-link href=/posts/>文章</a></div></div></nav><main id=main-content><article class="single container"><header class=single-header><div class=flex><h1>记一次debug的经历及反思</h1><div class=post-meta><time class=date datetime=2016-02-26T00:00:00.000&#43;00:00 itemprop=datePublished>2016-02-26</time>
 /
 <span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container><a style=text-decoration:none href=https://xuanwo.io/tags/hexo><span>Hexo</span></a>
 <a style=text-decoration:none href=https://xuanwo.io/tags/software><span>Software</span></a>
-<a style=text-decoration:none href=https://xuanwo.io/tags/node.js><span>Node.js</span></a></div></div></header><div class=post><h2 id=起因>起因</h2><p><a href=https://github.com/hexojs/hexo/issues/1775>hexojs/hexo #1775</a>
-BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。</p><h2 id=经过>经过</h2><p>收到反馈之后，我在我的测试环境中也复现了这个bug。一开始还怀疑是主题的问题，专门测试了next主题，结果发现也存在这样的问题，于是就排除了主题方面的bug。
-首先我们可以初步判断这个url生成出现了问题，参考landscape主题中此处的代码：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-ejs data-lang=ejs>&lt;% for (var i in theme.menu){ %&gt;
-	&lt;a class=&#34;main-nav-link&#34; href=&#34;&lt;%- url_for(theme.menu[i]) %&gt;&#34;&gt;&lt;%= i %&gt;&lt;/a&gt;
-&lt;% } %&gt;</code></pre></div><p>这里调用了一个<code>url_for</code>函数来生成超链接，代码如下（去除了与本BUG无关的部分）：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-nodejs data-lang=nodejs>function urlForHelper(path, options) {
-  path = path || &#39;/&#39;;
+<a style=text-decoration:none href=https://xuanwo.io/tags/node.js><span>Node.js</span></a></div></div></header><div class=post><h2 id=heading>起因</h2><p><a href=https://github.com/hexojs/hexo/issues/1775>hexojs/hexo #1775</a>
+BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，然后会发现home以及categories的链接全都忽略了子目录的设定。</p><h2 id=heading1>经过</h2><p>收到反馈之后，我在我的测试环境中也复现了这个bug。一开始还怀疑是主题的问题，专门测试了next主题，结果发现也存在这样的问题，于是就排除了主题方面的bug。
+首先我们可以初步判断这个url生成出现了问题，参考landscape主题中此处的代码：</p><pre><code class=language-ejs data-lang=ejs>&lt;% for (var i in theme.menu){ %&gt;
+	&lt;a class=&quot;main-nav-link&quot; href=&quot;&lt;%- url_for(theme.menu[i]) %&gt;&quot;&gt;&lt;%= i %&gt;&lt;/a&gt;
+&lt;% } %&gt;
+</code></pre><p>这里调用了一个<code>url_for</code>函数来生成超链接，代码如下（去除了与本BUG无关的部分）：</p><pre><code class=language-nodejs data-lang=nodejs>function urlForHelper(path, options) {
+  path = path || '/';
 
-  if (path[0] === &#39;#&#39; || path.substring(0, 2) === &#39;//&#39;) {
+  if (path[0] === '#' || path.substring(0, 2) === '//') {
     return path;
   }
 
@@ -26,33 +27,35 @@ BUG非常明显，在使用hexo 3.1.1搭建一个位于子目录下的博客，�
   // Prepend root path
   path = root + path;
 
-  return path.replace(/\/{2,}/g, &#39;/&#39;);
-}</code></pre></div><p>直觉告诉我，这个问题很有可能就是这个函数写搓了。</p><p>然而我仔细研究了一下，发现<code>url_for</code>的逻辑并没有什么问题。而且根据我脑补的代码执行情况来看，应该生成一个正确的链接才对，但是<code>config.root</code>偏偏就丢了。
-真的是非常奇怪，一时之间，我完全懵逼展开了，不明白到底发生了什么。</p><h2 id=转折>转折</h2><p>后来我跟我的朋友聊天的时候提到这个bug，结果他告诉我，这个<code>url_for</code>写搓了，我点点头，应该就是这样。然后他说，一个判断都没有中，直接返回自身了，还贴了一张图。图中的代码大致如下：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-nodejs data-lang=nodejs>function urlForHelper(path, options){
+  return path.replace(/\/{2,}/g, '/');
+}
+</code></pre><p>直觉告诉我，这个问题很有可能就是这个函数写搓了。</p><p>然而我仔细研究了一下，发现<code>url_for</code>的逻辑并没有什么问题。而且根据我脑补的代码执行情况来看，应该生成一个正确的链接才对，但是<code>config.root</code>偏偏就丢了。
+真的是非常奇怪，一时之间，我完全懵逼展开了，不明白到底发生了什么。</p><h2 id=heading2>转折</h2><p>后来我跟我的朋友聊天的时候提到这个bug，结果他告诉我，这个<code>url_for</code>写搓了，我点点头，应该就是这样。然后他说，一个判断都没有中，直接返回自身了，还贴了一张图。图中的代码大致如下：</p><pre><code class=language-nodejs data-lang=nodejs>function urlForHelper(path, options){
   /* jshint validthis: true */
-  path = path || &#39;/&#39;;
+  path = path || '/';
 
   var config = this.config;
   var root = config.root;
   var data = url.parse(path);
 
   // Exit if this is an external path
-  if (data.protocol || path.substring(0, 2) === &#39;//&#39;){
+  if (data.protocol || path.substring(0, 2) === '//'){
     return path;
   }
 
   // Prepend root path
-  if (path[0] !== &#39;/&#39;){
+  if (path[0] !== '/'){
     return root + path;
   }
 
   return path;
-}</code></pre></div><p>看到图我立马懵逼了，连忙说，不对啊，你这个不是最新版本的代码。他被我这气场吓到，弱弱回复，我是刚安装的hexo&hellip;。
+}
+</code></pre><p>看到图我立马懵逼了，连忙说，不对啊，你这个不是最新版本的代码。他被我这气场吓到，弱弱回复，我是刚安装的hexo&hellip;。
 我顿时明白自己错在哪里了，npm源里面的稳定版还是3.1.1，但是我们github库中的代码已经是3.2beta了。使用最新的代码测试以后，发现这个bug已经不存在了。
-也就是说，我花一个下午的时间，对着最新版的代码找一个已经被fix的bug…</p><h2 id=总结>总结</h2><p>这一次的事情非常乌龙，事后想想觉得自己真的太傻逼了。
+也就是说，我花一个下午的时间，对着最新版的代码找一个已经被fix的bug…</p><h2 id=heading3>总结</h2><p>这一次的事情非常乌龙，事后想想觉得自己真的太傻逼了。
 吃一堑长一智，以后做debug工作的时候一定要分清楚线上和线下的代码，首先就要明确出问题的是哪个版本，然后再开展相应的分析。
 除此以外，还跟我不重视流程有关系。尽管我总是让人提供各种version信息，但是我却总是在分析问题的时候忽略这些信息，没有把这些关键的信息加入到自己的分析过程中。
-总结起来就是，too young ，姿势水平还有待提高。</p><h2 id=更新日志>更新日志</h2><ul><li>2016年02月26日 初次发布</li></ul></div><div id=disqus_thread></div><script type=application/javascript>let disqus_config=function(){this.page.identifier='\/2016\/02\/26\/debug-for-hexo-1775\/';this.page.title='记一次debug的经历及反思';this.page.url='https:\/\/xuanwo.io\/2016\/02\/26\/debug-for-hexo-1775\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
+总结起来就是，too young ，姿势水平还有待提高。</p><h2 id=heading4>更新日志</h2><ul><li>2016年02月26日 初次发布</li></ul></div><div id=disqus_thread></div><script type=application/javascript>let disqus_config=function(){this.page.identifier='\/2016\/02\/26\/debug-for-hexo-1775\/';this.page.title='记一次debug的经历及反思';this.page.url='https:\/\/xuanwo.io\/2016\/02\/26\/debug-for-hexo-1775\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
 <a class=main-nav-link href=/tags/>标签</a>
 <a class=main-nav-link href=/series/>专题</a>
 <a class=main-nav-link href=/blogroll/>友链</a>
