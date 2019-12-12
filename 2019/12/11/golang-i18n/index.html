@@ -1,0 +1,214 @@
+<!doctype html><html><head><title>在 Golang 中如何做国际化？</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="在 Golang 中如何做国际化？"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2019/12/11/golang-i18n/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.205f66f49f9da5d3cf4d75bccde5556244ad68165ba7d8ea2b1fccb18766df72.css integrity="sha256-IF9m9J+dpdPPTXW8zeVVYkStaBZbp9jqKx/MsYdm33I="><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.61.0"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo's Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
+<a class=main-nav-link href=/posts/>文章</a></div></div></nav><main id=main-content><article class="single container"><header class=single-header><div class=flex><h1>在 Golang 中如何做国际化？</h1><div class=post-meta><time class=date datetime=2019-12-11T01:00:00.000+00:00 itemprop=datePublished>2019-12-11</time>
+/
+<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container><a style=text-decoration:none href=https://xuanwo.io/tags/golang><span>golang</span></a>
+<a style=text-decoration:none href=https://xuanwo.io/tags/qsctl><span>qsctl</span></a>
+<a style=text-decoration:none href=https://xuanwo.io/tags/i18n><span>i18n</span></a></div></div></header><div class=post><p>国际化是一个大问题，具体到我现在从事的开发工作而言，大体上会分为以下几个步骤：</p><ul><li>获取待翻译字符串</li><li>翻译字符串</li><li>应用已翻译字符串</li><li>使用已翻译字符串</li></ul><p>目前并不存在 Golang 的国际化最佳实践，大家都需要自己去摸索，而本文将会结合我在 <a href=https://github.com/yunify/qsctl>qsctl</a> 中的实践介绍 Golang 中如何做国际化，希望对读者们有所助益，少走一些弯路。首先我会介绍每个步骤需要完成的事情，然后介绍常见的 i18n 框架是如何做的，最后介绍我在 qsctl 中的做法。</p><hr><h2 id=heading>步骤介绍</h2><h3 id=heading-1>获取待翻译字符串</h3><p>翻译的第一步是获取待翻译字符串，社区比较常见的有两种做法。</p><p>第一种是事先定义好需要翻译的字符串，通过配置文件或者 DB 等方式存储；第二种是通过某种方式从源码中获取。</p><p>这种方式的弊端很明显：开发流程不顺畅——想要加入一个字符串，需要先修改配置文件，更好一点的方法是通过某种方式从源码中获取，将翻译和开发解耦。</p><h3 id=heading-2>翻译字符串</h3><p>第二步是翻译字符串。这个部分在开发上需要做的工作并不多，只需要保证以一个确定的格式存储并读取正确即可，比如 YAML，JSON 或者 PO 文件等。</p><p>通常可以使用一些 SaaS 化的服务来辅助这一工作：<a href=https://crowdin.com/>crowdin</a>，<a href=https://www.oneskyapp.com/>onesky</a>，<a href=https://localizejs.com/>localizejs</a>，<a href=https://phrase.com/>phrase</a>，<a href=https://www.transifex.com/>transifex</a>，<a href=https://www.smartling.com/>smartling</a> 等都是可选择的项，作为开发者，尤其需要注意的是这个服务是否支持与 Github 或者 Gitlab 集成，并支持 CI 自动构建等。</p><h3 id=heading-3>应用已翻译字符串</h3><p>翻译完毕之后需要应用到程序中，根据之前的技术决策不同，翻译后的字符串可能是以配置文件的形式被读取，或者是编译成二进制（比如 gettext），或者直接生成为代码等。</p><h3 id=heading-4>使用已翻译字符串</h3><p>最后一步但总是被忽略的一步是使用已翻译字符串：用户究竟是什么语言？Web 应用可以根据用户传递的 <code>Accept-Language</code> 来确定，但是命令行应用就需要根据不同的系统来做判断了。很多框架并不关心这一问题，他们只提供了接口来使用指定的语言，<a href=https://github.com/gosexy/gettext>gosexy/gettext</a> 稍微好一些，会通过 <code>LANGUAGE</code> 来获取语言。</p><h2 id=heading-5>现有的实现</h2><p>接下来我们简单的看看目前的各个 i18n 库都是怎么做的。</p><h3 id=qori18nhttpsgithubcomqori18n><a href=https://github.com/qor/i18n>qor/i18n</a></h3><p>在第一步上，它使用的是预定义方式，支持通过数据库或者本地存储来获取。</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>db, _ <span style=color:#666>:=</span> gorm.<span style=color:#06287e>Open</span>(<span style=color:#4070a0>&#34;mysql&#34;</span>, <span style=color:#4070a0>&#34;user:password@/dbname?charset=utf8&amp;parseTime=True&amp;loc=Local&#34;</span>)
+
+I18n <span style=color:#666>:=</span> i18n.<span style=color:#06287e>New</span>(
+    database.<span style=color:#06287e>New</span>(<span style=color:#666>&amp;</span>db), <span style=color:#60a0b0;font-style:italic>// load translations from the database
+</span><span style=color:#60a0b0;font-style:italic></span>    yaml.<span style=color:#06287e>New</span>(filepath.<span style=color:#06287e>Join</span>(config.Root, <span style=color:#4070a0>&#34;config/locales&#34;</span>)), <span style=color:#60a0b0;font-style:italic>// load translations from the YAML files in directory `config/locales`
+</span><span style=color:#60a0b0;font-style:italic></span>)
+</code></pre></div><p>YAML 文件形如：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml>en-US:<span style=color:#bbb>
+</span><span style=color:#bbb>  </span>demo:<span style=color:#bbb>
+</span><span style=color:#bbb>    </span>hello:<span style=color:#bbb> </span><span style=color:#4070a0>&#34;Hello, world&#34;</span><span style=color:#bbb>
+</span></code></pre></div><p>通过一个简短的 key 来标识不同的待翻译字符串，用起来是这种感觉：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>I18n.<span style=color:#06287e>T</span>(<span style=color:#4070a0>&#34;en-US&#34;</span>, <span style=color:#4070a0>&#34;demo.greeting&#34;</span>) <span style=color:#60a0b0;font-style:italic>// Not exist at first
+</span><span style=color:#60a0b0;font-style:italic></span>I18n.<span style=color:#06287e>T</span>(<span style=color:#4070a0>&#34;en-US&#34;</span>, <span style=color:#4070a0>&#34;demo.hello&#34;</span>) <span style=color:#60a0b0;font-style:italic>// Exists in the yml file
+</span></code></pre></div><h3 id=loctoolsgo-l10nhttpsgithubcomloctoolsgo-l10n><a href=https://github.com/loctools/go-l10n>loctools/go-l10n</a></h3><p>go-l10n 的做法与 <a href=https://github.com/qor/i18n>qor/i18n</a> 类似，只不过它的待翻译字符串是在源码中声明的：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>locpool.Resources[<span style=color:#4070a0>&#34;en&#34;</span>] = <span style=color:#007020;font-weight:700>map</span>[<span style=color:#902000>string</span>]<span style=color:#902000>string</span>{
+    <span style=color:#60a0b0;font-style:italic>// Page title
+</span><span style=color:#60a0b0;font-style:italic></span>    <span style=color:#4070a0>&#34;Hello&#34;</span>: <span style=color:#4070a0>&#34;Hello!&#34;</span>,
+
+    <span style=color:#60a0b0;font-style:italic>// {N} is the number of messages
+</span><span style=color:#60a0b0;font-style:italic></span>    <span style=color:#4070a0>&#34;YouHaveNMessages&#34;</span>: <span style=color:#4070a0>&#34;You have {N} {N_PLURAL:message|messages}&#34;</span>,
+}
+</code></pre></div><p>它还设计一套特定的语法来支持复数等场景，用起来形如：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>package</span> main
+
+<span style=color:#007020;font-weight:700>import</span> (
+    <span style=color:#4070a0>&#34;github.com/iafan/Plurr/go/plurr&#34;</span>
+    <span style=color:#4070a0>&#34;github.com/iafan/go-l10n/loc&#34;</span>
+)
+
+<span style=color:#60a0b0;font-style:italic>// Create a global localization pool which will be populated
+</span><span style=color:#60a0b0;font-style:italic></span><span style=color:#60a0b0;font-style:italic>// by resource files; use English as a default (fallback) language
+</span><span style=color:#60a0b0;font-style:italic></span><span style=color:#007020;font-weight:700>var</span> locpool = loc.<span style=color:#06287e>NewPool</span>(<span style=color:#4070a0>&#34;en&#34;</span>)
+
+<span style=color:#007020;font-weight:700>func</span> <span style=color:#06287e>main</span>() {
+  <span style=color:#60a0b0;font-style:italic>// Get Russian localization context
+</span><span style=color:#60a0b0;font-style:italic></span>  lc <span style=color:#666>:=</span> locpool.<span style=color:#06287e>GetContext</span>(<span style=color:#4070a0>&#34;ru&#34;</span>)
+
+  <span style=color:#60a0b0;font-style:italic>// Get translation by key name:
+</span><span style=color:#60a0b0;font-style:italic></span>  name <span style=color:#666>:=</span> lc.<span style=color:#06287e>Tr</span>(<span style=color:#4070a0>&#34;Hello&#34;</span>)
+
+  <span style=color:#60a0b0;font-style:italic>// get translation by key name, then format it using Plurr:
+</span><span style=color:#60a0b0;font-style:italic></span>  hello <span style=color:#666>:=</span> lc.<span style=color:#06287e>Format</span>(<span style=color:#4070a0>&#34;YouHaveNMessages&#34;</span>, plurr.Params{<span style=color:#4070a0>&#34;N&#34;</span>: <span style=color:#40a070>5</span>})
+
+  <span style=color:#666>...</span>
+}
+</code></pre></div><h3 id=gosexygettexthttpsgithubcomgosexygettext><a href=https://github.com/gosexy/gettext>gosexy/gettext</a></h3><p>gosexy/gettext 的做法有些不太一样，它选择了提取所有的 <code>gettext</code> 函数调用中的字符串并生成 PO 文件：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>fmt.<span style=color:#06287e>Println</span>(gettext.<span style=color:#06287e>Gettext</span>(<span style=color:#4070a0>&#34;Hello, world!&#34;</span>))
+</code></pre></div><p>这里的 <code>Hello, world</code> 就会被作为 PO 文件中的 <code>msgid</code> 存储下来。</p><p>由于是 gettext 的 binding，它也继承了 gettext text domain 的概念，用起来稍微有些复杂：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>package</span> main
+
+<span style=color:#007020;font-weight:700>import</span> (
+	<span style=color:#4070a0>&#34;fmt&#34;</span>
+
+	<span style=color:#4070a0>&#34;github.com/gosexy/gettext&#34;</span>
+)
+
+<span style=color:#007020;font-weight:700>func</span> <span style=color:#06287e>main</span>() {
+	textDomain <span style=color:#666>:=</span> <span style=color:#4070a0>&#34;default&#34;</span>
+
+	gettext.<span style=color:#06287e>BindTextdomain</span>(textDomain, <span style=color:#4070a0>&#34;path/to/domains&#34;</span>)
+	gettext.<span style=color:#06287e>Textdomain</span>(textDomain)
+
+	gettext.<span style=color:#06287e>SetLocale</span>(gettext.LcAll, <span style=color:#4070a0>&#34;es_MX.utf8&#34;</span>)
+
+	fmt.<span style=color:#06287e>Println</span>(gettext.<span style=color:#06287e>Gettext</span>(<span style=color:#4070a0>&#34;Hello, world!&#34;</span>))
+}
+</code></pre></div><p>好处是它能使用已有一套基于 gettext 的完整生态链，包括 POEditor 之类的都能使用，各大 SaaS 平台也都有支持。</p><p>K8s 做国际化的时候就是使用了这套方案，参见：<a href=https://github.com/kubernetes/kubernetes/tree/master/translations>https://github.com/kubernetes/kubernetes/tree/master/translations</a> 。</p><h3 id=nicksnydergo-i18nhttpsgithubcomnicksnydergo-i18n><a href=https://github.com/nicksnyder/go-i18n>nicksnyder/go-i18n</a></h3><p>这个库目前看来是 Star 数量最多的，也是运用最广泛的。它的设计同样是会提取所有特定类型的调用来生成待翻译字符串：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>i18n.Message{
+    ID: <span style=color:#4070a0>&#34;PersonCats&#34;</span>,
+    One: <span style=color:#4070a0>&#34;{{.Name}} has {{.Count}} cat.&#34;</span>,
+    Other: <span style=color:#4070a0>&#34;{{.Name}} has {{.Count}} cats.&#34;</span>,
+}
+</code></pre></div><p>会被提取成：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=color:#60a0b0;font-style:italic># active.en.toml</span>
+[PersonCats]
+description = <span style=color:#4070a0>&#34;The number of cats a person has&#34;</span>
+one = <span style=color:#4070a0>&#34;{{.Name}} has {{.Count}} cat.&#34;</span>
+other = <span style=color:#4070a0>&#34;{{.Name}} has {{.Count}} cats.&#34;</span>
+</code></pre></div><p>除此之外，它提供了一系列的工具来提取和合并，翻译一个新的语言需要做如下的事情：</p><ul><li><p>创建一个空的语言配置，比如 <code>translate.es.toml</code></p></li><li><p>将待翻译的字符串填充进去：<code>goi18n merge active.en.toml translate.es.toml</code></p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=color:#60a0b0;font-style:italic># translate.es.toml</span>
+[HelloPerson]
+hash = <span style=color:#4070a0>&#34;sha1-5b49bfdad81fedaeefb224b0ffc2acc58b09cff5&#34;</span>
+other = <span style=color:#4070a0>&#34;Hello {{.Name}}&#34;</span>
+</code></pre></div></li><li><p>翻译完毕后重命名为 <code>active.es.toml</code></p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=color:#60a0b0;font-style:italic># active.es.toml</span>
+[HelloPerson]
+hash = <span style=color:#4070a0>&#34;sha1-5b49bfdad81fedaeefb224b0ffc2acc58b09cff5&#34;</span>
+other = <span style=color:#4070a0>&#34;Hola {{.Name}}&#34;</span>
+</code></pre></div></li><li><p>在代码中载入</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>bundle.<span style=color:#06287e>RegisterUnmarshalFunc</span>(<span style=color:#4070a0>&#34;toml&#34;</span>, toml.Unmarshal)
+bundle.<span style=color:#06287e>LoadMessageFile</span>(<span style=color:#4070a0>&#34;active.es.toml&#34;</span>)
+</code></pre></div></li></ul><p>实际用起来的感觉是这样的：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>import</span> <span>（</span>
+	<span style=color:#4070a0>&#34;fmt&#34;</span>
+
+	<span style=color:#4070a0>&#34;github.com/nicksnyder/go-i18n/v2/i18n&#34;</span>
+<span>）</span>
+
+<span style=color:#007020;font-weight:700>func</span> <span style=color:#06287e>main</span>() {
+	bundle <span style=color:#666>:=</span> i18n.<span style=color:#06287e>NewBundle</span>(language.English)
+    bundle.<span style=color:#06287e>RegisterUnmarshalFunc</span>(<span style=color:#4070a0>&#34;toml&#34;</span>, toml.Unmarshal)
+	bundle.<span style=color:#06287e>LoadMessageFile</span>(<span style=color:#4070a0>&#34;es.toml&#34;</span>)
+    localizer <span style=color:#666>:=</span> i18n.<span style=color:#06287e>NewLocalizer</span>(bundle, lang, accept)
+    helloPersonMessage <span style=color:#666>:=</span> <span style=color:#666>&amp;</span>i18n.Message{
+        ID:    <span style=color:#4070a0>&#34;HelloPerson&#34;</span>,
+        Other: <span style=color:#4070a0>&#34;Hello {{.Name}}!&#34;</span>,
+	}
+
+    fmt.<span style=color:#06287e>Println</span>(localizer.<span style=color:#06287e>MustLocalize</span>(<span style=color:#666>&amp;</span>i18n.LocalizeConfig{
+        DefaultMessage: helloPersonMessage,
+        TemplateData:   <span style=color:#007020;font-weight:700>map</span>[<span style=color:#902000>string</span>]<span style=color:#902000>string</span>{<span style=color:#4070a0>&#34;Name&#34;</span>: <span style=color:#4070a0>&#34;Nick&#34;</span>},
+    }))
+}
+</code></pre></div><p>抽象最多，功能最强，应该算是目前最好的 go-i18n 库了。</p><h2 id=heading-6>更好的方案</h2><h3 id=heading-7>理想很丰满</h3><p>刚才分析了 i18n 需要的各个步骤，也看了社区的一些实现，是时候想想理想中的 i18n 流程的模样了。我认为一个好的 i18n 流程应当将翻译工作和代码开发解耦，业务人员在实现逻辑的时候不需要考虑当前的语言环境，也不需要考虑这个字符串是否被翻译过，调用习惯最好与标准库接近（比如 <code>fmt</code>），而翻译人员在进行翻译的时候，则需要屏蔽所有的代码细节，不需要考虑这个字符串会被如何调用，不需要有任何的开发背景。那么问题来了，有没有这样<del>一个游戏</del>一个库呢？</p><h3 id=heading-8>现实很骨感</h3><p>没有，但是我们有一个很接近的，<a href=https://golang.org/x/text>https://golang.org/x/text</a> : <em>a repository of text-related packages related to internationalization (i18n) and localization (l10n)</em></p><p>text 包中提供的 message 库主要专注于我们上文提到的步骤三，以接近于 <code>fmt</code> 的接口来输出已翻译的字符串，比如：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>message.<span style=color:#06287e>SetString</span>(language.Dutch, <span style=color:#4070a0>&#34;You have chosen to play %m.&#34;</span>, <span style=color:#4070a0>&#34;U heeft ervoor gekozen om %m te spelen.&#34;</span>)
+message.<span style=color:#06287e>SetString</span>(language.Dutch, <span style=color:#4070a0>&#34;basketball&#34;</span>, <span style=color:#4070a0>&#34;basketbal&#34;</span>)
+message.<span style=color:#06287e>SetString</span>(language.Dutch, <span style=color:#4070a0>&#34;hockey&#34;</span>, <span style=color:#4070a0>&#34;ijshockey&#34;</span>)
+message.<span style=color:#06287e>SetString</span>(language.Dutch, <span style=color:#4070a0>&#34;soccer&#34;</span>, <span style=color:#4070a0>&#34;voetbal&#34;</span>)
+message.<span style=color:#06287e>SetString</span>(language.BritishEnglish, <span style=color:#4070a0>&#34;soccer&#34;</span>, <span style=color:#4070a0>&#34;football&#34;</span>)
+
+<span style=color:#007020;font-weight:700>for</span> _, sport <span style=color:#666>:=</span> <span style=color:#007020;font-weight:700>range</span> []<span style=color:#902000>string</span>{<span style=color:#4070a0>&#34;soccer&#34;</span>, <span style=color:#4070a0>&#34;basketball&#34;</span>, <span style=color:#4070a0>&#34;hockey&#34;</span>} {
+    <span style=color:#007020;font-weight:700>for</span> _, lang <span style=color:#666>:=</span> <span style=color:#007020;font-weight:700>range</span> []<span style=color:#902000>string</span>{<span style=color:#4070a0>&#34;en&#34;</span>, <span style=color:#4070a0>&#34;en-GB&#34;</span>, <span style=color:#4070a0>&#34;nl&#34;</span>} {
+        p <span style=color:#666>:=</span> message.<span style=color:#06287e>NewPrinter</span>(language.<span style=color:#06287e>Make</span>(lang))
+        fmt.<span style=color:#06287e>Printf</span>(<span style=color:#4070a0>&#34;%-6s %s\n&#34;</span>, lang, p.<span style=color:#06287e>Sprintf</span>(<span style=color:#4070a0>&#34;You have chosen to play %m.&#34;</span>, sport))
+    }
+    fmt.<span style=color:#06287e>Println</span>()
+}
+</code></pre></div><p>所以我们只需要想办法处理其他步骤即可。</p><h3 id=heading-9>实现总有坑</h3><p>首先，提取待翻译字符串。</p><blockquote><p>当初在实现的时候我忽略了 message 包提供的 <code>gotext</code> 工具，它支持从源码中提取所有使用 <code>message.Printer</code> 输出的字符串，没必要再自己重新造轮子了。</p></blockquote><p>我当时的做法是创建了一个新的包叫做 <code>i18n</code>，在内部创建并初始化一个全局的 <code>message.Printer</code> ，并把 <code>message.Printer</code> 的方法导出为包的方法，然后在 AST 中提取所有的调用。一个比较粗糙的实现是这样的，之后应该会改成直接用 <code>gotext</code>：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>ast.<span style=color:#06287e>Inspect</span>(f, <span style=color:#007020;font-weight:700>func</span>(n ast.Node) <span style=color:#902000>bool</span> {
+    call, ok <span style=color:#666>:=</span> n.(<span style=color:#666>*</span>ast.CallExpr)
+    <span style=color:#007020;font-weight:700>if</span> !ok {
+        <span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>true</span>
+    }
+    fn, ok <span style=color:#666>:=</span> call.Fun.(<span style=color:#666>*</span>ast.SelectorExpr)
+    <span style=color:#007020;font-weight:700>if</span> !ok {
+        <span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>true</span>
+    }
+    pack, ok <span style=color:#666>:=</span> fn.X.(<span style=color:#666>*</span>ast.Ident)
+    <span style=color:#007020;font-weight:700>if</span> !ok {
+        <span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>true</span>
+    }
+    <span style=color:#007020;font-weight:700>if</span> pack.Name <span style=color:#666>!=</span> <span style=color:#4070a0>&#34;i18n&#34;</span> {
+        <span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>true</span>
+    }
+    <span style=color:#007020;font-weight:700>if</span> <span style=color:#007020>len</span>(call.Args) <span style=color:#666>==</span> <span style=color:#40a070>0</span> {
+        <span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>true</span>
+    }
+    str, ok <span style=color:#666>:=</span> call.Args[<span style=color:#40a070>0</span>].(<span style=color:#666>*</span>ast.BasicLit)
+    <span style=color:#007020;font-weight:700>if</span> !ok {
+        <span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>true</span>
+    }
+
+    <span style=color:#60a0b0;font-style:italic>// Keep this for later debug usage.
+</span><span style=color:#60a0b0;font-style:italic></span>    <span style=color:#60a0b0;font-style:italic>// log.Printf(&#34;%v&#34;, str.Value)
+</span><span style=color:#60a0b0;font-style:italic></span>    data[str.Value] = str.Value
+    <span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>true</span>
+})
+</code></pre></div><p>然后翻译服务使用了 <a href=https://crowdin.com/>crowdin</a>，它支持与 Github 的集成，同时还为开源项目提供了慷慨的支持。</p><p>最后在应用的时候我遇到了不少的问题。</p><p>第一个问题是，Go 目前没有一个好的检测运行环境语言的库，以 Linux 为例，根据用户的发行版不同，设置语言的方式也千差万别，只是检查 <code>LANG</code> 或者 <code>LANGUAGE</code> 是不够的 ，为此我开发了 <a href=https://github.com/Xuanwo/go-locale>go-locale</a>：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>import</span> (
+    <span style=color:#4070a0>&#34;github.com/Xuanwo/go-locale&#34;</span>
+)
+
+<span style=color:#007020;font-weight:700>func</span> <span style=color:#06287e>main</span>() {
+	tag, err <span style=color:#666>:=</span> locale.<span style=color:#06287e>Detect</span>()
+    <span style=color:#007020;font-weight:700>if</span> err <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+        log.<span style=color:#06287e>Fatal</span>(err)
+    }
+    <span style=color:#60a0b0;font-style:italic>// Have fun with language.Tag!
+</span><span style=color:#60a0b0;font-style:italic></span>}
+</code></pre></div><p>只需要一个简单的调用就能获得当前系统环境的对应 Language Tag。目前只支持 Linux，内部采用检查所有的 <code>LC_*</code> ，<code>LANG</code>，<code>LANGUAGE</code> 环境变量，调用 <code>locale</code> 等多种方式来判断，后续还会支持 Windows 和 Mac 等常用操作系统。</p><p>第二个问题是 <a href=https://godoc.org/golang.org/x/text/language>language</a> 库的提供的 Language Match 实现很是坑爹：按照 BCP 47 的规范，<code>zh_CN</code> 应当被 <code>zh_Hans</code> 代替，但是现实是 <code>zh_CN</code> 已经被广泛应用于各种地方，比如 Linux 下的 locale 就是 <code>zh_CN.UTF-8</code>，然而使用 <code>zh_CN</code> 创建的 <code>language.Tag</code> 是既匹配不到 <code>zh_Hans</code> 也匹配不到 <code>zh</code> 的。</p><p>我也没有太好的方案，目前的做法是从 <code>language</code> 库的内部实现中 copy 了一个 Matcher 的实现：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>func</span> <span style=color:#06287e>newMatcher</span>(t []language.Tag) <span style=color:#666>*</span>matcher {
+	tags <span style=color:#666>:=</span> <span style=color:#666>&amp;</span>matcher{<span style=color:#007020>make</span>(<span style=color:#007020;font-weight:700>map</span>[language.Tag]<span style=color:#902000>int</span>)}
+	<span style=color:#007020;font-weight:700>for</span> i, tag <span style=color:#666>:=</span> <span style=color:#007020;font-weight:700>range</span> t {
+		ct, err <span style=color:#666>:=</span> language.All.<span style=color:#06287e>Canonicalize</span>(tag)
+		<span style=color:#007020;font-weight:700>if</span> err <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+			ct = tag
+		}
+		tags.index[ct] = i
+	}
+	<span style=color:#007020;font-weight:700>return</span> tags
+}
+
+<span style=color:#007020;font-weight:700>type</span> matcher <span style=color:#007020;font-weight:700>struct</span> {
+	index <span style=color:#007020;font-weight:700>map</span>[language.Tag]<span style=color:#902000>int</span>
+}
+
+<span style=color:#007020;font-weight:700>func</span> (m matcher) <span style=color:#06287e>Match</span>(want <span style=color:#666>...</span>language.Tag) (language.Tag, <span style=color:#902000>int</span>, language.Confidence) {
+	<span style=color:#007020;font-weight:700>for</span> _, t <span style=color:#666>:=</span> <span style=color:#007020;font-weight:700>range</span> want {
+		ct, err <span style=color:#666>:=</span> language.All.<span style=color:#06287e>Canonicalize</span>(t)
+		<span style=color:#007020;font-weight:700>if</span> err <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+			ct = t
+		}
+		conf <span style=color:#666>:=</span> language.Exact
+		<span style=color:#007020;font-weight:700>for</span> {
+			<span style=color:#007020;font-weight:700>if</span> index, ok <span style=color:#666>:=</span> m.index[ct]; ok {
+				<span style=color:#007020;font-weight:700>return</span> ct, index, conf
+			}
+			<span style=color:#007020;font-weight:700>if</span> ct <span style=color:#666>==</span> language.Und {
+				<span style=color:#007020;font-weight:700>break</span>
+			}
+			ct = ct.<span style=color:#06287e>Parent</span>()
+			conf = language.High
+		}
+	}
+	<span style=color:#007020;font-weight:700>return</span> language.Und, <span style=color:#40a070>0</span>, language.No
+}
+</code></pre></div><p>保证这个 Matcher 内使用的 Tag 都进行了规范化，而且总是返回我们支持的语言之一或者直接返回不支持，而不是 Tag Compose 之后的结果。</p><p>这样我们就能够按照语言来进行初始化了：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#60a0b0;font-style:italic>// Init will init i18n support via input language.
+</span><span style=color:#60a0b0;font-style:italic></span><span style=color:#007020;font-weight:700>func</span> <span style=color:#06287e>Init</span>(lang language.Tag) {
+	tag, _, _ <span style=color:#666>:=</span> supported.<span style=color:#06287e>Match</span>(lang)
+	<span style=color:#007020;font-weight:700>switch</span> tag {
+	<span style=color:#007020;font-weight:700>case</span> language.AmericanEnglish, language.English:
+		<span style=color:#06287e>initEnUS</span>(lang)
+	<span style=color:#007020;font-weight:700>case</span> language.SimplifiedChinese, language.Chinese:
+		<span style=color:#06287e>initZhCN</span>(lang)
+	<span style=color:#007020;font-weight:700>default</span>:
+		<span style=color:#06287e>initEnUS</span>(lang)
+	}
+}
+</code></pre></div><h3 id=heading-10>总算搞定了</h3><p>上述工作做完之后，在 qsctl 想输出一个国际化字符串非常容易，只需要像使用 <code>fmt</code> 一样使用 <code>i18n</code> 库即可：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>i18n.<span style=color:#06287e>Printf</span>(<span style=color:#4070a0>&#34;File &lt;%s&gt; copied to &lt;%s&gt;.\n&#34;</span>, t.<span style=color:#06287e>GetSourcePath</span>(), t.<span style=color:#06287e>GetDestinationPath</span>())
+</code></pre></div><ul><li>不需要手动载入，因为所有的字符串都已经事先生成好并在 <code>i18n</code> 库初始化的时候导入了</li><li>不需要关心这个字符串是否被翻译以及会不会翻译，只要专注于自己的逻辑即可</li></ul><p>在 qsctl 中 i18n 流程如下：</p><ul><li>使用 <code>i18n</code> 库提供的 <code>Sprintf</code> 和 <code>Printf</code> 等函数来输出需要国际化的字符串</li><li><code>make generate</code> 会将这些字符串都提取到 <code>translations/en_US</code> 目录下，以 JSON 文件的形式存储</li><li>翻译人员通过 <a href=https://crowdin.com/project/qsctl>crowdin</a> 进行翻译，<a href=https://crowdin.com/>crowdin</a> 会自动创建翻译后的目录 (形如 <code>translations/zh_CN</code>) ，并提交 PR</li><li>PR Merge 之后再次运行 <code>make generate</code> 会将 <code>translations</code> 目录下的不同语言的 JSON 文件生成为对应的语言初始化函数，在 <code>i18n</code> 的 <code>init</code> 函数中会根据检测到的语言类型进行初始化</li></ul><p>最后的成果：</p><p><img src=qsctl.png alt></p><p>QingStor 旗下第一款支持国际化的命令行工具诞生啦！</p><h2 id=heading-11>总结</h2><p>所以在 Golang 中该如何做国际化呢？我有以下几点小小的建议：</p><ul><li>多看看 <a href=https://godoc.org/golang.org/x/text/message>message</a> 库，避免重复造轮子</li><li>全流程自动化，不要手工维护翻译文件</li><li>挑选一个合适的翻译服务</li></ul><p>当然国际化不仅仅是将字符串本地化，其中还有货币，时间，数字本地化等内容，由于没有实践经验，我就不赘述了。</p><p>欢迎大家在评论区交流～</p><h2 id=heading-12>参考资料</h2><ul><li><a href=https://github.com/qor/i18n>qor/i18n</a>: <em>I18n is a golang implementation, provides internationalization support for your application, with different backends support</em></li><li><a href=https://github.com/loctools/go-l10n>loctools/go-l10n</a>: <em>Lightweight yet powerful continuous localization solution for Go, based on Serge and Plurr.</em></li><li><a href=https://github.com/gosexy/gettext>gosexy/gettext</a>: <em>Go bindings for <a href=http://www.gnu.org/software/gettext/>GNU gettext</a>, an internationalization and localization library for writing multilingual systems.</em></li><li><a href=https://github.com/nicksnyder/go-i18n>nicksnyder/go-i18n</a>: <em>go-i18n is a Go <a href=https://github.com/nicksnyder/go-i18n#package-i18n>package</a> and a <a href=https://github.com/nicksnyder/go-i18n#command-goi18n>command</a> that helps you translate Go programs into multiple languages.</em></li><li><a href=https://godoc.org/golang.org/x/text/message>message</a>: <em>Package message implements formatted I/O for localized strings with functions analogous to the fmt's print functions. It is a drop-in replacement for fmt.</em></li></ul></div><div id=disqus_thread></div><script type=application/javascript>let disqus_config=function(){this.page.identifier='\/2019\/12\/11\/golang-i18n\/';this.page.title='在 Golang 中如何做国际化？';this.page.url='https:\/\/xuanwo.io\/2019\/12\/11\/golang-i18n\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script></footer></body></html>
