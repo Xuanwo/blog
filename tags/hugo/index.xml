@@ -1,4 +1,42 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Hugo on Xuanwo's Blog</title><link>https://xuanwo.io/tags/hugo/</link><description>Recent content in Hugo on Xuanwo's Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 15 Oct 2018 13:35:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/hugo/index.xml" rel="self" type="application/rss+xml"/><item><title>在 Golang 中如何做国际化？</title><link>https://xuanwo.io/2019/12/11/golang-i18n/</link><pubDate>Wed, 11 Dec 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/12/11/golang-i18n/</guid><description>&lt;p>国际化是一个大问题，具体到我现在从事的开发工作而言，大体上会分为以下几个步骤：&lt;/p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Hugo on Xuanwo's Blog</title><link>https://xuanwo.io/tags/hugo/</link><description>Recent content in Hugo on Xuanwo's Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 15 Oct 2018 13:35:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/hugo/index.xml" rel="self" type="application/rss+xml"/><item><title>go-locale 介绍</title><link>https://xuanwo.io/2019/12/13/go-locale/</link><pubDate>Fri, 13 Dec 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/12/13/go-locale/</guid><description>&lt;p>在上一篇文章 &lt;a href="https://xuanwo.io/2019/12/11/golang-i18n/">在 Golang 中如何做国际化？&lt;/a> 中我提到了 “Go 目前没有一个好的检测运行环境语言的库”，&lt;code>go-locale&lt;/code> 就是为了解决这个问题而诞生的。&lt;/p>
+&lt;h2 id="heading">一些事实&lt;/h2>
+&lt;p>现实的情况是，我们没有一个标准的方法可以获取到当前代码运行环境的语言情况。&lt;/p>
+&lt;p>对于大部分 Linux 发行版而言，我们可以检查 &lt;code>LANG&lt;/code> 或者 &lt;code>LANGUAGE&lt;/code> 环境变量，但是不同发行版有不同的习惯，而每个人还有自己的配置，比如我在 Archlinux 上就只有 &lt;code>LANG=en_US.UTF-8&lt;/code> ，其他的语言相关环境变量都没有。macOS 上更加复杂，传统上我们将它看作类 Unix 操作系统，沿用环境变量或者直接调用 &lt;code>locale&lt;/code> 来检查，但是这也是不一定的。Windows 更不必说了，环境变量这一套不好使，需要检查注册表或者调用 Win32 API。&lt;/p>
+&lt;p>所以想要解决这些问题，我们需要为不同的平台实现不同的语言检测逻辑，但是现在这些任务可以交给 &lt;code>go-locale&lt;/code> 来做了。&lt;/p>
+&lt;h2 id="heading-1">介绍&lt;/h2>
+&lt;p>&lt;code>go-locale&lt;/code> 的目标是跨平台的语言检测库，它会使用各个平台的不同方式来尽力探测出当前使用的语言，目前已经支持了 &lt;code>Linux&lt;/code>，&lt;code>macOS&lt;/code> 和 &lt;code>Windows&lt;/code> 三大主流平台。&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">import&lt;/span> (
+&lt;span style="color:#4070a0">&amp;#34;github.com/Xuanwo/go-locale&amp;#34;&lt;/span>
+)
+&lt;span style="color:#007020;font-weight:bold">func&lt;/span> &lt;span style="color:#06287e">main&lt;/span>() {
+tag, err &lt;span style="color:#666">:=&lt;/span> locale.&lt;span style="color:#06287e">Detect&lt;/span>()
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+log.&lt;span style="color:#06287e">Fatal&lt;/span>(err)
+}
+&lt;span style="color:#60a0b0;font-style:italic">// Have fun with language.Tag!
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="heading-2">内部实现&lt;/h2>
+&lt;p>&lt;code>go-locale&lt;/code> 使用条件编译机制，对外暴露一个统一的 &lt;code>Detect&lt;/code> ，内部按照平台不同实现不一样的 &lt;code>detect&lt;/code> 方法，在 &lt;code>detect&lt;/code> 内会尝试该平台下已知可用的多种不同方式，所有方式都检测不到的情况下才会返回 &lt;code>ErrNotDetected&lt;/code>。&lt;/p>
+&lt;h3 id="linux">Linux&lt;/h3>
+&lt;p>在 Linux 平台下首先会检查环境变量，检查顺序如下：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>LANGUAGE&lt;/code> 兼容 &lt;code>gettext&lt;/code> 的行为&lt;/li>
+&lt;li>&lt;code>LC_ALL&lt;/code> 总是会覆盖其他的所有 &lt;code>LC_*&lt;/code> 配置&lt;/li>
+&lt;li>&lt;code>LC_MESSAGES&lt;/code> 是所有消息的 locale 配置&lt;/li>
+&lt;li>&lt;code>LANG&lt;/code> 是所有 &lt;code>LC_*&lt;/code> 配置的 fallback 值&lt;/li>
+&lt;/ul>
+&lt;p>如果环境变量全部检查失败，会尝试调用 &lt;code>locale&lt;/code> 命令来获取语言。&lt;/p>
+&lt;h3 id="macos">macOS&lt;/h3>
+&lt;p>在 macOS 下首先会进行全部的 Linux 系统兼容的检查，如果没有获取到，则会使用系统提供的 &lt;code>User Defaults System&lt;/code> ，通过 &lt;code>defaults read NSGlobalDomain AppleLanguages&lt;/code> 来获取语言。&lt;/p>
+&lt;h3 id="windows">Windows&lt;/h3>
+&lt;p>Windows 下则会使用 Win32 OLE API 来获取。&lt;/p>
+&lt;h2 id="heading-3">已知问题&lt;/h2>
+&lt;h3 id="-code-coverage">虚高的 Code Coverage&lt;/h3>
+&lt;p>目前项目显示的代码测试覆盖率为 100%，但是这只是在 Linux 平台下测试的结果。目前 Codecov 不支持汇总多个平台下的整体结果，所以选择了只提交最好看的一个平台。&lt;/p>
+&lt;p>此外，在 Linux 的单元测试中大量的进行了 mock 和 monkey patch 来模拟行为，但是由于我本人 Windows 和 macOS 使用经验较少，并不确定他们的行为是否真的是这样，所以也没有写类似的单元测试。&lt;/p>
+&lt;p>根据在 Travis CI 上测试的结果，Windows 和 macOS 上的实现是 work 的，但是我不排除在特定版本和配置下会出问题的可能，如果遇到的话欢迎提交 Issue 反馈。&lt;/p>
+&lt;h3 id="heading-4">只返回一个语言&lt;/h3>
+&lt;p>设计时的目标是返回最有可能的那个语言，但是很多人会设置多种可选语言，比如 &lt;code>zh_CN:zh_TW:en_US&lt;/code>，如果软件不支持中文的话使用英文也可以。所以这个计划在之后会返回成按照 fallback 顺序来排列的语言数组。&lt;/p></description></item><item><title>在 Golang 中如何做国际化？</title><link>https://xuanwo.io/2019/12/11/golang-i18n/</link><pubDate>Wed, 11 Dec 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/12/11/golang-i18n/</guid><description>&lt;p>国际化是一个大问题，具体到我现在从事的开发工作而言，大体上会分为以下几个步骤：&lt;/p>
 &lt;ul>
 &lt;li>获取待翻译字符串&lt;/li>
 &lt;li>翻译字符串&lt;/li>
@@ -1356,116 +1394,4 @@ i-use-systemd.txt
 &lt;ul>
 &lt;li>&lt;a href="https://docs.qingcloud.com/qingstor/">QingStor 对象存储文档&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS">HTTP访问控制（CORS）&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>从 netctl 切换到 systemd-networkd</title><link>https://xuanwo.io/2019/06/13/switch-to-systemd-networkd/</link><pubDate>Thu, 13 Jun 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/06/13/switch-to-systemd-networkd/</guid><description>&lt;p>晚上的时候临时起意决定把网络管理器从 &lt;code>netctl&lt;/code> 切换到 &lt;code>systemd-networkd&lt;/code>，切换的过程意外的顺畅。本文记录了一下切换的过程并简单介绍一下 &lt;code>systemd-networkd&lt;/code> + &lt;code>iwd&lt;/code> 的组合如何使用。&lt;/p>
-&lt;hr>
-&lt;h2 id="heading">出场人物介绍&lt;/h2>
-&lt;h3 id="netctl">netctl&lt;/h3>
-&lt;p>netctl 是 archlinux 的亲儿子，上游就在 &lt;a href="https://git.archlinux.org/netctl.git/">https://git.archlinux.org/netctl.git/&lt;/a>，也是除了 &lt;code>systemd-networkd&lt;/code> 之外（这是 systemd 钦定的），唯一一个进入 base 组的网络管理工具，说是官方钦定也不为过。netcl 依赖 dhcpcd 或者 dhclient 来获取动态 IP 地址，通过 &lt;code>wpa_supplicant&lt;/code> 来访问加密的 WiFi，提供了 &lt;code>wifi-menu&lt;/code> 供用户在命令行下交互式地选择热点并输入密码。同时还提供了一系列的 systemd service 文件（&lt;code>netctl@.service&lt;/code>，&lt;code>netctl-ifplugd@.service&lt;/code>，&lt;code>netctl-auto@.service&lt;/code>）来帮助用户进行配置，比如在开启了 &lt;code>netctl-auto@&amp;lt;interface&amp;gt;.service&lt;/code> 之后，你的网卡就能在可选的 profile 中自动切换。&lt;/p>
-&lt;h3 id="systemd-networkd">systemd-networkd&lt;/h3>
-&lt;p>正如它的名字所暗示的，这是 systemd 全家桶的一员。它主要负责的是检测并配置网络设备，特别的是它还能够用来配置 &lt;code>systemd-nspawn&lt;/code> 启动的容器的网络。&lt;/p>
-&lt;h3 id="iwd">iwd&lt;/h3>
-&lt;p>iwd (iNet wireless daemon) 是 Intel 开发，用于取代 &lt;code>wpa_supplicant&lt;/code> 的 WiFi 后端。它的主要目标是通过不依赖任何外部库而是最大限度的利用 Linux 内核提供的功能来优化资源利用率。iwd 可以很好的跟 systemd-network 配合使用。&lt;/p>
-&lt;h2 id="heading-1">使用场景介绍&lt;/h2>
-&lt;p>平时只需要连接 3 个 Wi-Fi：家里的，公司的，手机的，没有频繁切换/增加/修改/删除 Wi-Fi 配置的需求，所以我不需要一个常驻通知区域的服务来进行切换。此外，我的 VPN 已经全部通过 systemd 来进行管理了，所以也不需要网络管理工具替我做这些操作。我需要的是这样的一个工具组合：一个负责管理网络设备，一个负责连接 WiFi 并进行认证。之前的组合是 &lt;code>netctl&lt;/code> + &lt;code>wpa_supplicant&lt;/code>，现在我有了新欢：&lt;code>systemd-networkd&lt;/code> + &lt;code>iwd&lt;/code>。&lt;/p>
-&lt;h2 id="heading-2">如何使用&lt;/h2>
-&lt;h3 id="-netctl">停用 netctl&lt;/h3>
-&lt;p>首先需要停用 netctl 的相关服务，避免多个网络管理工具在一起打架。&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">:&lt;span style="color:#666">)&lt;/span> systemctl stop netctl-auto@&amp;lt;interface&amp;gt;.service
-:&lt;span style="color:#666">)&lt;/span> systemctl disable netctl-auto@&amp;lt;interface&amp;gt;.service
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="heading-3">配置网卡&lt;/h3>
-&lt;p>然后按照 Wiki 的指示写无线网卡的配置，放在 &lt;code>/etc/systemd/network&lt;/code> 下。&lt;/p>
-&lt;p>对无线网卡来说，最小化的配置是这样的：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-ini" data-lang="ini">&lt;span style="color:#007020;font-weight:bold">[Match]&lt;/span>
-&lt;span style="color:#4070a0">Name&lt;/span>&lt;span style="color:#666">=&lt;/span>&lt;span style="color:#4070a0">wlp2s0&lt;/span>
-&lt;span style="color:#007020;font-weight:bold">[Network]&lt;/span>
-&lt;span style="color:#4070a0">DHCP&lt;/span>&lt;span style="color:#666">=&lt;/span>&lt;span style="color:#4070a0">ipv4&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
-&lt;li>&lt;code>Match&lt;/code> 主要是用于匹配管理的设备，可以通过设备名，MAC 地址等来选择&lt;/li>
-&lt;li>&lt;code>Network&lt;/code> 用来做网络相关的具体配置，比如 DHCP，DNS 等&lt;/li>
-&lt;/ul>
-&lt;p>我的本地开启了 coredns 作为 DNS 服务，所以我需要额外加一些配置来通过 DHCP 来获取 IPv4 地址，但是不使用 DHCP 下发的 DNS。&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-ini" data-lang="ini">&lt;span style="color:#007020;font-weight:bold">[Match]&lt;/span>
-&lt;span style="color:#4070a0">Name&lt;/span>&lt;span style="color:#666">=&lt;/span>&lt;span style="color:#4070a0">wlan0&lt;/span>
-&lt;span style="color:#007020;font-weight:bold">[Network]&lt;/span>
-&lt;span style="color:#4070a0">DHCP&lt;/span>&lt;span style="color:#666">=&lt;/span>&lt;span style="color:#4070a0">ipv4&lt;/span>
-&lt;span style="color:#4070a0">DNS&lt;/span>&lt;span style="color:#666">=&lt;/span>&lt;span style="color:#4070a0">127.0.0.1&lt;/span>
-&lt;span style="color:#007020;font-weight:bold">[DHCP]&lt;/span>
-&lt;span style="color:#4070a0">UseDNS&lt;/span>&lt;span style="color:#666">=&lt;/span>&lt;span style="color:#4070a0">false&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
-&lt;p>iwd 启动的时候似乎会修改网络设备的名字，我的网卡被修改成了 wlan0&lt;/p>
-&lt;/blockquote>
-&lt;p>在配置写好之后就可以启动 &lt;code>systemd-networkd&lt;/code> 的服务啦：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">:&lt;span style="color:#666">)&lt;/span> systemctl start systemd-netword
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果修改了网络配置，只需要 restrart 即可。&lt;/p>
-&lt;p>更具体的配置可以参阅 ArchWiki 或者 &lt;code>man systemd-networkd&lt;/code>。&lt;/p>
-&lt;h3 id="-iwd">配置 iwd&lt;/h3>
-&lt;p>iwd 不是自带的软件包，所以首先需要自行安装：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">:&lt;span style="color:#666">)&lt;/span> pacman -S iwd
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>在开始使用之前，我们需要 start 并且 enable iwd 服务：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">:&lt;span style="color:#666">)&lt;/span> systemctl start iwd
-:&lt;span style="color:#666">)&lt;/span> systemctl &lt;span style="color:#007020">enable&lt;/span> iwd
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后就可以用 &lt;code>iwctl&lt;/code> 进行管理啦，iwctl 默认会进入一个交互式的命令行界面，使用体验还是很赞的：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">:&lt;span style="color:#666">)&lt;/span> iwctl
-&lt;span style="color:#666">[&lt;/span>iwd&lt;span style="color:#666">]&lt;/span>#
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>此时输入 help 会返回支持的所有命令，各个命令都比较直观，只要对 WiFi 的相关技术名词稍有了解就能很快上手，此外这个界面所有命令都支持自动补全，好评。&lt;/p>
-&lt;p>首先先看看我们有哪些设备：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#666">[&lt;/span>iwd&lt;span style="color:#666">]&lt;/span>&lt;span style="color:#60a0b0;font-style:italic"># device list&lt;/span>
-Devices *
---------------------------------------------------------------------------------
-Name Address Powered Adapter Mode
---------------------------------------------------------------------------------
-wlan0 xx:xx:xx:xx:xx:xx on phy0 station
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个界面是动态的，右上角的 &lt;code>*&lt;/code> 会不断闪烁表明这个界面是实时的。&lt;/p>
-&lt;p>然后我们可以手动触发一次 STA 扫描：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#666">[&lt;/span>iwd&lt;span style="color:#666">]&lt;/span>&lt;span style="color:#60a0b0;font-style:italic"># station wlan0 scan&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>之后就可以查看有哪些能连接 WiFi 热点了：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#666">[&lt;/span>iwd&lt;span style="color:#666">]&lt;/span>&lt;span style="color:#60a0b0;font-style:italic"># station wlan0 get-networks&lt;/span>
-Available networks *
---------------------------------------------------------------------------------
-Network name Security Signal
---------------------------------------------------------------------------------
-CU_SNZQ psk ****
-xjzy psk ****
-Tenda_30BDD0 psk ****
-TP-LINK_D82B80 psk ****
-TP-LINK_lee psk ****
-ziroom201 psk ****
-mhshome psk ****
-TP-LINK_he psk ****
-TP-LINK_450C psk ****
-yuzhe psk ****
-z212-202 psk ****
-Bill&lt;span style="">&amp;#39;&lt;/span>s Router psk ****
-tcs psk ****
-&amp;gt; XXXXXXXXXXX psk ****
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个界面同样是动态的，可以查看当前能连接网络机器信号强度。&lt;/p>
-&lt;p>最后就能够选择想要连接 SSID 连接网络了，如果需要输入密码的话，iwd 还会出现一个提示要求输入密码。&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#666">[&lt;/span>iwd&lt;span style="color:#666">]&lt;/span>&lt;span style="color:#60a0b0;font-style:italic"># station wlan0 connect XXXXXXXXXXX&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里有个需要提出来的点：iwd 通过交互式界面成功连接上网络之后，就会自动的在 &lt;code>/var/lib/iwd&lt;/code> 下生成对应的配置文件，之后 iwd 自动的进行连接。所以一方面是不需要自己手动的去写配置文件，另一方面是切换过程也是自动的，不需要人工干预。&lt;/p>
-&lt;p>iwd 生成的配置文件名是有一定规则的，用 SSID 作为文件名，然后以加密方式作为后缀，比如 &lt;code>*.open&lt;/code> 表示这是一个开放网络，&lt;code>*.psk&lt;/code> 表示这是一个使用 PSK 加密的网络。&lt;/p>
-&lt;h3 id="heading-4">检查状态&lt;/h3>
-&lt;p>全部配置好之后可以分别查看一下 WiFi 和网卡的状态：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">:&lt;span style="color:#666">)&lt;/span> iwctl device wlan0 show
-Device: wlan0
---------------------------------------------------------------------------------
-Settable Property Value
---------------------------------------------------------------------------------
-Name wlan0
-* Mode station
-* Powered on
-Address xx:xx:xx:xx:xx:xx
-* WDS off
-Adapter phy0
-:&lt;span style="color:#666">)&lt;/span> networkctl status
-● State: routable
-Address: 192.168.0.103 on wlan0
-xxxx::xxxx:xxxx:xxxx:xxxx on wlan0
-Gateway: 192.168.0.1 &lt;span style="color:#666">(&lt;/span>TP-LINK TECHNOLOGIES CO.,LTD.&lt;span style="color:#666">)&lt;/span> on wlan0
-DNS: 127.0.0.1
-&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="heading-5">总结&lt;/h2>
-&lt;p>systemd 真香，上交底裤我光荣！天灭 networkmanager ！&lt;/p>
-&lt;h2 id="heading-6">参考资料&lt;/h2>
-&lt;ul>
-&lt;li>&lt;a href="https://wiki.archlinux.org/index.php/Systemd-networkd">systemd-networkd - ArchWiki&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://wiki.archlinux.org/index.php/Iwd">iwd - ArchWiki&lt;/a>&lt;/li>
 &lt;/ul></description></item></channel></rss>
