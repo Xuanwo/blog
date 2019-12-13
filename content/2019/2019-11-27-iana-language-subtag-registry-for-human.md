@@ -3,6 +3,7 @@ categories: Code
 date: 2019-11-27T01:00:00Z
 tags:
 - golang
+series: "Self-made Wheels"
 title: 更好用的 IANA Language Subtag Registry 数据
 url: /2019/11/27/iana-language-subtag-registry-for-human
 ---
