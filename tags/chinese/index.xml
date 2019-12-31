@@ -1,4 +1,470 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Chinese on Xuanwo's Blog</title><link>https://xuanwo.io/tags/chinese/</link><description>Recent content in Chinese on Xuanwo's Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 30 Mar 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/chinese/index.xml" rel="self" type="application/rss+xml"/><item><title>go-locale 介绍</title><link>https://xuanwo.io/2019/12/13/go-locale/</link><pubDate>Fri, 13 Dec 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/12/13/go-locale/</guid><description>&lt;p>在上一篇文章 &lt;a href="https://xuanwo.io/2019/12/11/golang-i18n/">在 Golang 中如何做国际化？&lt;/a> 中我提到了 “Go 目前没有一个好的检测运行环境语言的库”，&lt;code>go-locale&lt;/code> 就是为了解决这个问题而诞生的。&lt;/p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Chinese on Xuanwo's Blog</title><link>https://xuanwo.io/tags/chinese/</link><description>Recent content in Chinese on Xuanwo's Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 30 Mar 2019 01:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/chinese/index.xml" rel="self" type="application/rss+xml"/><item><title>面向应用的 Golang 抽象存储层介绍</title><link>https://xuanwo.io/2019/12/30/storage-intro/</link><pubDate>Mon, 30 Dec 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/12/30/storage-intro/</guid><description>&lt;p>&lt;a href="https://github.com/Xuanwo/storage">storage&lt;/a> 是一个面向应用的 Golang 统一存储层，其目标是生产级别就绪，高性能，无供应商锁定。目前支持 &lt;a href="https://docs.microsoft.com/en-us/azure/storage/blobs/">Azure Blob storage&lt;/a>，本地文件系统，&lt;a href="https://cloud.google.com/storage/">Google Cloud Storage&lt;/a>，&lt;a href="https://www.aliyun.com/product/oss">阿里云对象存储&lt;/a>，&lt;a href="https://www.qingcloud.com/products/qingstor/">QingStor 对象存储&lt;/a>，&lt;a href="https://aws.amazon.com/s3/">Amazon S3&lt;/a> 等多种存储后端。这个项目从 09/30 开始至今，做了刚刚好三个月，选在今天发布 &lt;a href="https://github.com/Xuanwo/storage/releases/tag/v0.5.0">v0.5.0&lt;/a>，一方面是想总结一下过去三个月的开发经历，展望一下黯淡残酷的未来，另一方面是实在按捺不住想跟大家分享一下的心情。本文首先会介绍 storage 这个项目的诞生，然后介绍项目与社区林林总总各种存储项目的不同，之后再介绍未来的开发计划，最后谈谈自己的一些小体会。&lt;/p>
+&lt;h2 id="showtime">Showtime&lt;/h2>
+&lt;p>在介绍 storage 的历史和设计之前，先看看 storage 用起来是什么样子吧。&lt;/p>
+&lt;p>首先初始化一个服务：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">srv, store, err &lt;span style="color:#666">:=&lt;/span> coreutils.&lt;span style="color:#06287e">Open&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;qingstor://hmac:test_access_key:test_secret_key@https:qingstor.com:443/test_bucket_name&amp;#34;&lt;/span>)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+log.&lt;span style="color:#06287e">Fatalf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;service init failed: %v&amp;#34;&lt;/span>, err)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>srv&lt;/code> 是这个存储服务的 &lt;code>Servicer&lt;/code>，负责管理 &lt;code>Namespace&lt;/code>；&lt;code>store&lt;/code> 是这个存储服务的 &lt;code>Storager&lt;/code>，负责实际的存储交互。&lt;code>coreutils&lt;/code> 是 &lt;code>storage&lt;/code> 库提供的工具包，支持通过统一的配置字符串来创建存储服务。&lt;/p>
+&lt;p>然后使用这个服务来列取一个目录并发送到通道：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">ch &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#007020">make&lt;/span>(&lt;span style="color:#007020;font-weight:bold">chan&lt;/span> &lt;span style="color:#666">*&lt;/span>types.Object, &lt;span style="color:#40a070">1&lt;/span>)
+&lt;span style="color:#007020;font-weight:bold">defer&lt;/span> &lt;span style="color:#007020">close&lt;/span>(ch)
+err &lt;span style="color:#666">:=&lt;/span> store.&lt;span style="color:#06287e">ListDir&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;prefix&amp;#34;&lt;/span>, pairs.&lt;span style="color:#06287e">WithFileFunc&lt;/span>(&lt;span style="color:#007020;font-weight:bold">func&lt;/span>(&lt;span style="color:#666">*&lt;/span>types.Object){
+ch &lt;span style="color:#666">&amp;lt;-&lt;/span> o
+}))
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+log.&lt;span style="color:#06287e">Fatalf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;listdir: %v&amp;#34;&lt;/span>, err)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>pairs&lt;/code> 是 &lt;code>storage&lt;/code> 库提供的参数包，提供了能用在各个 API 接口的强类型参数，风格统一为 &lt;code>pairs.WithXXX&lt;/code>。&lt;/p>
+&lt;p>从本地读取文件并上传到 QingStor 对象存储可以这样：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">_, src, _ &lt;span style="color:#666">:=&lt;/span> coreutils.&lt;span style="color:#06287e">Open&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;fs:///path&amp;#34;&lt;/span>)
+_, dst, _ &lt;span style="color:#666">:=&lt;/span> coreutils.&lt;span style="color:#06287e">Open&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;qingstor://hmac:test_access_key:test_secret_key@https:qingstor.com:443/test_bucket_name&amp;#34;&lt;/span>)
+r, err &lt;span style="color:#666">:=&lt;/span> src.&lt;span style="color:#06287e">Read&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;test_file&amp;#34;&lt;/span>)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+log.&lt;span style="color:#06287e">Fatalf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;read from src: %v&amp;#34;&lt;/span>, err)
+}
+&lt;span style="color:#007020;font-weight:bold">defer&lt;/span> r.&lt;span style="color:#06287e">Close&lt;/span>()
+err = dst.&lt;span style="color:#06287e">Write&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;test_key&amp;#34;&lt;/span>, r, pairs.&lt;span style="color:#06287e">WithSize&lt;/span>(&lt;span style="color:#40a070">1024&lt;/span>))
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+log.&lt;span style="color:#06287e">Fatalf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;read from src: %v&amp;#34;&lt;/span>, err)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 Storager 初始化完毕后，就不再需要关心业务无关的底层存储细节，可以轻松的开发出需要持久化数据的无供应商锁定应用。&lt;/p>
+&lt;h2 id="heading">诞生&lt;/h2>
+&lt;p>接下来聊一聊 &lt;code>storage&lt;/code> 库的由来。&lt;/p>
+&lt;p>时间倒转到 2018 年初，我们对象存储的周边工具遇到了挑战：有个私有云用户需要迁移数十 TB 的数据到对象存储。当时可用的工具只有 python 写成的 qsctl，所有状态都存储在内存中，一旦出现任务中断就需要从头开始，用户意见很大。为此，我在一次内部会议上提出我们需要一个全新的工具，这个工具会专注于长时间的数据迁移操作，支持断点续传，支持持久化任务状态。由于原本的 qscamel 1.0 设计目标与之接近，所以沿用 qscamel 项目名，开发出了 &lt;a href="https://xuanwo.io/2018/09/05/qscamel-intro/">qscamel 2.0&lt;/a>。&lt;/p>
+&lt;p>在 qscamel 2.0 中，我设计出了这样一套接口：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#60a0b0;font-style:italic">// Base is the interface that both Source and Destination should implement.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>&lt;span style="color:#007020;font-weight:bold">type&lt;/span> Base &lt;span style="color:#007020;font-weight:bold">interface&lt;/span> {
+&lt;span style="color:#60a0b0;font-style:italic">// Name will return the endpoint&amp;#39;s name.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Name&lt;/span>(ctx context.Context) (name &lt;span style="color:#902000">string&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// Stat will get the metadata.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Stat&lt;/span>(ctx context.Context, p &lt;span style="color:#902000">string&lt;/span>) (o &lt;span style="color:#666">*&lt;/span>model.SingleObject, err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// Read will return a reader.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Read&lt;/span>(ctx context.Context, p &lt;span style="color:#902000">string&lt;/span>) (r io.Reader, err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// ReadRange will read content with range [offset, offset+size)
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">ReadRange&lt;/span>(ctx context.Context, p &lt;span style="color:#902000">string&lt;/span>, offset, size &lt;span style="color:#902000">int64&lt;/span>) (r io.Reader, err &lt;span style="color:#902000">error&lt;/span>)
+}
+&lt;span style="color:#60a0b0;font-style:italic">// Destination is the interface for destination endpoint.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>&lt;span style="color:#007020;font-weight:bold">type&lt;/span> Destination &lt;span style="color:#007020;font-weight:bold">interface&lt;/span> {
+Base
+&lt;span style="color:#60a0b0;font-style:italic">// Delete will use endpoint to delete the path.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Delete&lt;/span>(ctx context.Context, p &lt;span style="color:#902000">string&lt;/span>) (err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// Deletable will return whether current endpoint supports delete.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Deletable&lt;/span>() &lt;span style="color:#902000">bool&lt;/span>
+&lt;span style="color:#60a0b0;font-style:italic">// Fetch will use endpoint to fetch the url.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Fetch&lt;/span>(ctx context.Context, path, url &lt;span style="color:#902000">string&lt;/span>) (err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// Fetchable will return whether current endpoint supports fetch.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Fetchable&lt;/span>() &lt;span style="color:#902000">bool&lt;/span>
+&lt;span style="color:#60a0b0;font-style:italic">// InitPart will inti a multipart upload.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">InitPart&lt;/span>(ctx context.Context, p &lt;span style="color:#902000">string&lt;/span>, size &lt;span style="color:#902000">int64&lt;/span>) (uploadID &lt;span style="color:#902000">string&lt;/span>, partSize &lt;span style="color:#902000">int64&lt;/span>, partNumbers &lt;span style="color:#902000">int&lt;/span>, err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// UploadPart will upload a part.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">UploadPart&lt;/span>(ctx context.Context, o &lt;span style="color:#666">*&lt;/span>model.PartialObject, r io.Reader) (err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// Partable will return whether current endpoint supports multipart upload.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Partable&lt;/span>() &lt;span style="color:#902000">bool&lt;/span>
+&lt;span style="color:#60a0b0;font-style:italic">// Write will read data from the reader and write to endpoint.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Write&lt;/span>(ctx context.Context, path &lt;span style="color:#902000">string&lt;/span>, size &lt;span style="color:#902000">int64&lt;/span>, r io.Reader) (err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// Writable will return whether current endpoint supports write.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Writable&lt;/span>() &lt;span style="color:#902000">bool&lt;/span>
+}
+&lt;span style="color:#60a0b0;font-style:italic">// Source is the interface for source endpoint.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>&lt;span style="color:#007020;font-weight:bold">type&lt;/span> Source &lt;span style="color:#007020;font-weight:bold">interface&lt;/span> {
+Base
+&lt;span style="color:#60a0b0;font-style:italic">// List will list from the job.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">List&lt;/span>(ctx context.Context, j &lt;span style="color:#666">*&lt;/span>model.DirectoryObject, fn &lt;span style="color:#007020;font-weight:bold">func&lt;/span>(model.Object)) (err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// Reach will return an accessible url.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Reach&lt;/span>(ctx context.Context, p &lt;span style="color:#902000">string&lt;/span>) (url &lt;span style="color:#902000">string&lt;/span>, err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// Reachable will return whether current endpoint supports reach.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Reachable&lt;/span>() &lt;span style="color:#902000">bool&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这套接口是面向迁移任务设计的，虽然不是非常优雅，但是工作的很好，一直沿用至今。qscamel 基于这套接口提供了本地文件系统，QingStor 对象存储，阿里云 OSS，Google Cloud Storage，七牛对象存储，S3，又拍云，腾讯云对象存储等多家主流存储服务的支持。&lt;/p>
+&lt;p>qscamel 2.0 中是我第一次尝试统一存储层的接口，受限于个人的能力和时间的要求，选择的方案是只实现任务要求操作的部分 API。这套接口完全没有复用的价值，它离开特定业务场景就失去了生命力。在之后的很长一段时间里面，我常常会想到这套接口——有没有可能提供一个抽象的统一的现代的存储层呢？&lt;/p>
+&lt;p>在 &lt;a href="https://xuanwo.io/2019/11/10/go-template-meta-coding-in-qsctl2/">Go 模板元编程及其在 qsctl 中的实践&lt;/a> 中我介绍了一部分 qsctl 2 中所做的工作，当时刻意忽略了存储层的部分。实际上，如果没有一个统一的存储层，我们是无法抽象出一个好的任务框架的，以初始化分段为例：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-json" data-lang="json">{
+&lt;span style="color:#062873;font-weight:bold">&amp;#34;SegmentInit&amp;#34;&lt;/span>: {
+&lt;span style="color:#062873;font-weight:bold">&amp;#34;description&amp;#34;&lt;/span>: &lt;span style="color:#4070a0">&amp;#34;init a segment upload&amp;#34;&lt;/span>,
+&lt;span style="color:#062873;font-weight:bold">&amp;#34;input&amp;#34;&lt;/span>: [
+&lt;span style="color:#4070a0">&amp;#34;PartSize&amp;#34;&lt;/span>,
+&lt;span style="color:#4070a0">&amp;#34;Path&amp;#34;&lt;/span>,
+&lt;span style="color:#4070a0">&amp;#34;Storage&amp;#34;&lt;/span>
+],
+&lt;span style="color:#062873;font-weight:bold">&amp;#34;output&amp;#34;&lt;/span>: [
+&lt;span style="color:#4070a0">&amp;#34;SegmentID&amp;#34;&lt;/span>
+]
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里的 &lt;code>Storage&lt;/code> 实际上就是由 storage 库提供的抽象，上层任务不需要关心这个 &lt;code>Storage&lt;/code> 底层到底是文件存储还是 QingStor 对象存储，抑或是 S3。这层抽象将 &lt;code>fs-&amp;gt;qingstor&lt;/code>，&lt;code>qingstor-&amp;gt;fs&lt;/code> 简化为了 &lt;code>src-&amp;gt;dst&lt;/code>，减少了大量的重复任务。&lt;/p>
+&lt;p>在 qsctl 2 开发的初期其实并没有考虑要做一个通用的存储层，当时是直接写死的本地存储和对象存储。但是开发进入到后期，我们遇到了两个问题。一是单元测试不好做，大量的单测都依赖于本地存储和对象存储的行为；二是有大量重复的任务，比如从本地复制到对象存储，从对象存储复制到本地，里面大部分逻辑都是相似但无法直接复用代码的。为此，我重新审视了统一存储层接口的想法，距离我上次尝试已经过去了一年多，我变强了，头发也变得更少了，是时候再试试了。&lt;/p>
+&lt;h2 id="heading-1">区别&lt;/h2>
+&lt;blockquote>
+&lt;p>漩涡啊，你怎么又造轮子了？&lt;/p>
+&lt;p>我认为造轮子分两种：一种是学东西，另一种是拿来用。在市场上已经有类似库的情况下造轮子，要么就是想出名，要么就是别的轮子不太圆，两种想法我都有。&lt;/p>
+&lt;/blockquote>
+&lt;p>Golang 社区中类似的库有如下几个：&lt;a href="https://github.com/spf13/afero">Afero&lt;/a>，&lt;a href="https://github.com/viant/afs">afs&lt;/a>，&lt;a href="https://github.com/C2FO/vfs">vfs&lt;/a>，此外再加上与 POSIX file API 做对比。&lt;/p>
+&lt;h3 id="afero">Afero&lt;/h3>
+&lt;p>Afero 目标更接近于成为 &lt;code>os&lt;/code> 和 &lt;code>ioutil&lt;/code> 包的补充，尽可能的提供类似体验，并支持更多便利的函数。&lt;/p>
+&lt;p>为各个底层的文件系统提供相似的函数：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#06287e">Chmod&lt;/span>(name &lt;span style="color:#902000">string&lt;/span>, mode os.FileMode) : &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Chtimes&lt;/span>(name &lt;span style="color:#902000">string&lt;/span>, atime time.Time, mtime time.Time) : &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Create&lt;/span>(name &lt;span style="color:#902000">string&lt;/span>) : File, &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Mkdir&lt;/span>(name &lt;span style="color:#902000">string&lt;/span>, perm os.FileMode) : &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">MkdirAll&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, perm os.FileMode) : &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Name&lt;/span>() : &lt;span style="color:#902000">string&lt;/span>
+&lt;span style="color:#06287e">Open&lt;/span>(name &lt;span style="color:#902000">string&lt;/span>) : File, &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">OpenFile&lt;/span>(name &lt;span style="color:#902000">string&lt;/span>, flag &lt;span style="color:#902000">int&lt;/span>, perm os.FileMode) : File, &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Remove&lt;/span>(name &lt;span style="color:#902000">string&lt;/span>) : &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">RemoveAll&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>) : &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Rename&lt;/span>(oldname, newname &lt;span style="color:#902000">string&lt;/span>) : &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Stat&lt;/span>(name &lt;span style="color:#902000">string&lt;/span>) : os.FileInfo, &lt;span style="color:#902000">error&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>暴露出与原生库相似的接口：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">io.Closer
+io.Reader
+io.ReaderAt
+io.Seeker
+io.Writer
+io.WriterAt
+&lt;span style="color:#06287e">Name&lt;/span>() : &lt;span style="color:#902000">string&lt;/span>
+&lt;span style="color:#06287e">Readdir&lt;/span>(count &lt;span style="color:#902000">int&lt;/span>) : []os.FileInfo, &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Readdirnames&lt;/span>(n &lt;span style="color:#902000">int&lt;/span>) : []&lt;span style="color:#902000">string&lt;/span>, &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Stat&lt;/span>() : os.FileInfo, &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Sync&lt;/span>() : &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Truncate&lt;/span>(size &lt;span style="color:#902000">int64&lt;/span>) : &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">WriteString&lt;/span>(s &lt;span style="color:#902000">string&lt;/span>) : ret &lt;span style="color:#902000">int&lt;/span>, err &lt;span style="color:#902000">error&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>提供更多的帮助函数：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#06287e">DirExists&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>) (&lt;span style="color:#902000">bool&lt;/span>, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">Exists&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>) (&lt;span style="color:#902000">bool&lt;/span>, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">FileContainsBytes&lt;/span>(filename &lt;span style="color:#902000">string&lt;/span>, subslice []&lt;span style="color:#902000">byte&lt;/span>) (&lt;span style="color:#902000">bool&lt;/span>, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">GetTempDir&lt;/span>(subPath &lt;span style="color:#902000">string&lt;/span>) &lt;span style="color:#902000">string&lt;/span>
+&lt;span style="color:#06287e">IsDir&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>) (&lt;span style="color:#902000">bool&lt;/span>, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">IsEmpty&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>) (&lt;span style="color:#902000">bool&lt;/span>, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">ReadDir&lt;/span>(dirname &lt;span style="color:#902000">string&lt;/span>) ([]os.FileInfo, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">ReadFile&lt;/span>(filename &lt;span style="color:#902000">string&lt;/span>) ([]&lt;span style="color:#902000">byte&lt;/span>, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">SafeWriteReader&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, r io.Reader) (err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">TempDir&lt;/span>(dir, prefix &lt;span style="color:#902000">string&lt;/span>) (name &lt;span style="color:#902000">string&lt;/span>, err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">TempFile&lt;/span>(dir, prefix &lt;span style="color:#902000">string&lt;/span>) (f File, err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">Walk&lt;/span>(root &lt;span style="color:#902000">string&lt;/span>, walkFn filepath.WalkFunc) &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">WriteFile&lt;/span>(filename &lt;span style="color:#902000">string&lt;/span>, data []&lt;span style="color:#902000">byte&lt;/span>, perm os.FileMode) &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">WriteReader&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, r io.Reader) (err &lt;span style="color:#902000">error&lt;/span>)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>我认为 Afero 的目标不是一个统一的存储层，而是一个统一的文件系统操作集。同时，受限于它的接口设计，它很难对接好 S3 这样的对象存储服务。&lt;/p>
+&lt;h2 id="afs">afs&lt;/h2>
+&lt;p>AFS 的目标跟我非常接近了：abstract file storage，从提供的 API 可见一斑：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#06287e">List&lt;/span>(ctx context.Context, URL &lt;span style="color:#902000">string&lt;/span>, options &lt;span style="color:#666">...&lt;/span>Option) ([]Object, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">Walk&lt;/span>(ctx context.Context, URL &lt;span style="color:#902000">string&lt;/span>, handler OnVisit, options &lt;span style="color:#666">...&lt;/span>Option) &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Download&lt;/span>(ctx context.Context, object Object, options &lt;span style="color:#666">...&lt;/span>Option) (io.ReadCloser, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">DownloadWithURL&lt;/span>(ctx context.Context, URL &lt;span style="color:#902000">string&lt;/span>, options &lt;span style="color:#666">...&lt;/span>Option) (io.ReadCloser, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">Upload&lt;/span>(ctx context.Context, URL &lt;span style="color:#902000">string&lt;/span>, mode os.FileMode, reader io.Reader, options &lt;span style="color:#666">...&lt;/span>Option) &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Create&lt;/span>(ctx context.Context, URL &lt;span style="color:#902000">string&lt;/span>, mode os.FileMode, isContainer &lt;span style="color:#902000">bool&lt;/span>, options &lt;span style="color:#666">...&lt;/span>Option) &lt;span style="color:#902000">error&lt;/span>
+&lt;span style="color:#06287e">Delete&lt;/span>(ctx context.Context, URL &lt;span style="color:#902000">string&lt;/span>, options &lt;span style="color:#666">...&lt;/span>Option) &lt;span style="color:#902000">error&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>但是在具体的实现上，我跟他的想法有很多不一致的地方：&lt;/p>
+&lt;ul>
+&lt;li>统一的存储层应该支持 Bucket/Namespace/Container 的操作&lt;/li>
+&lt;li>统一的存储层不应该加入太多的高级功能，比如 Modifier，Matcher 和 Batch&lt;/li>
+&lt;li>统一的存储层应该抛弃本地优先的思想，将 FileMode 作为本地存储的 metadata 之一而不是规范之一&lt;/li>
+&lt;/ul>
+&lt;p>所以 afs 很好，但仍然不是我想要的。&lt;/p>
+&lt;h2 id="vfs">vfs&lt;/h2>
+&lt;p>vfs 与 afs 的思路是相似的：&lt;em>vfs provides a pluggable, extensible, and opinionated set of file system functionality for Go across a number of file system types such as os, S3, and GCS&lt;/em>&lt;/p>
+&lt;p>但是不要 vfs 的原因与 afs 是相似的，他们提供了这样的接口：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#60a0b0;font-style:italic">// CopyToLocation will copy the current file to the provided location.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>&lt;span style="color:#06287e">CopyToLocation&lt;/span>(location Location) (File, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// CopyToFile will copy the current file to the provided file instance.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>&lt;span style="color:#06287e">CopyToFile&lt;/span>(file File) &lt;span style="color:#902000">error&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>想必这样的设计有他们内部业务的考量，但是作为一个通用的存储层，我们不需要实现跨存储服务的 Copy 和 Move，它们应当构建在存储层之上。&lt;/p>
+&lt;h3 id="posix-file-api">POSIX File API&lt;/h3>
+&lt;p>设计存储层当然绕不过 &lt;code>POSIX File API&lt;/code>，下面是 storage 库对 &lt;code>POSIX File API&lt;/code> 的对比情况：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>API&lt;/th>
+&lt;th>介绍&lt;/th>
+&lt;th>storage&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>getcwd&lt;/td>
+&lt;td>get current working directory&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>mkdir&lt;/td>
+&lt;td>create a directory&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>rmdir&lt;/td>
+&lt;td>delete a directory&lt;/td>
+&lt;td>Y: Delete&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>chdir&lt;/td>
+&lt;td>change working directory&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>link&lt;/td>
+&lt;td>make a new name for a file&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>unlink&lt;/td>
+&lt;td>delete a name and possibly the file it refers to&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>rename&lt;/td>
+&lt;td>change the name or location of a file&lt;/td>
+&lt;td>Y: Move&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>stat&lt;/td>
+&lt;td>get file status&lt;/td>
+&lt;td>Y: Stat&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>chmod&lt;/td>
+&lt;td>change permissions of a file&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>chown&lt;/td>
+&lt;td>change ownership of a file&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>utime&lt;/td>
+&lt;td>change access and/or modification times of an inode&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>opendir&lt;/td>
+&lt;td>open a directory&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>readdir&lt;/td>
+&lt;td>read directory entry&lt;/td>
+&lt;td>Y: ListDir&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>closedir&lt;/td>
+&lt;td>close a directory&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>rewinddir&lt;/td>
+&lt;td>reset directory stream&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>access&lt;/td>
+&lt;td>check user's permissions for a file&lt;/td>
+&lt;td>Y: Stat&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>open&lt;/td>
+&lt;td>open and possibly create a file or device&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>creat&lt;/td>
+&lt;td>open and possibly create a file or device&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>close&lt;/td>
+&lt;td>close a file descriptor&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>read&lt;/td>
+&lt;td>read from a file descriptor&lt;/td>
+&lt;td>Y: Read&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>write&lt;/td>
+&lt;td>write to a file descriptor&lt;/td>
+&lt;td>Y: Write&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>fcntl&lt;/td>
+&lt;td>manipulate file descriptor&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>fstat&lt;/td>
+&lt;td>get file status&lt;/td>
+&lt;td>Y: Stat&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>lseek&lt;/td>
+&lt;td>reposition read/write file offset&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>dup&lt;/td>
+&lt;td>duplicate a file descriptor&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>dup2&lt;/td>
+&lt;td>duplicate a file descriptor&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>pipe&lt;/td>
+&lt;td>create pipe&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>mkfifo&lt;/td>
+&lt;td>make a FIFO special file (a named pipe)&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>umask&lt;/td>
+&lt;td>set file creation mask&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>fdopen&lt;/td>
+&lt;td>associate a stream with an existing file descriptor&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>fileno&lt;/td>
+&lt;td>return file descriptor of stream&lt;/td>
+&lt;td>N&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>其中：&lt;/p>
+&lt;ul>
+&lt;li>storage 不支持切换工作路径，Storager 的 WorkDir 参数需要在初始化的时候指定，因此不需要 &lt;code>getcwd&lt;/code> 和 &lt;code>chdir&lt;/code>&lt;/li>
+&lt;li>storage 中文件夹的概念得到了相对的弱化，大多数存储服务中不提供对文件夹的操作，本地文件系统则会在 &lt;code>Write&lt;/code> 调用是自动创建，因此去掉了 &lt;code>mkdir&lt;/code>&lt;/li>
+&lt;li>storage 没有链接文件的概念，因此没有 &lt;code>link&lt;/code> 和 &lt;code>unlink&lt;/code>&lt;/li>
+&lt;li>在 storage 中，权限，所有权，创建/修改时间等属性都被视作元数据，因此会放到统一的元数据操作 API 中，不再需要 &lt;code>chmod&lt;/code>，&lt;code>chown&lt;/code>，&lt;code>utime&lt;/code> 等 API&lt;/li>
+&lt;li>storage 对外屏蔽了内部的读写细节，不再暴露文件描述符，因此外部程序不再需要显式的打开和关闭文件，它们只需要处理数据，不再需要 &lt;code>opendir&lt;/code>，&lt;code>closedir&lt;/code>，&lt;code>rewinddir&lt;/code>，&lt;code>open&lt;/code>，&lt;code>close&lt;/code>，&lt;code>fcntl&lt;/code>，&lt;code>dup&lt;/code>，&lt;code>dup2&lt;/code>，&lt;code>fdopen&lt;/code>，&lt;code>fileno&lt;/code> 等一系列 API&lt;/li>
+&lt;li>在 storage 中，&lt;code>create&lt;/code> 等价于 &lt;code>Write&lt;/code> 一个 0 字节的文件，因此不再需要独立的 &lt;code>create&lt;/code> 接口&lt;/li>
+&lt;li>storage 支持在 &lt;code>Read&lt;/code> 和 &lt;code>Write&lt;/code> 的时候传递 Offset，因此不再需要 &lt;code>lseek&lt;/code> 接口&lt;/li>
+&lt;li>一些操作系统相关的操作 storage 均不予支持，包括 &lt;code>pipe&lt;/code>，&lt;code>mkfifo&lt;/code>，&lt;code>umask&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="heading-2">设计&lt;/h2>
+&lt;p>前面聊过了历史， 也聊过了竞品，下面该讲讲我心目中的存储层了。&lt;/p>
+&lt;p>一个好的面向应用的抽象存储层该是什么样子呢？&lt;/p>
+&lt;ul>
+&lt;li>忽略无关细节：应用不需要关注打开关闭文件描述符这些底层细节&lt;/li>
+&lt;li>去除历史包袱：不需要提供管道这种现代应用很少用到的功能&lt;/li>
+&lt;li>众存储平等：避免本地存储优先思想，API 接口不依赖已有的 File 和 FileMode 等结构&lt;/li>
+&lt;li>少即是多：提供机制而不是策略，给用户写高级功能的能力，而不是直接提供类似 Matcher 这样的功能&lt;/li>
+&lt;li>专注于单一存储层：跨存储层的操作交给上层应用实现&lt;/li>
+&lt;/ul>
+&lt;p>在开始写 storage 的时候，我拍脑袋定了三个目标：&lt;/p>
+&lt;ul>
+&lt;li>Production ready：这个库需要靠谱，要稳定，要有单元测试，不能随意的引入破坏性变更，不能随意的修改函数及其参数的语意，要开发者友好&lt;/li>
+&lt;li>High performance：（尽可能的）高性能，一方面是运行效率高，另一方面是开发效率。接口不要太慢，关键路径上不要有过多的封装；接口设计要友好，避免引入过多的新概念，让开发者能快速上手，快速使用&lt;/li>
+&lt;li>Vendor lock free：要做一个真正的统一存储层，要尽可能屏蔽各个存储服务业务无关的细节，减少用户迁移存储时的阻力&lt;/li>
+&lt;/ul>
+&lt;p>除了 High performance 目前还没有实际的 Benchmark 外，其他两个目标都算是完成了一大半，下面简单介绍一下。&lt;/p>
+&lt;h3 id="heading-3">初始化&lt;/h3>
+&lt;p>初始化是使用任何服务的第一步，作为一个通用存储层当然也需要相关的设计，在提案 &lt;a href="https://github.com/Xuanwo/storage/blob/master/docs/design/3-support-service-init-via-config-string.md">3. Support service init via config string&lt;/a> 中我提出了一套基于字符串的配置方式：&lt;/p>
+&lt;pre>&lt;code>&amp;lt;type&amp;gt;://&amp;lt;config&amp;gt;
++
+|
+v
+&amp;lt;credential&amp;gt;@&amp;lt;endpoint&amp;gt;/&amp;lt;namespace&amp;gt;?&amp;lt;options&amp;gt;
++ + +
+| +---------+ +----------------------+
+v v v
+&amp;lt;protocol&amp;gt;:&amp;lt;data&amp;gt; &amp;lt;protocol&amp;gt;:&amp;lt;data&amp;gt; &amp;lt;key&amp;gt;:&amp;lt;value&amp;gt;[&amp;amp;&amp;lt;key&amp;gt;:&amp;lt;value&amp;gt;]
+&lt;/code>&lt;/pre>&lt;p>比如 QingStor 是：&lt;/p>
+&lt;pre>&lt;code>qingstor://hmac:&amp;lt;access_key_id&amp;gt;:&amp;lt;secret_access_key&amp;gt;@https:qingstor.com:443/&amp;lt;bucket_name&amp;gt;/&amp;lt;prefix&amp;gt;?zone=pek3b
+&lt;/code>&lt;/pre>&lt;p>而初始化本地文件系统是：&lt;/p>
+&lt;pre>&lt;code>fs:///&amp;lt;work_dir&amp;gt;
+&lt;/code>&lt;/pre>&lt;p>不同服务的配置串会在文档中制定。&lt;/p>
+&lt;p>实际的初始化体验形如：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">srv, store, err &lt;span style="color:#666">:=&lt;/span> coreutils.&lt;span style="color:#06287e">Open&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;qingstor://hmac:test_access_key:test_secret_key@https:qingstor.com:443/test_bucket_name&amp;#34;&lt;/span>)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+log.&lt;span style="color:#06287e">Fatalf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;service init failed: %v&amp;#34;&lt;/span>, err)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="heading-4">接口设计&lt;/h3>
+&lt;p>大多数存储服务都会有两级甚至更多层次，我将他们分为两层，一层负责实际的存储操作，叫做 Storager，另一层负责处理 Namespace 管理。对大多数对象存储服务来说，就是 Bucket 的管理，特别的，本地文件系统没有实现 Servier 接口。&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">type&lt;/span> Servicer &lt;span style="color:#007020;font-weight:bold">interface&lt;/span> {
+&lt;span style="color:#60a0b0;font-style:italic">// String will implement Stringer.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">String&lt;/span>() &lt;span style="color:#902000">string&lt;/span>
+&lt;span style="color:#60a0b0;font-style:italic">// List will list all storager instances under this service.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">List&lt;/span>(pairs &lt;span style="color:#666">...&lt;/span>&lt;span style="color:#666">*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// Get will get a valid storager instance for service.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Get&lt;/span>(name &lt;span style="color:#902000">string&lt;/span>, pairs &lt;span style="color:#666">...&lt;/span>&lt;span style="color:#666">*&lt;/span>types.Pair) (Storager, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// Create will create a new storager instance.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Create&lt;/span>(name &lt;span style="color:#902000">string&lt;/span>, pairs &lt;span style="color:#666">...&lt;/span>&lt;span style="color:#666">*&lt;/span>types.Pair) (Storager, &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#60a0b0;font-style:italic">// Delete will delete a storager instance.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#06287e">Delete&lt;/span>(name &lt;span style="color:#902000">string&lt;/span>, pairs &lt;span style="color:#666">...&lt;/span>&lt;span style="color:#666">*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Storager 负责所有实际的存储操作，经过各个版本的演化，现在相对稳定的接口形态是这样的：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">type&lt;/span> Storager &lt;span style="color:#007020;font-weight:bold">interface&lt;/span> {
+&lt;span style="color:#06287e">String&lt;/span>() &lt;span style="color:#902000">string&lt;/span>
+&lt;span style="color:#06287e">Init&lt;/span>(pairs &lt;span style="color:#666">...&lt;/span>&lt;span style="color:#666">*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">Metadata&lt;/span>() (m metadata.Storage, err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">ListDir&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, pairs &lt;span style="color:#666">...&lt;/span>&lt;span style="color:#666">*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">Read&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, pairs &lt;span style="color:#666">...&lt;/span>&lt;span style="color:#666">*&lt;/span>types.Pair) (r io.ReadCloser, err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">Write&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, r io.Reader, pairs &lt;span style="color:#666">...&lt;/span>&lt;span style="color:#666">*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">Stat&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, pairs &lt;span style="color:#666">...&lt;/span>&lt;span style="color:#666">*&lt;/span>types.Pair) (o &lt;span style="color:#666">*&lt;/span>types.Object, err &lt;span style="color:#902000">error&lt;/span>)
+&lt;span style="color:#06287e">Delete&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, pairs &lt;span style="color:#666">...&lt;/span>&lt;span style="color:#666">*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>此外，在提案 &lt;a href="https://github.com/Xuanwo/storage/blob/master/docs/design/1-unify-storager-behavior.md">1. Unify storager behavior&lt;/a> 中，我给出了支持更多高级操作的方案：将这些操作拆分为其他的 interface，并在实际使用的时候进行转换。相关的技术考量在提案中都已经描述过，这里就不赘述了。在 Storager 之外，存储服务还能够支持复制（Copier），移动（Mover），获取公开访问链接（Reacher），获取数据统计（Statistician），分段上传（Segmenter）等功能。&lt;/p>
+&lt;p>一个经常出现分歧的点在于 ListDir 这样的操作中如何返回 item，之前的方案是传递一个递归参数，但是在提案 &lt;a href="https://github.com/Xuanwo/storage/blob/master/docs/design/2-use-callback-in-list-operations.md">2. Use callback in List operations&lt;/a> 中，我决定使用 callback 的方式：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">dirFunc &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#007020;font-weight:bold">func&lt;/span>(object &lt;span style="color:#666">*&lt;/span>types.Object) {
+&lt;span style="color:#06287e">printf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;dir %s&amp;#34;&lt;/span>, object.Name)
+}
+fileFunc &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#007020;font-weight:bold">func&lt;/span>(object &lt;span style="color:#666">*&lt;/span>types.Object) {
+&lt;span style="color:#06287e">printf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;file %s&amp;#34;&lt;/span>, object.Name)
+}
+err &lt;span style="color:#666">:=&lt;/span> store.&lt;span style="color:#06287e">ListDir&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;prefix&amp;#34;&lt;/span>, types.&lt;span style="color:#06287e">WithDirFunc&lt;/span>(dirFunc), types.&lt;span style="color:#06287e">WithFileFunc&lt;/span>(fileFunc))
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>有一个没有被文档化的设计是接口中几乎每个函数都有的 &lt;code>types.Pair&lt;/code>，这个设计的比较早，在 v0.1.0 中就已经引入，至今变化不大。&lt;code>Pair&lt;/code> 是一个简单的 K-V 结构体：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">type&lt;/span> Pair &lt;span style="color:#007020;font-weight:bold">struct&lt;/span> {
+Key &lt;span style="color:#902000">string&lt;/span>
+Value &lt;span style="color:#007020;font-weight:bold">interface&lt;/span>{}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 &lt;code>types/pairs&lt;/code> 包中，通过 &lt;code>pairs.json&lt;/code> 来规定所有可用的 Pair：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-json" data-lang="json">{
+&lt;span style="color:#062873;font-weight:bold">&amp;#34;file_func&amp;#34;&lt;/span>: &lt;span style="color:#4070a0">&amp;#34;types.ObjectFunc&amp;#34;&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>并通过代码生成的方式将对应的构造器生成出来：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#60a0b0;font-style:italic">// WithFileFunc will apply file_func value to Options
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>&lt;span style="color:#007020;font-weight:bold">func&lt;/span> &lt;span style="color:#06287e">WithFileFunc&lt;/span>(v types.ObjectFunc) &lt;span style="color:#666">*&lt;/span>types.Pair {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> &lt;span style="color:#666">&amp;amp;&lt;/span>types.Pair{
+Key: FileFunc,
+Value: v,
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后在每个服务下，都会有 &lt;code>meta.json&lt;/code>，比如 &lt;a href="https://github.com/Xuanwo/storage/blob/master/services/qingstor/meta.json">qingstor meta&lt;/a> 来描述每个方法都支持哪些参数，以及哪些参数是必须的，并生成对应的解析函数和结构体。&lt;/p>
+&lt;p>以 ListDir 为例：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">ch &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#007020">make&lt;/span>(&lt;span style="color:#007020;font-weight:bold">chan&lt;/span> &lt;span style="color:#666">*&lt;/span>types.Object, &lt;span style="color:#40a070">1&lt;/span>)
+&lt;span style="color:#007020;font-weight:bold">defer&lt;/span> &lt;span style="color:#007020">close&lt;/span>(ch)
+err &lt;span style="color:#666">:=&lt;/span> store.&lt;span style="color:#06287e">ListDir&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;prefix&amp;#34;&lt;/span>, pairs.&lt;span style="color:#06287e">WithFileFunc&lt;/span>(&lt;span style="color:#007020;font-weight:bold">func&lt;/span>(&lt;span style="color:#666">*&lt;/span>types.Object){
+ch &lt;span style="color:#666">&amp;lt;-&lt;/span> o
+}))
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+log.&lt;span style="color:#06287e">Printf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;storager listdir failed: %v&amp;#34;&lt;/span>, err)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="heading-5">开发计划&lt;/h2>
+&lt;p>作为一个通用的存储层，如果只支持个别几个服务是很可笑的。因此接下来的一个重要是对接尽可能多的存储服务，这样才能提供这个存储抽象层的自身价值，另一方面也能够通过不同存储服务的不同设计，不同接入方式来验证我的设计合理性和扩展性 。在 v0.4.0 到 v0.5.0 中间，storage 初步支持了 &lt;a href="https://docs.microsoft.com/en-us/azure/storage/blobs/">Azure Blob storage&lt;/a>，&lt;a href="https://cloud.google.com/storage/">Google Cloud Storage&lt;/a>，&lt;a href="https://www.aliyun.com/product/oss">Aliyun Object Storage&lt;/a>，&lt;a href="https://aws.amazon.com/s3/">Amazon S3&lt;/a>。接下来的版本中，storage 会支持 &lt;a href="https://cloud.tencent.com/product/cos">Tencent Cloud Object Storage&lt;/a>，&lt;a href="https://www.qiniu.com/products/kodo">qiniu kodo&lt;/a> 和 &lt;a href="https://www.upyun.com/products/file-storage">UPYUN Storage Service&lt;/a>，并为所有的服务都加上单元测试并补充完整功能。&lt;/p>
+&lt;p>此外，storage 还要统一存储层返回的错误，使得上层调用者能够轻松的处理来自存储层的错误。在实现 qingstor 支持的时候做过一些尝试，但是并不完整，接下来会在目前的已经实现的存储服务中去验证这个思路。&lt;/p>
+&lt;p>作为一个服务的重要组成部份，storage 将在 Public API 中加入 context 并支持 OpenTracing。&lt;/p>
+&lt;p>文档非常重要，目前 storage 只有实现相关的文档，接下来会逐步加入更多的样例和使用说明文档，帮助开发者更快的上手。&lt;/p>
+&lt;p>其他的代码重构不再展开，欢迎大家来 &lt;a href="https://github.com/Xuanwo/storage/issues">Issues 区&lt;/a> 反馈意见。&lt;/p>
+&lt;h2 id="heading-6">体会&lt;/h2>
+&lt;ul>
+&lt;li>在开发 storage 库的过程中，我尝试着把一些重大的架构决策都以 Proposal 的方式记录下来，算是某种形式的架构决策记录（ADR）。除了写的时候经常能发现自己拍脑袋遗漏掉的点之外，更大的作用是在事后能知道自己当初为什么要做这样的决策，帮助后来者更好的理解设计意图，这样才能够做出更好的决策。&lt;/li>
+&lt;li>想知道自己的接口好不好用，最好的方式还是用到真实的项目中去，小 Demo 很难反映出这个接口的扩展性和可复用性。&lt;/li>
+&lt;li>项目未成形之前不要跟别人讨论，贯彻自己的思路。想不明白的事情可以先实现最简化的路径，然后写个小项目验证一下。&lt;/li>
+&lt;li>在 CI 中引入单元测试，代码覆盖率和质量控制能够提高重构的自信心，对于 Golang 项目来说，可以用 Travis CI + Codecov + GolangCI。&lt;/li>
+&lt;li>知易行难，开始做的时候才会知道看起来简单的东西想做好真的很难。&lt;/li>
+&lt;/ul></description></item><item><title>go-locale 介绍</title><link>https://xuanwo.io/2019/12/13/go-locale/</link><pubDate>Fri, 13 Dec 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/12/13/go-locale/</guid><description>&lt;p>在上一篇文章 &lt;a href="https://xuanwo.io/2019/12/11/golang-i18n/">在 Golang 中如何做国际化？&lt;/a> 中我提到了 “Go 目前没有一个好的检测运行环境语言的库”，&lt;code>go-locale&lt;/code> 就是为了解决这个问题而诞生的。&lt;/p>
 &lt;h2 id="heading">一些事实&lt;/h2>
 &lt;p>现实的情况是，我们没有一个标准的方法可以获取到当前代码运行环境的语言情况。&lt;/p>
 &lt;p>对于大部分 Linux 发行版而言，我们可以检查 &lt;code>LANG&lt;/code> 或者 &lt;code>LANGUAGE&lt;/code> 环境变量，但是不同发行版有不同的习惯，而每个人还有自己的配置，比如我在 Archlinux 上就只有 &lt;code>LANG=en_US.UTF-8&lt;/code> ，其他的语言相关环境变量都没有。macOS 上更加复杂，传统上我们将它看作类 Unix 操作系统，沿用环境变量或者直接调用 &lt;code>locale&lt;/code> 来检查，但是这也是不一定的。Windows 更不必说了，环境变量这一套不好使，需要检查注册表或者调用 Win32 API。&lt;/p>
@@ -1026,7 +1492,7 @@ curl: (35) OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to goproxy.team.
 &lt;p>go moudle 的 replace 和 exclude 都只针对当前构建生效，不会扩散到其他项目中。这导致如果有依赖写成了这样：&lt;/p>
 &lt;pre>&lt;code>require github.com/ownauX/lol v0.0.0
 replace github.com/ownauX/lol =&amp;gt; github.com/Xuanwo/lol v1.0.1
-&lt;/code>&lt;/pre>&lt;p>那下游所有的项目都会需要进行 replace，因为直接进行构建会因为找不到 &lt;a href="mailto:%60github.com/ownauX/lol@v0.0.0">`github.com/ownauX/lol@v0.0.0&lt;/a>` 而报错。&lt;/p>
+&lt;/code>&lt;/pre>&lt;p>那下游所有的项目都会需要进行 replace，因为直接进行构建会因为找不到 &lt;code>github.com/ownauX/lol@v0.0.0&lt;/code> 而报错。&lt;/p>
 &lt;p>所以：&lt;/p>
 &lt;ul>
 &lt;li>replace 建议只作为临时的 workaround 使用，即使要用，原来的 version 也要写对，否则会影响其他项目构建&lt;/li>
@@ -1210,188 +1676,4 @@ replace github.com/ownauX/lol =&amp;gt; github.com/Xuanwo/lol v1.0.1
 &lt;/span>&lt;span style="color:#bbb"> &lt;/span>value:&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#4070a0">&amp;#34;Expenses:Transport:Bicycle&amp;#34;&lt;/span>&lt;span style="color:#bbb">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果 &lt;code>payee&lt;/code> 是 &lt;code>摩拜单车&lt;/code> 的话，就在 &lt;code>posting&lt;/code> 中增加账户 &lt;code>Expenses:Transport:Bicycle&lt;/code>&lt;/p>
 &lt;hr>
-&lt;p>项目地址在 &lt;a href="https://github.com/Xuanwo/beancollect">https://github.com/Xuanwo/beancollect&lt;/a>，欢迎大家提需求和反馈 BUG。&lt;/p></description></item><item><title>QingStor 对象存储对接指北</title><link>https://xuanwo.io/2019/06/27/develop-with-object-storage/</link><pubDate>Thu, 27 Jun 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/06/27/develop-with-object-storage/</guid><description>&lt;p>在工作中接触到过很多不了解对象存储的开发者在对接上遇到了很多问题，这篇文章旨在从核心概念出发介绍 QingStor 对象存储，然后介绍 API 和 SDK 及其注意事项，最后总结一下遇到的常见问题，希望能解决大多数人的困惑。本文主要介绍的是 QingStor 对象存储，但是其他的对象存储概念应当相似，同样可以参考。&lt;/p>
-&lt;h2 id="heading">核心概念&lt;/h2>
-&lt;h3 id="service">Service&lt;/h3>
-&lt;p>对象存储服务的顶层命名空间。在同一个命名空间下，Bucket Name 是唯一的。每个对象存储 Serivce 都会有一个独立的 Host，比如青云 QingStor 对象存储的 Host 是 &lt;code>qingstor.com&lt;/code>。私有云用户在接入时需要将 Host 修改为对应的环境配置的 Host。&lt;/p>
-&lt;h3 id="zone">Zone&lt;/h3>
-&lt;p>每个对象存储 Service 都会至少有一个 Zone，每个 Zone 会有一个唯一的标识。比如青云公有云目前线上运维的对象存储 Zone 包括：&lt;code>pek3a&lt;/code>，&lt;code>pek3b&lt;/code>，&lt;code>sh1a&lt;/code> 和 &lt;code>gd2&lt;/code>。&lt;/p>
-&lt;h3 id="bucket">Bucket&lt;/h3>
-&lt;p>Bucket 是用户申请的存储空间，每个 Bucket 都会属于一个 Zone，每个 Bucket 在同一个 Service 下都是全局唯一的，每个 Bucket 彼此之间完全隔离。&lt;/p>
-&lt;p>Bucket 将会是域名的一部分，因此 Bucket 在命名时需要遵守以下规则：&lt;/p>
-&lt;ul>
-&lt;li>遵守 DNS 命名规则&lt;/li>
-&lt;li>长度在 6 ~ 63 之间&lt;/li>
-&lt;li>只能包含小写字母，数字和连接字符 &lt;code>-&lt;/code>&lt;/li>
-&lt;li>开头和结尾只能是小写字母或数字&lt;/li>
-&lt;/ul>
-&lt;h3 id="object">Object&lt;/h3>
-&lt;p>Object 是用户访问数据的最小单元，每个 Object 都会属于一个 Bucket，每个 Object 在同一个 Bucket 下都是唯一的。单个 Object 最大 50TB。&lt;/p>
-&lt;p>Object 将会是 URL 的一部分，因此 Object 在命名需要遵守以下规则：&lt;/p>
-&lt;ul>
-&lt;li>长度须在 1-1023 字节之间&lt;/li>
-&lt;li>第一个字符不能是反斜杠 &lt;code>/&lt;/code>&lt;/li>
-&lt;li>须用 UTF-8 编码&lt;/li>
-&lt;/ul>
-&lt;p>在发送请求的时候，Object Key 部分需要进行 URL 编码。&lt;/p>
-&lt;h2 id="api-">API 介绍&lt;/h2>
-&lt;p>对象存储对外暴露的是 RESTful 风格的 API。&lt;/p>
-&lt;pre>&lt;code>GET /?delimiter=/&amp;amp;limit=4 HTTP/1.1
-Host: mybucket.pek3a.qingstor.com
-Date: Sun, 16 Aug 2015 09:05:00 GMT
-Authorization: authorization string
-HTTP/1.1 200 OK
-Server: QingStor
-Date: Sun, 16 Aug 2015 09:05:00 GMT
-Content-Length: 559
-Connection: close
-x-qs-request-id: aa08cf7a43f611e5886952542e6ce14b
-{
-&amp;quot;name&amp;quot;: &amp;quot;mybucket&amp;quot;,
-&amp;quot;keys&amp;quot;: [
-{
-&amp;quot;created&amp;quot;: &amp;quot;2016-08-22T15:03:32.000Z&amp;quot;,
-&amp;quot;modified&amp;quot;: 1471878212,
-&amp;quot;encrypted&amp;quot;: true,
-&amp;quot;storage_class&amp;quot;: &amp;quot;STANDARD&amp;quot;,
-&amp;quot;etag&amp;quot;: &amp;quot;\&amp;quot;4f44b10f5cb83777fea4ef88a3f7b3c4\&amp;quot;&amp;quot;,
-&amp;quot;key&amp;quot;: &amp;quot;api.txt&amp;quot;,
-&amp;quot;mime_type&amp;quot;: &amp;quot;text/plain&amp;quot;,
-&amp;quot;size&amp;quot;: 38970
-},
-{
-&amp;quot;created&amp;quot;: &amp;quot;2016-08-22T15:09:52.000Z&amp;quot;,
-&amp;quot;modified&amp;quot;: 1471878592,
-&amp;quot;encrypted&amp;quot;: false,
-&amp;quot;storage_class&amp;quot;: &amp;quot;STANDARD_IA&amp;quot;,
-&amp;quot;etag&amp;quot;: &amp;quot;\&amp;quot;9f1cd921dbb6656c2c9e57f83f73d70e\&amp;quot;&amp;quot;,
-&amp;quot;key&amp;quot;: &amp;quot;bigtable-osdi06.pdf&amp;quot;,
-&amp;quot;mime_type&amp;quot;: &amp;quot;application/pdf&amp;quot;,
-&amp;quot;size&amp;quot;: 221214
-}
-],
-&amp;quot;prefix&amp;quot;: &amp;quot;&amp;quot;,
-&amp;quot;owner&amp;quot;: {
-&amp;quot;id&amp;quot;: &amp;quot;usr-DxWdNcCr&amp;quot;,
-&amp;quot;name&amp;quot;: &amp;quot;william&amp;quot;
-},
-&amp;quot;delimiter&amp;quot;: &amp;quot;/&amp;quot;,
-&amp;quot;limit&amp;quot;: 4,
-&amp;quot;marker&amp;quot;: &amp;quot;&amp;quot;,
-&amp;quot;next_marker&amp;quot;: &amp;quot;bigtable-osdi06.pdf&amp;quot;,
-&amp;quot;has_more&amp;quot;: true,
-&amp;quot;common_prefixes&amp;quot;: [
-&amp;quot;QCI/&amp;quot;,
-&amp;quot;Screenshot/&amp;quot;
-]
-}
-&lt;/code>&lt;/pre>&lt;p>正如上面这个样例展示的：&lt;/p>
-&lt;ul>
-&lt;li>通过 HTTP 动词来区分语义，GET 表示获取资源，PUT 表示上传整个资源等&lt;/li>
-&lt;li>通过返回标准的 HTTP Status Code 来标识本次请求的状态，比如 200 表示正常，401 表示认证失败等，详细的 error code 可以参考&lt;a href="https://docs.qingcloud.com/qingstor/api/common/error_code">此处&lt;/a>&lt;/li>
-&lt;li>输入和输出均为 JSON 格式&lt;/li>
-&lt;/ul>
-&lt;p>此外，API 请求时还有如下需要关注的点：&lt;/p>
-&lt;ul>
-&lt;li>所有请求返回的 Response 都会带有 &lt;code>x-qs-request-id&lt;/code> Header，在请求遇到问题时在工单中附上 &lt;code>request-id&lt;/code> 将有助于我们更快的定位问题&lt;/li>
-&lt;li>所有请求发送时都需要携带正确的 Date 和 Host，其中 Date 采用 UTC 时间，格式由 &lt;a href="https://www.ietf.org/rfc/rfc822.txt">RFC 822&lt;/a> 定义，该时间误差不能超过 15 分钟&lt;/li>
-&lt;li>除非访问公开的 Bucket，所有的请求都需要认证，认证文档参考&lt;a href="https://docs.qingcloud.com/qingstor/api/common/signature">此处&lt;/a>，无特殊需求请使用官方提供的 SDK&lt;/li>
-&lt;/ul>
-&lt;p>QingStor 对象存储同时支持通过 HTTP 和 HTTPS 协议访问，使用的都是标准端口。&lt;/p>
-&lt;p>支持通过两种风格访问：&lt;/p>
-&lt;ul>
-&lt;li>&lt;code>Virtual-host Style&lt;/code>: &lt;code>&amp;lt;bucket_name&amp;gt;.&amp;lt;zone_id&amp;gt;.qingstor.com/&amp;lt;object_key&amp;gt;&lt;/code>&lt;/li>
-&lt;li>&lt;code>Path Style&lt;/code>: &lt;code>&amp;lt;zone_id&amp;gt;.qingstor.com/&amp;lt;bucket_name&amp;gt;/&amp;lt;object_key&amp;gt;&lt;/code>&lt;/li>
-&lt;/ul>
-&lt;p>比如上传 &lt;code>arch-is-the-best.png&lt;/code> 到位于 &lt;code>pek3b&lt;/code> 的 &lt;code>linux&lt;/code> Bucket 下，请求应当形如：&lt;/p>
-&lt;pre>&lt;code>PUT https://linux.pek3b.qingstor.com/arch-is-the-best.png
-&lt;/code>&lt;/pre>&lt;p>QingStor 对象存储支持 S3 兼容模式，访问形式为每个 Zone 提供一个 s3 的子域：&lt;/p>
-&lt;ul>
-&lt;li>&lt;code>Virtual-host Style&lt;/code>: &lt;code>&amp;lt;bucket_name&amp;gt;.s3.&amp;lt;zone_id&amp;gt;.qingstor.com/&amp;lt;object_key&amp;gt;&lt;/code>&lt;/li>
-&lt;li>&lt;code>Path Style&lt;/code>: &lt;code>s3.&amp;lt;zone_id&amp;gt;.qingstor.com/&amp;lt;bucket_name&amp;gt;/&amp;lt;object_key&amp;gt;&lt;/code>&lt;/li>
-&lt;/ul>
-&lt;h2 id="sdk-">SDK 介绍&lt;/h2>
-&lt;p>QingStor 对象存储目前提供了绝大部分语言的 SDK，他们都共用相似的逻辑：&lt;/p>
-&lt;ul>
-&lt;li>首先初始化 Config&lt;/li>
-&lt;li>然后创建 Service 实例&lt;/li>
-&lt;li>通过 Service 实例可以初始化出一个 Bucket 实例&lt;/li>
-&lt;/ul>
-&lt;p>所有的 API 可分为三类：&lt;/p>
-&lt;ul>
-&lt;li>Service: &lt;a href="https://docs.qingcloud.com/qingstor/api/service/">https://docs.qingcloud.com/qingstor/api/service/&lt;/a>&lt;/li>
-&lt;li>Bucket: &lt;a href="https://docs.qingcloud.com/qingstor/api/bucket/">https://docs.qingcloud.com/qingstor/api/bucket/&lt;/a>&lt;/li>
-&lt;li>Object: &lt;a href="https://docs.qingcloud.com/qingstor/api/object/">https://docs.qingcloud.com/qingstor/api/object/&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>其中 Service 实例可以处理 Serivce 级别的 API，而 Bucket 实例可以处理 Bucket 和 Object 级别的 API。&lt;/p>
-&lt;p>所有 SDK 均通过 API Specs 自动生成，采用与语言主流风格相似的命名逻辑，比如 Golang 中 &lt;code>ListObjects&lt;/code>，Python 中是 &lt;code>list_objects&lt;/code>，Node.js 中是 &lt;code>listObjects&lt;/code>。&lt;/p>
-&lt;h2 id="heading-1">常见问题&lt;/h2>
-&lt;p>在总结我见过的常见问题之前，首先分享几个关于工单的小秘密：&lt;/p>
-&lt;ul>
-&lt;li>提工单之前首先检查自己有没有什么低级错误（要不然这个单子会很没意思）&lt;/li>
-&lt;li>提工单的时候提供完整的信息会有助于问题的快速解决（在对象存储这边就是 Zone，Bucket，SDK，最最最重要的是请带上 &lt;code>request_id&lt;/code>）&lt;/li>
-&lt;li>在工单里面发脾气是没用的（在哪里都没用，做个大人吧）&lt;/li>
-&lt;/ul>
-&lt;h3 id="heading-2">如何做断点续传？&lt;/h3>
-&lt;p>断点续传分成上传和下载，下载使用标准的 HTTP Range Header 来下载指定的部分，上传则需要使用分段上传的接口，具体的流程可以参考 &lt;a href="https://docs.qingcloud.com/qingstor/api/object/multipart/index.html">Multipart 分段上传过程&lt;/a>。在分段上传完成后，它就是一个完整的 Object，无法再获取到分段的信息。&lt;/p>
-&lt;h3 id="heading-3">如何上传超大文件？&lt;/h3>
-&lt;p>超大文件需要使用分段上传接口，单个分段最大 5GB，与 PutObject 的限制一致，单文件最大可到 50TB。&lt;/p>
-&lt;h3 id="heading-4">如何访问上传的文件？&lt;/h3>
-&lt;p>正如上面提到的，对象存储提供的是 RESTful 的 API 接口，上传时用 PUT，下载就用 GET，删除用 DELETE。&lt;/p>
-&lt;h3 id="heading-5">如何创建文件夹？&lt;/h3>
-&lt;p>对象存储没有层次结构，因此也没有文件夹的概念。&lt;/p>
-&lt;p>但是对象存储支持指定一个分隔符，把带有相同分隔符的 Object 组织到一起，可以模拟出文件夹。比如：&lt;/p>
-&lt;pre>&lt;code>ubuntu/my-patch-is-so-good.patch
-ubuntu/this-apt-has-super-power.png
-centos/my-gcc-is-5.txt
-centos/my-kernel-is-3-10.jpg
-arch/my-gcc-is-going-to-9.gif
-i-use-systemd.txt
-&lt;/code>&lt;/pre>&lt;p>如果指定 &lt;code>delimiter&lt;/code> 为 &lt;code>/&lt;/code>，则我们会得到形如这样的结果：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-json" data-lang="json">{
-&lt;span style="color:#062873;font-weight:bold">&amp;#34;common_prefixes&amp;#34;&lt;/span>: [
-&lt;span style="color:#4070a0">&amp;#34;ubuntu/&amp;#34;&lt;/span>,
-&lt;span style="color:#4070a0">&amp;#34;centos/&amp;#34;&lt;/span>,
-&lt;span style="color:#4070a0">&amp;#34;arch/&amp;#34;&lt;/span>
-],
-&lt;span style="color:#062873;font-weight:bold">&amp;#34;keys&amp;#34;&lt;/span>: [
-{
-&lt;span style="color:#062873;font-weight:bold">&amp;#34;created&amp;#34;&lt;/span>: &lt;span style="color:#4070a0">&amp;#34;2016-08-22T15:03:32.000Z&amp;#34;&lt;/span>,
-&lt;span style="color:#062873;font-weight:bold">&amp;#34;modified&amp;#34;&lt;/span>: &lt;span style="color:#40a070">1471878212&lt;/span>,
-&lt;span style="color:#062873;font-weight:bold">&amp;#34;encrypted&amp;#34;&lt;/span>: &lt;span style="color:#007020;font-weight:bold">true&lt;/span>,
-&lt;span style="color:#062873;font-weight:bold">&amp;#34;storage_class&amp;#34;&lt;/span>: &lt;span style="color:#4070a0">&amp;#34;STANDARD&amp;#34;&lt;/span>,
-&lt;span style="color:#062873;font-weight:bold">&amp;#34;etag&amp;#34;&lt;/span>: &lt;span style="color:#4070a0">&amp;#34;\&amp;#34;4f44b10f5cb83777fea4ef88a3f7b3c4\&amp;#34;&amp;#34;&lt;/span>,
-&lt;span style="color:#062873;font-weight:bold">&amp;#34;key&amp;#34;&lt;/span>: &lt;span style="color:#4070a0">&amp;#34;i-use-systemd.txt&amp;#34;&lt;/span>,
-&lt;span style="color:#062873;font-weight:bold">&amp;#34;mime_type&amp;#34;&lt;/span>: &lt;span style="color:#4070a0">&amp;#34;text/plain&amp;#34;&lt;/span>,
-&lt;span style="color:#062873;font-weight:bold">&amp;#34;size&amp;#34;&lt;/span>: &lt;span style="color:#40a070">38970&lt;/span>
-}
-]
-}
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>common_prefixes&lt;/code> 就是那些有共同前缀的 Key，而 &lt;code>keys&lt;/code> 则是当前 prefix 下不带有指定 &lt;code>delimiter&lt;/code> 的 Key。&lt;/p>
-&lt;p>&lt;code>delimiter&lt;/code> 可以是任意 Char，不过我们一般指定为 &lt;code>/&lt;/code>。&lt;/p>
-&lt;h3 id="heading-6">如何下载文件夹？&lt;/h3>
-&lt;p>List 指定 Prefix，然后下载所有的 Key。&lt;/p>
-&lt;p>也可以使用命令行工具，比如 &lt;a href="https://github.com/yunify/qsctl">&lt;code>qsctl&lt;/code>&lt;/a>，&lt;a href="https://github.com/yunify/qscamel">&lt;code>qscamel&lt;/code>&lt;/a>。&lt;/p>
-&lt;h3 id="heading-7">如何批量删除文件？&lt;/h3>
-&lt;p>List 指定 Prefix，然后逐个删除或使用 &lt;a href="https://docs.qingcloud.com/qingstor/api/bucket/delete_multiple">&lt;code>DeleteMultipleObjects&lt;/code>&lt;/a> 接口。&lt;/p>
-&lt;h3 id="heading-8">内网访问&lt;/h3>
-&lt;p>青云 IaaS 与同一个 Zone 的对象存储是内网互通的，因此在青云 IaaS 中访问对象存储不收取公网流量费用。对象存储的 &lt;code>Service Global Server&lt;/code> 可能部署在其他区域，因此没有绑定公网 IP 的机器可能无法访问，此时可以直接指定 Bucket 所在的 Zone，避免工具或者 SDK 访问 Global Server 来自动检测 Bucket 的 Zone。&lt;/p>
-&lt;p>如果担心 DNS 解析结果不正确导致走公网的话，可以 &lt;code>dig &amp;lt;zone_id&amp;gt;.qingstor.com&lt;/code>：如果返回的是 &lt;code>10.x&lt;/code> 开头的内网 IP，则说明访问会走内网；如果返回的是 &lt;code>139.198.x&lt;/code> 开头的公网 IP，则说明访问会走公网。&lt;/p>
-&lt;h3 id="request-expired-">request_expired 是什么问题？&lt;/h3>
-&lt;p>QingStor 对象存储服务会通过 Date 来检查签名的时间，如果服务器收到请求的时间与 Date 相差过大，则会返回该错误。在确定网络没有明显拥堵的情况下，请检查服务器本身的时间是否已经校准。&lt;/p>
-&lt;h3 id="-cors-">浏览器访问遇到 CORS 报错&lt;/h3>
-&lt;p>在浏览器端访问对象存储的时候经常会遇到 CORS 相关的报错，请正确配置 Bucket 的 CORS。&lt;/p>
-&lt;h3 id="heading-9">浏览器端如何避免密钥泄漏&lt;/h3>
-&lt;p>访问对象存储服务需要 &lt;code>Access Key ID&lt;/code> 和 &lt;code>Secret Access Key&lt;/code>，这两个值不能直接暴露在浏览器中，否则会导致密钥泄漏。此时需要自行搭建签名服务器，在后端校验请求后在本地进行请求的签名，并将签名的结果返回给前端。整体的访问流程如下：&lt;/p>
-&lt;ul>
-&lt;li>浏览器请求签名服务器&lt;/li>
-&lt;li>签名服务器返回签名后的结果&lt;/li>
-&lt;li>浏览器发送签名后的请求&lt;/li>
-&lt;li>对象存储服务器响应&lt;/li>
-&lt;/ul>
-&lt;p>签名服务器与业务耦合比较紧密，因此只提供了一个 demo 作为参考：&lt;a href="https://github.com/yunify/qingstor-demo-signature-server-nodejs">QingStor Demo - Signature Server (NodeJS)&lt;/a>&lt;/p>
-&lt;h2 id="heading-10">参考资料&lt;/h2>
-&lt;ul>
-&lt;li>&lt;a href="https://docs.qingcloud.com/qingstor/">QingStor 对象存储文档&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS">HTTP访问控制（CORS）&lt;/a>&lt;/li>
-&lt;/ul></description></item></channel></rss>
+&lt;p>项目地址在 &lt;a href="https://github.com/Xuanwo/beancollect">https://github.com/Xuanwo/beancollect&lt;/a>，欢迎大家提需求和反馈 BUG。&lt;/p></description></item></channel></rss>

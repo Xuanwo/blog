@@ -1,0 +1,228 @@
+<!doctype html><html><head><title>面向应用的 Golang 抽象存储层介绍</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="面向应用的 Golang 抽象存储层介绍"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2019/12/30/storage-intro/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.a285da0837b674a21742d9d9056c807cf8074d0e7b0cd2e85d30ed1ddf2acddd.css integrity="sha256-ooXaCDe2dKIXQtnZBWyAfPgHTQ57DNLoXTDtHd8qzd0="><script data-ad-client=ca-pub-8380875817494486 async src=https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js></script><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.62.0"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo's Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
+<a class=main-nav-link href=/posts/>文章</a></div></div></nav><main id=main-content><article class="single container"><header class=single-header><div class=flex><h1>面向应用的 Golang 抽象存储层介绍</h1><div class=post-meta><time class=date datetime=2019-12-30T01:00:00.000+00:00 itemprop=datePublished>2019-12-30</time>
+/
+<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container><a style=text-decoration:none href=https://xuanwo.io/tags/golang><span>golang</span></a>
+<a style=text-decoration:none href=https://xuanwo.io/tags/storage><span>storage</span></a></div></div></header><div class=post><blockquote><p>本文是
+<a href=https://xuanwo.io/series/self-made-wheels>Self-made Wheels</a> 系列的第 8 篇文章, 共 8 篇。</p></blockquote><p><a href=https://github.com/Xuanwo/storage>storage</a> 是一个面向应用的 Golang 统一存储层，其目标是生产级别就绪，高性能，无供应商锁定。目前支持 <a href=https://docs.microsoft.com/en-us/azure/storage/blobs/>Azure Blob storage</a>，本地文件系统，<a href=https://cloud.google.com/storage/>Google Cloud Storage</a>，<a href=https://www.aliyun.com/product/oss>阿里云对象存储</a>，<a href=https://www.qingcloud.com/products/qingstor/>QingStor 对象存储</a>，<a href=https://aws.amazon.com/s3/>Amazon S3</a> 等多种存储后端。这个项目从 09/30 开始至今，做了刚刚好三个月，选在今天发布 <a href=https://github.com/Xuanwo/storage/releases/tag/v0.5.0>v0.5.0</a>，一方面是想总结一下过去三个月的开发经历，展望一下黯淡残酷的未来，另一方面是实在按捺不住想跟大家分享一下的心情。本文首先会介绍 storage 这个项目的诞生，然后介绍项目与社区林林总总各种存储项目的不同，之后再介绍未来的开发计划，最后谈谈自己的一些小体会。</p><h2 id=showtime>Showtime</h2><p>在介绍 storage 的历史和设计之前，先看看 storage 用起来是什么样子吧。</p><p>首先初始化一个服务：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>srv, store, err <span style=color:#666>:=</span> coreutils.<span style=color:#06287e>Open</span>(<span style=color:#4070a0>&#34;qingstor://hmac:test_access_key:test_secret_key@https:qingstor.com:443/test_bucket_name&#34;</span>)
+<span style=color:#007020;font-weight:700>if</span> err <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+    log.<span style=color:#06287e>Fatalf</span>(<span style=color:#4070a0>&#34;service init failed: %v&#34;</span>, err)
+}
+</code></pre></div><p><code>srv</code> 是这个存储服务的 <code>Servicer</code>，负责管理 <code>Namespace</code>；<code>store</code> 是这个存储服务的 <code>Storager</code>，负责实际的存储交互。<code>coreutils</code> 是 <code>storage</code> 库提供的工具包，支持通过统一的配置字符串来创建存储服务。</p><p>然后使用这个服务来列取一个目录并发送到通道：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>ch <span style=color:#666>:=</span> <span style=color:#007020>make</span>(<span style=color:#007020;font-weight:700>chan</span> <span style=color:#666>*</span>types.Object, <span style=color:#40a070>1</span>)
+<span style=color:#007020;font-weight:700>defer</span> <span style=color:#007020>close</span>(ch)
+
+err <span style=color:#666>:=</span> store.<span style=color:#06287e>ListDir</span>(<span style=color:#4070a0>&#34;prefix&#34;</span>, pairs.<span style=color:#06287e>WithFileFunc</span>(<span style=color:#007020;font-weight:700>func</span>(<span style=color:#666>*</span>types.Object){
+    ch <span style=color:#666>&lt;-</span> o
+}))
+<span style=color:#007020;font-weight:700>if</span> err <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+    log.<span style=color:#06287e>Fatalf</span>(<span style=color:#4070a0>&#34;listdir: %v&#34;</span>, err)
+}
+</code></pre></div><p><code>pairs</code> 是 <code>storage</code> 库提供的参数包，提供了能用在各个 API 接口的强类型参数，风格统一为 <code>pairs.WithXXX</code>。</p><p>从本地读取文件并上传到 QingStor 对象存储可以这样：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>_, src, _ <span style=color:#666>:=</span> coreutils.<span style=color:#06287e>Open</span>(<span style=color:#4070a0>&#34;fs:///path&#34;</span>)
+_, dst, _ <span style=color:#666>:=</span> coreutils.<span style=color:#06287e>Open</span>(<span style=color:#4070a0>&#34;qingstor://hmac:test_access_key:test_secret_key@https:qingstor.com:443/test_bucket_name&#34;</span>)
+
+r, err <span style=color:#666>:=</span> src.<span style=color:#06287e>Read</span>(<span style=color:#4070a0>&#34;test_file&#34;</span>)
+<span style=color:#007020;font-weight:700>if</span> err <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+    log.<span style=color:#06287e>Fatalf</span>(<span style=color:#4070a0>&#34;read from src: %v&#34;</span>, err)
+}
+<span style=color:#007020;font-weight:700>defer</span> r.<span style=color:#06287e>Close</span>()
+
+err = dst.<span style=color:#06287e>Write</span>(<span style=color:#4070a0>&#34;test_key&#34;</span>, r, pairs.<span style=color:#06287e>WithSize</span>(<span style=color:#40a070>1024</span>))
+<span style=color:#007020;font-weight:700>if</span> err <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+	log.<span style=color:#06287e>Fatalf</span>(<span style=color:#4070a0>&#34;read from src: %v&#34;</span>, err)
+}
+</code></pre></div><p>在 Storager 初始化完毕后，就不再需要关心业务无关的底层存储细节，可以轻松的开发出需要持久化数据的无供应商锁定应用。</p><h2 id=heading>诞生</h2><p>接下来聊一聊 <code>storage</code> 库的由来。</p><p>时间倒转到 2018 年初，我们对象存储的周边工具遇到了挑战：有个私有云用户需要迁移数十 TB 的数据到对象存储。当时可用的工具只有 python 写成的 qsctl，所有状态都存储在内存中，一旦出现任务中断就需要从头开始，用户意见很大。为此，我在一次内部会议上提出我们需要一个全新的工具，这个工具会专注于长时间的数据迁移操作，支持断点续传，支持持久化任务状态。由于原本的 qscamel 1.0 设计目标与之接近，所以沿用 qscamel 项目名，开发出了 <a href=https://xuanwo.io/2018/09/05/qscamel-intro/>qscamel 2.0</a>。</p><p>在 qscamel 2.0 中，我设计出了这样一套接口：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#60a0b0;font-style:italic>// Base is the interface that both Source and Destination should implement.
+</span><span style=color:#60a0b0;font-style:italic></span><span style=color:#007020;font-weight:700>type</span> Base <span style=color:#007020;font-weight:700>interface</span> {
+	<span style=color:#60a0b0;font-style:italic>// Name will return the endpoint&#39;s name.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Name</span>(ctx context.Context) (name <span style=color:#902000>string</span>)
+
+	<span style=color:#60a0b0;font-style:italic>// Stat will get the metadata.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Stat</span>(ctx context.Context, p <span style=color:#902000>string</span>) (o <span style=color:#666>*</span>model.SingleObject, err <span style=color:#902000>error</span>)
+
+	<span style=color:#60a0b0;font-style:italic>// Read will return a reader.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Read</span>(ctx context.Context, p <span style=color:#902000>string</span>) (r io.Reader, err <span style=color:#902000>error</span>)
+	<span style=color:#60a0b0;font-style:italic>// ReadRange will read content with range [offset, offset+size)
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>ReadRange</span>(ctx context.Context, p <span style=color:#902000>string</span>, offset, size <span style=color:#902000>int64</span>) (r io.Reader, err <span style=color:#902000>error</span>)
+}
+
+<span style=color:#60a0b0;font-style:italic>// Destination is the interface for destination endpoint.
+</span><span style=color:#60a0b0;font-style:italic></span><span style=color:#007020;font-weight:700>type</span> Destination <span style=color:#007020;font-weight:700>interface</span> {
+	Base
+
+	<span style=color:#60a0b0;font-style:italic>// Delete will use endpoint to delete the path.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Delete</span>(ctx context.Context, p <span style=color:#902000>string</span>) (err <span style=color:#902000>error</span>)
+	<span style=color:#60a0b0;font-style:italic>// Deletable will return whether current endpoint supports delete.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Deletable</span>() <span style=color:#902000>bool</span>
+
+	<span style=color:#60a0b0;font-style:italic>// Fetch will use endpoint to fetch the url.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Fetch</span>(ctx context.Context, path, url <span style=color:#902000>string</span>) (err <span style=color:#902000>error</span>)
+	<span style=color:#60a0b0;font-style:italic>// Fetchable will return whether current endpoint supports fetch.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Fetchable</span>() <span style=color:#902000>bool</span>
+
+	<span style=color:#60a0b0;font-style:italic>// InitPart will inti a multipart upload.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>InitPart</span>(ctx context.Context, p <span style=color:#902000>string</span>, size <span style=color:#902000>int64</span>) (uploadID <span style=color:#902000>string</span>, partSize <span style=color:#902000>int64</span>, partNumbers <span style=color:#902000>int</span>, err <span style=color:#902000>error</span>)
+	<span style=color:#60a0b0;font-style:italic>// UploadPart will upload a part.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>UploadPart</span>(ctx context.Context, o <span style=color:#666>*</span>model.PartialObject, r io.Reader) (err <span style=color:#902000>error</span>)
+	<span style=color:#60a0b0;font-style:italic>// Partable will return whether current endpoint supports multipart upload.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Partable</span>() <span style=color:#902000>bool</span>
+
+	<span style=color:#60a0b0;font-style:italic>// Write will read data from the reader and write to endpoint.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Write</span>(ctx context.Context, path <span style=color:#902000>string</span>, size <span style=color:#902000>int64</span>, r io.Reader) (err <span style=color:#902000>error</span>)
+	<span style=color:#60a0b0;font-style:italic>// Writable will return whether current endpoint supports write.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Writable</span>() <span style=color:#902000>bool</span>
+}
+
+<span style=color:#60a0b0;font-style:italic>// Source is the interface for source endpoint.
+</span><span style=color:#60a0b0;font-style:italic></span><span style=color:#007020;font-weight:700>type</span> Source <span style=color:#007020;font-weight:700>interface</span> {
+	Base
+
+	<span style=color:#60a0b0;font-style:italic>// List will list from the job.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>List</span>(ctx context.Context, j <span style=color:#666>*</span>model.DirectoryObject, fn <span style=color:#007020;font-weight:700>func</span>(model.Object)) (err <span style=color:#902000>error</span>)
+
+	<span style=color:#60a0b0;font-style:italic>// Reach will return an accessible url.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Reach</span>(ctx context.Context, p <span style=color:#902000>string</span>) (url <span style=color:#902000>string</span>, err <span style=color:#902000>error</span>)
+	<span style=color:#60a0b0;font-style:italic>// Reachable will return whether current endpoint supports reach.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Reachable</span>() <span style=color:#902000>bool</span>
+}
+</code></pre></div><p>这套接口是面向迁移任务设计的，虽然不是非常优雅，但是工作的很好，一直沿用至今。qscamel 基于这套接口提供了本地文件系统，QingStor 对象存储，阿里云 OSS，Google Cloud Storage，七牛对象存储，S3，又拍云，腾讯云对象存储等多家主流存储服务的支持。</p><p>qscamel 2.0 中是我第一次尝试统一存储层的接口，受限于个人的能力和时间的要求，选择的方案是只实现任务要求操作的部分 API。这套接口完全没有复用的价值，它离开特定业务场景就失去了生命力。在之后的很长一段时间里面，我常常会想到这套接口——有没有可能提供一个抽象的统一的现代的存储层呢？</p><p>在 <a href=https://xuanwo.io/2019/11/10/go-template-meta-coding-in-qsctl2/>Go 模板元编程及其在 qsctl 中的实践</a> 中我介绍了一部分 qsctl 2 中所做的工作，当时刻意忽略了存储层的部分。实际上，如果没有一个统一的存储层，我们是无法抽象出一个好的任务框架的，以初始化分段为例：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json>{
+    <span style=color:#062873;font-weight:700>&#34;SegmentInit&#34;</span>: {
+        <span style=color:#062873;font-weight:700>&#34;description&#34;</span>: <span style=color:#4070a0>&#34;init a segment upload&#34;</span>,
+        <span style=color:#062873;font-weight:700>&#34;input&#34;</span>: [
+          <span style=color:#4070a0>&#34;PartSize&#34;</span>,
+          <span style=color:#4070a0>&#34;Path&#34;</span>,
+          <span style=color:#4070a0>&#34;Storage&#34;</span>
+        ],
+        <span style=color:#062873;font-weight:700>&#34;output&#34;</span>: [
+          <span style=color:#4070a0>&#34;SegmentID&#34;</span>
+        ]
+  	}
+}
+</code></pre></div><p>这里的 <code>Storage</code> 实际上就是由 storage 库提供的抽象，上层任务不需要关心这个 <code>Storage</code> 底层到底是文件存储还是 QingStor 对象存储，抑或是 S3。这层抽象将 <code>fs->qingstor</code>，<code>qingstor->fs</code> 简化为了 <code>src->dst</code>，减少了大量的重复任务。</p><p>在 qsctl 2 开发的初期其实并没有考虑要做一个通用的存储层，当时是直接写死的本地存储和对象存储。但是开发进入到后期，我们遇到了两个问题。一是单元测试不好做，大量的单测都依赖于本地存储和对象存储的行为；二是有大量重复的任务，比如从本地复制到对象存储，从对象存储复制到本地，里面大部分逻辑都是相似但无法直接复用代码的。为此，我重新审视了统一存储层接口的想法，距离我上次尝试已经过去了一年多，我变强了，头发也变得更少了，是时候再试试了。</p><h2 id=heading-1>区别</h2><blockquote><p>漩涡啊，你怎么又造轮子了？</p><p>我认为造轮子分两种：一种是学东西，另一种是拿来用。在市场上已经有类似库的情况下造轮子，要么就是想出名，要么就是别的轮子不太圆，两种想法我都有。</p></blockquote><p>Golang 社区中类似的库有如下几个：<a href=https://github.com/spf13/afero>Afero</a>，<a href=https://github.com/viant/afs>afs</a>，<a href=https://github.com/C2FO/vfs>vfs</a>，此外再加上与 POSIX file API 做对比。</p><h3 id=afero>Afero</h3><p>Afero 目标更接近于成为 <code>os</code> 和 <code>ioutil</code> 包的补充，尽可能的提供类似体验，并支持更多便利的函数。</p><p>为各个底层的文件系统提供相似的函数：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#06287e>Chmod</span>(name <span style=color:#902000>string</span>, mode os.FileMode) : <span style=color:#902000>error</span>
+<span style=color:#06287e>Chtimes</span>(name <span style=color:#902000>string</span>, atime time.Time, mtime time.Time) : <span style=color:#902000>error</span>
+<span style=color:#06287e>Create</span>(name <span style=color:#902000>string</span>) : File, <span style=color:#902000>error</span>
+<span style=color:#06287e>Mkdir</span>(name <span style=color:#902000>string</span>, perm os.FileMode) : <span style=color:#902000>error</span>
+<span style=color:#06287e>MkdirAll</span>(path <span style=color:#902000>string</span>, perm os.FileMode) : <span style=color:#902000>error</span>
+<span style=color:#06287e>Name</span>() : <span style=color:#902000>string</span>
+<span style=color:#06287e>Open</span>(name <span style=color:#902000>string</span>) : File, <span style=color:#902000>error</span>
+<span style=color:#06287e>OpenFile</span>(name <span style=color:#902000>string</span>, flag <span style=color:#902000>int</span>, perm os.FileMode) : File, <span style=color:#902000>error</span>
+<span style=color:#06287e>Remove</span>(name <span style=color:#902000>string</span>) : <span style=color:#902000>error</span>
+<span style=color:#06287e>RemoveAll</span>(path <span style=color:#902000>string</span>) : <span style=color:#902000>error</span>
+<span style=color:#06287e>Rename</span>(oldname, newname <span style=color:#902000>string</span>) : <span style=color:#902000>error</span>
+<span style=color:#06287e>Stat</span>(name <span style=color:#902000>string</span>) : os.FileInfo, <span style=color:#902000>error</span>
+</code></pre></div><p>暴露出与原生库相似的接口：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>io.Closer
+io.Reader
+io.ReaderAt
+io.Seeker
+io.Writer
+io.WriterAt
+
+<span style=color:#06287e>Name</span>() : <span style=color:#902000>string</span>
+<span style=color:#06287e>Readdir</span>(count <span style=color:#902000>int</span>) : []os.FileInfo, <span style=color:#902000>error</span>
+<span style=color:#06287e>Readdirnames</span>(n <span style=color:#902000>int</span>) : []<span style=color:#902000>string</span>, <span style=color:#902000>error</span>
+<span style=color:#06287e>Stat</span>() : os.FileInfo, <span style=color:#902000>error</span>
+<span style=color:#06287e>Sync</span>() : <span style=color:#902000>error</span>
+<span style=color:#06287e>Truncate</span>(size <span style=color:#902000>int64</span>) : <span style=color:#902000>error</span>
+<span style=color:#06287e>WriteString</span>(s <span style=color:#902000>string</span>) : ret <span style=color:#902000>int</span>, err <span style=color:#902000>error</span>
+</code></pre></div><p>提供更多的帮助函数：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#06287e>DirExists</span>(path <span style=color:#902000>string</span>) (<span style=color:#902000>bool</span>, <span style=color:#902000>error</span>)
+<span style=color:#06287e>Exists</span>(path <span style=color:#902000>string</span>) (<span style=color:#902000>bool</span>, <span style=color:#902000>error</span>)
+<span style=color:#06287e>FileContainsBytes</span>(filename <span style=color:#902000>string</span>, subslice []<span style=color:#902000>byte</span>) (<span style=color:#902000>bool</span>, <span style=color:#902000>error</span>)
+<span style=color:#06287e>GetTempDir</span>(subPath <span style=color:#902000>string</span>) <span style=color:#902000>string</span>
+<span style=color:#06287e>IsDir</span>(path <span style=color:#902000>string</span>) (<span style=color:#902000>bool</span>, <span style=color:#902000>error</span>)
+<span style=color:#06287e>IsEmpty</span>(path <span style=color:#902000>string</span>) (<span style=color:#902000>bool</span>, <span style=color:#902000>error</span>)
+<span style=color:#06287e>ReadDir</span>(dirname <span style=color:#902000>string</span>) ([]os.FileInfo, <span style=color:#902000>error</span>)
+<span style=color:#06287e>ReadFile</span>(filename <span style=color:#902000>string</span>) ([]<span style=color:#902000>byte</span>, <span style=color:#902000>error</span>)
+<span style=color:#06287e>SafeWriteReader</span>(path <span style=color:#902000>string</span>, r io.Reader) (err <span style=color:#902000>error</span>)
+<span style=color:#06287e>TempDir</span>(dir, prefix <span style=color:#902000>string</span>) (name <span style=color:#902000>string</span>, err <span style=color:#902000>error</span>)
+<span style=color:#06287e>TempFile</span>(dir, prefix <span style=color:#902000>string</span>) (f File, err <span style=color:#902000>error</span>)
+<span style=color:#06287e>Walk</span>(root <span style=color:#902000>string</span>, walkFn filepath.WalkFunc) <span style=color:#902000>error</span>
+<span style=color:#06287e>WriteFile</span>(filename <span style=color:#902000>string</span>, data []<span style=color:#902000>byte</span>, perm os.FileMode) <span style=color:#902000>error</span>
+<span style=color:#06287e>WriteReader</span>(path <span style=color:#902000>string</span>, r io.Reader) (err <span style=color:#902000>error</span>)
+</code></pre></div><p>我认为 Afero 的目标不是一个统一的存储层，而是一个统一的文件系统操作集。同时，受限于它的接口设计，它很难对接好 S3 这样的对象存储服务。</p><h2 id=afs>afs</h2><p>AFS 的目标跟我非常接近了：abstract file storage，从提供的 API 可见一斑：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#06287e>List</span>(ctx context.Context, URL <span style=color:#902000>string</span>, options <span style=color:#666>...</span>Option) ([]Object, <span style=color:#902000>error</span>)
+<span style=color:#06287e>Walk</span>(ctx context.Context, URL <span style=color:#902000>string</span>, handler OnVisit, options <span style=color:#666>...</span>Option) <span style=color:#902000>error</span>
+<span style=color:#06287e>Download</span>(ctx context.Context, object Object, options <span style=color:#666>...</span>Option) (io.ReadCloser, <span style=color:#902000>error</span>)
+<span style=color:#06287e>DownloadWithURL</span>(ctx context.Context, URL <span style=color:#902000>string</span>, options <span style=color:#666>...</span>Option) (io.ReadCloser, <span style=color:#902000>error</span>)
+<span style=color:#06287e>Upload</span>(ctx context.Context, URL <span style=color:#902000>string</span>, mode os.FileMode, reader io.Reader, options <span style=color:#666>...</span>Option) <span style=color:#902000>error</span>
+<span style=color:#06287e>Create</span>(ctx context.Context, URL <span style=color:#902000>string</span>, mode os.FileMode, isContainer <span style=color:#902000>bool</span>, options <span style=color:#666>...</span>Option) <span style=color:#902000>error</span>
+<span style=color:#06287e>Delete</span>(ctx context.Context, URL <span style=color:#902000>string</span>, options <span style=color:#666>...</span>Option) <span style=color:#902000>error</span>
+</code></pre></div><p>但是在具体的实现上，我跟他的想法有很多不一致的地方：</p><ul><li>统一的存储层应该支持 Bucket/Namespace/Container 的操作</li><li>统一的存储层不应该加入太多的高级功能，比如 Modifier，Matcher 和 Batch</li><li>统一的存储层应该抛弃本地优先的思想，将 FileMode 作为本地存储的 metadata 之一而不是规范之一</li></ul><p>所以 afs 很好，但仍然不是我想要的。</p><h2 id=vfs>vfs</h2><p>vfs 与 afs 的思路是相似的：<em>vfs provides a pluggable, extensible, and opinionated set of file system functionality for Go across a number of file system types such as os, S3, and GCS</em></p><p>但是不要 vfs 的原因与 afs 是相似的，他们提供了这样的接口：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#60a0b0;font-style:italic>// CopyToLocation will copy the current file to the provided location.
+</span><span style=color:#60a0b0;font-style:italic></span><span style=color:#06287e>CopyToLocation</span>(location Location) (File, <span style=color:#902000>error</span>)
+
+<span style=color:#60a0b0;font-style:italic>// CopyToFile will copy the current file to the provided file instance.
+</span><span style=color:#60a0b0;font-style:italic></span><span style=color:#06287e>CopyToFile</span>(file File) <span style=color:#902000>error</span>
+</code></pre></div><p>想必这样的设计有他们内部业务的考量，但是作为一个通用的存储层，我们不需要实现跨存储服务的 Copy 和 Move，它们应当构建在存储层之上。</p><h3 id=posix-file-api>POSIX File API</h3><p>设计存储层当然绕不过 <code>POSIX File API</code>，下面是 storage 库对 <code>POSIX File API</code> 的对比情况：</p><table><thead><tr><th>API</th><th>介绍</th><th>storage</th></tr></thead><tbody><tr><td>getcwd</td><td>get current working directory</td><td>N</td></tr><tr><td>mkdir</td><td>create a directory</td><td>N</td></tr><tr><td>rmdir</td><td>delete a directory</td><td>Y: Delete</td></tr><tr><td>chdir</td><td>change working directory</td><td>N</td></tr><tr><td>link</td><td>make a new name for a file</td><td>N</td></tr><tr><td>unlink</td><td>delete a name and possibly the file it refers to</td><td>N</td></tr><tr><td>rename</td><td>change the name or location of a file</td><td>Y: Move</td></tr><tr><td>stat</td><td>get file status</td><td>Y: Stat</td></tr><tr><td>chmod</td><td>change permissions of a file</td><td>N</td></tr><tr><td>chown</td><td>change ownership of a file</td><td>N</td></tr><tr><td>utime</td><td>change access and/or modification times of an inode</td><td>N</td></tr><tr><td>opendir</td><td>open a directory</td><td>N</td></tr><tr><td>readdir</td><td>read directory entry</td><td>Y: ListDir</td></tr><tr><td>closedir</td><td>close a directory</td><td>N</td></tr><tr><td>rewinddir</td><td>reset directory stream</td><td>N</td></tr><tr><td>access</td><td>check user's permissions for a file</td><td>Y: Stat</td></tr><tr><td>open</td><td>open and possibly create a file or device</td><td>N</td></tr><tr><td>creat</td><td>open and possibly create a file or device</td><td>N</td></tr><tr><td>close</td><td>close a file descriptor</td><td>N</td></tr><tr><td>read</td><td>read from a file descriptor</td><td>Y: Read</td></tr><tr><td>write</td><td>write to a file descriptor</td><td>Y: Write</td></tr><tr><td>fcntl</td><td>manipulate file descriptor</td><td>N</td></tr><tr><td>fstat</td><td>get file status</td><td>Y: Stat</td></tr><tr><td>lseek</td><td>reposition read/write file offset</td><td>N</td></tr><tr><td>dup</td><td>duplicate a file descriptor</td><td>N</td></tr><tr><td>dup2</td><td>duplicate a file descriptor</td><td>N</td></tr><tr><td>pipe</td><td>create pipe</td><td>N</td></tr><tr><td>mkfifo</td><td>make a FIFO special file (a named pipe)</td><td>N</td></tr><tr><td>umask</td><td>set file creation mask</td><td>N</td></tr><tr><td>fdopen</td><td>associate a stream with an existing file descriptor</td><td>N</td></tr><tr><td>fileno</td><td>return file descriptor of stream</td><td>N</td></tr></tbody></table><p>其中：</p><ul><li>storage 不支持切换工作路径，Storager 的 WorkDir 参数需要在初始化的时候指定，因此不需要 <code>getcwd</code> 和 <code>chdir</code></li><li>storage 中文件夹的概念得到了相对的弱化，大多数存储服务中不提供对文件夹的操作，本地文件系统则会在 <code>Write</code> 调用是自动创建，因此去掉了 <code>mkdir</code></li><li>storage 没有链接文件的概念，因此没有 <code>link</code> 和 <code>unlink</code></li><li>在 storage 中，权限，所有权，创建/修改时间等属性都被视作元数据，因此会放到统一的元数据操作 API 中，不再需要 <code>chmod</code>，<code>chown</code>，<code>utime</code> 等 API</li><li>storage 对外屏蔽了内部的读写细节，不再暴露文件描述符，因此外部程序不再需要显式的打开和关闭文件，它们只需要处理数据，不再需要 <code>opendir</code>，<code>closedir</code>，<code>rewinddir</code>，<code>open</code>，<code>close</code>，<code>fcntl</code>，<code>dup</code>，<code>dup2</code>，<code>fdopen</code>，<code>fileno</code> 等一系列 API</li><li>在 storage 中，<code>create</code> 等价于 <code>Write</code> 一个 0 字节的文件，因此不再需要独立的 <code>create</code> 接口</li><li>storage 支持在 <code>Read</code> 和 <code>Write</code> 的时候传递 Offset，因此不再需要 <code>lseek</code> 接口</li><li>一些操作系统相关的操作 storage 均不予支持，包括 <code>pipe</code>，<code>mkfifo</code>，<code>umask</code></li></ul><h2 id=heading-2>设计</h2><p>前面聊过了历史， 也聊过了竞品，下面该讲讲我心目中的存储层了。</p><p>一个好的面向应用的抽象存储层该是什么样子呢？</p><ul><li>忽略无关细节：应用不需要关注打开关闭文件描述符这些底层细节</li><li>去除历史包袱：不需要提供管道这种现代应用很少用到的功能</li><li>众存储平等：避免本地存储优先思想，API 接口不依赖已有的 File 和 FileMode 等结构</li><li>少即是多：提供机制而不是策略，给用户写高级功能的能力，而不是直接提供类似 Matcher 这样的功能</li><li>专注于单一存储层：跨存储层的操作交给上层应用实现</li></ul><p>在开始写 storage 的时候，我拍脑袋定了三个目标：</p><ul><li>Production ready：这个库需要靠谱，要稳定，要有单元测试，不能随意的引入破坏性变更，不能随意的修改函数及其参数的语意，要开发者友好</li><li>High performance：（尽可能的）高性能，一方面是运行效率高，另一方面是开发效率。接口不要太慢，关键路径上不要有过多的封装；接口设计要友好，避免引入过多的新概念，让开发者能快速上手，快速使用</li><li>Vendor lock free：要做一个真正的统一存储层，要尽可能屏蔽各个存储服务业务无关的细节，减少用户迁移存储时的阻力</li></ul><p>除了 High performance 目前还没有实际的 Benchmark 外，其他两个目标都算是完成了一大半，下面简单介绍一下。</p><h3 id=heading-3>初始化</h3><p>初始化是使用任何服务的第一步，作为一个通用存储层当然也需要相关的设计，在提案 <a href=https://github.com/Xuanwo/storage/blob/master/docs/design/3-support-service-init-via-config-string.md>3. Support service init via config string</a> 中我提出了一套基于字符串的配置方式：</p><pre><code>&lt;type&gt;://&lt;config&gt;
+             +
+             |
+             v
+&lt;credential&gt;@&lt;endpoint&gt;/&lt;namespace&gt;?&lt;options&gt;
+     +            +                 +
+     |            +---------+       +----------------------+
+     v                      v                              v
+&lt;protocol&gt;:&lt;data&gt;   &lt;protocol&gt;:&lt;data&gt;         &lt;key&gt;:&lt;value&gt;[&amp;&lt;key&gt;:&lt;value&gt;]
+</code></pre><p>比如 QingStor 是：</p><pre><code>qingstor://hmac:&lt;access_key_id&gt;:&lt;secret_access_key&gt;@https:qingstor.com:443/&lt;bucket_name&gt;/&lt;prefix&gt;?zone=pek3b
+</code></pre><p>而初始化本地文件系统是：</p><pre><code>fs:///&lt;work_dir&gt;
+</code></pre><p>不同服务的配置串会在文档中制定。</p><p>实际的初始化体验形如：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>srv, store, err <span style=color:#666>:=</span> coreutils.<span style=color:#06287e>Open</span>(<span style=color:#4070a0>&#34;qingstor://hmac:test_access_key:test_secret_key@https:qingstor.com:443/test_bucket_name&#34;</span>)
+<span style=color:#007020;font-weight:700>if</span> err <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+    log.<span style=color:#06287e>Fatalf</span>(<span style=color:#4070a0>&#34;service init failed: %v&#34;</span>, err)
+}
+</code></pre></div><h3 id=heading-4>接口设计</h3><p>大多数存储服务都会有两级甚至更多层次，我将他们分为两层，一层负责实际的存储操作，叫做 Storager，另一层负责处理 Namespace 管理。对大多数对象存储服务来说，就是 Bucket 的管理，特别的，本地文件系统没有实现 Servier 接口。</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>type</span> Servicer <span style=color:#007020;font-weight:700>interface</span> {
+	<span style=color:#60a0b0;font-style:italic>// String will implement Stringer.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>String</span>() <span style=color:#902000>string</span>
+
+	<span style=color:#60a0b0;font-style:italic>// List will list all storager instances under this service.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>List</span>(pairs <span style=color:#666>...</span><span style=color:#666>*</span>types.Pair) (err <span style=color:#902000>error</span>)
+	<span style=color:#60a0b0;font-style:italic>// Get will get a valid storager instance for service.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Get</span>(name <span style=color:#902000>string</span>, pairs <span style=color:#666>...</span><span style=color:#666>*</span>types.Pair) (Storager, <span style=color:#902000>error</span>)
+	<span style=color:#60a0b0;font-style:italic>// Create will create a new storager instance.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Create</span>(name <span style=color:#902000>string</span>, pairs <span style=color:#666>...</span><span style=color:#666>*</span>types.Pair) (Storager, <span style=color:#902000>error</span>)
+	<span style=color:#60a0b0;font-style:italic>// Delete will delete a storager instance.
+</span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#06287e>Delete</span>(name <span style=color:#902000>string</span>, pairs <span style=color:#666>...</span><span style=color:#666>*</span>types.Pair) (err <span style=color:#902000>error</span>)
+}
+</code></pre></div><p>Storager 负责所有实际的存储操作，经过各个版本的演化，现在相对稳定的接口形态是这样的：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>type</span> Storager <span style=color:#007020;font-weight:700>interface</span> {
+	<span style=color:#06287e>String</span>() <span style=color:#902000>string</span>
+
+	<span style=color:#06287e>Init</span>(pairs <span style=color:#666>...</span><span style=color:#666>*</span>types.Pair) (err <span style=color:#902000>error</span>)
+	<span style=color:#06287e>Metadata</span>() (m metadata.Storage, err <span style=color:#902000>error</span>)
+	<span style=color:#06287e>ListDir</span>(path <span style=color:#902000>string</span>, pairs <span style=color:#666>...</span><span style=color:#666>*</span>types.Pair) (err <span style=color:#902000>error</span>)
+	<span style=color:#06287e>Read</span>(path <span style=color:#902000>string</span>, pairs <span style=color:#666>...</span><span style=color:#666>*</span>types.Pair) (r io.ReadCloser, err <span style=color:#902000>error</span>)
+	<span style=color:#06287e>Write</span>(path <span style=color:#902000>string</span>, r io.Reader, pairs <span style=color:#666>...</span><span style=color:#666>*</span>types.Pair) (err <span style=color:#902000>error</span>)
+	<span style=color:#06287e>Stat</span>(path <span style=color:#902000>string</span>, pairs <span style=color:#666>...</span><span style=color:#666>*</span>types.Pair) (o <span style=color:#666>*</span>types.Object, err <span style=color:#902000>error</span>)
+	<span style=color:#06287e>Delete</span>(path <span style=color:#902000>string</span>, pairs <span style=color:#666>...</span><span style=color:#666>*</span>types.Pair) (err <span style=color:#902000>error</span>)
+}
+</code></pre></div><p>此外，在提案 <a href=https://github.com/Xuanwo/storage/blob/master/docs/design/1-unify-storager-behavior.md>1. Unify storager behavior</a> 中，我给出了支持更多高级操作的方案：将这些操作拆分为其他的 interface，并在实际使用的时候进行转换。相关的技术考量在提案中都已经描述过，这里就不赘述了。在 Storager 之外，存储服务还能够支持复制（Copier），移动（Mover），获取公开访问链接（Reacher），获取数据统计（Statistician），分段上传（Segmenter）等功能。</p><p>一个经常出现分歧的点在于 ListDir 这样的操作中如何返回 item，之前的方案是传递一个递归参数，但是在提案 <a href=https://github.com/Xuanwo/storage/blob/master/docs/design/2-use-callback-in-list-operations.md>2. Use callback in List operations</a> 中，我决定使用 callback 的方式：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>dirFunc <span style=color:#666>:=</span> <span style=color:#007020;font-weight:700>func</span>(object <span style=color:#666>*</span>types.Object) {
+    <span style=color:#06287e>printf</span>(<span style=color:#4070a0>&#34;dir %s&#34;</span>, object.Name)
+}
+fileFunc <span style=color:#666>:=</span> <span style=color:#007020;font-weight:700>func</span>(object <span style=color:#666>*</span>types.Object) {
+    <span style=color:#06287e>printf</span>(<span style=color:#4070a0>&#34;file %s&#34;</span>, object.Name)
+}
+
+err <span style=color:#666>:=</span> store.<span style=color:#06287e>ListDir</span>(<span style=color:#4070a0>&#34;prefix&#34;</span>, types.<span style=color:#06287e>WithDirFunc</span>(dirFunc), types.<span style=color:#06287e>WithFileFunc</span>(fileFunc))
+<span style=color:#007020;font-weight:700>if</span> err <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+    <span style=color:#007020;font-weight:700>return</span> err
+}
+</code></pre></div><p>有一个没有被文档化的设计是接口中几乎每个函数都有的 <code>types.Pair</code>，这个设计的比较早，在 v0.1.0 中就已经引入，至今变化不大。<code>Pair</code> 是一个简单的 K-V 结构体：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>type</span> Pair <span style=color:#007020;font-weight:700>struct</span> {
+	Key   <span style=color:#902000>string</span>
+	Value <span style=color:#007020;font-weight:700>interface</span>{}
+}
+</code></pre></div><p>在 <code>types/pairs</code> 包中，通过 <code>pairs.json</code> 来规定所有可用的 Pair：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json>{
+    <span style=color:#062873;font-weight:700>&#34;file_func&#34;</span>: <span style=color:#4070a0>&#34;types.ObjectFunc&#34;</span>
+}
+</code></pre></div><p>并通过代码生成的方式将对应的构造器生成出来：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#60a0b0;font-style:italic>// WithFileFunc will apply file_func value to Options
+</span><span style=color:#60a0b0;font-style:italic></span><span style=color:#007020;font-weight:700>func</span> <span style=color:#06287e>WithFileFunc</span>(v types.ObjectFunc) <span style=color:#666>*</span>types.Pair {
+	<span style=color:#007020;font-weight:700>return</span> <span style=color:#666>&amp;</span>types.Pair{
+		Key:   FileFunc,
+		Value: v,
+	}
+}
+</code></pre></div><p>然后在每个服务下，都会有 <code>meta.json</code>，比如 <a href=https://github.com/Xuanwo/storage/blob/master/services/qingstor/meta.json>qingstor meta</a> 来描述每个方法都支持哪些参数，以及哪些参数是必须的，并生成对应的解析函数和结构体。</p><p>以 ListDir 为例：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>ch <span style=color:#666>:=</span> <span style=color:#007020>make</span>(<span style=color:#007020;font-weight:700>chan</span> <span style=color:#666>*</span>types.Object, <span style=color:#40a070>1</span>)
+<span style=color:#007020;font-weight:700>defer</span> <span style=color:#007020>close</span>(ch)
+
+err <span style=color:#666>:=</span> store.<span style=color:#06287e>ListDir</span>(<span style=color:#4070a0>&#34;prefix&#34;</span>, pairs.<span style=color:#06287e>WithFileFunc</span>(<span style=color:#007020;font-weight:700>func</span>(<span style=color:#666>*</span>types.Object){
+    ch <span style=color:#666>&lt;-</span> o
+}))
+<span style=color:#007020;font-weight:700>if</span> err <span style=color:#666>!=</span> <span style=color:#007020;font-weight:700>nil</span> {
+    log.<span style=color:#06287e>Printf</span>(<span style=color:#4070a0>&#34;storager listdir failed: %v&#34;</span>, err)
+}
+</code></pre></div><h2 id=heading-5>开发计划</h2><p>作为一个通用的存储层，如果只支持个别几个服务是很可笑的。因此接下来的一个重要是对接尽可能多的存储服务，这样才能提供这个存储抽象层的自身价值，另一方面也能够通过不同存储服务的不同设计，不同接入方式来验证我的设计合理性和扩展性 。在 v0.4.0 到 v0.5.0 中间，storage 初步支持了 <a href=https://docs.microsoft.com/en-us/azure/storage/blobs/>Azure Blob storage</a>，<a href=https://cloud.google.com/storage/>Google Cloud Storage</a>，<a href=https://www.aliyun.com/product/oss>Aliyun Object Storage</a>，<a href=https://aws.amazon.com/s3/>Amazon S3</a>。接下来的版本中，storage 会支持 <a href=https://cloud.tencent.com/product/cos>Tencent Cloud Object Storage</a>，<a href=https://www.qiniu.com/products/kodo>qiniu kodo</a> 和 <a href=https://www.upyun.com/products/file-storage>UPYUN Storage Service</a>，并为所有的服务都加上单元测试并补充完整功能。</p><p>此外，storage 还要统一存储层返回的错误，使得上层调用者能够轻松的处理来自存储层的错误。在实现 qingstor 支持的时候做过一些尝试，但是并不完整，接下来会在目前的已经实现的存储服务中去验证这个思路。</p><p>作为一个服务的重要组成部份，storage 将在 Public API 中加入 context 并支持 OpenTracing。</p><p>文档非常重要，目前 storage 只有实现相关的文档，接下来会逐步加入更多的样例和使用说明文档，帮助开发者更快的上手。</p><p>其他的代码重构不再展开，欢迎大家来 <a href=https://github.com/Xuanwo/storage/issues>Issues 区</a> 反馈意见。</p><h2 id=heading-6>体会</h2><ul><li>在开发 storage 库的过程中，我尝试着把一些重大的架构决策都以 Proposal 的方式记录下来，算是某种形式的架构决策记录（ADR）。除了写的时候经常能发现自己拍脑袋遗漏掉的点之外，更大的作用是在事后能知道自己当初为什么要做这样的决策，帮助后来者更好的理解设计意图，这样才能够做出更好的决策。</li><li>想知道自己的接口好不好用，最好的方式还是用到真实的项目中去，小 Demo 很难反映出这个接口的扩展性和可复用性。</li><li>项目未成形之前不要跟别人讨论，贯彻自己的思路。想不明白的事情可以先实现最简化的路径，然后写个小项目验证一下。</li><li>在 CI 中引入单元测试，代码覆盖率和质量控制能够提高重构的自信心，对于 Golang 项目来说，可以用 Travis CI + Codecov + GolangCI。</li><li>知易行难，开始做的时候才会知道看起来简单的东西想做好真的很难。</li></ul></div><div id=disqus_thread></div><script type=application/javascript async>let disqus_config=function(){this.page.identifier='\/2019\/12\/30\/storage-intro\/';this.page.title='面向应用的 Golang 抽象存储层介绍';this.page.url='https:\/\/xuanwo.io\/2019\/12\/30\/storage-intro\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
+<a class=main-nav-link href=/tags/>标签</a>
+<a class=main-nav-link href=/series/>专题</a>
+<a class=main-nav-link href=/blogroll/>友链</a>
+<a class=main-nav-link href=/index.xml>订阅</a>
+<script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script></footer></body></html>
