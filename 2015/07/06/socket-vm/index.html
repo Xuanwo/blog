@@ -1,43 +1,43 @@
-<!doctype html><html><head><title>基于Socket.io的虚拟计算机</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="基于Socket.io的虚拟计算机"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2015/07/06/socket-vm/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.a285da0837b674a21742d9d9056c807cf8074d0e7b0cd2e85d30ed1ddf2acddd.css integrity="sha256-ooXaCDe2dKIXQtnZBWyAfPgHTQ57DNLoXTDtHd8qzd0="><script data-ad-client=ca-pub-8380875817494486 async src=https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js></script><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.62.0"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo's Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
+<!doctype html><html><head><title>基于Socket.io的虚拟计算机</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="基于Socket.io的虚拟计算机"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2015/07/06/socket-vm/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.be107db044369d658c06efdc8f7f5462fda2b704c0a580ab8c227b3dad6ac109.css integrity="sha256-vhB9sEQ2nWWMBu/cj39UYv2itwTApYCrjCJ7Pa1qwQk="><script data-ad-client=ca-pub-8380875817494486 async src=https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js></script><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.65.3"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo's Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
 <a class=main-nav-link href=/posts/>文章</a></div></div></nav><main id=main-content><article class="single container"><header class=single-header><div class=flex><h1>基于Socket.io的虚拟计算机</h1><div class=post-meta><time class=date datetime=2015-07-06T21:05:38.000+00:00 itemprop=datePublished>2015-07-06</time>
 /
-<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container><a style=text-decoration:none href=https://xuanwo.io/tags/together><span>Together</span></a></div></div></header><div class=post><p>基于Socket.io有很多特别强大的应用，socket.io官方提供的一个<a href=http://socket.io/demos/computer/>虚拟计算机Demo</a>就非常赞。通过将使用Qemu虚拟取出来的PC界面转发至Socket.io的端口，然后对Canvas不断地进行绘制，形成了近似与远程操控的体验。我们<a href=http://xuanwo.io/2015/06/30/together-project/>Together项目</a>用到了这个库，但由于这个库发布于很久之前，再加上相关文档过少，导致部署起来极为困难。所以我完成了这篇文章，希望能让后来人少走一些弯路。</p><p><em>下文基于Ubuntu 14.04 x64，其他系统请自行转换相应命令，谢谢~</em></p><h1 id=heading>环境配置</h1><h2 id=nodejs>安装nodejs</h2><p>使用APT安装</p><pre><code>sudo apt-get -y install nodejs-legacy
+<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container><a style=text-decoration:none href=https://xuanwo.io/tags/together><span>Together</span></a></div></div></header><div class=post><p>基于Socket.io有很多特别强大的应用，socket.io官方提供的一个<a href=http://socket.io/demos/computer/>虚拟计算机Demo</a>就非常赞。通过将使用Qemu虚拟取出来的PC界面转发至Socket.io的端口，然后对Canvas不断地进行绘制，形成了近似与远程操控的体验。我们<a href=http://xuanwo.io/2015/06/30/together-project/>Together项目</a>用到了这个库，但由于这个库发布于很久之前，再加上相关文档过少，导致部署起来极为困难。所以我完成了这篇文章，希望能让后来人少走一些弯路。</p><p><em>下文基于Ubuntu 14.04 x64，其他系统请自行转换相应命令，谢谢~</em></p><h1 id=环境配置>环境配置</h1><h2 id=安装nodejs>安装nodejs</h2><p>使用APT安装</p><pre><code>sudo apt-get -y install nodejs-legacy
 
 </code></pre><p>或使用nvm来管理不同版本的nodejs</p><pre><code>wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh | bash
 
 </code></pre><p><em>Canvas库在Debian系的OS上会有些诡异的行为，所以需要格外的做一些处理，感谢<a href=https://github.com/computernewb>@computernewb</a>的<a href=https://github.com/kevin-roark/socket.io-computer/issues/11#issuecomment-118790681>回复</a></em></p><pre><code>sudo ln -s /usr/bin/nodejs /usr/sbin/node
 
-</code></pre><h2 id=heading-1>安装依赖</h2><pre><code>sudo apt-get -y install libcairo2-dev libpango1.0-dev libgif-dev build-essential g++
+</code></pre><h2 id=安装依赖>安装依赖</h2><pre><code>sudo apt-get -y install libcairo2-dev libpango1.0-dev libgif-dev build-essential g++
 
-</code></pre><h2 id=libjpeg9libjpeg9-dev>安装libjpeg9和libjpeg9-dev</h2><pre><code>wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9_9a-2_amd64.deb
+</code></pre><h2 id=安装libjpeg9和libjpeg9-dev>安装libjpeg9和libjpeg9-dev</h2><pre><code>wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9_9a-2_amd64.deb
 dpkg -i libjpeg9_9a-2_amd64.deb
 wget http://ftp.us.debian.org/debian/pool/main/libj/libjpeg9/libjpeg9-dev_9a-2_amd64.deb
 dpkg -i libjpeg9-dev_9a-2_amd64.deb
 
-</code></pre><h1 id=winxp>处理WinXp镜像</h1><h2 id=xp>下载XP镜像</h2><h3 id=heading-2>下载后使用网盘中转</h3><p>在<a href=http://msdn.itellyou.cn/>I Tell You</a>上下载纯净的XP镜像。（如果使用盗版的镜像，VPS可能会因为违反其Tos而封号）
+</code></pre><h1 id=处理winxp镜像>处理WinXp镜像</h1><h2 id=下载xp镜像>下载XP镜像</h2><h3 id=下载后使用网盘中转>下载后使用网盘中转</h3><p>在<a href=http://msdn.itellyou.cn/>I Tell You</a>上下载纯净的XP镜像。（如果使用盗版的镜像，VPS可能会因为违反其Tos而封号）
 比如，WinXP的中文简体专业版：</p><pre><code>ed2k://|file|CN_WINXP_PRO_ISO.img|530186240|7855069CE4216615D761654E2B75A4F7|/
 
-</code></pre><h3 id=sftp>使用sftp上传</h3><p>可以使用类似于FileZilla这样的FTP工具直接上传，大部分国内的网盘到国外的速度都不理想= =，百度云还会出现断流，而好用的国外网盘都被墙，本身就需要翻墙上传。所以还不如直接使用sftp传到服务器上。</p><h2 id=heading-3>格式转换</h2><p><a href=http://msdn.itellyou.cn/>I Tell You</a>上下载下来的是img镜像文件，然而我们需要的是ISO，所以还需要进行转换。将img转换为iso，我们需要<code>ccd2iso</code>。</p><pre><code>sudo apt-get install ccd2iso
+</code></pre><h3 id=使用sftp上传>使用sftp上传</h3><p>可以使用类似于FileZilla这样的FTP工具直接上传，大部分国内的网盘到国外的速度都不理想= =，百度云还会出现断流，而好用的国外网盘都被墙，本身就需要翻墙上传。所以还不如直接使用sftp传到服务器上。</p><h2 id=格式转换>格式转换</h2><p><a href=http://msdn.itellyou.cn/>I Tell You</a>上下载下来的是img镜像文件，然而我们需要的是ISO，所以还需要进行转换。将img转换为iso，我们需要<code>ccd2iso</code>。</p><pre><code>sudo apt-get install ccd2iso
 
 </code></pre><p>使用方法：</p><pre><code>ccd2iso &lt;.img filename&gt; &lt;.iso filename&gt;
 
-</code></pre><h1 id=socketio-computer>socket.io-computer配置</h1><h2 id=heading-4>安装依赖</h2><pre><code>sudo apt-get -y install qemu redis-server
+</code></pre><h1 id=socketio-computer配置>socket.io-computer配置</h1><h2 id=安装依赖-1>安装依赖</h2><pre><code>sudo apt-get -y install qemu redis-server
 
-</code></pre><h2 id=heading-5>虚拟机配置</h2><p>生成一个光盘镜像文件用来加载ISO</p><pre><code>qemu-img create -f qcow2 winxp.img 10G
+</code></pre><h2 id=虚拟机配置>虚拟机配置</h2><p>生成一个光盘镜像文件用来加载ISO</p><pre><code>qemu-img create -f qcow2 winxp.img 10G
 
-</code></pre><h2 id=heading-6>运行</h2><h3 id=web>启动Web服务器</h3><pre><code>node app.js
+</code></pre><h2 id=运行>运行</h2><h3 id=启动web服务器>启动Web服务器</h3><pre><code>node app.js
 
-</code></pre><h3 id=io>启动IO服务器</h3><pre><code>node io.js
+</code></pre><h3 id=启动io服务器>启动IO服务器</h3><pre><code>node io.js
 
-</code></pre><h3 id=qemu>生成qemu实例</h3><pre><code>COMPUTER_ISO=winxp.iso COMPUTER_IMG=winxp.img node qemu.js
+</code></pre><h3 id=生成qemu实例>生成qemu实例</h3><pre><code>COMPUTER_ISO=winxp.iso COMPUTER_IMG=winxp.img node qemu.js
 
-</code></pre><h3 id=heading-7>启动虚拟机</h3><pre><code>COMPUTER_IMG=winxp.img node emu-runner.js
+</code></pre><h3 id=启动虚拟机>启动虚拟机</h3><pre><code>COMPUTER_IMG=winxp.img node emu-runner.js
 
-</code></pre><h1 id=heading-8>运行</h1><p>访问<code>http://localhost:5000</code></p><h1 id=heading-9>注意</h1><h2 id=ip>若搭建在服务器上，使用IP访问</h2><p>需要修改</p><pre><code>var url = process.env.COMPUTER_IO_URL || 'http://localhost:6001';
+</code></pre><h1 id=运行-1>运行</h1><p>访问<code>http://localhost:5000</code></p><h1 id=注意>注意</h1><h2 id=若搭建在服务器上使用ip访问>若搭建在服务器上，使用IP访问</h2><p>需要修改</p><pre><code>var url = process.env.COMPUTER_IO_URL || 'http://localhost:6001';
 
 </code></pre><p>为</p><pre><code>var url = process.env.COMPUTER_IO_URL || 'http://your IP address:6001';
 
-</code></pre><p>否则无法正常连接</p><h1 id=heading-10>更新日志</h1><ul><li>2015年07月06日 完成主体框架</li></ul></div><div id=disqus_thread></div><script type=application/javascript async>let disqus_config=function(){this.page.identifier='\/2015\/07\/06\/socket-vm\/';this.page.title='基于Socket.io的虚拟计算机';this.page.url='https:\/\/xuanwo.io\/2015\/07\/06\/socket-vm\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
+</code></pre><p>否则无法正常连接</p><h1 id=更新日志>更新日志</h1><ul><li>2015年07月06日 完成主体框架</li></ul></div><div id=disqus_thread></div><script type=application/javascript async>let disqus_config=function(){this.page.identifier='\/2015\/07\/06\/socket-vm\/';this.page.title='基于Socket.io的虚拟计算机';this.page.url='https:\/\/xuanwo.io\/2015\/07\/06\/socket-vm\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
 <a class=main-nav-link href=/tags/>标签</a>
 <a class=main-nav-link href=/series/>专题</a>
 <a class=main-nav-link href=/blogroll/>友链</a>

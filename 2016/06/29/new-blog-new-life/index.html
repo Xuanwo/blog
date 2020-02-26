@@ -1,4 +1,4 @@
-<!doctype html><html><head><title>新博客上线&Hexo主题开发入门</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="新博客上线&Hexo主题开发入门"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2016/06/29/new-blog-new-life/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.a285da0837b674a21742d9d9056c807cf8074d0e7b0cd2e85d30ed1ddf2acddd.css integrity="sha256-ooXaCDe2dKIXQtnZBWyAfPgHTQ57DNLoXTDtHd8qzd0="><script data-ad-client=ca-pub-8380875817494486 async src=https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js></script><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.62.0"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo's Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
+<!doctype html><html><head><title>新博客上线&Hexo主题开发入门</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="新博客上线&Hexo主题开发入门"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2016/06/29/new-blog-new-life/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.be107db044369d658c06efdc8f7f5462fda2b704c0a580ab8c227b3dad6ac109.css integrity="sha256-vhB9sEQ2nWWMBu/cj39UYv2itwTApYCrjCJ7Pa1qwQk="><script data-ad-client=ca-pub-8380875817494486 async src=https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js></script><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.65.3"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo's Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
 <a class=main-nav-link href=/posts/>文章</a></div></div></nav><main id=main-content><article class="single container"><header class=single-header><div class=flex><h1>新博客上线&Hexo主题开发入门</h1><div class=post-meta><time class=date datetime=2016-06-29T00:00:00.000+00:00 itemprop=datePublished>2016-06-29</time>
 /
 <span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container><a style=text-decoration:none href=https://xuanwo.io/tags/hexo><span>Hexo</span></a>
@@ -9,7 +9,7 @@
 这一次的更新其实酝酿了很久，早在刚开始用Hexo的时候就想着要有一个自己的主题。但是那个时候觉得这是一件很难的事情，要懂HTML，CSS，JavaScript，还要懂Swig，Ejs等模板语言，还要懂Hexo的内部原理，于是就一直搁置了。在独立实现了一个<a href=https://xuanwo.io/2016/06/16/jade_ims/>完整的项目</a>之后，我认为自己已经有这样的能力了，于是决定正式开始。
 在我看来的话，Hexo的使用者大概分为三个层次：第一种用别人的主题，第二种模仿现有的主题，第三种自己独立开发。我原来是第一种，在Next的基础上做了很多改动，这一次进入到了第二个层次。我找了一套自我感觉还不错的模板，然后套用它的CSS设定和页面结构，就成了我现在的主题。
 利用两天学习和工作的闲暇时间，我大体上完成了这个主题。做得比较糙，很多细节还有待优化，但是我已经急不可耐地想要正式上线了，笑。在未来的话，我希望能把一些配置都能整理出来，优化一下代码，然后开源这个主题，希望大家能够喜欢~
-庆祝的话已经说的差不多了，下面来讲一讲如何开发一个Hexo主题。</p><h1 id=heading>结构</h1><h2 id=heading-1>主题结构</h2><p>Hexo主题的结构大体如下：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>.
+庆祝的话已经说的差不多了，下面来讲一讲如何开发一个Hexo主题。</p><h1 id=结构>结构</h1><h2 id=主题结构>主题结构</h2><p>Hexo主题的结构大体如下：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>.
 ├── _config.yml
 ├── languages
 │   ├── default.yml
@@ -32,49 +32,60 @@
 </code></pre></div><p>首先有一个<code>_config.yml</code>负责提供主题级别的配置，可以在<code>layout</code>中通过<code>theme.xxx</code>的形式进行调用。
 然后<code>languages</code>负责实现博客的i18N功能，如果博客没有多语言的需求，只需要实现一个<code>default.yml</code>即可。
 其次是最为重要的<code>layout</code>文件夹，这个里面主要存放博客的结构，Hexo 引擎会使用指定的渲染引擎将<code>layout</code>文件渲染成HTML页面。
-最后是<code>source</code>，把所有主题需要用到的资源，比如CSS，Fonts，JS等都存放到这个文件夹中。</p><p>这个主题使用了<a href=http://paularmstrong.github.io/swig/>swig</a>。</p><h2 id=heading-2>页面结构</h2><p>页面结构分为两个维度，一者是我要呈现哪些页面，二者是每个页面上都有哪些内容。</p><h3 id=heading-3>哪些页面？</h3><p>作为一个博客，主要需要的页面有以下这些：</p><ul><li>主页</li><li>单页</li><li>归档页面</li><li>分类页面</li><li>标签页面</li><li>文章页</li></ul><h3 id=heading-4>哪些内容？</h3><p>如果没有什么特别的设计，博客的页面大体上可以分为这几个部分：</p><ul><li>head：头部文件</li><li>body：主体内容<ul><li>header：题图，导航栏等</li><li>content： 内容</li><li>footer：尾部的联系方式等</li></ul></li></ul><h1 id=heading-5>实现</h1><p>前面讲到了 Hexo 的结构，下面来聊一聊具体的实现。</p><h2 id=heading-6>原理</h2><p>Hexo 渲染的入口是<code>_layout.swig</code>，所以一个主题至少需要实现一个<code>_layout.swig</code>。
-然后Hexo会遍历Hexo目录下<code>source</code>文件夹中的所有Markdown文件，根据Markdown文件所指定的layout进行渲染，默认类型为<code>post</code>。</p><h2 id=heading-7>技巧</h2><h3 id=-layoutswig>_layout.swig结构</h3><p>整体的结构基本如下：</p><pre><code class=language-swig data-lang=swig>{% raw %}
-<!doctype html>
-<html>
-<head>
-    {% include '_partials/head.swig' %}
-    <title>{% block title %}{% endblock %}</title>
-</head>
-<body id=home>
-    {% include '_partials/menu.swig' %}
-    <div id=wrap>
-        {% include '_partials/nav.swig' %}
-        {% include '_partials/header.swig' %}
-        <div id=start class="container content">
+最后是<code>source</code>，把所有主题需要用到的资源，比如CSS，Fonts，JS等都存放到这个文件夹中。</p><p>这个主题使用了<a href=http://paularmstrong.github.io/swig/>swig</a>。</p><h2 id=页面结构>页面结构</h2><p>页面结构分为两个维度，一者是我要呈现哪些页面，二者是每个页面上都有哪些内容。</p><h3 id=哪些页面>哪些页面？</h3><p>作为一个博客，主要需要的页面有以下这些：</p><ul><li>主页</li><li>单页</li><li>归档页面</li><li>分类页面</li><li>标签页面</li><li>文章页</li></ul><h3 id=哪些内容>哪些内容？</h3><p>如果没有什么特别的设计，博客的页面大体上可以分为这几个部分：</p><ul><li>head：头部文件</li><li>body：主体内容<ul><li>header：题图，导航栏等</li><li>content： 内容</li><li>footer：尾部的联系方式等</li></ul></li></ul><h1 id=实现>实现</h1><p>前面讲到了 Hexo 的结构，下面来聊一聊具体的实现。</p><h2 id=原理>原理</h2><p>Hexo 渲染的入口是<code>_layout.swig</code>，所以一个主题至少需要实现一个<code>_layout.swig</code>。
+然后Hexo会遍历Hexo目录下<code>source</code>文件夹中的所有Markdown文件，根据Markdown文件所指定的layout进行渲染，默认类型为<code>post</code>。</p><h2 id=技巧>技巧</h2><h3 id=_layoutswig结构>_layout.swig结构</h3><p>整体的结构基本如下：</p><pre><code class=language-swig data-lang=swig>{% raw %}
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    {% include &#39;_partials/head.swig&#39; %}
+    &lt;title&gt;{% block title %}{% endblock %}&lt;/title&gt;
+&lt;/head&gt;
+&lt;body id=&#34;home&#34;&gt;
+    {% include &#39;_partials/menu.swig&#39; %}
+    &lt;div id=&#34;wrap&#34;&gt;
+        {% include &#39;_partials/nav.swig&#39; %}
+        {% include &#39;_partials/header.swig&#39; %}
+        &lt;div id=&#34;start&#34; class=&#34;container content&#34;&gt;
             {% block content %}{% endblock %}
-        </div>
-        {% include '_partials/footer.swig' %}
-    </div>
-</body>
-</html>
-{% endraw %}</code></pre><h3 id=heading-8>实现文章渲染</h3><p>这个地方主要是借鉴了NexT主题的设计，实现了一个swig的宏来生成对应的文章。这个宏主要有两个参数，第一个是post对象，第二个是是否为主页。如果是主页就只显示简略的内容，如果不是就输出全文。</p><p>判断的部分实现如下：</p><pre><code class=language-swig data-lang=swig>{% raw %}
+        &lt;/div&gt;
+        {% include &#39;_partials/footer.swig&#39; %}
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+{% endraw %}</code></pre><h3 id=实现文章渲染>实现文章渲染</h3><p>这个地方主要是借鉴了NexT主题的设计，实现了一个swig的宏来生成对应的文章。这个宏主要有两个参数，第一个是post对象，第二个是是否为主页。如果是主页就只显示简略的内容，如果不是就输出全文。</p><p>判断的部分实现如下：</p><pre><code class=language-swig data-lang=swig>{% raw %}
 {% if is_index %}
     {% if post.excerpt %}
         {{ post.excerpt }}
-        <a href="{{ url_for(post.path) }}">Read more</a>
+        &lt;a class=&#34;&#34; href=&#34;{{ url_for(post.path) }}&#34;&gt;Read more&lt;/a&gt;
     {% endif %}
 {% else %}
     {{ post.content }}
 {% endif %}
-{% endraw %}</code></pre><p>用到的post页的参数可以<a href=https://hexo.io/zh-cn/docs/variables.html>我翻译的中文文档</a></p><h3 id=heading-9>分页插件</h3><p>Hexo 自己实现了一个分页插件，直接使用paginator函数即可。</p><pre><code class=language-swig data-lang=swig>{% raw %}
+{% endraw %}</code></pre><p>用到的post页的参数可以<a href=https://hexo.io/zh-cn/docs/variables.html>我翻译的中文文档</a></p><h3 id=分页插件>分页插件</h3><p>Hexo 自己实现了一个分页插件，直接使用paginator函数即可。</p><pre><code class=language-swig data-lang=swig>{% raw %}
 {% if page.prev or page.next %}
-    <nav class=pagination>
+    &lt;nav class=&#34;pagination&#34;&gt;
         {{ paginator({
-            prev_text: '<i class="fa fa-angle-left"></i>',
-            next_text: '<i class="fa fa-angle-right"></i>',
+            prev_text: &#39;&lt;i class=&#34;fa fa-angle-left&#34;&gt;&lt;/i&gt;&#39;,
+            next_text: &#39;&lt;i class=&#34;fa fa-angle-right&#34;&gt;&lt;/i&gt;&#39;,
             mid_size: 1
         }) }}
-    </nav>
+    &lt;/nav&gt;
 {% endif %}
-{% endraw %}</code></pre><h3 id=heading-10>评论系统</h3><p>对于Hexo来说，评论系统就是调用一个第三方的JS。所以只需要在合适的位置插入代码即可。</p><pre><code class=language-swig data-lang=swig>{% raw %}
-<div id=disqus_thread></div>
-<script>var disqus_config=function(){this.page.url='{{ page.permalink }}';this.page.identifier='{{ page.path }}';};(function(){var d=document,s=d.createElement('script');s.src='//abc.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script>
-{% endraw %}</code></pre><h1 id=heading-11>需要注意的坑</h1><ul><li><code>page.posts</code>是按照时间排序的，但是<code>site.posts</code>是无序的。</li></ul><h1 id=heading-12>参考资料</h1><ul><li><a href=https://hexo.io/zh-cn/docs/>Hexo 官方中文文档</a></li></ul><h1 id=heading-13>更新日志</h1><ul><li>2016年06月30日 首次发布</li></ul></div><div id=disqus_thread></div><script type=application/javascript async>let disqus_config=function(){this.page.identifier='\/2016\/06\/29\/new-blog-new-life\/';this.page.title='新博客上线\x26Hexo主题开发入门';this.page.url='https:\/\/xuanwo.io\/2016\/06\/29\/new-blog-new-life\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
+{% endraw %}</code></pre><h3 id=评论系统>评论系统</h3><p>对于Hexo来说，评论系统就是调用一个第三方的JS。所以只需要在合适的位置插入代码即可。</p><pre><code class=language-swig data-lang=swig>{% raw %}
+&lt;div id=&#34;disqus_thread&#34;&gt;&lt;/div&gt;
+&lt;script&gt;
+    var disqus_config = function () {
+        this.page.url = &#39;{{ page.permalink }}&#39;;
+        this.page.identifier = &#39;{{ page.path }}&#39;;
+    };
+    (function () {
+        var d = document, s = d.createElement(&#39;script&#39;);
+        s.src = &#39;//abc.disqus.com/embed.js&#39;;
+        s.setAttribute(&#39;data-timestamp&#39;, +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+&lt;/script&gt;
+{% endraw %}</code></pre><h1 id=需要注意的坑>需要注意的坑</h1><ul><li><code>page.posts</code>是按照时间排序的，但是<code>site.posts</code>是无序的。</li></ul><h1 id=参考资料>参考资料</h1><ul><li><a href=https://hexo.io/zh-cn/docs/>Hexo 官方中文文档</a></li></ul><h1 id=更新日志>更新日志</h1><ul><li>2016年06月30日 首次发布</li></ul></div><div id=disqus_thread></div><script type=application/javascript async>let disqus_config=function(){this.page.identifier='\/2016\/06\/29\/new-blog-new-life\/';this.page.title='新博客上线\x26Hexo主题开发入门';this.page.url='https:\/\/xuanwo.io\/2016\/06\/29\/new-blog-new-life\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
 <a class=main-nav-link href=/tags/>标签</a>
 <a class=main-nav-link href=/series/>专题</a>
 <a class=main-nav-link href=/blogroll/>友链</a>

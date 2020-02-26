@@ -1,7 +1,7 @@
-<!doctype html><html><head><title>动态规划——最长上升子序列问题</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="动态规划——最长上升子序列问题"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2015/07/31/dp-lis/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.a285da0837b674a21742d9d9056c807cf8074d0e7b0cd2e85d30ed1ddf2acddd.css integrity="sha256-ooXaCDe2dKIXQtnZBWyAfPgHTQ57DNLoXTDtHd8qzd0="><script data-ad-client=ca-pub-8380875817494486 async src=https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js></script><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.62.0"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo's Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
+<!doctype html><html><head><title>动态规划——最长上升子序列问题</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="动态规划——最长上升子序列问题"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2015/07/31/dp-lis/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.be107db044369d658c06efdc8f7f5462fda2b704c0a580ab8c227b3dad6ac109.css integrity="sha256-vhB9sEQ2nWWMBu/cj39UYv2itwTApYCrjCJ7Pa1qwQk="><script data-ad-client=ca-pub-8380875817494486 async src=https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js></script><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.65.3"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo's Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
 <a class=main-nav-link href=/posts/>文章</a></div></div></nav><main id=main-content><article class="single container"><header class=single-header><div class=flex><h1>动态规划——最长上升子序列问题</h1><div class=post-meta><time class=date datetime=2015-07-31T15:58:35.000+00:00 itemprop=datePublished>2015-07-31</time>
 /
-<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container><a style=text-decoration:none href=https://xuanwo.io/tags/c><span>C</span></a></div></div></header><div class=post><h1 id=heading>介绍</h1><p>最长上升子序列问题，也就是<code>Longest increasing subsequence</code>，缩写为<code>LIS</code>。是指在一个序列中求长度最长的一个上升子序列的问题，是动态规划中一个相当经典问题。在这里我们可以看到，这个上升实质上就是一个对<code>&lt;</code>进行定义的过程，所以我们求解的其实是一类问题，也就是在给定序列中求解长度最长的符合某一性质的子序列的问题。在下面总结的过程中，我还是以递增为例进行阐述。</p><h1 id=on2>O(n^2)的动态规划方法</h1><p><code>dp[i]</code>表示以i结尾的子序列中LIS的长度。然后我用<code>dp[j](0&lt;=j&lt;i)</code>来表示在i之前的LIS的长度。然后我们可以看到，只有当<code>a[i]>a[j]</code>的时候，我们需要进行判断，是否将a[i]加入到dp[j]当中。为了保证我们每次加入都是得到一个最优的LIS，有两点需要注意：第一，每一次，a[i]都应当加入最大的那个dp[j]，保证局部性质最优，也就是我们需要找到<code>max(dp[j](0&lt;=j&lt;i))</code>；第二，每一次加入之后，我们都应当更新dp[j]的值，显然，<code>dp[i]=dp[j]+1</code>。
+<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container><a style=text-decoration:none href=https://xuanwo.io/tags/c><span>C</span></a></div></div></header><div class=post><h1 id=介绍>介绍</h1><p>最长上升子序列问题，也就是<code>Longest increasing subsequence</code>，缩写为<code>LIS</code>。是指在一个序列中求长度最长的一个上升子序列的问题，是动态规划中一个相当经典问题。在这里我们可以看到，这个上升实质上就是一个对<code>&lt;</code>进行定义的过程，所以我们求解的其实是一类问题，也就是在给定序列中求解长度最长的符合某一性质的子序列的问题。在下面总结的过程中，我还是以递增为例进行阐述。</p><h1 id=on2的动态规划方法>O(n^2)的动态规划方法</h1><p><code>dp[i]</code>表示以i结尾的子序列中LIS的长度。然后我用<code>dp[j](0&lt;=j&lt;i)</code>来表示在i之前的LIS的长度。然后我们可以看到，只有当<code>a[i]>a[j]</code>的时候，我们需要进行判断，是否将a[i]加入到dp[j]当中。为了保证我们每次加入都是得到一个最优的LIS，有两点需要注意：第一，每一次，a[i]都应当加入最大的那个dp[j]，保证局部性质最优，也就是我们需要找到<code>max(dp[j](0&lt;=j&lt;i))</code>；第二，每一次加入之后，我们都应当更新dp[j]的值，显然，<code>dp[i]=dp[j]+1</code>。
 如果写成递推公式，我们可以得到<code>dp[i]=max(dp[j](0&lt;=j&lt;i))+(a[i]>a[j]?1:0)</code>。
 于是我们就能够得到O(n^2)的动态规划方法的实现：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#007020;font-weight:700>const</span> <span style=color:#902000>int</span> MAXN <span style=color:#666>=</span> <span style=color:#40a070>1010</span>;
 <span style=color:#902000>int</span> n;
@@ -12,10 +12,10 @@
 {
     memset(dp, <span style=color:#40a070>0</span>, <span style=color:#007020;font-weight:700>sizeof</span>(dp));
     <span style=color:#902000>int</span> Max;
-    <span style=color:#007020;font-weight:700>for</span> (<span style=color:#902000>int</span> i <span style=color:#666>=</span> <span style=color:#40a070>0</span>; i <span style=color:#666>&lt;</span> n; <span style=color:#666>+</span><span style=color:#666>+</span>i)
+    <span style=color:#007020;font-weight:700>for</span> (<span style=color:#902000>int</span> i <span style=color:#666>=</span> <span style=color:#40a070>0</span>; i <span style=color:#666>&lt;</span> n; <span style=color:#666>++</span>i)
     {
         Max <span style=color:#666>=</span> <span style=color:#40a070>0</span>;
-        <span style=color:#007020;font-weight:700>for</span> (<span style=color:#902000>int</span> j <span style=color:#666>=</span> <span style=color:#40a070>0</span>; j <span style=color:#666>&lt;</span> i; <span style=color:#666>+</span><span style=color:#666>+</span>j)
+        <span style=color:#007020;font-weight:700>for</span> (<span style=color:#902000>int</span> j <span style=color:#666>=</span> <span style=color:#40a070>0</span>; j <span style=color:#666>&lt;</span> i; <span style=color:#666>++</span>j)
         {
             <span style=color:#007020;font-weight:700>if</span> (a[i] <span style=color:#666>&gt;</span> a[j])
             {
@@ -25,14 +25,14 @@
         dp[i] <span style=color:#666>=</span> Max <span style=color:#666>+</span> <span style=color:#40a070>1</span>;
     }
     Max <span style=color:#666>=</span> <span style=color:#40a070>0</span>;
-    <span style=color:#007020;font-weight:700>for</span> (<span style=color:#902000>int</span> i <span style=color:#666>=</span> <span style=color:#40a070>0</span>; i <span style=color:#666>&lt;</span> n; <span style=color:#666>+</span><span style=color:#666>+</span>i)
+    <span style=color:#007020;font-weight:700>for</span> (<span style=color:#902000>int</span> i <span style=color:#666>=</span> <span style=color:#40a070>0</span>; i <span style=color:#666>&lt;</span> n; <span style=color:#666>++</span>i)
     {
         <span style=color:#007020;font-weight:700>if</span> (dp[i] <span style=color:#666>&gt;</span> Max)    Max <span style=color:#666>=</span> dp[i];
     }
     <span style=color:#007020;font-weight:700>return</span> Max;
 }
 
-</code></pre></div><h1 id=onlogn>O(nlogn)的动态规划+二分方法</h1><p>在前一种方法中，我们花费了很多时间在寻找最大的dp[j]上。如果有办法让这个dp[j]变成一个递增的序列，我们就能使用二分来进行优化，从而使得复杂度下降为<code>O(nlogn)</code>了。
+</code></pre></div><h1 id=onlogn的动态规划二分方法>O(nlogn)的动态规划+二分方法</h1><p>在前一种方法中，我们花费了很多时间在寻找最大的dp[j]上。如果有办法让这个dp[j]变成一个递增的序列，我们就能使用二分来进行优化，从而使得复杂度下降为<code>O(nlogn)</code>了。
 幸运的是，这种方法确实是存在的。我们可以使用dp[i]来保存在前i个数中最大的那个数，很容易可以理解，这个dp[i]已经是单调不减的。接下来的处理其实有些贪心的思想，对于每一个a[i]，我们都在dp数组中寻找比它大的第一个数的下标，不妨设为pos，然后用a[i]来更新dp[pos]。于是我们可以明白，len就应当是<code>max(len, pos+1)</code>。</p><blockquote></blockquote><p>在这里我们使用<a href="http://www.cplusplus.com/reference/algorithm/lower_bound/?kw=lower_bound">lower_bound函数</a>，这个函数将会返回小于等于val的第一个值的指针，如果不存在就返回end指针。</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#007020;font-weight:700>const</span> <span style=color:#902000>int</span> MAXN <span style=color:#666>=</span> <span style=color:#40a070>1010</span>;
 <span style=color:#902000>int</span> n;
 <span style=color:#902000>int</span> a[MAXN];
@@ -43,7 +43,7 @@
     memset(dp, <span style=color:#40a070>0</span>, <span style=color:#007020;font-weight:700>sizeof</span>(<span style=color:#902000>int</span>)<span style=color:#666>*</span>n);
     <span style=color:#902000>int</span> len <span style=color:#666>=</span> <span style=color:#40a070>1</span>;
     dp[<span style=color:#40a070>0</span>] <span style=color:#666>=</span> a[<span style=color:#40a070>0</span>];
-    <span style=color:#007020;font-weight:700>for</span> (<span style=color:#902000>int</span> i <span style=color:#666>=</span> <span style=color:#40a070>1</span>; i <span style=color:#666>&lt;</span> n; <span style=color:#666>+</span><span style=color:#666>+</span>i)
+    <span style=color:#007020;font-weight:700>for</span> (<span style=color:#902000>int</span> i <span style=color:#666>=</span> <span style=color:#40a070>1</span>; i <span style=color:#666>&lt;</span> n; <span style=color:#666>++</span>i)
     {
         <span style=color:#902000>int</span> pos <span style=color:#666>=</span> lower_bound(dp, dp <span style=color:#666>+</span> len, a[i]) <span style=color:#666>-</span> dp;
         dp[pos] <span style=color:#666>=</span> a[i];
@@ -52,7 +52,7 @@
     <span style=color:#007020;font-weight:700>return</span> len;
 }
 
-</code></pre></div><h1 id=heading-1>更新日志</h1><ul><li>2015年07月31日 初步总结</li></ul></div><div id=disqus_thread></div><script type=application/javascript async>let disqus_config=function(){this.page.identifier='\/2015\/07\/31\/dp-lis\/';this.page.title='动态规划——最长上升子序列问题';this.page.url='https:\/\/xuanwo.io\/2015\/07\/31\/dp-lis\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
+</code></pre></div><h1 id=更新日志>更新日志</h1><ul><li>2015年07月31日 初步总结</li></ul></div><div id=disqus_thread></div><script type=application/javascript async>let disqus_config=function(){this.page.identifier='\/2015\/07\/31\/dp-lis\/';this.page.title='动态规划——最长上升子序列问题';this.page.url='https:\/\/xuanwo.io\/2015\/07\/31\/dp-lis\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
 <a class=main-nav-link href=/tags/>标签</a>
 <a class=main-nav-link href=/series/>专题</a>
 <a class=main-nav-link href=/blogroll/>友链</a>

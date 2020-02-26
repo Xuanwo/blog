@@ -1,8 +1,8 @@
-<!doctype html><html><head><title>POJ 1753 Flip Game</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="POJ 1753 Flip Game"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2014/07/12/poj-1753-flip-game/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.a285da0837b674a21742d9d9056c807cf8074d0e7b0cd2e85d30ed1ddf2acddd.css integrity="sha256-ooXaCDe2dKIXQtnZBWyAfPgHTQ57DNLoXTDtHd8qzd0="><script data-ad-client=ca-pub-8380875817494486 async src=https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js></script><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.62.0"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo's Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
+<!doctype html><html><head><title>POJ 1753 Flip Game</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="POJ 1753 Flip Game"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2014/07/12/poj-1753-flip-game/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.be107db044369d658c06efdc8f7f5462fda2b704c0a580ab8c227b3dad6ac109.css integrity="sha256-vhB9sEQ2nWWMBu/cj39UYv2itwTApYCrjCJ7Pa1qwQk="><script data-ad-client=ca-pub-8380875817494486 async src=https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js></script><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.65.3"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo's Blog</a></div><div class=links><a class=main-nav-link href=/about/>关于我</a>
 <a class=main-nav-link href=/posts/>文章</a></div></div></nav><main id=main-content><article class="single container"><header class=single-header><div class=flex><h1>POJ 1753 Flip Game</h1><div class=post-meta><time class=date datetime=2014-07-12T00:00:00.000+00:00 itemprop=datePublished>2014-07-12</time>
 /
-<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container></div></div></header><div class=post><h2 id=heading>题目</h2><p>源地址：</p><p><a href="http://poj.org/problem?id=1753">http://poj.org/problem?id=1753</a></p><h1 id=heading-1>理解</h1><p>我一开始的思路是错误的，企图通过正面的方法来找出从当前情况达到全白和全黑的方法，多次尝试之后，发现很难找到一条通用的方法，只能找出几个比较简单的特例。后来才明白过来，应当从全黑或者全白的情况出发，再来判断给定的图是不是其中的一个子集。因为是一个4X4的格子，不难看出，总共的情况只有2^16种。只要一一枚举即可。最后的步数就是这颗树的深度，使用DFS即可实现。</p><h1 id=get>新技能get</h1><p>深度优先搜索<code>DFS</code>
-对每一个可能的分支路径深入到不能再深入为止，而且每个节点只能访问一次。</p><h1 id=heading-2>代码</h1><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#007020>#</span><span style=color:#007020>include</span><span style=color:#007020>&lt;iostream&gt;</span><span style=color:#007020>
+<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container></div></div></header><div class=post><h2 id=题目>题目</h2><p>源地址：</p><p><a href="http://poj.org/problem?id=1753">http://poj.org/problem?id=1753</a></p><h1 id=理解>理解</h1><p>我一开始的思路是错误的，企图通过正面的方法来找出从当前情况达到全白和全黑的方法，多次尝试之后，发现很难找到一条通用的方法，只能找出几个比较简单的特例。后来才明白过来，应当从全黑或者全白的情况出发，再来判断给定的图是不是其中的一个子集。因为是一个4X4的格子，不难看出，总共的情况只有2^16种。只要一一枚举即可。最后的步数就是这颗树的深度，使用DFS即可实现。</p><h1 id=新技能get>新技能get</h1><p>深度优先搜索<code>DFS</code>
+对每一个可能的分支路径深入到不能再深入为止，而且每个节点只能访问一次。</p><h1 id=代码>代码</h1><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#007020>#include</span><span style=color:#007020>&lt;iostream&gt;</span><span style=color:#007020>
 </span><span style=color:#007020></span><span style=color:#007020;font-weight:700>using</span> <span style=color:#007020;font-weight:700>namespace</span> std;
 
 <span style=color:#902000>bool</span> chess[<span style=color:#40a070>6</span>][<span style=color:#40a070>6</span>]<span style=color:#666>=</span>{<span style=color:#007020>false</span>};
@@ -14,9 +14,9 @@
 <span style=color:#902000>bool</span> <span style=color:#06287e>judge_all</span>(<span style=color:#902000>void</span>)
 {
     <span style=color:#902000>int</span> i,j;
-    <span style=color:#007020;font-weight:700>for</span>(i<span style=color:#666>=</span><span style=color:#40a070>1</span>;i<span style=color:#666>&lt;</span><span style=color:#40a070>5</span>;i<span style=color:#666>+</span><span style=color:#666>+</span>)
-        <span style=color:#007020;font-weight:700>for</span>(j<span style=color:#666>=</span><span style=color:#40a070>1</span>;j<span style=color:#666>&lt;</span><span style=color:#40a070>5</span>;j<span style=color:#666>+</span><span style=color:#666>+</span>)
-            <span style=color:#007020;font-weight:700>if</span>(chess[i][j]<span style=color:#666>!</span><span style=color:#666>=</span>chess[<span style=color:#40a070>1</span>][<span style=color:#40a070>1</span>])
+    <span style=color:#007020;font-weight:700>for</span>(i<span style=color:#666>=</span><span style=color:#40a070>1</span>;i<span style=color:#666>&lt;</span><span style=color:#40a070>5</span>;i<span style=color:#666>++</span>)
+        <span style=color:#007020;font-weight:700>for</span>(j<span style=color:#666>=</span><span style=color:#40a070>1</span>;j<span style=color:#666>&lt;</span><span style=color:#40a070>5</span>;j<span style=color:#666>++</span>)
+            <span style=color:#007020;font-weight:700>if</span>(chess[i][j]<span style=color:#666>!=</span>chess[<span style=color:#40a070>1</span>][<span style=color:#40a070>1</span>])
                 <span style=color:#007020;font-weight:700>return</span> <span style=color:#007020>false</span>;
     <span style=color:#007020;font-weight:700>return</span> <span style=color:#007020>true</span>;
 }
@@ -24,20 +24,20 @@
 <span style=color:#902000>void</span> <span style=color:#06287e>flip</span>(<span style=color:#902000>int</span> row,<span style=color:#902000>int</span> col)
 {
     <span style=color:#902000>int</span> i;
-    <span style=color:#007020;font-weight:700>for</span>(i<span style=color:#666>=</span><span style=color:#40a070>0</span>;i<span style=color:#666>&lt;</span><span style=color:#40a070>5</span>;i<span style=color:#666>+</span><span style=color:#666>+</span>)
-        chess[row<span style=color:#666>+</span>r[i]][col<span style=color:#666>+</span>c[i]]<span style=color:#666>=</span><span style=color:#666>!</span>chess[row<span style=color:#666>+</span>r[i]][col<span style=color:#666>+</span>c[i]];
+    <span style=color:#007020;font-weight:700>for</span>(i<span style=color:#666>=</span><span style=color:#40a070>0</span>;i<span style=color:#666>&lt;</span><span style=color:#40a070>5</span>;i<span style=color:#666>++</span>)
+        chess[row<span style=color:#666>+</span>r[i]][col<span style=color:#666>+</span>c[i]]<span style=color:#666>=!</span>chess[row<span style=color:#666>+</span>r[i]][col<span style=color:#666>+</span>c[i]];
     <span style=color:#007020;font-weight:700>return</span>;
 }
 
 <span style=color:#902000>void</span> <span style=color:#06287e>dfs</span>(<span style=color:#902000>int</span> row,<span style=color:#902000>int</span> col,<span style=color:#902000>int</span> deep)
 {
-    <span style=color:#007020;font-weight:700>if</span>(deep<span style=color:#666>=</span><span style=color:#666>=</span>step)
+    <span style=color:#007020;font-weight:700>if</span>(deep<span style=color:#666>==</span>step)
     {
         flag<span style=color:#666>=</span>judge_all();
         <span style=color:#007020;font-weight:700>return</span>;
     }
 
-    <span style=color:#007020;font-weight:700>if</span>(flag<span style=color:#666>|</span><span style=color:#666>|</span>row<span style=color:#666>=</span><span style=color:#666>=</span><span style=color:#40a070>5</span>)<span style=color:#007020;font-weight:700>return</span>;
+    <span style=color:#007020;font-weight:700>if</span>(flag<span style=color:#666>||</span>row<span style=color:#666>==</span><span style=color:#40a070>5</span>)<span style=color:#007020;font-weight:700>return</span>;
 
     flip(row,col);
     <span style=color:#007020;font-weight:700>if</span>(col<span style=color:#666>&lt;</span><span style=color:#40a070>4</span>)
@@ -58,28 +58,28 @@
 {
     <span style=color:#902000>char</span> temp;
     <span style=color:#902000>int</span> i,j;
-    <span style=color:#007020;font-weight:700>for</span>(i<span style=color:#666>=</span><span style=color:#40a070>1</span>;i<span style=color:#666>&lt;</span><span style=color:#40a070>5</span>;i<span style=color:#666>+</span><span style=color:#666>+</span>)
-        <span style=color:#007020;font-weight:700>for</span>(j<span style=color:#666>=</span><span style=color:#40a070>1</span>;j<span style=color:#666>&lt;</span><span style=color:#40a070>5</span>;j<span style=color:#666>+</span><span style=color:#666>+</span>)
+    <span style=color:#007020;font-weight:700>for</span>(i<span style=color:#666>=</span><span style=color:#40a070>1</span>;i<span style=color:#666>&lt;</span><span style=color:#40a070>5</span>;i<span style=color:#666>++</span>)
+        <span style=color:#007020;font-weight:700>for</span>(j<span style=color:#666>=</span><span style=color:#40a070>1</span>;j<span style=color:#666>&lt;</span><span style=color:#40a070>5</span>;j<span style=color:#666>++</span>)
         {
-            cin<span style=color:#666>&gt;</span><span style=color:#666>&gt;</span>temp;
-            <span style=color:#007020;font-weight:700>if</span>(temp<span style=color:#666>=</span><span style=color:#666>=</span><span style=color:#4070a0></span><span style=color:#4070a0>&#39;</span><span style=color:#4070a0>b</span><span style=color:#4070a0>&#39;</span>)
+            cin<span style=color:#666>&gt;&gt;</span>temp;
+            <span style=color:#007020;font-weight:700>if</span>(temp<span style=color:#666>==</span><span style=color:#4070a0>&#39;b&#39;</span>)
                 chess[i][j]<span style=color:#666>=</span><span style=color:#007020>true</span>;
         }
 
-    <span style=color:#007020;font-weight:700>for</span>(step<span style=color:#666>=</span><span style=color:#40a070>0</span>;step<span style=color:#666>&lt;</span><span style=color:#666>=</span><span style=color:#40a070>16</span>;step<span style=color:#666>+</span><span style=color:#666>+</span>)
+    <span style=color:#007020;font-weight:700>for</span>(step<span style=color:#666>=</span><span style=color:#40a070>0</span>;step<span style=color:#666>&lt;=</span><span style=color:#40a070>16</span>;step<span style=color:#666>++</span>)
     {
         dfs(<span style=color:#40a070>1</span>,<span style=color:#40a070>1</span>,<span style=color:#40a070>0</span>);
         <span style=color:#007020;font-weight:700>if</span>(flag)<span style=color:#007020;font-weight:700>break</span>;
     }
 
     <span style=color:#007020;font-weight:700>if</span>(flag)
-        cout<span style=color:#666>&lt;</span><span style=color:#666>&lt;</span>step<span style=color:#666>&lt;</span><span style=color:#666>&lt;</span>endl;
+        cout<span style=color:#666>&lt;&lt;</span>step<span style=color:#666>&lt;&lt;</span>endl;
     <span style=color:#007020;font-weight:700>else</span>
-        cout<span style=color:#666>&lt;</span><span style=color:#666>&lt;</span><span style=color:#4070a0></span><span style=color:#4070a0>&#34;</span><span style=color:#4070a0>Impossible</span><span style=color:#4070a0>&#34;</span><span style=color:#666>&lt;</span><span style=color:#666>&lt;</span>endl;
+        cout<span style=color:#666>&lt;&lt;</span><span style=color:#4070a0>&#34;Impossible&#34;</span><span style=color:#666>&lt;&lt;</span>endl;
     <span style=color:#007020;font-weight:700>return</span> <span style=color:#40a070>0</span>;
 }
 
-</code></pre></div><h1 id=heading-3>更新日志</h1><ul><li>2014年07月12日 已AC。</li></ul></div><div id=disqus_thread></div><script type=application/javascript async>let disqus_config=function(){this.page.identifier='\/2014\/07\/12\/poj-1753-flip-game\/';this.page.title='POJ 1753 Flip Game';this.page.url='https:\/\/xuanwo.io\/2014\/07\/12\/poj-1753-flip-game\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
+</code></pre></div><h1 id=更新日志>更新日志</h1><ul><li>2014年07月12日 已AC。</li></ul></div><div id=disqus_thread></div><script type=application/javascript async>let disqus_config=function(){this.page.identifier='\/2014\/07\/12\/poj-1753-flip-game\/';this.page.title='POJ 1753 Flip Game';this.page.url='https:\/\/xuanwo.io\/2014\/07\/12\/poj-1753-flip-game\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>分类</a>
 <a class=main-nav-link href=/tags/>标签</a>
 <a class=main-nav-link href=/series/>专题</a>
 <a class=main-nav-link href=/blogroll/>友链</a>
