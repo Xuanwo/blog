@@ -1,4 +1,416 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Lenovo on Xuanwo's Blog</title><link>https://xuanwo.io/tags/lenovo/</link><description>Recent content in Lenovo on Xuanwo's Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 19 Feb 2019 06:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/lenovo/index.xml" rel="self" type="application/rss+xml"/><item><title>小 Piu 本纪</title><link>https://xuanwo.io/2020/02/26/apiu/</link><pubDate>Wed, 26 Feb 2020 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2020/02/26/apiu/</guid><description>&lt;p>小撇，又唤作小 Piu，因为我近来常看《甄嬛传》，又称做 Piu 贵人，Piu 妃。性别母，生于 19 年 9 月，尚未成年，时常被唤作小母狗，不以为意，甚至更加亲近，我总会说因为她是狗。&lt;/p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Lenovo on Xuanwo's Blog</title><link>https://xuanwo.io/tags/lenovo/</link><description>Recent content in Lenovo on Xuanwo's Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 19 Feb 2019 06:00:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/lenovo/index.xml" rel="self" type="application/rss+xml"/><item><title>公有云对象存储服务体验吐嘈</title><link>https://xuanwo.io/2020/03/03/object-storage/</link><pubDate>Tue, 03 Mar 2020 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2020/03/03/object-storage/</guid><description>&lt;p>最近一直在做&lt;a href="https://xuanwo.io/2019/12/30/storage-intro/">面向应用的 Golang 抽象存储层&lt;/a>，目前已经对接了十个存储后端，其中有八个是对象存储服务，可以说是对接了大部分公有云对象存储服务了。在对接的过程中有很多感慨，这次整理起来盘点一下。&lt;/p>
+&lt;p>截止到 &lt;a href="https://github.com/Xuanwo/storage/releases/tag/v0.7.1">v0.7.1&lt;/a>，&lt;a href="https://github.com/Xuanwo/storage">storage&lt;/a> 对接了如下对象存储服务：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="#azblob">azblob&lt;/a>: &lt;a href="https://docs.microsoft.com/en-us/azure/storage/blobs/">Azure Blob storage&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#cos">cos&lt;/a>: &lt;a href="https://cloud.tencent.com/product/cos">Tencent Cloud Object Storage&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#gcs">gcs&lt;/a>: &lt;a href="https://cloud.google.com/storage/">Google Cloud Storage&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#kodo">kodo&lt;/a>: &lt;a href="https://www.qiniu.com/products/kodo">qiniu kodo&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#oss">oss&lt;/a>: &lt;a href="https://www.aliyun.com/product/oss">Aliyun Object Storage&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#qingstor">qingstor&lt;/a>: &lt;a href="https://www.qingcloud.com/products/qingstor/">QingStor Object Storage&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#s3">s3&lt;/a>: &lt;a href="https://aws.amazon.com/s3/">Amazon S3&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#uss">uss&lt;/a>: &lt;a href="https://www.upyun.com/products/file-storage">UPYUN Storage Service&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>每个服务会简单介绍一下，然后聊聊对应服务的 go SDK对接体验，并不涉及到性能/稳定性等方面的测试，也不是严肃的产品选型方案，请诸君明鉴。SDK 方面会统一以调用一次 &lt;code>Write&lt;/code> 为例展开，看看 SDK 的设计风格和相应的错误处理体验。&lt;/p>
+&lt;h2 id="azblob">azblob&lt;/h2>
+&lt;p>如今的云计算市场上，Azure 算是比较特别的，很多服务都是自成一格，没有采取跟随 AWS 的策略：跟 AWS 把块存储，文件存储，对象存储分为三个不同的服务不同，Azure 先构建好一个 Stream Layer，然后在上面支持各种存储形态，包括 &lt;a href="https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction">Blob&lt;/a>，&lt;a href="https://docs.microsoft.com/en-us/azure/storage/files/storage-files-introduction">Files&lt;/a>，&lt;a href="https://docs.microsoft.com/en-us/azure/storage/queues/storage-queues-introduction">Queue&lt;/a> 和 &lt;a href="https://docs.microsoft.com/en-us/azure/storage/tables/table-storage-overview">Table&lt;/a>，共同组成了 Azure Storage 服务。&lt;/p>
+&lt;blockquote>
+&lt;p>相关 Paper: &lt;a href="https://www.microsoft.com/en-us/research/publication/erasure-coding-in-windows-azure-storage/">Erasure Coding in Windows azure storage&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;p>我们这次要聊的就是 Azure Blob Storage，下面简写为 &lt;code>azblob&lt;/code>。&lt;/p>
+&lt;p>&lt;code>azblob&lt;/code> 会涉及到三种资源：&lt;code>Account&lt;/code>，&lt;code>Container&lt;/code> 和 &lt;code>Blob&lt;/code>，关系如 Azure 官方文档给出的图：&lt;/p>
+&lt;p>&lt;img src="./azblob-1.png" alt="">&lt;/p>
+&lt;p>&lt;code>Container&lt;/code> 对应 &lt;code>s3&lt;/code> 的 &lt;code>Bucket&lt;/code>，&lt;code>Blob&lt;/code> 对应 &lt;code>s3&lt;/code> 的 &lt;code>Objcet&lt;/code>。比较特别的是 &lt;code>Account&lt;/code> 的概念，Azure 通过 &lt;code>Account&lt;/code> 来提供不同应用场景的优化，比如 &lt;code>General-purpose v2 accounts&lt;/code> 适用于大多数场景，而 &lt;code>BlockBlobStorage accounts&lt;/code> 适用于高吞吐，低延迟的场景等。&lt;/p>
+&lt;p>&lt;code>azblob&lt;/code> 中的 &lt;code>blob&lt;/code> 有三种类型，在创建的时候决定，创建后不能修改：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>block blobs&lt;/code>： 由一组 blocks 组成，单个 block 最大 100MB，最多 5W 个，也就是说单个 &lt;code>block blobs&lt;/code> 最大 4.75 TB。&lt;/li>
+&lt;li>&lt;code>page blobs&lt;/code>： 则是由一组 512B 的 pages 组成，针对随机读写的场景优化，写操作需要对齐 512B（以 page 为单位），单次写操作最大 4MB，单个 &lt;code>page blobs&lt;/code> 最大 8 TB。&lt;/li>
+&lt;li>&lt;code>append blobs&lt;/code>： 同样由 blocks 组成，针对 append 场景优化。单个 Block 最大 4MB，最多 5W 个，也就是说单个 &lt;code>append blobs&lt;/code> 最大 195GB。&lt;/li>
+&lt;/ul>
+&lt;p>底层架构决定上层设计。架构复杂的情况下，API 自然也精简不起来，用户需要搞明白上述的全部内容才能在 &lt;code>PutBlob&lt;/code>，&lt;code>PutPage&lt;/code>，&lt;code>AppendBlock&lt;/code> 和 &lt;code>PutBlock&lt;/code> 这几个 API 中做出正确的选择。&lt;/p>
+&lt;p>&lt;code>azblob&lt;/code> 提供了 &lt;code>container&lt;/code> 级别的删除锁，&lt;code>blob&lt;/code> 级别的写/删除锁和 snapshot，支持自定义 metadata，存储级别，批量操作，复制。支持配置 ACL，但是不支持 Blob 级别的 Policy。支持软删除，保留时间通过 &lt;code>DeleteRetentionPolicy&lt;/code> 来定义，能够通过 &lt;code>UndeleteBlob&lt;/code> 恢复。&lt;/p>
+&lt;p>&lt;code>azblob&lt;/code> SDK 用来的一个突出感受是智商不太够用，一方面 SDK 对外暴露的方案跟 API 文档中给的不太对应，另一方面是 SDK 额外提供了很多抽象。比如说 &lt;code>put-blob&lt;/code> 对外暴露的方法是 &lt;code>Upload&lt;/code>，&lt;code>put-block&lt;/code> 暴露的是 &lt;code>StageBlock&lt;/code>，而 &lt;code>put-block-list&lt;/code>则是 &lt;code>CommitBlockList&lt;/code>。调用一次 &lt;code>Upload&lt;/code> 需要初始化很多空的结构体，包括 &lt;code>azblob.BlobHTTPHeaders&lt;/code>，&lt;code>azblob.Metadata&lt;/code> 和 &lt;code>azblob.BlobAccessConditions&lt;/code>。&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> (s &lt;span style="color:#666">*&lt;/span>Storage) &lt;span style="color:#06287e">Write&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, r io.Reader, pairs &lt;span style="color:#666">...*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>) {
+&lt;span style="color:#666">...&lt;/span>
+rp &lt;span style="color:#666">:=&lt;/span> s.&lt;span style="color:#06287e">getAbsPath&lt;/span>(path)
+&lt;span style="color:#666">...&lt;/span>
+_, err = s.bucket.&lt;span style="color:#06287e">NewBlockBlobURL&lt;/span>(rp).&lt;span style="color:#06287e">Upload&lt;/span>(opt.Context, iowrap.&lt;span style="color:#06287e">ReadSeekCloser&lt;/span>(r),
+azblob.BlobHTTPHeaders{}, azblob.Metadata{}, azblob.BlobAccessConditions{})
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>返回的 Error 都统一封装为 &lt;code>azblob.StorageError&lt;/code> 接口，但是不知道是不是我搞错了什么，有个蛋疼点是&lt;code>azblob.StorageError&lt;/code> 暴露的 &lt;code>ServiceCode()&lt;/code> 方法返回的是 &lt;code>ServiceCodeType&lt;/code> ，然而 &lt;code>azblob&lt;/code> 导出的是一堆 &lt;code>StorageErrorCodeType&lt;/code>。所以在检查错误的时候还需要强行转换一下：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> &lt;span style="color:#06287e">formatAzblobError&lt;/span>(err azblob.StorageError) &lt;span style="color:#902000">error&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">switch&lt;/span> azblob.&lt;span style="color:#06287e">StorageErrorCodeType&lt;/span>(err.&lt;span style="color:#06287e">ServiceCode&lt;/span>()) {
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> azblob.StorageErrorCodeBlobNotFound:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrObjectNotExist, err)
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> azblob.StorageErrorCodeInsufficientAccountPermissions:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrPermissionDenied, err)
+&lt;span style="color:#007020;font-weight:bold">default&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="cos">cos&lt;/h2>
+&lt;p>&lt;code>cos&lt;/code> 是腾讯云推出的对象存储服务，提供了 S3 兼容。&lt;/p>
+&lt;p>&lt;code>cos&lt;/code> 有种很强的接地气的感觉，我举个例子：&lt;code>清单 inventory&lt;/code> API，包括 &lt;code>PUT Bucket inventory&lt;/code>，&lt;code>GET Bucket inventory&lt;/code>，&lt;code>List Bucket Inventory Configurations&lt;/code> 和 &lt;code>DELETE Bucket inventory&lt;/code>，用来增删改查 Bucket 配置的清单，其用途是每天或者每周定时扫描用户存储桶内指定的对象或拥有相同对象前缀的对象，并输出一份清单报告，以 CSV 格式的文件存储到用户指定的存储桶中。这功能就很有意思，官方给出的基本用途也很有中国特色：&lt;code>审核并报告对象的复制和加密状态&lt;/code>，&lt;code>简化并加快业务工作流和大数据作业&lt;/code>。&lt;/p>
+&lt;p>&lt;code>cos&lt;/code> 的 SDK 用起来中规中举，不过 &lt;code>ObjectPutOptions&lt;/code> 下面嵌套了两个结构体 &lt;code>ObjectPutHeaderOptions&lt;/code> 和 &lt;code>ACLHeaderOptions&lt;/code>，稍微有那么点不太舒服，想必是 &lt;code>cos&lt;/code> SDK 开发者为了能够复用 &lt;code>ACLHeaderOptions&lt;/code>，不想在 API 中重复展开 &lt;code>ACL&lt;/code> 相关的 Header 才如此设计的。&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#60a0b0;font-style:italic">// Write implements Storager.Write
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>&lt;span style="color:#007020;font-weight:bold">func&lt;/span> (s &lt;span style="color:#666">*&lt;/span>Storage) &lt;span style="color:#06287e">Write&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, r io.Reader, pairs &lt;span style="color:#666">...*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>) {
+&lt;span style="color:#666">...&lt;/span>
+rp &lt;span style="color:#666">:=&lt;/span> s.&lt;span style="color:#06287e">getAbsPath&lt;/span>(path)
+putOptions &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#666">&amp;amp;&lt;/span>cos.ObjectPutOptions{
+ObjectPutHeaderOptions: &lt;span style="color:#666">&amp;amp;&lt;/span>cos.ObjectPutHeaderOptions{
+ContentLength: &lt;span style="color:#007020">int&lt;/span>(opt.Size),
+},
+}
+&lt;span style="color:#666">...&lt;/span>
+_, err = s.object.&lt;span style="color:#06287e">Put&lt;/span>(opt.Context, rp, r, putOptions)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>cos&lt;/code> 同样返回了自定义的错误类型：&lt;code>*cos.ErrorResponse&lt;/code>，不过并没有导出所有的 error code，需要从文档中查询对应的错误码：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> &lt;span style="color:#06287e">formatCosError&lt;/span>(err &lt;span style="color:#666">*&lt;/span>cos.ErrorResponse) &lt;span style="color:#902000">error&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">switch&lt;/span> err.Code {
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#4070a0">&amp;#34;NoSuchKey&amp;#34;&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrObjectNotExist, err)
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#4070a0">&amp;#34;AccessDenied&amp;#34;&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrPermissionDenied, err)
+&lt;span style="color:#007020;font-weight:bold">default&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="gcs">gcs&lt;/h2>
+&lt;p>GCP 充满了一股子技术精英范儿，&lt;code>gcs&lt;/code> 也不例外。&lt;/p>
+&lt;p>他们官方文档列出来的核心功能头一条就是 &lt;code>Storage classes for any workload&lt;/code>，提供了标准，近线，冷和归档四种存储级别，而且不管是哪个存储级别都能做到毫秒级的 TTFB(time to first byte)，他们归档存储文档的原话是：&lt;/p>
+&lt;blockquote>
+&lt;p>Unlike the &amp;ldquo;coldest&amp;rdquo; storage services offered by other Cloud providers, your data is available within milliseconds, not hours or days.&lt;/p>
+&lt;/blockquote>
+&lt;p>这就很强势。&lt;/p>
+&lt;p>&lt;code>gcs&lt;/code> 同时提供了 JSON 和 XML 的 RESTful API，提供了 S3 兼容，返回的都是标准的 HTTP Status Code。API 里面都是骚东西，比如说：&lt;/p>
+&lt;p>&lt;code>compose&lt;/code>：把一组 Object 合并为一个新 Object&lt;/p>
+&lt;p>&lt;code>rewrite&lt;/code>：将一个 Object 重写到新位置，支持超大 Object，&lt;code>copy&lt;/code> 的内部实现就是调用了一次 &lt;code>rewrite&lt;/code>&lt;/p>
+&lt;p>&lt;code>gcs&lt;/code> 的 SDK 是我见过的最酷的，抽象程度最高，也是用起来最爽的。&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> (s &lt;span style="color:#666">*&lt;/span>Storage) &lt;span style="color:#06287e">Write&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, r io.Reader, pairs &lt;span style="color:#666">...*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>) {
+&lt;span style="color:#666">...&lt;/span>
+rp &lt;span style="color:#666">:=&lt;/span> s.&lt;span style="color:#06287e">getAbsPath&lt;/span>(path)
+object &lt;span style="color:#666">:=&lt;/span> s.bucket.&lt;span style="color:#06287e">Object&lt;/span>(rp)
+w &lt;span style="color:#666">:=&lt;/span> object.&lt;span style="color:#06287e">NewWriter&lt;/span>(opt.Context)
+&lt;span style="color:#007020;font-weight:bold">defer&lt;/span> w.&lt;span style="color:#06287e">Close&lt;/span>()
+&lt;span style="color:#666">...&lt;/span>
+_, err = io.&lt;span style="color:#06287e">Copy&lt;/span>(w, r)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>额外贴一组 &lt;code>gcs&lt;/code> 和 &lt;code>qingstor&lt;/code> 调用 &lt;code>List&lt;/code> 方法的对比：&lt;/p>
+&lt;p>&lt;code>gcs&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">for&lt;/span> {
+it &lt;span style="color:#666">:=&lt;/span> s.bucket.&lt;span style="color:#06287e">Objects&lt;/span>(opt.Context, &lt;span style="color:#666">&amp;amp;&lt;/span>gs.Query{
+Prefix: rp,
+Delimiter: delimiter,
+})
+object, err &lt;span style="color:#666">:=&lt;/span> it.&lt;span style="color:#06287e">Next&lt;/span>()
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> &lt;span style="color:#666">&amp;amp;&amp;amp;&lt;/span> err &lt;span style="color:#666">==&lt;/span> iterator.Done {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span>
+}
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>qingstor&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">var&lt;/span> output &lt;span style="color:#666">*&lt;/span>service.ListObjectsOutput
+&lt;span style="color:#007020;font-weight:bold">for&lt;/span> {
+output, err = s.bucket.&lt;span style="color:#06287e">ListObjects&lt;/span>(&lt;span style="color:#666">&amp;amp;&lt;/span>service.ListObjectsInput{
+Limit: &lt;span style="color:#666">&amp;amp;&lt;/span>limit,
+Marker: &lt;span style="color:#666">&amp;amp;&lt;/span>marker,
+Prefix: &lt;span style="color:#666">&amp;amp;&lt;/span>rp,
+Delimiter: &lt;span style="color:#666">&amp;amp;&lt;/span>delimiter,
+})
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span>
+}
+marker = convert.&lt;span style="color:#06287e">StringValue&lt;/span>(output.NextMarker)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> marker &lt;span style="color:#666">==&lt;/span> &lt;span style="color:#4070a0">&amp;#34;&amp;#34;&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">break&lt;/span>
+}
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> output.HasMore &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> &lt;span style="color:#666">&amp;amp;&amp;amp;&lt;/span> !&lt;span style="color:#666">*&lt;/span>output.HasMore {
+&lt;span style="color:#007020;font-weight:bold">break&lt;/span>
+}
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> &lt;span style="color:#007020">len&lt;/span>(output.Keys) &lt;span style="color:#666">==&lt;/span> &lt;span style="color:#40a070">0&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">break&lt;/span>
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>要是有机会搞 qingstor go sdk v3，我一定抄作业。&lt;/p>
+&lt;p>&lt;code>gcs&lt;/code> 返回的错误是统一的 &lt;code>*googleapi.Error&lt;/code> 类型，但是诡异的是代码中会额外处理 &lt;code>ObjectNotExist&lt;/code> 的逻辑，导致在检查的时候需要额外判断：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> &lt;span style="color:#06287e">formatGcsError&lt;/span>(err &lt;span style="color:#902000">error&lt;/span>) &lt;span style="color:#902000">error&lt;/span> {
+&lt;span style="color:#60a0b0;font-style:italic">// gcs sdk could return explicit error, we should handle them.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#007020;font-weight:bold">if&lt;/span> errors.&lt;span style="color:#06287e">Is&lt;/span>(err, gs.ErrObjectNotExist) {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrObjectNotExist, err)
+}
+e, ok &lt;span style="color:#666">:=&lt;/span> err.(&lt;span style="color:#666">*&lt;/span>googleapi.Error)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> !ok {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;span style="color:#007020;font-weight:bold">switch&lt;/span> e.Code {
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> http.StatusNotFound:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrObjectNotExist, err)
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> http.StatusForbidden:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrPermissionDenied, err)
+&lt;span style="color:#007020;font-weight:bold">default&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="kodo">kodo&lt;/h2>
+&lt;p>&lt;code>kodo&lt;/code> 是七牛的云海量存储系统，提供了 S3 兼容。&lt;/p>
+&lt;p>&lt;code>kodo&lt;/code> 的 API 设计充满了实用主义色彩，缺乏一些顶层设计，以实用为上。以同样是 Bucket 级别的几个操作为例：&lt;/p>
+&lt;p>设置空间标签：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-http" data-lang="http">&lt;span style="color:#06287e">PUT&lt;/span> &lt;span style="color:#0e84b5;font-weight:bold">/bucketTagging?bucket=&amp;lt;BucketName&amp;gt;&lt;/span> &lt;span style="color:#007020;font-weight:bold">HTTP&lt;/span>&lt;span style="color:#666">/&lt;/span>&lt;span style="color:#40a070">1.1&lt;/span>
+Host&lt;span style="color:#666">:&lt;/span> uc.qbox.me
+Content-Type&lt;span style="color:#666">:&lt;/span> application/json
+Authorization&lt;span style="color:#666">:&lt;/span> Qiniu &amp;lt;AccessToken&amp;gt;
+{
+&lt;span style="color:#062873;font-weight:bold">&amp;#34;Tags&amp;#34;&lt;/span>:[
+{&lt;span style="color:#062873;font-weight:bold">&amp;#34;Key&amp;#34;&lt;/span>:&lt;span style="">xx&lt;/span>, &lt;span style="color:#062873;font-weight:bold">&amp;#34;Value&amp;#34;&lt;/span>: &lt;span style="">xx&lt;/span>},
+{&lt;span style="color:#062873;font-weight:bold">&amp;#34;Key&amp;#34;&lt;/span>:&lt;span style="">xx&lt;/span>, &lt;span style="color:#062873;font-weight:bold">&amp;#34;Value&amp;#34;&lt;/span>: &lt;span style="">xx&lt;/span>},
+&lt;span style="">...&lt;/span>
+]
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>设置 Bucket 镜像源：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-http" data-lang="http">&lt;span style="color:#06287e">POST&lt;/span> &lt;span style="color:#0e84b5;font-weight:bold">/image/&amp;lt;BucketName&amp;gt;/from/&amp;lt;EncodedSrcSiteUrl&amp;gt;/host/&amp;lt;EncodedHost&amp;gt;&lt;/span> &lt;span style="color:#007020;font-weight:bold">HTTP&lt;/span>&lt;span style="color:#666">/&lt;/span>&lt;span style="color:#40a070">1.1&lt;/span>
+Host&lt;span style="color:#666">:&lt;/span> uc.qbox.me
+Content-Type&lt;span style="color:#666">:&lt;/span> application/x-www-form-urlencoded
+Authorization&lt;span style="color:#666">:&lt;/span> QBox &amp;lt;AccessToken&amp;gt;
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>设置 Bucket 访问权限：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-http" data-lang="http">&lt;span style="color:#06287e">POST&lt;/span> &lt;span style="color:#0e84b5;font-weight:bold">/private&lt;/span> &lt;span style="color:#007020;font-weight:bold">HTTP&lt;/span>&lt;span style="color:#666">/&lt;/span>&lt;span style="color:#40a070">1.1&lt;/span>
+Host&lt;span style="color:#666">:&lt;/span> uc.qbox.me
+Content-Type&lt;span style="color:#666">:&lt;/span> application/x-www-form-urlencoded
+Authorization&lt;span style="color:#666">:&lt;/span> QBox &amp;lt;AccessToken&amp;gt;
+bucket=&amp;lt;BucketName&amp;gt;&amp;amp;private=&amp;lt;Private&amp;gt;
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>三个 API，三种设计风格。我个人不太喜欢，但是能用。说到底，用户也不关心你的 API 设计是否优雅，能满足业务需求才是第一位的。&lt;/p>
+&lt;p>&lt;code>kodo&lt;/code> 的 SDK 用起来感觉就很罗嗦，上传之前还需要先构造 &lt;code>FormUploader&lt;/code>，然后获取 &lt;code>UploadToken&lt;/code> ，&lt;code>Upload&lt;/code> 方法还有一堆参数。SDK 写成这样，跟他们的 API 设计是相关的，这也是他们为了实现各种上传方式付出的代价。&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> (s &lt;span style="color:#666">*&lt;/span>Storage) &lt;span style="color:#06287e">Write&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, r io.Reader, pairs &lt;span style="color:#666">...*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>) {
+&lt;span style="color:#666">...&lt;/span>
+rp &lt;span style="color:#666">:=&lt;/span> s.&lt;span style="color:#06287e">getAbsPath&lt;/span>(path)
+uploader &lt;span style="color:#666">:=&lt;/span> qs.&lt;span style="color:#06287e">NewFormUploader&lt;/span>(s.bucket.Cfg)
+ret &lt;span style="color:#666">:=&lt;/span> qs.PutRet{}
+err = uploader.&lt;span style="color:#06287e">Put&lt;/span>(opt.Context,
+&lt;span style="color:#666">&amp;amp;&lt;/span>ret, s.putPolicy.&lt;span style="color:#06287e">UploadToken&lt;/span>(s.bucket.Mac), rp, r, opt.Size, &lt;span style="color:#007020;font-weight:bold">nil&lt;/span>)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>kodo&lt;/code> 返回的错误类型是 &lt;code>*qs.ErrorInfo&lt;/code>，判断错误的方式也是错误码，前面的画风很正常，404 表示 not found，403 表示没权限，但是后面的一堆 6xx 和 7xx 就有点飘了，错误检查的时候也需要额外注释一下：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> &lt;span style="color:#06287e">formatError&lt;/span>(err &lt;span style="color:#902000">error&lt;/span>) &lt;span style="color:#902000">error&lt;/span> {
+e, ok &lt;span style="color:#666">:=&lt;/span> err.(&lt;span style="color:#666">*&lt;/span>qs.ErrorInfo)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> !ok {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;span style="color:#60a0b0;font-style:italic">// error code returned by kodo looks like http status code, but it&amp;#39;s not.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#60a0b0;font-style:italic">// kodo could return 6xx or 7xx for their costumed errors, so we use untyped int directly.
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#007020;font-weight:bold">switch&lt;/span> e.Code {
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#40a070">404&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrObjectNotExist, err)
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#40a070">403&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrPermissionDenied, err)
+&lt;span style="color:#007020;font-weight:bold">default&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="oss">oss&lt;/h2>
+&lt;p>&lt;code>oss&lt;/code> 是阿里云的对象存储服务，提供了 s3 兼容，几乎是国内的事实标准。我个人有一个不太准确的小观察是，用 &lt;code>s3&lt;/code> 代称对象存储服务的客户通常都是搞国际业务的，技术范儿重一些，用 &lt;code>oss&lt;/code> 代称的客户则国内用户多一些，商务范儿也重一些。&lt;/p>
+&lt;p>&lt;code>oss&lt;/code> 的 API 中有两个特别的一点的：一个是 &lt;code>Put/Get Symlink&lt;/code>，能为目标对象创建软链接。我能想到的应用场景是 &lt;code>GET /latest-build.tar.gz&lt;/code> ，Key 不变，但是背后指向的 Object 一直在更新。另一个是 &lt;code>SelectObject&lt;/code>，对目标文件（csv，json）执行 SQL 语句并返回结果。这个 API 是为了支持将计算下推，在存储层去做一些基本的过滤，只返回有用的数据。这样客户端这边就能减少网络流量，也能降低计算开销，对大数据平台很有利。这个还是挺酷的，目前还没有看到有厂商提供类似的功能。&lt;/p>
+&lt;p>&lt;code>oss&lt;/code> 的 SDK 所有的 API 都接受 &lt;code>options ...Option&lt;/code> 这样的参数，用户需要构造 &lt;code>[]oss.Option&lt;/code> 并传进去。这样的设计保证了强类型，但是无法在编译期决定 API 是否支持这个参数，依赖于用户在开发的时候好好读文档。&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> (s &lt;span style="color:#666">*&lt;/span>Storage) &lt;span style="color:#06287e">Write&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, r io.Reader, pairs &lt;span style="color:#666">...*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>) {
+&lt;span style="color:#666">...&lt;/span>
+options &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#007020">make&lt;/span>([]oss.Option, &lt;span style="color:#40a070">0&lt;/span>)
+&lt;span style="color:#666">...&lt;/span>
+rp &lt;span style="color:#666">:=&lt;/span> s.&lt;span style="color:#06287e">getAbsPath&lt;/span>(path)
+err = s.bucket.&lt;span style="color:#06287e">PutObject&lt;/span>(rp, r, options&lt;span style="color:#666">...&lt;/span>)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>oss&lt;/code> 返回了两类错误：&lt;code>oss.ServiceError&lt;/code> 与 &lt;code>oss.UnexpectedStatusCodeError&lt;/code>，分别对应的是有 Response Body 和没有 &lt;code>Body&lt;/code> 的请求。同样没有导出错误码，需要手写：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> &lt;span style="color:#06287e">formatError&lt;/span>(err &lt;span style="color:#902000">error&lt;/span>) &lt;span style="color:#902000">error&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">switch&lt;/span> e &lt;span style="color:#666">:=&lt;/span> err.(&lt;span style="color:#007020;font-weight:bold">type&lt;/span>) {
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> oss.ServiceError:
+&lt;span style="color:#007020;font-weight:bold">switch&lt;/span> e.Code {
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#4070a0">&amp;#34;NoSuchKey&amp;#34;&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrObjectNotExist, err)
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#4070a0">&amp;#34;AccessDenied&amp;#34;&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrPermissionDenied, err)
+}
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> oss.UnexpectedStatusCodeError:
+&lt;span style="color:#007020;font-weight:bold">switch&lt;/span> e.&lt;span style="color:#06287e">Got&lt;/span>() {
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#40a070">404&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrObjectNotExist, err)
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#40a070">403&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrPermissionDenied, err)
+}
+}
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="qingstor">qingstor&lt;/h2>
+&lt;blockquote>
+&lt;p>利益相关: 截止到本文发布时，我就职于青云QingCloud QingStor Team&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;code>qingstor&lt;/code> 是青云QingCloud 推出的对象存储服务，提供 &lt;code>s3&lt;/code> 兼容。跟其他的公有云大厂不同的是，&lt;code>qingstor&lt;/code> 还有很多私有云客户。&lt;/p>
+&lt;p>功能上基本对标 &lt;code>s3&lt;/code>，多了 &lt;code>AppendObject&lt;/code>， &lt;code>MoveObject&lt;/code> 和 &lt;code>FetchObject&lt;/code>。受累于青云QingCloud 本身至今没有对标 &lt;code>AWS Lambda&lt;/code> 的产品，&lt;code>qingstor&lt;/code> 被迫自己实现了图片转码和音视频转码等功能。按照我的看法，这些功能本应该从对象存储这一层剥离出去的。&lt;/p>
+&lt;p>&lt;code>qingstor&lt;/code> 的 SDK 开发很大程度上参考了 &lt;code>s3&lt;/code> 的 go SDK，同样采用了代码生成的方式来保证每个 API 的 Input 和 Output 结构都是确定的。&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> (s &lt;span style="color:#666">*&lt;/span>Storage) &lt;span style="color:#06287e">Write&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, r io.Reader, pairs &lt;span style="color:#666">...*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>) {
+&lt;span style="color:#666">...&lt;/span>
+input &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#666">&amp;amp;&lt;/span>service.PutObjectInput{
+ContentLength: &lt;span style="color:#666">&amp;amp;&lt;/span>opt.Size,
+Body: r,
+}
+&lt;span style="color:#666">...&lt;/span>
+rp &lt;span style="color:#666">:=&lt;/span> s.&lt;span style="color:#06287e">getAbsPath&lt;/span>(path)
+_, err = s.bucket.&lt;span style="color:#06287e">PutObject&lt;/span>(rp, input)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span>
+}
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>qingstor&lt;/code> SDK 返回了专门的 &lt;code>QingStorError&lt;/code> 类型，同样没有导出 error code：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> &lt;span style="color:#06287e">formatQingStorError&lt;/span>(e &lt;span style="color:#666">*&lt;/span>qserror.QingStorError) &lt;span style="color:#902000">error&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> e.Code &lt;span style="color:#666">==&lt;/span> &lt;span style="color:#4070a0">&amp;#34;&amp;#34;&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">switch&lt;/span> e.StatusCode {
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#40a070">404&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrObjectNotExist, e)
+&lt;span style="color:#007020;font-weight:bold">default&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> e
+}
+}
+&lt;span style="color:#007020;font-weight:bold">switch&lt;/span> e.Code {
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#4070a0">&amp;#34;permission_denied&amp;#34;&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrPermissionDenied, e)
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#4070a0">&amp;#34;object_not_exists&amp;#34;&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrObjectNotExist, e)
+&lt;span style="color:#007020;font-weight:bold">default&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> e
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="s3">s3&lt;/h2>
+&lt;p>&lt;code>s3&lt;/code> 想必是不用多说了，对象存储领域的事实标准。除了 &lt;code>s3&lt;/code> 本身以外，本文聊到了 7 家公有云对象存储服务供应商，只有 &lt;code>azblob&lt;/code> 没有直接兼容 &lt;code>s3&lt;/code> 接口。私有云领域的 &lt;code>ceph&lt;/code> 和 &lt;code>minio&lt;/code> 则更是早早的就提供了 &lt;code>s3&lt;/code> 接口的兼容，并将其作为自己的重要卖点。&lt;/p>
+&lt;p>在我看来 &lt;code>s3&lt;/code> 的最大优势在于它与 &lt;code>AWS&lt;/code> 平台的深度协作，能够作为诸多 &lt;code>AWS&lt;/code> 产品的备份/恢复解决方案，能集成于各种大数据解决方案，能够与 &lt;code>Lambda&lt;/code> 协同实现各种各样的功能。产品生态恐怖如斯，后来者只能努力兼容 API 来稍微喝点汤。&lt;/p>
+&lt;p>&lt;code>s3&lt;/code> SDK 有着很明显的代码生成痕迹，所有参数都放在一个 Input 中。&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> (s &lt;span style="color:#666">*&lt;/span>Storage) &lt;span style="color:#06287e">Write&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, r io.Reader, pairs &lt;span style="color:#666">...*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>) {
+&lt;span style="color:#666">...&lt;/span>
+rp &lt;span style="color:#666">:=&lt;/span> s.&lt;span style="color:#06287e">getAbsPath&lt;/span>(path)
+input &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#666">&amp;amp;&lt;/span>s3.PutObjectInput{
+Key: aws.&lt;span style="color:#06287e">String&lt;/span>(rp),
+ContentLength: &lt;span style="color:#666">&amp;amp;&lt;/span>opt.Size,
+Body: aws.&lt;span style="color:#06287e">ReadSeekCloser&lt;/span>(r),
+}
+&lt;span style="color:#666">...&lt;/span>
+_, err = s.service.&lt;span style="color:#06287e">PutObject&lt;/span>(input)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>s3&lt;/code> SDK 返回了 &lt;code>awserr.Error&lt;/code> 类型，同样是没有导出的错误码：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> &lt;span style="color:#06287e">formatError&lt;/span>(err &lt;span style="color:#902000">error&lt;/span>) &lt;span style="color:#902000">error&lt;/span> {
+e, ok &lt;span style="color:#666">:=&lt;/span> err.(awserr.Error)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> !ok {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;span style="color:#007020;font-weight:bold">switch&lt;/span> e.&lt;span style="color:#06287e">Code&lt;/span>() {
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#4070a0">&amp;#34;NoSuchKey&amp;#34;&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrObjectNotExist, err)
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#4070a0">&amp;#34;AccessDenied&amp;#34;&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrPermissionDenied, err)
+}
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="uss">uss&lt;/h2>
+&lt;p>&lt;code>uss&lt;/code> 是又拍云提供的对象存储服务，是我遇到的头一个不能通过 API 创建 Bucket，有真正的目录层级的对象存储服务。与其说是一个对象存储服务，倒更像是一个通过 HTTP 接口访问的文件存储。&lt;/p>
+&lt;p>&lt;code>uss&lt;/code> 提供的 API 相对弱一点，只有文件和目录的操作，没有提供类似于 &lt;code>ACL&lt;/code>，&lt;code>Policy&lt;/code> 这样的特性。&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> (s &lt;span style="color:#666">*&lt;/span>Storage) &lt;span style="color:#06287e">Write&lt;/span>(path &lt;span style="color:#902000">string&lt;/span>, r io.Reader, pairs &lt;span style="color:#666">...*&lt;/span>types.Pair) (err &lt;span style="color:#902000">error&lt;/span>) {
+&lt;span style="color:#666">...&lt;/span>
+rp &lt;span style="color:#666">:=&lt;/span> s.&lt;span style="color:#06287e">getAbsPath&lt;/span>(path)
+cfg &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#666">&amp;amp;&lt;/span>upyun.PutObjectConfig{
+Path: rp,
+Reader: r,
+}
+err = s.bucket.&lt;span style="color:#06287e">Put&lt;/span>(cfg)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>uss&lt;/code> 的错误处理就很难搞了，在展示 &lt;a href="https://github.com/Xuanwo/storage">storage&lt;/a> 怎么处理 &lt;code>uss&lt;/code> 的错误之前，可以先看看它的源码是怎么写的：&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">resp, err &lt;span style="color:#666">:=&lt;/span> up.&lt;span style="color:#06287e">doHTTPRequest&lt;/span>(config.method, url, headers, config.httpBody)
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#60a0b0;font-style:italic">// Don&amp;#39;t modify net error
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#007020;font-weight:bold">return&lt;/span> &lt;span style="color:#007020;font-weight:bold">nil&lt;/span>, err
+}
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> resp.StatusCode&lt;span style="color:#666">/&lt;/span>&lt;span style="color:#40a070">100&lt;/span> &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#40a070">2&lt;/span> {
+body, _ &lt;span style="color:#666">:=&lt;/span> ioutil.&lt;span style="color:#06287e">ReadAll&lt;/span>(resp.Body)
+resp.Body.&lt;span style="color:#06287e">Close&lt;/span>()
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> resp, fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%s %d %s&amp;#34;&lt;/span>, config.method, resp.StatusCode, &lt;span style="color:#007020">string&lt;/span>(body))
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>我现在真的是有很多问号，API 都已经返回确定结构的 JSON 了，为啥 SDK 还要偷这个懒？Unmarshal 一下不吃亏的吧？最气的是，SDK 里面直接把 Body 读完了，外面想处理都没有机会了，食我 error string 啦！&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#007020;font-weight:bold">func&lt;/span> &lt;span style="color:#06287e">formatError&lt;/span>(err &lt;span style="color:#902000">error&lt;/span>) &lt;span style="color:#902000">error&lt;/span> {
+fn &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#007020;font-weight:bold">func&lt;/span>(s &lt;span style="color:#902000">string&lt;/span>) &lt;span style="color:#902000">bool&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> strings.&lt;span style="color:#06287e">Contains&lt;/span>(err.&lt;span style="color:#06287e">Error&lt;/span>(), &lt;span style="color:#4070a0">`&amp;#34;code&amp;#34;: `&lt;/span>&lt;span style="color:#666">+&lt;/span>s)
+}
+&lt;span style="color:#007020;font-weight:bold">switch&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#06287e">fn&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;40400001&amp;#34;&lt;/span>):
+&lt;span style="color:#60a0b0;font-style:italic">// 40400001: file or directory not found
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrObjectNotExist, err)
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#06287e">fn&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;40100017&amp;#34;&lt;/span>), &lt;span style="color:#06287e">fn&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;40100019&amp;#34;&lt;/span>), &lt;span style="color:#06287e">fn&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;40300011&amp;#34;&lt;/span>):
+&lt;span style="color:#60a0b0;font-style:italic">// 40100017: user need permission
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#60a0b0;font-style:italic">// 40100019: account forbidden
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#60a0b0;font-style:italic">// 40300011: has no permission to delete
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#007020;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#06287e">Errorf&lt;/span>(&lt;span style="color:#4070a0">&amp;#34;%w: %v&amp;#34;&lt;/span>, services.ErrPermissionDenied, err)
+&lt;span style="color:#007020;font-weight:bold">default&lt;/span>:
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> err
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>本文吐嘈了八家公有云对象存储供应商，其中 5 家国内的，3 家国外的。还是能比较明显的看出国外的三个大厂搞的对象存储各有特色，SDK 也写的非常扎实。国内的对象存储供应商里面 &lt;code>oss&lt;/code> 独一挡，不仅能追赶上御三家的节奏，还能拿出点自己的干货，&lt;code>uss&lt;/code> 吊车尾，功能不完整，SDK 一托屎。其他的厂商都差不多，都有些自己的问题。&lt;/p>
+&lt;p>这个八个供应商里头，5 个巨头，3 个创业公司。不难发现这个 5 个巨头设计的 API 一致性都很强，SDK 也都写的不错。创业公司受限于人手和生存压力，往往没有办法顾及那么多，不管是 API 的设计还是 SDK 的开发优先级都不是最高的，尽力满足用户需求，生存下去才是第一位的。&lt;/p>
+&lt;p>&lt;em>我们 QingStor 搞存储真的算挺认真的了（&lt;/em>&lt;/p>
+&lt;p>&lt;strong>PS&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>本文单纯是 &lt;a href="https://github.com/Xuanwo/storage">storage&lt;/a> 开发过程中的体验吐嘈，文中提到的问题都是开发过程中的真实体验&lt;/li>
+&lt;li>没有提及的厂商都是由于我个人尚不了解导致的，并非刻意排除&lt;/li>
+&lt;li>如有错漏都是我个人对文档的理解有误，欢迎指正&lt;/li>
+&lt;/ul>
+&lt;h2 id="参考资料">参考资料&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;a href="https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-overview">azblob 官方文档&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;a href="https://cloud.tencent.com/product/cos/document">cos 官方文档&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;a href="https://cloud.google.com/storage/docs">gcs 官方文档&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;a href="https://developer.qiniu.com/kodo">kodo 官方文档&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;a href="https://help.aliyun.com/product/31815.html">oss 官方文档&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;a href="https://docs.qingcloud.com/qingstor/">qingstor 官方文档&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;a href="https://docs.aws.amazon.com/s3/index.html">s3 官方文档&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;a href="https://help.upyun.com/docs/storage/">uss 官方文档&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ul></description></item><item><title>小 Piu 本纪</title><link>https://xuanwo.io/2020/02/26/apiu/</link><pubDate>Wed, 26 Feb 2020 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2020/02/26/apiu/</guid><description>&lt;p>小撇，又唤作小 Piu，因为我近来常看《甄嬛传》，又称做 Piu 贵人，Piu 妃。性别母，生于 19 年 9 月，尚未成年，时常被唤作小母狗，不以为意，甚至更加亲近，我总会说因为她是狗。&lt;/p>
 &lt;hr>
 &lt;p>女朋友思狗成疾，总是想养一只小边牧，在换房子后便去燕郊狗市抱了一只，两人空手去程两小时，返程带着她和一车子物件。在路上定名为小撇，姓随女友，乳名 Piu。很安静，一路上没有拉屎撒尿，没有发出一点声音，进京时已经在小箱子中睡着。到家后怯懦不敢行，满地板乱嗅，养在狗笼中，经常屎尿齐飞。后来换了开放式的狗栅栏，给它置办了狗窝，狗厕所，但是它总是想跳出来。有一天惹火了两人，将它关在狗栅栏中，谁知它在挣扎数次后，从上方跳了出来，两人喜不自胜。后来逐步撤走狗栅栏，让小 Piu 自由活动，满屋子都是它小脚爪敲击地面的声音。&lt;/p>
 &lt;p>小 Piu 兴奋时会在房间内转圈奔跑，双耳直立，尾巴高翘及背，唤作“旋风狗”，冲过来踹我们一脚并反弹开，如是反复。小 Piu 害怕的时候会一个 Piu 缩到角落，双耳紧贴头皮，尾巴下垂，常发出“嘤嘤嘤”的声音。小 Piu 睡觉时会依偎在床侧，双手前伸，双脚后探，呈伸长状。大了之后能自行跳上床，并喜欢睡在我的头顶，整个 Piu 趴在枕头上侧，温热柔软的肚子贴着我的头皮，双手双脚抱住我的头，并常在熟睡时猛踹多次，纠正无效。小 Piu 安静时会认真看着我们，轻轻歪头，女友说这是因为小 Piu 的鼻子会挡住它的视线。&lt;/p>
@@ -1441,120 +1853,4 @@ sh &lt;span style="color:#4070a0">&amp;#39;real compile&amp;#39;&lt;/span>
 &lt;li>&lt;a href="https://jenkins.io/doc/book/pipeline/syntax/">Pipeline Syntax&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://groovy-lang.org/syntax.html">Groovy Syntax&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://jenkins.io/doc/book/pipeline/shared-libraries/">Extending with Shared Libraries&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Go Modules 迁移实战经验</title><link>https://xuanwo.io/2019/08/22/go-modules-migrate/</link><pubDate>Thu, 22 Aug 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/08/22/go-modules-migrate/</guid><description>&lt;p>自从上次 &lt;a href="https://xuanwo.io/2019/05/27/go-modules/">Go Modules 分享&lt;/a>以来，我们 Team 的所有 Golang 项目在逐步的切换到 Go Modules，但是在实际执行的操作中遇到了很多问题。本文首先分享我们实际的迁移方案，然后分享我们遇到的问题及其解决方案，最后会谈谈现在还存在的一些问题。&lt;/p>
-&lt;h2 id="迁移方案">迁移方案&lt;/h2>
-&lt;h3 id="现状">现状&lt;/h3>
-&lt;blockquote>
-&lt;p>所有地址和项目均为虚构，并未实际使用，仅用于说明&lt;/p>
-&lt;/blockquote>
-&lt;p>公司内部的 gitlab 地址是 &lt;code>git.enterprise.dev&lt;/code>，team 内部现在同时进行着 &lt;code>alpha&lt;/code>, &lt;code>beta&lt;/code>, &lt;code>gamma&lt;/code>, &lt;code>delta&lt;/code> 等多个项目，他们分散在 gitlab 的不同组织下。然后 &lt;code>alpha&lt;/code> 作为最早的项目，它还包括了 &lt;code>common-go&lt;/code>这样一个被所有项目都引用的基础库，此外还有大量的 fork 自第三方且内部进行了定制化的开源项目。项目之前的命名均采用 &lt;code>alpha-io&lt;/code>， &lt;code>alpha-common&lt;/code> 这样的形式。&lt;/p>
-&lt;p>之前没有统一过 Team 内部的项目依赖管理工具，因此 Team 内的项目同时存在着自己写的脚本，&lt;a href="https://github.com/Masterminds/glide">glide&lt;/a>, &lt;a href="https://github.com/golang/dep">dep&lt;/a> 等多种依赖管理工具。由于依赖管理工具的混乱，也导致了构建步骤的混乱。很多项目的 &lt;code>Makefile&lt;/code> 中会修改 &lt;code>GOPATH&lt;/code> 为 &lt;code>&amp;lt;project_path&amp;gt;/build&lt;/code>，并在构建打包的时候把整个 build 都复制到远程的 Builder 上进行构建。整个构建流程的结果无法复现，不同人打包的结果可能完全是不一致的。&lt;/p>
-&lt;h3 id="方案">方案&lt;/h3>
-&lt;p>首先我们确定了项目统一的命名规则：&lt;/p>
-&lt;ul>
-&lt;li>所有项目都放在 &lt;code>git.team.dev&lt;/code> 下&lt;/li>
-&lt;li>按照所属项目的不同来划分 namespace
-&lt;ul>
-&lt;li>每个项目拥有自己独立的 namespace，比如 &lt;code>git.team.dev/alpha&lt;/code>&lt;/li>
-&lt;li>&lt;code>global&lt;/code> 存放 team 全局的项目，比如 &lt;code>common-go&lt;/code>： &lt;code>git.team.dev/global/common&lt;/code>&lt;/li>
-&lt;li>&lt;code>external&lt;/code> 存放所有 fork 自第三方的项目，比如 &lt;code>teapot&lt;/code>: &lt;code>git.team.dev/external/teapot&lt;/code>&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>取消所有用来区分项目的前缀
-&lt;ul>
-&lt;li>&lt;code>git.enterprise.dev/team/alpha-io&lt;/code> -&amp;gt; &lt;code>git.team.dev/alpha/io&lt;/code>&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;p>然后我们基于 &lt;a href="https://github.com/gomods/athens">Athens&lt;/a> 搭建了 Team 共用的 GOPROXY： &lt;code>https://goproxy.team.dev&lt;/code>，主要做了如下配置：&lt;/p>
-&lt;ul>
-&lt;li>配置了到我们内网的 VPN，使得它网络上到我们内网 gitlab 是通的&lt;/li>
-&lt;li>配置了科学上网的代理，使得它可以顺畅的访问外部资源&lt;/li>
-&lt;li>在 gitlab 上创建了专门的 robot 帐号，并配置 SSH key，授予它所有项目的 Read Only 权限&lt;/li>
-&lt;/ul>
-&lt;p>最后是完成对项目的 Replace。这个部分我们走了一些弯路，一开始是依赖大家在项目中自行做 replace，但是引发了很多问题，因此我开发了 &lt;a href="https://github.com/Xuanwo/go-mod-redirect">go-mod-redirect&lt;/a> 来完成项目 import 路径的映射。&lt;/p>
-&lt;h3 id="步骤">步骤&lt;/h3>
-&lt;p>刚才介绍的是整体的迁移方案，下面就谈一谈我们完成迁移执行的具体步骤：&lt;/p>
-&lt;ul>
-&lt;li>升级本地的 Golang 版本至 1.11.3，最好是 1.12.x&lt;/li>
-&lt;li>&lt;code>export GO111MODULE=on&lt;/code>&lt;/li>
-&lt;li>&lt;code>go mod init&lt;/code> 或者 &lt;code>echo &amp;quot;module git.team.dev/&amp;lt;namespace&amp;gt;/&amp;lt;project&amp;gt;&amp;quot; &amp;gt; go.mod&lt;/code>&lt;/li>
-&lt;li>批量替换项目中的 import 路径&lt;/li>
-&lt;li>&lt;code>go mod tidy&lt;/code>&lt;/li>
-&lt;li>调整并修改依赖&lt;/li>
-&lt;li>&lt;code>go build&lt;/code>&lt;/li>
-&lt;/ul>
-&lt;p>Tips:&lt;/p>
-&lt;ul>
-&lt;li>如果项目本身存在依赖管理系统的话，go module 会尝试读取已有的依赖，否则会自动拉取最新的依赖。&lt;/li>
-&lt;li>如果自动生成的依赖不符合项目构建的要求，可以自行修改，支持 tag, branch, commit id 等，修改完毕后 &lt;code>go.mod&lt;/code> 文件会被自动更新&lt;/li>
-&lt;li>由于 Go Module 的&lt;a href="https://xuanwo.io/2019/05/27/go-modules/">最小版本选择&lt;/a>机制，强制指定一个旧版本可能无法生效，此时可以 &lt;code>go mod why &amp;lt;module&amp;gt;&lt;/code> 来看谁依赖了这个模块&lt;/li>
-&lt;li>&lt;code>go mod tidy&lt;/code> 完毕后可能会出现一些项目的间接依赖，这是因为依赖库中存在还没有切换到 &lt;code>Go Module&lt;/code> 的项目，go 工具链需要有一个地方存放这个间接依赖的版本，会使用 &lt;code>//indirect&lt;/code> 注释出来&lt;/li>
-&lt;/ul>
-&lt;h2 id="常见问题及其解决">常见问题及其解决&lt;/h2>
-&lt;h3 id="go-module-的启用时机">GO Module 的启用时机&lt;/h3>
-&lt;p>符合下列任一一种情况时 Go Module 机制将会被启用&lt;/p>
-&lt;ul>
-&lt;li>&lt;code>GO111MODULE&lt;/code> 被设置为 &lt;code>on&lt;/code>&lt;/li>
-&lt;li>当前路径不在 &lt;code>GOPATH&lt;/code> 下，且目录下或者上级目录中存在有效的 &lt;code>go.mod&lt;/code> 文件，且 &lt;code>GO111MODULE&lt;/code> 未空或 &lt;code>auto&lt;/code>&lt;/li>
-&lt;/ul>
-&lt;h3 id="环境变量设置不正确">环境变量设置不正确&lt;/h3>
-&lt;p>&lt;code>GO111MODULE&lt;/code> 设置不正确会导致 &lt;code>go get&lt;/code> 或者 &lt;code>go build&lt;/code> 没有使用 module 的形式来获取包，&lt;code>GOPROXY&lt;/code> 设置不正确会导致网络请求没有走我们的 &lt;code>GOPROXY&lt;/code>，从而出现一系列的超时现象。此外错误的配置了 &lt;code>HTTP_PROXY&lt;/code> 等代理同样会导致 GOPROXY 连接失败，此类问题可以按照如下顺序排查：&lt;/p>
-&lt;p>&lt;code>go get -v &amp;lt;module&amp;gt;&lt;/code>，此时会输出完整的请求的历史，比如&lt;/p>
-&lt;pre>&lt;code>:) go get -v gopkg.in/yaml.v2
-Fetching https://gopkg.in/yaml.v2?go-get=1
-Parsing meta tags from https://gopkg.in/yaml.v2?go-get=1 (status code 200)
-get &amp;quot;gopkg.in/yaml.v2&amp;quot;: found meta tag get.metaImport{Prefix:&amp;quot;gopkg.in/yaml.v2&amp;quot;, VCS:&amp;quot;git&amp;quot;, RepoRoot:&amp;quot;https://gopkg.in/yaml.v2&amp;quot;} at https://gopkg.in/yaml.v2?go-get=1
-&lt;/code>&lt;/pre>&lt;p>如果访问的地址不是 &lt;code>GOPROXY&lt;/code>，说明 &lt;code>GO111MODULE&lt;/code> 和 &lt;code>GOPROXY&lt;/code> 的配置有问题。&lt;/p>
-&lt;p>如果访问 &lt;code>GOPROXY&lt;/code> 有问题，可以 curl 看一下：&lt;/p>
-&lt;pre>&lt;code>:) curl https://goproxy.team.dev -v
-* Uses proxy env variable no_proxy == 'localhost,127.0.0.1,localaddress,.localdomain.com'
-* Uses proxy env variable https_proxy == 'http://127.0.0.1:1090'
-* Trying 127.0.0.1:1090...
-* TCP_NODELAY set
-* Connected to 127.0.0.1 (127.0.0.1) port 1090 (#0)
-* allocate connect buffer!
-* Establish HTTP proxy tunnel to goproxy.team.dev:443
-&amp;gt; CONNECT goproxy.team.dev:443 HTTP/1.1
-&amp;gt; Host: goproxy.team.dev:443
-&amp;gt; User-Agent: curl/7.65.3
-&amp;gt; Proxy-Connection: Keep-Alive
-&amp;gt;
-&amp;lt; HTTP/1.1 200 Connection established
-&amp;lt;
-* Proxy replied 200 to CONNECT request
-* CONNECT phase completed!
-* ALPN, offering h2
-* ALPN, offering http/1.1
-* successfully set certificate verify locations:
-* CAfile: /etc/ssl/certs/ca-certificates.crt
-CApath: none
-* TLSv1.3 (OUT), TLS handshake, Client hello (1):
-* CONNECT phase completed!
-* CONNECT phase completed!
-* OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to goproxy.team.dev:443
-* Closing connection 0
-curl: (35) OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to goproxy.team.dev:443
-&lt;/code>&lt;/pre>&lt;p>比如这种情况说明代理访问失败了，我们可以把这个域名加进 &lt;code>NO_PROXY&lt;/code>&lt;/p>
-&lt;pre>&lt;code>export no_proxy=localhost,127.0.0.1,localaddress,.localdomain.com,team.dev
-&lt;/code>&lt;/pre>&lt;h3 id="athens-500-internal-server-error-报错">Athens 500 Internal Server Error 报错&lt;/h3>
-&lt;p>Athens 本质上还是会用 &lt;code>go get&lt;/code> 来下载包，如果 &lt;code>go get&lt;/code> 命令执行失败就会返回 500 错误，这个情况需要具体分析，我遇到的有以下这些情况：&lt;/p>
-&lt;pre>&lt;code>go get gopkg.in/Shopify/sarama.v1: unexpected status (https://goproxy.team.dev/gopkg.in/Shopify/sarama.v1/@v/v1.23.1.info): 500 Internal Server Error
-&lt;/code>&lt;/pre>&lt;p>目标项目不存在：这种情况多见于项目本身改名，或者 import 路径发生了修改。比如说 &lt;a href="https://github.com/Shopify/sarama">Shopify/sarama&lt;/a> 的 import 路径由 &lt;code>gopkg.in/Shopify/sarama.v1&lt;/code> 修改为了 &lt;code>github.com/Shopify/sarama&lt;/code>，需要调整项目中的 import。&lt;/p>
-&lt;pre>&lt;code>go: git.team.dev/global/common@v0.0.0: unexpected status (https://goproxy.team.dev/git.team.dev/global/common/@v/v0.0.0.info): 500 Internal Server Error
-&lt;/code>&lt;/pre>&lt;p>目标 Commit 不存在：这种一般是因为上游进行了 force-push，导致这个 commit 已经不存在了。还有种比较特殊的情况是依赖的项目中做了 replace，而本项目中没有，从而导致构建的时候访问到了错误的 tag。这种问题比较难排查，建议 &lt;code>go mod why &amp;lt;module&amp;gt;&lt;/code> 查看一下依赖关系，然后确定依赖的模块中 version 没有写错。&lt;/p>
-&lt;h3 id="replace-不会继承">Replace 不会继承&lt;/h3>
-&lt;p>go moudle 的 replace 和 exclude 都只针对当前构建生效，不会扩散到其他项目中。这导致如果有依赖写成了这样：&lt;/p>
-&lt;pre>&lt;code>require github.com/ownauX/lol v0.0.0
-replace github.com/ownauX/lol =&amp;gt; github.com/Xuanwo/lol v1.0.1
-&lt;/code>&lt;/pre>&lt;p>那下游所有的项目都会需要进行 replace，因为直接进行构建会因为找不到 &lt;code>github.com/ownauX/lol@v0.0.0&lt;/code> 而报错。&lt;/p>
-&lt;p>所以：&lt;/p>
-&lt;ul>
-&lt;li>replace 建议只作为临时的 workaround 使用，即使要用，原来的 version 也要写对，否则会影响其他项目构建&lt;/li>
-&lt;li>公司内部项目需要做批量做 replace 可以使用我的 &lt;a href="https://github.com/Xuanwo/go-mod-redirect">go-mod-redirect&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h2 id="尚未解决的问题">尚未解决的问题&lt;/h2>
-&lt;h3 id="无法直接安装二进制">无法直接安装二进制&lt;/h3>
-&lt;p>在切换到 Go Module 之后，&lt;code>go get&lt;/code> 都是 module-aware 的操作，像之前一样去 &lt;code>go get github.com/tinylib/msgp&lt;/code> 来安装二进制会导致 msgp 进入 &lt;code>go.mod&lt;/code>。&lt;/p>
-&lt;h3 id="无法跟踪指定分支">无法跟踪指定分支&lt;/h3>
-&lt;p>开发中常见的一种情况是每次构建都需要这个依赖的某个分支最新 commit，go moudle 支持写 branch name。但是为了可重现构建，&lt;code>go get&lt;/code> 每次都会将 branch 重写为对应的 commit id，这导致如果项目中如果有正在活跃开发且需要跟进最新提交的依赖会非常麻烦。目前的 workaround 是在 Makefile 中修改 build target，每次构建之前都执行一次 &lt;code>go get -u &amp;lt;module&amp;gt;@develop&lt;/code> 来更新。&lt;/p></description></item></channel></rss>
+&lt;/ul></description></item></channel></rss>
