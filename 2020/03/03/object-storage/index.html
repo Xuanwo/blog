@@ -109,7 +109,7 @@
         <span style=color:#007020;font-weight:700>break</span>
     }
 }
-</code></pre></div><p>要是有机会搞 qingstor go sdk v3，我一定抄作业。</p><p><code>gcs</code> 返回的错误是统一的 <code>*googleapi.Error</code> 类型，但是诡异的是代码中会额外处理 <code>ObjectNotExist</code> 的逻辑，导致在检查的时候需要额外判断：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>func</span> <span style=color:#06287e>formatGcsError</span>(err <span style=color:#902000>error</span>) <span style=color:#902000>error</span> {
+</code></pre></div><p>要是有机会搞 qingstor go sdk v4，我一定抄作业。</p><p><code>gcs</code> 返回的错误是统一的 <code>*googleapi.Error</code> 类型，但是诡异的是代码中会额外处理 <code>ObjectNotExist</code> 的逻辑，导致在检查的时候需要额外判断：</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>func</span> <span style=color:#06287e>formatGcsError</span>(err <span style=color:#902000>error</span>) <span style=color:#902000>error</span> {
 	<span style=color:#60a0b0;font-style:italic>// gcs sdk could return explicit error, we should handle them.
 </span><span style=color:#60a0b0;font-style:italic></span>	<span style=color:#007020;font-weight:700>if</span> errors.<span style=color:#06287e>Is</span>(err, gs.ErrObjectNotExist) {
 		<span style=color:#007020;font-weight:700>return</span> fmt.<span style=color:#06287e>Errorf</span>(<span style=color:#4070a0>&#34;%w: %v&#34;</span>, services.ErrObjectNotExist, err)
