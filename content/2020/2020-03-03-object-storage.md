@@ -225,7 +225,7 @@ for {
 }
 ```
 
-要是有机会搞 qingstor go sdk v3，我一定抄作业。
+要是有机会搞 qingstor go sdk v4，我一定抄作业。
 
 `gcs` 返回的错误是统一的 `*googleapi.Error` 类型，但是诡异的是代码中会额外处理 `ObjectNotExist` 的逻辑，导致在检查的时候需要额外判断：
 
