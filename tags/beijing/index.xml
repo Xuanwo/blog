@@ -1,4 +1,108 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Beijing on Xuanwo's Blog</title><link>https://xuanwo.io/tags/beijing/</link><description>Recent content in Beijing on Xuanwo's Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Wed, 03 Oct 2018 15:35:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/beijing/index.xml" rel="self" type="application/rss+xml"/><item><title>公有云对象存储服务体验吐嘈</title><link>https://xuanwo.io/2020/03/03/object-storage/</link><pubDate>Tue, 03 Mar 2020 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2020/03/03/object-storage/</guid><description>&lt;p>最近一直在做&lt;a href="https://xuanwo.io/2019/12/30/storage-intro/">面向应用的 Golang 抽象存储层&lt;/a>，目前已经对接了十个存储后端，其中有八个是对象存储服务，可以说是对接了大部分公有云对象存储服务了。在对接的过程中有很多感慨，这次整理起来盘点一下。&lt;/p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Beijing on Xuanwo's Blog</title><link>https://xuanwo.io/tags/beijing/</link><description>Recent content in Beijing on Xuanwo's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-US</language><lastBuildDate>Wed, 03 Oct 2018 15:35:00 +0000</lastBuildDate><atom:link href="https://xuanwo.io/tags/beijing/index.xml" rel="self" type="application/rss+xml"/><item><title>My Solution for DNS Poisoning by AtomDNS</title><link>https://xuanwo.io/2020/04/05/my-solution-for-dns-poisoning-by-atomdns/</link><pubDate>Sun, 05 Apr 2020 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2020/04/05/my-solution-for-dns-poisoning-by-atomdns/</guid><description>&lt;p>I used to be a big fan of &lt;a href="https://github.com/coredns/coredns">coredns&lt;/a>: I use it on my laptop, in our team&amp;rsquo;s internal infrastructure and maintain the package for &lt;a href="https://github.com/archlinuxcn/repo">archlinuxcn&lt;/a>. Until one day, I want to solve the DNS Pollution problem by &lt;a href="https://github.com/coredns/coredns">coredns&lt;/a>. But&amp;hellip;&lt;/p>
+&lt;h2 id="coredns-is-not-for-dns-pollution">CoreDNS is not for DNS Pollution&lt;/h2>
+&lt;p>It&amp;rsquo;s obvious that I&amp;rsquo;m not the only fan of &lt;a href="https://github.com/coredns/coredns">coredns&lt;/a>, there are mainly two solutions via coredns:&lt;/p>
+&lt;ul>
+&lt;li>Generate Corefile: as &lt;a href="https://minidump.info/blog/2019/07/coredns-no-dns-poisoning/">https://minidump.info/blog/2019/07/coredns-no-dns-poisoning/&lt;/a> does&lt;/li>
+&lt;li>Write coredns plugin: like &lt;a href="https://github.com/blahgeek/coredns-chinadns">coredns-chinadns&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="why-not-generate-corefile">Why not generate corefile?&lt;/h3>
+&lt;p>First of all, it&amp;rsquo;s ugly and not suitable for updates automatically. We have to generate the whole &lt;code>Corefile&lt;/code> every time domain list updated and make it hard to apply custom updates. For example, I need to forward some internal domains to a DNS server in a VPN. I need to add them in corefile build scripts or build another system to build corefile.&lt;/p>
+&lt;p>Then, coredns forward except is not designed for large domains input. forward will read all zone in a slice, and check them one by one:&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#60a0b0;font-style:italic">// Read all domains
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>&lt;span style="color:#007020;font-weight:bold">func&lt;/span> &lt;span style="color:#06287e">parseBlock&lt;/span>(c &lt;span style="color:#666">*&lt;/span>caddy.Controller, f &lt;span style="color:#666">*&lt;/span>Forward) &lt;span style="color:#902000">error&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">switch&lt;/span> c.&lt;span style="color:#06287e">Val&lt;/span>() {
+&lt;span style="color:#007020;font-weight:bold">case&lt;/span> &lt;span style="color:#4070a0">&amp;#34;except&amp;#34;&lt;/span>:
+ignore &lt;span style="color:#666">:=&lt;/span> c.&lt;span style="color:#06287e">RemainingArgs&lt;/span>()
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> &lt;span style="color:#007020">len&lt;/span>(ignore) &lt;span style="color:#666">==&lt;/span> &lt;span style="color:#40a070">0&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> c.&lt;span style="color:#06287e">ArgErr&lt;/span>()
+}
+&lt;span style="color:#007020;font-weight:bold">for&lt;/span> i &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#40a070">0&lt;/span>; i &amp;lt; &lt;span style="color:#007020">len&lt;/span>(ignore); i&lt;span style="color:#666">++&lt;/span> {
+ignore[i] = plugin.&lt;span style="color:#06287e">Host&lt;/span>(ignore[i]).&lt;span style="color:#06287e">Normalize&lt;/span>()
+}
+f.ignored = ignore
+&lt;span style="color:#666">...&lt;/span>
+}
+&lt;span style="color:#60a0b0;font-style:italic">// Check one by one
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>&lt;span style="color:#007020;font-weight:bold">func&lt;/span> (f &lt;span style="color:#666">*&lt;/span>Forward) &lt;span style="color:#06287e">isAllowedDomain&lt;/span>(name &lt;span style="color:#902000">string&lt;/span>) &lt;span style="color:#902000">bool&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> dns.&lt;span style="color:#06287e">Name&lt;/span>(name) &lt;span style="color:#666">==&lt;/span> dns.&lt;span style="color:#06287e">Name&lt;/span>(f.from) {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> &lt;span style="color:#007020;font-weight:bold">true&lt;/span>
+}
+&lt;span style="color:#007020;font-weight:bold">for&lt;/span> _, ignore &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#007020;font-weight:bold">range&lt;/span> f.ignored {
+&lt;span style="color:#007020;font-weight:bold">if&lt;/span> plugin.&lt;span style="color:#06287e">Name&lt;/span>(ignore).&lt;span style="color:#06287e">Matches&lt;/span>(name) {
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> &lt;span style="color:#007020;font-weight:bold">false&lt;/span>
+}
+}
+&lt;span style="color:#007020;font-weight:bold">return&lt;/span> &lt;span style="color:#007020;font-weight:bold">true&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>We can use the builtin zone support for better performance:&lt;/p>
+&lt;pre>&lt;code class="language-caddyfile" data-lang="caddyfile">. {
+log
+cache
+forward . 8.8.8.8
+}
+abc.com def.com {
+log
+cache
+forward . 114.114.114.114
+}
+&lt;/code>&lt;/pre>&lt;p>But we still need to maintain a huge corefile.&lt;/p>
+&lt;h3 id="why-not-write-a-plugin">Why not write a plugin?&lt;/h3>
+&lt;p>So, why not write a plugin to read domains from a file and forward it to different upstreams? Yes, I tried, and I found &lt;a href="https://github.com/coredns/coredns">coredns&lt;/a>&amp;lsquo;s plugin system is a mess.&lt;/p>
+&lt;p>&lt;a href="https://github.com/coredns/coredns">coredns&lt;/a> is chain based, all dns query will be split via zones, so we can&amp;rsquo;t filter and forward them by domains. To handle all domains, we have to design a plugin under root:&lt;/p>
+&lt;pre>&lt;code class="language-caddyfile" data-lang="caddyfile">. {
+filter xxxxx
+}
+&lt;/code>&lt;/pre>&lt;p>Then, we need to design a config that matches something and forward to somewhere, maybe like the following:&lt;/p>
+&lt;pre>&lt;code class="language-caddyfile" data-lang="caddyfile">. {
+filter {
+condition domain_in_file xxxxxxxxxx
+action forward xxxxxxx
+}
+filter {
+condition domain_not_in_file xxxxxxxxxx
+action forward xxxxxx
+}
+}
+&lt;/code>&lt;/pre>&lt;p>Looks perfect for now, let&amp;rsquo;s implement it. Ooooops, we need forward here, why not use the builtin forward? Sorry, we can&amp;rsquo;t. Plugin in coredns doesn&amp;rsquo;t been designed for run standalone or embedded, we can&amp;rsquo;t call other plugins or pass the query to other plugins conveniently. As I described in RFC &lt;a href="https://github.com/coredns/rfc/issues/6">embeddable plugin&lt;/a>, many plugins have to implement the same feature.&lt;/p>
+&lt;p>So, don&amp;rsquo;t dig deeper, let&amp;rsquo;s jump out of the chaos.&lt;/p>
+&lt;h2 id="so-what-am-i-need">So, what am I need?&lt;/h2>
+&lt;p>After talking so much, what am I need?&lt;/p>
+&lt;ul>
+&lt;li>Forward DNS query to upstreams depends on conditions&lt;/li>
+&lt;li>Human-readable config&lt;/li>
+&lt;li>Simple deployment, no extra build needed&lt;/li>
+&lt;li>No so bad performance&lt;/li>
+&lt;/ul>
+&lt;p>Although there are other good DNS servers like &lt;a href="https://github.com/shawn1m/overture">overture&lt;/a> and &lt;a href="https://github.com/pymumu/smartdns">smartdns&lt;/a>, let&amp;rsquo;s build a DNS server for ourselves.&lt;/p>
+&lt;h2 id="say-hi-to-atomdns">Say Hi to AtomDNS!&lt;/h2>
+&lt;p>With &lt;a href="https://github.com/miekg/dns">dns&lt;/a> package support, write a DNS server by go is so simple that we can build one in a half-day: &lt;a href="https://github.com/Xuanwo/atomdns">atomdns&lt;/a>.&lt;/p>
+&lt;p>&lt;a href="https://github.com/Xuanwo/atomdns">atomdns&lt;/a> is built by three-part: &lt;code>upstream&lt;/code>, &lt;code>match&lt;/code> and &lt;code>rules&lt;/code>. &lt;code>upstream&lt;/code> means a set of DNS servers that dns been forwarded to. &lt;code>match&lt;/code> is the match policy, and we support &lt;code>in_domain_list&lt;/code> type for now. &lt;code>rules&lt;/code> will specify when match policy matched, this query should be forwarded to which &lt;code>upstream&lt;/code>.&lt;/p>
+&lt;p>&lt;a href="https://github.com/Xuanwo/atomdns">atomdns&lt;/a>&amp;lsquo;s config is powered by &lt;a href="https://github.com/hashicorp/hcl/tree/hcl2">hcl2&lt;/a>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-hcl" data-lang="hcl">listen &lt;span style="color:#666">=&lt;/span> &lt;span style="color:#4070a0">&amp;#34;127.0.0.1:53&amp;#34;&lt;/span>
+&lt;span style="color:#007020;font-weight:bold">upstream&lt;/span> &lt;span style="color:#4070a0">&amp;#34;oversea&amp;#34;&lt;/span> {
+type &lt;span style="color:#666">=&lt;/span> &lt;span style="color:#4070a0">&amp;#34;dot&amp;#34;&lt;/span>
+addr &lt;span style="color:#666">=&lt;/span> &lt;span style="color:#4070a0">&amp;#34;185.222.222.222:853&amp;#34;&lt;/span>
+tls_server_name &lt;span style="color:#666">=&lt;/span> &lt;span style="color:#4070a0">&amp;#34;public-dns-a.dns.sb&amp;#34;&lt;/span>
+}
+&lt;span style="color:#007020;font-weight:bold">upstream&lt;/span> &lt;span style="color:#4070a0">&amp;#34;mainland&amp;#34;&lt;/span> {
+type &lt;span style="color:#666">=&lt;/span> &lt;span style="color:#4070a0">&amp;#34;udp&amp;#34;&lt;/span>
+addr &lt;span style="color:#666">=&lt;/span> &lt;span style="color:#4070a0">&amp;#34;114.114.114.114:53&amp;#34;&lt;/span>
+}
+&lt;span style="color:#007020;font-weight:bold">match&lt;/span> &lt;span style="color:#4070a0">&amp;#34;to_mainland&amp;#34;&lt;/span> {
+type &lt;span style="color:#666">=&lt;/span> &lt;span style="color:#4070a0">&amp;#34;in_domain_list&amp;#34;&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic"> # get this file from https://github.com/felixonmars/dnsmasq-china-list
+&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> path &lt;span style="color:#666">=&lt;/span> &lt;span style="color:#4070a0">&amp;#34;/etc/atomdns/accelerated-domains.china.raw.txt&amp;#34;&lt;/span>
+}
+rules &lt;span style="color:#666">=&lt;/span> {
+&lt;span style="color:#007020;font-weight:bold">to_mainland&lt;/span>&lt;span style="">:&lt;/span> &lt;span style="color:#4070a0">&amp;#34;mainland&amp;#34;&lt;/span>,
+&lt;span style="color:#007020;font-weight:bold">default&lt;/span>&lt;span style="">:&lt;/span> &lt;span style="color:#4070a0">&amp;#34;oversea&amp;#34;&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>We have two &lt;code>upstream&lt;/code> here, and one names &lt;code>oversea&lt;/code>, the other names &lt;code>mainland&lt;/code>. When &lt;code>to_mainland&lt;/code> matched which is in the domain list we specify here, we will forward it to &lt;code>mainland&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">atomdns[164688]: 2020/04/06 22:09:13 [{wx1.qq.com. 1 1}]
+atomdns[164688]: 2020/04/06 22:09:13 rule to_mainland matched, served via mainland
+atomdns[164688]: 2020/04/06 22:12:18 [{github.githubassets.com. 1 1}]
+atomdns[164688]: 2020/04/06 22:12:18 no rules matched, served via oversea
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Simple, but works.&lt;/p></description></item><item><title>公有云对象存储服务体验吐嘈</title><link>https://xuanwo.io/2020/03/03/object-storage/</link><pubDate>Tue, 03 Mar 2020 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2020/03/03/object-storage/</guid><description>&lt;p>最近一直在做&lt;a href="https://xuanwo.io/2019/12/30/storage-intro/">面向应用的 Golang 抽象存储层&lt;/a>，目前已经对接了十个存储后端，其中有八个是对象存储服务，可以说是对接了大部分公有云对象存储服务了。在对接的过程中有很多感慨，这次整理起来盘点一下。&lt;/p>
 &lt;p>截止到 &lt;a href="https://github.com/Xuanwo/storage/releases/tag/v0.7.1">v0.7.1&lt;/a>，&lt;a href="https://github.com/Xuanwo/storage">storage&lt;/a> 对接了如下对象存储服务：&lt;/p>
 &lt;ul>
 &lt;li>&lt;a href="#azblob">azblob&lt;/a>: &lt;a href="https://docs.microsoft.com/en-us/azure/storage/blobs/">Azure Blob storage&lt;/a>&lt;/li>
@@ -1606,251 +1710,4 @@ assert.&lt;span style="color:#06287e">True&lt;/span>(t, task.&lt;span style="col
 &lt;li>&lt;a href="https://www.ibm.com/developerworks/cn/linux/l-lpic1-108-4/index.html">学习 Linux，101: 管理打印机和打印&lt;/a> 教程从 &lt;a href="http://www.lpi.org/">LPIC-1&lt;/a> 备考的角度介绍了管理和使用打印机的相关知识&lt;/li>
 &lt;li>&lt;a href="https://wiki.linuxfoundation.org/openprinting/start">OpenPrinting&lt;/a> 提供了驱动程序，打印机支持等资源和信息&lt;/li>
 &lt;li>维基百科词条 &lt;a href="https://zh.wikipedia.org/wiki/PostScript">PostScript&lt;/a> 详细地介绍了 PostScript 的前世今生&lt;/li>
-&lt;/ul></description></item><item><title>Jenkins Pipeline 介绍</title><link>https://xuanwo.io/2019/08/30/jenkins-pipeline-intro/</link><pubDate>Fri, 30 Aug 2019 01:00:00 +0000</pubDate><guid>https://xuanwo.io/2019/08/30/jenkins-pipeline-intro/</guid><description>&lt;p>前一段时间推动整个 Team 都转向了 Go Modules，最近一段时间的工作主要是在推动自动化构建与测试。我们最后选定的方案是 &lt;code>Jenkins&lt;/code> + &lt;code>Multibranch Pipelines&lt;/code>，本文将会简单介绍一下 Jenkins Pipeline 以及常用的技巧。&lt;/p>
-&lt;h2 id="pipeline-是什么">Pipeline 是什么&lt;/h2>
-&lt;p>Jenkins Pipeline 实际上是基于 Groovy 实现的 CI/CD 领域特定语言（DSL），主要分为两类，一类叫做 &lt;code>Declarative Pipeline&lt;/code>，一类叫做 &lt;code>Scripted Pipeline&lt;/code>。&lt;/p>
-&lt;p>&lt;code>Declarative Pipeline&lt;/code> 体验上更接近于我们熟知的 &lt;code>travis CI&lt;/code> 的 &lt;code>travis.yml&lt;/code>，通过声明自己要做的事情来规范流程，形如：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">pipeline &lt;span style="color:#666">{&lt;/span>
-agent any
-stages &lt;span style="color:#666">{&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;Build&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-steps &lt;span style="color:#666">{&lt;/span>
-&lt;span style="color:#60a0b0;font-style:italic">//
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;Test&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-steps &lt;span style="color:#666">{&lt;/span>
-&lt;span style="color:#60a0b0;font-style:italic">//
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;Deploy&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-steps &lt;span style="color:#666">{&lt;/span>
-&lt;span style="color:#60a0b0;font-style:italic">//
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>而 &lt;code>Scripted Pipeline&lt;/code> 则是旧版本中 Jenkins 支持的 Pipeline 模式，主要是写一些 groovy 的代码来制定流程：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">node &lt;span style="color:#666">{&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;Build&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-&lt;span style="color:#60a0b0;font-style:italic">//
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#666">}&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;Test&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-&lt;span style="color:#60a0b0;font-style:italic">//
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#666">}&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;Deploy&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-&lt;span style="color:#60a0b0;font-style:italic">//
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span> &lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>一般情况下声明式的流水线已经可以满足我们的需要，只有在复杂的情况下才会需要脚本式流水线的参与。&lt;/p>
-&lt;p>过去大家经常在 Jenkins 的界面上直接写脚本来实现自动化，但是现在更鼓励大家通过在项目中增加 &lt;code>Jenkinsfile&lt;/code> 的方式把流水线固定下来，实现 &lt;code>Pipeline As Code&lt;/code>，Jenkins 的 Pipeline 插件将会自动发现并执行它。&lt;/p>
-&lt;h2 id="语法">语法&lt;/h2>
-&lt;p>&lt;code>Declarative Pipeline&lt;/code> 最外层有个 &lt;code>pipeline&lt;/code> 表明它是一个声明式流水线，下面会有 4 个主要的部分：
-&lt;code>agent&lt;/code>，&lt;code>post&lt;/code>，&lt;code>stages&lt;/code>，&lt;code>steps&lt;/code>，我会逐一介绍一下。&lt;/p>
-&lt;h3 id="agent">Agent&lt;/h3>
-&lt;p>&lt;code>agent&lt;/code> 主要用于描述整个 Pipeline 或者指定的 Stage 由什么规则来选择节点执行。Pipeline 级别的 agent 可以视为 Stage 级别的默认值，如果 stage 中没有指定，将会使用与 Pipeline 一致的规则。在最新的 Jenkins 版本中，可以支持指定任意节点(&lt;code>any&lt;/code>)，不指定(&lt;code>none&lt;/code>)，标签(&lt;code>label&lt;/code>)，节点(&lt;code>node&lt;/code>)，&lt;code>docker&lt;/code>，&lt;code>dockerfile&lt;/code> 和 &lt;code>kubernetes&lt;/code> 等，具体的配置细节可以查看文档，下面是一个使用 docker 的样例：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">agent &lt;span style="color:#666">{&lt;/span>
-docker &lt;span style="color:#666">{&lt;/span>
-image &lt;span style="color:#4070a0">&amp;#39;myregistry.com/node&amp;#39;&lt;/span>
-label &lt;span style="color:#4070a0">&amp;#39;my-defined-label&amp;#39;&lt;/span>
-registryUrl &lt;span style="color:#4070a0">&amp;#39;https://myregistry.com/&amp;#39;&lt;/span>
-registryCredentialsId &lt;span style="color:#4070a0">&amp;#39;myPredefinedCredentialsInJenkins&amp;#39;&lt;/span>
-args &lt;span style="color:#4070a0">&amp;#39;-v /tmp:/tmp&amp;#39;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Tips:&lt;/p>
-&lt;ul>
-&lt;li>如果 Pipeline 选择了 none，那么 stage 必须要指定一个有效的 agent，否则无法执行&lt;/li>
-&lt;li>Jenkins 总是会使用 master 来执行 scan multibranch 之类的操作，即使 master 配置了 0 executors&lt;/li>
-&lt;li>agent 指定的是规则而不是具体的节点，如果 stage 各自配置了自己的 agent，需要注意是不是在同一个节点执行的&lt;/li>
-&lt;/ul>
-&lt;h3 id="stages--stage">Stages &amp;amp;&amp;amp; Stage&lt;/h3>
-&lt;p>Stages 是 Pipeline 中最主要的组成部分，Jenkins 将会按照 Stages 中描述的顺序从上往下的执行。Stages 中可以包括任意多个 Stage，而 Stage 与 Stages 又能互相嵌套，除此以外还有 &lt;code>parallel&lt;/code> 指令可以让内部的 Stage 并行运行。实际上可以把 Stage 当作最小单元，Stages 指定的是顺序运行，而 parallel 指定的是并行运行。&lt;/p>
-&lt;p>接下来的这个 case 很好的说明了这一点：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">pipeline &lt;span style="color:#666">{&lt;/span>
-agent none
-stages &lt;span style="color:#666">{&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;Sequential&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-stages &lt;span style="color:#666">{&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;In Sequential 1&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-steps &lt;span style="color:#666">{&lt;/span>
-echo &lt;span style="color:#4070a0">&amp;#34;In Sequential 1&amp;#34;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;In Sequential 2&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-steps &lt;span style="color:#666">{&lt;/span>
-echo &lt;span style="color:#4070a0">&amp;#34;In Sequential 2&amp;#34;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;Parallel In Sequential&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-parallel &lt;span style="color:#666">{&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;In Parallel 1&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-steps &lt;span style="color:#666">{&lt;/span>
-echo &lt;span style="color:#4070a0">&amp;#34;In Parallel 1&amp;#34;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;In Parallel 2&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-steps &lt;span style="color:#666">{&lt;/span>
-echo &lt;span style="color:#4070a0">&amp;#34;In Parallel 2&amp;#34;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>除了指定 Stage 之间的顺序关系之外，我们还可以通过 &lt;code>when&lt;/code> 来指定某个 Stage 指定与否：比如要配置只有在 Master 分支上才执行 push，其他分支上都只运行 build&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">stages &lt;span style="color:#666">{&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;Build&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-when &lt;span style="color:#666">{&lt;/span>
-not &lt;span style="color:#666">{&lt;/span> branch &lt;span style="color:#4070a0">&amp;#39;master&amp;#39;&lt;/span> &lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-steps &lt;span style="color:#666">{&lt;/span>
-sh &lt;span style="color:#4070a0">&amp;#39;./scripts/run.py build&amp;#39;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;Run&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-when &lt;span style="color:#666">{&lt;/span>
-branch &lt;span style="color:#4070a0">&amp;#39;master&amp;#39;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-steps &lt;span style="color:#666">{&lt;/span>
-sh &lt;span style="color:#4070a0">&amp;#39;./scripts/run.py push&amp;#39;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>还能在 Stage 的级别设置 &lt;code>environment&lt;/code>，这些就不展开了，文档里有更详细的描述。&lt;/p>
-&lt;h3 id="steps">Steps&lt;/h3>
-&lt;p>&lt;code>steps&lt;/code> 是 Pipeline 中最核心的部分，每个 Stage 都需要指定 Steps。Steps 内部可以执行一系列的操作，任意操作执行出错都会返回错误。完整的 Steps 操作列表可以参考 &lt;a href="https://jenkins.io/doc/pipeline/steps/">Pipeline Steps Reference&lt;/a>，这里只说一些使用时需要注意的点。&lt;/p>
-&lt;ul>
-&lt;li>groovy 语法中有不同的字符串类型，其中 &lt;code>'abc'&lt;/code> 是 Plain 字符串，不会转义 &lt;code>${WROKSPACE}&lt;/code> 这样的变量，而 &lt;code>&amp;quot;abc&amp;quot;&lt;/code> 会做这样的转换。此外还有 &lt;code>''' xxx '''&lt;/code> 支持跨行字符串，&lt;code>&amp;quot;&amp;quot;&amp;quot;&lt;/code> 同理。&lt;/li>
-&lt;li>调用函数的 &lt;code>()&lt;/code> 可以省略，使得函数调用形如 &lt;code>updateGitlabCommitStatus name: 'build', state: 'success'&lt;/code>，通过 &lt;code>,&lt;/code> 来分割不同的参数，支持换行。&lt;/li>
-&lt;li>可以在声明式流水线中通过 &lt;code>script&lt;/code> 来插入一段 groovy 脚本&lt;/li>
-&lt;/ul>
-&lt;h3 id="post">Post&lt;/h3>
-&lt;p>&lt;code>post&lt;/code> 部分将会在 pipeline 的最后执行，经常用于一些测试完毕后的清理和通知操作。文档中给出了一系列的情况，比较常用的是 &lt;code>always&lt;/code>，&lt;code>success&lt;/code> 和 &lt;code>failure&lt;/code>。&lt;/p>
-&lt;p>比如说下面的脚本将会在成功和失败的时候更新 gitlab 的状态，在失败的时候发送通知邮件：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">post &lt;span style="color:#666">{&lt;/span>
-failure &lt;span style="color:#666">{&lt;/span>
-updateGitlabCommitStatus &lt;span style="color:#002070;font-weight:bold">name:&lt;/span> &lt;span style="color:#4070a0">&amp;#39;build&amp;#39;&lt;/span>&lt;span style="color:#666">,&lt;/span> &lt;span style="color:#002070;font-weight:bold">state:&lt;/span> &lt;span style="color:#4070a0">&amp;#39;failed&amp;#39;&lt;/span>
-emailext &lt;span style="color:#002070;font-weight:bold">body:&lt;/span> &lt;span style="color:#4070a0">&amp;#39;$DEFAULT_CONTENT&amp;#39;&lt;/span>&lt;span style="color:#666">,&lt;/span> &lt;span style="color:#002070;font-weight:bold">recipientProviders:&lt;/span> &lt;span style="color:#666">[&lt;/span>culprits&lt;span style="color:#666">()],&lt;/span> &lt;span style="color:#002070;font-weight:bold">subject:&lt;/span> &lt;span style="color:#4070a0">&amp;#39;$DEFAULT_SUBJECT&amp;#39;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-success &lt;span style="color:#666">{&lt;/span>
-updateGitlabCommitStatus &lt;span style="color:#002070;font-weight:bold">name:&lt;/span> &lt;span style="color:#4070a0">&amp;#39;build&amp;#39;&lt;/span>&lt;span style="color:#666">,&lt;/span> &lt;span style="color:#002070;font-weight:bold">state:&lt;/span> &lt;span style="color:#4070a0">&amp;#39;success&amp;#39;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>每个状态其实都相当于于一个 &lt;code>steps&lt;/code>，都能够执行一系列的操作，不同状态的执行顺序是事先规定好的，就是文档中列出的顺序。&lt;/p>
-&lt;h2 id="shared-libraries">Shared Libraries&lt;/h2>
-&lt;p>同一个 Team 产出的不同项目往往会有着相似的流程，比如 golang 的大部分项目都会执行同样的命令。这就导致了人们经常需要在不同的项目间复制同样的流程，而 Shared Libraries 就解决了这个问题。通过在 Pipeline 中引入共享库，把常用的流程抽象出来变成一个的指令，简化了大量重复的操作。&lt;/p>
-&lt;p>在配置好 lib 之后，Jenkins 会在每个 Pipeline 启动前去检查 lib 是否更新并 pull 到本地，根据配置决定是否直接加载。&lt;/p>
-&lt;p>所有的 Shared Libraries 都要遵循相同的项目结构：&lt;/p>
-&lt;pre>&lt;code>(root)
-+- src # Groovy source files
-| +- org
-| +- foo
-| +- Bar.groovy # for org.foo.Bar class
-+- vars
-| +- foo.groovy # for global 'foo' variable
-| +- foo.txt # help for 'foo' variable
-+- resources # resource files (external libraries only)
-| +- org
-| +- foo
-| +- bar.json # static helper data for org.foo.Bar
-&lt;/code>&lt;/pre>&lt;p>目前我们的使用比较低级，所以只用到了 &lt;code>vars&lt;/code> 来存储全局的变量。&lt;/p>
-&lt;p>vars 下的每一个 &lt;code>foo.groovy&lt;/code> 文件都是一个独立的 namespace，在 Pipeline 中可以以 &lt;code>foo.XXX&lt;/code> 的形式来导入。比如我们有 &lt;code>vars/log.groovy&lt;/code>：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">&lt;span style="color:#902000">def&lt;/span> &lt;span style="color:#06287e">info&lt;/span>&lt;span style="color:#666">(&lt;/span>message&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-echo &lt;span style="color:#4070a0">&amp;#34;INFO: ${message}&amp;#34;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#902000">def&lt;/span> &lt;span style="color:#06287e">warning&lt;/span>&lt;span style="color:#666">(&lt;/span>message&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-echo &lt;span style="color:#4070a0">&amp;#34;WARNING: ${message}&amp;#34;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>那么 Jenkinsfile 中就可以这样调用：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">&lt;span style="color:#60a0b0;font-style:italic">// Jenkinsfile
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>steps &lt;span style="color:#666">{&lt;/span>
-log&lt;span style="color:#666">.&lt;/span>&lt;span style="color:#4070a0">info&lt;/span> &lt;span style="color:#4070a0">&amp;#39;Starting&amp;#39;&lt;/span>
-log&lt;span style="color:#666">.&lt;/span>&lt;span style="color:#4070a0">warning&lt;/span> &lt;span style="color:#4070a0">&amp;#39;Nothing to do!&amp;#39;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>大家可能已经注意到了，在 &lt;code>groovy&lt;/code> 文件中，我们可以直接像在 &lt;code>steps&lt;/code> 中一样调用已有的方法，比如 &lt;code>echo&lt;/code> 和 &lt;code>sh&lt;/code> 等。&lt;/p>
-&lt;p>我们也能在 &lt;code>groovy&lt;/code> 文件中去引用 Java 的库并返回一个变量，比如：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">&lt;span style="color:#007020">#!/usr/bin/env groovy&lt;/span>
-&lt;span style="color:#007020;font-weight:bold">import&lt;/span> &lt;span style="color:#0e84b5;font-weight:bold">java.util.Random&lt;/span>&lt;span style="color:#666">;&lt;/span>
-&lt;span style="color:#902000">def&lt;/span> String &lt;span style="color:#06287e">name&lt;/span>&lt;span style="color:#666">()&lt;/span> &lt;span style="color:#666">{&lt;/span>
-&lt;span style="color:#902000">def&lt;/span> rand &lt;span style="color:#666">=&lt;/span> &lt;span style="color:#007020;font-weight:bold">new&lt;/span> Random&lt;span style="color:#666">()&lt;/span>
-&lt;span style="color:#902000">def&lt;/span> t &lt;span style="color:#666">=&lt;/span> rand&lt;span style="color:#666">.&lt;/span>&lt;span style="color:#4070a0">nextInt&lt;/span>&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#40a070">1000&lt;/span>&lt;span style="color:#666">)&lt;/span>
-&lt;span style="color:#007020;font-weight:bold">return&lt;/span> String&lt;span style="color:#666">.&lt;/span>&lt;span style="color:#4070a0">valueOf&lt;/span>&lt;span style="color:#666">(&lt;/span>t&lt;span style="color:#666">)&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样就能够在 &lt;code>JenkinsFile&lt;/code> 中去设置一个环境变量：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">&lt;span style="color:#60a0b0;font-style:italic">// Jenkinsfile
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>environment &lt;span style="color:#666">{&lt;/span>
-NAME &lt;span style="color:#666">=&lt;/span> random&lt;span style="color:#666">.&lt;/span>&lt;span style="color:#4070a0">name&lt;/span>&lt;span style="color:#666">()&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>除了定义方法之外，我们还能让这个文件本身就能被调用，只需要定义一个 call 方法：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">&lt;span style="color:#007020">#!/usr/bin/env groovy&lt;/span>
-&lt;span style="color:#902000">def&lt;/span> &lt;span style="color:#06287e">call&lt;/span>&lt;span style="color:#666">()&lt;/span> &lt;span style="color:#666">{&lt;/span>
-sh &lt;span style="color:#4070a0">&amp;#34;hello, world&amp;#34;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>还能够定义一个新的 section，接受一个 Block：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">&lt;span style="color:#902000">def&lt;/span> &lt;span style="color:#06287e">call&lt;/span>&lt;span style="color:#666">(&lt;/span>Closure body&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-node&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;windows&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-body&lt;span style="color:#666">()&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样可以让指定的 Body 在 windows 节点上调用：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">&lt;span style="color:#60a0b0;font-style:italic">// Jenkinsfile
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>windows &lt;span style="color:#666">{&lt;/span>
-bat &lt;span style="color:#4070a0">&amp;#34;cmd /?&amp;#34;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="常用技巧">常用技巧&lt;/h2>
-&lt;h3 id="发送邮件通知">发送邮件通知&lt;/h3>
-&lt;p>主要使用 &lt;code>emailext&lt;/code>，需要在 Jenkins 的配置界面事先配置好，可用的环境变量和参数可以参考文档 &lt;a href="https://wiki.jenkins.io/display/JENKINS/Email-ext+plugin#Email-extplugin-Globalconfiguration">Email-ext plugin&lt;/a>&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">emailext &lt;span style="color:#002070;font-weight:bold">body:&lt;/span> &lt;span style="color:#4070a0">&amp;#39;$DEFAULT_CONTENT&amp;#39;&lt;/span>&lt;span style="color:#666">,&lt;/span> &lt;span style="color:#002070;font-weight:bold">recipientProviders:&lt;/span> &lt;span style="color:#666">[&lt;/span>culprits&lt;span style="color:#666">(),&lt;/span>developers&lt;span style="color:#666">()],&lt;/span> &lt;span style="color:#002070;font-weight:bold">subject:&lt;/span> &lt;span style="color:#4070a0">&amp;#39;$DEFAULT_SUBJECT&amp;#39;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="结果同步到-gitlab">结果同步到 gitlab&lt;/h3>
-&lt;p>同样需要配置好 gitlab 插件，在 Pipeline 中指定 &lt;code>options&lt;/code>：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">&lt;span style="color:#60a0b0;font-style:italic">// Jenkisfile
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>options &lt;span style="color:#666">{&lt;/span>
-gitLabConnection&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;gitlab&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后就可以在 post 中根据不同的状态来更新 gitlab 了：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">&lt;span style="color:#60a0b0;font-style:italic">// Jenkisfile
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>failure &lt;span style="color:#666">{&lt;/span>
-updateGitlabCommitStatus &lt;span style="color:#002070;font-weight:bold">name:&lt;/span> &lt;span style="color:#4070a0">&amp;#39;build&amp;#39;&lt;/span>&lt;span style="color:#666">,&lt;/span> &lt;span style="color:#002070;font-weight:bold">state:&lt;/span> &lt;span style="color:#4070a0">&amp;#39;failed&amp;#39;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-success &lt;span style="color:#666">{&lt;/span>
-updateGitlabCommitStatus &lt;span style="color:#002070;font-weight:bold">name:&lt;/span> &lt;span style="color:#4070a0">&amp;#39;build&amp;#39;&lt;/span>&lt;span style="color:#666">,&lt;/span> &lt;span style="color:#002070;font-weight:bold">state:&lt;/span> &lt;span style="color:#4070a0">&amp;#39;success&amp;#39;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>文档参考：&lt;a href="https://github.com/jenkinsci/gitlab-plugin#build-status-configuration">Build status configuration&lt;/a>&lt;/p>
-&lt;h3 id="构建过程中可用的环境变量列表">构建过程中可用的环境变量列表&lt;/h3>
-&lt;p>Jenkins 会提供一个完整的列表，只需要访问 &lt;code>&amp;lt;your-jenkins-url&amp;gt;/env-vars.html/&lt;/code> 即可，别忘了需要使用 &lt;code>&amp;quot;${WORKSPACE}&amp;quot;&lt;/code>&lt;/p>
-&lt;h3 id="在-checkout-前执行自定义操作">在 checkout 前执行自定义操作&lt;/h3>
-&lt;p>在 Multibranch Pipeline 的默认流程中会在 checkout 之前和之后执行 &lt;code>git clean -fdx&lt;/code>，如果在测试中以 root 权限创建了文件，那么 jenkins 会因为这个命令执行失败而报错。所以我们需要在 checkout 之前执行自定义的任务：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">&lt;span style="color:#007020">#!/usr/bin/env groovy&lt;/span>
-&lt;span style="color:#60a0b0;font-style:italic">// var/pre.groovy
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>&lt;span style="color:#902000">def&lt;/span> &lt;span style="color:#06287e">call&lt;/span>&lt;span style="color:#666">(&lt;/span>Closure body&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-body&lt;span style="color:#666">()&lt;/span>
-checkout scm
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 Jenkinsfile 中配置以跳过默认的 checkout 行为：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">&lt;span style="color:#60a0b0;font-style:italic">// Jenkisfile
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>options &lt;span style="color:#666">{&lt;/span>
-skipDefaultCheckout &lt;span style="color:#007020;font-weight:bold">true&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>在每个 stage 中执行自定义的任务即可：&lt;/p>
-&lt;div class="highlight">&lt;pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-groovy" data-lang="groovy">&lt;span style="color:#60a0b0;font-style:italic">// Jenkisfile
-&lt;/span>&lt;span style="color:#60a0b0;font-style:italic">&lt;/span>stage&lt;span style="color:#666">(&lt;/span>&lt;span style="color:#4070a0">&amp;#39;Compile&amp;#39;&lt;/span>&lt;span style="color:#666">)&lt;/span> &lt;span style="color:#666">{&lt;/span>
-agent any
-steps &lt;span style="color:#666">{&lt;/span>
-pre &lt;span style="color:#666">{&lt;/span>
-sh &lt;span style="color:#4070a0">&amp;#39;pre compile&amp;#39;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-sh &lt;span style="color:#4070a0">&amp;#39;real compile&amp;#39;&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;span style="color:#666">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="总结">总结&lt;/h2>
-&lt;p>Jenkins 作为使用最为广泛的 CI/CD 平台，网上流传着无数的脚本和攻略，在学习和开发的时候一定要从基本出发，了解内部原理，多看官方的文档，不要拿到一段代码就开始用，这样才能不会迷失在各式各样的脚本之中。&lt;/p>
-&lt;p>更重要的是要结合自己的业务需求，开发和定制属于自己的流程，不要被 Jenkins 的框架限制住。比如我们是否可以定义一个自己的 YAML 配置文件，然后根据 YAML 来生成 Pipeline，不需要业务自己写 Pipeline 脚本，规范使用，提前检查不合法的脚本，核心的模块共同升级，避免了一个流程小改动需要所有项目组同步更新。这是我现在正在做的事情，有机会再跟大家分享～&lt;/p>
-&lt;h2 id="参考资料">参考资料&lt;/h2>
-&lt;ul>
-&lt;li>&lt;a href="https://jenkins.io/doc/book/pipeline/syntax/">Pipeline Syntax&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://groovy-lang.org/syntax.html">Groovy Syntax&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://jenkins.io/doc/book/pipeline/shared-libraries/">Extending with Shared Libraries&lt;/a>&lt;/li>
 &lt;/ul></description></item></channel></rss>
