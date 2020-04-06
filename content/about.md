@@ -1,5 +1,5 @@
 ---
-title: 关于我
+title: About me
 type: page
 layout: about
 ---
@@ -19,10 +19,10 @@ Coding [@github](https://github.com/Xuanwo)
 
 Working [@qingcloud](https://www.qingcloud.com/)
 
-- [青云QingCloud](https://www.qingcloud.com/) 市场专员，负责自动化脚本 & 工具开发，社区运营
-- [青云QingCloud](https://www.qingcloud.com/) 对象存储研发工程师，负责对象存储 SDK 及其周边工具开发
-- [青云QingCloud](https://www.qingcloud.com/) 企业网盘研发工程师，负责后端开发
-- [青云QingCloud](https://www.qingcloud.com/) 存储研发部效率研发工程师，负责内部研发效率提升
+- [QingCloud](https://www.qingcloud.com/) Marketing, automate scripts and tools develop, community operation
+- [QingCloud](https://www.qingcloud.com/) Object Storage R&D, responsible for object storage SDK and peripheral tool development
+- [QingCloud](https://www.qingcloud.com/) Enterprise network disk R&D, responsible for back-end development
+- [QingCloud](https://www.qingcloud.com/) Storage Department Efficiency Engineering R&D, responsible for internal R&D efficiency improvement
 
 ## Social
 
