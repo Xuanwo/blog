@@ -1,6 +1,6 @@
 .PHONY: build
 server:
-	hugo server --minify --disableFastRender -F --ignoreCache
+	hugo server --minify --disableFastRender -F --ignoreCache -w
 
 .PHONY: run
 build:
