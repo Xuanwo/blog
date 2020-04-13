@@ -1,0 +1,147 @@
+<!doctype html><html><head><title>Get Started with HCL2</title><meta charset=utf-8><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta name=description content="A blog maintained by an interesting programmer."><meta name=keywords content="Technology,Code,Program,Linux,"><meta name=author content="Xuanwo"><meta property="og:title" content="Get Started with HCL2"><meta property="og:description" content="A blog maintained by an interesting programmer."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="https://xuanwo.io/2020/04/13/get-started-with-hcl2/"><link rel="shortcut icon" href=/favicon.ico><link rel=stylesheet href=https://xuanwo.io/css/main.min.be107db044369d658c06efdc8f7f5462fda2b704c0a580ab8c227b3dad6ac109.css integrity="sha256-vhB9sEQ2nWWMBu/cj39UYv2itwTApYCrjCJ7Pa1qwQk="><script data-ad-client=ca-pub-8380875817494486 async src=https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js></script><link href=http://gmpg.org/xfn/11 rel=profile><meta name=generator content="Hugo 0.68.3"></head><body><nav class=nav><div class=nav-container><div class=brand><a href=https://xuanwo.io>Xuanwo's Blog</a></div><div class=links><a class=main-nav-link href=/about/>About</a>
+<a class=main-nav-link href=/posts/>Posts</a></div></div></nav><main id=main-content><article class="single container"><header class=single-header><div class=flex><h1>Get Started with HCL2</h1><div class=post-meta><time class=date datetime=2020-04-13T01:00:00.000+00:00 itemprop=datePublished>2020-04-13</time>
+/
+<span><a href=#disqus_thread class=comment-link>Comments</a></span></div><div class=tag-container><a style=text-decoration:none href=https://xuanwo.io/tags/golang><span>golang</span></a>
+<a style=text-decoration:none href=https://xuanwo.io/tags/config><span>config</span></a>
+<a style=text-decoration:none href=https://xuanwo.io/tags/hcl><span>hcl</span></a></div></div></header><div class=post><p><a href=https://github.com/hashicorp/hcl/tree/hcl2>HCL</a> 2 is the most promising configuration language I have ever met, but the lack of document makes it hard to use, especially for developers who want to build applications using HCL 2 as config format. This article will show how to use and fully appreciate the benefits of HCL 2.</p><blockquote><p>In the following content, <code>HCL</code> means <code>HCL v2</code>, please don&rsquo;t confuse with <code>HCL v1</code></p></blockquote><h2 id=prerequisites>Prerequisites</h2><p>To fully understand the following content, you may need the following prerequisites:</p><ul><li>Basic golang development experience</li><li>Familiar with other configuration languages: <code>YAML</code>, <code>JSON</code> and so on</li></ul><h2 id=introduction>Introduction</h2><blockquote><p>HCL is a toolkit for creating structured configuration languages that are both human- and machine-friendly, for use with command-line tools. Although intended to be generally useful, it is primarily targeted towards devops tools, servers, etc.</p></blockquote><p>HCL has been widely used in all <a href=https://www.hashicorp.com/>hashicorp</a> products: <a href=https://www.hashicorp.com/products/terraform/>terraform</a>, <a href=https://www.hashicorp.com/products/vault/>vault</a>, <a href=https://www.hashicorp.com/products/consul/>consul</a>, <a href=https://www.hashicorp.com/products/nomad/>nomad</a>, <a href=https://www.vagrantup.com/>vagrant</a> and <a href=https://www.packer.io/>packer</a>. Users can configure them like following:</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-hcl data-lang=hcl>io_mode <span style=color:#666>=</span> <span style=color:#4070a0>&#34;async&#34;</span>
+
+<span style=color:#007020;font-weight:700>service</span> <span style=color:#4070a0>&#34;http&#34; &#34;web_proxy&#34;</span> {
+  listen_addr <span style=color:#666>=</span> <span style=color:#4070a0>&#34;127.0.0.1:8080&#34;</span>
+  
+  <span style=color:#007020;font-weight:700>process</span> <span style=color:#4070a0>&#34;main&#34;</span> {
+    command <span style=color:#666>=</span> [<span style=color:#4070a0>&#34;/usr/local/bin/awesome-app&#34;, &#34;server&#34;</span>]
+  }
+
+  <span style=color:#007020;font-weight:700>process</span> <span style=color:#4070a0>&#34;mgmt&#34;</span> {
+    command <span style=color:#666>=</span> [<span style=color:#4070a0>&#34;/usr/local/bin/awesome-app&#34;, &#34;mgmt&#34;</span>]
+  }
+}
+</code></pre></div><p>instead of</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json>{
+  <span style=color:#062873;font-weight:700>&#34;io_mode&#34;</span>: <span style=color:#4070a0>&#34;async&#34;</span>,
+  <span style=color:#062873;font-weight:700>&#34;service&#34;</span>: {
+    <span style=color:#062873;font-weight:700>&#34;http&#34;</span>: {
+      <span style=color:#062873;font-weight:700>&#34;web_proxy&#34;</span>: {
+        <span style=color:#062873;font-weight:700>&#34;listen_addr&#34;</span>: <span style=color:#4070a0>&#34;127.0.0.1:8080&#34;</span>,
+        <span style=color:#062873;font-weight:700>&#34;process&#34;</span>: {
+          <span style=color:#062873;font-weight:700>&#34;main&#34;</span>: {
+            <span style=color:#062873;font-weight:700>&#34;command&#34;</span>: [<span style=color:#4070a0>&#34;/usr/local/bin/awesome-app&#34;</span>, <span style=color:#4070a0>&#34;server&#34;</span>]
+          },
+          <span style=color:#062873;font-weight:700>&#34;mgmt&#34;</span>: {
+            <span style=color:#062873;font-weight:700>&#34;command&#34;</span>: [<span style=color:#4070a0>&#34;/usr/local/bin/awesome-app&#34;</span>, <span style=color:#4070a0>&#34;mgmt&#34;</span>]
+          }
+        }
+      }
+    }
+  }
+}
+</code></pre></div><p>or</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#007020;font-weight:700>id_mode</span>:<span style=color:#bbb> </span><span style=color:#4070a0>&#34;async&#34;</span><span style=color:#bbb>
+</span><span style=color:#bbb></span><span style=color:#007020;font-weight:700>service</span>:<span style=color:#bbb>
+</span><span style=color:#bbb>    </span><span style=color:#007020;font-weight:700>http</span>:<span style=color:#bbb>
+</span><span style=color:#bbb>      </span><span style=color:#007020;font-weight:700>web_proxy</span>:<span style=color:#bbb>
+</span><span style=color:#bbb>        </span><span style=color:#007020;font-weight:700>listen_addr</span>:<span style=color:#bbb> </span><span style=color:#4070a0>&#34;127.0.0.1:8080&#34;</span><span style=color:#bbb>
+</span><span style=color:#bbb>        </span><span style=color:#007020;font-weight:700>process</span>:<span style=color:#bbb>
+</span><span style=color:#bbb>          </span>- <span style=color:#007020;font-weight:700>main</span>:<span style=color:#bbb>
+</span><span style=color:#bbb>              </span><span style=color:#007020;font-weight:700>command</span>:<span style=color:#bbb> 
+</span><span style=color:#bbb>                </span>- <span style=color:#4070a0>&#34;/usr/local/bin/awesome-app&#34;</span><span style=color:#bbb>
+</span><span style=color:#bbb>                </span>- <span style=color:#4070a0>&#34;server&#34;</span><span style=color:#bbb>
+</span><span style=color:#bbb>          </span>- <span style=color:#007020;font-weight:700>mgmt</span>:<span style=color:#bbb>
+</span><span style=color:#bbb>              </span><span style=color:#007020;font-weight:700>command</span>:<span style=color:#bbb>
+</span><span style=color:#bbb>                </span>- <span style=color:#4070a0>&#34;/usr/local/bin/awesome-app&#34;</span><span style=color:#bbb>
+</span><span style=color:#bbb>                </span>- <span style=color:#4070a0>&#34;mgmt&#34;</span><span style=color:#bbb>
+</span></code></pre></div><p><a href=https://github.com/hashicorp/hcl/tree/hcl2>HCL</a> v2 combines HCL 1.0 and <a href=https://github.com/hashicorp/hil>HIL</a>, so that we can interpolate values directly:</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-hcl data-lang=hcl><span style=color:#60a0b0;font-style:italic># Arithmetic with literals and application-provided variables
+</span><span style=color:#60a0b0;font-style:italic></span>sum <span style=color:#666>=</span> <span style=color:#40a070>1</span> <span>+</span> <span style=color:#007020;font-weight:700>addend</span><span style=color:#60a0b0;font-style:italic>
+</span><span style=color:#60a0b0;font-style:italic>
+</span><span style=color:#60a0b0;font-style:italic># String interpolation and templates
+</span><span style=color:#60a0b0;font-style:italic></span>message <span style=color:#666>=</span> <span style=color:#4070a0>&#34;Hello, ${name}!&#34;</span><span style=color:#60a0b0;font-style:italic>
+</span><span style=color:#60a0b0;font-style:italic>
+</span><span style=color:#60a0b0;font-style:italic># Application-provided functions
+</span><span style=color:#60a0b0;font-style:italic></span>shouty_message <span style=color:#666>=</span> <span style=color:#007020;font-weight:700>upper</span>(<span style=color:#007020;font-weight:700>message</span>)
+</code></pre></div><p><a href=https://github.com/hashicorp/hcl/tree/hcl2>HCL</a> is both user and developer-friendly, not registered or missing block will be warned, so the developer doesn&rsquo;t need to guess the reason why config parse failed:</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>TestParse: config_test.<span style=color:#007020;font-weight:700>go</span>:<span style=color:#40a070>45</span>: test.hcl:<span style=color:#40a070>1</span>,<span style=color:#40a070>1</span><span style=color:#666>-</span><span style=color:#40a070>1</span>: Missing required argument; The argument <span style=color:#4070a0>&#34;name&#34;</span> is required, but no definition was found., and <span style=color:#40a070>1</span> other <span style=color:#06287e>diagnostic</span>(s)
+</code></pre></div><h2 id=syntax>Syntax</h2><p>To get started quickly, we will not cover every syntax in <a href=https://github.com/hashicorp/hcl/blob/hcl2/hclsyntax/spec.md>HCL Native Syntax Specification</a>. Instead, we focused on the most used subset of <em>structural</em> language.</p><h3 id=attributes-and-blocks>Attributes and Blocks</h3><p>HCL is built around two constructs: attributes and blocks.</p><p>An <code>attribute</code> means to assign a value to a name.</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-hcl data-lang=hcl>io_mode <span style=color:#666>=</span> <span style=color:#4070a0>&#34;async&#34;</span>
+debug <span style=color:#666>=</span> <span style=color:#902000>false</span>
+max_size <span style=color:#666>=</span> <span style=color:#40a070>1024</span> <span>*</span> <span style=color:#40a070>1024</span>
+ratio <span style=color:#666>=</span> <span style=color:#40a070>0</span>.<span style=color:#40a070>7</span>
+placehold <span style=color:#666>=</span> <span style=color:#007020;font-weight:700>null</span>
+command <span style=color:#666>=</span> [<span style=color:#4070a0>&#34;/usr/local/bin/awesome-app&#34;, &#34;server&#34;</span>]
+rules <span style=color:#666>=</span> {
+  <span style=color:#007020;font-weight:700>mainland</span><span>:</span> <span style=color:#4070a0>&#34;mainland&#34;</span>,
+  <span style=color:#007020;font-weight:700>default</span><span>:</span> <span style=color:#4070a0>&#34;oversea&#34;</span>
+}
+</code></pre></div><p>The <code>identifier</code> before the equals sign is the <code>attribute</code> name, and the <code>expression</code> after the equals sign is the <code>attribute</code>'s value.</p><p>A block creates a child body annotated by a type and optional labels, and block&rsquo;s content consists of a collection of attributes and blocks.</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-hcl data-lang=hcl><span style=color:#007020;font-weight:700>service</span> <span style=color:#4070a0>&#34;http&#34; &#34;web_proxy&#34;</span> {
+  listen_addr <span style=color:#666>=</span> <span style=color:#4070a0>&#34;127.0.0.1:8080&#34;</span>
+  
+  <span style=color:#007020;font-weight:700>process</span> {
+    command <span style=color:#666>=</span> [<span style=color:#4070a0>&#34;/usr/local/bin/awesome-app&#34;, &#34;server&#34;</span>]
+  }
+}
+</code></pre></div><p><code>service</code> here defines a type with two required labels: every <code>service</code> following should have two <code>labels</code>. A particular block type may have any number of required labels, or it may require none as with the nested <code>process</code> block type.</p><p>A block&rsquo;s body content is delimited by <code>{</code> and <code>}</code>. Within the block body, further <code>attributes</code> and <code>blocks</code> may be nested, creating a hierarchy of blocks and their associated attributes.</p><h3 id=identifiers>Identifiers</h3><p><code>identifier</code> is the name for <code>attribute</code> and <code>block</code> types.</p><p>Identifiers can contain letters, digits, underscores (<code>_</code>), and hyphens (<code>-</code>). The first character of an identifier must not be a digit, to avoid ambiguity with literal numbers.</p><h3 id=comments>Comments</h3><ul><li><code>#</code> begins a single-line comment, ending at the end of the line.</li><li><code>//</code> also begins a single-line comment, as an alternative to #.</li><li><code>/*</code> and <code>*/</code> start and end delimiters for a comment that might span over multiple lines.</li></ul><h3 id=other-tips>Other tips</h3><ul><li>MUST be UTF-8 encoding</li><li>Invalid or non-normalized UTF-8 encoding is always a parse error</li><li>No limit for line endings, but prefer <code>LF</code> for most case</li></ul><h2 id=using-in-a-project>Using in a project</h2><p>In this section, we will use <code>hcl</code> in a project. This project is designed to route DNS requests to different upstream via rules, different upstream could have different config.</p><blockquote><p>All example code is in <code>github.com/Xuanwo/hcl2-example</code></p></blockquote><h3 id=config-design>Config design</h3><p>The config format we desired could be:</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-hcl data-lang=hcl>listen <span style=color:#666>=</span> <span style=color:#4070a0>&#34;127.0.0.1:53&#34;</span>
+
+
+<span style=color:#007020;font-weight:700>upstream</span> <span style=color:#4070a0>&#34;oversea&#34;</span> {
+  type <span style=color:#666>=</span> <span style=color:#4070a0>&#34;dot&#34;</span>
+  addr <span style=color:#666>=</span> <span style=color:#4070a0>&#34;185.222.222.222:853&#34;</span>
+  tls_server_name <span style=color:#666>=</span> <span style=color:#4070a0>&#34;public-dns-a.dns.sb&#34;</span>
+}
+
+<span style=color:#007020;font-weight:700>upstream</span> <span style=color:#4070a0>&#34;mainland&#34;</span> {
+  type <span style=color:#666>=</span> <span style=color:#4070a0>&#34;udp&#34;</span>
+  addr <span style=color:#666>=</span> <span style=color:#4070a0>&#34;114.114.114.114:53&#34;</span>
+}
+
+rules <span style=color:#666>=</span> {
+  <span style=color:#007020;font-weight:700>to_mainland</span><span>:</span> <span style=color:#4070a0>&#34;mainland&#34;</span>,
+  <span style=color:#007020;font-weight:700>default</span><span>:</span> <span style=color:#4070a0>&#34;oversea&#34;</span>
+}
+</code></pre></div><h3 id=implementation>Implementation</h3><p>Firstly, we need to declare our config struct:</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>type</span> Config <span style=color:#007020;font-weight:700>struct</span> {
+   Listen    <span style=color:#902000>string</span>            <span style=color:#4070a0>`hcl:&#34;listen&#34;`</span>
+   Upstreams []<span style=color:#666>*</span>Upstream       <span style=color:#4070a0>`hcl:&#34;upstream,block&#34;`</span>
+   Rules     <span style=color:#007020;font-weight:700>map</span>[<span style=color:#902000>string</span>]<span style=color:#902000>string</span> <span style=color:#4070a0>`hcl:&#34;rules&#34;`</span>
+}
+
+<span style=color:#007020;font-weight:700>type</span> Upstream <span style=color:#007020;font-weight:700>struct</span> {
+   Name    <span style=color:#902000>string</span>   <span style=color:#4070a0>`hcl:&#34;,label&#34;`</span>
+   Type    <span style=color:#902000>string</span>   <span style=color:#4070a0>`hcl:&#34;type&#34;`</span>
+   Addr    <span style=color:#902000>string</span>   <span style=color:#4070a0>`hcl:&#34;addr&#34;`</span>
+   Options hcl.Body <span style=color:#4070a0>`hcl:&#34;,remain&#34;`</span>
+}
+</code></pre></div><p>The tags are formatted as in the following example:</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>ThingType <span style=color:#902000>string</span> <span style=color:#4070a0>`hcl:&#34;thing_type,attr&#34;`</span>
+</code></pre></div><p>The first is the name of the corresponding construct in configuration, while the second is a keyword giving the kind of construct expected. <code>gohcl</code> supports the following keywords:</p><ul><li><code>attr</code>: default if empty, indicates that the value is to be populated from an attribute</li><li><code>block</code>: indicates that the value is to populated from a block</li><li><code>label</code>: indicates that the value is to populated from a block label</li><li><code>optional</code>: is the same as attr, but the field is optional</li><li><code>remain</code>: indicates that the value is to be populated from the remaining body after populating other fields</li></ul><p>More tips:</p><ul><li><code>remain</code>'s corresponding type should be <code>hcl.Body</code> or <code>hcl.Attributes</code></li><li>If there is no <code>remain</code> field, any attributes or blocks not matched will cause an error</li><li>All fields are required as default except they have an <code>optional</code> keyword</li></ul><p>Secondly, we need to parse the config to get a <code>hcl.Body</code>:</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>var</span> diags hcl.Diagnostics
+
+file, diags <span style=color:#666>:=</span> hclsyntax.<span style=color:#06287e>ParseConfig</span>(src, filename, hcl.Pos{Line: <span style=color:#40a070>1</span>, Column: <span style=color:#40a070>1</span>})
+<span style=color:#007020;font-weight:700>if</span> diags.<span style=color:#06287e>HasErrors</span>() {
+    <span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>nil</span>, fmt.<span style=color:#06287e>Errorf</span>(<span style=color:#4070a0>&#34;config parse: %w&#34;</span>, diags)
+}
+</code></pre></div><ul><li><code>src</code> is the config file&rsquo;s content in <code>[]byte</code> slice</li><li><code>filename</code> is used for debugging</li></ul><p><code>Diagnostic</code> is the struct used by <code>hcl</code> for representing information to be presented to a user about an error or anomaly in parsing or evaluating configuration, and <code>Diagnostics</code> is a slice of <code>Diagnostic</code>. All <code>hcl</code> functions will return <code>Diagnostics</code> instead of <code>error</code>, developers should check error by <code>diags.HasErrors()</code> instead of <code>err != nil</code>.</p><p>Finally, we can decode body into a struct:</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>c = <span style=color:#666>&amp;</span>Config{}
+
+diags = gohcl.<span style=color:#06287e>DecodeBody</span>(file.Body, <span style=color:#007020;font-weight:700>nil</span>, c)
+<span style=color:#007020;font-weight:700>if</span> diags.<span style=color:#06287e>HasErrors</span>() {
+    <span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>nil</span>, fmt.<span style=color:#06287e>Errorf</span>(<span style=color:#4070a0>&#34;config parse: %w&#34;</span>, diags)
+}
+</code></pre></div><p>To support different upstream type, we may want to delay the <code>hcl.Body</code> parse so that we can get strongly typed config struct:</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#007020;font-weight:700>type</span> client <span style=color:#007020;font-weight:700>struct</span> {
+   cfg <span style=color:#666>*</span>Upstream
+
+   <span style=color:#60a0b0;font-style:italic>// DoT related config
+</span><span style=color:#60a0b0;font-style:italic></span>   TLSServerName <span style=color:#902000>string</span> <span style=color:#4070a0>`hcl:&#34;tls_server_name,optional&#34;`</span>
+}
+
+<span style=color:#007020;font-weight:700>func</span> <span style=color:#06287e>NewClient</span>(cfg <span style=color:#666>*</span>Upstream) (<span style=color:#666>*</span>client, <span style=color:#902000>error</span>) {
+   c <span style=color:#666>:=</span> <span style=color:#666>&amp;</span>client{cfg: cfg}
+
+   <span style=color:#007020;font-weight:700>var</span> diags hcl.Diagnostics
+   diags = gohcl.<span style=color:#06287e>DecodeBody</span>(cfg.Options, <span style=color:#007020;font-weight:700>nil</span>, c)
+   <span style=color:#007020;font-weight:700>if</span> diags.<span style=color:#06287e>HasErrors</span>() {
+      <span style=color:#007020;font-weight:700>return</span> <span style=color:#007020;font-weight:700>nil</span>, fmt.<span style=color:#06287e>Errorf</span>(<span style=color:#4070a0>&#34;new domain list: %w&#34;</span>, diags)
+   }
+
+   <span style=color:#007020;font-weight:700>return</span> c, <span style=color:#007020;font-weight:700>nil</span>
+}
+</code></pre></div><p>One great feature for hcl is the clear error message, take the <code>TestParseMissingField</code> as an example, we are missing a <code>addr</code> here:</p><div class=highlight><pre style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#666>==</span>= RUN   TestParseMissingField
+    TestParseMissingField: main_test.<span style=color:#007020;font-weight:700>go</span>:<span style=color:#40a070>35</span>: config parse: testdata<span style=color:#666>/</span><span style=color:#40a070>2.</span>hcl:<span style=color:#40a070>9</span>,<span style=color:#40a070>20</span><span style=color:#666>-</span><span style=color:#40a070>20</span>: Missing required argument; The argument <span style=color:#4070a0>&#34;addr&#34;</span> is required, but no definition was found.
+<span style=color:#666>---</span> FAIL: <span style=color:#06287e>TestParseMissingField</span> (<span style=color:#40a070>0.00</span>s)
+FAIL
+</code></pre></div><h2 id=conclusion>Conclusion</h2><p><a href=https://github.com/hashicorp/hcl/tree/hcl2>HCL</a> is a <strong>strong type</strong>, <strong>strictly restricted</strong>, <strong>human readable</strong>, <strong>developer friendly</strong> configuration language which suitable for rich configuration application.</p><h2 id=references>References</h2><ul><li>Terraform&rsquo;s <a href=https://www.terraform.io/docs/configuration/syntax.html>Configuration Syntax</a> introduce (partial contents and structure copied here for no more web pages)</li><li><a href=https://github.com/hashicorp/hcl/blob/hcl2/hclsyntax/spec.md>HCL Native Syntax Specification</a></li></ul></div><div id=disqus_thread></div><script type=application/javascript async>let disqus_config=function(){this.page.identifier='\/2020\/04\/13\/get-started-with-hcl2\/';this.page.title='Get Started with HCL2';this.page.url='https:\/\/xuanwo.io\/2020\/04\/13\/get-started-with-hcl2\/';};(function(){let d=document,s=d.createElement('script');s.async=true;s.src='//only0god.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script></article></main><footer class="footer container"><a class=main-nav-link href=/categories/>Categories</a>
+<a class=main-nav-link href=/tags/>Tags</a>
+<a class=main-nav-link href=/series/>Series</a>
+<a class=main-nav-link href=/blogroll/>Blogroll</a>
+<a class=main-nav-link href=/index.xml>Subscribe</a>
+<script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-51515330-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script></footer></body></html>
