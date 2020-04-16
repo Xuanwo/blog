@@ -5,6 +5,7 @@
     {{ $scratch.Add "data" (getJSON $path) }}
     {{ $scratch.Add "length" (len ($scratch.Get "data")) }}
 {{ else }}
+    {{ $scratch.Add "data" slice }}
     {{ $scratch.Add "length" 0 }}
 {{ end }}
 <div id="gitalk-container">
@@ -17,7 +18,7 @@
             <a class="gt-avatar-github"><span class="gt-avatar gt-comment-avatar"><img src="https://www.gravatar.com/avatar/"></span></a>
             <div class="gt-header-comment">
                 <form class="gt-header-form" target="comment-iframe" method="post" action="{{ $.Site.Params.gitqusEndpoint }}">
-                    <input type="hidden" name="slug" value="static{{ .RelPermalink }}">
+                    <input type="hidden" name="slug" value="{{ .RelPermalink }}">
                     <input class="gt-header-input" type="text" name="name" placeholder="Name" required>
                     <input class="gt-header-input" type="email" name="email" placeholder="Email" required>
                     <textarea class="gt-header-textarea" name="content" placeholder="Leave a comment"></textarea>
@@ -31,7 +32,8 @@
         </div>
 
         <div class="gt-comments">
-            {{ range $index, $comments := $scratch.Get "data" }}
+            {{ $data := $scratch.Get "data" }}
+            {{ range $index, $comments := sort $data "created_at" "desc" }}
                 <div class="gt-comment gt-comment-admin">
                     <div class="gt-avatar gt-comment-avatar">
                         <img src="https://www.gravatar.com/avatar/{{ .email }}">
