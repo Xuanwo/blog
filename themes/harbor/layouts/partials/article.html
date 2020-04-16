@@ -7,29 +7,24 @@
 
                 <div class="post-meta">
                     <time class="date" datetime='{{ .Date.Format "2006-01-02T15:04:05.000-07:00" }}' itemprop="datePublished">{{ .Date.Format "2006-01-02" }}</time>
-                    {{ if .Site.DisqusShortname }}
-                    /
-<!--                    <span>-->
-<!--                        <a href="#disqus_thread" class="comment-link">Comments</a>-->
-<!--                    </span>-->
-                    {{ end }}
                 </div>
                 <div class="tag-container">
                     {{ range .Params.tags }}
-                    <a style="text-decoration:none" href="{{ $Site.BaseURL}}/tags/{{ . | urlize }}">
-                        <span>{{ . }}</span>
-                    </a>
+                        <a style="text-decoration:none" href="{{ $Site.BaseURL}}/tags/{{ . | urlize }}">
+                            <span>{{ . }}</span>
+                        </a>
                     {{ end }}
                 </div>
             </div>
         </header>
         <div class="post">
             {{ if .Params.series }}
-            <blockquote>
-                {{ $e := .Params.series }}
-                <p>This post is the {{ range $index, $element := index .Site.Taxonomies.series ($e | urlize) }} {{ if eq $element.Title $.Title }} {{sub (.Site.Taxonomies.series.Count ($e | urlize)) $index }}{{ end }}{{end}} / {{ .Site.Taxonomies.series.Count ($e | urlize) }} post in <a href="{{ $Site.BaseURL }}/series/{{ $e | urlize }}">{{ $e }}</a> Series.
-                </p>
-            </blockquote>
+                <blockquote>
+                    {{ $e := .Params.series }}
+                    <p>This post is the {{ range $index, $element := index .Site.Taxonomies.series ($e | urlize) }} {{ if eq $element.Title $.Title }} {{sub (.Site.Taxonomies.series.Count ($e | urlize)) $index }}{{ end }}{{end}} / {{ .Site.Taxonomies.series.Count ($e | urlize) }} post in
+                        <a href="{{ $Site.BaseURL }}/series/{{ $e | urlize }}">{{ $e }}</a> Series.
+                    </p>
+                </blockquote>
             {{ end }}
             {{ .Content }}
         </div>

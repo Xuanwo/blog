@@ -16,15 +16,17 @@
         <div class="gt-header">
             <a class="gt-avatar-github"><span class="gt-avatar gt-comment-avatar"><img src="https://www.gravatar.com/avatar/"></span></a>
             <div class="gt-header-comment">
-                <form class="gt-header-form">
-                    <input class="gt-header-input" type="text" placeholder="Name" required>
-                    <input class="gt-header-input" type="email" placeholder="Email" required>
-                    <textarea class="gt-header-textarea" placeholder="Leave a comment"></textarea>
-                </form>
+                <form class="gt-header-form" target="comment-iframe" method="post" action="{{ $.Site.Params.gitqusEndpoint }}">
+                    <input type="hidden" name="slug" value="static{{ .RelPermalink }}">
+                    <input class="gt-header-input" type="text" name="name" placeholder="Name" required>
+                    <input class="gt-header-input" type="email" name="email" placeholder="Email" required>
+                    <textarea class="gt-header-textarea" name="content" placeholder="Leave a comment"></textarea>
 
-                <div class="gt-header-controls">
-                    <button class="gt-btn"><span class="gt-btn-text">Submit</span></button>
-                </div>
+                    <div class="gt-header-controls">
+                        <button class="gt-btn"><span class="gt-btn-text">Submit</span></button>
+                    </div>
+                    <iframe name="comment-iframe" hidden id="frame"></iframe>
+                </form>
             </div>
         </div>
 
