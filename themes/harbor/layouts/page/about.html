@@ -9,16 +9,8 @@
         <div class="post">
             {{ .Content }}
         </div>
-        {{ partial "comment.html" . }}
     </div>
 </main>
 {{ partial "footer.html" . }}
-
-{{ $github := resources.Get "javascript/github.js" | resources.Minify | resources.Fingerprint }}
-{{ if .Site.IsServer }}
-<script src="{{ $github.Permalink }}" defer></script>
-{{ else }}
-<script src="{{ $github.Permalink }}" integrity="{{ $github.Data.Integrity }}" defer></script>
-{{ end }}
 </body>
 </html>
