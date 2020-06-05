@@ -1,37 +1,28 @@
-{{ partial "head.html" . }}
-<body>
-{{ partial "header.html" . }}
-
-<main id="main-content">
-    <div class="container">
-        <div class="lead">
-            <h1>Hi, 我是漩涡</h1>
+{{ define "main" }}
+    <div class="container py-16 mx-auto max-w-3xl px-3">
+        <div class="justify-center">
+            <div class="">
+                <h1>Hi, 我是漩涡</h1>
+            </div>
         </div>
+        <ul class="list-reset mb-8">
+            {{ $categories := slice "Code" "Daily" "Game" "Travel" }}
+            {{ range $value := $categories }}
+                {{- if where $.Site.Pages "Params.categories" $value}}
+                    <div class="mt-12 mb-2">
+                        <h2 class="inline btn">{{ $value }}</h2>
+                    </div>
+                    {{range first 5 (where $.Site.Pages "Params.categories" $value) }}
+                        <li class="mb-6">
+                            <h2 class="font-semibold m-0 leading-tight">
+                                <a class="text-black" href="{{ .RelPermalink }}">
+                                    <span>{{ .Title }}</span>
+                                </a>
+                            </h2>
+                        </li>
+                    {{ end }}
+                {{- end }}
+            {{ end }}
+        </ul>
     </div>
-    <div class="container front-page">
-        {{ $categories := slice "Code" "Daily" "Game" "Travel" }}
-        {{ range $value := $categories }}
-            {{- if where $.Site.Pages "Params.categories" $value}}
-                <section class="section">
-                    <h2>{{ $value }}</h2>
-                    <section class="posts simple">
-                        {{range first 5 (where $.Site.Pages "Params.categories" $value) }}
-                            <a href="{{ .RelPermalink }}">
-                                <div class="each">
-                                    <div>
-                                        <h2> {{ .Title }}</h2>
-                                    </div>
-                                </div>
-                            </a>
-                        {{ end }}
-                    </section>
-                </section>
-            {{- end }}
-        {{ end }}
-    </div>
-</main>
-
-{{ partial "footer.html" . }}
-
-</body>
-</html>
+{{end}}

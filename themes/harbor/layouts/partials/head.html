@@ -7,12 +7,29 @@
     {{ partial "og.html" . }}
 
     <link rel="shortcut icon" href="/favicon.ico">
-    {{ $style := resources.Get "css/main.sass" | resources.ToCSS | resources.Minify | resources.Fingerprint }}
+    {{ $style := resources.Get "css/output.css" | minify | fingerprint | resources.PostProcess }}
     {{ if .Site.IsServer }}
-    <link rel="stylesheet" href="{{ $style.RelPermalink }}">
+        <link rel="stylesheet" href="{{ $style.RelPermalink }}">
     {{ else }}
-    <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}">
+        <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}">
     {{ end }}
+
+    {{ $fas := resources.Get "javascript/fontawesome.js" | minify | fingerprint | resources.PostProcess }}
+    {{ if .Site.IsServer }}
+    <script defer src="{{ $fas.RelPermalink }}"></script>
+    {{ else }}
+    <script defer src="{{ $fas.RelPermalink }}" integrity="{{ $fas.Data.Integrity }}"></script>
+    {{ end }}
+
+    {{ $algolia := resources.Get "javascript/algolia_search.js" | minify | fingerprint | resources.PostProcess }}
+    {{ if .Site.IsServer }}
+    <script defer src="{{ $algolia.RelPermalink }}"></script>
+    {{ else }}
+    <script defer src="{{ $algolia.RelPermalink }}" integrity="{{ $algolia.Data.Integrity }}"></script>
+    {{ end }}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7.4.2/themes/algolia-min.css" integrity="sha256-HB49n/BZjuqiCtQQf49OdZn63XuKFaxcIHWf0HNKte8=" crossorigin="anonymous">
+
     <link href="http://gmpg.org/xfn/11" rel="profile">
 
     {{ hugo.Generator }}

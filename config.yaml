@@ -8,6 +8,7 @@ paginate:           10000
 googleAnalytics:    "UA-51515330-1"
 
 defaultContentLanguage: zh-hans
+
 languages:
   zh-hans:
     title: 漩涡的博客
@@ -37,9 +38,21 @@ languages:
         - name: "友情链接"
           url: "/blogroll/"
           weight: 4
-        - name: "订阅"
+
+      icon:
+        - name: "rss"
           url: "/index.xml"
-          weight: 5
+          weight: 1
+        - name: "github"
+          url: "https://github.com/Xuanwo"
+          weight: 2
+        - name: "telegram-plane"
+          url: "https://t.me/xuanwo_read_later"
+          weight: 3
+        - name: "twitter"
+          url: "https://twitter.com/OnlyXuanwo"
+          weight: 4
+
   en-us:
     title: Xuanwo's Blog
     contentDir: content/en-US
@@ -72,6 +85,20 @@ languages:
           url: "/index.xml"
           weight: 5
 
+      icon:
+        - name: "rss"
+          url: "/index.xml"
+          weight: 1
+        - name: "github"
+          url: "https://github.com/Xuanwo"
+          weight: 2
+        - name: "telegram-plane"
+          url: "https://t.me/xuanwo_read_later"
+          weight: 3
+        - name: "twitter"
+          url: "https://twitter.com/OnlyXuanwo"
+          weight: 4
+
 markup:
   highlight:
     style: friendly
@@ -86,8 +113,22 @@ params:
     - Program
     - Linux
   description:      "A blog maintained by an interesting programmer."
+  algolia:
+    vars: ["title", "summary", "date", "publishdate", "expirydate", "permalink"]
+    params: ["categories", "tags"]
 
 taxonomies:
   tag:              "tags"
   category:         "categories"
   series:           "series"
+
+summaryLength: 500
+hasCJKLanguage: true
+outputs:
+  home: ["html", "rss", "algolia"]
+outputFormats:
+  algolia:
+    baseName: "algolia"
+    isPlainText: true
+    mediaType: "application/json"
+    notAlternative: true

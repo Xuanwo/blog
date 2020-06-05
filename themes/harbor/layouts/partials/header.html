@@ -1,12 +1,15 @@
-<nav class="nav">
-    <div class="nav-container">
-        <div class="brand">
-            <a href="{{ .Site.BaseURL | relLangURL }}">{{ .Site.Title }}</a>
+<header class="px-3 shadow">
+    <nav class="container max-w-6xl text-gray">
+        <div class="-my-2px py-4 flex flex-col lg:flex-row flex-wrap justify-between items-baseline">
+            <a class="mr-4 text-2xl text-gray-700 hover:no-underline flex-shrink-0 font-normal" href="{{ .Site.BaseURL | relLangURL }}">{{ .Site.Title }}</a>
+            <div class="flex flex-col lg:flex-row items-baseline w-full lg:w-auto">
+                {{ range .Site.Menus.main }}
+                    <a class="header-link flex-shrink-0 hover:no-underline hover:text-indigo-500 relative mr-8 my-2 lg:my-0 font-semibold text-gray-900" href="{{ .URL }}">{{ .Name }}</a>
+                {{ end }}
+                <div class="bg-white flex items-center rounded-full shadow-xl">
+                    <input id="search-box" type="text">
+                </div>
+            </div>
         </div>
-        <div class="links">
-            {{ range .Site.Menus.main }}
-            <a class="main-nav-link" href="{{ .URL }}">{{ .Name }}</a>
-            {{ end }}
-        </div>
-    </div>
-</nav>
+    </nav>
+</header>
