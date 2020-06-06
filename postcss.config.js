@@ -1,14 +1,11 @@
-const themeDir = __dirname
-
 const purgecss = require('@fullhuman/postcss-purgecss')({
-  // Specify the paths to all of the template files in your project
   content: [
-    themeDir + 'layouts/**/*.html',
     'layouts/**/*.html',
-    'content/**/*.html'
   ],
 
-  // This is the function used to extract class names from your templates
+  whitelist: ['.highlight'],
+  whitelistPatterns: [/^[a-z]/],
+
   defaultExtractor: (content) => {
     // Capture as liberally as possible, including things like `h-(screen-1.5)`
     const broadMatches = content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || []
@@ -22,13 +19,9 @@ const purgecss = require('@fullhuman/postcss-purgecss')({
 
 module.exports = {
   plugins: [
-    require('postcss-import')({
-      path: [themeDir]
-    }),
-    require('tailwindcss')(themeDir + '/tailwind.config.js'),
-    require('autoprefixer')({
-      path: [themeDir]
-    }),
+    require('postcss-import'),
+    require('tailwindcss'),
+    require('autoprefixer'),
     purgecss
   ]
 }
