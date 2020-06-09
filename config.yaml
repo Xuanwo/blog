@@ -1,13 +1,13 @@
 baseURL:            "https://xuanwo.io"
 languageCode:       "zh-Hans"
 title:              "Xuanwo's Blog"
-theme:              "harbor"
 paginate:           10000
 
 # Site config
 googleAnalytics:    "UA-51515330-1"
 
 defaultContentLanguage: zh-hans
+
 languages:
   zh-hans:
     title: 漩涡的博客
@@ -17,29 +17,41 @@ languages:
         - name: "关于我"
           url: "/about/"
           weight: 1
-        - name: "所有文章"
-          url: "/posts/"
-          weight: 2
         - name: "English Version"
           url: "/en-us/"
-          weight: 3
+          weight: 2
 
       footer:
+        - name: "归档"
+          url: "/archives/"
+          weight: 1
         - name: "分类"
           url: "/categories/"
-          weight: 1
+          weight: 2
         - name: "标签"
           url: "/tags/"
-          weight: 2
+          weight: 3
         - name: "系列"
           url:  "/series/"
-          weight: 3
-        - name: "友情链接"
-          url: "/blogroll/"
           weight: 4
-        - name: "订阅"
-          url: "/index.xml"
+        - name: "友链"
+          url: "/blogroll/"
           weight: 5
+
+      icon:
+        - name: "rss"
+          url: "/index.xml"
+          weight: 1
+        - name: "github"
+          url: "https://github.com/Xuanwo"
+          weight: 2
+        - name: "telegram-plane"
+          url: "https://t.me/xuanwo_read_later"
+          weight: 3
+        - name: "twitter"
+          url: "https://twitter.com/OnlyXuanwo"
+          weight: 4
+
   en-us:
     title: Xuanwo's Blog
     contentDir: content/en-US
@@ -48,29 +60,40 @@ languages:
         - name: "About"
           url: "/en-us/about/"
           weight: 1
-        - name: "Posts"
-          url: "/en-us/posts/"
-          weight: 2
         - name: "中文版本"
           url: "/"
-          weight: 3
+          weight: 2
 
       footer:
+        - name: "Archives"
+          url: "/archives/"
+          weight: 1
         - name: "Categories"
           url: "/categories/"
-          weight: 1
+          weight: 2
         - name: "Tags"
           url: "/tags/"
-          weight: 2
+          weight: 3
         - name: "Series"
           url:  "/series/"
-          weight: 3
+          weight: 4
         - name: "Blogroll"
           url: "/blogroll/"
-          weight: 4
-        - name: "Subscribe"
-          url: "/index.xml"
           weight: 5
+
+      icon:
+        - name: "rss"
+          url: "/index.xml"
+          weight: 1
+        - name: "github"
+          url: "https://github.com/Xuanwo"
+          weight: 2
+        - name: "telegram-plane"
+          url: "https://t.me/xuanwo_read_later"
+          weight: 3
+        - name: "twitter"
+          url: "https://twitter.com/OnlyXuanwo"
+          weight: 4
 
 markup:
   highlight:
@@ -86,8 +109,22 @@ params:
     - Program
     - Linux
   description:      "A blog maintained by an interesting programmer."
+  algolia:
+    vars: ["title", "summary", "date", "publishdate", "expirydate", "permalink"]
+    params: ["categories", "tags"]
 
 taxonomies:
   tag:              "tags"
   category:         "categories"
   series:           "series"
+
+summaryLength: 500
+hasCJKLanguage: true
+outputs:
+  home: ["html", "rss", "algolia"]
+outputFormats:
+  algolia:
+    baseName: "algolia"
+    isPlainText: true
+    mediaType: "application/json"
+    notAlternative: true

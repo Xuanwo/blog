@@ -1,0 +1,32 @@
+{{ define "main" }}
+    <article class="container pt-16">
+        {{ $Site := .Site }}
+        <header class="pb-4 mb-8 border-b">
+            <h1 class="my-2 text-black leading-tight">{{ .Title }}</h1>
+            <ul class="mb-0 pb-0 text-sm text-grey-500">
+                <li class="block sm:inline-block mr-3">
+                    <time class="text-lg font-light" datetime='{{ .Date.Format "2006-01-02T15:04:05.000-07:00" }}' itemprop="datePublished">{{ .Date.Format "2006-01-02" }}</time>
+                </li>
+                <li class="block sm:inline-block mr-3">
+                    {{ range .Params.tags }}
+                        <a class="text-lg font-light" href="{{ $Site.BaseURL}}/tags/{{ . | urlize }}">
+                            <span>#{{ . }}</span>
+                        </a>
+                    {{ end }}
+                </li>
+            </ul>
+        </header>
+        <div class="post-content">
+            {{ if .Params.series }}
+                <blockquote>
+                    {{ $e := .Params.series }}
+                    <p>This post is the {{ range $index, $element := index .Site.Taxonomies.series ($e | urlize) }} {{ if eq $element.Title $.Title }} {{sub (.Site.Taxonomies.series.Count ($e | urlize)) $index }}{{ end }}{{end}} / {{ .Site.Taxonomies.series.Count ($e | urlize) }} post in
+                        <a href="{{ $Site.BaseURL }}/series/{{ $e | urlize }}">{{ $e }}</a> Series.
+                    </p>
+                </blockquote>
+            {{ end }}
+            {{ .Content }}
+        </div>
+    </article>
+
+{{ end }}

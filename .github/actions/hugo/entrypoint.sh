@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -13,18 +13,23 @@ export REMOTE_BRANCH="${GIT_BRANCH}"
 git config --global user.name "${GITHUB_ACTOR}"
 git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-mkdir -p public && cd public \
+mkdir -p public
+
+cd public \
 && git init \
 && git remote add deploy $REMOTE_REPO \
 && git fetch deploy \
 && git checkout $REMOTE_BRANCH \
-&& rm ./* -r
+&& rm ./* -r \
+&& popd
 
-cd .. && HUGO_ENV=production hugo --minify
+npm install
+HUGO_ENV=production hugo --minify
 
 cd public \
 && git add . \
 && git commit -m "Automated deployment to GitHub Pages on $(date +%s%3N)" \
-&& git push deploy $REMOTE_BRANCH --force
+&& git push deploy $REMOTE_BRANCH --force \
+&& popd
 
 rm /root/.ssh -r
