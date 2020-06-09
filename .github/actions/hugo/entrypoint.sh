@@ -15,7 +15,7 @@ git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
 mkdir -p public
 
-cd public \
+pushd public \
 && git init \
 && git remote add deploy $REMOTE_REPO \
 && git fetch deploy \
@@ -26,7 +26,7 @@ cd public \
 npm install
 HUGO_ENV=production hugo --minify
 
-cd public \
+pushd public \
 && git add . \
 && git commit -m "Automated deployment to GitHub Pages on $(date +%s%3N)" \
 && git push deploy $REMOTE_BRANCH --force \
