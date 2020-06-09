@@ -1,28 +1,23 @@
 {{ define "main" }}
-    <div class="container py-16 mx-auto px-3">
-        <div class="justify-center">
-            <div class="">
-                <h1>Hi, 我是漩涡</h1>
-            </div>
-        </div>
-        <ul class="list-reset mb-8">
-            {{ $categories := slice "Code" "Daily" "Game" "Travel" }}
-            {{ range $value := $categories }}
-                {{- if where $.Site.Pages "Params.categories" $value}}
-                    <div class="mt-12 mb-2">
-                        <h2 class="inline btn">{{ $value }}</h2>
-                    </div>
+    <div class="container py-16 mx-auto">
+        {{ $categories := slice "Code" "Daily" "Game" "Travel" }}
+        {{ range $value := $categories }}
+            {{- if where $.Site.Pages "Params.categories" $value}}
+                <div class="mt-8 mb-8">
+                    <h2>{{ $value }}</h2>
+                </div>
+                <ul>
                     {{range first 5 (where $.Site.Pages "Params.categories" $value) }}
-                        <li class="mb-6">
-                            <h2 class="font-semibold m-0 leading-tight">
-                                <a class="text-black" href="{{ .RelPermalink }}">
+                        <li class="hover:bg-gray-100 border-4 border-transparent rounded">
+                            <p class="p-1 lg:p-2">
+                                <a class="text-black leading-normal" href="{{ .RelPermalink }}">
                                     <span>{{ .Title }}</span>
                                 </a>
-                            </h2>
+                            </p>
                         </li>
                     {{ end }}
-                {{- end }}
-            {{ end }}
-        </ul>
+                </ul>
+            {{- end }}
+        {{ end }}
     </div>
 {{end}}
