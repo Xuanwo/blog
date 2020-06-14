@@ -1,7 +1,7 @@
 {{- $.Scratch.Add "index" slice -}}
 {{- $section := $.Site.GetPage "section" .Section }}
 {{- range .Site.AllPages -}}
-{{- if or (and (.IsDescendant $section) (and (not .Draft) (not .Params.private))) $section.IsHome -}}
+{{- if and (ne .Type "page") (eq .Kind "page") -}}
 {{- $.Scratch.Add "index" (dict "objectID" .RelPermalink "date" .Date.UTC.Unix "kind" .Kind "lang" .Lang "permalink" .Permalink "publishdate" .PublishDate "relpermalink" .RelPermalink "summary" (.Summary | plainify) "title" .Title "url" .RelPermalink "tags" .Params.Tags "categories" .Params.Categories)}}
 {{- end -}}
 {{- end -}}
