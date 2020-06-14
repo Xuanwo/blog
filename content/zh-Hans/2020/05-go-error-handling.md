@@ -111,3 +111,11 @@ func (e *Error) Unwrap() error {
       log.Print(e.Segment)
   }
   ```
+
+## 参考资料
+
+- [storage Proposal: Error Handling](https://storage.xuanwo.io/design/11-error-handling.html)
+- [storage Spec: Error Handling](https://storage.xuanwo.io/spec/1-error-handling.html)
+- [Go Blog: Error handling and Go](https://blog.golang.org/error-handling-and-go)
+- [Go Blog: Working with Errors in Go 1.13](https://blog.golang.org/go1.13-errors)
+- [The Error Model in Midori](http://joeduffyblog.com/2016/02/07/the-error-model/)
