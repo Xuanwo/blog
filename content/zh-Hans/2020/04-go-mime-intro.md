@@ -2,6 +2,8 @@
 categories: Code
 date: 2020-06-01T01:00:00Z
 title: go-mime 介绍以及踩坑记录
+tags:
+- golang
 ---
 
 上周花了一天时间写了一个 [MIME 检测](https://github.com/qingstor/go-mime) 的库，作用是能够根据后缀名来检测对应的 Media Type 类型，比如说输入 `pdf` 能够返回  `application/pdf`。本文介绍一下这个库以及开发过程中的踩坑记录。
