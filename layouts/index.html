@@ -1,23 +1,14 @@
 {{ define "main" }}
     <div class="container py-16 mx-auto">
-        {{ $categories := slice "Code" "Daily" "Game" "Travel" }}
-        {{ range $value := $categories }}
-            {{- if where $.Site.Pages "Params.categories" $value}}
-                <div class="my-8">
-                    <h2 class="text-center sm:text-left">{{ $value }}</h2>
-                </div>
-                <ul>
-                    {{range first 5 (where $.Site.Pages "Params.categories" $value) }}
-                        <a class="text-black leading-normal" href="{{ .RelPermalink }}">
-                            <li class="hover:bg-gray-100 border-4 border-transparent rounded">
-                                <p class="text-lg">
-                                    <span>{{ .Title }}</span>
-                                </p>
-                            </li>
-                        </a>
-                    {{ end }}
-                </ul>
-            {{- end }}
-        {{ end }}
+        <ul>
+            {{range first 10 $.Site.RegularPages }}
+                <li class="border-4 border-transparent rounded">
+                    <time class="text-sm text-gray-500" datetime="{{ .Date }}">{{ dateFormat "Jan 2, 2006"  .Date  }}</time>
+                    <a class="text-black hover:bg-gray-100" href="{{ .RelPermalink }}">
+                        <h2 class="font-normal">{{ .Title }}</h2>
+                    </a>
+                </li>
+            {{ end }}
+        </ul>
     </div>
 {{end}}
