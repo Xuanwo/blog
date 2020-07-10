@@ -2,6 +2,7 @@
 categories: Code
 date: 2020-06-01T01:00:00Z
 title: go-mime 介绍以及踩坑记录
+series: "Self-made Wheels"
 tags:
 - golang
 ---
