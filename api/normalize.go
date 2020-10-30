@@ -6,6 +6,12 @@ import (
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.String()
+	url = strings.ToLower(url)
+	if !strings.HasSuffix(url, "/") {
+		url += "/"
+	}
+
 	w.WriteHeader(http.StatusMovedPermanently)
-	w.Header().Add("Location", strings.ToLower(r.URL.String()))
+	w.Header().Add("Location", strings.ToLower(url))
 }
