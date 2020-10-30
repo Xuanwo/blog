@@ -14,7 +14,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// If url changed, we should redirect this request.
 	if url != r.URL.String() {
-		w.WriteHeader(http.StatusMovedPermanently)
 		w.Header().Add("Location", strings.ToLower(url))
+		w.WriteHeader(http.StatusMovedPermanently)
 	}
 }
