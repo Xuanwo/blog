@@ -80,7 +80,7 @@ Error: spawn ENOENT
 
 **问题描述：**
 
-![Github 404 孩子不哭](/imgs/opinion/Github-404.png)
+![Github 404 孩子不哭](/imgs/opinion/github-404.png)
 
 **解决方案：**
 
