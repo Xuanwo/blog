@@ -16,5 +16,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if url != r.URL.String() {
 		w.Header().Add("Location", strings.ToLower(url))
 		w.WriteHeader(http.StatusMovedPermanently)
+		_, _ = w.Write(nil)
 	}
 }
