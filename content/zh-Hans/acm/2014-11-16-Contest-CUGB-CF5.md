@@ -16,26 +16,26 @@ http://acm.hust.edu.cn/vjudge/contest/view.action?cid=62933#overview
 
 ## A题（字符串）
 贪心+乱搞，水过的题目。为了抢时间都没有测数据，幸运1A。
-http://xuanwo.io/2014/11/16/CF-11A/
+http://xuanwo.io/2014/11/16/cf-11a/
 
 ## B题（进制转换）
 机智+乱搞。
 这个题正好跟前面那场BC有点像，能过也有点运气成分。不过思路出来之后敲得有点慢，这个是弱点。水题要出的快，出的稳，这样才能保住铜牌，233333。
-http://xuanwo.io/2014/11/16/CF-9C/
+http://xuanwo.io/2014/11/16/cf-9c/
 
 ## C题（暴力）
 暴力+乱搞。
 这道题只要能正确的找出导致BUG的两类情况就能A，我少考虑了一种，WA了一发，2A。
-http://xuanwo.io/2014/11/16/CF-8B/
+http://xuanwo.io/2014/11/16/cf-8b/
 
 ## D题（字符串Hash，DP）
 字符串Hash+乱搞。
 开了一个好几个50万的数组乱搞，感谢CF不限制内存占用= =。
-http://xuanwo.io/2014/11/16/CF-7D/
+http://xuanwo.io/2014/11/16/cf-7d/
 
 ## E题（神DP）
 有一个神奇的递推公式，猜一猜，看RP，赛后出证明。
-http://xuanwo.io/2014/11/16/CF-9D/
+http://xuanwo.io/2014/11/16/cf-9d/
 
 
 # 更新日志

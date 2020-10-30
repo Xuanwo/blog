@@ -8,7 +8,7 @@ tags:
 - Hexo
 title: VPS搭配Github Webhook实现Hexo自动发布
 toc: true
-url: /2015/02/05/VPS-Hexo-Autodeploy/
+url: /2015/02/05/vpx-hexo-autodeploy/
 ---
 
 自从买了VPS之后，我的人生就多了一个需要思考的问题——我的VPS还能用来干嘛？然后想到Github有一个Webhook的功能，可以在每一次提交之后发送一个POST到指定的URL。那么，只要找一个办法获取这个POST，再执行指定的命令，可以实现Hexo的自动发布功能了。从此以后，不管在哪里，我只要修改我的md文件，push之后我的服务器就能自动进行编译并且部署了。

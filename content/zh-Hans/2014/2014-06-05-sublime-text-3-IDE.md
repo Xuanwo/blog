@@ -5,7 +5,7 @@ tags:
 - Software
 - C
 title: Sublime Text 3 化身为高大上的C/C++ IDE
-url: /2014/06/05/sublime-text-3-IDE/
+url: /2014/06/05/sublime-text-3-ide/
 ---
 
 我是一只有着小小的强迫症的苦逼菜鸟，敲代码追求一个爽快。原来一直在用Code::Blocks，虽然说是用C++开发的，效率很高，但是每次启动的时候总是要盯着它不怎么样的启动页看很久，不开心= =。这两天开始接触Sublime Text，顿时被迷住了，不管不顾的决定把它改造成一个狂霸酷拽屌的IDE，所以，走你～～

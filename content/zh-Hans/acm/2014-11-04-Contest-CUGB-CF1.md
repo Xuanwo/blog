@@ -16,24 +16,24 @@ http://acm.hust.edu.cn/vjudge/contest/view.action?cid=61581#overview
 # 分题讲解
 ## A题（纯水题）
 通过简单的分析就能搞定，一道比较简单的贪心。
-http://xuanwo.io/2014/11/03/CF-4B/
+http://xuanwo.io/2014/11/03/cf-4b/
 
 
 ## B题（DP）
 没做出来，一开始想的是DFS，但是没有处理好2跟5，以及出现0的一些情况。赛后看题解，才写出来使用DP的解法。
-http://xuanwo.io/2014/11/03/CF-2B/
+http://xuanwo.io/2014/11/03/cf-2b/
 
 ## C题（模拟）
 WA了很多发，比赛的时候考虑的还是太不全面，没能从正面解决.
-http://xuanwo.io/2014/11/02/CF-3C/
+http://xuanwo.io/2014/11/02/cf-3c/
 
 ## D题（计算几何）
 之前做过的题目，用到了海伦公式和计算圆心角知识。
-http://xuanwo.io/2014/10/21/CF-1C/
+http://xuanwo.io/2014/10/21/cf-1c/
 
 ## E题（贪心）
 用的贪心的思想，先使得所有的'?'都变为')'，再来处理合法性和最优化的问题。
-http://xuanwo.io/2014/11/03/CF-3D/
+http://xuanwo.io/2014/11/03/cf-3d/
 
 
 # 更新日志

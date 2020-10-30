@@ -16,21 +16,21 @@ http://acm.hust.edu.cn/vjudge/contest/view.action?cid=62931#overview
 # 分题讲解
 ## A题（阅读题）
 题意理解题，只要读懂题目就能A，并不是很难。
-http://xuanwo.io/2014/11/13/CF-9A/
+http://xuanwo.io/2014/11/13/cf-9a/
 
 ## B题（字符串）
 
 ## C题（模拟）
 感觉也是题意理解题，没有什么算法，只要模拟出翻面的操作就可以。
-http://xuanwo.io/2014/11/13/CF-7A/
+http://xuanwo.io/2014/11/13/cf-7a/
 
 ## D题（扩展欧几里得）
 用到了扩展欧几里得，模板题。
-http://xuanwo.io/2014/11/19/CF-7C/
+http://xuanwo.io/2014/11/19/cf-7c/
 
 ## E题（状态压缩DP）
 一开始不是特别明白，折腾了很久才看懂这个递推的公式。
-http://xuanwo.io/2014/11/19/CF-8C/
+http://xuanwo.io/2014/11/19/cf-8c/
 
 # 更新日志
 - 2014年11月19日 初稿。

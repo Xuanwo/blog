@@ -93,7 +93,7 @@ git --version
 
 打开[https://github.com/](https://github.com/)，在下图的框中，分别输入自己的用户名，邮箱，密码。
 
-![Github注册](/imgs/opinion/Github-sign-up.png)
+![Github注册](/imgs/opinion/github-sign-up.png)
 
 然后前往自己刚才填写的邮箱，点开Github发送给你的注册确认信，确认注册，结束注册流程。
 
@@ -103,23 +103,23 @@ git --version
 
 登陆之后，点击页面右上角的加号，选择`New repository`：
 
-![新建代码库](/imgs/opinion/Github-create-a-new-repo.png)
+![新建代码库](/imgs/opinion/github-create-a-new-repo.png)
 
 进入代码库创建页面：
 
 在`Repository name`下填写`yourname.github.io`，`Description (optional)`下填写一些简单的描述（不写也没有关系），如图所示：
 
-![代码库设置](/imgs/opinion/Github-new-repo-setting.png)
+![代码库设置](/imgs/opinion/github-new-repo-setting.png)
 
 正确创建之后，你将会看到如下界面：
 
-![新代码库的界面](/imgs/opinion/Github-new-repo-look-like.png)
+![新代码库的界面](/imgs/opinion/github-new-repo-look-like.png)
 
 ## 开启gh-pages功能
 
 点击界面右侧的`Settings`，你将会打开这个库的setting页面，向下拖动，直到看见`GitHub Pages`，如图：
 
-![Github pages](/imgs/opinion/Github-pages.png)
+![Github pages](/imgs/opinion/github-pages.png)
 
 点击`Automatic page generator`，Github将会自动替你创建出一个gh-pages的页面。
 如果你的配置没有问题，那么大约15分钟之后，`yourname.github.io`这个网址就可以正常访问了~
@@ -397,7 +397,7 @@ f1g1ns2.dnspod.net
 在自己本地的hexo目录下的`source`文件夹中，新建一个`CNAME`文件*（注意，没有后缀名。）*，内容为`yourdomin.xxx`。然后再执行一下`hexo d -g`，重新上传自己的博客。
 在github中打开你自己的库，进入库的setting界面，如果看到了如下提示，说明配置成功了。
 
-![Github-pages绑定自定义域名](/imgs/opinion/Github-domin.png)
+![Github-pages绑定自定义域名](/imgs/opinion/github-domin.png)
 
 在这一系列的操作中，包括修改NS服务器，设置A解析等等，都需要一定的时间。短则10分钟，长则24小时，最长不会超过72小时。如果超过72小时，请检查自己的配置过程，或者修改自己本地的DNS服务器。
 

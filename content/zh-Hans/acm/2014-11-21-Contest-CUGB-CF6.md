@@ -16,23 +16,23 @@ http://acm.hust.edu.cn/vjudge/contest/view.action?cid=63720#overview
 
 ## A题（暴力）
 没啥好说的，暴力乱搞。
-http://xuanwo.io/2014/11/21/CF-12A/
+http://xuanwo.io/2014/11/21/cf-12a/
 
 ## B题（暴力，排序）
 写得很挫- -，暴力乱搞过了，应该是数据弱。。
-http://xuanwo.io/2014/11/21/CF-12C/
+http://xuanwo.io/2014/11/21/cf-12c/
 
 ## C题（贪心）
 想清楚区间与区间之间的关系，并不是很难。
-http://xuanwo.io/2014/11/21/CF-14B/
+http://xuanwo.io/2014/11/21/cf-14b/
 
 ## D题（脑洞DP）
 这个DP也是神了，其实并没有怎么用到DP的思想，关键在于结论是怎样得出的。
-http://xuanwo.io/2014/11/21/CF-13C/
+http://xuanwo.io/2014/11/21/cf-13c/
 
 ## E题（树状数组）
 一碰到数据结构就A不了，只会暴力乱搞和开脑洞，太弱了。
-http://xuanwo.io/2014/11/21/CF-12D/
+http://xuanwo.io/2014/11/21/cf-12d/
 
 
 # 更新日志

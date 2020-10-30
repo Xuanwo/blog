@@ -3,7 +3,7 @@ categories: Code
 date: 2014-11-07T10:19:52Z
 title: CF拉练第二场
 toc: true
-url: /2014/11/07/Contest-CUGB-CF2/
+url: /2014/11/07/contest-cugb-cf2/
 ---
 
 ## 比赛地址
@@ -16,23 +16,23 @@ http://acm.hust.edu.cn/vjudge/contest/view.action?cid=62027#overview
 
 ## A题（模拟）
 没啥好说的，其实根本就不用判断人名是否相同。
-http://xuanwo.io/2014/11/05/CF-5A/
+http://xuanwo.io/2014/11/05/cf-5a/
 
 ## B题（模拟，字符串）
 注意理解题意，是左右摆动以保持平衡。
-http://xuanwo.io/2014/11/05/CF-5B/
+http://xuanwo.io/2014/11/05/cf-5b/
 
 ## C题（LIS）
 稍微变形一下的最长上升子序列就写不出来，说明做题太死板，不懂变通，要加强。
-http://xuanwo.io/2014/11/07/CF-4D/
+http://xuanwo.io/2014/11/07/cf-4d/
 
 ## D题（贪心）
 小心输出上的trick= =。
-http://xuanwo.io/2014/11/07/CF-3B/
+http://xuanwo.io/2014/11/07/cf-3b/
 
 ## E题（几何）
 论开脑洞的重要性，没有完善的证明。
-http://xuanwo.io/2014/11/06/CF-2C/
+http://xuanwo.io/2014/11/06/cf-2c/
 
 # 更新日志
 - 2014年11月7日 完成题解。

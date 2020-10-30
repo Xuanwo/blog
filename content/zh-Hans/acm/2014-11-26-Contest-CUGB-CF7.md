@@ -16,23 +16,23 @@ http://acm.hust.edu.cn/vjudge/contest/view.action?cid=63852#overview
 
 ## A题（暴力）
 从前后分别入手求出和，然后对应进行判断即可。
-http://xuanwo.io/2014/11/26/CF-18C/
+http://xuanwo.io/2014/11/26/cf-18c/
 
 ## B题（最短路）
 模板题，注意路径的输出。
-http://xuanwo.io/2014/11/26/CF-20C/
+http://xuanwo.io/2014/11/26/cf-20c/
 
 ## C题（数论）
 用到了GCD，只要找出原来的最简比例就可以了。
-http://xuanwo.io/2014/11/26/CF-16C/
+http://xuanwo.io/2014/11/26/cf-16c/
 
 ## D题（Nim博弈）
 用到了很多异或的性质，位运算果然是一门大学问。
-http://xuanwo.io/2014/11/26/CF-15C/
+http://xuanwo.io/2014/11/26/cf-15c/
 
 ## E题（DP，构造）
 这个题= =，还没有办法证明。
-http://xuanwo.io/2014/11/23/CF-15E/
+http://xuanwo.io/2014/11/23/cf-15e/
 
 
 # 更新日志
