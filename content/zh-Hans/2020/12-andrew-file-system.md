@@ -6,7 +6,7 @@ series: "Paper Reading"
 tags:
 - Distributed System
 - File System
-- CACM
+- Communications of the ACM
 ---
 
 ## 介绍
@@ -45,7 +45,7 @@ tags:
 
 ## 假设
 
-论文中研究和涉及主要基于以下假设：
+论文中研究和设计主要基于以下假设：
 
 - 大文件可能会存在，但是不多
 - 数据的分布稳定，不会经常发生变化
