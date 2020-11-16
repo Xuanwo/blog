@@ -65,9 +65,9 @@ Coda 的服务器端多副本实现如上图：
 
 #### 读取
 
-当客户端出现 cache miss 的时候，`Venus` 会从 `AVSG` 中挑选一个 `prefered server` 来传输数据。这个 server 可以是随机挑选的，也可以是根据负载等情况确定的。
+当客户端出现 cache miss 的时候，`Venus` 会从 `AVSG` 中挑选一个 `preferred server` 来传输数据。这个 server 可以是随机挑选的，也可以是根据负载等情况确定的。
 
-在下载完文件后，客户端会访问 `AVSG` 中的其他服务器以确认当前的 `prefered server` 的数据是不是有最新的，如果是的话读取流程结束，否则会将 `prefered server` 切换为有最新数据的 server 重新下载并通知整个 `AVSG` 以告知他们中有成员的副本不是最新的。
+在下载完文件后，客户端会访问 `AVSG` 中的其他服务器以确认当前的 `preferred server` 的数据是不是有最新的，如果是的话读取流程结束，否则会将 `preferred server` 切换为有最新数据的 server 重新下载并通知整个 `AVSG` 以告知他们中有成员的副本不是最新的。
 
 #### 写入
 
@@ -75,7 +75,7 @@ Coda 的服务器端多副本实现如上图：
 
 #### 缓存协商
 
-当客户端缓存好一个文件之后，客户端就会与 `prefered server` 建立一个回调，当这个文件发生修改的时候通知客户端这个文件已经被更新。
+当客户端缓存好一个文件之后，客户端就会与 `preferred server` 建立一个回调，当这个文件发生修改的时候通知客户端这个文件已经被更新。
 
 根据前面的信息我们知道不同客户端的 `preferred server` 可能是不同的，那么可能会出现这样的情况：另一个客户端更新了文件，但是 `preferred server` 没能成功通知当前客户端，比如说 `preferred server` 没有收到这个变更或者 `preferred server` 与当前客户端失连了。为了能够检测到这种故障，Coda 引入了 `version vector (volume CVV)` ：每次对 `Volume` 做修改操作的时候都会去更新 `volume CVV`，而每次客户端去探活的时候都会带上这个 `volume CVV`。当客户端发现自己的 `volume CVV` 对不上的时候，说明 `ASVG` 中有错过了 `Volume` 文件的更新，此时客户端会抛弃掉这个 `Volume` 所有的 `Callback`。
 
