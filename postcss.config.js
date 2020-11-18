@@ -4,8 +4,7 @@ const purgeCSS = require('@fullhuman/postcss-purgecss')({
   content: [
     'layouts/**/*.html'
   ],
-  whitelist: ['.highlight'],
-  whitelistPatterns: [/^[a-z]+$/g],
+  safelist: ['.highlight', /^[a-z]+$/g],
   extractors: [
     {
       extractor: purgeHTML,
