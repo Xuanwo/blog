@@ -1,8 +1,6 @@
 ---
 categories: Anime
 date: 2018-12-03T08:05:00Z
-tags:
-- 路人女主的养成方法
 title: 你好，加藤惠
 url: /2018/12/03/hello-katou-megumi/
 ---
