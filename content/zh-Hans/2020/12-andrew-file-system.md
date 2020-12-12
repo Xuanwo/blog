@@ -25,6 +25,7 @@ tags:
 - 下载链接
   - [ACM.org](https://dl.acm.org/doi/10.1145/5666.5671)
   - [SciHub](https://sci-hub.se/10.1145/5666.5671)
+  - [IPFS](https://ipfs.io/ipns/paper.xuanwo.io/Andrew:%20a%20distributed%20personal%20computing%20environment.pdf)
 
 显然的，发表于 1986 年的文章已经很难应用于当今的业界，参考价值也不高。我之所以将这篇文章翻出来，是想从本文出发看看这三十年间分布式存储的演进，或许能够对分布式存储领域有更深刻的理解。
 

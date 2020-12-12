@@ -22,6 +22,7 @@ tags:
   - [Dan Walsh](https://www.researchgate.net/scientific-contributions/Dan-Walsh-2163365764)
 - 下载链接
   - [ACM](https://dl.acm.org/doi/10.5555/59309.59338)
+  - [IPFS](https://ipfs.io/ipns/paper.xuanwo.io/The%20Sun%20Network%20Filesystem:%20Design,%20Implementation%20and%20Experience.pdf)
 
 ## 问题
 

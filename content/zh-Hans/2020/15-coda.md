@@ -25,6 +25,7 @@ tags:
 - 下载链接
   - [IEEE](https://ieeexplore.ieee.org/document/54838)
   - [SciHub](https://sci-hub.se/10.1109/12.54838)
+  - [IPFS](https://ipfs.io/ipns/paper.xuanwo.io/Coda:%20A%20Highly%20Available%20File%20System%20for%20a%20Distributed%20Workstation%20Environment.pdf)
 
 本论文是之前介绍过的 [Andrew File System](https://xuanwo.io/2020/12-andrew-file-system/) 的后续工作。
 
