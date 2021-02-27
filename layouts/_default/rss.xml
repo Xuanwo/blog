@@ -12,7 +12,7 @@
     {{ with .OutputFormats.Get "RSS" }}
         {{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType | safeHTML }}
     {{ end }}
-    {{ range first 10 .Site.RegularPages }}
+    {{ range first 10 (where .Paginator.Pages "Section" "!=" "reports") }}
     <item>
       <title>{{ .Title }}</title>
       <link>{{ .Permalink }}</link>
