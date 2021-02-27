@@ -1,1 +1,6 @@
-<img src="{{ .Destination | absURL | safeURL }}" alt="{{ .Text }}" />
+{{ $src := .Destination }}
+{{ if not (hasPrefix .Destination .Page.RelPermalink) }}
+{{ $src = path.Join .Page.RelPermalink .Destination }}
+{{ end }}
+
+<img src="{{ $src | safeURL }}" alt="{{ .Text }}" />
