@@ -130,7 +130,9 @@ func (cs *commentService) handleAuthorize(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusFound, AuthURL(state))
+	authURL := AuthURL(state)
+	log.Info("redirect to auth", zap.String("url", authURL))
+	c.Redirect(http.StatusFound, authURL)
 }
 
 func (cs *commentService) handleAuthorized(c *gin.Context) {
