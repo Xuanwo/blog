@@ -102,11 +102,13 @@ func (cs *commentService) register() {
 		MaxAge:           86400,
 	}))
 
-	cs.OPTIONS("", handleOptions)
-	cs.GET("/authorize", cs.handleAuthorize)
-	cs.GET("/authorized", cs.handleAuthorized)
-	cs.POST("/token", handleToken)
-	cs.POST("/repos/:repo/issues", cs.handleIssues)
+	csg := cs.Group("/api/comments")
+
+	csg.OPTIONS("", handleOptions)
+	csg.GET("/authorize", cs.handleAuthorize)
+	csg.GET("/authorized", cs.handleAuthorized)
+	csg.POST("/token", handleToken)
+	csg.POST("/repos/:repo/issues", cs.handleIssues)
 }
 
 func handleOptions(c *gin.Context) {
