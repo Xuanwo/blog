@@ -21,11 +21,22 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/github"
+)
+
+var (
+	log    *zap.Logger
+	config *oauth2.Config
+
+	commentSrv *commentService
 )
 
 const (
 	UtterancesBotToken      = "UTTERANCES_BOT_TOKEN"
 	UtterancesClientID      = "UTTERANCES_CLIENT_ID"
+	UtterancesClientSecret  = "UTTERANCES_CLIENT_SECRET"
 	UtterancesStatePassword = "UTTERANCES_STATE_PASSWORD"
 	UtterancesOrigins       = "UTTERANCES_ORIGINS"
 
@@ -263,4 +274,30 @@ func (cs *commentService) DecryptState(value string) (state State, err error) {
 		return State{}, err
 	}
 	return state, nil
+}
+
+func init() {
+	log, _ = zap.NewProduction()
+	config = &oauth2.Config{
+		ClientID:     os.Getenv(UtterancesClientID),
+		ClientSecret: os.Getenv(UtterancesClientSecret),
+		Endpoint:     github.Endpoint,
+	}
+
+	commentSrv = newCommentService()
+}
+
+func AuthURL(state string) string {
+	return config.AuthCodeURL(state)
+}
+
+func AccessToken(ctx context.Context, code string) (token *oauth2.Token, err error) {
+	return config.Exchange(ctx, code)
+}
+
+func Client(ctx context.Context, accessToken string) *http.Client {
+	return config.Client(ctx, &oauth2.Token{
+		AccessToken: accessToken,
+		TokenType:   "Bearer",
+	})
 }
