@@ -1,7 +1,20 @@
-<script src="https://comments.xuanwo.io/client.js"
-        repo="Xuanwo/blog"
-        issue-term="pathname"
-        theme="github-light"
-        crossorigin="anonymous"
-        async>
+<div id="gitalk-container"></div>
+{{ $gitalk := resources.Get "javascript/gitalk.min.js" | fingerprint | resources.PostProcess }}
+{{ if .Site.IsServer }}
+<script src="{{ $gitalk.RelPermalink }}"></script>
+{{ else }}
+<script src="{{ $gitalk.RelPermalink }}" integrity="{{ $gitalk.Data.Integrity }}"></script>
+{{ end }}
+<script>
+    const gitalk = new Gitalk({
+        clientID: 'Iv1.2ba19a444255b418',
+        clientSecret: 'a7d57d2dfab365d12c0ddd65fc69e65773beee83',
+        repo: 'blog',
+        owner: 'Xuanwo',
+        admin: ['Xuanwo'],
+        id: location.pathname,
+        distractionFreeMode: false
+    })
+
+    gitalk.render('gitalk-container')
 </script>
