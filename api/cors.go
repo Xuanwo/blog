@@ -30,7 +30,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			}
 		},
 		ModifyResponse: func(response *http.Response) error {
-			if response.StatusCode == http.StatusMovedPermanently {
+			// Don't redirect user while doing POST.
+			if response.StatusCode == http.StatusMovedPermanently &&
+				response.Request.Method == http.MethodPost {
 				response.Header.Set("Location", "/api/cors/")
 			}
 			return nil
