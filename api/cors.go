@@ -29,6 +29,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				req.Header.Set("User-Agent", "")
 			}
 		},
+		ModifyResponse: func(response *http.Response) error {
+			if response.StatusCode == http.StatusMovedPermanently {
+				response.Header.Set("Location", "/api/cors/")
+			}
+			return nil
+		},
 	}
 
 	c := cors.AllowAll()
