@@ -24,6 +24,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		r.URL.Host = GithubUrl.Host
 		r.URL.Path = GithubUrl.Path
 		r.URL.RawPath = GithubUrl.RawPath
+		// Also update host to make sure request sent correctly.
+		r.Host = GithubUrl.Host
+		r.Header.Set("Host", GithubUrl.Host)
 
 		resp, err := http.DefaultClient.Do(r)
 		if err != nil {
