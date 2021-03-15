@@ -1,9 +1,10 @@
 package api
 
 import (
+	"context"
+	"io"
 	"log"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"os"
 
@@ -14,33 +15,40 @@ var (
 	GithubUrl, _ = url.Parse("https://github.com/login/oauth/access_token")
 )
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	// Trick for gitalk.
-	r.Header.Add("Access-Control-Request-Method", "GET, POST")
+type transport struct{}
 
-	rp := httputil.ReverseProxy{
-		Director: func(req *http.Request) {
-			req.URL.Scheme = GithubUrl.Scheme
-			req.URL.Host = GithubUrl.Host
-			req.URL.Path = GithubUrl.Path
-			req.URL.RawPath = GithubUrl.RawPath
-			if _, ok := req.Header["User-Agent"]; !ok {
-				// explicitly disable User-Agent so it's not set to default value
-				req.Header.Set("User-Agent", "")
-			}
-		},
-		ModifyResponse: func(response *http.Response) error {
-			// Don't redirect user while doing POST.
-			if response.StatusCode == http.StatusMovedPermanently &&
-				response.Request.Method == http.MethodPost {
-				response.Header.Set("Location", "/api/cors/")
-			}
-			return nil
-		},
+func (tr *transport) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	r = r.Clone(context.Background())
+
+	// Replace to github.com
+	r.URL.Scheme = GithubUrl.Scheme
+	r.URL.Host = GithubUrl.Host
+	r.URL.Path = GithubUrl.Path
+	r.URL.RawPath = GithubUrl.RawPath
+
+	resp, err := http.DefaultClient.Do(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadGateway)
+		return
 	}
+	defer resp.Body.Close()
 
+	for key, value := range resp.Header {
+		for _, v := range value {
+			w.Header().Add(key, v)
+		}
+	}
+	w.WriteHeader(resp.StatusCode)
+
+	_, err = io.Copy(w, resp.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadGateway)
+		return
+	}
+}
+
+func Handler(w http.ResponseWriter, r *http.Request) {
 	c := cors.AllowAll()
 	c.Log = log.New(os.Stderr, "[cors] ", log.LstdFlags)
-
-	c.Handler(&rp).ServeHTTP(w, r)
+	c.Handler(&transport{}).ServeHTTP(w, r)
 }
