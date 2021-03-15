@@ -15,6 +15,9 @@ var (
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
+	// Trick for gitalk.
+	r.Header.Add("Access-Control-Request-Method", "GET, POST")
+
 	rp := httputil.ReverseProxy{
 		Director: func(req *http.Request) {
 			req.URL.Scheme = GithubUrl.Scheme
@@ -29,7 +32,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := cors.AllowAll()
-	c.Log = log.New(os.Stderr, "[cors]", log.LstdFlags)
+	c.Log = log.New(os.Stderr, "[cors] ", log.LstdFlags)
 
 	c.Handler(&rp).ServeHTTP(w, r)
 }
