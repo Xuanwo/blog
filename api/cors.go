@@ -19,16 +19,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		Director: func(req *http.Request) {
 			req.URL.Scheme = GithubUrl.Scheme
 			req.URL.Host = GithubUrl.Host
-			req.URL.Path, req.URL.RawPath = GithubUrl.Path, GithubUrl.RawPath
+			req.URL.Path = GithubUrl.Path
+			req.URL.RawPath = GithubUrl.RawPath
 			if _, ok := req.Header["User-Agent"]; !ok {
 				// explicitly disable User-Agent so it's not set to default value
 				req.Header.Set("User-Agent", "")
 			}
 		},
 	}
-	rp.ServeHTTP(w, r)
 
 	c := cors.AllowAll()
 	c.Log = log.New(os.Stderr, "[cors]", log.LstdFlags)
-	c.HandlerFunc(w, r)
+
+	c.Handler(&rp).ServeHTTP(w, r)
 }
