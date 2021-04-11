@@ -1,0 +1,6 @@
+{{ $src := .Destination }}
+{{ if not (hasPrefix .Destination .Page.RelPermalink) }}
+{{ $src = path.Join (strings.TrimPrefix "/en-us" .Page.RelPermalink) .Destination }}
+{{ end }}
+
+<img src="{{ $src | safeURL }}" alt="{{ .Text }}" />
