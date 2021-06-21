@@ -1,7 +1,7 @@
 ---
 categories: Code
 date: 2021-06-18T01:00:00Z
-title: "从接口视角看存储系统"
+title: "从应用接口视角看存储系统"
 series: "Storage System Notes"
 tags:
 - Distributed System
