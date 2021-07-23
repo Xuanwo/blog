@@ -18,14 +18,6 @@
         <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}">
     {{ end }}
 
-    {{ $gitalkStyle := resources.Get "css/gitalk.css" }}
-    {{ if .Site.IsServer }}
-    <link rel="stylesheet" href="{{ $gitalkStyle.RelPermalink }}">
-    {{ else }}
-    {{ $style = $style |  minify | fingerprint }}
-    <link rel="stylesheet" href="{{ $gitalkStyle.RelPermalink }}" integrity="{{ $gitalkStyle.Data.Integrity }}">
-    {{ end }}
-
     {{ $searchStyle := resources.Get "css/docsearch.min.css" | resources.PostCSS (dict "config" "./postcss.config.js")  }}
     {{ if .Site.IsServer }}
     <link rel="stylesheet" href="{{ $searchStyle.RelPermalink }}">
