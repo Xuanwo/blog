@@ -19,7 +19,7 @@ title: Hugo 基于 DocSearch 实现全文搜索
 
 显然，DocSearch 的实现是互相绑定的，正如 Issue [Uncaught (in promise) Error: [groupBy]: Object has no key lvl0](https://github.com/algolia/docsearch/issues/186) 中所说：
 
-> docsearch frontend **only works** with indices generated with the [docsearch crawler](https://github.com/algolia/docsearch-scraper). If you want to build a autocomplete dropdown you should use [autocomplete.js](github.com/algolia/autocomplete.js) instead, which allow to build autocomplete dropdown on top of any indices.
+> docsearch frontend **only works** with indices generated with the [docsearch crawler](https://github.com/algolia/docsearch-scraper). If you want to build a autocomplete dropdown you should use [autocomplete.js](https://github.com/algolia/autocomplete.js) instead, which allow to build autocomplete dropdown on top of any indices.
 
 Issue 中给出的解决方案让我们使用 `autocomplete.js` 来自行构建（*但是这太难了*），但是换个角度想，只要我们能构造出跟 `docsearch crawler` 完全一致的数据结构，我们就能直接用 `DocSearch` 了！
 
