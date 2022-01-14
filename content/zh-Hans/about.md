@@ -4,27 +4,31 @@ type: page
 layout: about
 ---
 
-## 领域
+我感兴趣的领域包括 **自动化**，**分布式系统** 和 **存储**。
 
-- [A]utomation: 自动化
-- [D]istributed Systems: 分布式系统
-- [S]torage: 存储
+- 了解我在做什么: [Work](https://work.xuanwo.io)
+- 了解我在学什么: [Note](https://note.xuanwo.io)
+- 当然，也可以关注我的 [Twitter](https://twitter.com/OnlyXuanwo)
 
-## 编程
+---
 
-开源项目都在 [@github](https://github.com/Xuanwo)
+我现在正在尝试以开源的方式 **学习**，**工作** 和 **思考**
 
-## 工作
+**以开源的方式学习**
 
-目前在 [@qingcloud](https://www.qingcloud.com/) 工作
+- 跟我的朋友们在 [discussions](https://github.com/Xuanwo/Xuanwo/discussions) 进行公开的讨论
+- 在 [Xuanwo's Note](https://note.xuanwo.io) 记录和整理我学到的知识
 
-- [QingCloud](https://www.qingcloud.com/) 市场部，自动化脚本和工具开发，社区运营
-- [QingCloud](https://www.qingcloud.com/) 对象存储研发工程师，对象存储 SDK 和周边工具开发
-- [QingCloud](https://www.qingcloud.com/) 企业级网盘研发工程师，后端开发
-- [QingCloud](https://www.qingcloud.com/) 存储研发部效率工程师，提升内部工程效率
-- [QingCloud](https://www.qingcloud.com/) 存储研发部对象存储研发工程师
+**公开工作，向社区汇报**
 
-## 社交
+- 我通过为开源项目工作获取报酬 (目前受雇于 [@datafuselabs](https://github.com/datafuselabs))
+- 我在 [Xuanwo's Work](https://work.xuanwo.io) 跟踪所有的工作
+- 每周一篇面向社区的[周报](/reports)
 
-- Telegram: <https://t.me/xuanwo>
-- Twitter: <https://twitter.com/OnlyXuanwo>
+**通过博客输出成型的思考**
+
+- 我觉得有意义的内容会通过 [Xuanwo's Blog](https://xuanwo.io) 输出成文章
+
+---
+
+**Let's rock!**
