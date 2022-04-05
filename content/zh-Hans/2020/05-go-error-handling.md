@@ -6,7 +6,7 @@ tags:
 - golang
 ---
 
-在开发 [storage](https://github.com/Xuanwo/storage) 库的过程中，我设计并实现了一套 Golang 错误处理的规范。原始的提案和规范可以参考 [Proposal: Error Handling](https://storage.xuanwo.io/design/11-error-handling.html) 与 [Spec: Error Handling](https://storage.xuanwo.io/spec/1-error-handling.html)，本文是两者汇总后重新梳理的产物。
+在开发 [storage](https://github.com/Xuanwo/storage) 库的过程中，我设计并实现了一套 Golang 错误处理的规范。原始的提案和规范可以参考 [Proposal: Error Handling](https://github.com/beyondstorage/go-storage/blob/master/docs/rfcs/11-error-handling.md) 与 [Spec: Error Handling](https://github.com/beyondstorage/go-storage/blob/master/docs/spec/1-error-handling.md)，本文是两者汇总后重新梳理的产物。
 
 ## TL;DR
 
