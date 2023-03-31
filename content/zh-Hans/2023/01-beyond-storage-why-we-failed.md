@@ -14,7 +14,7 @@ tags:
 
 [BeyondStorage](https://github.com/beyondstorage/go-storage) 旨在创建一个跨云数据服务开源社区，计划用完全开源的方式构建一个通用的存储库，向下对接各个存储服务，向上封装数据迁移，备份，管理等多种应用。这样应用开发者只需要开发一次就能让自己的应用跑在任意存储上，而用户则可以自由选择数据存储的位置。
 
-![](https://xuanwo.io/2021/11-2021-review/architecture.svg)
+![](architecture.svg)
 
 基于 BeyondStorage 提供的统一数据访问接口，我们可以实现以下服务：
 
