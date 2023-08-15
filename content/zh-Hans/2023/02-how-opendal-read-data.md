@@ -64,7 +64,7 @@ Operator 内部的逻辑看起来会是这样：
 - `CompleteLayer`: 为服务补全必须的能力，比如说为 s3 增加 seek 支持
 - `TypeEraseLayer`: 实现类型擦除，将 `Accessor` 中的关联类型统一擦除，让用户使用时不需要携带泛型参数
 
-这里的 `ErrorContextLayer` 和 `TypeEraseLayer` 都比较简单不再赘述，重点聊聊 `CompleteLayer`，它旨在以零开销的方式为 OpenDAL 返回的 `Reader` 增加 `seek` 支持，让用户不需要再重复实现。OpenDAL 在早期版本中通过不同的函数调用来返回 `Reader` 和 `SeekableReader`，但是用户的实际反馈并不是很好，几乎所有用户都在使用 `SeekableReader`。因此后续 OpenDAL 在重构中将 seek 支持作为第一优先级加入了内部的 `Read` trait 中：
+这里的 `ErrorContextLayer` 和 `TypeEraseLayer` 都比较简单不再赘述，重点聊聊 `CompleteLayer`，它旨在以零开销的方式为 OpenDAL 返回的 `Reader` 增加 `seek` 或者 `next` 支持，让用户不需要再重复实现。OpenDAL 在早期版本中通过不同的函数调用来返回 `Reader` 和 `SeekableReader`，但是用户的实际反馈并不是很好，几乎所有用户都在使用 `SeekableReader`。因此后续 OpenDAL 在重构中将 seek 支持作为第一优先级加入了内部的 `Read` trait 中：
 
 ```rust
 pub trait Read: Unpin + Send + Sync {
