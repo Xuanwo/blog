@@ -18,26 +18,11 @@
         <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}">
     {{ end }}
 
-    {{ $searchStyle := resources.Get "css/docsearch.min.css" | resources.PostCSS (dict "config" "./postcss.config.js")  }}
-    {{ if .Site.IsServer }}
-    <link rel="stylesheet" href="{{ $searchStyle.RelPermalink }}">
-    {{ else }}
-    {{ $style = $style |  minify | fingerprint }}
-    <link rel="stylesheet" href="{{ $searchStyle.RelPermalink }}" integrity="{{ $searchStyle.Data.Integrity }}">
-    {{ end }}
-
     {{ $fas := resources.Get "javascript/fontawesome.js" | minify | fingerprint | resources.PostProcess }}
     {{ if .Site.IsServer }}
     <script defer src="{{ $fas.RelPermalink }}"></script>
     {{ else }}
     <script defer src="{{ $fas.RelPermalink }}" integrity="{{ $fas.Data.Integrity }}"></script>
-    {{ end }}
-
-    {{ $alpine := resources.Get "javascript/alpine.js" | minify | fingerprint | resources.PostProcess }}
-    {{ if .Site.IsServer }}
-    <script defer src="{{ $alpine.RelPermalink }}"></script>
-    {{ else }}
-    <script defer src="{{ $alpine.RelPermalink }}" integrity="{{ $alpine.Data.Integrity }}"></script>
     {{ end }}
 
     <link href="http://gmpg.org/xfn/11" rel="profile">
