@@ -76,7 +76,7 @@ Several fundamental ideas are clear:
 - OpenDAL will continue to use the `path` concept for data access, constructing the appropriate SQL queries for PostgreSQL.
 - The `BYTEA` data type can be utilized to store data within PostgreSQL.
 
-I've initiated a pull request titled: [feat: Add PostgreSQL Support to OpenDAL](https://github.com/apache/incubator-opendal/pull/2815). After this PR, [@Zheaoli](Zheaoli) also added support for MySQL and SQLite.
+I've initiated a pull request titled: [feat: Add PostgreSQL Support to OpenDAL](https://github.com/apache/incubator-opendal/pull/2815). After this PR, [@Zheaoli](https://github.com/Zheaoli) also added support for MySQL and SQLite.
 
 Users can interact with PostgreSQL through OpenDAL as follows:
 
