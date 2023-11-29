@@ -1,7 +1,7 @@
 ---
 categories: Code
 date: 2023-11-29T01:00:00Z
-title: "Rust std fs slower than Python! Really!?"
+title: "Rust std fs slower than Python!? No, it's hardware!"
 tags:
     - rust
     - python
