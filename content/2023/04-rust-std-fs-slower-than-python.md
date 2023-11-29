@@ -11,6 +11,10 @@ I'm about to share a lengthy tale that begins with [opendal](https://github.com/
 
 > All the code snippets and scripts are available in [Xuanwo/when-i-find-rust-is-slow](https://github.com/Xuanwo/when-i-find-rust-is-slow)
 
+## TL;DR
+
+Jump to [Conclusion](#Conclusion) if you want to know the answer ASAP.
+
 ## OpenDAL Python Binding is slower than Python?
 
 [OpenDAL](https://github.com/apache/incubator-opendal) is a data access layer that allows users to easily and efficiently retrieve data from various storage services in a unified way. We provided python binding for OpenDAL via [pyo3](https://github.com/PyO3/pyo3).
