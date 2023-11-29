@@ -799,7 +799,7 @@ A big thank you to everyone who contributed to finding the answer:
 - [@Manjusaka](https://github.com/ZheaoLi) for reproducing the issue and use eBPF to investigate, which helped narrow down the problem to syscall itself.
 - [@lilydjwg](https://github.com/lilydjwg) for pinpointing the root cause: a `0x20` offset in memory
 - [@ryncsn](https://github.com/ryncsn) for his thorough analysis
-- And a friend who shared useful links about FSRM`
+- And a friend who shared useful links about FSRM
 
 Looking forward to our next journey!
 
