@@ -572,7 +572,7 @@ Summary
 
 The C version is also slower than Python! Does python have magic?
 
-## C is slower than Python with specified offset!
+## C is slower than Python without specified offset!
 
 At this time, [@lilydjwg](https://github.com/lilydjwg) has joined the discussion and noticed a difference in the memory region offset between C and Python.
 
@@ -642,7 +642,7 @@ offset milliseconds
  ...
 ```
 
-## AMD Ryzen 9 5900X is slow with specified offset!
+## AMD Ryzen 9 5900X is slow without specified offset!
 
 We've confirmed that this issue is related to the CPU. However, we're still unsure about its potential reasons. [@Manjusaka](https://github.com/ZheaoLi) has invited kernel developer [@ryncsn](https://github.com/ryncsn) to join the discussion.
 
@@ -759,7 +759,7 @@ Inside `_copy_to_iter`, the ASM will be:
 
 The key difference here is the performance of `rep movsb`.
 
-## AMD Ryzen 9 5900X is slow with FSRM!
+## AMD Ryzen 9 5900X is slow for FSRM!
 
 At this time, one of my friend sent me a link about [Terrible memcpy performance on Zen 3 when using rep movsb](https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/2030515). In which also pointed to `rep movsb`:
 
