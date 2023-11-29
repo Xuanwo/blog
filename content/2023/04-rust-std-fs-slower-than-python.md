@@ -799,7 +799,7 @@ A big thank you to everyone who contributed to finding the answer:
 
 - @beldathas from opendal's discord for identifying the problem.
 - The team at [@datafuselabs](https://github.com/datafuselabs) for their insightful suggestions.
-- Our friends over at [@rust_zh](https://t.me/rust_zh) for their advice and reproduction efforts.
+- Our friends over at [@rust_zh](https://t.me/rust_zh) *(a rust telegram group mainly in zh-Hans)* for their advice and reproduction efforts.
 - [@Manjusaka](https://github.com/ZheaoLi) for reproducing the issue and use eBPF to investigate, which helped narrow down the problem to syscall itself.
 - [@lilydjwg](https://github.com/lilydjwg) for pinpointing the root cause: a `0x20` offset in memory
 - [@ryncsn](https://github.com/ryncsn) for his thorough analysis
