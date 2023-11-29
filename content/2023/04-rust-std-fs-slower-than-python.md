@@ -781,7 +781,7 @@ At this time, one of my friend sent me a link about [Terrible memcpy performance
 
 ## Conclusion
 
-In conclusion, the issue isn't software-related. Python outperforms C/Rust due to an AMD bug. (I can finally get some sleep now.)
+In conclusion, the issue isn't software-related. Python outperforms C/Rust due to an AMD CPU bug. (I can finally get some sleep now.)
 
 However, our users continue to struggle with this problem. Unfortunately, features like `FSRM` will be implemented in `ucode`, leaving us no choice but to wait for AMD's response. An alternative solution could be not using `FSRM` or providing a flag to disable it. Rust developers might consider switching to `jemallocator` for improved performance - a beneficial move even without the presence of AMD CPU bugs.
 
