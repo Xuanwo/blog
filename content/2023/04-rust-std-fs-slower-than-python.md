@@ -13,7 +13,7 @@ I'm about to share a lengthy tale that begins with [opendal](https://github.com/
 
 ## TL;DR
 
-Jump to [Conclusion](#Conclusion) if you want to know the answer ASAP.
+Jump to [Conclusion](#conclusion) if you want to know the answer ASAP.
 
 ## OpenDAL Python Binding is slower than Python?
 
