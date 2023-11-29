@@ -511,7 +511,7 @@ Observation: On my computer, Rust operates slower than Python and it doesn't app
 
 I'm quite puzzled and can't pinpoint the difference. I suspect it might have something to do with the CPU, but I'm unsure which aspect: cache? frequency? core spacing? core affinity? architecture?
 
-Following the guidance from the Telegram group [Rust 众](https://t.me/rust_zh), I've developed a C version:
+Following the guidance from the Telegram group [@rust_zh](https://t.me/rust_zh), I've developed a C version:
 
 [c-fs-read](https://github.com/Xuanwo/when-i-find-rust-is-slow/blob/main/c-fs-read/test.c):
 
@@ -799,7 +799,7 @@ A big thank you to everyone who contributed to finding the answer:
 
 - @beldathas from opendal's discord for identifying the problem.
 - The team at [@datafuselabs](https://github.com/datafuselabs) for their insightful suggestions.
-- Our friends over at [Rust 众](https://t.me/rust_zh) for their advice and reproduction efforts.
+- Our friends over at [@rust_zh](https://t.me/rust_zh) for their advice and reproduction efforts.
 - [@Manjusaka](https://github.com/ZheaoLi) for reproducing the issue and use eBPF to investigate, which helped narrow down the problem to syscall itself.
 - [@lilydjwg](https://github.com/lilydjwg) for pinpointing the root cause: a `0x20` offset in memory
 - [@ryncsn](https://github.com/ryncsn) for his thorough analysis
