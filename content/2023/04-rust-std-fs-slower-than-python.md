@@ -813,3 +813,56 @@ Looking forward to our next journey!
 - [Std::fs::read slow?](https://users.rust-lang.org/t/std-read-slow/85424) is a report from rust community
 - [Terrible memcpy performance on Zen 3 when using rep movsb](https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/2030515) is a report to ubuntu glibc
 - [binding/python: rust std fs is slower than python fs](https://github.com/apache/incubator-opendal/issues/3665)
+
+---
+
+## Updates
+
+This article, written on `2023-11-29`, has gained widespread attention! To prevent any confusion among readers, I've decided not to alter the original content. Instead, I'll provide updates here to keep the information current and address frequently asked questions.
+
+### 2023-12-01: Does AMD know about this bug?
+
+TL;DR: **Yes**
+
+To my knowledge, AMD has been aware of this bug since 2021. After the article was published, several readers forwarded the link to AMD, so I'm confident they're informed about it.
+
+I firmly believe that AMD should take responsibility for this bug and address it in `amd-ucode`. However, unverified sources suggest that a fix via `amd-ucode` is unlikely (at least for Zen 3) due to limited patch space. If you have more information on this matter, please reach out to me.
+
+Our only hope is to address this issue in glibc by disabling FSRM as necessary. Progress has been made on the glibc front: [x86: Improve ERMS usage on Zen3](https://inbox.sourceware.org/libc-alpha/20231031200925.3297456-3-adhemerval.zanella@linaro.org/T/#m4f4458b8b16b0ee2bac1578f0383b10eee2312d8). Stay tuned for updates.
+
+### 2023-12-01: Is jemalloc or pymalloc faster than glibc's malloc?
+
+TL;DR: **No**
+
+Apologies for not detailing the connection between the memory allocator and this bug. It may seem from this post that `jemalloc` (`pymalloc`, `mimalloc`) is significantly faster than glibc's malloc. However, that's not the case. The issue doesn't related to the memory allocator. The speed difference where `jemalloc` or `pymalloc` outpaces glibc malloc is coincidental due to differing memory region offsets.
+
+Let's analyze the strace of `rust-std-fs-read` and `rust-std-fs-read-with-jemalloc`:
+
+strace for `rust-std-fs-read`:
+
+```shell
+> strace -e raw=read,mmap ./rust-std-fs-read/target/release/test
+...
+mmap(0, 0x4001000, 0x3, 0x22, 0xffffffff, 0) = 0x7f39a6e49000
+openat(AT_FDCWD, "/tmp/file", O_RDONLY|O_CLOEXEC) = 3
+read(0x3, 0x7f39a6e49010, 0x4000000)    = 0x4000000
+read(0x3, 0x7f39aae49010, 0)            = 0
+close(3)                                = 0
+```
+
+strace for `rust-std-fs-read-with-jemalloc`:
+
+```shell
+> strace -e raw=read,mmap ./rust-std-fs-read-with-jemalloc/target/release/test
+...
+mmap(0, 0x200000, 0x3, 0x4022, 0xffffffff, 0) = 0x7f7a5a400000
+mmap(0, 0x5000000, 0x3, 0x4022, 0xffffffff, 0) = 0x7f7a55400000
+openat(AT_FDCWD, "/tmp/file", O_RDONLY|O_CLOEXEC) = 3
+read(0x3, 0x7f7a55400740, 0x4000000)    = 0x4000000
+read(0x3, 0x7f7a59400740, 0)            = 0
+close(3)                                = 0
+```
+
+In `rust-std-fs-read`, `mmap` returns `0x7f39a6e49000`, but read syscall use `0x7f39a6e49010` as the start address, the offset is `0x10`. In `rust-std-fs-read-with-jemalloc`, `mmap` returns `0x7f7a55400000`, and read syscall use `0x7f7a55400740` as the start address, the offset is `0x740`.
+
+`rust-std-fs-read-with-jemalloc` outperforms `rust-std-fs-read` due to its larger offset, which falls outside the problematic range: `0x00..0x10` within a page. It's possible to reproduce the same issue with `jemalloc`.
