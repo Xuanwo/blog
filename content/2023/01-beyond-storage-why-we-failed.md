@@ -25,7 +25,7 @@ tags:
 - 提供数据备份在线服务，支持用户将数据备份到存储服务中
   - 用户可以在 macOS 中通过 Time Machine 将数据备份到对象存储
 
-不难发现其愿景与 [OpenDAL](https://github.com/apache/incubator-opendal) 基本是一致的，但是为什么在差不多的时间点，两个项目的发展会有如此大的差异呢？
+不难发现其愿景与 [Apache OpenDAL](https://github.com/apache/incubator-opendal) 基本是一致的，但是为什么在差不多的时间点，两个项目的发展会有如此大的差异呢？
 
 ## 根本原因：没有用户
 

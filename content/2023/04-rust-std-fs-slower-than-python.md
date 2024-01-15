@@ -7,7 +7,7 @@ tags:
     - python
 ---
 
-I'm about to share a lengthy tale that begins with [opendal](https://github.com/apache/incubator-opendal) `op.read()` and concludes with an unexpected twist. This journey was quite enlightening for me, and I hope it will be for you too. I'll do my best to recreate the experience, complete with the lessons I've learned along the way. Let's dive in!
+I'm about to share a lengthy tale that begins with [Apache OpenDAL](https://github.com/apache/incubator-opendal) `op.read()` and concludes with an unexpected twist. This journey was quite enlightening for me, and I hope it will be for you too. I'll do my best to recreate the experience, complete with the lessons I've learned along the way. Let's dive in!
 
 > All the code snippets and scripts are available in [Xuanwo/when-i-find-rust-is-slow](https://github.com/Xuanwo/when-i-find-rust-is-slow)
 
@@ -54,10 +54,10 @@ normal:  4.470868484000675
 opendal:  8.993250704006641
 ```
 
-Well, well, well. I'm somewhat embarrassed by these results. Here are a few quick hypotheses: 
+Well, well, well. I'm somewhat embarrassed by these results. Here are a few quick hypotheses:
 
 - Does Python have an internal cache that can reuse the same memory?
-- Does Python possess some trick to accelerate file reading? 
+- Does Python possess some trick to accelerate file reading?
 - Does PyO3 introduce additional overhead?
 
 I've refactored the code to:
@@ -87,11 +87,11 @@ The result shows that python is much faster than opendal:
 Benchmark 1: python-fs-read/test.py
   Time (mean ± σ):      15.9 ms ±   0.7 ms    [User: 5.6 ms, System: 10.1 ms]
   Range (min … max):    14.9 ms …  21.6 ms    180 runs
-  
+
 Benchmark 2: python-opendal-read/test.py
   Time (mean ± σ):      32.9 ms ±   1.3 ms    [User: 6.1 ms, System: 26.6 ms]
   Range (min … max):    31.4 ms …  42.6 ms    85 runs
-  
+
 Summary
   python-fs-read/test.py ran
     2.07 ± 0.12 times faster than python-opendal-read/test.py
@@ -141,11 +141,11 @@ However, the result shows that opendal is slower than python even when opendal i
 Benchmark 1: rust-opendal-fs-read/target/release/test
   Time (mean ± σ):      23.8 ms ±   2.0 ms    [User: 0.4 ms, System: 23.4 ms]
   Range (min … max):    21.8 ms …  34.6 ms    121 runs
- 
+
 Benchmark 2: python-fs-read/test.py
   Time (mean ± σ):      15.6 ms ±   0.8 ms    [User: 5.5 ms, System: 10.0 ms]
   Range (min … max):    14.4 ms …  20.8 ms    166 runs
- 
+
 Summary
   python-fs-read/test.py ran
     1.52 ± 0.15 times faster than rust-opendal-fs-read/target/release/test
@@ -191,7 +191,7 @@ But....
 Benchmark 1: rust-std-fs-read/target/release/test
   Time (mean ± σ):      23.1 ms ±   2.5 ms    [User: 0.3 ms, System: 22.8 ms]
   Range (min … max):    21.0 ms …  37.6 ms    124 runs
- 
+
 Benchmark 2: python-fs-read/test.py
   Time (mean ± σ):      15.2 ms ±   1.1 ms    [User: 5.4 ms, System: 9.7 ms]
   Range (min … max):    14.3 ms …  21.4 ms    178 runs
@@ -259,7 +259,7 @@ From analyzing strace, it's clear that `python-fs-read` has more syscalls than `
 
 ### Why we are using `mmap` here?
 
-I initially believed `mmap` was solely for mapping files to memory, enabling file access through memory. However, `mmap` has other uses too. It's commonly used to allocate large regions of memory for applications. 
+I initially believed `mmap` was solely for mapping files to memory, enabling file access through memory. However, `mmap` has other uses too. It's commonly used to allocate large regions of memory for applications.
 
 This can be seen in the strace results:
 
@@ -272,7 +272,7 @@ This syscall means
 - `NULL`: the first arg means start address of the memory region to map. `NULL` will let OS to pick up a suitable address for us.
 - `67112960`: The size of the memory region to map. We are allocating 64MiB + 4KiB memory here, the extra page is used to store the metadata of this memory region.
 - `PROT_READ|PROT_WRITE`: The memory region is readable and writable.
-- `MAP_PRIVATE|MAP_ANONYMOUS`: 
+- `MAP_PRIVATE|MAP_ANONYMOUS`:
   - `MAP_PRIVATE` means changes to this memory region will not be visible to other processes mapping the same region, and are not carried through to the underlying file (if we have).
   - `MAP_ANONYMOUS` means we are allocating anonymous memory that not related to a file.
 - `-1`: The file descriptor of the file to map. `-1` means we are not mapping a file.
@@ -329,7 +329,7 @@ Wooooooooooooooow?!
 Benchmark 1: rust-std-fs-read-with-jemalloc/target/release/test
   Time (mean ± σ):       9.7 ms ±   0.6 ms    [User: 0.3 ms, System: 9.4 ms]
   Range (min … max):     9.0 ms …  12.4 ms    259 runs
- 
+
 Benchmark 2: python-fs-read/test.py
   Time (mean ± σ):      15.8 ms ±   0.9 ms    [User: 5.9 ms, System: 9.8 ms]
   Range (min … max):    15.0 ms …  21.8 ms    169 runs
@@ -764,9 +764,9 @@ The key difference here is the performance of `rep movsb`.
 At this time, one of my friend sent me a link about [Terrible memcpy performance on Zen 3 when using rep movsb](https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/2030515). In which also pointed to `rep movsb`:
 
 > I've found this using a memcpy benchmark at https://github.com/ska-sa/katgpucbf/blob/69752be58fb8ab0668ada806e0fd809e782cc58b/scratch/memcpy_loop.cpp (compiled with the adjacent Makefile). To demonstrate the issue, run
-> 
+>
 > ./memcpy_loop -b 2113 -p 1000000 -t mmap -S 0 -D 1 0
-> 
+>
 > This runs:
 > - 2113-byte memory copies
 > - 1,000,000 times per timing measurement
@@ -774,7 +774,7 @@ At this time, one of my friend sent me a link about [Terrible memcpy performance
 > - with the source 0 bytes from the start of the page
 > - with the destination 1 byte from the start of the page
 > - on core 0.
-> 
+>
 > It reports about 3.2 GB/s. Change the -b argument to 2111 and it reports over 100 GB/s. So the REP MOVSB case is about 30× slower!
 
 `FSRM`, short for `Fast Short REP MOV`, is an innovation originally by Intel, recently incorporated into AMD as well, to enhance the speed of `rep movsb` and `rep movsd`. It's designed to boost the efficiency of copying large amounts of memory. CPUs that declare support for it will use `FSRM` as a default in `glibc`.
@@ -791,7 +791,7 @@ However, our users continue to struggle with this problem. Unfortunately, featur
 
 ## Final Remarks
 
-I spent nearly three days addressing this issue, which began with complaints from [opendal](https://github.com/apache/incubator-opendal) users and eventually led me to the CPU's ucode. 
+I spent nearly three days addressing this issue, which began with complaints from [opendal](https://github.com/apache/incubator-opendal) users and eventually led me to the CPU's ucode.
 
 This journey taught me a lot about `strace`, `perf` and `eBPF`. It was my first time using `eBPF` for diagnostics. I also explored various unfruitful avenues such as studying the implementations of rust's `std::fs` and Python & CPython's read implementation details. Initially, I hoped to resolve this at a higher level but found it necessary to delve deeper.
 
