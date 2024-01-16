@@ -1,14 +1,14 @@
 ---
 categories: Code
 date: 2023-10-15T01:00:00Z
-title: "OpenDAL Databases Support"
+title: "Databases Support in Apache OpenDAL™"
 tags:
     - rust
     - opendal
 series: "OpenDAL Internal"
 ---
 
-[Apache OpenDAL](https://github.com/apache/incubator-opendal) is a data access layer that allows users to easily and efficiently retrieve data from various storage services in a unified way.
+[Apache OpenDAL™](https://github.com/apache/incubator-opendal) is a data access layer that allows users to easily and efficiently retrieve data from various storage services in a unified way.
 
 ![](opendal.png)
 

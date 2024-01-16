@@ -7,7 +7,7 @@ tags:
     - python
 ---
 
-I'm about to share a lengthy tale that begins with [Apache OpenDAL](https://github.com/apache/incubator-opendal) `op.read()` and concludes with an unexpected twist. This journey was quite enlightening for me, and I hope it will be for you too. I'll do my best to recreate the experience, complete with the lessons I've learned along the way. Let's dive in!
+I'm about to share a lengthy tale that begins with [Apache OpenDAL™](https://github.com/apache/incubator-opendal) `op.read()` and concludes with an unexpected twist. This journey was quite enlightening for me, and I hope it will be for you too. I'll do my best to recreate the experience, complete with the lessons I've learned along the way. Let's dive in!
 
 > All the code snippets and scripts are available in [Xuanwo/when-i-find-rust-is-slow](https://github.com/Xuanwo/when-i-find-rust-is-slow)
 
