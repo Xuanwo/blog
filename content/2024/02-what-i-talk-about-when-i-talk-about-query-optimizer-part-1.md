@@ -1,9 +1,8 @@
 ---
 categories: Code
 date: 2024-01-29T01:00:00Z
-title: "Exploring SQL Query Optimizer (Part 1): IR Design"
+title: "What I Talk About When I Talk About Query Optimizer (Part 1): IR Design"
 tags:
-    - rust
     - sql
 ---
 
