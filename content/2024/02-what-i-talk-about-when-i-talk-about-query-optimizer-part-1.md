@@ -18,6 +18,10 @@ During our recent conversation, [Mr. Chi](https://github.com/skyzh) and I discus
 
 So, I've made the decision to launch a series where we'll cover everything about query optimizers—ranging from algorithm basics to engineering techniques, technological evolution to project implementation, and even some insider industry gossip.
 
+The inspiration of the title comes from [Haruki Murakami's book](https://en.wikipedia.org/wiki/What_I_Talk_About_When_I_Talk_About_Running), which I highly recommend. The book is a collection of essays that Murakami wrote about his experience as a runner. The title is a reference to a collection of short stories by Raymond Carver, "What We Talk About When We Talk About Love", which Murakami translated into Japanese.
+
+Software development is a skill just as running is, everyone can do it by practising but not everyone will have the same feelings about it. I'd like to share some personal thoughts and experiences about query optimizers, and I hope that you will find them interesting.
+
 Today, let's begin by discussing the topic of **IR Design**, focusing on common design patterns in optimizers and the underlying considerations.
 
 ## What is a Query Optimizer?
