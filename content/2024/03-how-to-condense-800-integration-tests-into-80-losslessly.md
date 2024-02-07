@@ -1,7 +1,7 @@
 ---
 categories: Code
 date: 2024-02-07T01:00:00Z
-title: "How to keep integration tests scale linearly?"
+title: "How to Condense 800 Integration Tests into 80, Losslessly?"
 tags:
     - rust
     - ci
@@ -11,7 +11,7 @@ Integration testing is a crucial component of production-ready projects. It prov
 
 As the project expands, so does the number of integration tests. Maintainers might realize they're dedicating more time to these tests than to the actual code. These tests can become slow, unreliable, or difficult to maintain. To prevent this issue, it's crucial that our integration tests scale linearly with the project's growth.
 
-I'll share my experience with [Apache OpenDAL](https://github.com/apache/opendal), hoping it helps you design your own integration tests architecture.
+I'll share my experience with [Apache OpenDAL](https://github.com/apache/opendal), where I condensed nearly 800 integration tests into 80, hoping it helps you design your own integration tests architecture.
 
 ## TL;DR
 
@@ -30,7 +30,7 @@ Each service may have various setups and configurations. For instance, S3 offers
 
 To further complicate matters, OpenDAL offers language bindings for several languages, such as Python, Java, and Node.js. This requires us to test the same features across various languages and services.
 
-OpenDAL can't test every case at `TEST * SERVICE * COMPONENT`; we need to scale linearly, as in `TEST + SERVICE + COMPONENT`.
+OpenDAL can't test every scenario with `TEST * SERVICE * COMPONENT`; instead, we need a scalable and seamless approach like `TEST + SERVICE + COMPONENT`. This allows us to add new tests, include more services, and incorporate fresh components without adding to our maintenance workload.
 
 ## Split Test Case
 
