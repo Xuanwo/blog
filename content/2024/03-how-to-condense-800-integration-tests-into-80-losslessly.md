@@ -30,7 +30,7 @@ Each service may have various setups and configurations. For instance, S3 offers
 
 To further complicate matters, OpenDAL offers language bindings for several languages, such as Python, Java, and Node.js. This requires us to test the same features across various languages and services.
 
-We need to test 40 services, totaling 68 service setups. This includes testing their behavior, fuzzing, and edge cases. Additionally, we must test our core Rust code along with Python, Java, and Node.js bindings. This creates a vast matrix of tests. Moreover, more services and languages are expected to be added.
+We need to test 40 services, totaling 68 service setups. This includes testing their behavior, fuzzing, and edge cases. Additionally, we must test our core Rust code along with Python, Java, and Node.js bindings. This creates a vast matrix of tests. Moreover, more services and components are expected to be added.
 
 OpenDAL can't test every scenario with `TEST * SERVICE * COMPONENT`; instead, we need a scalable and seamless approach like `TEST + SERVICE + COMPONENT`. This allows us to add new tests, include more services, and incorporate fresh components without adding to our maintenance workload.
 
