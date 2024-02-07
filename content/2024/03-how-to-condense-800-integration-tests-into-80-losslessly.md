@@ -46,7 +46,7 @@ All these tests use the same service setup but with different test cases, making
 
 ```shell
 # For behavior test
-OPENDAL_TEST=s3 cargo test behaivor --features=tests
+OPENDAL_TEST=s3 cargo test behavior --features=tests
 
 # For fuzz test
 OPENDAL_TEST=fs cargo +nightly fuzz run fuzz_reader
