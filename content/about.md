@@ -4,31 +4,19 @@ type: page
 layout: about
 ---
 
-My areas of interest include **automation**, **distributed systems**, and **storage**.
+My VISION is [`Data Freedom`](https://xuanwo.io/2024/04-xuanwo-vision/).
 
-- Find out what I'm doing: [Work](https://work.xuanwo.io)
-- Learn about what I'm studying: [Note](https://note.xuanwo.io)
-- Of course, you can also follow me on [Twitter](https://twitter.com/OnlyXuanwo)
+I aim to create an ecosystem where users can access ANY data, across ANY service, using ANY method, in ANY language.
 
----
+- Find out what I'm doing: [Work](https://github.com/Xuanwo)
+- Follow me on [Twitter](https://twitter.com/OnlyXuanwo)
+- Find more links about me at [bento](https://bento.me/xuanwo)
 
-I'm currently trying to **learn**, **work**, and **think** in an open-source manner.
+If our visions align in some part, feel free to get in touch so we can collaborate.
 
-**Learning openly**
-
--    Have public discussions with my friends on [discussions](https://github.com/Xuanwo/Xuanwo/discussions)
--    Document and organize what I've learned at [Xuanwo's Note](https://note.xuanwo.io)
-
-**Working publicly and reporting to the community**
-
--    I earn my income by working on open-source projects (currently employed by [@datafuselabs](https://github.com/datafuselabs))
--    I track all my work at [Xuanwo's Work](https://work.xuanwo.io)
--    A community-facing [weekly report](/reports) 
-
-**Sharing well-formed thoughts via blogging**
-
--    Content I find meaningful will be published on [Xuanwo's Blog](https://xuanwo.io)
-
----
+- I'm an ASF Member, Apache OpenDAL PMC Chair, and a mentor at the Apache Incubator. If you have projects that align with my vision and are interested in bringing them to the Apache Incubator, please contact me.
+- I actively contribute to many Rust projects. If you're interested in learning Rust and joining the `RBIR` journey, please contact me.
+- I'm a believer of open source. If you're developing one that aligns with my vision, please contact me; I'm willing to offer some help.
+- Last but not least: I'm not a native English speaker and am currently practicing my English. If you're interested in having an English conversation with me, I would really appreciate it. Please contact me.
 
 **Let's rock!**
