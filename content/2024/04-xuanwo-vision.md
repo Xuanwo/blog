@@ -51,8 +51,8 @@ In addition to maintaining Databend, I also participate in the following open-so
 
 - [opendal](https://github.com/apache/opendal): a unified data access layer, empowering users to seamlessly and efficiently retrieve data from diverse storage services
 - [iceberg-rust](https://github.com/apache/iceberg-rust): Rust implementation of [Apache Iceberg](https://iceberg.apache.org/).
-- [paimon-rust](https://github.com/apache/paimon-rust): The rust implementation of Apache Paimon.
-- [arrow-rs](https://github.com/apache/arrow-rs): Official Rust implementation of Apache Arrow
+- [paimon-rust](https://github.com/apache/paimon-rust): The rust implementation of [Apache Paimon](https://paimon.apache.org/).
+- [arrow-rs](https://github.com/apache/arrow-rs): Official Rust implementation of [Apache Arrow](https://arrow.apache.org/).
 - [fury-rs](https://github.com/apache/fury): A blazingly fast multi-language serialization framework powered by JIT and zero-copy.
 
 ## Next
