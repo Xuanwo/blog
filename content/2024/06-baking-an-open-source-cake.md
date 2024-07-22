@@ -13,7 +13,7 @@ I was disappointed today when my pre-ordered cake wasn't delivered due to a lack
 
 ## Started
 
-I sent a tweet:
+I sent a [tweet](https://x.com/OnlyXuanwo/status/1814625279085851069):
 
 ![](tweet.png)
 
