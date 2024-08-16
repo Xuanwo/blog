@@ -7,7 +7,7 @@ tags:
     - open-source
 ---
 
-Rust is gaining popularity in data infrastructure, with more new systems being built using it. I refer to this trend as "Rewrite Bigdata in Rust" (RBIR) and am fully dedicating my energy to it. This post aims to explain what RBIR is, why it occurred, and how to join.
+Rust is gaining popularity in data infrastructure, with more new systems being built using it. I refer to this trend as "Rewrite Bigdata in Rust" (RBIR) and am [fully dedicating my energy to it](https://xuanwo.io/2024/04-xuanwo-vision/). This post aims to explain what RBIR is, why it occurred, and how to join.
 
 ## What RBIR is
 
