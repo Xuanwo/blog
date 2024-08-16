@@ -22,7 +22,7 @@ For example:
 - [tikv](https://github.com/tikv/tikv): Distributed transactional key-value database.
 - [databend](https://github.com/datafuselabs/databend/): a rust data warehouse, alternative to [Snowflake](https://www.snowflake.com/en/).
 - [quickwit](https://github.com/quickwit-oss/quickwit): a rust search engine, alternative to [Elasticsearch](https://www.elastic.co/elasticsearch).
-- [risingwave](https://github.com/risingwavelabs/risingwave): a rust streaming processing engine, alternative to [Apache Flink](https://flink.apache.org/).
+- [risingwave](https://github.com/risingwavelabs/risingwave): a rust streaming processing engine.
 - [Apache DataFusion](https://github.com/apache/datafusion): a fast, extensible query engine built in rust.
 - [influxdb](https://github.com/influxdata/influxdb): scalable datastore for metrics, events, and real-time analytics.
 - [greptimedb](https://github.com/GreptimeTeam/greptimedb): time series database for metrics, logs and events.
