@@ -29,6 +29,7 @@ For example:
 - [horaedb](https://github.com/apache/horaedb): a high-performance, distributed, cloud native time-series database.
 - [paradedb](https://github.com/paradedb/paradedb): Postgres for Search and Analytics
 - [glaredb](https://github.com/GlareDB/glaredb): An analytics DBMS for distributed data
+- [fluvio](https://github.com/infinyon/fluvio): Lean and mean distributed stream processing system
 
 RBIR will develop numerous new Rust projects in bigdata area. Consider this: most of the projects in the upcoming [CMU Database Building Blocks Seminar Series](https://db.cs.cmu.edu/seminar2024/) are written in Rust!
 
