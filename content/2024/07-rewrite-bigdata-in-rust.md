@@ -30,6 +30,7 @@ For example:
 - [paradedb](https://github.com/paradedb/paradedb): Postgres for Search and Analytics
 - [glaredb](https://github.com/GlareDB/glaredb): An analytics DBMS for distributed data
 - [fluvio](https://github.com/infinyon/fluvio): Lean and mean distributed stream processing system
+- [lancedb](https://github.com/lancedb/lancedb): Developer-friendly, database for multimodal AI
 
 RBIR will develop numerous new Rust projects in bigdata area. Consider this: most of the projects in the upcoming [CMU Database Building Blocks Seminar Series](https://db.cs.cmu.edu/seminar2024/) are written in Rust!
 
