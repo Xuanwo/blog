@@ -108,4 +108,4 @@ The last and most important one is [Call for maintainers](https://github.com/Xua
 
 As described in the issue, there are many retry libraries left unmaintained on crates.io. I am determined not to let BackON become one of them. Please contact me if you are interested.
 
-That's all. Please try and evaluate BackON in your use cases and provide feedback. Thanks!
+That's all. Welcome to try and evaluate BackON in your use cases and provide feedback. Thanks!
