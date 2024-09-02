@@ -67,8 +67,6 @@ Compared to other existing retry libraries, BackON offers the following advantag
 - `no_std` support: BackON can operate without the `std`; users only need to provide their own sleeper implementation.
 - No additional errors: BackON does not introduce new errors, so users do not need to adapt their error handling logic.
 
-BackON employs a variety of generic techniques with Rust's type system, which leads to some drawbacks:
-
 Due to rust's limitations, BackON cannot directly `retry` a function with arguments. Users need to create a closure to capture it as a `FnMut() -> impl Future<Output=Result<T>>` instead.
 
 ```rust
