@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/ac07c4ca-e820-44ec-a22e-1a7e9c755c38)---
+---
 categories: Code
 date: 2024-08-16T01:00:00Z
 title: "Rewrite Bigdata in Rust"
