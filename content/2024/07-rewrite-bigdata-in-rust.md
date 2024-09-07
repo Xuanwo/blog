@@ -1,4 +1,4 @@
----
+![image](https://github.com/user-attachments/assets/ac07c4ca-e820-44ec-a22e-1a7e9c755c38)---
 categories: Code
 date: 2024-08-16T01:00:00Z
 title: "Rewrite Bigdata in Rust"
@@ -31,6 +31,8 @@ For example:
 - [glaredb](https://github.com/GlareDB/glaredb): An analytics DBMS for distributed data
 - [fluvio](https://github.com/infinyon/fluvio): Lean and mean distributed stream processing system
 - [lancedb](https://github.com/lancedb/lancedb): Developer-friendly, database for multimodal AI
+- [slatedb](https://github.com/slatedb/slatedb): A cloud native embedded storage engine built on object storage
+- [daft](https://github.com/Eventual-Inc/Daft): Distributed DataFrame for Python designed for the cloud, powered by Rust
 
 RBIR will develop numerous new Rust projects in bigdata area. Consider this: most of the projects in the upcoming [CMU Database Building Blocks Seminar Series](https://db.cs.cmu.edu/seminar2024/) are written in Rust!
 
