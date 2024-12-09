@@ -122,12 +122,6 @@ Instead, establish a clear baseline. Engage with your business users and aim to 
 
 ## The Very Last
 
-Dear friends, you may feel I’m so upset for open source that I nealy alwayts encourage maintainers to give up. That’s wrong. I love open source. I love open source maintainers. There are many efforts from the entire community to make sure open source maintainers lives easier like [OpenSource Pledge](https://opensourcepledge.com/) and [Sovereign Tech Fund](https://www.sovereign.tech/). But as a maintainer ourselves, we need to make our baseline clear.
-
-That’s fine to exit if you you are not happy. Don’t be a bleeding hero. Be a happy coder.
-
-Be happy in open source.
-
 Dear friends, you might think I’m so upset about open source that I almost always encourage maintainers to give up. That’s not true. I do love open source. I deeply appreciate open source maintainers. Many efforts from the entire community aim to make the lives of open source maintainers easier, such as the [Open Source Pledge](https://opensourcepledge.com/) and the [Sovereign Tech Fund](https://www.sovereign.tech/). However, as maintainers ourselves, we need to establish our baseline clearly.
 
 It’s okay to step away if you’re not happy. Don't become a hero who bleeds and weeps.
