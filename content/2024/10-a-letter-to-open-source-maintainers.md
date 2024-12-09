@@ -8,7 +8,7 @@ tags:
 
 Here is a letter to all friends who are or aspire to be open-source maintainers. I have repeated many of these core ideas in various places. I believe it’s better to write them in a letter so that I don’t have to repeat myself again. This letter includes everything I want to share with NEW open-source maintainers. I hope all of them can find happiness and thrive in the open-source community. I wish for none of them to leave the open-source field with regret or sadness.
 
-This is a letter written with my utmost kindness. It may or may not align with your perspective. Nevertheless, thank you for reading, and remember, you are not alone, still one still loves you.
+This is a letter written with my utmost kindness. It may or may not align with your perspective. Nevertheless, thank you for reading, and remember, you are not alone, someone still loves you.
 
 ---
 
