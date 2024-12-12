@@ -127,3 +127,11 @@ Dear friends, you might think I’m so upset about open source that I almost alw
 It’s okay to step away if you’re not happy. Don't become a hero who bleeds and weeps.
 
 I wish you find happiness in open source.
+
+## Updates
+
+### Correct the usage of MIT
+
+> It’s entirely acceptable for someone to use your MIT-licensed projects to make money without even acknowledging your name.
+
+This is incorrect. The MIT license requires users to include the original copyright notice in all copies or substantial portions of the software. Users need to include it in the license notice, but they don't need to mention the open-source project or authors in marketing materials. I apologize for the confusion and appreciate the feedback from [@joshka at Hacker News](https://news.ycombinator.com/item?id=42395420).
