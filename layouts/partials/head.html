@@ -14,8 +14,8 @@
 
         <link rel="shortcut icon" href="/favicon.ico" />
 
-        {{ $style := resources.Get "css/main.css" | resources.PostCSS (dict
-        "config" "./postcss.config.js") }} {{ if hugo.IsServer }}
+        {{ $style := resources.Get "css/main.css" | css.PostCSS (dict "config"
+        "./postcss.config.js") }} {{ if hugo.IsServer }}
         <link rel="stylesheet" href="{{ $style.RelPermalink }}" />
         {{ else }} {{ $style = $style | minify | fingerprint }}
         <link
