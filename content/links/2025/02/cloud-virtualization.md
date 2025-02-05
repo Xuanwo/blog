@@ -1,7 +1,7 @@
 ---
 categories: Links
 date: 2025-02-05T01:00:00Z
-title: "Cloud virtualization: Red Hat, AWS Firecracker, and Ubicloud internals"
+title: "Cloud virtualization in the 2020s"
 tags:
     - cloud
 ---
