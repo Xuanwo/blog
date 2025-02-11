@@ -5,6 +5,7 @@ title: "duckdb is the best TPC data generator"
 tags:
     - bigdata
     - duckdb
+    - database
 ---
 
 **[TPC-DS Extension](https://duckdb.org/docs/extensions/tpcds.html)** from [duckdb](https://duckdb.org/) [via archive.is](https://archive.is/e4TXv)
