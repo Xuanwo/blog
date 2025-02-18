@@ -23,7 +23,7 @@ async fn fetch() -> Result<String> {
 let content = fetch.retry(ExponentialBuilder::default()).await?;
 ```
 
-The biggest change in this release was introduced by [@wackazong](https://github.com/wackazong), who correctly added `std` support for `no-std` without requiring a global random seed. With this improvement, users on `no-std` can now use `rand` properly as well.
+The biggest change in this release was introduced by [@wackazong](https://github.com/wackazong), who correctly added `std` support for `no-std` without requiring a global random seed. With this improvement, users on `no-std` can now use `jitter` properly as well.
 
 [@NumberFour8](https://github.com/NumberFour8) brought us `futures-timer` support, allowing `backon` to be used in an async context without relying on Tokio. [@Matt3o12](https://github.com/Matt3o12) contributed by making some functions `const`, enabling many backoff builder APIs to be used in a `const` context.
 
