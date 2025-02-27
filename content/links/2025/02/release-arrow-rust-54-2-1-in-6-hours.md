@@ -1,6 +1,6 @@
 ---
 categories: Links
-date: 2025-02-27T01:00:00Z
+date: 2025-02-27T02:00:00Z
 title: "Release Arrow Rust 54.2.1 in 6 hours"
 tags:
     - open-source
