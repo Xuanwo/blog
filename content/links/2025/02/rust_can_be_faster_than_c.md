@@ -121,6 +121,8 @@ fn check_status(value: i32) -> String {
 
 There are many DFAs within the decompressor of zlib, so enabling DFA jump threading can significantly improve performance, especially when handling small datasets.
 
+The LLVM community is working to enable this flag by default at [[DFAJumpThreading] Enable the pass by default](https://github.com/llvm/llvm-project/pull/83033).
+
 > Our implementation is mostly done, and clearly performs extremely well. However, we're missing some [less commonly used API functions](https://github.com/trifectatechfoundation/zlib-rs/issues/49) related to gzip files that would make us a complete drop-in replacement in all cases.
 
 Most functions, such as `gzclose` and `gzflush`, seem easy to implement. Let's take a look!
