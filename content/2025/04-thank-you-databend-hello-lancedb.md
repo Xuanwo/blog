@@ -1,7 +1,7 @@
 ---
 categories: Code
 date: 2025-06-29T01:00:00Z
-title: "Thank you, Databend; Hello, Lancedb"
+title: "Thank you, Databend; Hello, LanceDB"
 ---
 
 TL;DR: I'm leaving [Databend](https://github.com/datafuselabs/databend/) to join [LanceDB](https://github.com/lancedb/lance).
