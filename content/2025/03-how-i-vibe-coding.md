@@ -95,7 +95,7 @@ I've had some unsuccessful attempts at using Cursor or Windsurf. My progress beg
 
 Thank you for reading my post. I also recommend the following posts if you want to try vibe coding:
 
-- [Agentic Coding Recommendations](https://lucumr.pocoo.org/2025/6/12/agentic-coding/) from [@mitsuhiko](https://x.com/mitsuhiko)
+- [Agentic Coding Recommendations](https://lucumr.pocoo.org/2025/06/12/agentic-coding/) from [@mitsuhiko](https://x.com/mitsuhiko)
 - [Here’s how I use LLMs to help me write code](https://simonwillison.net/2025/Mar/11/using-llms-for-code/) from [@simonw](https://x.com/simonw)
 
 Hope you're enjoying the coding vibes: create more, hype less.
