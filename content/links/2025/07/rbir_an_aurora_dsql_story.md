@@ -9,7 +9,7 @@ tags:
 
 I've been pinged by [@vaibhaw_vipul](https://x.com/vaibhaw_vipul) to read and share my thoughts on [Just make it scale: An Aurora DSQL story](https://www.allthingsdistributed.com/2025/05/just-make-it-scale-an-aurora-dsql-story.html). It's actually quite enjoyable. I agree with [@iavins](https://x.com/iavins)'s comment that "It's less about database development and more like a love letter to Rust."
 
-I've talked about RBIR quite a lot, and this article offers great examples for my theory: Rust is a good choice for data-intensive infrastructure. It's time for us to rewrite bigdata in Rust.
+I've talked about rewrite bigdata in rust (RBIR) quite a lot, and this article offers great examples for my theory: Rust is a good choice for data-intensive infrastructure. It's time for us to rewrite bigdata in Rust.
 
 ---
 
