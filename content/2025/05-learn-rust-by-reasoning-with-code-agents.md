@@ -2,6 +2,7 @@
 categories: Code
 date: 2025-08-06T01:00:00Z
 title: "Learn Rust by Reasoning with Code Agents"
+tags: [AI]
 ---
 
 It's often said that Rust has a steep learning curve. I disagree with this notion. I'm a strong believer in learning by doing. Rust is a programming language, and like any language, it should be learned by applying it to real projects rather than relying solely on books or videos. However, learning by doing can't solve every problem that newcomers might encounter. While it helps with grasping the basics, when it comes to mastering Rust's advanced features like ownership, traits, lifetimes, async, we need more than just hands-on practice. We need to understand. We need to reason. Thanks to Code Agents, I discovered something even better: learning Rust by reasoning (with Code Agents).
@@ -20,34 +21,27 @@ Reasoning always involves **a question**, not just a fact. The power of AI-assis
 
 Reasoning mimics how we truly understand complex systems.
 
-- We retain better. When we ask "why?", our brain connects the new idea to our existing model.
-- We go beyond syntax. Books teach language rules; reasoning teaches engineering judgment.
-- We practice thinking like a Rust developer. Not just writing "working" code, but writing "good" code.
+- *We retain better*. When we ask "why?", our brain connects the new idea to our existing model.
+- *We go beyond syntax*. Books teach language rules; reasoning teaches engineering judgment.
+- *We practice thinking like a Rust developer*. Not just writing "working" code, but writing "good" code.
 
 A Reasoning-Driven Learning Loop looks like the following:
 
-1. Get (Generate) a diff.
-   Use a code agent to generate a small but non-trivial PR.
-2. Skim and find the edge.
-   What part of the diff feels unfamiliar or slightly suspicious?
-3. Ask “why” and “what if”.
-   Why was it written this way? What would happen if I changed this?
-4. Query the code agent.
-   Ask Claude the exact question we have — but don’t trust the answer blindly.
-5. Ask for runnable examples.
-   Can Claude show a minimal version of this concept? Run it. Tweak it. Break it.
-6. Repeat.
-   Each loop deepens our understanding, not just of Rust, but of design choices.
+- *Get (Generate) a diff*: Use a code agent to generate a small but non-trivial PR.
+- *Skim and find the edge*: What part of the diff feels unfamiliar or slightly suspicious?
+- *Ask "why" and "what if"*: Why was it written this way? What would happen if I changed this?
+- *Ask for runnable examples*: Show a minimal version of this concept. Run it. Tweak it. Break it.
+- *Repeat*: Each loop deepens our understanding, not just of Rust, but of design choices.
 
 This is not passive consumption. This is active debugging: not of the code, but of our understanding.
 
 Not all diffs are equally educational. Here’s what I look for:
 
--	Unexpected constructs
+-	*Unexpected constructs*:
   Traits, macros, async blocks, lifetimes, Pin, etc.
--	Non-obvious design choices
+-	*Non-obvious design choices*:
   Wrapping types in Box, using trait objects, error handling via thiserror, etc.
--	New concepts I haven’t mastered yet
+-	*New concepts I haven’t mastered yet*
 
 Sometimes it’s just one line, but one line is enough if we go deep enough.
 
