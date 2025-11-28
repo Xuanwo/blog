@@ -2,6 +2,7 @@
 categories: Code
 date: 2025-09-22T01:00:00Z
 title: "How I Vibe Coding? (Sept 2025 Edition)"
+series: "How I Coding"
 ---
 
 I wrote [How I vibe Coding?](https://xuanwo.io/2025/03-how-i-vibe-coding/) back in June. Nearly three months later, things have changed. Time to update this article to reflect my current setup. In this piece, I’ll share how I use my tools to do vibe coding. As always, I’m writing this down not just to document my journey, but to inspire you and welcome your feedback.

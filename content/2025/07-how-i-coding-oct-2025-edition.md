@@ -2,6 +2,7 @@
 categories: Code
 date: 2025-10-24T01:00:00Z
 title: "How I Coding? (Oct 2025 Edition)"
+series: "How I Coding"
 ---
 
 Just one week after I published my [Setp 2025 edition of How I vibe coding](https://xuanwo.io/2025/06-how-i-vibe-coding-sept-2025-edition/), Anthropic released Claude Sonnet 4.5. That's a quick reminder that in this field, SOTA doesn't stay still. This post updates my mindset after a month with the new model.

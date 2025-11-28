@@ -2,6 +2,7 @@
 categories: Code
 date: 2025-06-26T01:00:00Z
 title: "How I Vibe Coding?"
+series: "How I Coding"
 ---
 
 Hello everyone, long time no see. I've been evaluating various AI copilots extensively lately and have developed a fairly stable workflow that suits my context and background. I'm now writing it down to hopefully inspire you and to receive some feedback as well.
