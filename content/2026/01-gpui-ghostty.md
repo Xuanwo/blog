@@ -1,7 +1,7 @@
 ---
 categories: Code
 date: 2026-01-01T01:00:00Z
-title: "Build GPUI + Ghostty without coding"
+title: "Build GPUI + Ghostty without writing code"
 ---
 
 Hello everyone. Over the New Year holiday, I built [gpui-ghostty](https://github.com/Xuanwo/gpui-ghostty). It works as follows:
