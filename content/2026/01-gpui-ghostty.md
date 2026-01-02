@@ -40,7 +40,7 @@ I discussed the idea with ChatGPT (using the 5.2 Thinking with extended thinking
 - What are the differences between Alacritty, WezTerm, and Ghostty as embedded terminals?
 - What is VT? What is the difference between libghostty and libghostty-vt?
 - I want to integrate Ghostty under GPUI. How can I do that?
-- How much money does Mitchell have?
+- How much money does Mitchell Hashimoto have?
 
 After that, I asked ChatGPT to generate a full spec for me. The spec includes the project's goals, key technical decisions (such as using GPUI and libghostty-vt), and project milestones. I reviewed and edited the spec.
 
