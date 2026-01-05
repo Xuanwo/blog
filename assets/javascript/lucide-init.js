@@ -48,4 +48,8 @@ function initLucideIcons() {
   })
 }
 
-window.addEventListener('DOMContentLoaded', initLucideIcons)
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', initLucideIcons, { once: true })
+} else {
+  initLucideIcons()
+}
