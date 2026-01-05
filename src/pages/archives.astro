@@ -1,0 +1,29 @@
+---
+export const prerender = true
+
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getTranslation, loadContentIndex } from '../lib/site-data'
+
+const { pages } = await loadContentIndex()
+
+const years = Array.from(
+  new Set(
+    pages
+      .filter((p) => p.type !== 'page' && p.date)
+      .map((p) => new Date(p.date).getUTCFullYear())
+  )
+).sort((a, b) => b - a)
+---
+
+<BaseLayout title={getTranslation('archives')} urlPath="/archives/">
+  <div class="mx-auto">
+    <h1 class="text-center">{getTranslation('archives')}</h1>
+    <div class="flex justify-start flex-wrap">
+      {years.map((y) => (
+        <a class="flex border-6 m-2 px-4 py-2 rounded" href={`/${y}`}>
+          {y}
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

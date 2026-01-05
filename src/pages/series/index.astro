@@ -1,0 +1,25 @@
+---
+export const prerender = true
+
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getTranslation, loadContentIndex } from '../../lib/site-data'
+
+const { taxonomies } = await loadContentIndex()
+const terms = Object.entries(taxonomies.series)
+  .map(([slug, entry]) => ({ name: entry.name, slug, count: entry.pages.length }))
+  .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+---
+
+<BaseLayout title={getTranslation('series')} urlPath="/series/">
+  <div class="mx-auto">
+    <h1 class="text-center text-5xl">{getTranslation('series')}</h1>
+    <div class="mt-8">
+      {terms.map((t) => (
+        <a class="border-6 m-2 rounded text-xl" href={`/series/${t.slug}/`}>
+          {t.name}
+          <sup>{t.count}</sup>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

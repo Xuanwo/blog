@@ -1,0 +1,54 @@
+---
+export const prerender = true
+
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import SitePaginator from '../../components/SitePaginator.astro'
+import { formatDay, loadContentIndex } from '../../lib/site-data'
+import { paginate, slicePage } from '../../lib/pagination'
+
+const { site, pages } = await loadContentIndex()
+const pageSize = site.pagination ?? 10
+const regularPages = pages.filter((p) => p.type !== 'page')
+const { totalPages } = paginate(regularPages, pageSize)
+
+export async function getStaticPaths() {
+  const { site, pages } = await loadContentIndex()
+  const pageSize = site.pagination ?? 10
+  const regularPages = pages.filter((p) => p.type !== 'page')
+  const { totalPages } = paginate(regularPages, pageSize)
+  return Array.from({ length: totalPages }, (_, idx) => ({ params: { page: String(idx + 1) } }))
+}
+
+const current = Number(Astro.params.page)
+const list = slicePage(regularPages, pageSize, current)
+const urlPath = current <= 1 ? '/' : `/page/${current}/`
+---
+
+<BaseLayout title={site.title} urlPath={urlPath}>
+  <article class="container">
+    <ul>
+      {list.map((p) => {
+        const { day, monthYear } = p.date ? formatDay(p.date) : { day: '', monthYear: '' }
+        return (
+          <li class="grid grid-cols-12 mt-8">
+            <div class="col-span-2 text-center">
+              <span class="block text-5xl font-semibold">{day}</span>
+              <span class="block text-sm">{monthYear}</span>
+            </div>
+            <div class="col-span-10">
+              <h3 class="leading-relaxed mb-0 mt-0">
+                <a href={p.url}>{p.title}</a>
+              </h3>
+              <span class="leading-relaxed">{p.description ?? (p.plain.length > 120 ? `${p.plain.slice(0, 70)}...` : p.plain)}</span>
+            </div>
+          </li>
+        )
+      })}
+    </ul>
+    <SitePaginator
+      current={current}
+      total={totalPages}
+      hrefForPage={(page) => (page <= 1 ? '/' : `/page/${page}/`)}
+    />
+  </article>
+</BaseLayout>

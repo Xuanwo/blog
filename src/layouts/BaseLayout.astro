@@ -1,0 +1,32 @@
+---
+import SiteHead from '../components/SiteHead.astro'
+import SiteHeader from '../components/SiteHeader.astro'
+
+type Props = {
+  title: string
+  urlPath: string
+  ogImage?: string
+  ogTitle?: string
+  ogDescription?: string
+}
+
+const { title, urlPath, ogImage, ogTitle, ogDescription } = Astro.props as Props
+---
+
+<!doctype html>
+<html lang="en-US">
+  <SiteHead
+    title={title}
+    urlPath={urlPath}
+    ogImage={ogImage}
+    ogTitle={ogTitle}
+    ogDescription={ogDescription}
+  />
+  <body class="min-h-full max-w-4xl font-sans mx-4 lg:mx-auto xl:mx-auto leading-normal my-8">
+    <SiteHeader />
+    <main class="flex-1 text-gray-900">
+      <slot />
+    </main>
+  </body>
+</html>
+
