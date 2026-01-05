@@ -1,0 +1,36 @@
+---
+import { getTranslation, loadSite } from '../lib/site-data'
+
+const site = loadSite()
+const footer = (site.menu.footer ?? []).slice().sort((a, b) => (a.weight ?? 0) - (b.weight ?? 0))
+const icons = (site.menu.icon ?? []).slice().sort((a, b) => (a.weight ?? 0) - (b.weight ?? 0))
+---
+
+<header class="mx-auto pb-4">
+  <h1 class="text-center lg:text-left text-4xl text-gray-900 font-medium m-0">
+    <a class="text-gray-900" href="/">{getTranslation('site_title')}</a>
+  </h1>
+  <div class="lg:flex text-center justify-between">
+    <p class="text-lg text-gray-600">{getTranslation('site_description')}</p>
+    <nav class="my-auto">
+      <ul class="justify-center flex flex-wrap list-disc list-inside">
+        {icons.map((item) => (
+          <li class="list-none mx-2">
+            <a class="text-gray-600" href={item.url}>
+              <i class={`text-2xl fas fa-${item.name}`}></i>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+  <nav class="text-center border-t border-b px-1 mt-4">
+    <ul class="list-disc list-inside">
+      {footer.map((item) => (
+        <li class="inline-block list-none mx-4">
+          <a href={item.url}>{getTranslation(item.name)}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>

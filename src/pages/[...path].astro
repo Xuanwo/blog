@@ -1,0 +1,60 @@
+---
+export const prerender = true
+
+import BaseLayout from '../layouts/BaseLayout.astro'
+import CommentEmbed from '../components/CommentEmbed.astro'
+import { getTranslation, loadContentIndex } from '../lib/site-data'
+
+export async function getStaticPaths() {
+  const { pages } = await loadContentIndex()
+  return pages
+    .filter((p) => p.type !== 'page')
+    .map((p) => ({ params: { path: p.url.replace(/^\//, '').replace(/\/$/, '') } }))
+}
+
+const urlPath = `/${String(Astro.params.path).replace(/^\//, '').replace(/\/$/, '')}/`
+const { pageByUrl, taxonomies } = await loadContentIndex()
+const page = pageByUrl.get(urlPath)
+if (!page) throw new Error(`Missing page for ${urlPath}`)
+const html = page.html
+
+const taxonomyGroups: Array<{ name: 'tags' | 'categories' | 'series'; slugs: string[] }> = [
+  { name: 'categories', slugs: page.categories },
+  { name: 'tags', slugs: page.tags },
+  { name: 'series', slugs: page.series }
+].filter((g) => g.slugs.length > 0)
+---
+
+<BaseLayout title={page.title ?? ''} urlPath={page.url}>
+  <article class="container pt-8">
+    <header class="pb-4 mb-8 border-b">
+      <h1 class="my-2 text-black leading-tight">{page.title}</h1>
+    </header>
+    <div class="post-content" set:html={html}></div>
+
+    <div class="text-center pt-4 grid grid-cols-12">
+      {taxonomyGroups.map((g) => (
+        <>
+          <div class="col-span-2">
+            <p>{getTranslation(g.name)}</p>
+          </div>
+          <div class="col-span-10">
+            <p>
+              {g.slugs.map((slug) => (
+                <a
+                  class="inline-block border border-blue-600 px-2 rounded"
+                  href={`/${g.name}/${slug}/`}
+                >
+                  {taxonomies[g.name][slug]?.name ?? slug}
+                </a>
+              ))}
+            </p>
+          </div>
+        </>
+      ))}
+    </div>
+
+    <hr class="border-gray-200 mt-10 mb-4" />
+    <CommentEmbed />
+  </article>
+</BaseLayout>

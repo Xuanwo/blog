@@ -1,0 +1,31 @@
+---
+export const prerender = true
+
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { loadContentIndex } from '../lib/site-data'
+
+const { site, pageByUrl } = await loadContentIndex()
+const page = pageByUrl.get('/blogroll/')
+const title = page?.title ?? 'Links'
+
+const items = site.blogroll
+  .slice()
+  .sort((a, b) => a.url.localeCompare(b.url))
+---
+
+<BaseLayout title={title} urlPath="/blogroll/">
+  <h1>{title}</h1>
+  <hr class="border-gray-200 mt-4 mb-4" />
+  <section class="posts">
+    {items.map((it) => (
+      <a class="text-gray-900" href={it.url}>
+        <div class="each">
+          <div>
+            <h2>{it.name}</h2>
+            <div class="excerpt">{it.description}</div>
+          </div>
+        </div>
+      </a>
+    ))}
+  </section>
+</BaseLayout>

@@ -1,0 +1,53 @@
+---
+export const prerender = true
+
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import SitePaginator from '../../../components/SitePaginator.astro'
+import { formatDay, loadContentIndex } from '../../../lib/site-data'
+import { paginate, slicePage } from '../../../lib/pagination'
+
+const legacy = await loadContentIndex()
+const { site, pageByUrl, branches } = legacy
+
+const branchKey = 'en-us/reports'
+const urls = branches[branchKey] ?? []
+const items = urls.map((u) => pageByUrl.get(u)).filter(Boolean)
+
+const meta = legacy.site.indexMeta[branchKey] ?? {}
+const title = meta.title ?? 'Reports'
+const description = meta.description ?? ''
+
+const pageSize = site.pagination ?? 10
+const { totalPages } = paginate(items, pageSize)
+const current = 1
+const list = slicePage(items, pageSize, current)
+---
+
+<BaseLayout title={title} urlPath="/en-us/reports/">
+  <h1 class="text-center text-5xl">{title}</h1>
+  <p class="text-center mt-4">{description}</p>
+  <ul>
+    {list.map((p) => {
+      const { day, monthYear } = p?.date ? formatDay(p.date) : { day: '', monthYear: '' }
+      return (
+        <li class="grid grid-cols-12 mt-8">
+          <div class="col-span-2 text-center">
+            <span class="block text-5xl font-semibold">{day}</span>
+            <span class="block text-sm">{monthYear}</span>
+          </div>
+          <div class="col-span-10">
+            <h3 class="text-2xl leading-relaxed mb-0 mt-0">
+              <a href={p?.url}>{p?.title}</a>
+            </h3>
+            <span class="leading-relaxed">{p?.excerpt}</span>
+          </div>
+        </li>
+      )
+    })}
+  </ul>
+  <SitePaginator
+    current={current}
+    total={totalPages}
+    hrefForPage={(page) => (page <= 1 ? `/en-us/reports/` : `/en-us/reports/page/${page}/`)}
+  />
+</BaseLayout>

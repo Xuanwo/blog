@@ -1,0 +1,35 @@
+---
+import { getTranslation } from '../lib/site-data'
+
+type Props = {
+  current: number
+  total: number
+  hrefForPage: (page: number) => string
+}
+
+const { current, total, hrefForPage } = Astro.props as Props
+const hasPrev = current > 1
+const hasNext = current < total
+---
+
+{total > 1 ? (
+  <>
+    <hr class="border-gray-200 mt-10 mb-4" />
+    <ul class="pagination">
+      <li class="page-item page-prev">
+        {hasPrev ? (
+          <a href={hrefForPage(current - 1)} class="page-link" aria-label="Previous">
+            <span aria-hidden="true">{getTranslation('prevpage')}</span>
+          </a>
+        ) : null}
+      </li>
+      <li>
+        {hasNext ? (
+          <a href={hrefForPage(current + 1)} class="page-link" aria-label="Next">
+            <span aria-hidden="true">{getTranslation('nextpage')}</span>
+          </a>
+        ) : null}
+      </li>
+    </ul>
+  </>
+) : null}

@@ -1,0 +1,49 @@
+---
+import { loadSite } from '../lib/site-data'
+
+type Props = {
+  title: string
+  urlPath: string
+  ogImage?: string
+  ogTitle?: string
+  ogDescription?: string
+}
+
+const site = loadSite()
+const { title, urlPath, ogImage, ogTitle, ogDescription } = Astro.props as Props
+
+const fullUrl = new URL(urlPath.replace(/^\//, ''), site.baseURL).toString()
+const keywords = Array.isArray(site.params.keywords) ? site.params.keywords.join(',') : ''
+---
+
+<head>
+  <script
+    async
+    defer
+    data-domain="xuanwo.io"
+    src="https://plausible.io/js/plausible.js"
+  ></script>
+
+  <title>{title}</title>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content={site.params.description ?? ''} />
+  <meta name="keywords" content={keywords} />
+  <meta name="author" content={site.params.author ?? ''} />
+
+  <meta property="og:title" content={ogTitle ?? title} />
+  <meta property="og:description" content={ogDescription ?? (site.params.description ?? '')} />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:url" content={fullUrl} />
+  {ogImage ? <meta property="og:image" content={ogImage} /> : null}
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+  <link rel="stylesheet" href="/css/main.css" />
+  <script defer src="/javascript/fontawesome.js"></script>
+
+  <link href="http://gmpg.org/xfn/11" rel="profile" />
+</head>
