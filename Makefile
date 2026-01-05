@@ -1,7 +1,7 @@
-.PHONY: server
-server:
-	hugo server --minify --disableFastRender -F --ignoreCache -w
+.PHONY: dev
+dev:
+	npm run dev
 
 .PHONY: build
-build: setup
-	hugo --minify
+build:
+	npm run build
