@@ -26,10 +26,19 @@ function main() {
   ])
 
   copyFileSync(
-    join(REPO_ROOT, 'assets', 'javascript', 'fontawesome.js'),
-    join(REPO_ROOT, 'static', 'javascript', 'fontawesome.js')
+    join(REPO_ROOT, 'node_modules', 'lucide', 'dist', 'umd', 'lucide.min.js'),
+    join(REPO_ROOT, 'static', 'javascript', 'lucide.js')
+  )
+
+  copyFileSync(
+    join(REPO_ROOT, 'assets', 'javascript', 'codeblock.js'),
+    join(REPO_ROOT, 'static', 'javascript', 'codeblock.js')
+  )
+
+  copyFileSync(
+    join(REPO_ROOT, 'assets', 'javascript', 'lucide-init.js'),
+    join(REPO_ROOT, 'static', 'javascript', 'lucide-init.js')
   )
 }
 
 main()
-
