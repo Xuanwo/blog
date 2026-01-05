@@ -17,6 +17,14 @@ const { pageByUrl, taxonomies } = await loadContentIndex()
 const page = pageByUrl.get(urlPath)
 if (!page) throw new Error(`Missing page for ${urlPath}`)
 const html = page.html
+const publishedAt = page.date
+  ? new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    timeZone: 'UTC'
+  }).format(new Date(page.date))
+  : null
 
 const taxonomyGroups: Array<{ name: 'tags' | 'categories' | 'series'; slugs: string[] }> = [
   { name: 'categories', slugs: page.categories },
@@ -29,6 +37,11 @@ const taxonomyGroups: Array<{ name: 'tags' | 'categories' | 'series'; slugs: str
   <article class="container pt-8">
     <header class="pb-4 mb-8 border-b">
       <h1 class="my-2 text-black leading-tight">{page.title}</h1>
+      {page.date && publishedAt && (
+        <p class="text-sm text-gray-600">
+          <time datetime={page.date}>{publishedAt}</time>
+        </p>
+      )}
     </header>
     <div class="post-content" set:html={html}></div>
 
