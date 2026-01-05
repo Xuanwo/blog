@@ -1,8 +1,0 @@
-{{- $.Scratch.Add "index" slice -}}
-{{- $section := $.Site.GetPage "section" .Section }}
-{{- range .Site.AllPages -}}
-{{- if and (ne .Type "page") (eq .Kind "page") -}}
-{{- $.Scratch.Add "index" (dict "objectID" .RelPermalink "type" .Params.Categories "content" (print (substr (.Summary | plainify) 0 20) "...") "summary" (.Summary | plainify) "hierarchy" (dict "lvl0" .Params.Categories "lvl1" .Title "lvl2" "" "lvl3" "") "url" .RelPermalink "tags" .Params.Tags ) }}
-{{- end -}}
-{{- end -}}
-{{- $.Scratch.Get "index" | jsonify -}}

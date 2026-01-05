@@ -63,10 +63,20 @@ export type BranchesRecord = Record<string, string[]>
 
 const REPO_ROOT = process.cwd()
 const CONTENT_DIR = join(REPO_ROOT, 'content')
+const SITE_CONFIG_PATH = join(REPO_ROOT, 'site.yaml')
 
 function loadYamlFile(path: string) {
   const raw = readFileSync(path, 'utf8')
   return YAML.parse(raw)
+}
+
+function normalizePagination(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (value && typeof value === 'object') {
+    const pagerSize = (value as any).pagerSize
+    if (typeof pagerSize === 'number' && Number.isFinite(pagerSize)) return pagerSize
+  }
+  return 10
 }
 
 function normalizeSegment(segment: string) {
@@ -231,7 +241,7 @@ let cachedSite: SiteRecord | null = null
 export function loadSite() {
   if (cachedSite) return cachedSite
 
-  const config = loadYamlFile(join(REPO_ROOT, 'config.yaml'))
+  const config = loadYamlFile(SITE_CONFIG_PATH)
   const i18nList = loadYamlFile(join(REPO_ROOT, 'i18n', 'en-us.yaml'))
   const blogroll = loadYamlFile(join(REPO_ROOT, 'data', 'blogroll', 'blogroll.yaml'))
 
@@ -242,7 +252,7 @@ export function loadSite() {
     baseURL: config.baseURL,
     title: config.title,
     languageCode: config.languageCode,
-    pagination: config.pagination?.pagerSize ?? 10,
+    pagination: normalizePagination(config.pagination),
     params: config.params ?? {},
     menu: config.menu ?? {},
     i18n,
