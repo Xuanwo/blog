@@ -1,0 +1,68 @@
+---
+import { Github, Rss, Send, Twitter } from 'lucide'
+
+type Props = {
+  name: string
+  class?: string
+}
+
+const { name, class: className = '' } = Astro.props as Props
+
+const ICONS = {
+  github: Github,
+  rss: Rss,
+  send: Send,
+  twitter: Twitter
+}
+
+function escapeAttr(value: unknown) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function renderAttrs(attrs: Record<string, unknown>) {
+  return Object.entries(attrs)
+    .filter(([, value]) => value !== undefined && value !== null && value !== false)
+    .map(([key, value]) => ` ${key}="${escapeAttr(value)}"`)
+    .join('')
+}
+
+type IconChild = [string, Record<string, unknown>, IconChild[]?]
+type IconNode = Array<[string, Record<string, unknown>] | IconChild>
+
+function renderIconNode(node: IconNode) {
+  return node
+    .map((entry) => {
+      const [tag, attrs, children] = entry as IconChild
+      const inner = Array.isArray(children) ? renderIconNode(children) : ''
+      return `<${tag}${renderAttrs(attrs)}>${inner}</${tag}>`
+    })
+    .join('')
+}
+
+const iconNode = (ICONS as Record<string, IconNode | undefined>)[name]
+const svgInner = iconNode ? renderIconNode(iconNode) : ''
+const svgClass = ['lucide', `lucide-${name}`, className].filter(Boolean).join(' ')
+
+const svgAttrs = {
+  xmlns: 'http://www.w3.org/2000/svg',
+  width: '1em',
+  height: '1em',
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  'stroke-width': 2,
+  'stroke-linecap': 'round',
+  'stroke-linejoin': 'round',
+  'aria-hidden': 'true',
+  focusable: 'false',
+  class: svgClass
+}
+---
+
+{iconNode ? <svg {...svgAttrs} set:html={svgInner}></svg> : <i data-lucide={name} class={className}></i>}
+
