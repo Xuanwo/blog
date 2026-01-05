@@ -17,6 +17,7 @@ const { pageByUrl, taxonomies } = await loadContentIndex()
 const page = pageByUrl.get(urlPath)
 if (!page) throw new Error(`Missing page for ${urlPath}`)
 const html = page.html
+const markdownUrl = `${page.url.replace(/\/$/, '')}.md`
 const publishedAt = page.date
   ? new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -40,6 +41,17 @@ const taxonomyGroups: Array<{ name: 'tags' | 'categories' | 'series'; slugs: str
       {page.date && publishedAt && (
         <p class="text-sm text-gray-600">
           <time datetime={page.date}>{publishedAt}</time>
+          <span class="mx-2">·</span>
+          <a class="text-blue-600 hover:underline" href={markdownUrl}>
+            View as Markdown
+          </a>
+        </p>
+      )}
+      {(!page.date || !publishedAt) && (
+        <p class="text-sm text-gray-600">
+          <a class="text-blue-600 hover:underline" href={markdownUrl}>
+            View as Markdown
+          </a>
         </p>
       )}
     </header>
