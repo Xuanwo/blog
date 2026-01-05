@@ -173,7 +173,7 @@ function parseDate(value: unknown): string | undefined {
   return parsed.toISOString()
 }
 
-function preprocessHugoHighlightShortcode(markdown: string) {
+export function preprocessHugoHighlightShortcode(markdown: string) {
   const open = /\{\{<\s*highlight\s+([^\s>]+)[^>]*>\}\}/g
   const close = /\{\{<\s*\/\s*highlight\s*>\}\}/g
 
