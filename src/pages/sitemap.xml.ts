@@ -2,6 +2,7 @@ export const prerender = true
 
 import { loadContentIndex } from '../lib/site-data'
 import { paginate } from '../lib/pagination'
+import { getSortedSketches, sketchUrl } from '../data/sketches'
 
 function xmlEscape(value: string) {
   return value
@@ -68,6 +69,9 @@ export async function GET() {
     urls.add(`/series/${slug}/`)
     urls.add(`/series/${slug}/index.xml`)
   }
+
+  urls.add('/sketches/')
+  for (const sketch of getSortedSketches()) urls.add(sketchUrl(sketch))
 
   urls.add('/sitemap.xml')
 
