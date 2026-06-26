@@ -1,0 +1,68 @@
+---
+export const prerender = true
+
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getSortedSketches, sketchUrl } from '../../data/sketches'
+
+const title = 'Sketches'
+const description = 'Self-contained HTML sketches, diagrams, and visual notes.'
+const list = getSortedSketches()
+
+function formatSketchDate(date: string) {
+  const parsed = new Date(date)
+  if (Number.isNaN(parsed.getTime())) return date
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    timeZone: 'UTC'
+  }).format(parsed)
+}
+---
+
+<BaseLayout title={title} urlPath="/sketches/" ogTitle={title} ogDescription={description}>
+  <section class="container pt-8">
+    <header class="pb-4 mb-4 border-b border-gray-200 dark:border-gray-700">
+      <h1 class="my-2 text-black dark:text-gray-100 leading-tight">{title}</h1>
+      <p class="text-gray-600 dark:text-gray-400">{description}</p>
+    </header>
+
+    {list.length === 0 && (
+      <p class="text-gray-600 dark:text-gray-400">No sketches yet.</p>
+    )}
+
+    {list.length > 0 && (
+      <ul class="m-0 p-0">
+        {list.map((sketch) => (
+          <li class="list-none border-b border-gray-200 py-6 dark:border-gray-700">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-12">
+              {sketch.cover && (
+                <a class="sm:col-span-4" href={sketchUrl(sketch)} aria-label={sketch.title}>
+                  <img
+                    class="aspect-video w-full border border-gray-200 object-cover dark:border-gray-700"
+                    src={sketch.cover}
+                    alt=""
+                    loading="lazy"
+                  />
+                </a>
+              )}
+              <div class={sketch.cover ? 'sm:col-span-8' : 'sm:col-span-12'}>
+                <p class="my-0 text-sm text-gray-600 dark:text-gray-400">
+                  <time datetime={sketch.date}>{formatSketchDate(sketch.date)}</time>
+                </p>
+                <h2 class="mb-2 mt-1 text-2xl leading-relaxed">
+                  <a href={sketchUrl(sketch)}>{sketch.title}</a>
+                </h2>
+                {sketch.description && (
+                  <p class="my-0 leading-relaxed text-gray-700 dark:text-gray-300">
+                    {sketch.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+</BaseLayout>
