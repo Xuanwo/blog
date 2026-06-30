@@ -1,0 +1,39 @@
+---
+import LucideIcon from './LucideIcon.astro'
+---
+
+<button type="button" id="theme-toggle" class="xw-icon-btn" aria-label="Toggle theme" title="Toggle theme">
+  <span class="xw-theme-icon xw-theme-icon--moon"><LucideIcon name="moon" /></span>
+  <span class="xw-theme-icon xw-theme-icon--sun"><LucideIcon name="sun" /></span>
+</button>
+
+<script is:inline>
+  (function () {
+    var btn = document.getElementById('theme-toggle')
+    if (!btn) return
+    btn.addEventListener('click', function () {
+      var cur = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
+      var next = cur === 'dark' ? 'light' : 'dark'
+      document.documentElement.dataset.theme = next
+      try { localStorage.setItem('xw-theme', next) } catch (e) {}
+      // Keep the giscus comment iframe in sync with the page theme. The theme
+      // is a same-origin custom CSS URL that maps giscus to our design tokens.
+      var frame = document.querySelector('iframe.giscus-frame')
+      if (frame && frame.contentWindow) {
+        var themeUrl = 'https://xuanwo.io/giscus/' + (next === 'dark' ? 'dark' : 'light') + '.css'
+        frame.contentWindow.postMessage(
+          { giscus: { setConfig: { theme: themeUrl } } },
+          'https://giscus.app'
+        )
+      }
+    })
+  })()
+</script>
+
+<style>
+  /* Show moon in light mode (click → dark), sun in dark mode (click → light). */
+  .xw-theme-icon { display: inline-flex; }
+  .xw-theme-icon--sun { display: none; }
+  :global([data-theme='dark']) .xw-theme-icon--moon { display: none; }
+  :global([data-theme='dark']) .xw-theme-icon--sun { display: inline-flex; }
+</style>

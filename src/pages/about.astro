@@ -7,14 +7,13 @@ import { loadContentIndex } from '../lib/site-data'
 const { pageByUrl } = await loadContentIndex()
 const page = pageByUrl.get('/about/')
 if (!page) throw new Error('Missing /about/')
-const html = page.html
 ---
 
 <BaseLayout title={page.title ?? 'About'} urlPath="/about/">
-  <article class="container pt-8">
-    <header class="pb-4 mb-8 border-b border-gray-200 dark:border-gray-700">
-      <h1 class="my-2 text-black dark:text-gray-100 leading-tight">{page.title}</h1>
+  <div class="xw-container-prose xw-page">
+    <header class="xw-page-head">
+      <h1 class="xw-page-title">{page.title}</h1>
     </header>
-    <div class="post-content" set:html={html}></div>
-  </article>
+    <div class="post-content" set:html={page.html}></div>
+  </div>
 </BaseLayout>

@@ -3,7 +3,11 @@ export const prerender = true
 
 import BaseLayout from '../layouts/BaseLayout.astro'
 import CommentEmbed from '../components/CommentEmbed.astro'
+import TableOfContents from '../components/TableOfContents.astro'
+import LucideIcon from '../components/LucideIcon.astro'
 import { getTranslation, loadContentIndex } from '../lib/site-data'
+import { buildToc } from '../lib/toc'
+import { readingTime } from '../lib/reading-time'
 
 export async function getStaticPaths() {
   const { pages } = await loadContentIndex()
@@ -16,8 +20,10 @@ const urlPath = `/${String(Astro.params.path).replace(/^\//, '').replace(/\/$/, 
 const { pageByUrl, taxonomies } = await loadContentIndex()
 const page = pageByUrl.get(urlPath)
 if (!page) throw new Error(`Missing page for ${urlPath}`)
-const html = page.html
+
+const { toc, html } = buildToc(page.html)
 const markdownUrl = `${page.url.replace(/\/$/, '')}.md`
+const readMin = readingTime(page.plain)
 const publishedAt = page.date
   ? new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -35,51 +41,192 @@ const taxonomyGroups: Array<{ name: 'tags' | 'categories' | 'series'; slugs: str
 ---
 
 <BaseLayout title={page.title ?? ''} urlPath={page.url}>
-  <article class="container pt-8">
-    <header class="pb-4 mb-8 border-b border-gray-200 dark:border-gray-700">
-      <h1 class="my-2 text-black dark:text-gray-100 leading-tight">{page.title}</h1>
-      {page.date && publishedAt && (
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-          <time datetime={page.date}>{publishedAt}</time>
-          <span class="mx-2">·</span>
-          <a class="text-blue-600 dark:text-blue-400 hover:underline" href={markdownUrl}>
-            View as Markdown
-          </a>
-        </p>
+  <div class="xw-article__shell">
+    <header class="xw-article__header">
+      <a class="xw-article__back" href="/">
+        <span class="xw-article__back-ic"><LucideIcon name="arrow-left" /></span>
+        Writing
+      </a>
+      {page.tags.length > 0 && (
+        <div class="xw-article__tags">
+          {page.tags.slice(0, 4).map((t) => (
+            <a class="xw-tag is-hash" href={`/tags/${t}/`}>{t}</a>
+          ))}
+        </div>
       )}
-      {(!page.date || !publishedAt) && (
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-          <a class="text-blue-600 dark:text-blue-400 hover:underline" href={markdownUrl}>
-            View as Markdown
-          </a>
-        </p>
-      )}
+      <h1 class="xw-article__title">{page.title}</h1>
+      <div class="xw-article__meta">
+        <span class="xw-article__author">
+          <img class="xw-article__avatar" src="/img/logo/logo.jpeg" alt="Xuanwo" width="28" height="28" />
+          <span>Xuanwo</span>
+        </span>
+        {publishedAt && <time class="xw-mono" datetime={page.date}>{publishedAt}</time>}
+        <span class="xw-article__read"><LucideIcon name="clock" /> {readMin} min read</span>
+        <a class="xw-article__md" href={markdownUrl}>
+          <LucideIcon name="file-text" />
+          <span>View as Markdown</span>
+        </a>
+      </div>
     </header>
-    <div class="post-content" set:html={html}></div>
 
-    <div class="text-center pt-4 grid grid-cols-12">
-      {taxonomyGroups.map((g) => (
-        <>
-          <div class="col-span-2">
-            <p>{getTranslation(g.name)}</p>
-          </div>
-          <div class="col-span-10">
-            <p>
-              {g.slugs.map((slug) => (
-                <a
-                  class="inline-block border border-blue-600 px-2 rounded"
-                  href={`/${g.name}/${slug}/`}
-                >
-                  {taxonomies[g.name][slug]?.name ?? slug}
-                </a>
-              ))}
-            </p>
-          </div>
-        </>
-      ))}
-    </div>
+    <article class="xw-article__main">
+      <div class="post-content" set:html={html}></div>
 
-    <hr class="border-gray-200 dark:border-gray-700 mt-10 mb-4" />
-    <CommentEmbed />
-  </article>
+      {taxonomyGroups.length > 0 && (
+        <footer class="xw-article__taxonomy">
+          {taxonomyGroups.map((g) => (
+            <div class="xw-article__tax-row">
+              <span class="xw-eyebrow">{getTranslation(g.name)}</span>
+              <span class="xw-article__tax-tags">
+                {g.slugs.map((slug) => (
+                  <a class="xw-tag is-hash" href={`/${g.name}/${slug}/`}>
+                    {taxonomies[g.name][slug]?.name ?? slug}
+                  </a>
+                ))}
+              </span>
+            </div>
+          ))}
+        </footer>
+      )}
+
+      <CommentEmbed />
+    </article>
+
+    <TableOfContents items={toc} />
+  </div>
 </BaseLayout>
+
+<style>
+  .xw-article__shell {
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding: var(--space-7) var(--space-5) var(--space-8);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    column-gap: var(--space-8);
+    align-items: start;
+  }
+  /* Masthead spans both columns so the title gets full width and the TOC
+     starts level with the body, not jammed against the headline. */
+  .xw-article__header {
+    grid-column: 1 / -1;
+    margin-bottom: var(--space-7);
+  }
+  .xw-article__main {
+    grid-column: 1;
+    min-width: 0;
+    max-width: 760px;
+  }
+  .xw-article__shell > :global(.xw-toc) {
+    grid-column: 2;
+  }
+
+  .xw-article__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--text-sm);
+    color: var(--fg-subtle);
+    margin-bottom: var(--space-5);
+  }
+  .xw-article__back:hover { color: var(--fg); text-decoration: none; }
+  .xw-article__back-ic { display: inline-flex; }
+  .xw-article__back-ic :global(svg) { width: 14px; height: 14px; }
+
+  .xw-article__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: var(--space-4);
+  }
+
+  .xw-article__title {
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: var(--fg);
+    text-wrap: balance;
+  }
+
+  .xw-article__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-5);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--border);
+    font-size: var(--text-sm);
+    color: var(--fg-subtle);
+  }
+  .xw-article__author {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--fg);
+    font-weight: var(--weight-semibold);
+  }
+  .xw-article__avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    object-fit: cover;
+  }
+  .xw-article__read { display: inline-flex; align-items: center; gap: 5px; }
+  .xw-article__read :global(svg) { width: 13px; height: 13px; }
+  /* Lone utility action in the meta row: a restrained hairline ghost button,
+     not a bright accent link, so it reads as part of the design system. */
+  .xw-article__md {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--fg-subtle);
+    font-size: var(--text-xs);
+    line-height: 1;
+    transition: var(--transition-colors);
+  }
+  .xw-article__md:hover {
+    color: var(--fg);
+    border-color: var(--border-strong);
+    background: var(--surface-2);
+    text-decoration: none;
+  }
+  .xw-article__md :global(svg) { width: 13px; height: 13px; }
+
+  .xw-article__taxonomy {
+    margin-top: var(--space-7);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .xw-article__tax-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+  }
+  .xw-article__tax-row .xw-eyebrow { flex: none; width: 84px; }
+  .xw-article__tax-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 920px) {
+    .xw-article__shell { grid-template-columns: minmax(0, 1fr); }
+    .xw-article__shell > :global(.xw-toc) { display: none; }
+  }
+  @media (max-width: 520px) {
+    .xw-article__title { font-size: var(--text-3xl); }
+    .xw-article__tax-row { flex-direction: column; gap: var(--space-1); }
+    .xw-article__tax-row .xw-eyebrow { width: auto; }
+  }
+</style>

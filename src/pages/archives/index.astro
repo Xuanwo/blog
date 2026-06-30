@@ -5,26 +5,37 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import { getTranslation, loadContentIndex } from '../../lib/site-data'
 
 const { pages } = await loadContentIndex()
+const articles = pages.filter((p) => p.type !== 'page' && p.date)
 
-const years = Array.from(
-  new Set(
-    pages
-      .filter((p) => p.type !== 'page' && p.date)
-      .map((p) => new Date(p.date).getUTCFullYear())
-  )
-).sort((a, b) => b - a)
+function years(list: typeof articles) {
+  return Array.from(
+    new Set(list.map((p) => new Date(p.date as string).getUTCFullYear()))
+  ).sort((a, b) => b - a)
+}
+
+const panes = [
+  { lang: 'zh', years: years(articles.filter((p) => p.lang === 'zh')) },
+  { lang: 'en', years: years(articles.filter((p) => p.lang === 'en')) }
+]
 ---
 
 <BaseLayout title={getTranslation('archives')} urlPath="/archives/">
-  <div class="mx-auto">
-    <h1 class="text-center">{getTranslation('archives')}</h1>
-    <div class="flex justify-start flex-wrap">
-      {years.map((y) => (
-        <a class="flex m-2 px-4 py-2 rounded" href={`/${y}`}>
-          {y}
-        </a>
-      ))}
-    </div>
+  <div class="xw-container xw-page">
+    <header class="xw-page-head">
+      <h1 class="xw-page-title">{getTranslation('archives')}</h1>
+    </header>
+    {panes.map((pane) => (
+      <div data-lang-pane={pane.lang}>
+        {pane.years.length > 0 ? (
+          <div class="xw-cloud">
+            {pane.years.map((y) => (
+              <a class="xw-cloud__item xw-mono" href={`/${y}`}>{y}</a>
+            ))}
+          </div>
+        ) : (
+          <p class="xw-empty">No posts in this language yet.</p>
+        )}
+      </div>
+    ))}
   </div>
 </BaseLayout>
-

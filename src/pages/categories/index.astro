@@ -4,22 +4,51 @@ export const prerender = true
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { getTranslation, loadContentIndex } from '../../lib/site-data'
 
-const { taxonomies } = await loadContentIndex()
-const terms = Object.entries(taxonomies.categories)
-  .map(([slug, entry]) => ({ name: entry.name, slug, count: entry.pages.length }))
-  .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+const { taxonomies, pageByUrl } = await loadContentIndex()
+
+function langCount(urls: string[]) {
+  let zh = 0
+  let en = 0
+  for (const u of urls) {
+    const p = pageByUrl.get(u)
+    if (p?.lang === 'zh') zh++
+    else if (p?.lang === 'en') en++
+  }
+  return { zh, en }
+}
+
+const terms = Object.entries(taxonomies.categories).map(([slug, entry]) => {
+  const c = langCount(entry.pages)
+  return { name: entry.name, slug, zh: c.zh, en: c.en }
+})
+const zhTerms = terms.filter((t) => t.zh > 0).sort((a, b) => b.zh - a.zh || a.name.localeCompare(b.name))
+const enTerms = terms.filter((t) => t.en > 0).sort((a, b) => b.en - a.en || a.name.localeCompare(b.name))
+const panes = [
+  { lang: 'zh', terms: zhTerms },
+  { lang: 'en', terms: enTerms }
+]
 ---
 
 <BaseLayout title={getTranslation('categories')} urlPath="/categories/">
-  <div class="mx-auto">
-    <h1 class="text-center text-5xl">{getTranslation('categories')}</h1>
-    <div class="mt-8">
-      {terms.map((t) => (
-        <a class="m-2 rounded text-xl" href={`/categories/${t.slug}/`}>
-          {t.name}
-          <sup>{t.count}</sup>
-        </a>
-      ))}
-    </div>
+  <div class="xw-container xw-page">
+    <header class="xw-page-head">
+      <h1 class="xw-page-title">{getTranslation('categories')}</h1>
+    </header>
+    {panes.map((pane) => (
+      <div data-lang-pane={pane.lang}>
+        {pane.terms.length > 0 ? (
+          <div class="xw-cloud">
+            {pane.terms.map((t) => (
+              <a class="xw-cloud__item" href={`/categories/${t.slug}/`}>
+                <span class="xw-cloud__hash">#</span>{t.name}
+                <span class="xw-cloud__count">{pane.lang === 'zh' ? t.zh : t.en}</span>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <p class="xw-empty">No categories in this language yet.</p>
+        )}
+      </div>
+    ))}
   </div>
 </BaseLayout>

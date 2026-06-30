@@ -2,44 +2,65 @@
 export const prerender = true
 
 import BaseLayout from '../layouts/BaseLayout.astro'
-import SitePaginator from '../components/SitePaginator.astro'
-import { formatDay, loadContentIndex } from '../lib/site-data'
+import LangPanes from '../components/LangPanes.astro'
+import { loadContentIndex } from '../lib/site-data'
 import { paginate, slicePage } from '../lib/pagination'
 
 const { site, pages } = await loadContentIndex()
 const pageSize = site.pagination ?? 10
 
 const regularPages = pages.filter((p) => p.type !== 'page')
-const { totalPages } = paginate(regularPages, pageSize)
+const zhPages = regularPages.filter((p) => p.lang === 'zh')
+const enPages = regularPages.filter((p) => p.lang === 'en')
 const current = 1
-const list = slicePage(regularPages, pageSize, current)
+const { totalPages: zhTotal } = paginate(zhPages, pageSize)
+const { totalPages: enTotal } = paginate(enPages, pageSize)
+const zhList = slicePage(zhPages, pageSize, current)
+const enList = slicePage(enPages, pageSize, current)
+const description = site.params.description ?? ''
 ---
 
 <BaseLayout title={site.title} urlPath="/">
-  <article class="container">
-    <ul>
-      {list.map((p) => {
-        const { day, monthYear } = p.date ? formatDay(p.date) : { day: '', monthYear: '' }
-        return (
-          <li class="grid grid-cols-12 mt-8">
-            <div class="col-span-2 text-center">
-              <span class="block text-5xl font-semibold">{day}</span>
-              <span class="block text-sm">{monthYear}</span>
-            </div>
-            <div class="col-span-10">
-              <h3 class="leading-relaxed mb-0 mt-0">
-                <a href={p.url}>{p.title}</a>
-              </h3>
-              <span class="leading-relaxed">{p.description ?? (p.plain.length > 120 ? `${p.plain.slice(0, 70)}...` : p.plain)}</span>
-            </div>
-          </li>
-        )
-      })}
-    </ul>
-    <SitePaginator
+  <div class="xw-container xw-home">
+    <header class="xw-home__hero">
+      <div data-lang-pane="zh">
+        <h1 class="xw-home__title">{site.i18nZh.site_title ?? site.title}</h1>
+        <p class="xw-home__sub">{site.i18nZh.site_description ?? description}</p>
+      </div>
+      <div data-lang-pane="en">
+        <h1 class="xw-home__title">{site.title}</h1>
+        <p class="xw-home__sub">{description}</p>
+      </div>
+    </header>
+    <LangPanes
+      zhList={zhList}
+      enList={enList}
+      zhTotal={zhTotal}
+      enTotal={enTotal}
       current={current}
-      total={totalPages}
       hrefForPage={(page) => (page <= 1 ? '/' : `/page/${page}/`)}
     />
-  </article>
+  </div>
 </BaseLayout>
+
+<style>
+  .xw-home { padding-top: var(--space-8); padding-bottom: var(--space-7); }
+  .xw-home__hero { margin-bottom: var(--space-6); }
+  .xw-home__title {
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    margin-top: var(--space-2);
+    color: var(--fg);
+  }
+  .xw-home__sub {
+    font-size: var(--text-lg);
+    color: var(--fg-muted);
+    margin-top: var(--space-3);
+    line-height: var(--leading-relaxed);
+    max-width: 640px;
+  }
+  .xw-home__sub-cn { color: var(--fg-subtle); margin-left: 0.5ch; }
+</style>

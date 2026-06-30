@@ -5,26 +5,50 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 ---
 
 <BaseLayout title="404" urlPath="/404.html">
-  <div class="single container">
-    <div class="text-center">
-      <h1>404</h1>
-    </div>
-    <p>
-      A fatal exception 0E has occurred at <span class="tania">0x74616e6961</span> in 404:
+  <div class="xw-container xw-page xw-404">
+    <p class="xw-eyebrow">Error</p>
+    <h1 class="xw-404__code">404</h1>
+    <p class="xw-404__msg">
+      A fatal exception 0E has occurred at <span class="xw-mono">0x74616e6961</span> in 404:
       page not found.
     </p>
-    <div class="list">
-      <p>
-        <span class="bullet">*</span> Click any link to terminate the current application.
-      </p>
-      <p>
-        <span class="bullet">*</span> Press ALT + F4 again to restart your browser. You will lose
-        any unsaved information in all tabs.
-      </p>
-    </div>
-    <p class="text-right">
-      Click any link to continue<span class="blink">&#9608;</span>
-    </p>
+    <ul class="xw-404__list">
+      <li>Click any link to terminate the current application.</li>
+      <li>Press ALT + F4 again to restart your browser. You will lose any unsaved information in all tabs.</li>
+    </ul>
+    <p class="xw-404__cta">Click any link to continue<span class="xw-404__blink">█</span></p>
+    <a class="xw-btn-ghost" href="/">← Back home</a>
   </div>
 </BaseLayout>
 
+<style>
+  .xw-404 { max-width: 640px; }
+  .xw-404__code {
+    font-family: var(--font-display);
+    font-size: var(--text-5xl);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-tight);
+    margin-top: var(--space-2);
+    color: var(--fg);
+  }
+  .xw-404__msg { margin-top: var(--space-4); color: var(--fg-muted); }
+  .xw-404__list {
+    margin: var(--space-4) 0;
+    padding-left: 1.2em;
+    color: var(--fg-subtle);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .xw-404__cta { margin: var(--space-5) 0; color: var(--fg-muted); }
+  .xw-404__blink {
+    display: inline-block;
+    margin-left: 2px;
+    color: var(--accent);
+    animation: xw-blink 1s steps(2) infinite;
+  }
+  @keyframes xw-blink {
+    0%, 50% { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
+  }
+</style>

@@ -1,37 +1,100 @@
 ---
 import { getTranslation, loadSite } from '../lib/site-data'
 import LucideIcon from './LucideIcon.astro'
+import LangToggle from './LangToggle.astro'
+import ThemeToggle from './ThemeToggle.astro'
 
 const site = loadSite()
-const footer = (site.menu.footer ?? []).slice().sort((a, b) => (a.weight ?? 0) - (b.weight ?? 0))
+const nav = (site.menu.footer ?? []).slice().sort((a, b) => (a.weight ?? 0) - (b.weight ?? 0))
 const icons = (site.menu.icon ?? []).slice().sort((a, b) => (a.weight ?? 0) - (b.weight ?? 0))
+
+const isExternal = (url: string) => /^https?:\/\//.test(url)
 ---
 
-<header class="mx-auto pb-4">
-  <h1 class="text-center lg:text-left text-4xl text-gray-900 dark:text-gray-100 font-medium m-0">
-    <a class="text-gray-900 dark:text-gray-100" href="/">{getTranslation('site_title')}</a>
-  </h1>
-  <div class="lg:flex text-center justify-between">
-    <p class="text-lg text-gray-600 dark:text-gray-400">{getTranslation('site_description')}</p>
-    <nav class="my-auto">
-      <ul class="justify-center flex flex-wrap list-disc list-inside">
-        {icons.map((item) => (
-          <li class="list-none mx-2">
-            <a class="text-gray-600 dark:text-gray-400 text-2xl" href={item.url} aria-label={item.name}>
-              <LucideIcon name={item.name} />
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  </div>
-  <nav class="text-center border-t border-b border-gray-200 dark:border-gray-700 px-1 mt-4">
-    <ul class="list-disc list-inside">
-      {footer.map((item) => (
-        <li class="inline-block list-none mx-4">
-          <a href={item.url}>{getTranslation(item.name)}</a>
-        </li>
+<header class="xw-header">
+  <div class="xw-header__inner">
+    <a href="/" class="xw-header__brand" aria-label="Home">
+      <img
+        class="xw-header__avatar"
+        src="/img/logo/logo.jpeg"
+        alt="Xuanwo"
+        width="36"
+        height="36"
+        decoding="async"
+      />
+    </a>
+    <nav class="xw-header__nav" aria-label="Sections">
+      {nav.map((item) => (
+        <a href={item.url}>{getTranslation(item.name)}</a>
       ))}
-    </ul>
-  </nav>
+    </nav>
+    <div class="xw-header__actions">
+      {icons.map((item) => (
+        <a
+          class="xw-icon-btn"
+          href={item.url}
+          aria-label={item.name}
+          target={isExternal(item.url) ? '_blank' : null}
+          rel={isExternal(item.url) ? 'noopener noreferrer' : null}
+        >
+          <LucideIcon name={item.name} />
+        </a>
+      ))}
+      <LangToggle />
+      <ThemeToggle />
+    </div>
+  </div>
 </header>
+
+<style>
+  .xw-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .xw-header__inner {
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    min-height: 60px;
+    padding: 0 var(--space-5);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .xw-header__nav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-wrap: wrap;
+    margin-left: var(--space-2);
+  }
+  .xw-header__nav a {
+    font-size: var(--text-base);
+    font-weight: var(--weight-medium);
+    color: var(--fg-subtle);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    text-transform: capitalize;
+    transition: var(--transition-colors);
+  }
+  .xw-header__nav a:hover {
+    color: var(--fg);
+    background: var(--surface-2);
+    text-decoration: none;
+  }
+  .xw-header__actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: none;
+  }
+  @media (max-width: 760px) {
+    .xw-header__nav { display: none; }
+  }
+</style>

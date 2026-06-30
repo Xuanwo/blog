@@ -2,6 +2,7 @@
 export const prerender = true
 
 import BaseLayout from '../layouts/BaseLayout.astro'
+import LucideIcon from '../components/LucideIcon.astro'
 import { loadContentIndex } from '../lib/site-data'
 
 const { site, pageByUrl } = await loadContentIndex()
@@ -14,18 +15,64 @@ const items = site.blogroll
 ---
 
 <BaseLayout title={title} urlPath="/blogroll/">
-  <h1>{title}</h1>
-  <hr class="border-gray-200 dark:border-gray-700 mt-4 mb-4" />
-  <section class="posts">
-    {items.map((it) => (
-      <a class="text-gray-900 dark:text-gray-200" href={it.url}>
-        <div class="each">
-          <div>
-            <h2>{it.name}</h2>
-            <div class="excerpt">{it.description}</div>
-          </div>
-        </div>
-      </a>
-    ))}
-  </section>
+  <div class="xw-container xw-page">
+    <header class="xw-page-head">
+      <h1 class="xw-page-title">{title}</h1>
+      <p class="xw-page-sub">Blogs and sites worth reading. 值得一读的博客与站点。</p>
+    </header>
+    <ul class="xw-linklist">
+      {items.map((it) => (
+        <li>
+          <a class="xw-linkcard" href={it.url} target="_blank" rel="noopener noreferrer">
+            <span class="xw-linkcard__name">
+              {it.name}
+              <span class="xw-linkcard__ic"><LucideIcon name="external-link" /></span>
+            </span>
+            {it.description && <span class="xw-linkcard__desc">{it.description}</span>}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
 </BaseLayout>
+
+<style>
+  .xw-linklist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-4);
+  }
+  .xw-linkcard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    height: 100%;
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    transition: var(--transition-colors);
+  }
+  .xw-linkcard:hover {
+    border-color: var(--border-strong);
+    background: var(--surface-2);
+    text-decoration: none;
+  }
+  .xw-linkcard__name {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: var(--weight-semibold);
+    color: var(--fg);
+  }
+  .xw-linkcard__ic { color: var(--fg-faint); display: inline-flex; }
+  .xw-linkcard__ic :global(svg) { width: 13px; height: 13px; }
+  .xw-linkcard__desc {
+    font-size: var(--text-sm);
+    color: var(--fg-subtle);
+    line-height: var(--leading-normal);
+  }
+</style>

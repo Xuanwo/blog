@@ -1,15 +1,52 @@
 @import "tailwindcss";
 
-@layer theme {
-  :root, :host {
-    --color-blue-600: #2563eb;
-    --color-gray-200: #e5e7eb;
-    --color-gray-300: #d1d5db;
-    --color-gray-400: #9ca3af;
-    --color-gray-500: #6b7280;
-    --color-gray-600: #4b5563;
-    --color-gray-900: #111827;
-  }
+/* Xuanwo Design System tokens (no webfonts — system stacks). */
+@import "./tokens/colors.css";
+@import "./tokens/typography.css";
+@import "./tokens/layout.css";
+@import "./tokens/base.css";
+
+/* Dark mode follows the [data-theme] attribute (set on <html> early),
+   not prefers-color-scheme, so the toggle can pin it. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Bridge semantic tokens to Tailwind utilities. `inline` makes the
+   utilities output `var(--token)` instead of copying a static value,
+   so bg-surface / text-fg / border-border track [data-theme] live. */
+@theme inline {
+  --color-bg:           var(--bg);
+  --color-surface:      var(--surface);
+  --color-surface-2:    var(--surface-2);
+  --color-surface-3:    var(--surface-3);
+  --color-fg:           var(--fg);
+  --color-fg-muted:     var(--fg-muted);
+  --color-fg-subtle:    var(--fg-subtle);
+  --color-fg-faint:     var(--fg-faint);
+  --color-accent:       var(--accent);
+  --color-accent-text:  var(--accent-text);
+  --color-accent-subtle:var(--accent-subtle);
+  --color-accent-fg:    var(--accent-fg);
+  --color-border:       var(--border);
+  --color-border-strong:var(--border-strong);
+  --color-success:      var(--success);
+  --color-warning:      var(--warning);
+  --color-danger:       var(--danger);
+
+  --font-sans:    var(--font-sans);
+  --font-serif:   var(--font-serif);
+  --font-mono:    var(--font-mono);
+  --font-display: var(--font-display);
+
+  --text-xs:   var(--text-xs);
+  --text-sm:   var(--text-sm);
+  --text-base: var(--text-base);
+  --text-md:   var(--text-md);
+  --text-lg:   var(--text-lg);
+  --text-xl:   var(--text-xl);
+  --text-2xl:  var(--text-2xl);
+  --text-3xl:  var(--text-3xl);
+  --text-4xl:  var(--text-4xl);
+  --text-5xl:  var(--text-5xl);
 }
 
 @layer base {
@@ -22,202 +59,350 @@
       overflow-y: scroll;
     }
   }
-
-  body {
-    @apply font-normal leading-normal;
-  }
-
-  p,
-  ol,
-  ul,
-  dl,
-  table {
-    @apply my-2 text-base;
-  }
-
-
-  h1 {
-    @apply font-extrabold mb-2 mt-6 text-3xl;
-  }
-
-  h2 {
-    @apply font-bold mb-2 mt-6 text-2xl;
-  }
-
-  h3 {
-    @apply font-semibold mb-2 mt-6 text-xl;
-  }
-
-  h4, h5 {
-    @apply font-medium mb-2 mt-4 text-xl;
-  }
-
-  strong, b {
-    @apply font-bold;
-  }
-
-  blockquote {
-    @apply border-l-2 text-gray-500 border-gray-500 px-4;
-    @apply dark:text-gray-400 dark:border-gray-600;
-  }
-
-  hr {
-    @apply my-4 border-0 border-t border-gray-200;
-    @apply dark:border-gray-700;
-  }
-
-  table {
-    @apply block mb-4 border-collapse overflow-x-auto text-left;
-  }
-
-  thead {
-    @apply border-b-2 border-gray-200;
-    @apply dark:border-gray-700;
-  }
-
-  th {
-    @apply p-3 border-b-2 border-gray-200 text-left break-words;
-    @apply dark:border-gray-700;
-  }
-
-  td {
-    @apply p-3 border-b border-gray-200 text-left break-words;
-    @apply dark:border-gray-700;
-  }
-
-  a {
-    @apply text-blue-600 hover:text-gray-400 no-underline break-words;
-    @apply dark:text-blue-400 dark:hover:text-gray-300;
-  }
-
-  pre {
-    @apply overflow-auto;
-  }
 }
 
 @layer components {
+  /* ============================================================
+     Long-form prose (.post-content) — serif reading body, azure
+     links, hairline rules. Mirrors design-system ui_kits/blog.
+     ============================================================ */
   .post-content {
-      @apply leading-relaxed;
+    font-family: var(--font-reading);
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    color: var(--fg);
   }
 
-  .post-content .highlight {
-      @apply mb-8 block leading-relaxed rounded font-mono;
+  .post-content p,
+  .post-content ol,
+  .post-content ul,
+  .post-content dl {
+    margin-block: var(--space-5);
   }
 
-  .post-content .highlight pre {
-      @apply p-4 overflow-auto;
+  .post-content h1,
+  .post-content h2,
+  .post-content h3,
+  .post-content h4,
+  .post-content h5,
+  .post-content h6 {
+    font-family: var(--font-heading);
+    color: var(--fg);
+    letter-spacing: var(--tracking-snug);
+    scroll-margin-top: 5rem;
+    text-wrap: balance;
+  }
+  .post-content h2 { font-size: var(--text-2xl); font-weight: var(--weight-semibold); margin: var(--space-7) 0 var(--space-3); }
+  .post-content h3 { font-size: var(--text-xl);  font-weight: var(--weight-semibold); margin: var(--space-6) 0 var(--space-2); }
+  .post-content h4,
+  .post-content h5,
+  .post-content h6 { font-size: var(--text-md); font-weight: var(--weight-semibold); margin: var(--space-5) 0 var(--space-2); }
+
+  .post-content a {
+    color: var(--accent-text);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    text-decoration-color: var(--accent-border);
+    overflow-wrap: break-word;
+  }
+  .post-content a:hover { text-decoration-color: var(--accent); }
+
+  .post-content strong,
+  .post-content b { font-weight: var(--weight-semibold); color: var(--fg); }
+
+  .post-content blockquote {
+    border-left: 3px solid var(--accent);
+    margin: var(--space-6) 0;
+    padding: var(--space-1) 0 var(--space-1) var(--space-4);
+    color: var(--fg-muted);
+    font-style: italic;
   }
 
-  .post-content pre.astro-code {
-      @apply mb-8 block leading-relaxed rounded font-mono p-4 overflow-auto;
-      background-color: #f0f0f0 !important;
-      tab-size: 4;
+  .post-content hr {
+    margin-block: var(--space-7);
+    border: 0;
+    border-top: 1px solid var(--border);
   }
 
-  .post-content code {
-      @apply rounded bg-gray-300/75 px-2 py-px;
-      @apply dark:bg-gray-800/75 dark:text-gray-200;
-  }
-
-  .post-content pre code {
-      @apply rounded bg-transparent px-0  font-normal whitespace-pre-wrap;
-  }
-
-  .post-content .codeblock {
-      @apply relative;
-  }
-
-  .post-content .codeblock-toolbar {
-      @apply absolute top-2 right-2 flex gap-2 z-10;
-      @apply opacity-0 pointer-events-none;
-      transition: opacity 120ms ease-in-out;
-  }
-
-  .post-content .codeblock:hover .codeblock-toolbar,
-  .post-content .codeblock:focus-within .codeblock-toolbar {
-      @apply opacity-100 pointer-events-auto;
-  }
-
-  @media (hover: none) {
-    .post-content .codeblock-toolbar {
-        @apply opacity-100 pointer-events-auto;
-    }
-  }
-
-  .post-content .codeblock-btn {
-      @apply inline-flex items-center justify-center h-8 w-8 rounded border border-gray-300 bg-white/80 text-gray-600 hover:bg-white;
-      @apply dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-200 dark:hover:bg-gray-800;
-      backdrop-filter: blur(4px);
-  }
-
-  .post-content .codeblock-btn.is-active {
-      @apply bg-white text-gray-900;
-      @apply dark:bg-gray-700 dark:text-gray-100;
-  }
-
-  .post-content .codeblock.is-wrapped pre {
-      @apply overflow-x-hidden;
-  }
-
-  .post-content .codeblock.is-wrapped pre code {
-      @apply whitespace-pre-wrap;
-      overflow-wrap: anywhere;
-  }
-
-  .post-content .codeblock.is-unwrapped pre code {
-      @apply whitespace-pre;
-  }
-
-  .lucide {
-      @apply inline-block;
-      vertical-align: -0.125em;
-  }
-
-  i[data-lucide] {
-      display: inline-block;
-      width: 1em;
-      height: 1em;
-      vertical-align: -0.125em;
-  }
-
-  .post-content ul {
-      @apply list-inside list-disc;
-  }
-
-  .post-content ul li {
-      @apply relative pl-6;
-  }
-
-  .post-content ul li p {
-      @apply inline-block p-0 m-0;
-  }
+  .post-content ul { list-style: disc; padding-left: 1.4em; }
+  .post-content ol { list-style: decimal; padding-left: 1.4em; }
+  .post-content li { margin: var(--space-2) 0; }
+  .post-content li::marker { color: var(--fg-faint); }
+  .post-content li p { margin: 0; }
 
   .post-content img {
-      @apply block m-auto;
+    display: block;
+    margin: var(--space-6) auto;
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
   }
 
-  .post-content p {
-      @apply my-6;
+  /* Tables */
+  .post-content table {
+    display: block;
+    width: 100%;
+    margin-block: var(--space-5);
+    border-collapse: collapse;
+    overflow-x: auto;
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+  }
+  .post-content thead { border-bottom: 2px solid var(--border-strong); }
+  .post-content th { padding: var(--space-3); text-align: left; font-weight: var(--weight-semibold); border-bottom: 1px solid var(--border); }
+  .post-content td { padding: var(--space-3); text-align: left; border-bottom: 1px solid var(--border); }
+
+  /* ---- Inline code ---- */
+  .post-content :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    padding: 1px 5px;
+    color: var(--accent-text);
   }
 
+  /* ============================================================
+     Code blocks — design-system panel; shiki dual-theme colors.
+     ============================================================ */
+  .post-content .highlight,
+  .post-content pre.astro-code {
+    display: block;
+    margin-block: var(--space-6);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+  .post-content pre.astro-code {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border);
+    padding: var(--space-4);
+    overflow: auto;
+    tab-size: 4;
+  }
+  .post-content .highlight pre { padding: var(--space-4); overflow: auto; }
 
-  .pagination {
-      @apply m-4 p-0 text-left flex justify-between;
+  .post-content pre code {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font-size: inherit;
+    color: inherit;
+    white-space: pre-wrap;
   }
 
-  .pagination li {
-      @apply list-none inline-block m-0 p-0;
+  /* Dark: swap shiki's per-token colors; keep the design-system panel bg. */
+  [data-theme="dark"] .post-content pre.astro-code,
+  [data-theme="dark"] .post-content pre.astro-code span {
+    color: var(--shiki-dark) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
   }
 
-  .pagination .page-prev {
-      @apply mr-4 pr-4;
+  /* ---- Code block toolbar (copy / wrap) ---- */
+  .post-content .codeblock { position: relative; }
+  .post-content .codeblock-toolbar {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    display: flex;
+    gap: var(--space-2);
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  .post-content .codeblock:hover .codeblock-toolbar,
+  .post-content .codeblock:focus-within .codeblock-toolbar {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  @media (hover: none) {
+    .post-content .codeblock-toolbar { opacity: 1; pointer-events: auto; }
+  }
+  .post-content .codeblock-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    width: 32px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    color: var(--fg-muted);
+    backdrop-filter: blur(4px);
+    transition: var(--transition-colors);
+  }
+  .post-content .codeblock-btn:hover { background: var(--surface); color: var(--fg); }
+  .post-content .codeblock-btn.is-active { background: var(--surface-3); color: var(--fg); }
+  .post-content .codeblock.is-wrapped pre { overflow-x: hidden; }
+  .post-content .codeblock.is-wrapped pre code { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .post-content .codeblock.is-unwrapped pre code { white-space: pre; }
+
+  /* ---- Lucide icons ---- */
+  .lucide {
+    display: inline-block;
+    vertical-align: -0.125em;
+  }
+  i[data-lucide] {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
   }
 
-  .pagination .page-item.page-prev {
-      @apply text-left;
+  /* ============================================================
+     Shared UI primitives — design-system parity, no React.
+     Reused across header, footer, lists, article meta.
+     ============================================================ */
+  .xw-container {
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--space-5);
+  }
+  .xw-container-prose {
+    width: 100%;
+    max-width: calc(var(--container-prose) + var(--space-5) * 2);
+    margin-inline: auto;
+    padding-inline: var(--space-5);
   }
 
-  .pagination .page-item.page-next {
-      @apply text-right;
+  .xw-eyebrow {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    font-weight: var(--weight-semibold);
   }
+
+  /* Site header brand avatar (the personal avatar is the only mark) */
+  .xw-header__brand { display: inline-flex; align-items: center; flex: none; }
+  .xw-header__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    object-fit: cover;
+    display: block;
+  }
+
+  /* IconButton (ghost) */
+  .xw-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    width: 36px;
+    flex: none;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--fg-muted);
+    transition: var(--transition-colors);
+    cursor: pointer;
+  }
+  .xw-icon-btn:hover { background: var(--surface-2); color: var(--fg); text-decoration: none; }
+  .xw-icon-btn:active { background: var(--surface-3); }
+  .xw-icon-btn svg,
+  .xw-icon-btn .lucide { width: 1.15em; height: 1.15em; font-size: var(--text-md); }
+  .xw-icon-btn--sm { height: 28px; width: 28px; }
+
+  /* Tag (# prefix optional via .is-hash) */
+  .xw-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    line-height: 1;
+    white-space: nowrap;
+    background: var(--surface-2);
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+    transition: var(--transition-colors);
+  }
+  a.xw-tag:hover { background: var(--surface-3); color: var(--fg); text-decoration: none; }
+  .xw-tag.is-hash::before { content: "#"; color: var(--fg-faint); }
+  a.xw-tag.is-hash:hover::before { color: var(--accent); }
+
+  /* Ghost text button (e.g. "All posts →") */
+  .xw-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--fg-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    transition: var(--transition-colors);
+    cursor: pointer;
+  }
+  .xw-btn-ghost:hover { background: var(--surface-2); color: var(--fg); text-decoration: none; }
+
+  /* Mono meta text (dates, read time) */
+  .xw-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+  /* Page scaffolding — list/taxonomy/index headers */
+  .xw-page { padding-top: var(--space-8); padding-bottom: var(--space-8); }
+  .xw-page-head {
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-6);
+    border-bottom: 1px solid var(--border);
+  }
+  .xw-page-title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-tight);
+    line-height: var(--leading-tight);
+    color: var(--fg);
+  }
+  .xw-page-sub {
+    margin-top: var(--space-2);
+    font-size: var(--text-md);
+    color: var(--fg-muted);
+  }
+
+  /* Tag / year cloud (taxonomy index, archives) */
+  .xw-cloud { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .xw-cloud__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    color: var(--fg-muted);
+    font-size: var(--text-base);
+    transition: var(--transition-colors);
+  }
+  .xw-cloud__item:hover { background: var(--surface-3); color: var(--fg); text-decoration: none; }
+  .xw-cloud__hash { color: var(--fg-faint); }
+  .xw-cloud__item:hover .xw-cloud__hash { color: var(--accent); }
+  .xw-cloud__count { font-size: var(--text-xs); color: var(--fg-faint); font-family: var(--font-mono); }
+
+  .xw-empty { color: var(--fg-subtle); }
+
+  /* ============================================================
+     i18n — language panes & toggle, driven by html[data-lang].
+     Pure CSS chooses which pane shows; JS only sets data-lang.
+     ============================================================ */
+  [data-lang-pane] { display: none; }
+  html[data-lang="zh"] [data-lang-pane="zh"],
+  html[data-lang="en"] [data-lang-pane="en"] { display: block; }
+
 }

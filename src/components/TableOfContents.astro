@@ -1,0 +1,77 @@
+---
+import type { TocItem } from '../lib/toc'
+
+type Props = { items: TocItem[] }
+const { items } = Astro.props as Props
+---
+
+{items.length > 0 && (
+  <nav class="xw-toc" aria-label="On this page">
+    <div class="xw-eyebrow">On this page</div>
+    <ul>
+      {items.map((it) => (
+        <li class={`xw-toc__item xw-toc__item--l${it.level}`}>
+          <a href={`#${it.id}`} data-toc-link={it.id}>{it.text}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<script>
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'))
+  if (links.length > 0) {
+    const byId = new Map<string, HTMLAnchorElement>()
+    links.forEach((l) => byId.set(l.dataset.tocLink ?? '', l))
+    const headings = Array.from(byId.keys())
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el))
+
+    const setActive = (id: string) => {
+      links.forEach((l) => l.classList.toggle('is-active', l.dataset.tocLink === id))
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActive((entry.target as HTMLElement).id)
+        }
+      },
+      { rootMargin: '-80px 0px -70% 0px', threshold: 0 }
+    )
+    headings.forEach((h) => observer.observe(h))
+  }
+</script>
+
+<style>
+  .xw-toc {
+    position: sticky;
+    top: 84px;
+    align-self: start;
+  }
+  .xw-toc ul {
+    list-style: none;
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .xw-toc__item a {
+    display: block;
+    padding: 5px 0 5px 14px;
+    margin-left: -1px;
+    font-size: var(--text-sm);
+    color: var(--fg-subtle);
+    border-left: 2px solid transparent;
+    transition: var(--transition-colors);
+  }
+  .xw-toc__item a:hover { color: var(--fg); text-decoration: none; }
+  .xw-toc__item--l3 a { padding-left: 26px; }
+  .xw-toc__item a.is-active {
+    color: var(--accent-text);
+    font-weight: var(--weight-semibold);
+    border-left-color: var(--accent);
+  }
+</style>

@@ -21,48 +21,80 @@ function formatSketchDate(date: string) {
 ---
 
 <BaseLayout title={title} urlPath="/sketches/" ogTitle={title} ogDescription={description}>
-  <section class="container pt-8">
-    <header class="pb-4 mb-4 border-b border-gray-200 dark:border-gray-700">
-      <h1 class="my-2 text-black dark:text-gray-100 leading-tight">{title}</h1>
-      <p class="text-gray-600 dark:text-gray-400">{description}</p>
+  <div class="xw-container xw-page">
+    <header class="xw-page-head">
+      <h1 class="xw-page-title">{title}</h1>
+      <p class="xw-page-sub">{description}</p>
     </header>
 
-    {list.length === 0 && (
-      <p class="text-gray-600 dark:text-gray-400">No sketches yet.</p>
-    )}
+    {list.length === 0 && <p class="xw-empty">No sketches yet.</p>}
 
     {list.length > 0 && (
-      <ul class="m-0 p-0">
+      <ul class="xw-sketches">
         {list.map((sketch) => (
-          <li class="list-none border-b border-gray-200 py-6 dark:border-gray-700">
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-12">
-              {sketch.cover && (
-                <a class="sm:col-span-4" href={sketchUrl(sketch)} aria-label={sketch.title}>
-                  <img
-                    class="aspect-video w-full border border-gray-200 object-cover dark:border-gray-700"
-                    src={sketch.cover}
-                    alt=""
-                    loading="lazy"
-                  />
-                </a>
-              )}
-              <div class={sketch.cover ? 'sm:col-span-8' : 'sm:col-span-12'}>
-                <p class="my-0 text-sm text-gray-600 dark:text-gray-400">
-                  <time datetime={sketch.date}>{formatSketchDate(sketch.date)}</time>
-                </p>
-                <h2 class="mb-2 mt-1 text-2xl leading-relaxed">
-                  <a href={sketchUrl(sketch)}>{sketch.title}</a>
-                </h2>
-                {sketch.description && (
-                  <p class="my-0 leading-relaxed text-gray-700 dark:text-gray-300">
-                    {sketch.description}
-                  </p>
-                )}
-              </div>
+          <li class="xw-sketches__item">
+            {sketch.cover && (
+              <a class="xw-sketches__cover" href={sketchUrl(sketch)} aria-label={sketch.title}>
+                <img src={sketch.cover} alt="" loading="lazy" />
+              </a>
+            )}
+            <div class="xw-sketches__body">
+              <time class="xw-mono xw-sketches__date" datetime={sketch.date}>
+                {formatSketchDate(sketch.date)}
+              </time>
+              <h2 class="xw-sketches__title">
+                <a href={sketchUrl(sketch)}>{sketch.title}</a>
+              </h2>
+              {sketch.description && <p class="xw-sketches__desc">{sketch.description}</p>}
             </div>
           </li>
         ))}
       </ul>
     )}
-  </section>
+  </div>
 </BaseLayout>
+
+<style>
+  .xw-sketches { list-style: none; margin: 0; padding: 0; }
+  .xw-sketches__item {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    padding: var(--space-6) 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .xw-sketches__cover img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+  .xw-sketches__date { font-size: var(--text-sm); color: var(--fg-subtle); }
+  .xw-sketches__title {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-xl);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-snug);
+  }
+  .xw-sketches__title a { color: var(--fg); }
+  .xw-sketches__title a:hover { color: var(--accent-text); }
+  .xw-sketches__desc {
+    margin: var(--space-2) 0 0;
+    color: var(--fg-subtle);
+    line-height: var(--leading-normal);
+  }
+  @media (min-width: 640px) {
+    .xw-sketches__item--cover { grid-template-columns: 4fr 8fr; }
+  }
+  .xw-sketches__item:has(.xw-sketches__cover) {
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .xw-sketches__item:has(.xw-sketches__cover) {
+      grid-template-columns: 320px 1fr;
+      align-items: start;
+    }
+  }
+</style>
