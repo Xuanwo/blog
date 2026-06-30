@@ -1,0 +1,86 @@
+---
+import { loadSite } from '../lib/site-data'
+import LucideIcon from './LucideIcon.astro'
+
+const site = loadSite()
+const icons = (site.menu.icon ?? []).slice().sort((a, b) => (a.weight ?? 0) - (b.weight ?? 0))
+const year = new Date().getUTCFullYear()
+const descEn = site.params.description ?? ''
+const descZh = site.i18nZh.site_description ?? descEn
+
+const isExternal = (url: string) => /^https?:\/\//.test(url)
+---
+
+<footer class="xw-footer">
+  <div class="xw-footer__inner">
+    <a href="/" class="xw-footer__home" aria-label="Home">
+      <img
+        class="xw-footer__avatar"
+        src="/img/logo/logo.jpeg"
+        alt="Xuanwo"
+        width="48"
+        height="48"
+        decoding="async"
+      />
+    </a>
+    <p class="xw-footer__desc" data-lang-pane="zh">{descZh}</p>
+    <p class="xw-footer__desc" data-lang-pane="en">{descEn}</p>
+    <div class="xw-footer__social">
+      {icons.map((item) => (
+        <a
+          class="xw-icon-btn xw-icon-btn--sm"
+          href={item.url}
+          aria-label={item.name}
+          target={isExternal(item.url) ? '_blank' : null}
+          rel={isExternal(item.url) ? 'noopener noreferrer' : null}
+        >
+          <LucideIcon name={item.name} />
+        </a>
+      ))}
+    </div>
+    <div class="xw-footer__legal">
+      <span data-lang-pane="zh">© {year} 漩涡</span>
+      <span data-lang-pane="en">© {year} Xuanwo</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .xw-footer {
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    margin-top: var(--space-9);
+  }
+  .xw-footer__inner {
+    max-width: var(--container-narrow);
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-4);
+  }
+  .xw-footer__home { display: inline-flex; }
+  .xw-footer__avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    object-fit: cover;
+    display: block;
+  }
+  .xw-footer__desc {
+    font-size: var(--text-sm);
+    color: var(--fg-subtle);
+    line-height: var(--leading-relaxed);
+    max-width: 420px;
+    margin: 0;
+  }
+  .xw-footer__social { display: flex; gap: 2px; }
+  .xw-footer__legal {
+    font-size: var(--text-sm);
+    color: var(--fg-faint);
+    margin-top: var(--space-2);
+  }
+</style>

@@ -19,6 +19,7 @@ export type PageFrontmatter = {
   type?: string
   url?: string
   layout?: string
+  lang?: string
 }
 
 export type PageRecord = {
@@ -35,6 +36,7 @@ export type PageRecord = {
   categories: string[]
   series: string[]
   type?: string
+  lang: 'zh' | 'en'
 }
 
 export type SiteRecord = {
@@ -52,6 +54,7 @@ export type SiteRecord = {
     icon?: Array<{ name: string; url: string; weight?: number }>
   }
   i18n: Record<string, string>
+  i18nZh: Record<string, string>
   blogroll: Array<{ name: string; url: string; description: string }>
   indexMeta: Record<string, { title?: string; description?: string }>
 }
@@ -127,6 +130,17 @@ function stripHtmlToText(html: string) {
 
 function hasUppercase(str: string) {
   return /[A-Z]/.test(str)
+}
+
+// Detect an article's language by script. CJK-dominant text → 'zh', else 'en'.
+// Compares CJK ideograph count against Latin word count; front matter `lang`
+// overrides this (see loadContentIndex). Mixed posts may misfire — rare, and
+// fixable per-post with `lang:` in front matter.
+export function detectLang(text: string): 'zh' | 'en' {
+  if (!text) return 'en'
+  const cjk = (text.match(/[㐀-鿿豈-﫿]/g) || []).length
+  const latinWords = (text.match(/[a-zA-Z]{2,}/g) || []).length
+  return cjk > latinWords ? 'zh' : 'en'
 }
 
 function titleizeHyphenated(str: string) {
@@ -243,10 +257,13 @@ export function loadSite() {
 
   const config = loadYamlFile(SITE_CONFIG_PATH)
   const i18nList = loadYamlFile(join(REPO_ROOT, 'i18n', 'en-us.yaml'))
+  const i18nZhList = loadYamlFile(join(REPO_ROOT, 'i18n', 'zh-hans.yaml'))
   const blogroll = loadYamlFile(join(REPO_ROOT, 'data', 'blogroll', 'blogroll.yaml'))
 
   const i18n: Record<string, string> = {}
   for (const item of i18nList) i18n[item.id] = item.translation
+  const i18nZh: Record<string, string> = {}
+  for (const item of i18nZhList) i18nZh[item.id] = item.translation
 
   cachedSite = {
     baseURL: config.baseURL,
@@ -256,6 +273,7 @@ export function loadSite() {
     params: config.params ?? {},
     menu: config.menu ?? {},
     i18n,
+    i18nZh,
     blogroll,
     indexMeta: {}
   }
@@ -276,7 +294,7 @@ async function getMarkdownProcessor() {
       smartypants: false,
       remarkPlugins: [remarkRewriteRelativeImages],
       shikiConfig: {
-        theme: 'github-light',
+        themes: { light: 'github-light', dark: 'github-dark' },
         wrap: true,
         langAlias: {
           golang: 'go',
@@ -420,7 +438,8 @@ export async function loadContentIndex() {
       tags,
       categories,
       series,
-      type: typeof fm.type === 'string' ? fm.type : undefined
+      type: typeof fm.type === 'string' ? fm.type : undefined,
+      lang: fm.lang === 'zh' || fm.lang === 'en' ? fm.lang : detectLang(plain)
     })
   }
 

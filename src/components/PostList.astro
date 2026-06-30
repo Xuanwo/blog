@@ -1,0 +1,113 @@
+---
+import { readingTime } from '../lib/reading-time'
+import LucideIcon from './LucideIcon.astro'
+
+type Item = {
+  url: string
+  title?: string
+  date?: string
+  description?: string
+  excerpt?: string
+  plain: string
+  tags: string[]
+}
+
+type Props = { pages: Item[] }
+const { pages } = Astro.props as Props
+
+function fmtDate(iso?: string) {
+  if (!iso) return ''
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric',
+    timeZone: 'UTC'
+  }).format(new Date(iso))
+}
+---
+
+<ul class="xw-postlist">
+  {pages.map((p) => (
+    <li>
+      <a class="xw-postlist__row" href={p.url}>
+        <time class="xw-postlist__date xw-mono" datetime={p.date}>{fmtDate(p.date)}</time>
+        <div class="xw-postlist__main">
+          <span class="xw-postlist__title">{p.title}</span>
+          {(p.description || p.excerpt) && (
+            <span class="xw-postlist__desc">{p.description ?? p.excerpt}</span>
+          )}
+          {p.tags.length > 0 && (
+            <span class="xw-postlist__tags">
+              {p.tags.slice(0, 4).map((t) => (
+                <span class="xw-tag is-hash">{t}</span>
+              ))}
+            </span>
+          )}
+        </div>
+        <span class="xw-postlist__read">
+          <LucideIcon name="clock" />
+          {readingTime(p.plain)} min
+        </span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .xw-postlist { list-style: none; margin: 0; padding: 0; }
+  .xw-postlist__row {
+    display: grid;
+    grid-template-columns: 116px minmax(0, 1fr) auto;
+    gap: var(--space-5);
+    align-items: baseline;
+    padding: var(--space-4) var(--space-3);
+    border-bottom: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: background-color var(--duration-fast) var(--ease-out);
+  }
+  .xw-postlist__row:hover { background: var(--surface-2); text-decoration: none; }
+  .xw-postlist__date {
+    font-size: var(--text-sm);
+    color: var(--fg-subtle);
+    white-space: nowrap;
+  }
+  .xw-postlist__main { display: block; min-width: 0; }
+  .xw-postlist__title {
+    display: block;
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--fg);
+    letter-spacing: var(--tracking-snug);
+  }
+  .xw-postlist__desc {
+    display: block;
+    font-size: var(--text-base);
+    color: var(--fg-subtle);
+    margin-top: 2px;
+    line-height: var(--leading-normal);
+  }
+  .xw-postlist__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .xw-postlist__read {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--text-sm);
+    color: var(--fg-faint);
+    white-space: nowrap;
+  }
+  .xw-postlist__read :global(svg) { width: 13px; height: 13px; }
+  @media (max-width: 640px) {
+    .xw-postlist__row {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+      align-items: start;
+    }
+    .xw-postlist__date { order: -1; font-size: var(--text-xs); }
+    .xw-postlist__read { display: none; }
+  }
+</style>

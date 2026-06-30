@@ -1,0 +1,43 @@
+---
+import PostList from './PostList.astro'
+import SitePaginator from './SitePaginator.astro'
+
+type Item = {
+  url: string
+  title?: string
+  date?: string
+  description?: string
+  excerpt?: string
+  plain: string
+  tags: string[]
+}
+
+type Props = {
+  zhList: Item[]
+  enList: Item[]
+  zhTotal: number
+  enTotal: number
+  current: number
+  hrefForPage: (page: number) => string
+}
+
+const { zhList, enList, zhTotal, enTotal, current, hrefForPage } = Astro.props as Props
+
+const panes = [
+  { lang: 'zh', list: zhList, total: zhTotal },
+  { lang: 'en', list: enList, total: enTotal }
+]
+---
+
+{panes.map((pane) => (
+  <div data-lang-pane={pane.lang}>
+    {pane.list.length > 0 ? (
+      <>
+        <PostList pages={pane.list} />
+        <SitePaginator current={current} total={pane.total} hrefForPage={hrefForPage} />
+      </>
+    ) : (
+      <p class="xw-empty">No posts in this language here yet.</p>
+    )}
+  </div>
+))}

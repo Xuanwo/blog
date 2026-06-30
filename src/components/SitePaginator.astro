@@ -12,24 +12,37 @@ const hasPrev = current > 1
 const hasNext = current < total
 ---
 
-{total > 1 ? (
-  <>
-    <hr class="border-gray-200 dark:border-gray-700 mt-10 mb-4" />
-    <ul class="pagination">
-      <li class="page-item page-prev">
-        {hasPrev ? (
-          <a href={hrefForPage(current - 1)} class="page-link" aria-label="Previous">
-            <span aria-hidden="true">{getTranslation('prevpage')}</span>
-          </a>
-        ) : null}
-      </li>
-      <li>
-        {hasNext ? (
-          <a href={hrefForPage(current + 1)} class="page-link" aria-label="Next">
-            <span aria-hidden="true">{getTranslation('nextpage')}</span>
-          </a>
-        ) : null}
-      </li>
-    </ul>
-  </>
-) : null}
+{total > 1 && (
+  <nav class="xw-pager" aria-label="Pagination">
+    <div class="xw-pager__side">
+      {hasPrev && (
+        <a class="xw-btn-ghost" href={hrefForPage(current - 1)} aria-label="Previous">
+          {getTranslation('prevpage')}
+        </a>
+      )}
+    </div>
+    <span class="xw-pager__count xw-mono">{current} / {total}</span>
+    <div class="xw-pager__side xw-pager__side--right">
+      {hasNext && (
+        <a class="xw-btn-ghost" href={hrefForPage(current + 1)} aria-label="Next">
+          {getTranslation('nextpage')}
+        </a>
+      )}
+    </div>
+  </nav>
+)}
+
+<style>
+  .xw-pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--border);
+  }
+  .xw-pager__side { flex: 1; display: flex; }
+  .xw-pager__side--right { justify-content: flex-end; }
+  .xw-pager__count { font-size: var(--text-sm); color: var(--fg-faint); }
+</style>

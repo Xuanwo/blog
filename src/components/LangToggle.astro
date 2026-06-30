@@ -1,0 +1,20 @@
+---
+import LucideIcon from './LucideIcon.astro'
+// Content-language toggle. A ghost icon button identical in shape to
+// ThemeToggle; clicking flips zh <-> en. CSS (html[data-lang]) decides which
+// content panes and labels are visible. Swap "languages" for "globe" to use
+// the globe icon instead.
+---
+
+<button type="button" id="xw-lang-toggle" class="xw-icon-btn" aria-label="Switch language" title="Switch language">
+  <LucideIcon name="languages" />
+</button>
+
+<script>
+  const btn = document.getElementById('xw-lang-toggle')
+  btn?.addEventListener('click', () => {
+    const next = document.documentElement.dataset.lang === 'zh' ? 'en' : 'zh'
+    document.documentElement.dataset.lang = next
+    try { localStorage.setItem('xw-lang', next) } catch (e) {}
+  })
+</script>

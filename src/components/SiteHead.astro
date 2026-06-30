@@ -17,6 +17,27 @@ const keywords = Array.isArray(site.params.keywords) ? site.params.keywords.join
 ---
 
 <head>
+  <script is:inline>
+    // Set the theme before first paint to avoid a flash. Pinned choice
+    // wins; otherwise follow the OS. See ThemeToggle for the toggle.
+    (function () {
+      try {
+        var t = localStorage.getItem('xw-theme')
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        }
+        document.documentElement.dataset.theme = t
+
+        // Content language: pinned choice wins, else follow the browser.
+        var l = localStorage.getItem('xw-lang')
+        if (l !== 'zh' && l !== 'en') {
+          l = /^zh/i.test(navigator.language || '') ? 'zh' : 'en'
+        }
+        document.documentElement.dataset.lang = l
+      } catch (e) {}
+    })()
+  </script>
+
   <script
     async
     defer
@@ -40,7 +61,9 @@ const keywords = Array.isArray(site.params.keywords) ? site.params.keywords.join
   <meta property="og:url" content={fullUrl} />
   {ogImage ? <meta property="og:image" content={ogImage} /> : null}
 
+  <link rel="icon" type="image/png" href="/img/logo/monogram.png" />
   <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/img/logo/monogram.png" />
 
   <link rel="stylesheet" href="/css/main.css" />
   <script defer src="/javascript/lucide.js"></script>

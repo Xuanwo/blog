@@ -1,15 +1,55 @@
-<div class="giscus"></div>
+<section class="xw-comments" id="comments">
+  <div class="giscus"></div>
+</section>
 
-<script
-  src="https://giscus.app/client.js"
-  data-repo="Xuanwo/blog"
-  data-repo-id="MDEwOlJlcG9zaXRvcnkyMDYwNzE1Nw=="
-  data-category="Announcements"
-  data-category-id="DIC_kwDOATpwtc4B-a6u"
-  data-mapping="title"
-  data-reactions-enabled="1"
-  data-emit-metadata="0"
-  data-theme="preferred_color_scheme"
-  crossorigin="anonymous"
-  async
-></script>
+<script is:inline>
+  // Giscus loads a cross-origin iframe and fetches GitHub Discussions, so it is
+  // the heaviest thing on an article page. Defer it until the reader scrolls
+  // near the comments (IntersectionObserver), keeping initial render fast.
+  // The theme points at a same-origin custom CSS that maps giscus to the
+  // site's design tokens; ThemeToggle keeps it in sync afterwards.
+  (function () {
+    var mount = document.getElementById('comments')
+    if (!mount) return
+    var loaded = false
+
+    function themeUrl() {
+      var dark = document.documentElement.dataset.theme === 'dark'
+      return 'https://xuanwo.io/giscus/' + (dark ? 'dark' : 'light') + '.css'
+    }
+
+    function load() {
+      if (loaded) return
+      loaded = true
+      var s = document.createElement('script')
+      s.src = 'https://giscus.app/client.js'
+      s.setAttribute('data-repo', 'Xuanwo/blog')
+      s.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnkyMDYwNzE1Nw==')
+      s.setAttribute('data-category', 'Announcements')
+      s.setAttribute('data-category-id', 'DIC_kwDOATpwtc4B-a6u')
+      s.setAttribute('data-mapping', 'title')
+      s.setAttribute('data-reactions-enabled', '1')
+      s.setAttribute('data-emit-metadata', '0')
+      s.setAttribute('data-theme', themeUrl())
+      s.crossOrigin = 'anonymous'
+      s.async = true
+      mount.querySelector('.giscus').appendChild(s)
+    }
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        if (entries.some(function (e) { return e.isIntersecting })) {
+          io.disconnect()
+          load()
+        }
+      }, { rootMargin: '400px 0px' })
+      io.observe(mount)
+    } else {
+      load()
+    }
+  })()
+</script>
+
+<style>
+  .xw-comments { margin-top: var(--space-6); }
+</style>
