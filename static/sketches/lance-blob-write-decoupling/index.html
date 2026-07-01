@@ -1,0 +1,971 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lance blob preparation API</title>
+  <meta name="description" content="A visual explanation of the Lance Blob v2 preparation API: prepare sidecars and writer-side blob arrays, then write one Lance data file and commit through existing transactions.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap');
+
+    :root {
+      --azure-50: #e8f4fc;
+      --azure-100: #cbe6f8;
+      --azure-200: #9bd0f2;
+      --azure-400: #2b97db;
+      --azure-500: #0f83cf;
+      --azure-600: #0a6aa8;
+      --azure-700: #08547f;
+      --bg: #fbfbfc;
+      --surface: #ffffff;
+      --surface-2: #f4f5f7;
+      --surface-3: #eceef1;
+      --surface-inset: #f7f8f9;
+      --fg: #14171a;
+      --fg-muted: #4d545c;
+      --fg-subtle: #767e87;
+      --fg-faint: #9aa1aa;
+      --border: #e6e8eb;
+      --border-strong: #d4d8dd;
+      --accent: var(--azure-500);
+      --accent-hover: var(--azure-600);
+      --accent-text: var(--azure-600);
+      --accent-subtle: var(--azure-50);
+      --accent-border: var(--azure-200);
+      --success-text: #157048;
+      --success-subtle: #e6f4ec;
+      --success-border: #b6e0c8;
+      --warning-text: #8f5f12;
+      --warning-subtle: #fdf2dd;
+      --warning-border: #f0d9a3;
+      --danger-text: #a72e26;
+      --danger-subtle: #fcebe9;
+      --danger-border: #f3c2bd;
+      --font-sans: "Source Sans 3", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --font-serif: "Source Serif 4", "Noto Serif SC", Georgia, "Songti SC", serif;
+      --font-mono: "Fira Code", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --space-1: .25rem;
+      --space-2: .5rem;
+      --space-3: .75rem;
+      --space-4: 1rem;
+      --space-5: 1.5rem;
+      --space-6: 2rem;
+      --space-7: 3rem;
+      --space-8: 4rem;
+      --duration-fast: 120ms;
+      --duration-base: 180ms;
+      --ease-out: cubic-bezier(.22, 1, .36, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b0d0f;
+      --surface: #131619;
+      --surface-2: #1a1e22;
+      --surface-3: #23282d;
+      --surface-inset: #15181c;
+      --fg: #f4f6f7;
+      --fg-muted: #a7afb8;
+      --fg-subtle: #7a838d;
+      --fg-faint: #59616a;
+      --border: #23272c;
+      --border-strong: #323840;
+      --accent: #38a8ec;
+      --accent-hover: #5fb3e8;
+      --accent-text: #6fc1f0;
+      --accent-subtle: #0c2f44;
+      --accent-border: #134c6b;
+      --success-text: #5cc497;
+      --success-subtle: #10241b;
+      --success-border: #1d3f30;
+      --warning-text: #e6b765;
+      --warning-subtle: #2a2113;
+      --warning-border: #473717;
+      --danger-text: #ef847c;
+      --danger-subtle: #2c1514;
+      --danger-border: #4a221f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font: 15px/1.5 var(--font-sans);
+      letter-spacing: 0;
+      font-feature-settings: "cv05" 1, "ss01" 1;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: .92em;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-weight: 600;
+      color: var(--fg);
+      text-wrap: balance;
+    }
+
+    .page {
+      min-height: 100vh;
+    }
+
+    .shell {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      height: 56px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      color: var(--fg-muted);
+      font-size: 14px;
+    }
+
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-md);
+      color: var(--accent-text);
+      background: var(--accent-subtle);
+      font: 700 15px/1 var(--font-mono);
+    }
+
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      height: 32px;
+      padding: 0 var(--space-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--fg-muted);
+      background: var(--surface);
+      cursor: pointer;
+      transition: color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--border-strong);
+      color: var(--fg);
+      background: var(--surface-2);
+    }
+
+    .hero {
+      padding: var(--space-8) 0 var(--space-6);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .eyebrow {
+      margin: 0 0 var(--space-4);
+      color: var(--accent-text);
+      font: 600 12px/1 var(--font-mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 900px;
+      font: 600 clamp(40px, 5.6vw, 72px)/1.08 var(--font-serif);
+      letter-spacing: -.02em;
+    }
+
+    .lead {
+      max-width: 780px;
+      margin: var(--space-5) 0 0;
+      color: var(--fg-muted);
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: var(--space-6);
+      align-items: end;
+      margin-top: var(--space-7);
+    }
+
+    .callout-block {
+      display: flex;
+      gap: var(--space-3);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-md);
+      background: var(--accent-subtle);
+      padding: var(--space-4);
+    }
+
+    .callout-block__icon {
+      flex: none;
+      display: inline-flex;
+      margin-top: 2px;
+      color: var(--accent-text);
+    }
+
+    .callout-block__icon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .callout-block strong {
+      display: block;
+      margin-bottom: var(--space-2);
+      color: var(--accent-text);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .01em;
+    }
+
+    .callout-block p {
+      margin: 0;
+      color: var(--fg);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .stat-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .stat {
+      padding: var(--space-4);
+      border-left: 1px solid var(--border);
+    }
+
+    .stat:first-child {
+      border-left: none;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--fg-subtle);
+      font-size: 12px;
+    }
+
+    .stat b {
+      display: block;
+      margin-top: var(--space-2);
+      color: var(--fg);
+      font: 600 19px/1.2 var(--font-mono);
+    }
+
+    section {
+      padding: var(--space-7) 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: var(--space-5);
+      margin-bottom: var(--space-5);
+    }
+
+    .section-index {
+      display: block;
+      margin-bottom: var(--space-2);
+      color: var(--fg-faint);
+      font: 600 12px/1 var(--font-mono);
+      letter-spacing: .08em;
+    }
+
+    h2 {
+      font: 600 28px/1.2 var(--font-serif);
+      letter-spacing: -.01em;
+    }
+
+    .section-head p {
+      max-width: 500px;
+      margin: 0;
+      color: var(--fg-muted);
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-5);
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .panel.is-resolved {
+      border-color: var(--accent-border);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .panel.is-resolved .panel-header {
+      background: var(--accent-subtle);
+      border-bottom-color: var(--accent-border);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 var(--space-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--fg-muted);
+      background: var(--surface);
+      font: 500 12px/1 var(--font-mono);
+      white-space: nowrap;
+    }
+
+    .badge.good {
+      border-color: var(--success-border);
+      color: var(--success-text);
+      background: var(--success-subtle);
+    }
+
+    .badge.warn {
+      border-color: var(--warning-border);
+      color: var(--warning-text);
+      background: var(--warning-subtle);
+    }
+
+    .steps {
+      display: grid;
+      gap: var(--space-4);
+      padding: var(--space-5);
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      gap: var(--space-3);
+      align-items: start;
+    }
+
+    .node {
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      margin-top: 1px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--fg-subtle);
+      background: var(--surface-2);
+      font: 600 12px/1 var(--font-mono);
+    }
+
+    .panel.is-resolved .node {
+      border-color: var(--accent-border);
+      color: var(--accent-text);
+      background: var(--surface);
+    }
+
+    .step h3 {
+      margin: 0 0 3px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--fg-muted);
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr;
+      align-items: stretch;
+    }
+
+    .flow-node {
+      min-height: 128px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: var(--space-4);
+      opacity: 0;
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: var(--space-2);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .flow-node p {
+      margin: 0;
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .flow-node.accent {
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+    }
+
+    .flow-node.accent strong {
+      color: var(--accent-text);
+    }
+
+    .flow-arrow {
+      align-self: center;
+      width: var(--space-6);
+      height: 1px;
+      background: var(--border-strong);
+      position: relative;
+    }
+
+    .flow-arrow::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      border-right: 1.5px solid var(--border-strong);
+      border-bottom: 1.5px solid var(--border-strong);
+      transform: translateY(-50%) rotate(-45deg);
+    }
+
+    .api-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-5);
+      align-items: start;
+    }
+
+    .code-block {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      overflow: hidden;
+    }
+
+    .code-block__head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px 9px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .code-block__dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--border-strong);
+      flex: none;
+    }
+
+    .code-block__name {
+      font-size: 13px;
+      color: var(--fg-muted);
+      font-weight: 500;
+    }
+
+    .code-block__lang {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--fg-faint);
+      font-family: var(--font-mono);
+      text-transform: lowercase;
+      letter-spacing: .02em;
+    }
+
+    .code-block pre {
+      margin: 0;
+      overflow: auto;
+      padding: var(--space-5);
+      color: var(--fg);
+      font: 13px/1.7 var(--font-mono);
+      white-space: pre;
+    }
+
+    .matrix {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .matrix-row {
+      display: grid;
+      grid-template-columns: 150px 1fr 110px;
+      gap: var(--space-4);
+      align-items: center;
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .matrix-row:last-child {
+      border-bottom: none;
+    }
+
+    .matrix-row b {
+      font: 600 14px/1.3 var(--font-mono);
+    }
+
+    .matrix-row p {
+      margin: 0;
+      color: var(--fg-muted);
+    }
+
+    .closing {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .footer {
+      padding: var(--space-6) 0 var(--space-8);
+      color: var(--fg-subtle);
+      font-size: 14px;
+    }
+
+    @media (max-width: 920px) {
+      .hero-grid,
+      .pipeline,
+      .api-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-arrow {
+        width: 1px;
+        height: var(--space-5);
+        margin: 0 auto;
+      }
+
+      .flow-arrow::after {
+        right: 50%;
+        top: auto;
+        bottom: 0;
+        transform: translateX(50%) rotate(45deg);
+      }
+
+      .matrix-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .panel,
+      .flow-node,
+      .matrix,
+      .callout-block {
+        animation: enter var(--duration-base) var(--ease-out) both;
+      }
+
+      .flow-node:nth-child(3) { animation-delay: 60ms; }
+      .flow-node:nth-child(5) { animation-delay: 120ms; }
+      .flow-node:nth-child(7) { animation-delay: 180ms; }
+      .flow-node:nth-child(9) { animation-delay: 240ms; }
+
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .flow-node { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <div class="brand">
+          <span class="mark">X</span>
+          <span>Lance blob preparation API sketch</span>
+        </div>
+        <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Toggle theme">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3v2.5M12 18.5V21M4.64 4.64l1.77 1.77M17.59 17.59l1.77 1.77M3 12h2.5M18.5 12H21M4.64 19.36l1.77-1.77M17.59 6.41l1.77-1.77" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/>
+          </svg>
+          Theme
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="shell">
+          <p class="eyebrow">Blob v2 preparation · Current API direction</p>
+          <h1>Prepare blob layout before the data file is written.</h1>
+          <p class="lead">Blob v2 now has a clear advanced boundary: bind a <code>LanceBlobSession</code> to one <code>data_file_path</code>, produce a writer-side prepared blob column, then write that column with ordinary columns through the existing <code>LanceFileWriter</code> and <code>DataReplacement</code> path.</p>
+
+          <div class="hero-grid">
+            <div class="callout-block">
+              <span class="callout-block__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3 11.2c.6.4 1 1 1 1.8h4c0-.8.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg>
+              </span>
+              <div>
+                <strong>Core decision</strong>
+                <p>The boundary is not a second fragment writer and not a blob-only commit path. It is a preparation session that owns the data-file-local blob namespace, while the data file and transaction stay on the existing write path.</p>
+              </div>
+            </div>
+            <div class="stat-strip" aria-label="Design summary">
+              <div class="stat">
+                <span>Public break</span>
+                <b>0</b>
+              </div>
+              <div class="stat">
+                <span>Namespace</span>
+                <b>file</b>
+              </div>
+              <div class="stat">
+                <span>Commit</span>
+                <b>existing</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">01</span>
+              <h2>Before and after</h2>
+            </div>
+            <p>The file format does not need a new concept here. The difference is whether users can explicitly prepare writer-side blob values before the data file is encoded.</p>
+          </div>
+
+          <div class="pipeline">
+            <article class="panel">
+              <div class="panel-header">
+                <h3 class="panel-title">Before: preprocessing owns everything</h3>
+                <span class="badge warn">coupled</span>
+              </div>
+              <div class="steps">
+                <div class="step">
+                  <div class="node">1</div>
+                  <div>
+                    <h3>Logical input only</h3>
+                    <p><code>Struct&lt;data, uri&gt;</code> is the stable entry point. Users describe values, not the underlying layout.</p>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="node">2</div>
+                  <div>
+                    <h3>BlobPreprocessor chooses layout</h3>
+                    <p>Inline, packed, dedicated, and external values are all converted inside the dataset write path. Blob ids are allocated there as well.</p>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="node">3</div>
+                  <div>
+                    <h3>Existing sidecars are awkward</h3>
+                    <p>Advanced users cannot directly register a packed blob they already own, even if they also own the replacement data file id.</p>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel is-resolved">
+              <div class="panel-header">
+                <h3 class="panel-title">After: prepare first, write normally</h3>
+                <span class="badge good">decoupled</span>
+              </div>
+              <div class="steps">
+                <div class="step">
+                  <div class="node">1</div>
+                  <div>
+                    <h3>Bind a LanceBlobSession</h3>
+                    <p>The session is created from <code>data_file_path</code> and owns the shared data-file-local <code>blob_id</code> allocator.</p>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="node">2</div>
+                  <div>
+                    <h3>Prepare writer-side values</h3>
+                    <p>Create new packed or dedicated sidecars, or call <code>load_packed</code> / <code>load_dedicated</code> for sidecars already placed under this namespace.</p>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="node">3</div>
+                  <div>
+                    <h3>Finish into a prepared array</h3>
+                    <p>Write the prepared array and ordinary columns into the same <code>.lance</code> data file, then commit with existing transaction APIs.</p>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">02</span>
+              <h2>Data flow</h2>
+            </div>
+            <p>The key change is recognizing three distinct schema surfaces. Logical input keeps the old behavior. Prepared input goes directly to the encoder. Footer descriptors remain the persisted reader view.</p>
+          </div>
+
+          <div class="flow">
+            <div class="flow-node">
+              <strong>Logical input</strong>
+              <p><code>Struct&lt;data, uri&gt;</code> remains the regular-user API. No blob id or sidecar knowledge is required.</p>
+            </div>
+            <div class="flow-arrow" aria-hidden="true"></div>
+            <div class="flow-node">
+              <strong>BlobPreprocessor</strong>
+              <p>Only logical schemas trigger placement policy. Internally it should reuse the same blob writer primitives as the advanced API.</p>
+            </div>
+            <div class="flow-arrow" aria-hidden="true"></div>
+            <div class="flow-node accent">
+              <strong>Prepared input</strong>
+              <p><code>Struct&lt;kind, data, uri, blob_id, blob_size, position&gt;</code> is validated exactly and passed to the file encoder.</p>
+            </div>
+            <div class="flow-arrow" aria-hidden="true"></div>
+            <div class="flow-node">
+              <strong>LanceFileWriter</strong>
+              <p>Still writes one complete data file. The encoder converts writer-side prepared values to the persisted descriptor view.</p>
+            </div>
+            <div class="flow-arrow" aria-hidden="true"></div>
+            <div class="flow-node">
+              <strong>DataReplacement</strong>
+              <p><code>DataFile.create</code> reads the footer metadata, then the existing transaction path swaps the replacement file into the fragment.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">03</span>
+              <h2>API shape</h2>
+            </div>
+            <p>The public API should expose only objects with stable contracts. There is no <code>open_fragment_writer</code> and no dataset-bound second write path.</p>
+          </div>
+
+          <div class="api-grid">
+            <div class="code-block">
+              <div class="code-block__head">
+                <span class="code-block__dot"></span>
+                <span class="code-block__name">geneva-style replacement</span>
+                <span class="code-block__lang">python</span>
+              </div>
+              <pre><code>file_id = str(uuid.uuid4())
+data_file_path = dataset_uri / "data" / f"{file_id}.lance"
+data_file_name = f"{file_id}.lance"
+
+session = lance.LanceBlobSession(str(data_file_path))
+images = session.open_writer("image")
+
+packed = images.new_packed()
+packed.write_blob(image_0)
+packed.write_blob(image_1)
+images.extend(packed.finish())
+
+images.extend(images.load_packed(
+    existing_blob_id,
+    offsets=[0, 4096],
+    sizes=[4096, 8192],
+))
+
+image_array = images.finish()
+physical_schema = pa.schema([id_field, images.field])
+batch = pa.record_batch([id_array, image_array],
+                        schema=physical_schema)
+
+with LanceFileWriter(str(data_file_path),
+                     schema=physical_schema,
+                     version="2.2") as writer:
+    writer.write_batch(batch)
+
+data_file = lance.fragment.DataFile.create(dataset, data_file_name)
+operation = lance.LanceOperation.DataReplacement([
+    lance.LanceOperation.DataReplacementGroup(fragment_id, data_file)
+])
+dataset = lance.LanceDataset.commit(dataset, operation,
+                                    read_version=dataset.version)</code></pre>
+            </div>
+
+            <div class="matrix">
+              <div class="matrix-row">
+                <b>session</b>
+                <p><code>LanceBlobSession(data_file_path)</code> derives <code>data_dir</code>, <code>data_file_key</code>, and the sidecar path namespace.</p>
+                <span class="badge good">scope</span>
+              </div>
+              <div class="matrix-row">
+                <b>new_packed</b>
+                <p>Create a Lance-owned packed sidecar and return a <code>PackedBlobWriter</code>. <code>finish()</code> returns prepared values in write order.</p>
+                <span class="badge good">new file</span>
+              </div>
+              <div class="matrix-row">
+                <b>new_dedicated</b>
+                <p>Create one dedicated sidecar. Bytes may be appended in multiple writes; <code>finish()</code> returns one prepared value.</p>
+                <span class="badge good">new file</span>
+              </div>
+              <div class="matrix-row">
+                <b>load_packed</b>
+                <p>Load an existing packed sidecar under the current data file key, validate offset/size ranges, and return values.</p>
+                <span class="badge">existing</span>
+              </div>
+              <div class="matrix-row">
+                <b>load_dedicated</b>
+                <p>Load an existing dedicated sidecar and use the object size as the descriptor size.</p>
+                <span class="badge">existing</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">04</span>
+              <h2>Compatibility</h2>
+            </div>
+            <p>Compatibility comes from exact schema inference and narrow guardrails around the advanced path. The ordinary logical API remains the default.</p>
+          </div>
+
+          <div class="matrix">
+            <div class="matrix-row">
+              <b>Existing users</b>
+              <p>Keep using <code>BlobArrayBuilder</code> / <code>blob_field</code>. Logical blob input behaves as before.</p>
+              <span class="badge good">unchanged</span>
+            </div>
+            <div class="matrix-row">
+              <b>Advanced users</b>
+              <p>Can construct prepared blob columns through <code>LanceBlobWriter</code>, or pass exact prepared structs when they take responsibility for sidecars.</p>
+              <span class="badge good">new</span>
+            </div>
+            <div class="matrix-row">
+              <b>Schema inference</b>
+              <p>No marker and no public <code>BlobInputMode</code>. Only exact logical or exact prepared input is accepted.</p>
+              <span class="badge">exact</span>
+            </div>
+            <div class="matrix-row">
+              <b>Dataset schema</b>
+              <p>On create/overwrite, prepared writer-side fields are normalized back to the logical blob field so physical structure does not leak into the dataset schema.</p>
+              <span class="badge good">stable</span>
+            </div>
+            <div class="matrix-row">
+              <b>DataFile.create</b>
+              <p>Must keep recursive schema validation for normal columns. The only special case is the blob footer descriptor view, whose child field ids are not public API.</p>
+              <span class="badge warn">guarded</span>
+            </div>
+            <div class="matrix-row">
+              <b>Validation</b>
+              <p><code>blob_id == 0</code>, range overflow, and out-of-object ranges are rejected before prepared values reach the commit path.</p>
+              <span class="badge warn">boundary</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="shell">
+          <div class="closing callout-block">
+            <span class="callout-block__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8h10M7 12h6M7 16h8"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>
+            </span>
+            <div>
+              <p>From first principles, this is not a blob side channel. It splits “prepare writer-side blob values” from “write and commit a complete data file.” The old API stays simple; the new API gives advanced users control without changing the file format.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="shell">Public sketch path: <code>/sketches/lance-blob-write-decoupling/index.html</code></div>
+    </footer>
+  </div>
+
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("xuanwo-sketch-theme");
+    if (saved) {
+      root.dataset.theme = saved;
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.dataset.theme = "dark";
+    }
+
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+      const next = root.dataset.theme === "dark" ? "light" : "dark";
+      root.dataset.theme = next;
+      localStorage.setItem("xuanwo-sketch-theme", next);
+    });
+  </script>
+</body>
+</html>

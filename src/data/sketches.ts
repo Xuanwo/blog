@@ -9,6 +9,12 @@ export type Sketch = {
 // Each slug maps to static/sketches/<slug>/index.html.
 export const sketches: Sketch[] = [
   {
+    slug: 'lance-blob-write-decoupling',
+    title: 'Lance Blob Preparation API',
+    date: '2026-07-01',
+    description: 'How Lance Blob v2 separates sidecar preparation from data-file writes and existing transactions.'
+  },
+  {
     slug: 'sq-affine-offset',
     title: 'SQ Affine Offset',
     date: '2026-06-26',
