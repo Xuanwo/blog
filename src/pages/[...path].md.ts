@@ -1,10 +1,12 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
-
 import type { APIRoute } from 'astro'
-import matter from 'gray-matter'
 
-import { loadContentIndex, loadSite, preprocessHugoHighlightShortcode } from '../lib/site-data'
+import {
+  getMarkdownSource,
+  loadContentIndex,
+  loadSite,
+  parseMarkdownFrontmatter,
+  preprocessHugoHighlightShortcode
+} from '../lib/site-data'
 
 export const prerender = true
 
@@ -71,9 +73,8 @@ export const GET: APIRoute = async ({ params }) => {
   if (!page) return new Response('Not Found', { status: 404 })
 
   const site = loadSite()
-  const absPath = join(process.cwd(), 'content', page.source)
-  const raw = readFileSync(absPath, 'utf8')
-  const parsed = matter(raw)
+  const raw = getMarkdownSource(page.source)
+  const parsed = parseMarkdownFrontmatter(raw)
 
   const title = page.title ?? (typeof parsed.data?.title === 'string' ? parsed.data.title : undefined)
   const markdownBody = preprocessHugoHighlightShortcode(parsed.content)
