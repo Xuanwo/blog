@@ -1,0 +1,43 @@
+export const i18n: Record<string, string> = {
+  prevpage: '← Prev page',
+  nextpage: 'Next page →',
+  nojscomments: 'Please enable JavaScript to load the comments.',
+  authorpretext: 'Written by',
+  '404title': 'HTTP-404 Error',
+  '404text': 'There is not content here.',
+  site_title: "Xuanwo's Blog",
+  site_description: 'Achieving Data Freedom Through Open Source and Rust',
+  archives: 'Archives',
+  categories: 'Categories',
+  tags: 'Tags',
+  series: 'Series',
+  sketches: 'Sketches',
+  reports: 'Reports',
+  links: 'Links',
+  blogroll: 'Blogroll',
+  about: 'About',
+  i18n: 'zh-hans'
+}
+
+export const i18nZh: Record<string, string> = {
+  prevpage: '← Prev page',
+  nextpage: 'Next page →',
+  nojscomments: 'Please enable JavaScript to load the comments.',
+  authorpretext: 'Written by',
+  '404title': 'HTTP-404 Error',
+  '404text': 'There is not content here.',
+  year: '年',
+  site_title: '漩涡的博客',
+  site_description: '通过开源和 Rust 实现数据自由',
+  archives: '归档',
+  categories: '分类',
+  tags: '标签',
+  series: '系列',
+  sketches: '草图',
+  reports: '周报',
+  links: '链接',
+  blogroll: '友链',
+  code: '编程',
+  about: '关于我',
+  i18n: 'en-us'
+}

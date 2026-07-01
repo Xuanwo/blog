@@ -3,10 +3,9 @@ import { Parser } from 'htmlparser2'
 import { visit } from 'unist-util-visit'
 import YAML from 'yaml'
 
-import blogrollYaml from '../../data/blogroll/blogroll.yaml?raw'
-import i18nEnYaml from '../../i18n/en-us.yaml?raw'
-import i18nZhYaml from '../../i18n/zh-hans.yaml?raw'
-import siteYaml from '../../site.yaml?raw'
+import { blogroll } from '../data/blogroll'
+import { i18n, i18nZh } from '../data/i18n'
+import { siteConfig } from '../data/site'
 
 export type TaxonomyName = 'tags' | 'categories' | 'series'
 
@@ -75,10 +74,6 @@ const markdownModules = import.meta.glob('../../content/**/*.{md,markdown}', {
   import: 'default',
   eager: true
 }) as Record<string, string>
-
-function parseYaml(raw: string) {
-  return YAML.parse(raw)
-}
 
 function contentRelPathFromModulePath(path: string) {
   const normalized = path.replace(/\\/g, '/')
@@ -290,15 +285,7 @@ let cachedSite: SiteRecord | null = null
 export function loadSite() {
   if (cachedSite) return cachedSite
 
-  const config = parseYaml(siteYaml)
-  const i18nList = parseYaml(i18nEnYaml)
-  const i18nZhList = parseYaml(i18nZhYaml)
-  const blogroll = parseYaml(blogrollYaml)
-
-  const i18n: Record<string, string> = {}
-  for (const item of i18nList) i18n[item.id] = item.translation
-  const i18nZh: Record<string, string> = {}
-  for (const item of i18nZhList) i18nZh[item.id] = item.translation
+  const config = siteConfig
 
   cachedSite = {
     baseURL: config.baseURL,

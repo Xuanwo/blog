@@ -20,4 +20,6 @@ This repo hosts https://xuanwo.io.
 
 ## Configuration
 
-- `site.yaml`: site metadata and navigation
+- `src/data/site.ts`: site metadata and navigation
+- `src/data/i18n.ts`: interface copy
+- `src/data/blogroll.ts`: blogroll links
