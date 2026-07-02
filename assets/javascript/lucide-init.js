@@ -1,6 +1,6 @@
-function initLucideIcons() {
-  if (!window.lucide || typeof window.lucide.createIcons !== 'function') return
+import { createSiteIcons } from './lucide-icons.js'
 
+function initLucideIcons () {
   const faToLucide = {
     'square-o': 'square',
     'angle-left': 'chevron-left',
@@ -39,7 +39,7 @@ function initLucideIcons() {
     element.setAttribute('data-lucide', lucideName)
   }
 
-  window.lucide.createIcons({
+  createSiteIcons({
     attrs: {
       width: '1em',
       height: '1em',

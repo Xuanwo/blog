@@ -1,8 +1,10 @@
-function normalizeCodeText(text) {
+import { createSiteIcons } from './lucide-icons.js'
+
+function normalizeCodeText (text) {
   return text.replace(/\n$/, '')
 }
 
-function setTemporaryButtonIcon(button, iconName, durationMs) {
+function setTemporaryButtonIcon (button, iconName, durationMs) {
   const original = button.dataset.originalIcon ?? ''
   button.dataset.originalIcon = original
   renderIcon(button, iconName)
@@ -12,7 +14,7 @@ function setTemporaryButtonIcon(button, iconName, durationMs) {
   }, durationMs)
 }
 
-async function copyToClipboard(text) {
+async function copyToClipboard (text) {
   if (navigator.clipboard?.writeText) {
     await navigator.clipboard.writeText(text)
     return
@@ -34,34 +36,29 @@ async function copyToClipboard(text) {
   if (!ok) throw new Error('copy failed')
 }
 
-function hasSoftWrapEnabled(codeElement) {
+function hasSoftWrapEnabled (codeElement) {
   const ws = window.getComputedStyle(codeElement).whiteSpace
   return ws === 'pre-wrap' || ws === 'break-spaces'
 }
 
-function renderIcon(button, iconName) {
+function renderIcon (button, iconName) {
   button.replaceChildren()
 
   const placeholder = document.createElement('i')
   placeholder.setAttribute('data-lucide', iconName)
   button.appendChild(placeholder)
 
-  if (window.lucide?.createIcons) {
-    window.lucide.createIcons({
-      root: button,
-      attrs: {
-        width: '1em',
-        height: '1em',
-        'aria-hidden': 'true'
-      }
-    })
-    return
-  }
-
-  placeholder.textContent = iconName
+  createSiteIcons({
+    root: button,
+    attrs: {
+      width: '1em',
+      height: '1em',
+      'aria-hidden': 'true'
+    }
+  })
 }
 
-function enhanceCodeBlock(preElement) {
+function enhanceCodeBlock (preElement) {
   if (!(preElement instanceof HTMLElement)) return
   if (preElement.dataset.codeblockEnhanced === 'true') return
 
@@ -130,7 +127,7 @@ function enhanceCodeBlock(preElement) {
   preElement.dataset.codeblockEnhanced = 'true'
 }
 
-function enhanceAllCodeBlocks() {
+function enhanceAllCodeBlocks () {
   const root = document.querySelector('.post-content')
   if (!root) return
 
@@ -140,4 +137,8 @@ function enhanceAllCodeBlocks() {
   }
 }
 
-window.addEventListener('DOMContentLoaded', enhanceAllCodeBlocks)
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', enhanceAllCodeBlocks, { once: true })
+} else {
+  enhanceAllCodeBlocks()
+}

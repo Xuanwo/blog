@@ -1,11 +1,11 @@
-import { readdirSync, readFileSync } from 'node:fs'
-import { join, relative } from 'node:path'
-
 import { createMarkdownProcessor } from '@astrojs/markdown-remark'
-import { load as loadHtml } from 'cheerio'
-import matter from 'gray-matter'
+import { Parser } from 'htmlparser2'
 import { visit } from 'unist-util-visit'
 import YAML from 'yaml'
+
+import { blogroll } from '../data/blogroll'
+import { i18n, i18nZh } from '../data/i18n'
+import { siteConfig } from '../data/site'
 
 export type TaxonomyName = 'tags' | 'categories' | 'series'
 
@@ -20,6 +20,11 @@ export type PageFrontmatter = {
   url?: string
   layout?: string
   lang?: string
+}
+
+export type ParsedMarkdown = {
+  data: Record<string, unknown>
+  content: string
 }
 
 export type PageRecord = {
@@ -64,13 +69,49 @@ export type SectionsMetaRecord = Record<string, { display: string }>
 export type TaxonomiesRecord = Record<TaxonomyName, Record<string, { name: string; pages: string[] }>>
 export type BranchesRecord = Record<string, string[]>
 
-const REPO_ROOT = process.cwd()
-const CONTENT_DIR = join(REPO_ROOT, 'content')
-const SITE_CONFIG_PATH = join(REPO_ROOT, 'site.yaml')
+const markdownModules = import.meta.glob('../../content/**/*.{md,markdown}', {
+  query: '?raw',
+  import: 'default',
+  eager: true
+}) as Record<string, string>
 
-function loadYamlFile(path: string) {
-  const raw = readFileSync(path, 'utf8')
-  return YAML.parse(raw)
+function contentRelPathFromModulePath(path: string) {
+  const normalized = path.replace(/\\/g, '/')
+  const marker = '/content/'
+  const markerIndex = normalized.indexOf(marker)
+  if (markerIndex !== -1) return normalized.slice(markerIndex + marker.length)
+
+  const relativePrefix = '../../content/'
+  if (normalized.startsWith(relativePrefix)) return normalized.slice(relativePrefix.length)
+
+  throw new Error(`Invalid content module path: ${path}`)
+}
+
+const markdownSources = Object.entries(markdownModules)
+  .map(([modulePath, raw]) => ({
+    rel: contentRelPathFromModulePath(modulePath),
+    raw
+  }))
+  .sort((a, b) => a.rel.localeCompare(b.rel))
+
+const markdownSourceByRelPath = new Map(markdownSources.map(({ rel, raw }) => [rel, raw]))
+
+export function getMarkdownSource(source: string) {
+  const raw = markdownSourceByRelPath.get(source)
+  if (raw == null) throw new Error(`Missing markdown source: ${source}`)
+  return raw
+}
+
+export function parseMarkdownFrontmatter(markdown: string): ParsedMarkdown {
+  const match = /^(?:\uFEFF)?---[ \t]*\r?\n([\s\S]*?)\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/.exec(markdown)
+  if (!match) return { data: {}, content: markdown }
+
+  const parsed = YAML.parse(match[1] ?? '') ?? {}
+  const data = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}
+  return {
+    data: data as Record<string, unknown>,
+    content: markdown.slice(match[0].length)
+  }
 }
 
 function normalizePagination(value: unknown): number {
@@ -121,9 +162,19 @@ function computeSectionKey(contentRelPath: string) {
 }
 
 function stripHtmlToText(html: string) {
-  const $ = loadHtml(`<div id="root">${html}</div>`)
-  return $('#root')
-    .text()
+  let text = ''
+  const parser = new Parser(
+    {
+      ontext(data) {
+        text += `${data} `
+      }
+    },
+    { decodeEntities: true }
+  )
+  parser.write(html)
+  parser.end()
+
+  return text
     .replace(/\s+/g, ' ')
     .trim()
 }
@@ -160,27 +211,6 @@ function deriveTaxonomyDisplayName(raw: string) {
   if (!value) return value
   if (hasUppercase(value)) return value
   return titleizeHyphenated(value)
-}
-
-function walkFiles(rootDir: string, filterFn: (path: string) => boolean) {
-  const files: string[] = []
-  const stack: string[] = [rootDir]
-
-  while (stack.length > 0) {
-    const dir = stack.pop()
-    if (!dir) continue
-    const entries = readdirSync(dir, { withFileTypes: true })
-    for (const entry of entries) {
-      const fullPath = join(dir, entry.name)
-      if (entry.isDirectory()) {
-        stack.push(fullPath)
-        continue
-      }
-      if (filterFn(fullPath)) files.push(fullPath)
-    }
-  }
-
-  return files
 }
 
 function normalizeFrontmatterStringArray(value: unknown) {
@@ -255,15 +285,7 @@ let cachedSite: SiteRecord | null = null
 export function loadSite() {
   if (cachedSite) return cachedSite
 
-  const config = loadYamlFile(SITE_CONFIG_PATH)
-  const i18nList = loadYamlFile(join(REPO_ROOT, 'i18n', 'en-us.yaml'))
-  const i18nZhList = loadYamlFile(join(REPO_ROOT, 'i18n', 'zh-hans.yaml'))
-  const blogroll = loadYamlFile(join(REPO_ROOT, 'data', 'blogroll', 'blogroll.yaml'))
-
-  const i18n: Record<string, string> = {}
-  for (const item of i18nList) i18n[item.id] = item.translation
-  const i18nZh: Record<string, string> = {}
-  for (const item of i18nZhList) i18nZh[item.id] = item.translation
+  const config = siteConfig
 
   cachedSite = {
     baseURL: config.baseURL,
@@ -310,7 +332,10 @@ async function getMarkdownProcessor() {
           env: 'ini',
           hosts: 'ini',
           dns: 'ini',
-          ssh_config: 'ini'
+          ssh_config: 'ini',
+          openai: 'markdown',
+          claude: 'markdown',
+          swig: 'twig'
         }
       }
     })
@@ -335,17 +360,13 @@ export async function loadContentIndex() {
 
   const site = loadSite()
 
-  const markdownFiles = walkFiles(CONTENT_DIR, (p) => /\.(md|markdown)$/i.test(p))
-
   const indexMeta: Record<string, { title?: string; description?: string }> = {}
-  for (const absPath of markdownFiles) {
-    const rel = relative(CONTENT_DIR, absPath).replace(/\\\\/g, '/')
+  for (const { rel, raw } of markdownSources) {
     const segments = rel.split('/').filter(Boolean).map(normalizeSegment)
     const name = segments[segments.length - 1]?.toLowerCase()
     if (name !== '_index.md' && name !== '_index.markdown') continue
 
-    const raw = readFileSync(absPath, 'utf8')
-    const parsed = matter(raw)
+    const parsed = parseMarkdownFrontmatter(raw)
     const key = segments.slice(0, -1).join('/')
     indexMeta[key] = {
       title: parsed.data?.title,
@@ -365,13 +386,11 @@ export async function loadContentIndex() {
     series: {}
   }
 
-  for (const absPath of markdownFiles) {
-    const rel = relative(CONTENT_DIR, absPath).replace(/\\\\/g, '/')
+  for (const { rel, raw } of markdownSources) {
     const filename = rel.split('/').pop()?.toLowerCase()
     if (filename === '_index.md' || filename === '_index.markdown') continue
 
-    const raw = readFileSync(absPath, 'utf8')
-    const parsed = matter(raw)
+    const parsed = parseMarkdownFrontmatter(raw)
     const fm = (parsed.data ?? {}) as PageFrontmatter
 
     const urlPath = computeUrlFromContentPath(rel, fm.url)
