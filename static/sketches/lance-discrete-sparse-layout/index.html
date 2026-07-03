@@ -1,0 +1,1386 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lance Discrete Sparse Layout</title>
+  <meta name="description" content="A visual design note for Lance sparse structural encoding: the problem, the row-domain model, the layout, and why it improves sparse scan and take workloads.">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f7f4;
+      --surface: #ffffff;
+      --surface-soft: #f0f2ee;
+      --ink: #1f2420;
+      --muted: #5c665e;
+      --faint: #838c85;
+      --border: #d9ddd6;
+      --border-strong: #b9c0b8;
+      --blue: #2d72d9;
+      --blue-soft: #dfecff;
+      --orange: #dd6b20;
+      --orange-soft: #fff0df;
+      --purple: #7257b8;
+      --purple-soft: #f0eaff;
+      --green: #16836f;
+      --green-soft: #e3f6ef;
+      --red: #c9382f;
+      --red-soft: #ffe6e2;
+      --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --shadow: 0 18px 48px rgb(28 35 30 / 8%);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.55 var(--sans);
+      letter-spacing: 0;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: .93em;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .page {
+      min-height: 100vh;
+    }
+
+    .shell {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 58px;
+      gap: 18px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      color: var(--muted);
+      font: 600 13px/1 var(--mono);
+      white-space: nowrap;
+    }
+
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid color-mix(in srgb, var(--green) 35%, var(--border));
+      border-radius: 6px;
+      color: var(--green);
+      background: var(--green-soft);
+      font: 800 14px/1 var(--mono);
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 9px 0;
+      scrollbar-width: none;
+    }
+
+    .nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .nav a {
+      flex: none;
+      color: var(--muted);
+      text-decoration: none;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    .nav a:hover {
+      color: var(--ink);
+      border-color: var(--border);
+      background: var(--surface);
+    }
+
+    .hero {
+      border-bottom: 1px solid var(--border);
+      padding: 70px 0 54px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(380px, .98fr);
+      gap: 48px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      margin-bottom: 14px;
+      color: var(--green);
+      font: 700 12px/1 var(--mono);
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 760px;
+      font-size: clamp(44px, 6vw, 76px);
+      font-weight: 760;
+    }
+
+    .lead {
+      max-width: 760px;
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: clamp(18px, 2vw, 21px);
+      line-height: 1.6;
+    }
+
+    .hero-points {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 30px;
+    }
+
+    .fact {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      background: var(--surface);
+    }
+
+    .fact b {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+      font-size: 15px;
+    }
+
+    .fact span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .hero-visual {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .flow-visual {
+      display: grid;
+      gap: 16px;
+    }
+
+    .flow-row {
+      display: grid;
+      grid-template-columns: 128px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .flow-label {
+      color: var(--muted);
+      font: 700 13px/1.2 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .slot-strip {
+      display: flex;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .slot,
+    .mini-slot,
+    .value-cell,
+    .meta-cell {
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      border: 1px solid var(--border-strong);
+      min-width: 0;
+      font: 700 13px/1 var(--mono);
+    }
+
+    .slot {
+      width: 44px;
+      height: 38px;
+      background: var(--surface-soft);
+      color: var(--faint);
+    }
+
+    .slot.hot,
+    .meta-cell.pos {
+      border-color: color-mix(in srgb, var(--orange) 65%, white);
+      background: var(--orange-soft);
+      color: #a84b12;
+    }
+
+    .slot.null,
+    .meta-cell.null {
+      border-color: color-mix(in srgb, var(--purple) 60%, white);
+      background: var(--purple-soft);
+      color: var(--purple);
+    }
+
+    .value-cell {
+      width: 52px;
+      height: 38px;
+      border-color: color-mix(in srgb, var(--blue) 55%, white);
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    .meta-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meta-cell {
+      min-width: 72px;
+      height: 36px;
+      padding: 0 10px;
+    }
+
+    .section {
+      padding: 66px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(280px, .55fr);
+      gap: 34px;
+      align-items: end;
+      margin-bottom: 30px;
+    }
+
+    .section h2 {
+      font-size: clamp(31px, 4vw, 50px);
+      font-weight: 730;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .layout-panel {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .layout-panel header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+    }
+
+    .layout-panel h3 {
+      font-size: 18px;
+      font-weight: 720;
+    }
+
+    .badge {
+      flex: none;
+      border-radius: 999px;
+      padding: 5px 8px;
+      color: var(--muted);
+      background: var(--surface-soft);
+      font: 700 11px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .layout-body {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(14, 1fr);
+      gap: 3px;
+      height: 34px;
+    }
+
+    .tick {
+      border-radius: 3px;
+      background: #e6e9e3;
+    }
+
+    .tick.hot {
+      background: var(--orange-soft);
+      border: 1px solid color-mix(in srgb, var(--orange) 55%, white);
+    }
+
+    .page-strip {
+      display: flex;
+      gap: 5px;
+      height: 62px;
+    }
+
+    .page-box {
+      position: relative;
+      flex: 1;
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      background: linear-gradient(to bottom, var(--purple-soft), var(--surface));
+      overflow: hidden;
+    }
+
+    .page-box.small {
+      flex-basis: 15%;
+    }
+
+    .page-box.payload {
+      background: linear-gradient(to bottom, var(--blue-soft), var(--surface));
+    }
+
+    .page-box.index {
+      background: linear-gradient(to bottom, var(--orange-soft), var(--surface));
+    }
+
+    .page-box::after {
+      content: "";
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      bottom: 9px;
+      height: 10px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--blue) 70%, white);
+      opacity: .38;
+    }
+
+    .page-note {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .principle {
+      border-top: 3px solid var(--green);
+      background: var(--surface);
+      border-radius: 0 0 8px 8px;
+      padding: 18px;
+      box-shadow: inset 0 0 0 1px var(--border);
+    }
+
+    .principle h3 {
+      font-size: 18px;
+      margin-bottom: 9px;
+    }
+
+    .principle p {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .animator {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .animator-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      border-bottom: 1px solid var(--border);
+      padding: 18px 20px;
+    }
+
+    .animator-head h3 {
+      font-size: 22px;
+      margin-bottom: 7px;
+    }
+
+    .animator-head p {
+      color: var(--muted);
+      max-width: 700px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex: none;
+    }
+
+    .control {
+      min-width: 42px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--ink);
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    .control.primary {
+      min-width: 74px;
+      color: white;
+      border-color: var(--green);
+      background: var(--green);
+      font-weight: 700;
+    }
+
+    .control:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-soft);
+    }
+
+    .control.primary:hover {
+      background: #126c5c;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      min-height: 510px;
+    }
+
+    .diagram {
+      position: relative;
+      min-height: 510px;
+      padding: 22px;
+      overflow: hidden;
+    }
+
+    .side {
+      border-left: 1px solid var(--border);
+      background: #fbfbf8;
+      padding: 20px;
+    }
+
+    .step-title {
+      color: var(--green);
+      font: 800 12px/1 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .step-copy {
+      margin-top: 12px;
+      color: var(--ink);
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .step-detail {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .step-list {
+      display: grid;
+      gap: 9px;
+      margin-top: 22px;
+    }
+
+    .step-dot {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .step-dot::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-strong);
+    }
+
+    .step-dot.active {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .step-dot.active::before {
+      background: var(--green);
+    }
+
+    .fader {
+      opacity: .16;
+      transform: translateY(6px);
+      transition: opacity 260ms ease, transform 260ms ease, filter 260ms ease;
+      filter: grayscale(.2);
+    }
+
+    .fader.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+      filter: none;
+    }
+
+    .list-grid {
+      display: grid;
+      grid-template-columns: 250px 1fr 230px;
+      gap: 18px;
+      align-items: start;
+      min-width: 760px;
+    }
+
+    .diagram-title {
+      margin-bottom: 11px;
+      color: var(--muted);
+      font: 800 12px/1 var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .row-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .row-id {
+      color: var(--faint);
+      font: 800 13px/1 var(--mono);
+      text-align: right;
+    }
+
+    .row-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 42px;
+      border: 1px solid var(--border-strong);
+      border-radius: 7px;
+      background: var(--surface-soft);
+      color: var(--faint);
+      font: 800 13px/1 var(--mono);
+    }
+
+    .row-box.nonempty {
+      border-color: color-mix(in srgb, var(--orange) 45%, var(--border));
+      background: #fffaf3;
+      color: var(--ink);
+    }
+
+    .row-box.null {
+      border-color: color-mix(in srgb, var(--purple) 50%, white);
+      background: var(--purple-soft);
+      color: var(--purple);
+    }
+
+    .tiny-value {
+      display: inline-grid;
+      place-items: center;
+      min-width: 34px;
+      height: 26px;
+      border: 1px solid color-mix(in srgb, var(--blue) 55%, white);
+      border-radius: 5px;
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    .metadata-stack {
+      display: grid;
+      gap: 13px;
+      padding-top: 40px;
+    }
+
+    .domain-ruler {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      color: var(--faint);
+      font: 700 12px/1 var(--mono);
+      text-align: center;
+    }
+
+    .meta-row {
+      display: grid;
+      grid-template-columns: 144px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .meta-label {
+      color: var(--muted);
+      font: 700 13px/1.2 var(--mono);
+    }
+
+    .meta-values {
+      display: flex;
+      gap: 8px;
+      min-height: 36px;
+      align-items: center;
+    }
+
+    .list-payload {
+      padding-top: 122px;
+    }
+
+    .payload-strip {
+      display: flex;
+      gap: 8px;
+    }
+
+    .take-path {
+      position: absolute;
+      left: 44px;
+      right: 330px;
+      bottom: 28px;
+      border: 1px dashed color-mix(in srgb, var(--red) 55%, white);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: var(--red);
+      background: var(--red-soft);
+      font: 700 13px/1.45 var(--mono);
+    }
+
+    .deep-diagram {
+      min-width: 800px;
+      display: grid;
+      gap: 13px;
+      padding-top: 4px;
+    }
+
+    .band {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .band-label {
+      color: var(--muted);
+      font: 800 12px/1.25 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .band-slots {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(36px, 1fr));
+      gap: 5px;
+      min-height: 44px;
+    }
+
+    .band-slots.event {
+      grid-template-columns: repeat(4, minmax(50px, 1fr));
+      max-width: 420px;
+    }
+
+    .deep-slot {
+      display: grid;
+      place-items: center;
+      min-height: 42px;
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      background: var(--surface-soft);
+      color: var(--faint);
+      font: 800 13px/1 var(--mono);
+    }
+
+    .deep-slot.valid,
+    .deep-slot.nonempty {
+      border-color: color-mix(in srgb, var(--orange) 55%, white);
+      background: var(--orange-soft);
+      color: #9e4a11;
+    }
+
+    .deep-slot.null {
+      border-color: color-mix(in srgb, var(--purple) 55%, white);
+      background: var(--purple-soft);
+      color: var(--purple);
+    }
+
+    .deep-slot.leaf {
+      padding: 0;
+      border-color: color-mix(in srgb, var(--blue) 55%, white);
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    .deep-note {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      color: var(--muted);
+      font: 700 13px/1.45 var(--mono);
+    }
+
+    .payoff-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .payoff {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 20px;
+    }
+
+    .payoff h3 {
+      margin-bottom: 11px;
+      font-size: 21px;
+    }
+
+    .payoff p {
+      color: var(--muted);
+    }
+
+    .equation {
+      margin-top: 14px;
+      border-radius: 7px;
+      background: var(--surface-soft);
+      padding: 12px;
+      color: var(--ink);
+      font: 700 13px/1.55 var(--mono);
+      overflow-x: auto;
+    }
+
+    .contract {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .contract-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 20px;
+    }
+
+    .contract-box h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .contract-box ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+    }
+
+    .contract-box li + li {
+      margin-top: 8px;
+    }
+
+    .footer {
+      padding: 36px 0 48px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid,
+      .section-head,
+      .stage,
+      .contract {
+        grid-template-columns: 1fr;
+      }
+
+      .side {
+        border-left: 0;
+        border-top: 1px solid var(--border);
+      }
+
+      .comparison,
+      .principles,
+      .payoff-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-points {
+        grid-template-columns: 1fr;
+      }
+
+      .diagram {
+        overflow-x: auto;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero {
+        padding-top: 44px;
+      }
+
+      .topbar-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 10px 0;
+      }
+
+      .animator-head {
+        flex-direction: column;
+      }
+
+      .controls {
+        width: 100%;
+      }
+
+      .control.primary {
+        flex: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .fader {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav class="topbar" aria-label="Page sections">
+      <div class="shell topbar-inner">
+        <div class="brand"><span class="mark">LS</span><span>Lance sparse structural encoding</span></div>
+        <div class="nav">
+          <a href="#problem">Problem</a>
+          <a href="#layout">Layout</a>
+          <a href="#list">List encode</a>
+          <a href="#deep">Deep struct</a>
+          <a href="#why-fast">Why fast</a>
+        </div>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="shell hero-grid">
+        <div>
+          <p class="eyebrow">Storage format 2.3 design sketch</p>
+          <h1>Make sparse nested columns physical sparse.</h1>
+          <p class="lead">Rep/def streams describe every structural event in row order. That is correct, but sparse nested data pays for empty rows again and again. The discrete sparse layout keeps logical row coordinates, then stores only the structural facts that lead to real child values.</p>
+          <div class="hero-points" aria-label="Design goals">
+            <div class="fact"><b>Bytes</b><span>Do not encode empty branches as dense level events.</span></div>
+            <div class="fact"><b>Scan</b><span>Read compact structure and compact value payloads.</span></div>
+            <div class="fact"><b>Take</b><span>Probe structure first, then read only reachable leaf ranges.</span></div>
+          </div>
+        </div>
+        <div class="hero-visual" aria-label="Sparse layout overview">
+          <div class="flow-visual">
+            <div class="flow-row">
+              <div class="flow-label">row domain</div>
+              <div class="slot-strip">
+                <div class="slot">0</div><div class="slot hot">1</div><div class="slot null">2</div><div class="slot">3</div><div class="slot hot">4</div><div class="slot">5</div>
+              </div>
+            </div>
+            <div class="flow-row">
+              <div class="flow-label">slot facts</div>
+              <div class="meta-strip">
+                <div class="meta-cell pos">[1,4]</div>
+                <div class="meta-cell">[2,1]</div>
+                <div class="meta-cell null">[2]</div>
+              </div>
+            </div>
+            <div class="flow-row">
+              <div class="flow-label">leaf values</div>
+              <div class="slot-strip">
+                <div class="value-cell">10</div><div class="value-cell">11</div><div class="value-cell">12</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section" id="problem">
+        <div class="shell">
+          <div class="section-head">
+            <h2>The problem is structural density, not value density.</h2>
+            <p>A sparse nested column can have very few values but a huge logical row domain. If the format still writes structure as a dense event stream, empty rows keep participating in compression, decoding, and random access.</p>
+          </div>
+          <div class="comparison">
+            <article class="layout-panel">
+              <header><h3>FullZip</h3><span class="badge">dense events</span></header>
+              <div class="layout-body">
+                <div class="timeline">
+                  <span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span>
+                </div>
+                <div class="page-strip">
+                  <div class="page-box"></div><div class="page-box"></div><div class="page-box"></div>
+                </div>
+                <p class="page-note">One structural stream covers the full row range. Take can hit a broad compressed page even when selected rows are empty.</p>
+              </div>
+            </article>
+            <article class="layout-panel">
+              <header><h3>MiniBlock</h3><span class="badge">smaller pages</span></header>
+              <div class="layout-body">
+                <div class="timeline">
+                  <span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span>
+                </div>
+                <div class="page-strip">
+                  <div class="page-box small"></div><div class="page-box small"></div><div class="page-box small"></div><div class="page-box small"></div><div class="page-box small"></div><div class="page-box small"></div>
+                </div>
+                <p class="page-note">The dense structure is split into smaller units. Random access improves, but empty regions still shape the page plan.</p>
+              </div>
+            </article>
+            <article class="layout-panel">
+              <header><h3>Discrete Sparse</h3><span class="badge">slot domains</span></header>
+              <div class="layout-body">
+                <div class="timeline">
+                  <span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span>
+                </div>
+                <div class="page-strip">
+                  <div class="page-box index"></div><div class="page-box payload"></div>
+                </div>
+                <p class="page-note">Structure is stored as sparse mappings over each parent slot domain. Payload pages only contain reachable leaf values.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="layout">
+        <div class="shell">
+          <div class="section-head">
+            <h2>The layout is a chain of slot-domain mappings.</h2>
+            <p>The outermost slot domain is the page row domain. Every nested layer maps selected parent slots to child slots. Leaf value buffers live in the final compact value domain.</p>
+          </div>
+          <div class="principles">
+            <article class="principle">
+              <h3>Rows stay logical</h3>
+              <p>Row ids are not rewritten. The format keeps the page row domain so slices and takes preserve Arrow semantics.</p>
+            </article>
+            <article class="principle">
+              <h3>Lists store presence</h3>
+              <p>A list layer records non-empty parent positions and child counts. Missing valid positions mean empty lists.</p>
+            </article>
+            <article class="principle">
+              <h3>Nulls stay local</h3>
+              <p>Nullable layers record null positions in their own parent slot domain, not in a global event stream.</p>
+            </article>
+            <article class="principle">
+              <h3>Leaves are compact</h3>
+              <p>Value buffers contain only visible leaf values and keep mini-block compression for the physical payload.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="list">
+        <div class="shell">
+          <div class="section-head">
+            <h2>Encoding <code>list&lt;int&gt;</code>.</h2>
+            <p>This is the smallest example that shows the contract: empty lists are represented by absence from sparse structural facts, not by payload gaps.</p>
+          </div>
+          <div class="animator" id="listAnimator">
+            <div class="animator-head">
+              <div>
+                <h3>From rows to sparse structure to leaf values</h3>
+                <p>Input rows are converted into a list structural layer, and the leaf payload is packed independently.</p>
+              </div>
+              <div class="controls">
+                <button class="control" data-action="prev" aria-label="Previous step">&lt;</button>
+                <button class="control primary" data-action="play">Play</button>
+                <button class="control" data-action="next" aria-label="Next step">&gt;</button>
+              </div>
+            </div>
+            <div class="stage">
+              <div class="diagram">
+                <div class="list-grid">
+                  <div class="fader" data-step-min="0">
+                    <div class="diagram-title">input rows</div>
+                    <div class="row-stack">
+                      <div class="input-row"><div class="row-id">0</div><div class="row-box">[]</div></div>
+                      <div class="input-row"><div class="row-id">1</div><div class="row-box nonempty">[ <span class="tiny-value">10</span><span class="tiny-value">11</span> ]</div></div>
+                      <div class="input-row"><div class="row-id">2</div><div class="row-box null">null</div></div>
+                      <div class="input-row"><div class="row-id">3</div><div class="row-box">[]</div></div>
+                      <div class="input-row"><div class="row-id">4</div><div class="row-box nonempty">[ <span class="tiny-value">12</span> ]</div></div>
+                      <div class="input-row"><div class="row-id">5</div><div class="row-box">[]</div></div>
+                    </div>
+                  </div>
+
+                  <div class="fader metadata-stack" data-step-min="1">
+                    <div>
+                      <div class="diagram-title">parent row domain</div>
+                      <div class="domain-ruler"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+                    </div>
+                    <div class="meta-row">
+                      <div class="meta-label">non_empty</div>
+                      <div class="meta-values"><div class="meta-cell pos">1</div><div class="meta-cell pos">4</div></div>
+                    </div>
+                    <div class="meta-row fader" data-step-min="2">
+                      <div class="meta-label">counts</div>
+                      <div class="meta-values"><div class="meta-cell">2</div><div class="meta-cell">1</div></div>
+                    </div>
+                    <div class="meta-row fader" data-step-min="2">
+                      <div class="meta-label">nulls</div>
+                      <div class="meta-values"><div class="meta-cell null">2</div></div>
+                    </div>
+                  </div>
+
+                  <div class="fader list-payload" data-step-min="3">
+                    <div class="diagram-title">leaf value domain</div>
+                    <div class="payload-strip"><div class="value-cell">10</div><div class="value-cell">11</div><div class="value-cell">12</div></div>
+                  </div>
+                </div>
+                <div class="take-path fader" data-step-min="4">take [0,1,5]: row 0 stops empty, row 1 reads leaf range 0..2, row 5 stops empty.</div>
+              </div>
+              <aside class="side">
+                <div class="step-title">Current step</div>
+                <p class="step-copy" data-copy></p>
+                <p class="step-detail" data-detail></p>
+                <div class="step-list" data-steps></div>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="deep">
+        <div class="shell">
+          <div class="section-head">
+            <h2>Deep nesting uses the same rule recursively.</h2>
+            <p>There is no special global row-index trick. Each layer owns a parent slot domain and emits the child ranges needed by the next layer.</p>
+          </div>
+          <div class="animator" id="deepAnimator">
+            <div class="animator-head">
+              <div>
+                <h3><code>struct&lt;profile: struct&lt;events: list&lt;struct&lt;score:int32, tags:list&lt;int32&gt;&gt;&gt;&gt;</code></h3>
+                <p>The selected rows either stop at a null or empty layer, or continue downward to compact score and tag payloads.</p>
+              </div>
+              <div class="controls">
+                <button class="control" data-action="prev" aria-label="Previous step">&lt;</button>
+                <button class="control primary" data-action="play">Play</button>
+                <button class="control" data-action="next" aria-label="Next step">&gt;</button>
+              </div>
+            </div>
+            <div class="stage">
+              <div class="diagram">
+                <div class="deep-diagram">
+                  <div class="band fader" data-step-min="0">
+                    <div class="band-label">row domain</div>
+                    <div class="band-slots">
+                      <div class="deep-slot">0</div><div class="deep-slot">1</div><div class="deep-slot">2</div><div class="deep-slot">3</div><div class="deep-slot">4</div><div class="deep-slot">5</div><div class="deep-slot">6</div><div class="deep-slot">7</div>
+                    </div>
+                  </div>
+                  <div class="band fader" data-step-min="1">
+                    <div class="band-label">profile validity</div>
+                    <div class="band-slots">
+                      <div class="deep-slot null">null</div><div class="deep-slot valid">1</div><div class="deep-slot valid">1</div><div class="deep-slot valid">1</div><div class="deep-slot valid">1</div><div class="deep-slot null">null</div><div class="deep-slot valid">1</div><div class="deep-slot valid">1</div>
+                    </div>
+                  </div>
+                  <div class="band fader" data-step-min="2">
+                    <div class="band-label">events list</div>
+                    <div class="band-slots">
+                      <div class="deep-slot null">-</div><div class="deep-slot">[]</div><div class="deep-slot nonempty">2</div><div class="deep-slot">[]</div><div class="deep-slot nonempty">1</div><div class="deep-slot null">-</div><div class="deep-slot">[]</div><div class="deep-slot nonempty">1</div>
+                    </div>
+                  </div>
+                  <div class="band fader" data-step-min="3">
+                    <div class="band-label">event slots</div>
+                    <div class="band-slots event">
+                      <div class="deep-slot valid">0</div><div class="deep-slot null">1</div><div class="deep-slot valid">2</div><div class="deep-slot valid">3</div>
+                    </div>
+                  </div>
+                  <div class="band fader" data-step-min="4">
+                    <div class="band-label">score values</div>
+                    <div class="band-slots event">
+                      <div class="deep-slot leaf">91</div><div class="deep-slot null">-</div><div class="deep-slot leaf">84</div><div class="deep-slot leaf">77</div>
+                    </div>
+                  </div>
+                  <div class="band fader" data-step-min="5">
+                    <div class="band-label">tags list</div>
+                    <div class="band-slots event">
+                      <div class="deep-slot nonempty">2</div><div class="deep-slot null">-</div><div class="deep-slot">[]</div><div class="deep-slot nonempty">2</div>
+                    </div>
+                  </div>
+                  <div class="band fader" data-step-min="6">
+                    <div class="band-label">tag values</div>
+                    <div class="band-slots event">
+                      <div class="deep-slot leaf">3</div><div class="deep-slot leaf">5</div><div class="deep-slot leaf">8</div><div class="deep-slot leaf">13</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="take-path fader" data-step-min="7">take [1,2,5]: row 1 stops at empty events, row 2 descends to event slots 0..2, row 5 stops at profile null.</div>
+              </div>
+              <aside class="side">
+                <div class="step-title">Current step</div>
+                <p class="step-copy" data-copy></p>
+                <p class="step-detail" data-detail></p>
+                <div class="step-list" data-steps></div>
+                <div class="deep-note">
+                  <div>profile nulls: [0,5]</div>
+                  <div>events non_empty: [2,4,7], counts: [2,1,1]</div>
+                  <div>event nulls: [1]</div>
+                  <div>tags non_empty: [0,3], counts: [2,2]</div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="why-fast">
+        <div class="shell">
+          <div class="section-head">
+            <h2>Why this improves sparse workloads.</h2>
+            <p>The important change is not just fewer pages. It is the ability to decide whether a selected path exists before reading and decoding value payloads.</p>
+          </div>
+          <div class="payoff-grid">
+            <article class="payoff">
+              <h3>Smaller bytes</h3>
+              <p>Empty rows do not produce dense rep/def events. Sparse positions and counts scale with non-empty structure, not with total row count.</p>
+              <div class="equation">cost ~= positions + counts + nulls + leaf_values</div>
+            </article>
+            <article class="payoff">
+              <h3>Faster scans</h3>
+              <p>Sequential reads walk compact structural metadata and compact value buffers. There is less structural data to inflate before rebuilding Arrow arrays.</p>
+              <div class="equation">scan = decode_sparse_layers + decode_leaf_payload</div>
+            </article>
+            <article class="payoff">
+              <h3>Faster takes</h3>
+              <p>Take first slices slot-domain mappings. Empty and null branches stop in metadata; non-empty branches become exact leaf ranges.</p>
+              <div class="equation">take = probe_structure -&gt; read_reachable_chunks</div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="contract">
+        <div class="shell">
+          <div class="section-head">
+            <h2>The format contract.</h2>
+            <p>This layout belongs to file version 2.3 because it changes the physical representation of nested structure. Older stable versions keep their existing encodings.</p>
+          </div>
+          <div class="contract">
+            <article class="contract-box">
+              <h3>What must be true</h3>
+              <ul>
+                <li>Structural layers are stored outermost to innermost.</li>
+                <li>Positions are sorted and delta-compressed within their parent slot domain.</li>
+                <li>List counts sum to the next child slot domain size.</li>
+                <li>Leaf payload chunks contain no rep/def buffers.</li>
+              </ul>
+            </article>
+            <article class="contract-box">
+              <h3>Where it wins</h3>
+              <ul>
+                <li>Most selected rows are empty or null before reaching leaf values.</li>
+                <li>Non-empty values are clustered enough to coalesce leaf ranges.</li>
+                <li>Structural metadata is small enough to cache or read cheaply.</li>
+                <li>The workload mixes full scans with random sparse takes.</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="shell">Lance discrete sparse structural layout sketch. Built as a self-contained visual design note.</div>
+    </footer>
+  </div>
+
+  <script>
+    const animatorSpecs = {
+      listAnimator: [
+        {
+          title: "Start with Arrow rows.",
+          detail: "The logical row domain has six row slots. Some rows are empty lists, one row is null, and two rows have real leaf values."
+        },
+        {
+          title: "Record non-empty list positions.",
+          detail: "Only rows 1 and 4 create child ranges, so the list layer stores non_empty_positions = [1, 4]."
+        },
+        {
+          title: "Add counts and null positions.",
+          detail: "Counts [2, 1] define the child ranges for rows 1 and 4. Null positions [2] distinguish null from empty."
+        },
+        {
+          title: "Pack the leaf value domain.",
+          detail: "The physical values are [10, 11, 12]. Empty and null rows do not reserve payload slots."
+        },
+        {
+          title: "Take probes structure first.",
+          detail: "Rows 0 and 5 stop as empty lists. Row 1 maps to leaf range 0..2 and reads only [10, 11]."
+        }
+      ],
+      deepAnimator: [
+        {
+          title: "Start at the page row domain.",
+          detail: "The outermost domain is still rows 0..7. Sparse layout does not rewrite row identity."
+        },
+        {
+          title: "Profile validity is local to row slots.",
+          detail: "Rows 0 and 5 are null profiles. Valid rows continue to the profile child structure."
+        },
+        {
+          title: "Events list maps rows to event slots.",
+          detail: "Rows 2, 4, and 7 are non-empty event lists with counts [2, 1, 1]. Empty rows stop here."
+        },
+        {
+          title: "The next domain is event slots.",
+          detail: "The child domain now has four event slots. Slot 1 is null, and the other event slots can expose fields."
+        },
+        {
+          title: "Score values are compact.",
+          detail: "Only valid score events produce score payload values: [91, 84, 77]."
+        },
+        {
+          title: "Tags is another list layer.",
+          detail: "The parent domain is event slots 0..3. Only event slots 0 and 3 have non-empty tags."
+        },
+        {
+          title: "Tag payload is compact too.",
+          detail: "The tag leaf value domain contains [3, 5, 8, 13], with no gaps for empty or null events."
+        },
+        {
+          title: "Take descends only while paths exist.",
+          detail: "Row 1 stops at empty events, row 2 reaches payload, and row 5 stops immediately at profile null."
+        }
+      ]
+    };
+
+    function setupAnimator(id) {
+      const root = document.getElementById(id);
+      const spec = animatorSpecs[id];
+      let step = 0;
+      let timer = null;
+      const copy = root.querySelector("[data-copy]");
+      const detail = root.querySelector("[data-detail]");
+      const steps = root.querySelector("[data-steps]");
+      const play = root.querySelector("[data-action='play']");
+
+      steps.innerHTML = spec.map((item, index) => `<div class="step-dot" data-step-dot="${index}">${index + 1}. ${item.title}</div>`).join("");
+
+      function stop() {
+        if (timer) window.clearInterval(timer);
+        timer = null;
+        play.textContent = "Play";
+      }
+
+      function render() {
+        root.querySelectorAll("[data-step-min]").forEach((el) => {
+          const min = Number(el.getAttribute("data-step-min"));
+          el.classList.toggle("is-visible", step >= min);
+        });
+        root.querySelectorAll("[data-step-dot]").forEach((el) => {
+          el.classList.toggle("active", Number(el.getAttribute("data-step-dot")) === step);
+        });
+        copy.textContent = spec[step].title;
+        detail.textContent = spec[step].detail;
+      }
+
+      root.querySelector("[data-action='prev']").addEventListener("click", () => {
+        stop();
+        step = (step + spec.length - 1) % spec.length;
+        render();
+      });
+
+      root.querySelector("[data-action='next']").addEventListener("click", () => {
+        stop();
+        step = (step + 1) % spec.length;
+        render();
+      });
+
+      play.addEventListener("click", () => {
+        if (timer) {
+          stop();
+          return;
+        }
+        play.textContent = "Pause";
+        timer = window.setInterval(() => {
+          step = (step + 1) % spec.length;
+          render();
+        }, 1400);
+      });
+
+      render();
+    }
+
+    setupAnimator("listAnimator");
+    setupAnimator("deepAnimator");
+  </script>
+</body>
+</html>
