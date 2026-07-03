@@ -9,6 +9,13 @@ export type Sketch = {
 // Each slug maps to static/sketches/<slug>/index.html.
 export const sketches: Sketch[] = [
   {
+    slug: 'lance-discrete-sparse-layout',
+    title: 'Lance Discrete Sparse Layout',
+    date: '2026-07-04',
+    description: 'A visual design note for Lance sparse structural encoding and why slot-domain mappings improve sparse nested data.',
+    cover: '/sketches/lance-discrete-sparse-layout/cover.svg'
+  },
+  {
     slug: 'lance-blob-write-decoupling',
     title: 'Lance Blob Preparation API',
     date: '2026-07-01',
