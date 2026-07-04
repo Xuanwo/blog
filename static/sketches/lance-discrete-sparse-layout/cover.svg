@@ -1,55 +1,106 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
   <title id="title">Lance Discrete Sparse Layout</title>
   <desc id="desc">A compact diagram showing sparse row structure separated from leaf values.</desc>
-  <rect width="1200" height="675" fill="#f7f7f4"/>
-  <rect x="72" y="72" width="1056" height="531" rx="16" fill="#ffffff" stroke="#d9ddd6"/>
-  <text x="112" y="142" fill="#222723" font-family="ui-sans-serif, system-ui, sans-serif" font-size="44" font-weight="700">Discrete Sparse Layout</text>
-  <text x="112" y="188" fill="#657066" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="22">row domain -&gt; slot domains -&gt; compact leaf values</text>
+  <style>
+    svg {
+      --bg: #fbfbfc;
+      --surface: #ffffff;
+      --surface-2: #f4f5f7;
+      --border: #e6e8eb;
+      --border-strong: #d4d8dd;
+      --fg: #14171a;
+      --fg-subtle: #767e87;
+      --fg-faint: #9aa1aa;
+      --accent-text: #0a6aa8;
+      --accent-subtle: #e8f4fc;
+      --accent-border: #9bd0f2;
+      --warning-text: #8f5f12;
+      --warning-subtle: #fdf2dd;
+      --warning-border: #f0d9a3;
+      --danger-text: #a72e26;
+      --danger-subtle: #fcebe9;
+      --danger-border: #f3c2bd;
+    }
+    @media (prefers-color-scheme: dark) {
+      svg {
+        --bg: #0b0d0f;
+        --surface: #131619;
+        --surface-2: #1a1e22;
+        --border: #23272c;
+        --border-strong: #323840;
+        --fg: #f4f6f7;
+        --fg-subtle: #7a838d;
+        --fg-faint: #59616a;
+        --accent-text: #6fc1f0;
+        --accent-subtle: #0c2f44;
+        --accent-border: #134c6b;
+        --warning-text: #e6b765;
+        --warning-subtle: #2a2113;
+        --warning-border: #473717;
+        --danger-text: #ef847c;
+        --danger-subtle: #2c1514;
+        --danger-border: #4a221f;
+      }
+    }
+    .serif { font-family: Georgia, "Songti SC", "Noto Serif SC", serif; }
+    .mono { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+    .label { fill: var(--fg-subtle); font-size: 17px; font-weight: 600; letter-spacing: .08em; }
+    .num { font-size: 24px; font-weight: 600; text-anchor: middle; }
+    .cell { fill: var(--surface-2); stroke: var(--border-strong); }
+    .cell-fact { fill: var(--warning-subtle); stroke: var(--warning-border); }
+    .cell-null { fill: var(--danger-subtle); stroke: var(--danger-border); }
+    .cell-value { fill: var(--accent-subtle); stroke: var(--accent-border); }
+  </style>
 
-  <g transform="translate(112 264)">
-    <text x="0" y="-30" fill="#222723" font-family="ui-sans-serif, system-ui, sans-serif" font-size="21" font-weight="700">logical rows</text>
-    <g fill="#eef0ec" stroke="#cfd5cf" stroke-width="2">
-      <rect x="0" y="0" width="82" height="58" rx="8"/>
-      <rect x="94" y="0" width="82" height="58" rx="8"/>
-      <rect x="188" y="0" width="82" height="58" rx="8"/>
-      <rect x="282" y="0" width="82" height="58" rx="8"/>
-      <rect x="376" y="0" width="82" height="58" rx="8"/>
-      <rect x="470" y="0" width="82" height="58" rx="8"/>
-    </g>
-    <g fill="#7b8490" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="22" font-weight="700" text-anchor="middle">
-      <text x="41" y="37">0</text>
-      <text x="135" y="37">1</text>
-      <text x="229" y="37">2</text>
-      <text x="323" y="37">3</text>
-      <text x="417" y="37">4</text>
-      <text x="511" y="37">5</text>
+  <rect width="1200" height="675" fill="var(--bg)"/>
+  <rect x="64" y="64" width="1072" height="547" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+
+  <text x="108" y="156" class="serif" fill="var(--fg)" font-size="48" font-weight="600" letter-spacing="-.5">Discrete Sparse Layout</text>
+  <text x="108" y="200" class="mono" fill="var(--fg-subtle)" font-size="20">row domain &#8594; slot facts &#8594; leaf values</text>
+  <line x1="108" y1="238" x2="1092" y2="238" stroke="var(--border)"/>
+
+  <!-- row domain -->
+  <g class="mono">
+    <text x="108" y="316" class="label">ROW DOMAIN</text>
+    <g transform="translate(340 280)">
+      <rect class="cell" width="88" height="60" rx="6"/>
+      <rect class="cell-fact" x="100" width="88" height="60" rx="6"/>
+      <rect class="cell-null" x="200" width="88" height="60" rx="6"/>
+      <rect class="cell" x="300" width="88" height="60" rx="6"/>
+      <rect class="cell-fact" x="400" width="88" height="60" rx="6"/>
+      <rect class="cell" x="500" width="88" height="60" rx="6"/>
+      <text x="44" y="38" class="num" fill="var(--fg-faint)">0</text>
+      <text x="144" y="38" class="num" fill="var(--warning-text)">1</text>
+      <text x="244" y="38" class="num" fill="var(--danger-text)">2</text>
+      <text x="344" y="38" class="num" fill="var(--fg-faint)">3</text>
+      <text x="444" y="38" class="num" fill="var(--warning-text)">4</text>
+      <text x="544" y="38" class="num" fill="var(--fg-faint)">5</text>
     </g>
   </g>
 
-  <path d="M690 292 L780 292" fill="none" stroke="#dd5f2a" stroke-width="5" stroke-linecap="round"/>
-  <path d="M780 292 l-16 -11 v22z" fill="#dd5f2a"/>
-
-  <g transform="translate(820 234)">
-    <text x="0" y="-24" fill="#222723" font-family="ui-sans-serif, system-ui, sans-serif" font-size="21" font-weight="700">sparse structure</text>
-    <rect x="0" y="0" width="228" height="44" rx="8" fill="#fff4e8" stroke="#e8873e" stroke-width="2"/>
-    <rect x="0" y="60" width="228" height="44" rx="8" fill="#edf9f5" stroke="#1d9a87" stroke-width="2"/>
-    <rect x="0" y="120" width="228" height="44" rx="8" fill="#f3edff" stroke="#7c57c2" stroke-width="2"/>
-    <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" font-weight="700">
-      <text x="18" y="29" fill="#bf5a1f">non_empty [1,4]</text>
-      <text x="18" y="89" fill="#147a6c">counts [2,1]</text>
-      <text x="18" y="149" fill="#6046a6">nulls [2]</text>
+  <!-- slot facts -->
+  <g class="mono">
+    <text x="108" y="426" class="label">SLOT FACTS</text>
+    <g transform="translate(340 390)">
+      <rect class="cell-fact" width="256" height="60" rx="6"/>
+      <rect class="cell" x="272" width="216" height="60" rx="6"/>
+      <rect class="cell-null" x="504" width="160" height="60" rx="6"/>
+      <text x="128" y="38" class="num" fill="var(--warning-text)" font-size="21">non_empty [1,4]</text>
+      <text x="380" y="38" class="num" fill="var(--fg-subtle)" font-size="21">counts [2,1]</text>
+      <text x="584" y="38" class="num" fill="var(--danger-text)" font-size="21">nulls [2]</text>
     </g>
   </g>
 
-  <g transform="translate(278 472)">
-    <text x="0" y="-24" fill="#222723" font-family="ui-sans-serif, system-ui, sans-serif" font-size="21" font-weight="700">leaf payload only</text>
-    <rect x="0" y="0" width="118" height="58" rx="10" fill="#dfecff" stroke="#2d72d9" stroke-width="2"/>
-    <rect x="132" y="0" width="118" height="58" rx="10" fill="#dfecff" stroke="#2d72d9" stroke-width="2"/>
-    <rect x="264" y="0" width="118" height="58" rx="10" fill="#dfecff" stroke="#2d72d9" stroke-width="2"/>
-    <g fill="#1d5fbf" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24" font-weight="800" text-anchor="middle">
-      <text x="59" y="37">10</text>
-      <text x="191" y="37">11</text>
-      <text x="323" y="37">12</text>
+  <!-- leaf values -->
+  <g class="mono">
+    <text x="108" y="536" class="label">LEAF VALUES</text>
+    <g transform="translate(340 500)">
+      <rect class="cell-value" width="88" height="60" rx="6"/>
+      <rect class="cell-value" x="100" width="88" height="60" rx="6"/>
+      <rect class="cell-value" x="200" width="88" height="60" rx="6"/>
+      <text x="44" y="38" class="num" fill="var(--accent-text)">10</text>
+      <text x="144" y="38" class="num" fill="var(--accent-text)">11</text>
+      <text x="244" y="38" class="num" fill="var(--accent-text)">12</text>
     </g>
   </g>
 </svg>

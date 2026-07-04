@@ -4,31 +4,115 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lance Discrete Sparse Layout</title>
-  <meta name="description" content="A visual design note for Lance sparse structural encoding: the problem, the row-domain model, the layout, and why it improves sparse scan and take workloads.">
+  <meta name="description" content="A visual design note for Lance sparse structural encoding: the problem, the slot-domain model, the layout, when the writer selects it, and why it improves sparse scan and take workloads.">
   <style>
+    /* ==========================================================
+       Xuanwo Design System tokens (inlined — sketch pages are
+       self-contained). Light is :root; dark via [data-theme].
+       ========================================================== */
     :root {
-      color-scheme: light;
-      --bg: #f7f7f4;
+      --azure-50: #e8f4fc;
+      --azure-100: #cbe6f8;
+      --azure-200: #9bd0f2;
+      --azure-400: #2b97db;
+      --azure-500: #0f83cf;
+      --azure-600: #0a6aa8;
+      --azure-700: #08547f;
+
+      --bg: #fbfbfc;
       --surface: #ffffff;
-      --surface-soft: #f0f2ee;
-      --ink: #1f2420;
-      --muted: #5c665e;
-      --faint: #838c85;
-      --border: #d9ddd6;
-      --border-strong: #b9c0b8;
-      --blue: #2d72d9;
-      --blue-soft: #dfecff;
-      --orange: #dd6b20;
-      --orange-soft: #fff0df;
-      --purple: #7257b8;
-      --purple-soft: #f0eaff;
-      --green: #16836f;
-      --green-soft: #e3f6ef;
-      --red: #c9382f;
-      --red-soft: #ffe6e2;
-      --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      --shadow: 0 18px 48px rgb(28 35 30 / 8%);
+      --surface-2: #f4f5f7;
+      --surface-3: #eceef1;
+      --surface-inset: #f7f8f9;
+
+      --fg: #14171a;
+      --fg-muted: #4d545c;
+      --fg-subtle: #767e87;
+      --fg-faint: #9aa1aa;
+
+      --border: #e6e8eb;
+      --border-strong: #d4d8dd;
+
+      --accent: var(--azure-500);
+      --accent-hover: var(--azure-600);
+      --accent-fg: #ffffff;
+      --accent-text: var(--azure-600);
+      --accent-subtle: var(--azure-50);
+      --accent-border: var(--azure-200);
+
+      --success-text: #157048;
+      --success-subtle: #e6f4ec;
+      --success-border: #b6e0c8;
+
+      --warning-text: #8f5f12;
+      --warning-subtle: #fdf2dd;
+      --warning-border: #f0d9a3;
+
+      --danger-text: #a72e26;
+      --danger-subtle: #fcebe9;
+      --danger-border: #f3c2bd;
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-serif: Georgia, "Songti SC", "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+      --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
+
+      --radius-xs: 3px;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+
+      --space-1: .25rem;
+      --space-2: .5rem;
+      --space-3: .75rem;
+      --space-4: 1rem;
+      --space-5: 1.5rem;
+      --space-6: 2rem;
+      --space-7: 3rem;
+      --space-8: 4rem;
+
+      --duration-fast: 120ms;
+      --duration-base: 180ms;
+      --duration-slow: 280ms;
+      --ease-out: cubic-bezier(.22, 1, .36, 1);
+
+      color-scheme: light;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b0d0f;
+      --surface: #131619;
+      --surface-2: #1a1e22;
+      --surface-3: #23282d;
+      --surface-inset: #15181c;
+
+      --fg: #f4f6f7;
+      --fg-muted: #a7afb8;
+      --fg-subtle: #7a838d;
+      --fg-faint: #59616a;
+
+      --border: #23272c;
+      --border-strong: #323840;
+
+      --accent: #38a8ec;
+      --accent-hover: #5fb3e8;
+      --accent-fg: #04263b;
+      --accent-text: #6fc1f0;
+      --accent-subtle: #0c2f44;
+      --accent-border: #134c6b;
+
+      --success-text: #5cc497;
+      --success-subtle: #10241b;
+      --success-border: #1d3f30;
+
+      --warning-text: #e6b765;
+      --warning-subtle: #2a2113;
+      --warning-border: #473717;
+
+      --danger-text: #ef847c;
+      --danger-subtle: #2c1514;
+      --danger-border: #4a221f;
+
+      color-scheme: dark;
     }
 
     * {
@@ -42,11 +126,11 @@
     body {
       margin: 0;
       background: var(--bg);
-      color: var(--ink);
-      font: 16px/1.55 var(--sans);
-      letter-spacing: 0;
+      color: var(--fg);
+      font: 15px/1.5 var(--font-sans);
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
+      transition: background-color var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out);
     }
 
     button {
@@ -54,22 +138,23 @@
     }
 
     code {
-      font-family: var(--mono);
-      font-size: .93em;
+      font-family: var(--font-mono);
+      font-size: .92em;
     }
 
-    h1,
-    h2,
-    h3,
-    p {
+    h1, h2, h3, p {
       margin: 0;
     }
 
-    h1,
-    h2,
-    h3 {
-      line-height: 1.08;
-      letter-spacing: 0;
+    h1, h2, h3 {
+      font-weight: 600;
+      color: var(--fg);
+      text-wrap: balance;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
     .page {
@@ -81,12 +166,13 @@
       margin: 0 auto;
     }
 
+    /* ---- Topbar ---- */
     .topbar {
       position: sticky;
       top: 0;
-      z-index: 30;
+      z-index: 100;
       border-bottom: 1px solid var(--border);
-      background: color-mix(in srgb, var(--bg) 90%, transparent);
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
       backdrop-filter: blur(18px);
     }
 
@@ -94,37 +180,38 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      min-height: 58px;
-      gap: 18px;
+      gap: var(--space-4);
+      min-height: 56px;
     }
 
     .brand {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 10px;
+      gap: var(--space-3);
       min-width: 0;
-      color: var(--muted);
-      font: 600 13px/1 var(--mono);
+      color: var(--fg-muted);
+      font-size: 14px;
       white-space: nowrap;
     }
 
     .mark {
+      flex: none;
       display: grid;
       place-items: center;
       width: 28px;
       height: 28px;
-      border: 1px solid color-mix(in srgb, var(--green) 35%, var(--border));
-      border-radius: 6px;
-      color: var(--green);
-      background: var(--green-soft);
-      font: 800 14px/1 var(--mono);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-md);
+      color: var(--accent-text);
+      background: var(--accent-subtle);
+      font: 700 15px/1 var(--font-mono);
     }
 
     .nav {
       display: flex;
-      gap: 8px;
+      gap: var(--space-1);
       overflow-x: auto;
-      padding: 9px 0;
+      padding: var(--space-2) 0;
       scrollbar-width: none;
     }
 
@@ -134,325 +221,446 @@
 
     .nav a {
       flex: none;
-      color: var(--muted);
-      text-decoration: none;
-      border: 1px solid transparent;
-      border-radius: 999px;
       padding: 6px 10px;
+      border-radius: var(--radius-md);
+      color: var(--fg-muted);
       font-size: 13px;
+      text-decoration: none;
+      transition: color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
     }
 
     .nav a:hover {
-      color: var(--ink);
-      border-color: var(--border);
-      background: var(--surface);
+      color: var(--fg);
+      background: var(--surface-2);
     }
 
+    .theme-toggle {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      height: 32px;
+      padding: 0 var(--space-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--fg-muted);
+      background: var(--surface);
+      cursor: pointer;
+      transition: color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--border-strong);
+      color: var(--fg);
+      background: var(--surface-2);
+    }
+
+    /* ---- Hero ---- */
     .hero {
+      padding: var(--space-8) 0 var(--space-7);
       border-bottom: 1px solid var(--border);
-      padding: 70px 0 54px;
     }
 
     .hero-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.02fr) minmax(380px, .98fr);
-      gap: 48px;
+      grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
+      gap: var(--space-7);
       align-items: center;
     }
 
     .eyebrow {
-      margin-bottom: 14px;
-      color: var(--green);
-      font: 700 12px/1 var(--mono);
-      letter-spacing: .09em;
+      margin: 0 0 var(--space-4);
+      color: var(--accent-text);
+      font: 600 12px/1 var(--font-mono);
+      letter-spacing: .08em;
       text-transform: uppercase;
     }
 
     h1 {
-      max-width: 760px;
-      font-size: clamp(44px, 6vw, 76px);
-      font-weight: 760;
+      max-width: 720px;
+      font: 600 clamp(38px, 5vw, 64px)/1.15 var(--font-serif);
+      letter-spacing: -.02em;
     }
 
     .lead {
-      max-width: 760px;
-      margin-top: 22px;
-      color: var(--muted);
-      font-size: clamp(18px, 2vw, 21px);
-      line-height: 1.6;
+      max-width: 720px;
+      margin-top: var(--space-5);
+      color: var(--fg-muted);
+      font-size: 17px;
+      line-height: 1.7;
     }
 
     .hero-points {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 30px;
+      margin-top: var(--space-6);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
     }
 
     .fact {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px;
-      background: var(--surface);
+      padding: var(--space-4);
+      border-left: 1px solid var(--border);
+    }
+
+    .fact:first-child {
+      border-left: none;
     }
 
     .fact b {
       display: block;
-      margin-bottom: 6px;
-      color: var(--ink);
-      font-size: 15px;
+      margin-bottom: var(--space-1);
+      color: var(--fg);
+      font: 600 12px/1.4 var(--font-mono);
+      letter-spacing: .04em;
+      text-transform: uppercase;
     }
 
     .fact span {
       display: block;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.45;
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.5;
     }
 
+    /* ---- Hero visual ---- */
     .hero-visual {
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-lg);
       background: var(--surface);
-      box-shadow: var(--shadow);
-      padding: 22px;
+      overflow: hidden;
+    }
+
+    .hero-visual__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .hero-visual__title {
+      color: var(--fg-muted);
+      font: 500 13px/1.4 var(--font-mono);
+    }
+
+    .badge {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      padding: 0 var(--space-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--fg-muted);
+      background: var(--surface);
+      font: 500 11px/1 var(--font-mono);
+      white-space: nowrap;
+    }
+
+    .badge.accent {
+      border-color: var(--accent-border);
+      color: var(--accent-text);
+      background: var(--accent-subtle);
+    }
+
+    .badge.warn {
+      border-color: var(--warning-border);
+      color: var(--warning-text);
+      background: var(--warning-subtle);
     }
 
     .flow-visual {
       display: grid;
-      gap: 16px;
+      gap: var(--space-4);
+      padding: var(--space-5) var(--space-4);
     }
 
     .flow-row {
       display: grid;
-      grid-template-columns: 128px 1fr;
-      gap: 16px;
+      grid-template-columns: 108px 1fr;
+      gap: var(--space-4);
       align-items: center;
     }
 
     .flow-label {
-      color: var(--muted);
-      font: 700 13px/1.2 var(--mono);
+      color: var(--fg-muted);
+      font: 600 11px/1.35 var(--font-mono);
+      letter-spacing: .04em;
       text-transform: uppercase;
+    }
+
+    /* ---- Cells: the shared vocabulary for every diagram.
+       neutral = empty · amber = structural fact · red = null ·
+       azure = leaf value ---- */
+    .cell {
+      display: grid;
+      place-items: center;
+      min-width: 0;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      color: var(--fg-faint);
+      font: 600 13px/1 var(--font-mono);
+    }
+
+    .cell.fact {
+      border-color: var(--warning-border);
+      background: var(--warning-subtle);
+      color: var(--warning-text);
+    }
+
+    .cell.null {
+      border-color: var(--danger-border);
+      background: var(--danger-subtle);
+      color: var(--danger-text);
+    }
+
+    .cell.value {
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+      color: var(--accent-text);
     }
 
     .slot-strip {
       display: flex;
-      gap: 7px;
+      gap: 6px;
       min-width: 0;
     }
 
-    .slot,
-    .mini-slot,
-    .value-cell,
-    .meta-cell {
-      display: grid;
-      place-items: center;
-      border-radius: 6px;
-      border: 1px solid var(--border-strong);
-      min-width: 0;
-      font: 700 13px/1 var(--mono);
-    }
-
-    .slot {
-      width: 44px;
-      height: 38px;
-      background: var(--surface-soft);
-      color: var(--faint);
-    }
-
-    .slot.hot,
-    .meta-cell.pos {
-      border-color: color-mix(in srgb, var(--orange) 65%, white);
-      background: var(--orange-soft);
-      color: #a84b12;
-    }
-
-    .slot.null,
-    .meta-cell.null {
-      border-color: color-mix(in srgb, var(--purple) 60%, white);
-      background: var(--purple-soft);
-      color: var(--purple);
-    }
-
-    .value-cell {
-      width: 52px;
-      height: 38px;
-      border-color: color-mix(in srgb, var(--blue) 55%, white);
-      background: var(--blue-soft);
-      color: var(--blue);
+    .slot-strip .cell {
+      width: 42px;
+      height: 36px;
     }
 
     .meta-strip {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: var(--space-2);
     }
 
-    .meta-cell {
-      min-width: 72px;
-      height: 36px;
-      padding: 0 10px;
+    .meta-strip .cell {
+      min-width: 68px;
+      height: 32px;
+      padding: 0 var(--space-3);
     }
 
-    .section {
-      padding: 66px 0;
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3) var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      border-top: 1px solid var(--border);
+      background: var(--surface-inset);
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--fg-muted);
+      font: 500 12px/1 var(--font-mono);
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-strong);
+      background: var(--surface-2);
+    }
+
+    .legend .fact i {
+      border-color: var(--warning-border);
+      background: var(--warning-subtle);
+    }
+
+    .legend .null i {
+      border-color: var(--danger-border);
+      background: var(--danger-subtle);
+    }
+
+    .legend .value i {
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+    }
+
+    /* ---- Sections ---- */
+    section {
+      padding: var(--space-7) 0;
       border-bottom: 1px solid var(--border);
+      scroll-margin-top: 56px;
     }
 
     .section-head {
       display: grid;
-      grid-template-columns: minmax(0, .9fr) minmax(280px, .55fr);
-      gap: 34px;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 460px);
+      gap: var(--space-5);
       align-items: end;
-      margin-bottom: 30px;
+      margin-bottom: var(--space-6);
     }
 
-    .section h2 {
-      font-size: clamp(31px, 4vw, 50px);
-      font-weight: 730;
+    .section-index {
+      display: block;
+      margin-bottom: var(--space-2);
+      color: var(--fg-faint);
+      font: 600 12px/1 var(--font-mono);
+      letter-spacing: .08em;
     }
 
-    .section-head p {
-      color: var(--muted);
-      font-size: 18px;
-      line-height: 1.6;
+    h2 {
+      font: 600 clamp(26px, 3vw, 34px)/1.2 var(--font-serif);
+      letter-spacing: -.01em;
     }
 
+    .section-head > p {
+      color: var(--fg-muted);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    /* ---- 01 · Comparison ---- */
     .comparison {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
+      gap: var(--space-5);
     }
 
-    .layout-panel {
+    .panel {
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-lg);
       background: var(--surface);
       overflow: hidden;
     }
 
-    .layout-panel header {
+    .panel.is-resolved {
+      border-color: var(--accent-border);
+    }
+
+    .panel-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
       border-bottom: 1px solid var(--border);
-      padding: 16px;
+      background: var(--surface-2);
     }
 
-    .layout-panel h3 {
-      font-size: 18px;
-      font-weight: 720;
+    .panel.is-resolved .panel-header {
+      background: var(--accent-subtle);
+      border-bottom-color: var(--accent-border);
     }
 
-    .badge {
-      flex: none;
-      border-radius: 999px;
-      padding: 5px 8px;
-      color: var(--muted);
-      background: var(--surface-soft);
-      font: 700 11px/1 var(--mono);
-      text-transform: uppercase;
+    .panel-header h3 {
+      font-size: 14px;
+      font-weight: 600;
     }
 
-    .layout-body {
+    .panel-body {
       display: grid;
-      gap: 14px;
-      padding: 16px;
+      gap: var(--space-4);
+      padding: var(--space-4);
     }
 
     .timeline {
       display: grid;
       grid-template-columns: repeat(14, 1fr);
       gap: 3px;
-      height: 34px;
+      height: 28px;
     }
 
     .tick {
-      border-radius: 3px;
-      background: #e6e9e3;
+      border-radius: var(--radius-xs);
+      background: var(--surface-3);
     }
 
     .tick.hot {
-      background: var(--orange-soft);
-      border: 1px solid color-mix(in srgb, var(--orange) 55%, white);
+      border: 1px solid var(--warning-border);
+      background: var(--warning-subtle);
     }
 
     .page-strip {
       display: flex;
-      gap: 5px;
-      height: 62px;
+      gap: var(--space-2);
     }
 
     .page-box {
-      position: relative;
+      display: grid;
+      place-items: center;
       flex: 1;
+      min-width: 0;
+      min-height: 48px;
+      padding: var(--space-2);
       border: 1px solid var(--border-strong);
-      border-radius: 5px;
-      background: linear-gradient(to bottom, var(--purple-soft), var(--surface));
-      overflow: hidden;
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      color: var(--fg-subtle);
+      font: 500 11px/1.3 var(--font-mono);
+      text-align: center;
+      overflow-wrap: anywhere;
     }
 
     .page-box.small {
       flex-basis: 15%;
     }
 
+    .page-box.structure {
+      border-color: var(--warning-border);
+      background: var(--warning-subtle);
+      color: var(--warning-text);
+    }
+
     .page-box.payload {
-      background: linear-gradient(to bottom, var(--blue-soft), var(--surface));
-    }
-
-    .page-box.index {
-      background: linear-gradient(to bottom, var(--orange-soft), var(--surface));
-    }
-
-    .page-box::after {
-      content: "";
-      position: absolute;
-      left: 12%;
-      right: 12%;
-      bottom: 9px;
-      height: 10px;
-      border-radius: 999px;
-      background: color-mix(in srgb, var(--blue) 70%, white);
-      opacity: .38;
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+      color: var(--accent-text);
     }
 
     .page-note {
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.45;
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.55;
     }
 
+    /* ---- 02 · Principles ---- */
     .principles {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(196px, 1fr));
+      gap: var(--space-5);
     }
 
     .principle {
-      border-top: 3px solid var(--green);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
       background: var(--surface);
-      border-radius: 0 0 8px 8px;
-      padding: 18px;
-      box-shadow: inset 0 0 0 1px var(--border);
+      padding: var(--space-5);
+    }
+
+    .principle .section-index {
+      color: var(--accent-text);
     }
 
     .principle h3 {
-      font-size: 18px;
-      margin-bottom: 9px;
-    }
-
-    .principle p {
-      color: var(--muted);
+      margin-bottom: var(--space-2);
       font-size: 15px;
     }
 
+    .principle p {
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* ---- Animators ---- */
     .animator {
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-lg);
       background: var(--surface);
-      box-shadow: var(--shadow);
       overflow: hidden;
     }
 
@@ -460,168 +668,178 @@
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 18px;
+      gap: var(--space-5);
+      padding: var(--space-4) var(--space-5);
       border-bottom: 1px solid var(--border);
-      padding: 18px 20px;
+      background: var(--surface-2);
     }
 
     .animator-head h3 {
-      font-size: 22px;
-      margin-bottom: 7px;
+      margin-bottom: var(--space-1);
+      font-size: 16px;
     }
 
     .animator-head p {
-      color: var(--muted);
-      max-width: 700px;
+      max-width: 640px;
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.55;
     }
 
     .controls {
       display: flex;
-      gap: 8px;
+      gap: var(--space-2);
       flex: none;
     }
 
     .control {
-      min-width: 42px;
-      height: 36px;
+      min-width: 36px;
+      height: 32px;
       border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--ink);
+      border-radius: var(--radius-md);
+      color: var(--fg-muted);
       background: var(--surface);
       cursor: pointer;
-    }
-
-    .control.primary {
-      min-width: 74px;
-      color: white;
-      border-color: var(--green);
-      background: var(--green);
-      font-weight: 700;
+      transition: color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
     }
 
     .control:hover {
       border-color: var(--border-strong);
-      background: var(--surface-soft);
+      color: var(--fg);
+      background: var(--surface-2);
+    }
+
+    .control.primary {
+      min-width: 72px;
+      border-color: var(--accent);
+      color: var(--accent-fg);
+      background: var(--accent);
+      font-weight: 600;
     }
 
     .control.primary:hover {
-      background: #126c5c;
+      border-color: var(--accent-hover);
+      background: var(--accent-hover);
+      color: var(--accent-fg);
     }
 
     .stage {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 300px;
-      min-height: 510px;
     }
 
     .diagram {
-      position: relative;
-      min-height: 510px;
-      padding: 22px;
-      overflow: hidden;
+      min-width: 0;
+      padding: var(--space-5);
+      overflow-x: auto;
     }
 
     .side {
       border-left: 1px solid var(--border);
-      background: #fbfbf8;
-      padding: 20px;
+      background: var(--surface-inset);
+      padding: var(--space-5);
     }
 
     .step-title {
-      color: var(--green);
-      font: 800 12px/1 var(--mono);
+      color: var(--accent-text);
+      font: 600 11px/1 var(--font-mono);
       letter-spacing: .08em;
       text-transform: uppercase;
     }
 
     .step-copy {
-      margin-top: 12px;
-      color: var(--ink);
-      font-size: 18px;
-      line-height: 1.5;
+      margin-top: var(--space-3);
+      color: var(--fg);
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.45;
     }
 
     .step-detail {
-      margin-top: 16px;
-      color: var(--muted);
-      font-size: 15px;
+      margin-top: var(--space-2);
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.6;
     }
 
     .step-list {
       display: grid;
-      gap: 9px;
-      margin-top: 22px;
+      gap: var(--space-2);
+      margin-top: var(--space-5);
     }
 
     .step-dot {
       display: flex;
-      align-items: center;
-      gap: 9px;
-      color: var(--muted);
-      font-size: 13px;
+      align-items: baseline;
+      gap: var(--space-2);
+      color: var(--fg-muted);
+      font-size: 12px;
+      line-height: 1.45;
     }
 
     .step-dot::before {
       content: "";
-      width: 8px;
-      height: 8px;
+      flex: none;
+      align-self: center;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: var(--border-strong);
+      transition: background-color var(--duration-fast) var(--ease-out);
     }
 
     .step-dot.active {
-      color: var(--ink);
-      font-weight: 700;
+      color: var(--fg);
+      font-weight: 600;
     }
 
     .step-dot.active::before {
-      background: var(--green);
+      background: var(--accent);
     }
 
     .fader {
-      opacity: .16;
-      transform: translateY(6px);
-      transition: opacity 260ms ease, transform 260ms ease, filter 260ms ease;
-      filter: grayscale(.2);
+      opacity: .18;
+      transform: translateY(4px);
+      transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
     }
 
     .fader.is-visible {
       opacity: 1;
       transform: translateY(0);
-      filter: none;
     }
 
+    /* ---- 03 · List animator diagram ---- */
     .list-grid {
       display: grid;
-      grid-template-columns: 250px 1fr 230px;
-      gap: 18px;
+      grid-template-columns: 240px minmax(300px, 1fr) 220px;
+      gap: var(--space-5);
       align-items: start;
       min-width: 760px;
     }
 
     .diagram-title {
-      margin-bottom: 11px;
-      color: var(--muted);
-      font: 800 12px/1 var(--mono);
+      margin-bottom: var(--space-3);
+      color: var(--fg-muted);
+      font: 600 11px/1 var(--font-mono);
       letter-spacing: .08em;
       text-transform: uppercase;
     }
 
     .row-stack {
       display: grid;
-      gap: 8px;
+      gap: var(--space-2);
     }
 
     .input-row {
       display: grid;
-      grid-template-columns: 30px 1fr;
-      gap: 8px;
+      grid-template-columns: 24px 1fr;
+      gap: var(--space-2);
       align-items: center;
     }
 
     .row-id {
-      color: var(--faint);
-      font: 800 13px/1 var(--mono);
+      color: var(--fg-faint);
+      font: 600 12px/1 var(--font-mono);
       text-align: right;
     }
 
@@ -630,269 +848,369 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      min-height: 42px;
+      min-height: 38px;
       border: 1px solid var(--border-strong);
-      border-radius: 7px;
-      background: var(--surface-soft);
-      color: var(--faint);
-      font: 800 13px/1 var(--mono);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      color: var(--fg-faint);
+      font: 600 12px/1 var(--font-mono);
     }
 
     .row-box.nonempty {
-      border-color: color-mix(in srgb, var(--orange) 45%, var(--border));
-      background: #fffaf3;
-      color: var(--ink);
+      border-color: var(--warning-border);
+      background: var(--warning-subtle);
+      color: var(--warning-text);
     }
 
     .row-box.null {
-      border-color: color-mix(in srgb, var(--purple) 50%, white);
-      background: var(--purple-soft);
-      color: var(--purple);
+      border-color: var(--danger-border);
+      background: var(--danger-subtle);
+      color: var(--danger-text);
     }
 
     .tiny-value {
       display: inline-grid;
       place-items: center;
-      min-width: 34px;
-      height: 26px;
-      border: 1px solid color-mix(in srgb, var(--blue) 55%, white);
-      border-radius: 5px;
-      background: var(--blue-soft);
-      color: var(--blue);
+      min-width: 30px;
+      height: 24px;
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-xs);
+      background: var(--accent-subtle);
+      color: var(--accent-text);
     }
 
     .metadata-stack {
       display: grid;
-      gap: 13px;
-      padding-top: 40px;
+      gap: var(--space-4);
+      padding-top: var(--space-6);
     }
 
     .domain-ruler {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
       gap: 4px;
-      color: var(--faint);
-      font: 700 12px/1 var(--mono);
+      color: var(--fg-faint);
+      font: 600 12px/1 var(--font-mono);
       text-align: center;
     }
 
     .meta-row {
       display: grid;
-      grid-template-columns: 144px 1fr;
-      gap: 10px;
+      grid-template-columns: 104px 1fr;
+      gap: var(--space-3);
       align-items: center;
     }
 
     .meta-label {
-      color: var(--muted);
-      font: 700 13px/1.2 var(--mono);
+      color: var(--fg-muted);
+      font: 600 12px/1.2 var(--font-mono);
     }
 
+    /* Meta values live on the same 6-column grid as the domain ruler,
+       so each fact sits under its parent-domain position. */
     .meta-values {
-      display: flex;
-      gap: 8px;
-      min-height: 36px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
       align-items: center;
+      min-height: 32px;
+    }
+
+    .meta-values .cell {
+      height: 32px;
+      padding: 0 var(--space-1);
     }
 
     .list-payload {
-      padding-top: 122px;
+      /* Optically aligns the leaf strip with the metadata rows. */
+      padding-top: 104px;
     }
 
     .payload-strip {
       display: flex;
-      gap: 8px;
+      gap: var(--space-2);
+    }
+
+    .payload-strip .cell {
+      width: 46px;
+      height: 36px;
     }
 
     .take-path {
-      position: absolute;
-      left: 44px;
-      right: 330px;
-      bottom: 28px;
-      border: 1px dashed color-mix(in srgb, var(--red) 55%, white);
-      border-radius: 8px;
-      padding: 12px 14px;
-      color: var(--red);
-      background: var(--red-soft);
-      font: 700 13px/1.45 var(--mono);
+      margin-top: var(--space-5);
+      border: 1px solid var(--success-border);
+      border-radius: var(--radius-md);
+      background: var(--success-subtle);
+      padding: var(--space-3) var(--space-4);
+      color: var(--success-text);
+      font: 500 13px/1.5 var(--font-mono);
     }
 
+    /* ---- 04 · Deep animator diagram ----
+       Every band shares one 8-column grid, so a child domain's cells
+       sit under the parent slots they descend from, and SVG connectors
+       draw the parent → child mapping as it happens. */
     .deep-diagram {
-      min-width: 800px;
+      position: relative;
       display: grid;
-      gap: 13px;
-      padding-top: 4px;
+      gap: var(--space-5);
+      min-width: 760px;
+    }
+
+    .connectors {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .connectors path {
+      fill: none;
+      stroke-width: 1.5;
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+
+    .connectors path.is-visible {
+      opacity: 1;
+    }
+
+    .connectors path.fact {
+      stroke: var(--warning-text);
+    }
+
+    .connectors path.value {
+      stroke: var(--accent);
     }
 
     .band {
       display: grid;
-      grid-template-columns: 150px 1fr;
-      gap: 16px;
+      grid-template-columns: 128px 1fr;
+      gap: var(--space-4);
       align-items: center;
     }
 
     .band-label {
-      color: var(--muted);
-      font: 800 12px/1.25 var(--mono);
+      color: var(--fg-muted);
+      font: 600 11px/1.35 var(--font-mono);
+      letter-spacing: .04em;
       text-transform: uppercase;
+      transition: opacity var(--duration-base) var(--ease-out);
     }
 
     .band-slots {
       display: grid;
       grid-template-columns: repeat(8, minmax(36px, 1fr));
       gap: 5px;
-      min-height: 44px;
     }
 
-    .band-slots.event {
-      grid-template-columns: repeat(4, minmax(50px, 1fr));
-      max-width: 420px;
+    .band-slots .cell {
+      min-height: 38px;
+      transition: opacity var(--duration-base) var(--ease-out);
     }
 
-    .deep-slot {
-      display: grid;
-      place-items: center;
-      min-height: 42px;
-      border: 1px solid var(--border-strong);
-      border-radius: 6px;
-      background: var(--surface-soft);
-      color: var(--faint);
-      font: 800 13px/1 var(--mono);
+    /* Take mode: dim everything, ring the probed path.
+       Green ring = probed, red ring = where the probe stops. */
+    .take-mode .band-label,
+    .take-mode .band-slots .cell {
+      opacity: .3;
     }
 
-    .deep-slot.valid,
-    .deep-slot.nonempty {
-      border-color: color-mix(in srgb, var(--orange) 55%, white);
-      background: var(--orange-soft);
-      color: #9e4a11;
+    .take-mode .band-slots .cell[data-probe] {
+      opacity: 1;
+      outline: 2px solid var(--success-text);
+      outline-offset: 1px;
     }
 
-    .deep-slot.null {
-      border-color: color-mix(in srgb, var(--purple) 55%, white);
-      background: var(--purple-soft);
-      color: var(--purple);
+    .take-mode .band-slots .cell[data-stop] {
+      outline-color: var(--danger-text);
     }
 
-    .deep-slot.leaf {
-      padding: 0;
-      border-color: color-mix(in srgb, var(--blue) 55%, white);
-      background: var(--blue-soft);
-      color: var(--blue);
+    .take-mode .connectors path.is-visible {
+      opacity: .12;
+    }
+
+    .take-mode .connectors path[data-probe] {
+      opacity: 1;
+      stroke: var(--success-text);
+      stroke-width: 2;
     }
 
     .deep-note {
       display: grid;
-      gap: 10px;
-      margin-top: 18px;
-      border-top: 1px solid var(--border);
-      padding-top: 16px;
-      color: var(--muted);
-      font: 700 13px/1.45 var(--mono);
+      gap: var(--space-2);
+      margin-top: var(--space-5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      padding: var(--space-3) var(--space-4);
+      color: var(--fg-muted);
+      font: 500 12px/1.5 var(--font-mono);
     }
 
+    /* ---- 05 · Payoffs ---- */
     .payoff-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
+      gap: var(--space-5);
     }
 
     .payoff {
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-lg);
       background: var(--surface);
-      padding: 20px;
+      padding: var(--space-5);
     }
 
     .payoff h3 {
-      margin-bottom: 11px;
-      font-size: 21px;
+      margin-bottom: var(--space-2);
+      font-size: 15px;
     }
 
     .payoff p {
-      color: var(--muted);
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .panel-body .equation {
+      margin-top: 0;
     }
 
     .equation {
-      margin-top: 14px;
-      border-radius: 7px;
-      background: var(--surface-soft);
-      padding: 12px;
-      color: var(--ink);
-      font: 700 13px/1.55 var(--mono);
+      margin-top: var(--space-4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      padding: var(--space-3);
+      color: var(--fg);
+      font: 500 12px/1.6 var(--font-mono);
       overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    /* ---- 07 · Contract ---- */
+    .matrix {
+      margin-bottom: var(--space-5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .matrix-row {
+      display: grid;
+      grid-template-columns: 150px 1fr auto;
+      gap: var(--space-4);
+      align-items: center;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .matrix-row:last-child {
+      border-bottom: none;
+    }
+
+    .matrix-row b {
+      color: var(--fg);
+      font: 600 13px/1.3 var(--font-mono);
+    }
+
+    .matrix-row p {
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.55;
     }
 
     .contract {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-5);
     }
 
     .contract-box {
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-lg);
       background: var(--surface);
-      padding: 20px;
+      padding: var(--space-5);
     }
 
     .contract-box h3 {
-      font-size: 20px;
-      margin-bottom: 12px;
+      margin-bottom: var(--space-3);
+      font-size: 15px;
     }
 
     .contract-box ul {
       margin: 0;
-      padding-left: 20px;
-      color: var(--muted);
+      padding-left: 18px;
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.6;
     }
 
     .contract-box li + li {
-      margin-top: 8px;
+      margin-top: var(--space-2);
     }
 
     .footer {
-      padding: 36px 0 48px;
-      color: var(--muted);
-      font-size: 14px;
+      padding: var(--space-6) 0 var(--space-8);
+      color: var(--fg-subtle);
+      font-size: 13px;
     }
 
+    /* ---- Responsive ---- */
     @media (max-width: 980px) {
       .hero-grid,
       .section-head,
       .stage,
+      .comparison,
+      .principles,
+      .payoff-grid,
+      .matrix-row,
       .contract {
         grid-template-columns: 1fr;
       }
 
-      .side {
-        border-left: 0;
-        border-top: 1px solid var(--border);
-      }
-
-      .comparison,
-      .principles,
-      .payoff-grid {
-        grid-template-columns: 1fr;
+      .matrix-row {
+        gap: var(--space-2);
       }
 
       .hero-points {
         grid-template-columns: 1fr;
       }
 
-      .diagram {
-        overflow-x: auto;
+      .fact {
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+
+      .fact:first-child {
+        border-top: none;
+      }
+
+      .side {
+        border-left: none;
+        border-top: 1px solid var(--border);
       }
     }
 
     @media (max-width: 640px) {
       .hero {
-        padding-top: 44px;
+        padding-top: var(--space-7);
       }
 
       .topbar-inner {
-        align-items: flex-start;
-        flex-direction: column;
-        padding: 10px 0;
+        flex-wrap: wrap;
+        gap: var(--space-2) var(--space-4);
+        padding: var(--space-2) 0;
+      }
+
+      .nav {
+        order: 3;
+        width: 100%;
+        padding: 0 0 var(--space-2);
       }
 
       .animator-head {
@@ -908,12 +1226,43 @@
       }
     }
 
+    /* ---- Motion ---- */
+    @media (prefers-reduced-motion: no-preference) {
+      .hero .eyebrow,
+      .hero h1,
+      .hero .lead,
+      .hero .hero-points,
+      .hero .hero-visual {
+        animation: enter var(--duration-base) var(--ease-out) both;
+      }
+
+      .hero h1 { animation-delay: 40ms; }
+      .hero .lead { animation-delay: 80ms; }
+      .hero .hero-points { animation-delay: 120ms; }
+      .hero .hero-visual { animation-delay: 160ms; }
+
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       html {
         scroll-behavior: auto;
       }
 
-      .fader {
+      body,
+      .fader,
+      .connectors path,
+      .band-label,
+      .band-slots .cell {
         transition: none;
       }
     }
@@ -921,98 +1270,123 @@
 </head>
 <body>
   <div class="page">
-    <nav class="topbar" aria-label="Page sections">
-      <div class="shell topbar-inner">
-        <div class="brand"><span class="mark">LS</span><span>Lance sparse structural encoding</span></div>
+    <header class="topbar">
+      <nav class="shell topbar-inner" aria-label="Page sections">
+        <div class="brand">
+          <span class="mark">X</span>
+          <span>Lance discrete sparse layout sketch</span>
+        </div>
         <div class="nav">
           <a href="#problem">Problem</a>
           <a href="#layout">Layout</a>
           <a href="#list">List encode</a>
           <a href="#deep">Deep struct</a>
           <a href="#why-fast">Why fast</a>
+          <a href="#selection">Selection</a>
+          <a href="#contract">Contract</a>
         </div>
-      </div>
-    </nav>
-
-    <header class="hero">
-      <div class="shell hero-grid">
-        <div>
-          <p class="eyebrow">Storage format 2.3 design sketch</p>
-          <h1>Make sparse nested columns physical sparse.</h1>
-          <p class="lead">Rep/def streams describe every structural event in row order. That is correct, but sparse nested data pays for empty rows again and again. The discrete sparse layout keeps logical row coordinates, then stores only the structural facts that lead to real child values.</p>
-          <div class="hero-points" aria-label="Design goals">
-            <div class="fact"><b>Bytes</b><span>Do not encode empty branches as dense level events.</span></div>
-            <div class="fact"><b>Scan</b><span>Read compact structure and compact value payloads.</span></div>
-            <div class="fact"><b>Take</b><span>Probe structure first, then read only reachable leaf ranges.</span></div>
-          </div>
-        </div>
-        <div class="hero-visual" aria-label="Sparse layout overview">
-          <div class="flow-visual">
-            <div class="flow-row">
-              <div class="flow-label">row domain</div>
-              <div class="slot-strip">
-                <div class="slot">0</div><div class="slot hot">1</div><div class="slot null">2</div><div class="slot">3</div><div class="slot hot">4</div><div class="slot">5</div>
-              </div>
-            </div>
-            <div class="flow-row">
-              <div class="flow-label">slot facts</div>
-              <div class="meta-strip">
-                <div class="meta-cell pos">[1,4]</div>
-                <div class="meta-cell">[2,1]</div>
-                <div class="meta-cell null">[2]</div>
-              </div>
-            </div>
-            <div class="flow-row">
-              <div class="flow-label">leaf values</div>
-              <div class="slot-strip">
-                <div class="value-cell">10</div><div class="value-cell">11</div><div class="value-cell">12</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Toggle theme">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3v2.5M12 18.5V21M4.64 4.64l1.77 1.77M17.59 17.59l1.77 1.77M3 12h2.5M18.5 12H21M4.64 19.36l1.77-1.77M17.59 6.41l1.77-1.77" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/>
+          </svg>
+          Theme
+        </button>
+      </nav>
     </header>
 
     <main>
-      <section class="section" id="problem">
+      <section class="hero">
+        <div class="shell hero-grid">
+          <div>
+            <p class="eyebrow">Storage format 2.3 · Design sketch</p>
+            <h1>Make sparse nested columns physically sparse.</h1>
+            <p class="lead">Rep/def streams describe every structural event in row order. That is correct, but sparse nested data pays for empty rows again and again. The discrete sparse layout keeps logical row coordinates, then stores only the structural facts that lead to real child values.</p>
+            <div class="hero-points" role="group" aria-label="Design goals">
+              <div class="fact"><b>Bytes</b><span>Do not encode empty branches as dense level events.</span></div>
+              <div class="fact"><b>Scan</b><span>Read compact structure and compact value payloads.</span></div>
+              <div class="fact"><b>Take</b><span>Probe structure first, then read only reachable leaf ranges.</span></div>
+            </div>
+          </div>
+          <div class="hero-visual" role="group" aria-label="Sparse layout overview">
+            <div class="hero-visual__head">
+              <span class="hero-visual__title">list&lt;int32&gt; · 6 rows</span>
+              <span class="badge accent">slot domains</span>
+            </div>
+            <div class="flow-visual">
+              <div class="flow-row">
+                <div class="flow-label">row domain</div>
+                <div class="slot-strip">
+                  <div class="cell">0</div><div class="cell fact">1</div><div class="cell null">2</div><div class="cell">3</div><div class="cell fact">4</div><div class="cell">5</div>
+                </div>
+              </div>
+              <div class="flow-row">
+                <div class="flow-label">slot facts</div>
+                <div class="meta-strip">
+                  <div class="cell fact">[1,4]</div>
+                  <div class="cell">[2,1]</div>
+                  <div class="cell null">[2]</div>
+                </div>
+              </div>
+              <div class="flow-row">
+                <div class="flow-label">leaf values</div>
+                <div class="slot-strip">
+                  <div class="cell value">10</div><div class="cell value">11</div><div class="cell value">12</div>
+                </div>
+              </div>
+            </div>
+            <div class="legend" role="group" aria-label="Color legend">
+              <span><i></i>empty</span>
+              <span class="fact"><i></i>structural fact</span>
+              <span class="null"><i></i>null</span>
+              <span class="value"><i></i>leaf value</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="problem">
         <div class="shell">
           <div class="section-head">
-            <h2>The problem is structural density, not value density.</h2>
+            <div>
+              <span class="section-index">01</span>
+              <h2>The problem is structural density, not value density.</h2>
+            </div>
             <p>A sparse nested column can have very few values but a huge logical row domain. If the format still writes structure as a dense event stream, empty rows keep participating in compression, decoding, and random access.</p>
           </div>
           <div class="comparison">
-            <article class="layout-panel">
-              <header><h3>FullZip</h3><span class="badge">dense events</span></header>
-              <div class="layout-body">
-                <div class="timeline">
+            <article class="panel">
+              <div class="panel-header"><h3>FullZip</h3><span class="badge warn">dense events</span></div>
+              <div class="panel-body">
+                <div class="timeline" aria-hidden="true">
                   <span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span>
                 </div>
-                <div class="page-strip">
-                  <div class="page-box"></div><div class="page-box"></div><div class="page-box"></div>
+                <div class="page-strip" aria-hidden="true">
+                  <div class="page-box">rep/def + values</div><div class="page-box">rep/def + values</div><div class="page-box">rep/def + values</div>
                 </div>
                 <p class="page-note">One structural stream covers the full row range. Take can hit a broad compressed page even when selected rows are empty.</p>
               </div>
             </article>
-            <article class="layout-panel">
-              <header><h3>MiniBlock</h3><span class="badge">smaller pages</span></header>
-              <div class="layout-body">
-                <div class="timeline">
+            <article class="panel">
+              <div class="panel-header"><h3>MiniBlock</h3><span class="badge warn">smaller pages</span></div>
+              <div class="panel-body">
+                <div class="timeline" aria-hidden="true">
                   <span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span>
                 </div>
-                <div class="page-strip">
-                  <div class="page-box small"></div><div class="page-box small"></div><div class="page-box small"></div><div class="page-box small"></div><div class="page-box small"></div><div class="page-box small"></div>
+                <div class="page-strip" aria-hidden="true">
+                  <div class="page-box small">blk</div><div class="page-box small">blk</div><div class="page-box small">blk</div><div class="page-box small">blk</div><div class="page-box small">blk</div><div class="page-box small">blk</div>
                 </div>
-                <p class="page-note">The dense structure is split into smaller units. Random access improves, but empty regions still shape the page plan.</p>
+                <p class="page-note">The dense structure is split into smaller units. Random access improves, but empty regions still shape the page plan — and a sparse enough page exceeds the structural budget entirely.</p>
               </div>
             </article>
-            <article class="layout-panel">
-              <header><h3>Discrete Sparse</h3><span class="badge">slot domains</span></header>
-              <div class="layout-body">
-                <div class="timeline">
+            <article class="panel is-resolved">
+              <div class="panel-header"><h3>Discrete Sparse</h3><span class="badge accent">slot domains</span></div>
+              <div class="panel-body">
+                <div class="timeline" aria-hidden="true">
                   <span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick hot"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span>
                 </div>
-                <div class="page-strip">
-                  <div class="page-box index"></div><div class="page-box payload"></div>
+                <div class="page-strip" aria-hidden="true">
+                  <div class="page-box structure">slot facts</div><div class="page-box payload">leaf values</div>
                 </div>
                 <p class="page-note">Structure is stored as sparse mappings over each parent slot domain. Payload pages only contain reachable leaf values.</p>
               </div>
@@ -1021,26 +1395,38 @@
         </div>
       </section>
 
-      <section class="section" id="layout">
+      <section id="layout">
         <div class="shell">
           <div class="section-head">
-            <h2>The layout is a chain of slot-domain mappings.</h2>
+            <div>
+              <span class="section-index">02</span>
+              <h2>The layout is a chain of slot-domain mappings.</h2>
+            </div>
             <p>The outermost slot domain is the page row domain. Every nested layer maps selected parent slots to child slots. Leaf value buffers live in the final compact value domain.</p>
           </div>
           <div class="principles">
             <article class="principle">
+              <span class="section-index">a</span>
               <h3>Rows stay logical</h3>
               <p>Row ids are not rewritten. The format keeps the page row domain so slices and takes preserve Arrow semantics.</p>
             </article>
             <article class="principle">
+              <span class="section-index">b</span>
               <h3>Lists store presence</h3>
-              <p>A list layer records non-empty parent positions and child counts. Missing valid positions mean empty lists.</p>
+              <p>A list layer records non-empty parent positions and child counts. Missing valid positions mean empty lists. When every non-empty list has the same length, a constant count set replaces the counts buffer.</p>
             </article>
             <article class="principle">
+              <span class="section-index">c</span>
               <h3>Nulls stay local</h3>
               <p>Nullable layers record null positions in their own parent slot domain, not in a global event stream.</p>
             </article>
             <article class="principle">
+              <span class="section-index">d</span>
+              <h3>Fixed-size lists are free</h3>
+              <p>A fixed-size-list layer stores only its dimension and null positions. Child ranges are deterministic, so no positions or counts are written.</p>
+            </article>
+            <article class="principle">
+              <span class="section-index">e</span>
               <h3>Leaves are compact</h3>
               <p>Value buffers contain only visible leaf values and keep mini-block compression for the physical payload.</p>
             </article>
@@ -1048,10 +1434,13 @@
         </div>
       </section>
 
-      <section class="section" id="list">
+      <section id="list">
         <div class="shell">
           <div class="section-head">
-            <h2>Encoding <code>list&lt;int&gt;</code>.</h2>
+            <div>
+              <span class="section-index">03</span>
+              <h2>Encoding <code>list&lt;int&gt;</code>.</h2>
+            </div>
             <p>This is the smallest example that shows the contract: empty lists are represented by absence from sparse structural facts, not by payload gaps.</p>
           </div>
           <div class="animator" id="listAnimator">
@@ -1067,7 +1456,7 @@
               </div>
             </div>
             <div class="stage">
-              <div class="diagram">
+              <div class="diagram" tabindex="0" role="group" aria-label="List encoding diagram">
                 <div class="list-grid">
                   <div class="fader" data-step-min="0">
                     <div class="diagram-title">input rows</div>
@@ -1088,29 +1477,31 @@
                     </div>
                     <div class="meta-row">
                       <div class="meta-label">non_empty</div>
-                      <div class="meta-values"><div class="meta-cell pos">1</div><div class="meta-cell pos">4</div></div>
+                      <div class="meta-values"><div class="cell fact" style="grid-column: 2">1</div><div class="cell fact" style="grid-column: 5">4</div></div>
                     </div>
                     <div class="meta-row fader" data-step-min="2">
                       <div class="meta-label">counts</div>
-                      <div class="meta-values"><div class="meta-cell">2</div><div class="meta-cell">1</div></div>
+                      <div class="meta-values"><div class="cell" style="grid-column: 2">2</div><div class="cell" style="grid-column: 5">1</div></div>
                     </div>
                     <div class="meta-row fader" data-step-min="2">
                       <div class="meta-label">nulls</div>
-                      <div class="meta-values"><div class="meta-cell null">2</div></div>
+                      <div class="meta-values"><div class="cell null" style="grid-column: 3">2</div></div>
                     </div>
                   </div>
 
                   <div class="fader list-payload" data-step-min="3">
                     <div class="diagram-title">leaf value domain</div>
-                    <div class="payload-strip"><div class="value-cell">10</div><div class="value-cell">11</div><div class="value-cell">12</div></div>
+                    <div class="payload-strip"><div class="cell value">10</div><div class="cell value">11</div><div class="cell value">12</div></div>
                   </div>
                 </div>
                 <div class="take-path fader" data-step-min="4">take [0,1,5]: row 0 stops empty, row 1 reads leaf range 0..2, row 5 stops empty.</div>
               </div>
               <aside class="side">
                 <div class="step-title">Current step</div>
-                <p class="step-copy" data-copy></p>
-                <p class="step-detail" data-detail></p>
+                <div aria-live="polite">
+                  <p class="step-copy" data-copy></p>
+                  <p class="step-detail" data-detail></p>
+                </div>
                 <div class="step-list" data-steps></div>
               </aside>
             </div>
@@ -1118,17 +1509,20 @@
         </div>
       </section>
 
-      <section class="section" id="deep">
+      <section id="deep">
         <div class="shell">
           <div class="section-head">
-            <h2>Deep nesting uses the same rule recursively.</h2>
+            <div>
+              <span class="section-index">04</span>
+              <h2>Deep nesting uses the same rule recursively.</h2>
+            </div>
             <p>There is no special global row-index trick. Each layer owns a parent slot domain and emits the child ranges needed by the next layer.</p>
           </div>
           <div class="animator" id="deepAnimator">
             <div class="animator-head">
               <div>
-                <h3><code>struct&lt;profile: struct&lt;events: list&lt;struct&lt;score:int32, tags:list&lt;int32&gt;&gt;&gt;&gt;</code></h3>
-                <p>The selected rows either stop at a null or empty layer, or continue downward to compact score and tag payloads.</p>
+                <h3><code>struct&lt;profile: struct&lt;events: list&lt;struct&lt;score:int32, tags:list&lt;int32&gt;&gt;&gt;&gt;&gt;</code></h3>
+                <p>The selected rows either stop at a null or empty layer, or continue downward to compact score and tag payloads. In the file, each leaf column (score, tags) is its own page repeating these shared outer layers — the diagram shows one merged view.</p>
               </div>
               <div class="controls">
                 <button class="control" data-action="prev" aria-label="Previous step">&lt;</button>
@@ -1137,57 +1531,60 @@
               </div>
             </div>
             <div class="stage">
-              <div class="diagram">
-                <div class="deep-diagram">
+              <div class="diagram" tabindex="0" role="group" aria-label="Deep nesting diagram">
+                <div class="deep-diagram" data-take-dim>
+                  <svg class="connectors" aria-hidden="true"></svg>
                   <div class="band fader" data-step-min="0">
                     <div class="band-label">row domain</div>
                     <div class="band-slots">
-                      <div class="deep-slot">0</div><div class="deep-slot">1</div><div class="deep-slot">2</div><div class="deep-slot">3</div><div class="deep-slot">4</div><div class="deep-slot">5</div><div class="deep-slot">6</div><div class="deep-slot">7</div>
+                      <div class="cell" data-node="row-0">0</div><div class="cell" data-node="row-1" data-probe>1</div><div class="cell" data-node="row-2" data-probe>2</div><div class="cell" data-node="row-3">3</div><div class="cell" data-node="row-4">4</div><div class="cell" data-node="row-5" data-probe>5</div><div class="cell" data-node="row-6">6</div><div class="cell" data-node="row-7">7</div>
                     </div>
                   </div>
                   <div class="band fader" data-step-min="1">
                     <div class="band-label">profile validity</div>
                     <div class="band-slots">
-                      <div class="deep-slot null">null</div><div class="deep-slot valid">1</div><div class="deep-slot valid">1</div><div class="deep-slot valid">1</div><div class="deep-slot valid">1</div><div class="deep-slot null">null</div><div class="deep-slot valid">1</div><div class="deep-slot valid">1</div>
+                      <div class="cell null" data-node="prof-0">null</div><div class="cell fact" data-node="prof-1" data-probe>1</div><div class="cell fact" data-node="prof-2" data-probe>1</div><div class="cell fact" data-node="prof-3">1</div><div class="cell fact" data-node="prof-4">1</div><div class="cell null" data-node="prof-5" data-probe data-stop>null</div><div class="cell fact" data-node="prof-6">1</div><div class="cell fact" data-node="prof-7">1</div>
                     </div>
                   </div>
                   <div class="band fader" data-step-min="2">
                     <div class="band-label">events list</div>
                     <div class="band-slots">
-                      <div class="deep-slot null">-</div><div class="deep-slot">[]</div><div class="deep-slot nonempty">2</div><div class="deep-slot">[]</div><div class="deep-slot nonempty">1</div><div class="deep-slot null">-</div><div class="deep-slot">[]</div><div class="deep-slot nonempty">1</div>
+                      <div class="cell null" data-node="ev-0">-</div><div class="cell" data-node="ev-1" data-probe data-stop>[]</div><div class="cell fact" data-node="ev-2" data-probe>2</div><div class="cell" data-node="ev-3">[]</div><div class="cell fact" data-node="ev-4">1</div><div class="cell null" data-node="ev-5">-</div><div class="cell" data-node="ev-6">[]</div><div class="cell fact" data-node="ev-7">1</div>
                     </div>
                   </div>
                   <div class="band fader" data-step-min="3">
-                    <div class="band-label">event slots</div>
-                    <div class="band-slots event">
-                      <div class="deep-slot valid">0</div><div class="deep-slot null">1</div><div class="deep-slot valid">2</div><div class="deep-slot valid">3</div>
+                    <div class="band-label">event slot domain</div>
+                    <div class="band-slots">
+                      <div class="cell fact" style="grid-column: 2" data-node="eslot-0" data-probe>0</div><div class="cell null" style="grid-column: 3" data-node="eslot-1" data-probe data-stop>null</div><div class="cell fact" style="grid-column: 5" data-node="eslot-2">2</div><div class="cell fact" style="grid-column: 8" data-node="eslot-3">3</div>
                     </div>
                   </div>
                   <div class="band fader" data-step-min="4">
                     <div class="band-label">score values</div>
-                    <div class="band-slots event">
-                      <div class="deep-slot leaf">91</div><div class="deep-slot null">-</div><div class="deep-slot leaf">84</div><div class="deep-slot leaf">77</div>
+                    <div class="band-slots">
+                      <div class="cell value" style="grid-column: 2" data-node="score-0" data-probe>91</div><div class="cell value" style="grid-column: 5" data-node="score-1">84</div><div class="cell value" style="grid-column: 8" data-node="score-2">77</div>
                     </div>
                   </div>
                   <div class="band fader" data-step-min="5">
                     <div class="band-label">tags list</div>
-                    <div class="band-slots event">
-                      <div class="deep-slot nonempty">2</div><div class="deep-slot null">-</div><div class="deep-slot">[]</div><div class="deep-slot nonempty">2</div>
+                    <div class="band-slots">
+                      <div class="cell fact" style="grid-column: 2" data-node="tagf-0" data-probe>2</div><div class="cell null" style="grid-column: 3" data-node="tagf-1">-</div><div class="cell" style="grid-column: 5" data-node="tagf-2">[]</div><div class="cell fact" style="grid-column: 8" data-node="tagf-3">2</div>
                     </div>
                   </div>
                   <div class="band fader" data-step-min="6">
                     <div class="band-label">tag values</div>
-                    <div class="band-slots event">
-                      <div class="deep-slot leaf">3</div><div class="deep-slot leaf">5</div><div class="deep-slot leaf">8</div><div class="deep-slot leaf">13</div>
+                    <div class="band-slots">
+                      <div class="cell value" style="grid-column: 1" data-node="tagv-0" data-probe>3</div><div class="cell value" style="grid-column: 2" data-node="tagv-1" data-probe>5</div><div class="cell value" style="grid-column: 7" data-node="tagv-2">8</div><div class="cell value" style="grid-column: 8" data-node="tagv-3">13</div>
                     </div>
                   </div>
                 </div>
-                <div class="take-path fader" data-step-min="7">take [1,2,5]: row 1 stops at empty events, row 2 descends to event slots 0..2, row 5 stops at profile null.</div>
+                <div class="take-path fader" data-step-min="7">take [1,2,5]: row 1 stops at empty events, row 5 stops at profile null. Row 2 reaches event slots 0 and 1 — slot 1 is a null event, slot 0 reads score 91 and tags [3,5].</div>
               </div>
               <aside class="side">
                 <div class="step-title">Current step</div>
-                <p class="step-copy" data-copy></p>
-                <p class="step-detail" data-detail></p>
+                <div aria-live="polite">
+                  <p class="step-copy" data-copy></p>
+                  <p class="step-detail" data-detail></p>
+                </div>
                 <div class="step-list" data-steps></div>
                 <div class="deep-note">
                   <div>profile nulls: [0,5]</div>
@@ -1201,10 +1598,13 @@
         </div>
       </section>
 
-      <section class="section" id="why-fast">
+      <section id="why-fast">
         <div class="shell">
           <div class="section-head">
-            <h2>Why this improves sparse workloads.</h2>
+            <div>
+              <span class="section-index">05</span>
+              <h2>Why this improves sparse workloads.</h2>
+            </div>
             <p>The important change is not just fewer pages. It is the ability to decide whether a selected path exists before reading and decoding value payloads.</p>
           </div>
           <div class="payoff-grid">
@@ -1227,20 +1627,75 @@
         </div>
       </section>
 
-      <section class="section" id="contract">
+      <section id="selection">
         <div class="shell">
           <div class="section-head">
-            <h2>The format contract.</h2>
-            <p>This layout belongs to file version 2.3 because it changes the physical representation of nested structure. Older stable versions keep their existing encodings.</p>
+            <div>
+              <span class="section-index">06</span>
+              <h2>When the writer picks it.</h2>
+            </div>
+            <p>Sparse is a page layout, not a column-level promise. The writer decides per page; readers identify it only from <code>PageLayout.sparse_layout</code>, never from field metadata.</p>
+          </div>
+          <div class="comparison">
+            <article class="panel">
+              <div class="panel-header"><h3>Explicit request</h3><span class="badge warn">2.3+ only</span></div>
+              <div class="panel-body">
+                <div class="equation">lance-encoding:structural-encoding=sparse</div>
+                <p class="page-note">Field metadata forces sparse layout for the column's pages. Requests error out — never silently fall back — on file versions before 2.3, or when the column has no native structural layers (or uses dictionary / packed-struct blocks).</p>
+              </div>
+            </article>
+            <article class="panel is-resolved">
+              <div class="panel-header"><h3>Automatic escape</h3><span class="badge accent">2.3+ auto</span></div>
+              <div class="panel-body">
+                <div class="equation">repdef_over_budget &amp;&amp; has_sparse_plan</div>
+                <p class="page-note">With no explicit request, the writer switches to sparse when the dense rep/def stream exceeds the mini-block structural page budget — the page would need splitting, or a single row alone is over budget — and the page's structure has a native sparse mapping.</p>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><h3>Everything else</h3><span class="badge">default</span></div>
+              <div class="panel-body">
+                <div class="equation">miniblock | fullzip</div>
+                <p class="page-note">When the structural budget is satisfied, the existing mini-block / full-zip selection path is unchanged. Dense data never pays for the sparse machinery.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="contract">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">07</span>
+              <h2>The format contract.</h2>
+            </div>
+            <p>This layout belongs to file version 2.3 because it changes the physical representation of nested structure. Readers must reject malformed sparse pages with a format error.</p>
+          </div>
+          <div class="matrix" role="group" aria-label="Page buffer layout">
+            <div class="matrix-row">
+              <b>buffer 0</b>
+              <p>Value chunk metadata: one 8-byte entry per chunk — packed chunk size and the number of visible values. Sums must match the value buffer size and <code>num_visible_items</code> exactly.</p>
+              <span class="badge">metadata</span>
+            </div>
+            <div class="matrix-row">
+              <b>buffer 1</b>
+              <p>Mini-block encoded value chunks. Leaf payload only — no rep/def levels inside.</p>
+              <span class="badge accent">values</span>
+            </div>
+            <div class="matrix-row">
+              <b>buffer 2+</b>
+              <p>Structural buffers — one per explicit position or count set — in <code>SparseStructuralLayer</code> order, outermost to innermost.</p>
+              <span class="badge warn">structure</span>
+            </div>
           </div>
           <div class="contract">
             <article class="contract-box">
               <h3>What must be true</h3>
               <ul>
-                <li>Structural layers are stored outermost to innermost.</li>
-                <li>Positions are sorted and delta-compressed within their parent slot domain.</li>
-                <li>List counts sum to the next child slot domain size.</li>
-                <li>Leaf payload chunks contain no rep/def buffers.</li>
+                <li>Positions decode to strictly increasing values inside their parent slot domain.</li>
+                <li>List counts sum to exactly the next child slot domain size.</li>
+                <li>Position and count sets are normalized: empty, all-slots, contiguous-range, and constant-count forms live in metadata alone.</li>
+                <li>Only explicit sets write a structural buffer — exactly one each. Normalized sets carry no buffer and no compression descriptor.</li>
               </ul>
             </article>
             <article class="contract-box">
@@ -1258,11 +1713,33 @@
     </main>
 
     <footer class="footer">
-      <div class="shell">Lance discrete sparse structural layout sketch. Built as a self-contained visual design note.</div>
+      <div class="shell">Lance discrete sparse structural layout sketch, built as a self-contained visual design note. Public sketch path: <code>/sketches/lance-discrete-sparse-layout/index.html</code></div>
     </footer>
   </div>
 
   <script>
+    const root = document.documentElement;
+    let saved = null;
+    try {
+      saved = localStorage.getItem("xuanwo-sketch-theme");
+    } catch (e) {}
+    if (saved) {
+      root.dataset.theme = saved;
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.dataset.theme = "dark";
+    }
+
+    const themeToggle = document.getElementById("theme-toggle");
+    themeToggle.setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
+    themeToggle.addEventListener("click", () => {
+      const next = root.dataset.theme === "dark" ? "light" : "dark";
+      root.dataset.theme = next;
+      themeToggle.setAttribute("aria-pressed", String(next === "dark"));
+      try {
+        localStorage.setItem("xuanwo-sketch-theme", next);
+      } catch (e) {}
+    });
+
     const animatorSpecs = {
       listAnimator: [
         {
@@ -1292,45 +1769,46 @@
           detail: "The outermost domain is still rows 0..7. Sparse layout does not rewrite row identity."
         },
         {
-          title: "Profile validity is local to row slots.",
-          detail: "Rows 0 and 5 are null profiles. Valid rows continue to the profile child structure."
+          title: "Profile validity is a fact on row slots.",
+          detail: "Nulls [0, 5] are recorded against the row domain. A null row produces nothing in any layer below it."
         },
         {
-          title: "Events list maps rows to event slots.",
-          detail: "Rows 2, 4, and 7 are non-empty event lists with counts [2, 1, 1]. Empty rows stop here."
+          title: "Events list stores facts on valid rows.",
+          detail: "Only rows 2, 4, and 7 are non-empty, with counts [2, 1, 1]. Empty lists are represented by absence."
         },
         {
-          title: "The next domain is event slots.",
-          detail: "The child domain now has four event slots. Slot 1 is null, and the other event slots can expose fields."
+          title: "Counts open the event slot domain.",
+          detail: "Follow the lines: row 2 reserves event slots 0 and 1, row 4 slot 2, row 7 slot 3. Nothing below rows 0, 1, 3, 5, 6 — their columns stay blank. Slot 1 happens to be a null event."
         },
         {
-          title: "Score values are compact.",
-          detail: "Only valid score events produce score payload values: [91, 84, 77]."
+          title: "Score values pack only valid events.",
+          detail: "The leaf domain is [91, 84, 77] — three values for three valid events. The null event slot reserves no leaf space at all."
         },
         {
-          title: "Tags is another list layer.",
-          detail: "The parent domain is event slots 0..3. Only event slots 0 and 3 have non-empty tags."
+          title: "Tags is another list layer, one level down.",
+          detail: "Same rule, new parent: on the event slot domain, non_empty [0, 3] with counts [2, 2]. Slot 2's empty tags are again just absent."
         },
         {
-          title: "Tag payload is compact too.",
-          detail: "The tag leaf value domain contains [3, 5, 8, 13], with no gaps for empty or null events."
+          title: "Tag values pack the same way.",
+          detail: "Event slot 0 maps to tags [3, 5], event slot 3 to tags [8, 13]. Every layer's leaf buffer is dense."
         },
         {
-          title: "Take descends only while paths exist.",
-          detail: "Row 1 stops at empty events, row 2 reaches payload, and row 5 stops immediately at profile null."
+          title: "Take probes structure before touching values.",
+          detail: "take [1, 2, 5] — green ring marks the probed path, red ring where it stops. Rows 1 and 5 never leave metadata; only row 2 reads leaf bytes."
         }
       ]
     };
 
     function setupAnimator(id) {
-      const root = document.getElementById(id);
+      const animatorRoot = document.getElementById(id);
       const spec = animatorSpecs[id];
       let step = 0;
       let timer = null;
-      const copy = root.querySelector("[data-copy]");
-      const detail = root.querySelector("[data-detail]");
-      const steps = root.querySelector("[data-steps]");
-      const play = root.querySelector("[data-action='play']");
+      const copy = animatorRoot.querySelector("[data-copy]");
+      const detail = animatorRoot.querySelector("[data-detail]");
+      const steps = animatorRoot.querySelector("[data-steps]");
+      const play = animatorRoot.querySelector("[data-action='play']");
+      const takeDim = animatorRoot.querySelector("[data-take-dim]");
 
       steps.innerHTML = spec.map((item, index) => `<div class="step-dot" data-step-dot="${index}">${index + 1}. ${item.title}</div>`).join("");
 
@@ -1341,24 +1819,25 @@
       }
 
       function render() {
-        root.querySelectorAll("[data-step-min]").forEach((el) => {
+        animatorRoot.querySelectorAll("[data-step-min]").forEach((el) => {
           const min = Number(el.getAttribute("data-step-min"));
           el.classList.toggle("is-visible", step >= min);
         });
-        root.querySelectorAll("[data-step-dot]").forEach((el) => {
+        animatorRoot.querySelectorAll("[data-step-dot]").forEach((el) => {
           el.classList.toggle("active", Number(el.getAttribute("data-step-dot")) === step);
         });
         copy.textContent = spec[step].title;
         detail.textContent = spec[step].detail;
+        if (takeDim) takeDim.classList.toggle("take-mode", step === spec.length - 1);
       }
 
-      root.querySelector("[data-action='prev']").addEventListener("click", () => {
+      animatorRoot.querySelector("[data-action='prev']").addEventListener("click", () => {
         stop();
         step = (step + spec.length - 1) % spec.length;
         render();
       });
 
-      root.querySelector("[data-action='next']").addEventListener("click", () => {
+      animatorRoot.querySelector("[data-action='next']").addEventListener("click", () => {
         stop();
         step = (step + 1) % spec.length;
         render();
@@ -1379,6 +1858,69 @@
       render();
     }
 
+    // Parent → child mapping lines for the deep diagram. Paths are created
+    // once (so step visibility survives resizes) and only re-measured on
+    // layout changes. Coordinates use offset* so fader transforms don't skew.
+    function setupDeepConnectors() {
+      const diagram = document.querySelector("#deepAnimator .deep-diagram");
+      const svg = diagram.querySelector(".connectors");
+      const links = [
+        { from: "ev-2", to: "eslot-0", kind: "fact", step: 3 },
+        { from: "ev-2", to: "eslot-1", kind: "fact", step: 3 },
+        { from: "ev-4", to: "eslot-2", kind: "fact", step: 3 },
+        { from: "ev-7", to: "eslot-3", kind: "fact", step: 3 },
+        { from: "eslot-0", to: "score-0", kind: "value", step: 4 },
+        { from: "eslot-2", to: "score-1", kind: "value", step: 4 },
+        { from: "eslot-3", to: "score-2", kind: "value", step: 4 },
+        { from: "tagf-0", to: "tagv-0", kind: "value", step: 6 },
+        { from: "tagf-0", to: "tagv-1", kind: "value", step: 6 },
+        { from: "tagf-3", to: "tagv-2", kind: "value", step: 6 },
+        { from: "tagf-3", to: "tagv-3", kind: "value", step: 6 }
+      ];
+      const probed = new Set(["ev-2>eslot-0", "ev-2>eslot-1", "eslot-0>score-0", "tagf-0>tagv-0", "tagf-0>tagv-1"]);
+      const paths = links.map((link) => {
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("class", link.kind);
+        path.setAttribute("data-step-min", String(link.step));
+        if (probed.has(link.from + ">" + link.to)) path.setAttribute("data-probe", "");
+        svg.appendChild(path);
+        return { path, link };
+      });
+
+      // The faders' transform makes each band an offsetParent, so walk the
+      // offsetParent chain up to the diagram to get layout coordinates that
+      // ignore the fader's translateY.
+      function positionWithin(el) {
+        let x = 0;
+        let y = 0;
+        while (el && el !== diagram) {
+          x += el.offsetLeft;
+          y += el.offsetTop;
+          el = el.offsetParent;
+        }
+        return { x, y };
+      }
+
+      function layout() {
+        for (const { path, link } of paths) {
+          const from = diagram.querySelector(`[data-node="${link.from}"]`);
+          const to = diagram.querySelector(`[data-node="${link.to}"]`);
+          const a = positionWithin(from);
+          const b = positionWithin(to);
+          const x1 = a.x + from.offsetWidth / 2;
+          const y1 = a.y + from.offsetHeight + 1;
+          const x2 = b.x + to.offsetWidth / 2;
+          const y2 = b.y - 1;
+          const midY = (y1 + y2) / 2;
+          path.setAttribute("d", `M ${x1} ${y1} C ${x1} ${midY} ${x2} ${midY} ${x2} ${y2}`);
+        }
+      }
+
+      layout();
+      if (window.ResizeObserver) new ResizeObserver(layout).observe(diagram);
+    }
+
+    setupDeepConnectors();
     setupAnimator("listAnimator");
     setupAnimator("deepAnimator");
   </script>
