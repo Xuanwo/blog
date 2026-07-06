@@ -9,6 +9,13 @@ export type Sketch = {
 // Each slug maps to static/sketches/<slug>/index.html.
 export const sketches: Sketch[] = [
   {
+    slug: 'lance-planar-page-layout',
+    title: 'Lance Planar Page Layout',
+    date: '2026-07-06',
+    description: 'How Lance 2.3 rebuilds page layout as a structural plane times a value plane, turning five layouts into cells of one matrix with bytes unchanged.',
+    cover: '/sketches/lance-planar-page-layout/cover.svg'
+  },
+  {
     slug: 'lance-discrete-sparse-layout',
     title: 'Lance Discrete Sparse Layout',
     date: '2026-07-04',

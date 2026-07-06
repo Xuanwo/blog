@@ -1,0 +1,1385 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lance Planar Page Layout</title>
+  <meta name="description" content="A visual design note for the Lance 2.3 planar page layout rework: one page layout built from a structural plane times a value plane, with physical bytes unchanged.">
+  <style>
+    /* ==========================================================
+       Xuanwo Design System tokens (inlined — sketch pages are
+       self-contained). Light is :root; dark via [data-theme].
+       ========================================================== */
+    :root {
+      --azure-50: #e8f4fc;
+      --azure-100: #cbe6f8;
+      --azure-200: #9bd0f2;
+      --azure-400: #2b97db;
+      --azure-500: #0f83cf;
+      --azure-600: #0a6aa8;
+      --azure-700: #08547f;
+
+      --bg: #fbfbfc;
+      --surface: #ffffff;
+      --surface-2: #f4f5f7;
+      --surface-3: #eceef1;
+      --surface-inset: #f7f8f9;
+
+      --fg: #14171a;
+      --fg-muted: #4d545c;
+      --fg-subtle: #767e87;
+      --fg-faint: #9aa1aa;
+
+      --border: #e6e8eb;
+      --border-strong: #d4d8dd;
+
+      --accent: var(--azure-500);
+      --accent-hover: var(--azure-600);
+      --accent-fg: #ffffff;
+      --accent-text: var(--azure-600);
+      --accent-subtle: var(--azure-50);
+      --accent-border: var(--azure-200);
+
+      --success-text: #157048;
+      --success-subtle: #e6f4ec;
+      --success-border: #b6e0c8;
+
+      --warning-text: #8f5f12;
+      --warning-subtle: #fdf2dd;
+      --warning-border: #f0d9a3;
+
+      --danger-text: #a72e26;
+      --danger-subtle: #fcebe9;
+      --danger-border: #f3c2bd;
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-serif: Georgia, "Songti SC", "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+      --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
+
+      --radius-xs: 3px;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+
+      --space-1: .25rem;
+      --space-2: .5rem;
+      --space-3: .75rem;
+      --space-4: 1rem;
+      --space-5: 1.5rem;
+      --space-6: 2rem;
+      --space-7: 3rem;
+      --space-8: 4rem;
+
+      --duration-fast: 120ms;
+      --duration-base: 180ms;
+      --duration-slow: 280ms;
+      --ease-out: cubic-bezier(.22, 1, .36, 1);
+
+      color-scheme: light;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b0d0f;
+      --surface: #131619;
+      --surface-2: #1a1e22;
+      --surface-3: #23282d;
+      --surface-inset: #15181c;
+
+      --fg: #f4f6f7;
+      --fg-muted: #a7afb8;
+      --fg-subtle: #7a838d;
+      --fg-faint: #59616a;
+
+      --border: #23272c;
+      --border-strong: #323840;
+
+      --accent: #38a8ec;
+      --accent-hover: #5fb3e8;
+      --accent-fg: #04263b;
+      --accent-text: #6fc1f0;
+      --accent-subtle: #0c2f44;
+      --accent-border: #134c6b;
+
+      --success-text: #5cc497;
+      --success-subtle: #10241b;
+      --success-border: #1d3f30;
+
+      --warning-text: #e6b765;
+      --warning-subtle: #2a2113;
+      --warning-border: #473717;
+
+      --danger-text: #ef847c;
+      --danger-subtle: #2c1514;
+      --danger-border: #4a221f;
+
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font: 15px/1.5 var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      transition: background-color var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out);
+    }
+
+    button { font: inherit; }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: .92em;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1, h2, h3 {
+      font-weight: 600;
+      color: var(--fg);
+      text-wrap: balance;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .page { min-height: 100vh; }
+
+    .shell {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+    }
+
+    /* ---- Topbar ---- */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      min-height: 56px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      min-width: 0;
+      color: var(--fg-muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .mark {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-md);
+      color: var(--accent-text);
+      background: var(--accent-subtle);
+      font: 700 15px/1 var(--font-mono);
+    }
+
+    .nav {
+      display: flex;
+      gap: var(--space-1);
+      overflow-x: auto;
+      padding: var(--space-2) 0;
+      scrollbar-width: none;
+    }
+
+    .nav::-webkit-scrollbar { display: none; }
+
+    .nav a {
+      flex: none;
+      padding: 6px 10px;
+      border-radius: var(--radius-md);
+      color: var(--fg-muted);
+      font-size: 13px;
+      text-decoration: none;
+      transition: color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
+    }
+
+    .nav a:hover {
+      color: var(--fg);
+      background: var(--surface-2);
+    }
+
+    .theme-toggle {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      height: 32px;
+      padding: 0 var(--space-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--fg-muted);
+      background: var(--surface);
+      cursor: pointer;
+      transition: color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--border-strong);
+      color: var(--fg);
+      background: var(--surface-2);
+    }
+
+    /* ---- Hero ---- */
+    .hero {
+      padding: var(--space-8) 0 var(--space-7);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
+      gap: var(--space-7);
+      align-items: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 var(--space-4);
+      color: var(--accent-text);
+      font: 600 12px/1 var(--font-mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 720px;
+      font: 600 clamp(38px, 5vw, 64px)/1.15 var(--font-serif);
+      letter-spacing: -.02em;
+    }
+
+    .lead {
+      max-width: 720px;
+      margin-top: var(--space-5);
+      color: var(--fg-muted);
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .hero-points {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: var(--space-6);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .fact {
+      padding: var(--space-4);
+      border-left: 1px solid var(--border);
+    }
+
+    .fact:first-child { border-left: none; }
+
+    .fact b {
+      display: block;
+      margin-bottom: var(--space-1);
+      color: var(--fg);
+      font: 600 12px/1.4 var(--font-mono);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .fact span {
+      display: block;
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* ---- Hero visual: the planar pair ---- */
+    .hero-visual {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .hero-visual__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-visual__title {
+      color: var(--fg-muted);
+      font: 600 12px/1.4 var(--font-mono);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      color: var(--fg-muted);
+      font: 600 11px/1.3 var(--font-mono);
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+
+    .badge.accent {
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+      color: var(--accent-text);
+    }
+
+    .badge.ok {
+      border-color: var(--success-border);
+      background: var(--success-subtle);
+      color: var(--success-text);
+    }
+
+    .badge.warn {
+      border-color: var(--warning-border);
+      background: var(--warning-subtle);
+      color: var(--warning-text);
+    }
+
+    .badge.new {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--accent-fg);
+    }
+
+    .plane-visual {
+      display: grid;
+      gap: var(--space-3);
+      padding: var(--space-4);
+    }
+
+    .plane-row {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: var(--space-3);
+      align-items: center;
+    }
+
+    .plane-label {
+      color: var(--fg-subtle);
+      font: 600 11px/1.4 var(--font-mono);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      text-align: right;
+    }
+
+    .plane-cells {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .pcell {
+      padding: 8px 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--surface-inset);
+      color: var(--fg);
+      font: 500 13px/1.2 var(--font-mono);
+    }
+
+    .pcell.accent {
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+      color: var(--accent-text);
+    }
+
+    .plane-times {
+      justify-self: start;
+      grid-column: 2;
+      color: var(--fg-faint);
+      font: 600 18px/1 var(--font-serif);
+      padding-left: var(--space-2);
+    }
+
+    .plane-note {
+      padding: var(--space-3) var(--space-4);
+      border-top: 1px solid var(--border);
+      color: var(--fg-subtle);
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    /* ---- Sections ---- */
+    section { padding: var(--space-8) 0; }
+
+    section + section { border-top: 1px solid var(--border); }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+      gap: var(--space-5) var(--space-7);
+      align-items: end;
+      margin-bottom: var(--space-6);
+    }
+
+    .section-index {
+      display: inline-block;
+      margin-bottom: var(--space-3);
+      color: var(--accent-text);
+      font: 600 12px/1 var(--font-mono);
+      letter-spacing: .08em;
+    }
+
+    .section-head h2 {
+      font: 600 clamp(24px, 3vw, 34px)/1.25 var(--font-serif);
+      letter-spacing: -.01em;
+    }
+
+    .section-head > p {
+      color: var(--fg-muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ---- Problem: layout silos ---- */
+    .silos {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-header h3 {
+      font: 600 14px/1.4 var(--font-mono);
+    }
+
+    .panel-body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      padding: var(--space-4);
+      flex: 1;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-inset);
+      color: var(--fg-muted);
+      font: 500 12.5px/1.3 var(--font-mono);
+    }
+
+    .chip.dup {
+      border-color: var(--warning-border);
+      background: var(--warning-subtle);
+      color: var(--warning-text);
+    }
+
+    .chip.sets {
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+      color: var(--accent-text);
+    }
+
+    .chip.gap {
+      border-style: dashed;
+      color: var(--fg-faint);
+      background: transparent;
+    }
+
+    .grid-note {
+      margin-top: var(--space-5);
+      max-width: 860px;
+      color: var(--fg-muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* ---- Planes section ---- */
+    .planes-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-5);
+      align-items: stretch;
+    }
+
+    .codebox {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .codebox-head {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+      color: var(--fg-muted);
+      font: 600 12px/1.4 var(--font-mono);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .codebox pre {
+      margin: 0;
+      padding: var(--space-4);
+      overflow-x: auto;
+      font: 12.5px/1.65 var(--font-mono);
+      color: var(--fg-muted);
+    }
+
+    .codebox .k { color: var(--accent-text); }
+    .codebox .m { color: var(--fg); font-weight: 600; }
+    .codebox .c { color: var(--fg-faint); }
+
+    .duty-stack {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .duty {
+      flex: 1;
+      padding: var(--space-4) var(--space-5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+
+    .duty h3 {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font: 600 15px/1.4 var(--font-sans);
+    }
+
+    .duty p {
+      margin-top: var(--space-2);
+      color: var(--fg-muted);
+      font-size: 13.5px;
+      line-height: 1.7;
+    }
+
+    .duty code { color: var(--fg); }
+
+    /* ---- Matrix ---- */
+    .matrix-wrap { overflow-x: auto; }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: 120px repeat(4, minmax(170px, 1fr));
+      min-width: 820px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .mhead, .mrow-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-3);
+      background: var(--surface-2);
+      color: var(--fg-muted);
+      font: 600 12px/1.3 var(--font-mono);
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mhead + .mhead, .mcell + .mcell { border-left: 1px solid var(--border); }
+
+    .mrow-label {
+      flex-direction: column;
+      gap: var(--space-1);
+      border-bottom: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .mrow-label small {
+      color: var(--fg-faint);
+      font: 500 10.5px/1.3 var(--font-mono);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .mcell {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-2);
+      padding: var(--space-4);
+      border: none;
+      border-top: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--fg);
+      text-align: left;
+      cursor: pointer;
+      transition: background-color var(--duration-fast) var(--ease-out);
+    }
+
+    .mcell:hover { background: var(--surface-2); }
+
+    .mcell.is-active {
+      background: var(--accent-subtle);
+      box-shadow: inset 0 0 0 1px var(--accent-border);
+    }
+
+    .mcell b {
+      font: 600 13px/1.4 var(--font-mono);
+      color: var(--fg);
+    }
+
+    .mcell span {
+      color: var(--fg-subtle);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .matrix-detail {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin-top: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+
+    .matrix-detail h3 {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font: 600 14px/1.4 var(--font-mono);
+    }
+
+    .matrix-detail p {
+      color: var(--fg-muted);
+      font-size: 13.5px;
+      line-height: 1.7;
+      max-width: 900px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+      color: var(--fg-subtle);
+      font-size: 12.5px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-inset);
+    }
+
+    .legend .ok i { border-color: var(--success-border); background: var(--success-subtle); }
+    .legend .re i { border-color: var(--accent-border); background: var(--accent-subtle); }
+    .legend .nw i { border-color: var(--accent); background: var(--accent); }
+    .legend .dg i { border-color: var(--warning-border); background: var(--warning-subtle); }
+
+    /* ---- Bytes section ---- */
+    .modes {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-4);
+      margin-bottom: var(--space-5);
+    }
+
+    .bytestrips {
+      display: grid;
+      gap: var(--space-3);
+      margin-top: var(--space-3);
+    }
+
+    .bytestrip {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: var(--space-3);
+      align-items: center;
+    }
+
+    .bytestrip-label {
+      color: var(--fg-subtle);
+      font: 600 11px/1.4 var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      text-align: right;
+    }
+
+    .bstrip {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+
+    .bseg {
+      padding: 5px 9px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-xs);
+      background: var(--surface-inset);
+      color: var(--fg-muted);
+      font: 500 11px/1.3 var(--font-mono);
+      white-space: nowrap;
+    }
+
+    .bseg.lvl {
+      border-color: var(--warning-border);
+      background: var(--warning-subtle);
+      color: var(--warning-text);
+    }
+
+    .bseg.val {
+      border-color: var(--success-border);
+      background: var(--success-subtle);
+      color: var(--success-text);
+    }
+
+    .bseg.set {
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+      color: var(--accent-text);
+    }
+
+    .mode-note {
+      margin-top: var(--space-3);
+      color: var(--fg-subtle);
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    /* ---- Principles / scope ---- */
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+
+    .principle {
+      padding: var(--space-5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+
+    .principle h3 {
+      margin-top: var(--space-2);
+      font: 600 16px/1.4 var(--font-sans);
+    }
+
+    .principle p {
+      margin-top: var(--space-2);
+      color: var(--fg-muted);
+      font-size: 13.5px;
+      line-height: 1.7;
+    }
+
+    /* ---- Compatibility timeline ---- */
+    .timeline3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-4);
+      margin-bottom: var(--space-5);
+    }
+
+    .era {
+      position: relative;
+      padding: var(--space-5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+
+    .era.is-now {
+      border-color: var(--accent-border);
+      background: var(--surface);
+      box-shadow: inset 0 2px 0 var(--accent);
+    }
+
+    .era h3 { font: 600 14px/1.4 var(--font-mono); }
+
+    .era p {
+      margin-top: var(--space-2);
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .compat-list {
+      display: grid;
+      gap: var(--space-2);
+      max-width: 900px;
+      color: var(--fg-muted);
+      font-size: 14px;
+      line-height: 1.7;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .compat-list li {
+      padding-left: var(--space-5);
+      position: relative;
+    }
+
+    .compat-list li::before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 10px;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .refs {
+      margin-top: var(--space-5);
+      color: var(--fg-subtle);
+      font-size: 13px;
+    }
+
+    .refs a {
+      color: var(--accent-text);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent-border);
+    }
+
+    .refs a:hover { color: var(--accent-hover); }
+
+    /* ---- Footer ---- */
+    .footer {
+      padding: var(--space-6) 0 var(--space-8);
+      border-top: 1px solid var(--border);
+      color: var(--fg-subtle);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 960px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .section-head { grid-template-columns: 1fr; align-items: start; }
+      .silos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .planes-grid { grid-template-columns: 1fr; }
+      .modes { grid-template-columns: 1fr; }
+      .principles { grid-template-columns: 1fr; }
+      .timeline3 { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      .hero-points { grid-template-columns: 1fr; }
+      .fact { border-left: none; border-top: 1px solid var(--border); }
+      .fact:first-child { border-top: none; }
+      .silos { grid-template-columns: 1fr; }
+      .bytestrip { grid-template-columns: 1fr; }
+      .bytestrip-label { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <nav class="shell topbar-inner" aria-label="Page sections">
+        <div class="brand">
+          <span class="mark">X</span>
+          <span>Lance planar page layout sketch</span>
+        </div>
+        <div class="nav">
+          <a href="#problem">Problem</a>
+          <a href="#planes">Planes</a>
+          <a href="#matrix">Matrix</a>
+          <a href="#bytes">Bytes</a>
+          <a href="#scope">Scope</a>
+          <a href="#compat">Compatibility</a>
+        </div>
+        <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Toggle theme">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3v2.5M12 18.5V21M4.64 4.64l1.77 1.77M17.59 17.59l1.77 1.77M3 12h2.5M18.5 12H21M4.64 19.36l1.77-1.77M17.59 6.41l1.77-1.77" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/>
+          </svg>
+          Theme
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="shell hero-grid">
+          <div>
+            <p class="eyebrow">Storage format 2.3 · Design sketch</p>
+            <h1>One page layout, two planes.</h1>
+            <p class="lead">Lance 2.2 picks a page layout from a list — MiniBlock, FullZip, Constant — and the sparse work adds another entry. This rework replaces the list with a product: every page is a structural plane times a value plane, and the old layouts become cells of the matrix. The bytes on disk do not move.</p>
+            <div class="hero-points" role="group" aria-label="Design goals">
+              <div class="fact"><b>Refactor</b><span>No new encoding. Kept combinations stay byte-for-byte identical to 2.2.</span></div>
+              <div class="fact"><b>Free cells</b><span>sparse × zipped, sparse × constant, sparse × none appear without new layouts.</span></div>
+              <div class="fact"><b>Evolution</b><span>A future structural codec is a oneof variant, not a fifth silo.</span></div>
+            </div>
+          </div>
+          <div class="hero-visual" role="group" aria-label="Planar pair overview">
+            <div class="hero-visual__head">
+              <span class="hero-visual__title">PageLayout · 2.3</span>
+              <span class="badge accent">two planes</span>
+            </div>
+            <div class="plane-visual">
+              <div class="plane-row">
+                <div class="plane-label">structure</div>
+                <div class="plane-cells">
+                  <div class="pcell">dense rep/def</div>
+                  <div class="pcell accent">sparse sets</div>
+                </div>
+              </div>
+              <div class="plane-times">×</div>
+              <div class="plane-row">
+                <div class="plane-label">values</div>
+                <div class="plane-cells">
+                  <div class="pcell">chunked</div>
+                  <div class="pcell">zipped</div>
+                  <div class="pcell">constant</div>
+                  <div class="pcell">none</div>
+                </div>
+              </div>
+            </div>
+            <div class="plane-note">The structural plane maps rows to visible items and rebuilds rep/def. The value plane stores exactly the visible leaf values and maps them to bytes. "miniblock" and "fullzip" survive as aliases for dense&nbsp;×&nbsp;chunked and dense&nbsp;×&nbsp;zipped.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="problem">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">01</span>
+              <h2>Every structural idea became another layout.</h2>
+            </div>
+            <p>In 2.1/2.2 the <code>PageLayout</code> oneof grows one variant per idea, and each variant re-implements its surroundings. Dense rep/def — a single structural representation — is already stored three different ways.</p>
+          </div>
+          <div class="silos">
+            <article class="panel">
+              <div class="panel-header"><h3>MiniBlockLayout</h3><span class="badge">2.1</span></div>
+              <div class="panel-body">
+                <span class="chip dup">dense rep/def · in chunks</span>
+                <span class="chip">value chunks</span>
+                <span class="chip">dictionary</span>
+                <span class="chip">repetition index</span>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><h3>FullZipLayout</h3><span class="badge">2.1</span></div>
+              <div class="panel-body">
+                <span class="chip dup">dense rep/def · control words</span>
+                <span class="chip">per-value storage</span>
+                <span class="chip">row-offset index</span>
+                <span class="chip gap">no dictionary</span>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><h3>ConstantLayout</h3><span class="badge">2.2</span></div>
+              <div class="panel-body">
+                <span class="chip dup">dense rep/def · page buffers</span>
+                <span class="chip">inline scalar</span>
+                <span class="chip gap">complex all-null silo</span>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><h3>SparseLayout</h3><span class="badge accent">#7628</span></div>
+              <div class="panel-body">
+                <span class="chip sets">sparse position/count sets</span>
+                <span class="chip dup">value chunks · copied</span>
+                <span class="chip gap">no dictionary</span>
+                <span class="chip gap">no wide values</span>
+              </div>
+            </article>
+          </div>
+          <p class="grid-note">Three copies of the same dense representation, then a fourth silo that re-implements the chunked value machinery minus dictionary — and welds sparse structure to narrow values. On this trajectory, every structural-representation × value-storage combination costs a hand-written layout. The next idea would be a fifth.</p>
+        </div>
+      </section>
+
+      <section id="planes">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">02</span>
+              <h2>A page is structure × values.</h2>
+            </div>
+            <p>The 2.3 proto has no layout variants left. <code>PageLayout</code> holds the two planes directly; each plane is a small oneof of codecs with genuinely different cost profiles.</p>
+          </div>
+          <div class="planes-grid">
+            <div class="codebox">
+              <div class="codebox-head">encodings_v2_3.proto · sketch</div>
+              <pre><span class="k">message</span> <span class="m">PageLayout</span> {
+  <span class="m">StructuralPlane</span> structure = 1;
+  <span class="m">ValuePlane</span> values = 2;
+  uint64 num_items = 3;
+  uint64 num_visible_items = 4;
+}
+
+<span class="k">message</span> <span class="m">StructuralPlane</span> {
+  <span class="k">oneof</span> codec {
+    <span class="m">DenseRepDef</span>     dense  = 1;
+    <span class="m">SparseStructure</span> sparse = 2;  <span class="c">// as specified in #7631</span>
+  }
+}
+
+<span class="k">message</span> <span class="m">DenseRepDef</span> {
+  <span class="c">// pure logical semantics, zero physical fields</span>
+  <span class="k">repeated</span> RepDefLayer layers = 1;
+}
+
+<span class="k">message</span> <span class="m">ValuePlane</span> {
+  <span class="k">oneof</span> codec {
+    <span class="m">ChunkedValues</span> chunked  = 1;
+    <span class="m">ZippedValues</span>  zipped   = 2;
+    <span class="m">ConstantValue</span> constant = 3;
+    <span class="m">NoValues</span>      none     = 4;
+  }
+}</pre>
+            </div>
+            <div class="duty-stack">
+              <article class="duty">
+                <h3>Structural plane <span class="badge accent">rows ↔ visible items</span></h3>
+                <p>Declares the nesting shape and rebuilds rep/def on read. Everything invisible — nulls, empty lists — is its job. Dense addresses through the repetition index or control words; sparse addresses through its own position sets.</p>
+              </article>
+              <article class="duty">
+                <h3>Value plane <span class="badge accent">visible items → bytes</span></h3>
+                <p>Stores exactly <code>num_visible_items</code> visible leaf values and maps them to bytes: chunk metadata for chunked, stride or offset index for zipped, an inline scalar for constant, nothing for none.</p>
+              </article>
+              <article class="duty">
+                <h3>Aliases stay <span class="badge ok">API unbroken</span></h3>
+                <p><code>structural_encoding = "miniblock"</code> forces dense × chunked; <code>"fullzip"</code> forces dense × zipped — the exact semantics those names have today, which also suppresses automatic sparse selection.</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="matrix">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">03</span>
+              <h2>Five layouts become eight cells.</h2>
+            </div>
+            <p>Every existing layout lands in a cell with its bytes unchanged; three cells are new capability that previously would each have cost another layout. Click a cell for the details.</p>
+          </div>
+          <div class="matrix-wrap">
+            <div class="matrix" role="grid" aria-label="Structural plane by value plane matrix">
+              <div class="mhead" aria-hidden="true"></div>
+              <div class="mhead">chunked</div>
+              <div class="mhead">zipped</div>
+              <div class="mhead">constant</div>
+              <div class="mhead">none</div>
+
+              <div class="mrow-label">dense<small>rep/def levels</small></div>
+              <button class="mcell" type="button" data-cell="dense-chunked">
+                <span class="badge ok">identical</span>
+                <b>MiniBlockLayout</b>
+                <span>alias “miniblock”</span>
+              </button>
+              <button class="mcell" type="button" data-cell="dense-zipped">
+                <span class="badge ok">identical</span>
+                <b>FullZipLayout</b>
+                <span>alias “fullzip”</span>
+              </button>
+              <button class="mcell" type="button" data-cell="dense-constant">
+                <span class="badge warn">degenerate only</span>
+                <b>simple constant</b>
+                <span>complex form → legacy read</span>
+              </button>
+              <button class="mcell" type="button" data-cell="dense-none">
+                <span class="badge warn">degenerate only</span>
+                <b>simple all-null</b>
+                <span>complex form → legacy read</span>
+              </button>
+
+              <div class="mrow-label">sparse<small>position/count sets</small></div>
+              <button class="mcell" type="button" data-cell="sparse-chunked">
+                <span class="badge accent">re-mounted</span>
+                <b>SparseLayout #7628</b>
+                <span>bytes unchanged</span>
+              </button>
+              <button class="mcell" type="button" data-cell="sparse-zipped">
+                <span class="badge new">new</span>
+                <b>sparse wide values</b>
+                <span>mostly-null embeddings</span>
+              </button>
+              <button class="mcell" type="button" data-cell="sparse-constant">
+                <span class="badge new">new</span>
+                <b>sparse constant</b>
+                <span>metadata-only page</span>
+              </button>
+              <button class="mcell" type="button" data-cell="sparse-none">
+                <span class="badge new">new</span>
+                <b>nested all-null</b>
+                <span>O(1) sets</span>
+              </button>
+            </div>
+          </div>
+          <div class="legend" role="group" aria-label="Cell legend">
+            <span class="ok"><i></i>byte-identical to 2.2</span>
+            <span class="re"><i></i>re-mounted from #7628</span>
+            <span class="nw"><i></i>new capability</span>
+            <span class="dg"><i></i>degenerate form only</span>
+          </div>
+          <div class="matrix-detail" id="matrix-detail" aria-live="polite">
+            <h3 id="matrix-detail-title">Pick a cell</h3>
+            <p id="matrix-detail-body">Each cell describes one combination of structural codec and value codec. Colors mark whether it maps to an existing 2.2 form, re-mounts the landed SparseLayout, or is capability the matrix unlocks for free.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="bytes">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">04</span>
+              <h2>Placement is derived, not encoded.</h2>
+            </div>
+            <p>Structural data has two consumption modes, and each mode fixes where its bytes live. Nothing about placement is a choice a writer records — it follows from the pair of codecs.</p>
+          </div>
+          <div class="modes">
+            <article class="panel">
+              <div class="panel-header"><h3>Index-like · sparse sets</h3><span class="badge accent">page-level</span></div>
+              <div class="panel-body">
+                <div class="bytestrips">
+                  <div class="bytestrip">
+                    <div class="bytestrip-label">page</div>
+                    <div class="bstrip">
+                      <span class="bseg set">position/count sets</span>
+                      <span class="bseg val">value chunk</span>
+                      <span class="bseg val">value chunk</span>
+                      <span class="bseg val">…</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="mode-note">O(sparsity) small: read once at page open, then all addressing happens in memory. Structure first, then only the value bytes a take actually reaches. Empty takes do zero IO.</p>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><h3>Payload-like · dense levels</h3><span class="badge warn">rides the value store</span></div>
+              <div class="panel-body">
+                <div class="bytestrips">
+                  <div class="bytestrip">
+                    <div class="bytestrip-label">chunked</div>
+                    <div class="bstrip">
+                      <span class="bseg lvl">rep</span><span class="bseg lvl">def</span><span class="bseg val">values…</span>
+                      <span class="bseg lvl">rep</span><span class="bseg lvl">def</span><span class="bseg val">values…</span>
+                    </div>
+                  </div>
+                  <div class="bytestrip">
+                    <div class="bytestrip-label">zipped</div>
+                    <div class="bstrip">
+                      <span class="bseg lvl">ctrl</span><span class="bseg val">value</span>
+                      <span class="bseg lvl">ctrl</span><span class="bseg val">value</span>
+                      <span class="bseg lvl">ctrl</span><span class="bseg val">value</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="mode-note">O(items) large: reading levels up front would read the page twice, so they ride the value store at its IO granularity — inside each chunk, or as per-record control words. That is what keeps nested cold random access at one IO, and it is exactly where 2.1 already puts them.</p>
+              </div>
+            </article>
+          </div>
+          <div class="duty-stack" style="max-width: 900px;">
+            <article class="duty">
+              <h3>Streams are declared by <code>layers</code>, carried by the value codec</h3>
+              <p>A list layer implies a rep stream (even all-valid lists have variable-length offsets); a nullable layer implies a def stream. <code>DenseRepDef</code> carries only <code>layers</code> — each value codec's <code>DenseLevels</code> sub-message describes how its own storage carries the declared streams, and readers validate the two by derivation. There is no degree of freedom to coordinate between the planes.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="scope">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">05</span>
+              <h2>A refactor claims refactor benefits.</h2>
+            </div>
+            <p>This proposal ships after SparseLayout (#7628) lands and builds on it. Being honest about what belongs to whom keeps the review focused.</p>
+          </div>
+          <div class="principles">
+            <article class="principle">
+              <span class="section-index">a</span>
+              <h3>No new encoding</h3>
+              <p>The sparse performance numbers — 26.5x to 334x smaller on the benchmark shapes — ship with #7628, not here. Existing pages keep their exact bytes; kept combinations are verified byte-for-byte against 2.2 and against SparseLayout pages.</p>
+            </article>
+            <article class="principle">
+              <span class="section-index">b</span>
+              <h3>The delta is the matrix</h3>
+              <p>Three unlocked cells — sparse × zipped for mostly-null wide values, sparse × constant, sparse × none — plus dictionary composing with sparse structure. Each of these would otherwise have been another hand-written layout.</p>
+            </article>
+            <article class="principle">
+              <span class="section-index">c</span>
+              <h3>One rejected alternative</h3>
+              <p>A fully separated, self-owned level store (ORC-style) would make the planes physically independent too — but it turns one-IO nested takes into two, or requires new chunk byte formats. Expression cleanliness alone did not clear that bar.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="compat">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">06</span>
+              <h2>Old files keep working; stable 2.3 freezes the planar model.</h2>
+            </div>
+            <p>The reader normalizes every pb21 form into the same internal planar representation, so one decode framework serves all versions. 2.3 is still unstable — the rework must land before it stabilizes.</p>
+          </div>
+          <div class="timeline3">
+            <article class="era">
+              <h3>pb2.0 · frozen</h3>
+              <p>2.0 files have no page-layout concept — structure lives in the encoding tree. They keep their existing frozen legacy path and stay out of normalization.</p>
+            </article>
+            <article class="era">
+              <h3>pb21 · normalized</h3>
+              <p>2.1/2.2 files, plus 2.3-unstable files written with the interim SparseLayout, all map into planar cells with bytes unchanged. Complex constant/all-null pages read as legacy states.</p>
+            </article>
+            <article class="era is-now">
+              <h3>pb23 · planar</h3>
+              <p>New 2.3 files carry the planar pair. Complex constant/all-null pages switch to sparse sets — the one deliberate behavior change. Stable 2.3 freezes this model, not four layout variants.</p>
+            </article>
+          </div>
+          <ul class="compat-list">
+            <li>Old readers reject 2.3 files through the existing file-version gate — nothing depends on proto field-level compatibility.</li>
+            <li><code>structural_encoding</code> keeps its values: "miniblock" and "fullzip" force the historical dense combinations.</li>
+            <li>Blob v1 pages stay readable; the v1 write path closes in 2.3 with an explicit error pointing at blob v2.</li>
+            <li>Rollout is two reviewable steps: the planar rework with byte-for-byte acceptance, then sparse × zipped for wide values.</li>
+          </ul>
+          <p class="refs">Context: <a href="https://github.com/lance-format/lance/discussions/7635">proposal discussion #7635</a> · <a href="https://github.com/lance-format/lance/discussions/7631">sparse layout discussion #7631</a> · <a href="https://github.com/lance-format/lance/pull/7628">PR #7628</a> · companion sketch: <a href="/sketches/lance-discrete-sparse-layout/index.html">Lance discrete sparse layout</a></p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="shell">Lance planar page layout sketch, built as a self-contained visual design note. Public sketch path: <code>/sketches/lance-planar-page-layout/index.html</code></div>
+    </footer>
+  </div>
+
+  <script>
+    const root = document.documentElement;
+    let saved = null;
+    try {
+      saved = localStorage.getItem("xuanwo-sketch-theme");
+    } catch (e) {}
+    if (saved) {
+      root.dataset.theme = saved;
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.dataset.theme = "dark";
+    }
+
+    const themeToggle = document.getElementById("theme-toggle");
+    themeToggle.setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
+    themeToggle.addEventListener("click", () => {
+      const next = root.dataset.theme === "dark" ? "light" : "dark";
+      root.dataset.theme = next;
+      themeToggle.setAttribute("aria-pressed", String(next === "dark"));
+      try {
+        localStorage.setItem("xuanwo-sketch-theme", next);
+      } catch (e) {}
+    });
+
+    const cellDetails = {
+      "dense-chunked": {
+        title: "dense × chunked — today's MiniBlockLayout",
+        body: "Rep/def levels compressed inside each chunk, page-level repetition index, dictionary support, large chunks since 2.2. Byte-for-byte identical to the 2.2 form; only the metadata message changes. This is what the \"miniblock\" alias forces."
+      },
+      "dense-zipped": {
+        title: "dense × zipped — today's FullZipLayout",
+        body: "Per-record control words carry rep/def; fixed-width values address by stride, variable-width values through the rows + 1 row-offset index. Byte-for-byte identical to 2.2. This is what the \"fullzip\" alias forces."
+      },
+      "dense-constant": {
+        title: "dense × constant — degenerate form only",
+        body: "A constant page with trivial structure (no level buffers) stays byte-identical to the simple 2.2 ConstantLayout. The complex form — constant plus page-level rep/def buffers — has no value storage for levels to ride, so it remains a legacy-read state; 2.3 writers emit sparse × constant instead."
+      },
+      "dense-none": {
+        title: "dense × none — degenerate form only",
+        body: "Simple all-null pages keep their 2.2 bytes. Complex all-null pages (nested structure, page-level rep/def buffers) remain legacy-read states; 2.3 writers emit sparse × none, whose empty/all/range sets express the same structure in O(1) metadata."
+      },
+      "sparse-chunked": {
+        title: "sparse × chunked — SparseLayout, re-mounted",
+        body: "Exactly the #7628 layout: page-level position/count sets plus mini-block value chunks. Bytes unchanged — and because the value plane is now shared, dictionary encoding composes with sparse structure for free."
+      },
+      "sparse-zipped": {
+        title: "sparse × zipped — new: mostly-null wide values",
+        body: "Backfilled embedding columns today pay dense def levels plus a rows + 1 offset index under fullzip. With page-level sparse sets there are no control words, the offset index shrinks to visible + 1 entries (four orders of magnitude at 99.99% null, expected), takes read exactly one value, and empty takes do zero IO."
+      },
+      "sparse-constant": {
+        title: "sparse × constant — new: metadata-only pages",
+        body: "Sparse rows that all carry the same scalar collapse to position sets plus one inline value: a page with no value bytes at all."
+      },
+      "sparse-none": {
+        title: "sparse × none — new: nested all-null in O(1)",
+        body: "Replaces the page-level rep/def buffers of complex all-null pages with empty/all/range sets. This is the cell that retires the ComplexAllNull silo."
+      }
+    };
+
+    const detailTitle = document.getElementById("matrix-detail-title");
+    const detailBody = document.getElementById("matrix-detail-body");
+    const cells = document.querySelectorAll(".mcell");
+    cells.forEach((cell) => {
+      cell.addEventListener("click", () => {
+        cells.forEach((c) => c.classList.remove("is-active"));
+        cell.classList.add("is-active");
+        const detail = cellDetails[cell.dataset.cell];
+        if (detail) {
+          detailTitle.textContent = detail.title;
+          detailBody.textContent = detail.body;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
