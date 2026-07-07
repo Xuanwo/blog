@@ -9,6 +9,13 @@ export type Sketch = {
 // Each slug maps to static/sketches/<slug>/index.html.
 export const sketches: Sketch[] = [
   {
+    slug: 'lance-fts-v3-block-row-layout',
+    title: 'Lance FTS V3 Block-Row Layout',
+    date: '2026-07-07',
+    description: 'How Lance FTS V3 splits posting lists into block rows, enables selective cache and block-level planning, and exposes the remaining cold-read work.',
+    cover: '/sketches/lance-fts-v3-block-row-layout/cover.svg'
+  },
+  {
     slug: 'lance-planar-page-layout',
     title: 'Lance Planar Page Layout',
     date: '2026-07-06',
