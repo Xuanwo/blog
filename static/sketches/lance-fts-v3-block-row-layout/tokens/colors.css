@@ -1,0 +1,132 @@
+/* ============================================================
+   Xuanwo Design System — Color
+   ------------------------------------------------------------
+   A calm, technical palette. Cool near-neutrals carry the page;
+   a single azure accent — the monitor-screen blue from the Xuanwo
+   logo — does all the highlighting. Full dual theme: light is the :root default,
+   dark applies via [data-theme="dark"] and also follows the OS
+   when no explicit theme is set.
+
+   Layers (low → high): --bg → --surface → --surface-2 → --surface-3
+   Text  (strong → faint): --fg → --fg-muted → --fg-subtle → --fg-faint
+   Lines (faint → strong) : --border → --border-strong
+   ============================================================ */
+
+:root {
+  /* ---- Base ramp (raw values) — Azure (the logo's screen-blue) ---- */
+  --azure-50:  #e8f4fc;
+  --azure-100: #cbe6f8;
+  --azure-200: #9bd0f2;
+  --azure-300: #5fb3e8;
+  --azure-400: #2b97db;
+  --azure-500: #0f83cf;   /* brand accent — light */
+  --azure-600: #0a6aa8;
+  --azure-700: #08547f;
+  --azure-800: #06425f;
+  --azure-900: #052f44;
+
+  /* ---- Surfaces ---- */
+  --bg:           #fbfbfc;   /* page */
+  --surface:      #ffffff;   /* cards, panels */
+  --surface-2:    #f4f5f7;   /* subtle fills, code, hover */
+  --surface-3:    #eceef1;   /* pressed / nested */
+  --surface-inset:#f7f8f9;   /* inputs */
+
+  /* ---- Text ---- */
+  --fg:        #14171a;   /* primary ink */
+  --fg-muted:  #4d545c;   /* secondary */
+  --fg-subtle: #767e87;   /* tertiary, captions */
+  --fg-faint:  #9aa1aa;   /* placeholders, disabled */
+  --fg-on-accent: #ffffff;
+
+  /* ---- Lines ---- */
+  --border:        #e6e8eb;
+  --border-strong: #d4d8dd;
+  --border-accent: var(--azure-500);
+
+  /* ---- Accent (semantic) ---- */
+  --accent:         var(--azure-500);
+  --accent-hover:   var(--azure-600);
+  --accent-active:  var(--azure-700);
+  --accent-fg:      #ffffff;          /* text/icon on a filled accent */
+  --accent-text:    var(--azure-600);  /* accent used AS text on light bg */
+  --accent-subtle:  var(--azure-50);   /* tinted background */
+  --accent-border:  var(--azure-200);
+
+  /* ---- Semantic status ---- */
+  --success:        #1f8a5b;
+  --success-text:   #157048;
+  --success-subtle: #e6f4ec;
+  --success-border: #b6e0c8;
+
+  --warning:        #b3791a;
+  --warning-text:   #8f5f12;
+  --warning-subtle: #fdf2dd;
+  --warning-border: #f0d9a3;
+
+  --danger:         #c5392f;
+  --danger-text:    #a72e26;
+  --danger-subtle:  #fcebe9;
+  --danger-border:  #f3c2bd;
+
+  --info:           #2563c9;
+  --info-text:      #1f54ab;
+  --info-subtle:    #e8f0fd;
+  --info-border:    #bcd3f5;
+
+  /* ---- Focus ring ---- */
+  --ring: color-mix(in srgb, var(--accent) 55%, transparent);
+
+  /* ---- Selection ---- */
+  --selection-bg: var(--azure-100);
+  --selection-fg: var(--azure-900);
+
+  --color-scheme: light;
+}
+
+/* Shared dark palette — applied to explicit [data-theme="dark"]
+   and to the OS-preference fallback below. Keep the two blocks
+   identical. */
+[data-theme="dark"] {
+  --bg:           #0b0d0f;
+  --surface:      #131619;
+  --surface-2:    #1a1e22;
+  --surface-3:    #23282d;
+  --surface-inset:#15181c;
+
+  --fg:        #f4f6f7;
+  --fg-muted:  #a7afb8;
+  --fg-subtle: #7a838d;
+  --fg-faint:  #59616a;
+  --fg-on-accent: #04263b;
+
+  --border:        #23272c;
+  --border-strong: #323840;
+  --border-accent: var(--azure-400);
+
+  --accent:         #38a8ec;
+  --accent-hover:   #5fb3e8;
+  --accent-active:  #9bd0f2;
+  --accent-fg:      #04263b;
+  --accent-text:    #6fc1f0;
+  --accent-subtle:  #0c2f44;
+  --accent-border:  #134c6b;
+
+  --success:        #3fae7d;  --success-text: #5cc497;  --success-subtle:#10241b;  --success-border:#1d3f30;
+  --warning:        #d6a040;  --warning-text: #e6b765;  --warning-subtle:#2a2113;  --warning-border:#473717;
+  --danger:         #e0635a;  --danger-text:  #ef847c;  --danger-subtle: #2c1514;  --danger-border: #4a221f;
+  --info:           #5a93ef;  --info-text:    #82adf4;  --info-subtle:   #121f33;  --info-border:   #1f3656;
+
+  --ring: color-mix(in srgb, var(--accent) 60%, transparent);
+  --selection-bg: var(--azure-800);
+  --selection-fg: var(--azure-50);
+
+  --color-scheme: dark;
+}
+
+/* OS auto-dark: this system ships light as the default and switches to
+   dark explicitly via [data-theme="dark"]. To follow the OS, set the
+   attribute once on load, e.g.:
+     if (!root.dataset.theme && matchMedia('(prefers-color-scheme:dark)').matches)
+       root.dataset.theme = 'dark';
+   (kept out of CSS so every dark token registers under a single scope.) */

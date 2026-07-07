@@ -1,0 +1,79 @@
+/* ============================================================
+   Xuanwo Design System — Base / Reset
+   ------------------------------------------------------------
+   A light reset that wires the tokens to real elements. Linking
+   styles.css alone gives a consuming page sensible defaults:
+   correct fonts, themed bg/fg, smooth color transitions, themed
+   selection + focus, and styled prose/code.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+* { margin: 0; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: var(--color-scheme, light);
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  font-weight: var(--weight-regular);
+  color: var(--fg);
+  background-color: var(--bg);
+  font-feature-settings: "cv05" 1, "ss01" 1; /* friendlier letterforms in Source Sans */
+  text-rendering: optimizeLegibility;
+}
+
+/* Smoothly cross-fade the whole page on theme switch. */
+body, .ds-themed {
+  transition: background-color var(--duration-base) var(--ease-out),
+              color var(--duration-base) var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+::selection { background: var(--selection-bg); color: var(--selection-fg); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+a { color: var(--accent-text); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 0.15em; }
+
+code, kbd, samp, pre {
+  font-family: var(--font-code);
+  font-feature-settings: "calt" 1; /* Fira Code ligatures */
+  font-size: 0.9em;
+}
+
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-full);
+  border: 3px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--fg-faint); }
+
+/* Heading rhythm — opt-in via .ds-prose for long-form, but base
+   tags get sane defaults. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-snug);
+  color: var(--fg);
+  text-wrap: balance;
+}

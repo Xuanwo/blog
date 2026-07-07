@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lance FTS V3 block-row layout</title>
+  <meta name="description" content="Lance FTS V3 pulls posting-list skip metadata out of the payload and stores one block per row, so the executor can prove a block useless before paying to read it.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--fg); }
+    a { color: inherit; }
+    code { word-break: break-word; }
+
+    .shell {
+      width: min(var(--container-wide), calc(100vw - 2 * var(--gutter)));
+      margin: 0 auto;
+    }
+
+    /* ---------- topbar ---------- */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: var(--z-sticky);
+      border-bottom: var(--border-hairline);
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
+      backdrop-filter: blur(18px);
+    }
+    .topbar-inner {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-5);
+    }
+    .brand {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      color: var(--fg-muted);
+      font-size: var(--text-sm);
+    }
+    .mark {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: none;
+      border: var(--border-width) solid var(--accent-border);
+      border-radius: var(--radius-md);
+      color: var(--accent-text);
+      background: var(--accent-subtle);
+      font: var(--weight-bold) var(--text-sm)/1 var(--font-mono);
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav::-webkit-scrollbar { display: none; }
+    .nav a, .theme-toggle {
+      flex: none;
+      border: 0;
+      border-radius: var(--radius-md);
+      padding: 7px 10px;
+      background: transparent;
+      color: var(--fg-muted);
+      font: inherit;
+      font-size: var(--text-sm);
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition-colors);
+    }
+    .nav a:hover, .theme-toggle:hover { background: var(--surface-2); color: var(--fg); }
+
+    /* ---------- hero ---------- */
+    .hero { padding: var(--space-10) 0 var(--space-8); }
+    .eyebrow {
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent-text);
+      margin-bottom: var(--space-4);
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(34px, 5.2vw, 56px);
+      line-height: 1.08;
+      letter-spacing: -0.015em;
+      margin: 0 0 var(--space-4);
+      max-width: 18ch;
+    }
+    .hero .lead {
+      max-width: 62ch;
+      color: var(--fg-muted);
+      font-size: var(--text-lg);
+      line-height: 1.6;
+      margin: 0 0 var(--space-6);
+    }
+    .key-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-4);
+      max-width: 880px;
+    }
+    .key {
+      border: var(--border-hairline);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: var(--space-4) var(--space-5);
+    }
+    .key strong {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      color: var(--fg);
+      margin-bottom: var(--space-1);
+    }
+    .key span { color: var(--fg-subtle); font-size: var(--text-sm); line-height: 1.5; }
+
+    /* ---------- sections ---------- */
+    section { padding: var(--space-9) 0; border-top: var(--border-hairline); }
+    .section-head { max-width: 720px; margin-bottom: var(--space-7); }
+    .section-head h2 {
+      font-family: var(--font-display);
+      font-size: clamp(24px, 3vw, 32px);
+      line-height: 1.15;
+      margin: 0 0 var(--space-3);
+      letter-spacing: -0.01em;
+    }
+    .section-copy { color: var(--fg-muted); line-height: 1.65; margin: 0; }
+    .section-copy + .section-copy { margin-top: var(--space-3); }
+
+    .panel {
+      border: var(--border-hairline);
+      border-radius: var(--radius-xl);
+      background: var(--surface);
+      padding: var(--space-6);
+    }
+    .panel-title {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--fg-subtle);
+      letter-spacing: 0.06em;
+      margin-bottom: var(--space-5);
+    }
+    .replay {
+      border: var(--border-hairline);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--fg-muted);
+      font: inherit;
+      font-size: var(--text-sm);
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: var(--transition-colors);
+    }
+    .replay:hover { background: var(--surface-2); color: var(--fg); }
+    .panel-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-5);
+    }
+    .panel-bar .panel-title { margin-bottom: 0; }
+    .footnote { color: var(--fg-faint); font-size: var(--text-xs); margin-top: var(--space-4); }
+
+    /* ---------- anatomy (problem) ---------- */
+    .anatomy-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      gap: var(--space-5);
+      align-items: start;
+    }
+    .term-row { display: flex; gap: 6px; margin: var(--space-4) 0 var(--space-5); }
+    .blk {
+      flex: 1;
+      min-width: 0;
+      height: 46px;
+      display: flex;
+      border: var(--border-width) solid var(--border-color);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--surface-2);
+    }
+    .blk .hdr {
+      flex: none;
+      width: 18%;
+      background: var(--accent);
+      opacity: 0.85;
+    }
+    .legend { display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-6); }
+    .legend div {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      color: var(--fg-subtle);
+      font-size: var(--text-sm);
+    }
+    .swatch {
+      width: 12px; height: 12px; flex: none;
+      border-radius: var(--radius-xs);
+      border: var(--border-width) solid var(--border-color);
+    }
+    .swatch.s-hdr { background: var(--accent); border-color: transparent; }
+    .swatch.s-pl { background: var(--surface-2); }
+    .anatomy-aside { display: flex; flex-direction: column; gap: var(--space-4); }
+    .fact {
+      border: var(--border-hairline);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: var(--space-4) var(--space-5);
+      font-size: var(--text-sm);
+      color: var(--fg-muted);
+      line-height: 1.6;
+    }
+    .fact strong { color: var(--fg); display: block; margin-bottom: 2px; }
+    .fact.consequence { border-color: var(--warning-border); background: var(--warning-subtle); }
+    .fact.consequence strong { color: var(--warning-text); }
+
+    /* ---------- morph (the move) ---------- */
+    .morph-stage { position: relative; }
+    .scene {
+      transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
+    }
+    /* scene-b sits in normal flow and defines the stage height; scene-a overlays it */
+    .scene-a { position: absolute; inset: 0 0 auto 0; }
+    .scene-b { position: relative; }
+    .scene-a .term-row { margin-top: var(--space-6); }
+    .scene-a .blk { height: 52px; }
+    .scene-a .blk .hdr { transition: transform 600ms var(--ease-out), box-shadow 600ms var(--ease-out); }
+    .scene-caption { color: var(--fg-subtle); font-size: var(--text-sm); margin-top: var(--space-4); line-height: 1.6; }
+    .pull-tag {
+      display: inline-block;
+      margin-top: var(--space-3);
+      font: 500 var(--text-xs)/1 var(--font-mono);
+      color: var(--accent-text);
+      background: var(--accent-subtle);
+      border: var(--border-width) solid var(--accent-border);
+      border-radius: var(--radius-full);
+      padding: 5px 12px;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 400ms var(--ease-out), transform 400ms var(--ease-out);
+    }
+    .morph-stage[data-step="1"] .pull-tag { opacity: 1; transform: none; }
+
+    /* armed step machine: [data-step] on .morph-stage */
+    .morph-stage[data-step="1"] .scene-a .blk .hdr {
+      transform: translateY(-8px);
+      box-shadow: 0 0 0 2px var(--accent-border);
+    }
+    .morph-stage[data-step="0"] .scene-b,
+    .morph-stage[data-step="1"] .scene-b { opacity: 0; pointer-events: none; }
+    .morph-stage[data-step="2"] .scene-a { opacity: 0; transform: translateY(-10px); pointer-events: none; }
+
+    .v3-table { display: grid; gap: 6px; margin-top: var(--space-4); }
+    .v3-row {
+      display: grid;
+      grid-template-columns: 44px 44px 44px minmax(0, 1fr) 84px;
+      gap: 6px;
+      align-items: stretch;
+      transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+    }
+    .morph-stage[data-step="0"] .v3-row,
+    .morph-stage[data-step="1"] .v3-row { opacity: 0; transform: translateY(10px); }
+    .morph-stage[data-step="2"] .v3-row { opacity: 1; transform: none; }
+    .morph-stage[data-step="2"] .v3-row:nth-child(2) { transition-delay: 70ms; }
+    .morph-stage[data-step="2"] .v3-row:nth-child(3) { transition-delay: 140ms; }
+    .morph-stage[data-step="2"] .v3-row:nth-child(4) { transition-delay: 210ms; }
+    .morph-stage[data-step="2"] .v3-row:nth-child(5) { transition-delay: 280ms; }
+    .morph-stage[data-step="2"] .v3-row:nth-child(6) { transition-delay: 350ms; }
+    .morph-stage[data-step="2"] .v3-row:nth-child(7) { transition-delay: 420ms; }
+
+    .cell {
+      height: 34px;
+      border: var(--border-width) solid var(--border-color);
+      border-radius: var(--radius-xs);
+      display: grid;
+      place-items: center;
+      font: 500 var(--text-xs)/1 var(--font-mono);
+      color: var(--fg-subtle);
+      background: var(--surface);
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .cell.skip { background: var(--accent-subtle); border-color: var(--accent-border); color: var(--accent-text); }
+    .cell.payload { background: var(--surface-2); justify-items: start; padding: 0 10px; display: flex; align-items: center; }
+    .cell.pos { border-style: dashed; color: var(--info-text); border-color: var(--info-border); background: var(--info-subtle); }
+    .v3-head { font: 500 var(--text-xs)/1 var(--font-mono); color: var(--fg-faint); display: grid; grid-template-columns: 44px 44px 44px minmax(0, 1fr) 84px; gap: 6px; }
+    .v3-head span { padding: 0 2px; overflow: hidden; text-overflow: ellipsis; }
+    .coarse {
+      margin-top: var(--space-3);
+      height: 26px;
+      border: var(--border-width) dashed var(--accent-border);
+      border-radius: var(--radius-xs);
+      display: grid;
+      place-items: center;
+      font: 500 var(--text-xs)/1 var(--font-mono);
+      color: var(--accent-text);
+      transition: opacity 500ms var(--ease-out) 500ms;
+    }
+    .morph-stage[data-step="0"] .coarse,
+    .morph-stage[data-step="1"] .coarse { opacity: 0; }
+
+    /* ---------- race ---------- */
+    .race-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-5);
+    }
+    .lane {
+      border: var(--border-hairline);
+      border-radius: var(--radius-lg);
+      background: var(--bg);
+      padding: var(--space-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+    .lane-title { font-weight: var(--weight-semibold); font-size: var(--text-sm); }
+    .lane-title .mono-tag {
+      font: 500 var(--text-xs)/1 var(--font-mono);
+      color: var(--fg-subtle);
+      margin-left: var(--space-2);
+    }
+    .zone {
+      border: var(--border-width) dashed var(--border-color);
+      border-radius: var(--radius-md);
+      padding: var(--space-3);
+      position: relative;
+    }
+    .zone-label {
+      position: absolute;
+      top: -9px;
+      left: 10px;
+      background: var(--bg);
+      padding: 0 6px;
+      font: 500 var(--text-xs)/1 var(--font-mono);
+      color: var(--fg-faint);
+    }
+    .track {
+      height: 64px;
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+    .wire-note { font: 500 var(--text-xs)/1.4 var(--font-mono); color: var(--fg-faint); text-align: center; }
+
+    .mover {
+      position: absolute;
+      left: 50%;
+      top: -46px;
+      transform: translateX(-50%);
+      border-radius: var(--radius-sm);
+      font: 500 var(--text-xs)/1 var(--font-mono);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 300ms var(--ease-out);
+    }
+    .mover.big { background: var(--surface-3); border: var(--border-width) solid var(--border-color); color: var(--fg-muted); padding: 10px 14px; }
+    .mover.thin { background: var(--accent-subtle); border: var(--border-width) solid var(--accent-border); color: var(--accent-text); }
+    /* striped bar = bytes in flight */
+    .chunk { height: 10px; border-radius: 2px; background: repeating-linear-gradient(90deg, currentColor 0 6px, transparent 6px 8px); opacity: 0.7; }
+    .chunk.c12 { width: 94px; }
+    .chunk.c3 { width: 22px; }
+    .chunk.cmeta { width: 94px; height: 4px; background: repeating-linear-gradient(90deg, currentColor 0 3px, transparent 3px 8px); }
+
+    /* movers rest hidden; armed shows the pending request at the top of the wire */
+    .race.armed .lane-v2 .mover.big { opacity: 1; }
+    .race.armed .lane-v3 .mover.thin { opacity: 1; }
+    .race.r-go .lane-v2 .mover.big {
+      transform: translateX(-50%) translateY(112px);
+      transition: transform 3200ms linear, opacity 300ms var(--ease-out);
+    }
+    .race.r-go .lane-v3 .mover.thin {
+      transform: translateX(-50%) translateY(112px);
+      transition: transform 900ms var(--ease-standard), opacity 300ms var(--ease-out);
+    }
+    .race.r-v3meta .lane-v3 .mover.thin { opacity: 0; }
+    .race.r-v2arrive .lane-v2 .mover.big { opacity: 0; }
+    .race.r-v3fetch .lane-v3 .mover.big {
+      opacity: 1;
+      transform: translateX(-50%) translateY(112px);
+      transition: transform 1100ms var(--ease-standard), opacity 300ms var(--ease-out);
+    }
+    .race.r-v3done .lane-v3 .mover.big { opacity: 0; }
+
+    .slots { display: flex; gap: 4px; }
+    .slot {
+      flex: 1;
+      min-width: 0;
+      height: 40px;
+      border: var(--border-width) solid var(--border-color);
+      border-radius: var(--radius-xs);
+      background: var(--surface-2);
+      position: relative;
+      transition: opacity 400ms var(--ease-out), background-color 400ms var(--ease-out), border-color 400ms var(--ease-out);
+    }
+    .slot .score {
+      position: absolute;
+      inset: auto 0 3px 0;
+      text-align: center;
+      font: 500 10px/1 var(--font-mono);
+      color: var(--fg-subtle);
+      transition: opacity 300ms var(--ease-out);
+    }
+    .slot.keep { border-color: var(--accent-border); }
+    .slot.keep .score { color: var(--accent-text); }
+    .lane-v2 .slot.keep { background: var(--accent-subtle); }
+    .lane-v3 .slot { background: transparent; }
+    .lane-v3 .slot.keep.filled { background: var(--accent-subtle); }
+
+    /* staging: armed dims everything, stage classes light lanes up in order */
+    .race.armed .slot { opacity: 0.15; }
+    .race.armed .slot .score { opacity: 0; }
+    .race.r-v2arrive .lane-v2 .slot { opacity: 1; }
+    .race.r-v2score .lane-v2 .slot .score { opacity: 1; }
+    .race.r-v3meta .lane-v3 .slot { opacity: 1; }
+    .race.r-v3meta .lane-v3 .slot .score { opacity: 1; }
+
+    /* pruning is applied by JS as .pruned so it lands at the right moment */
+    .race .lane-v2 .slot.cut.pruned { opacity: 0.45; background: var(--surface-3); }
+    .race .lane-v2 .slot.cut.pruned .score { color: var(--fg-faint); text-decoration: line-through; }
+    .race .lane-v3 .slot.cut.pruned { opacity: 0.5; border-style: dashed; }
+
+    .verdict {
+      font-size: var(--text-sm);
+      color: var(--fg-muted);
+      border-top: var(--border-hairline);
+      padding-top: var(--space-3);
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      transition: opacity 400ms var(--ease-out);
+    }
+    .verdict .mono-strong { font: var(--weight-semibold) var(--text-sm)/1.4 var(--font-mono); color: var(--fg); }
+    .verdict .late { color: var(--danger-text); }
+    .verdict .early { color: var(--accent-text); }
+    .race.armed .verdict { opacity: 0; }
+    .race.r-v2prune .lane-v2 .verdict { opacity: 1; }
+    .race.r-v3done .lane-v3 .verdict { opacity: 1; }
+
+    .wire-note { transition: color var(--duration-fast) var(--ease-out); min-height: 2.8em; display: grid; place-items: center; }
+
+    /* ---------- threshold interactive ---------- */
+    .thr-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+      gap: var(--space-6);
+      align-items: start;
+    }
+    .chart {
+      position: relative;
+      height: 220px;
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+      padding-bottom: 2px;
+      border-bottom: var(--border-width) solid var(--border-color);
+    }
+    .bar {
+      flex: 1;
+      min-width: 0;
+      background: var(--accent);
+      border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+      opacity: 0.9;
+      transition: opacity var(--duration-base) var(--ease-out), background-color var(--duration-base) var(--ease-out);
+    }
+    .bar.cut { background: var(--surface-3); opacity: 0.8; }
+    .thr-line {
+      position: absolute;
+      left: 0; right: 0;
+      height: 0;
+      border-top: 2px dashed var(--danger-text);
+      pointer-events: none;
+      transition: bottom 80ms linear;
+    }
+    .thr-line::after {
+      content: "top-k threshold";
+      position: absolute;
+      right: 0;
+      top: -20px;
+      font: 500 var(--text-xs)/1 var(--font-mono);
+      color: var(--danger-text);
+      background: var(--surface);
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
+    }
+    .thr-controls { display: flex; flex-direction: column; gap: var(--space-4); }
+    .thr-controls input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .readout {
+      border: var(--border-hairline);
+      border-radius: var(--radius-lg);
+      background: var(--bg);
+      padding: var(--space-4) var(--space-5);
+      display: grid;
+      gap: var(--space-2);
+    }
+    .readout div { display: flex; justify-content: space-between; gap: var(--space-4); font-size: var(--text-sm); color: var(--fg-muted); }
+    .readout .num { font-family: var(--font-mono); color: var(--fg); }
+    .contract {
+      border-left: 3px solid var(--accent);
+      background: var(--accent-subtle);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: var(--space-4) var(--space-5);
+      color: var(--fg-muted);
+      font-size: var(--text-sm);
+      line-height: 1.65;
+    }
+    .contract strong { color: var(--accent-text); }
+    .plan-steps { margin: var(--space-6) 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-3); counter-reset: step; }
+    .plan-steps li {
+      border: var(--border-hairline);
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--text-xs);
+      color: var(--fg-subtle);
+      line-height: 1.5;
+    }
+    .plan-steps li::before {
+      counter-increment: step;
+      content: "0" counter(step);
+      display: block;
+      font: var(--weight-semibold) var(--text-xs)/1 var(--font-mono);
+      color: var(--accent-text);
+      margin-bottom: var(--space-2);
+    }
+    .plan-steps li strong { display: block; color: var(--fg); margin-bottom: 2px; font-size: var(--text-xs); }
+
+    /* ---------- prewarm ---------- */
+    .warm-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+      gap: var(--space-6);
+      align-items: start;
+    }
+    .warm-chart {
+      position: relative;
+      height: 180px;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      border-bottom: var(--border-width) solid var(--border-color);
+    }
+    .wbar {
+      flex: 1;
+      min-width: 0;
+      background: var(--surface-3);
+      border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+      transition: background-color 500ms var(--ease-out), opacity 500ms var(--ease-out);
+    }
+    .warm .wbar.hot { background: var(--accent); }
+    .warm.armed .wbar.hot { background: var(--surface-3); }
+    .warm.playing .wbar.hot { background: var(--accent); }
+    .warm.playing .wbar.hot:nth-child(1) { transition-delay: 1250ms; }
+    .warm.playing .wbar.hot:nth-child(2) { transition-delay: 1450ms; }
+    .warm.playing .wbar.hot:nth-child(3) { transition-delay: 1650ms; }
+    .warm-chart { --cut-x: calc(10% - 1px); }
+    .cutoff {
+      position: absolute;
+      top: -6px; bottom: -6px;
+      left: var(--cut-x);
+      border-left: 2px dashed var(--accent-text);
+      pointer-events: none;
+      transition: left 1100ms var(--ease-standard) 150ms, opacity 300ms var(--ease-out) 150ms;
+    }
+    .cutoff::after {
+      content: "percent=10 cutoff";
+      position: absolute;
+      left: 8px;
+      top: -4px;
+      font: 500 var(--text-xs)/1 var(--font-mono);
+      color: var(--accent-text);
+      white-space: nowrap;
+    }
+    /* the cutoff sweeps in from the right, then the surviving rows warm up */
+    .warm.armed .warm-chart { --cut-x: calc(100% - 2px); }
+    .warm.armed .cutoff { opacity: 0; transition: none; }
+    .warm.playing .warm-chart { --cut-x: calc(10% - 1px); }
+    .warm.playing .cutoff { opacity: 1; transition: left 1100ms var(--ease-standard) 150ms, opacity 300ms var(--ease-out) 150ms; }
+    .warm-caption { color: var(--fg-subtle); font-size: var(--text-sm); margin-top: var(--space-4); line-height: 1.6; }
+    .keys-list { margin: var(--space-4) 0 0; padding: 0; list-style: none; display: grid; gap: var(--space-2); }
+    .keys-list li {
+      font: 500 var(--text-xs)/1.5 var(--font-mono);
+      color: var(--fg-muted);
+      border: var(--border-hairline);
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      padding: var(--space-2) var(--space-3);
+    }
+    .keys-list b { color: var(--accent-text); font-weight: 500; }
+
+    .resident { display: grid; gap: var(--space-3); }
+    .res-row { display: grid; gap: 4px; }
+    .res-row .res-label { display: flex; justify-content: space-between; font-size: var(--text-sm); color: var(--fg-muted); }
+    .res-row .res-label .num { font-family: var(--font-mono); color: var(--fg); }
+    .res-track { height: 10px; border-radius: var(--radius-full); background: var(--surface-2); overflow: hidden; }
+    .res-fill { height: 100%; border-radius: var(--radius-full); background: var(--fg-faint); transition: width 900ms var(--ease-standard) 300ms; }
+    .res-fill.accent { background: var(--accent); }
+    .warm.armed .res-fill { width: 0 !important; }
+
+    /* ---------- bench ---------- */
+    .bench-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+    table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    th, td { text-align: left; padding: var(--space-3) var(--space-3); border-bottom: var(--border-hairline); vertical-align: top; }
+    th { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-faint); font-weight: var(--weight-semibold); }
+    td.mono, .mono { font-family: var(--font-mono); }
+    tr.hl td { background: var(--accent-subtle); }
+    .boundaries { display: grid; gap: var(--space-4); }
+    .boundary {
+      border: var(--border-hairline);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: var(--space-4) var(--space-5);
+      font-size: var(--text-sm);
+      color: var(--fg-muted);
+      line-height: 1.6;
+    }
+    .boundary strong { display: block; margin-bottom: var(--space-1); }
+    .boundary.proven { border-left: 3px solid var(--success); }
+    .boundary.proven strong { color: var(--success-text); }
+    .boundary.open { border-left: 3px solid var(--warning); }
+    .boundary.open strong { color: var(--warning-text); }
+    .boundary.regress { border-left: 3px solid var(--danger); }
+    .boundary.regress strong { color: var(--danger-text); }
+
+    /* ---------- future ---------- */
+    .future-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+    .future {
+      border: var(--border-hairline);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: var(--space-4) var(--space-5);
+    }
+    .future h3 { margin: 0 0 var(--space-2); font-size: var(--text-base); }
+    .future p { margin: 0; color: var(--fg-subtle); font-size: var(--text-sm); line-height: 1.55; }
+
+    .footer { border-top: var(--border-hairline); padding: var(--space-6) 0 var(--space-9); color: var(--fg-faint); font-size: var(--text-sm); }
+
+    /* ---------- reveal on scroll ---------- */
+    .reveal { opacity: 0; transform: translateY(12px); transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    @media (max-width: 960px) {
+      .key-strip, .anatomy-grid, .race-grid, .thr-grid, .warm-grid, .bench-grid { grid-template-columns: minmax(0, 1fr); }
+      .plan-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .future-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      .plan-steps, .future-grid { grid-template-columns: minmax(0, 1fr); }
+      .slot .score { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand">
+        <div class="mark">V3</div>
+        <div>Lance FTS · block-row posting layout</div>
+      </div>
+      <nav class="nav" aria-label="Sections">
+        <a href="#problem">Problem</a>
+        <a href="#move">The move</a>
+        <a href="#race">Race</a>
+        <a href="#executor">Executor</a>
+        <a href="#prewarm">Prewarm</a>
+        <a href="#bench">Boundary</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle theme">Theme</button>
+      </nav>
+    </div>
+  </div>
+
+  <main>
+    <header class="hero">
+      <div class="shell">
+        <div class="eyebrow">Lance full-text search · sketch</div>
+        <h1>Read the skip data before the payload.</h1>
+        <p class="lead">V1/V2 store a token's whole posting list as one row, with each block's max score buried in the first bytes of its compressed payload. V3 gives every 128-doc block its own row and pulls the skip metadata out into narrow columns — so the executor can prove a block useless <em>before</em> paying to read it.</p>
+        <div class="key-strip">
+          <div class="key"><strong>95% QPS at 6% memory</strong><span>Selective cache reaches 1376–1408 QPS with 4.09 MiB resident, against full-prewarm's 1452 QPS at 66.08 MiB.</span></div>
+          <div class="key"><strong>Prune before IO</strong><span>Block bound checks move from after payload decode to before payload reads.</span></div>
+          <div class="key"><strong>Exact top-k, always</strong><span>Every skipped block is proven out by its upper bound; anything unproven falls back to the full path.</span></div>
+        </div>
+      </div>
+    </header>
+
+    <section id="problem">
+      <div class="shell">
+        <div class="section-head reveal">
+          <h2>The score lives inside the thing it should judge</h2>
+          <p class="section-copy">One row of <code>invert.lance</code> holds a token's entire posting list: a <code>List&lt;LargeBinary&gt;</code> where each element is one 128-doc compressed block. The 8-byte header of every block carries <code>block_max_score</code> and <code>first_doc_id</code> — exactly the two numbers WAND needs to decide whether the block is worth reading.</p>
+        </div>
+        <div class="anatomy-grid reveal">
+          <div class="panel">
+            <div class="panel-title">invert.lance · one row = one token's posting list (V2)</div>
+            <div class="term-row" aria-hidden="true">
+              <div class="blk"><span class="hdr"></span></div>
+              <div class="blk"><span class="hdr"></span></div>
+              <div class="blk"><span class="hdr"></span></div>
+              <div class="blk"><span class="hdr"></span></div>
+              <div class="blk"><span class="hdr"></span></div>
+              <div class="blk"><span class="hdr"></span></div>
+              <div class="blk"><span class="hdr"></span></div>
+              <div class="blk"><span class="hdr"></span></div>
+            </div>
+            <div class="legend">
+              <div><span class="swatch s-hdr"></span>8-byte header: block_max_score + first_doc_id</div>
+              <div><span class="swatch s-pl"></span>128-doc compressed payload</div>
+            </div>
+            <p class="footnote">Header width exaggerated for visibility — it is 8 B in a ~1 KB block.</p>
+          </div>
+          <div class="anatomy-aside">
+            <div class="fact"><strong>Term-level metadata is fine.</strong><code>_max_score</code> and <code>_length</code> are separate columns — you can project them without touching payload.</div>
+            <div class="fact"><strong>Block-level metadata is not.</strong>To see one block's score you must read and decode the whole row. Lance reads List rows whole; there is no element-level IO.</div>
+            <div class="fact consequence"><strong>Consequence</strong>WAND's block skipping can only happen in the decode layer — after every byte has already crossed the network into memory.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="move">
+      <div class="shell">
+        <div class="section-head reveal">
+          <h2>The move: pull skip out, one block per row</h2>
+          <p class="section-copy">Split the storage by access pattern instead of by term. The skip data leaves the payload and becomes narrow columns you can project alone; each block becomes an independently addressable row; positions align to the same row ids; a coarse skip layer aggregates block groups for long-range <code>advance(target)</code>.</p>
+        </div>
+        <div class="panel reveal">
+          <div class="panel-bar">
+            <div class="panel-title">from one fat row to block rows</div>
+            <button class="replay" type="button" data-replay="morph">Replay</button>
+          </div>
+          <div class="morph-stage" data-step="2" id="morphStage">
+            <div class="scene scene-a">
+              <div class="term-row" aria-hidden="true">
+                <div class="blk"><span class="hdr"></span></div>
+                <div class="blk"><span class="hdr"></span></div>
+                <div class="blk"><span class="hdr"></span></div>
+                <div class="blk"><span class="hdr"></span></div>
+                <div class="blk"><span class="hdr"></span></div>
+                <div class="blk"><span class="hdr"></span></div>
+              </div>
+              <div class="pull-tag">skip metadata leaves the payload</div>
+              <p class="scene-caption">V2: six blocks welded into one row. The blue headers are the decision inputs — trapped inside the decision objects.</p>
+            </div>
+            <div class="scene scene-b">
+              <div class="v3-head" aria-hidden="true">
+                <span>first</span><span>last</span><span>max</span><span>posting_payload</span><span>positions</span>
+              </div>
+              <div class="v3-table" aria-hidden="true">
+                <div class="v3-row"><div class="cell skip">17</div><div class="cell skip">402</div><div class="cell skip">8.1</div><div class="cell payload">128-doc payload</div><div class="cell pos">row 0</div></div>
+                <div class="v3-row"><div class="cell skip">403</div><div class="cell skip">771</div><div class="cell skip">3.4</div><div class="cell payload">128-doc payload</div><div class="cell pos">row 1</div></div>
+                <div class="v3-row"><div class="cell skip">772</div><div class="cell skip">1188</div><div class="cell skip">6.9</div><div class="cell payload">128-doc payload</div><div class="cell pos">row 2</div></div>
+                <div class="v3-row"><div class="cell skip">1189</div><div class="cell skip">1550</div><div class="cell skip">2.2</div><div class="cell payload">128-doc payload</div><div class="cell pos">row 3</div></div>
+                <div class="v3-row"><div class="cell skip">1551</div><div class="cell skip">1903</div><div class="cell skip">2.8</div><div class="cell payload">128-doc payload</div><div class="cell pos">row 4</div></div>
+                <div class="v3-row"><div class="cell skip">1904</div><div class="cell skip">2377</div><div class="cell skip">7.5</div><div class="cell payload">128-doc payload</div><div class="cell pos">row 5</div></div>
+              </div>
+              <div class="coarse">posting_coarse_skip · doc range + group max over every block group</div>
+              <p class="scene-caption">V3: skip columns are narrow and projectable; <code>terms</code> maps token_id → <code>block_start + num_blocks</code>; payload and positions rows are fetched only when selected. The payload codec stays FTS-private — Lance only provides row addressing, range reads, and column projection.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="race">
+      <div class="shell">
+        <div class="section-head reveal">
+          <h2>Same query, two read paths</h2>
+          <p class="section-copy">One term, twelve blocks, three of them can beat the current top-k threshold. Watch what crosses the network in each version.</p>
+        </div>
+        <div class="panel reveal">
+          <div class="panel-bar">
+            <div class="panel-title">object store → executor · one query term</div>
+            <button class="replay" type="button" data-replay="race">Play</button>
+          </div>
+          <div class="race" id="raceStage">
+            <div class="race-grid">
+              <div class="lane lane-v2">
+                <div class="lane-title">V2 <span class="mono-tag">one row per token</span></div>
+                <div class="zone">
+                  <span class="zone-label">network</span>
+                  <div class="track">
+                    <div class="mover big"><span class="chunk c12"></span>12.4 KB</div>
+                    <div class="wire-note">12.4 KB crossed · 12 blocks decoded · 9 discarded late</div>
+                  </div>
+                </div>
+                <div class="zone">
+                  <span class="zone-label">executor · after decode</span>
+                  <div class="slots" aria-hidden="true">
+                    <div class="slot keep"><span class="score">8.1</span></div>
+                    <div class="slot cut pruned"><span class="score">3.4</span></div>
+                    <div class="slot cut pruned"><span class="score">1.9</span></div>
+                    <div class="slot cut pruned"><span class="score">2.2</span></div>
+                    <div class="slot keep"><span class="score">7.5</span></div>
+                    <div class="slot cut pruned"><span class="score">2.8</span></div>
+                    <div class="slot cut pruned"><span class="score">4.0</span></div>
+                    <div class="slot cut pruned"><span class="score">1.4</span></div>
+                    <div class="slot keep"><span class="score">6.9</span></div>
+                    <div class="slot cut pruned"><span class="score">3.1</span></div>
+                    <div class="slot cut pruned"><span class="score">2.5</span></div>
+                    <div class="slot cut pruned"><span class="score">0.8</span></div>
+                  </div>
+                </div>
+                <div class="verdict">
+                  <span>wire <span class="mono-strong">12.4 KB</span> · decoded <span class="mono-strong">12/12</span></span>
+                  <span class="late">pruned after decode</span>
+                </div>
+              </div>
+              <div class="lane lane-v3">
+                <div class="lane-title">V3 <span class="mono-tag">one row per block</span></div>
+                <div class="zone">
+                  <span class="zone-label">network</span>
+                  <div class="track">
+                    <div class="mover thin"><span class="chunk cmeta"></span>144 B skip metadata</div>
+                    <div class="mover big"><span class="chunk c3"></span>3.1 KB selected payload</div>
+                    <div class="wire-note">3.2 KB crossed · 3 blocks decoded · pruned before payload</div>
+                  </div>
+                </div>
+                <div class="zone">
+                  <span class="zone-label">executor · before payload reads</span>
+                  <div class="slots" aria-hidden="true">
+                    <div class="slot keep filled"><span class="score">8.1</span></div>
+                    <div class="slot cut pruned"><span class="score">3.4</span></div>
+                    <div class="slot cut pruned"><span class="score">1.9</span></div>
+                    <div class="slot cut pruned"><span class="score">2.2</span></div>
+                    <div class="slot keep filled"><span class="score">7.5</span></div>
+                    <div class="slot cut pruned"><span class="score">2.8</span></div>
+                    <div class="slot cut pruned"><span class="score">4.0</span></div>
+                    <div class="slot cut pruned"><span class="score">1.4</span></div>
+                    <div class="slot keep filled"><span class="score">6.9</span></div>
+                    <div class="slot cut pruned"><span class="score">3.1</span></div>
+                    <div class="slot cut pruned"><span class="score">2.5</span></div>
+                    <div class="slot cut pruned"><span class="score">0.8</span></div>
+                  </div>
+                </div>
+                <div class="verdict">
+                  <span>wire <span class="mono-strong">3.2 KB</span> · decoded <span class="mono-strong">3/12</span></span>
+                  <span class="early">pruned before payload reads</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="footnote">Illustrative sizes for one mid-frequency term: 12 × 128-doc blocks ≈ 1 KB each, skip metadata 12 B per block; widths not to scale. Striped bars are bytes in flight. Outlined slots in V3 are blocks the executor knows about but never fetches.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="executor">
+      <div class="shell">
+        <div class="section-head reveal">
+          <h2>Prune by proof, not by guess</h2>
+          <p class="section-copy">Drag the top-k threshold. A block issues a payload read only if its <code>block_max_score</code> — an upper bound on any score inside it — can still beat the threshold. As the heap fills during a real query, the threshold rises and the read plan shrinks.</p>
+        </div>
+        <div class="panel reveal">
+          <div class="thr-grid">
+            <div>
+              <div class="panel-title">block_max_score per block · one term, 16 blocks</div>
+              <div class="chart" id="thrChart" aria-hidden="true">
+                <div class="thr-line" id="thrLine"></div>
+              </div>
+            </div>
+            <div class="thr-controls">
+              <label for="thrRange" class="panel-title" style="margin-bottom:0">top-k threshold</label>
+              <input type="range" id="thrRange" min="0" max="9" step="0.1" value="5.6" aria-label="Top-k threshold">
+              <div class="readout">
+                <div><span>threshold τ</span><span class="num" id="roTau">5.6</span></div>
+                <div><span>blocks kept</span><span class="num" id="roKept">4 / 16</span></div>
+                <div><span>payload plan</span><span class="num" id="roBytes">≈ 4.1 KB</span></div>
+                <div><span>bytes avoided</span><span class="num" id="roSaved">75%</span></div>
+              </div>
+              <div class="contract"><strong>Exactness contract.</strong> Pruning is never approximate: a skipped block is one whose upper bound proves it cannot reach top-k. When the proof cannot be completed, the executor falls back to full posting-list materialization and recomputes everything — same result set, same scores.</div>
+            </div>
+          </div>
+          <ol class="plan-steps">
+            <li><strong>Resolve</strong>token → <code>terms</code> → block row range</li>
+            <li><strong>Read skip</strong>project first/last/max columns, or hit cache</li>
+            <li><strong>Bound-check</strong>threshold vs term bound vs block max</li>
+            <li><strong>Fetch survivors</strong>payload ranges for kept rows only</li>
+            <li><strong>Lazy positions</strong>phrase reads the same row ids on demand</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="prewarm">
+      <div class="shell">
+        <div class="section-head reveal">
+          <h2>Cache the valuable rows, keep an exact fallback</h2>
+          <p class="section-copy">Full-prewarm is no longer the only cache semantic. Selective prewarm reads the skip metadata for workload terms, ranks their block rows by <code>block_max_score</code>, and warms only the top slice — plus a workload-scoped fallback posting-list cache so a failed proof never sends query IO back to S3.</p>
+        </div>
+        <div class="panel reveal">
+          <div class="panel-bar">
+            <div class="panel-title">selective prewarm · block rows of one workload term, ranked by score</div>
+            <button class="replay" type="button" data-replay="warm">Replay</button>
+          </div>
+          <div class="warm" id="warmStage">
+            <div class="warm-grid">
+              <div>
+                <div class="warm-chart" id="warmChart" aria-hidden="true"></div>
+                <p class="warm-caption"><span style="color:var(--accent-text)">Accent bars</span> are warmed payload (and, when requested, positions) rows. Everything else stays cold on the object store — but its skip metadata is cached, so the executor can still prove what it isn't missing.</p>
+                <ul class="keys-list">
+                  <li><b>V3BlockMetadataKey</b>(token_id) — a term's block skip metadata</li>
+                  <li><b>V3TopBlockRowsKey</b>(token_id) — the rows selective prewarm picked</li>
+                  <li><b>V3PostingBlockKey</b>(block_row, with_position) — one payload block</li>
+                </ul>
+              </div>
+              <div>
+                <div class="panel-title">resident cache, measured</div>
+                <div class="resident">
+                  <div class="res-row">
+                    <div class="res-label"><span>V3 selective (top 10%)</span><span class="num">4.09 MiB</span></div>
+                    <div class="res-track"><div class="res-fill accent" style="width:6.2%"></div></div>
+                  </div>
+                  <div class="res-row">
+                    <div class="res-label"><span>V2 full-prewarm</span><span class="num">55.84 MiB</span></div>
+                    <div class="res-track"><div class="res-fill" style="width:84.5%"></div></div>
+                  </div>
+                  <div class="res-row">
+                    <div class="res-label"><span>V3 full-prewarm</span><span class="num">66.08 MiB</span></div>
+                    <div class="res-track"><div class="res-fill" style="width:100%"></div></div>
+                  </div>
+                </div>
+                <div class="fact" style="margin-top:var(--space-4)"><strong>Speculative search, isolated.</strong>When every query term's selected rows are cached, the executor tries a speculative pass with its own threshold, heap, and score state. It returns only when the result is provably exact; otherwise it falls back — and never reuses partial scores.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="bench">
+      <div class="shell">
+        <div class="section-head reveal">
+          <h2>Measured boundaries</h2>
+          <p class="section-copy">lance-bench-ec2, one S3 dataset, 120k docs, 160 queries, limit=10. Resident cache is much larger than bytes read (decompressed postings, positions, entry overhead), so the MiB ratios do not extrapolate to GB-scale indexes.</p>
+        </div>
+        <div class="bench-grid reveal">
+          <table aria-label="Measured results">
+            <thead>
+              <tr><th>Mode</th><th>QPS</th><th>Query IO</th><th>Resident cache</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>V2 cold</td><td class="mono">13.6</td><td class="mono">494 reads / 14.6 MB</td><td class="mono">65 entries</td></tr>
+              <tr><td>V3 cold</td><td class="mono">11.2</td><td class="mono">594 reads / 14.4 MB</td><td class="mono">48 entries</td></tr>
+              <tr><td>V3 top-block cache, no fallback</td><td class="mono">66.6</td><td class="mono">235 reads / 778 KB</td><td class="mono">484 entries</td></tr>
+              <tr class="hl"><td>V3 selective cache (top 10%)</td><td class="mono">1376–1408</td><td class="mono">0 reads / 0 B</td><td class="mono">4.09 MiB</td></tr>
+              <tr><td>V3 full-prewarm</td><td class="mono">1452</td><td class="mono">0 reads / 0 B</td><td class="mono">66.08 MiB</td></tr>
+              <tr><td>V2 full-prewarm</td><td class="mono">1426</td><td class="mono">0 reads / 0 B</td><td class="mono">55.84 MiB</td></tr>
+            </tbody>
+          </table>
+          <div class="boundaries">
+            <div class="boundary proven"><strong>Proven</strong>On this workload, selective cache reaches ~95% of full-prewarm QPS with ~6% of its resident cache, and zero remote reads at query time.</div>
+            <div class="boundary open"><strong>Not proven</strong>Block pruning's independent contribution. The no-fallback run (66.6 QPS, still 235 reads) suggests most of the QPS comes from the workload-scoped fallback cache — attribution needs the observability counters first.</div>
+            <div class="boundary regress"><strong>Known regression</strong>V3 cold is slower than V2 cold (11.2 vs 13.6 QPS, 594 vs 494 reads, bytes flat): cold pruning saved little payload here, while metadata reads added a hop, amplified by re-reading hot terms across queries.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="future">
+      <div class="shell">
+        <div class="section-head reveal">
+          <h2>Follow-up work</h2>
+          <p class="section-copy">The layout already exposes the row-level metadata these layers need.</p>
+        </div>
+        <div class="future-grid reveal">
+          <article class="future"><h3>Attribution counters</h3><p>Speculative completion rate, fallback rate, pruned blocks, and cache composition — then re-measure selective-without-fallback.</p></article>
+          <article class="future"><h3>Cold-path metadata reuse</h3><p>Keep block metadata and coarse skip resident across queries and coalesce metadata ranges, to close the cold regression.</p></article>
+          <article class="future"><h3>Prewarm range coalescing</h3><p>Selective prewarm issues 409 ranges vs full-prewarm's 35 for similar bytes; targeted token chunking should close that gap.</p></article>
+          <article class="future"><h3>Workload scope beyond query lists</h3><p>Extend selection from a fixed query list to query-log weighting or global score-aware prewarm under a memory budget.</p></article>
+          <article class="future"><h3>Cache-entry aggregation</h3><p>Shrink full-prewarm's 240k-entry overhead. Complementary, not a substitute: it still caches every payload row.</p></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="shell">Bench scope: lance-bench-ec2 · S3 · 120k docs · 160 queries · top-k 10. Sizes in the animations are illustrative; the table is measured.</div>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var saved = localStorage.getItem('theme');
+      if (saved) {
+        root.dataset.theme = saved;
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        root.dataset.theme = 'dark';
+      }
+      document.querySelector('.theme-toggle').addEventListener('click', function () {
+        var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        localStorage.setItem('theme', next);
+      });
+
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Scroll reveal
+      var revealEls = document.querySelectorAll('.reveal');
+      if (reduced || !('IntersectionObserver' in window)) {
+        revealEls.forEach(function (el) { el.classList.add('in'); });
+      } else {
+        var ro = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); }
+          });
+        }, { threshold: 0.15 });
+        revealEls.forEach(function (el) { ro.observe(el); });
+      }
+
+      // ---- morph: fat row -> block rows (data-step 0 -> 1 -> 2) ----
+      var morph = document.getElementById('morphStage');
+      var morphTimers = [];
+      function playMorph() {
+        morphTimers.forEach(clearTimeout);
+        morphTimers = [];
+        if (reduced) { morph.dataset.step = '2'; return; }
+        morph.dataset.step = '0';
+        void morph.offsetWidth;
+        morphTimers.push(setTimeout(function () { morph.dataset.step = '1'; }, 900));
+        morphTimers.push(setTimeout(function () { morph.dataset.step = '2'; }, 2800));
+      }
+
+      // ---- race: one clock drives both lanes; captions narrate each stage ----
+      var race = document.getElementById('raceStage');
+      var raceBtn = document.querySelector('[data-replay="race"]');
+      var raceTimers = [];
+      var capV2 = race.querySelector('.lane-v2 .wire-note');
+      var capV3 = race.querySelector('.lane-v3 .wire-note');
+      var RACE_STAGES = ['r-go', 'r-v3meta', 'r-v3prune', 'r-v3fetch', 'r-v3done', 'r-v2arrive', 'r-v2score', 'r-v2prune'];
+      var CAP_END_V2 = '12.4 KB crossed · 12 blocks decoded · 9 discarded late';
+      var CAP_END_V3 = '3.2 KB crossed · 3 blocks decoded · pruned before payload';
+      function raceMark(lane, on) {
+        race.querySelectorAll(lane + ' .slot.cut').forEach(function (s) { s.classList.toggle('pruned', on); });
+      }
+      function raceFill(on) {
+        race.querySelectorAll('.lane-v3 .slot.keep').forEach(function (s) { s.classList.toggle('filled', on); });
+      }
+      function raceEndState() {
+        RACE_STAGES.forEach(function (c) { race.classList.remove(c); });
+        race.classList.remove('armed');
+        raceMark('.lane-v2', true);
+        raceMark('.lane-v3', true);
+        raceFill(true);
+        capV2.textContent = CAP_END_V2;
+        capV3.textContent = CAP_END_V3;
+      }
+      function playRace() {
+        raceTimers.forEach(clearTimeout);
+        raceTimers = [];
+        raceBtn.textContent = 'Replay';
+        if (reduced) { raceEndState(); return; }
+        RACE_STAGES.forEach(function (c) { race.classList.remove(c); });
+        raceMark('.lane-v2', false);
+        raceMark('.lane-v3', false);
+        raceFill(false);
+        race.classList.add('armed');
+        capV2.textContent = 'GET full posting row';
+        capV3.textContent = 'GET skip columns only';
+        void race.offsetWidth;
+        var steps = [
+          [200, 'r-go', function () {
+            capV2.textContent = 'transferring 12.4 KB — every block, every time';
+            capV3.textContent = 'transferring 144 B of skip metadata';
+          }],
+          [1300, 'r-v3meta', function () {
+            capV3.textContent = 'scores visible — bound check before any payload';
+          }],
+          [2500, 'r-v3prune', function () {
+            raceMark('.lane-v3', true);
+            capV3.textContent = '9 / 12 proven out — nothing fetched for them';
+          }],
+          [3400, 'r-v3fetch', function () {
+            capV3.textContent = 'fetching the 3 surviving blocks';
+          }],
+          [4600, 'r-v3done', function () {
+            raceFill(true);
+            capV3.textContent = CAP_END_V3;
+          }],
+          [3500, 'r-v2arrive', function () {
+            capV2.textContent = 'arrived — decoding all 12 blocks';
+          }],
+          [4800, 'r-v2score', function () {
+            capV2.textContent = 'scores visible — only after full decode';
+          }],
+          [6000, 'r-v2prune', function () {
+            raceMark('.lane-v2', true);
+            capV2.textContent = CAP_END_V2;
+          }]
+        ];
+        steps.forEach(function (st) {
+          raceTimers.push(setTimeout(function () {
+            race.classList.add(st[1]);
+            st[2]();
+          }, st[0]));
+        });
+      }
+
+      // ---- prewarm: cutoff sweeps in from the right, survivors warm up ----
+      var warm = document.getElementById('warmStage');
+      var warmChart = document.getElementById('warmChart');
+      (function buildWarm() {
+        for (var i = 0; i < 30; i++) {
+          var b = document.createElement('div');
+          b.className = 'wbar' + (i < 3 ? ' hot' : '');
+          var h = 100 * Math.pow(1 - i / 32, 1.8);
+          b.style.height = Math.max(6, h) + '%';
+          warmChart.appendChild(b);
+        }
+        var cut = document.createElement('div');
+        cut.className = 'cutoff';
+        warmChart.appendChild(cut);
+      })();
+      function playWarm() {
+        if (reduced) { warm.classList.remove('armed', 'playing'); return; }
+        warm.classList.remove('playing');
+        warm.classList.add('armed');
+        void warm.offsetWidth;
+        warm.classList.add('playing');
+      }
+
+      // Replay buttons; a manual play also cancels any pending auto-play
+      document.querySelectorAll('[data-replay]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var kind = btn.dataset.replay;
+          autoPlayed[kind] = true;
+          if (kind === 'morph') playMorph();
+          if (kind === 'race') playRace();
+          if (kind === 'warm') playWarm();
+        });
+      });
+
+      // Auto-play once when scrolled into view; a manual Replay cancels the pending auto-play
+      var autoPlayed = { morph: false, race: false, warm: false };
+      if (!reduced && 'IntersectionObserver' in window) {
+        var autos = [
+          { key: 'morph', el: morph, fn: playMorph },
+          { key: 'race', el: race, fn: playRace },
+          { key: 'warm', el: warm, fn: playWarm }
+        ];
+        var ao = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (!e.isIntersecting) return;
+            var item = autos.find(function (a) { return a.el === e.target; });
+            if (item) {
+              ao.unobserve(e.target);
+              if (!autoPlayed[item.key]) { autoPlayed[item.key] = true; item.fn(); }
+            }
+          });
+        }, { threshold: 0.4 });
+        autos.forEach(function (a) { ao.observe(a.el); });
+      }
+
+      // ---- threshold interactive ----
+      var scores = [8.1, 3.4, 1.9, 2.2, 7.5, 2.8, 4.0, 1.4, 6.9, 3.1, 2.5, 0.8, 5.2, 4.6, 1.1, 6.1];
+      var maxScore = 9;
+      var chart = document.getElementById('thrChart');
+      var line = document.getElementById('thrLine');
+      var range = document.getElementById('thrRange');
+      var bars = scores.map(function (s) {
+        var b = document.createElement('div');
+        b.className = 'bar';
+        b.style.height = (s / maxScore * 100) + '%';
+        chart.appendChild(b);
+        return b;
+      });
+      var KB_PER_BLOCK = 1.03;
+      function updateThreshold() {
+        var tau = parseFloat(range.value);
+        var kept = 0;
+        bars.forEach(function (b, i) {
+          var cut = scores[i] < tau;
+          b.classList.toggle('cut', cut);
+          if (!cut) kept++;
+        });
+        line.style.bottom = (tau / maxScore * 100) + '%';
+        document.getElementById('roTau').textContent = tau.toFixed(1);
+        document.getElementById('roKept').textContent = kept + ' / ' + scores.length;
+        document.getElementById('roBytes').textContent = '≈ ' + (kept * KB_PER_BLOCK).toFixed(1) + ' KB';
+        document.getElementById('roSaved').textContent = Math.round((1 - kept / scores.length) * 100) + '%';
+      }
+      range.addEventListener('input', updateThreshold);
+      updateThreshold();
+    })();
+  </script>
+</body>
+</html>
