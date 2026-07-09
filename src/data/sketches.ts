@@ -9,6 +9,13 @@ export type Sketch = {
 // Each slug maps to static/sketches/<slug>/index.html.
 export const sketches: Sketch[] = [
   {
+    slug: 'lance-stable-row-id-birth-address',
+    title: 'Lance Stable Row IDs as Birth Addresses',
+    date: '2026-07-08',
+    description: 'How Lance 2.3 stable row ids equal their birth address, resolve through identity plus a relocation view transposed from fragment metadata, and make mutation cost land on moved rows only.',
+    cover: '/sketches/lance-stable-row-id-birth-address/cover.svg'
+  },
+  {
     slug: 'lance-fts-v3-block-row-layout',
     title: 'Lance FTS V3 Block-Row Layout',
     date: '2026-07-07',

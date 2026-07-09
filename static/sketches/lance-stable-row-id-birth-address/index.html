@@ -1,0 +1,1775 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lance Stable Row IDs as Birth Addresses</title>
+  <meta name="description" content="A visual design sketch for the Lance stable row id rework: row id equals birth address, reads resolve through identity plus a layered relocation table, and mutation cost lands on moved rows only.">
+  <style>
+    /* ==========================================================
+       Xuanwo Design System tokens (inlined — sketch pages are
+       self-contained). Light is :root; dark via [data-theme].
+       ========================================================== */
+    :root {
+      --azure-50: #e8f4fc;
+      --azure-100: #cbe6f8;
+      --azure-200: #9bd0f2;
+      --azure-400: #2b97db;
+      --azure-500: #0f83cf;
+      --azure-600: #0a6aa8;
+      --azure-700: #08547f;
+
+      --bg: #fbfbfc;
+      --surface: #ffffff;
+      --surface-2: #f4f5f7;
+      --surface-3: #eceef1;
+      --surface-inset: #f7f8f9;
+
+      --fg: #14171a;
+      --fg-muted: #4d545c;
+      --fg-subtle: #767e87;
+      --fg-faint: #9aa1aa;
+
+      --border: #e6e8eb;
+      --border-strong: #d4d8dd;
+
+      --accent: var(--azure-500);
+      --accent-hover: var(--azure-600);
+      --accent-fg: #ffffff;
+      --accent-text: var(--azure-600);
+      --accent-subtle: var(--azure-50);
+      --accent-border: var(--azure-200);
+
+      --success-text: #157048;
+      --success-subtle: #e6f4ec;
+      --success-border: #b6e0c8;
+
+      --warning-text: #8f5f12;
+      --warning-subtle: #fdf2dd;
+      --warning-border: #f0d9a3;
+
+      --danger-text: #a72e26;
+      --danger-subtle: #fcebe9;
+      --danger-border: #f3c2bd;
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-serif: Georgia, "Songti SC", "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+      --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
+
+      --radius-xs: 3px;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+
+      --space-1: .25rem;
+      --space-2: .5rem;
+      --space-3: .75rem;
+      --space-4: 1rem;
+      --space-5: 1.5rem;
+      --space-6: 2rem;
+      --space-7: 3rem;
+      --space-8: 4rem;
+
+      --duration-fast: 120ms;
+      --duration-base: 180ms;
+      --duration-slow: 280ms;
+      --ease-out: cubic-bezier(.22, 1, .36, 1);
+
+      color-scheme: light;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b0d0f;
+      --surface: #131619;
+      --surface-2: #1a1e22;
+      --surface-3: #23282d;
+      --surface-inset: #15181c;
+
+      --fg: #f4f6f7;
+      --fg-muted: #a7afb8;
+      --fg-subtle: #7a838d;
+      --fg-faint: #59616a;
+
+      --border: #23272c;
+      --border-strong: #323840;
+
+      --accent: #38a8ec;
+      --accent-hover: #5fb3e8;
+      --accent-fg: #04263b;
+      --accent-text: #6fc1f0;
+      --accent-subtle: #0c2f44;
+      --accent-border: #134c6b;
+
+      --success-text: #5cc497;
+      --success-subtle: #10241b;
+      --success-border: #1d3f30;
+
+      --warning-text: #e6b765;
+      --warning-subtle: #2a2113;
+      --warning-border: #473717;
+
+      --danger-text: #ef847c;
+      --danger-subtle: #2c1514;
+      --danger-border: #4a221f;
+
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font: 15px/1.5 var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      transition: background-color var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out);
+    }
+
+    button { font: inherit; }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: .92em;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1, h2, h3 {
+      font-weight: 600;
+      color: var(--fg);
+      text-wrap: balance;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .page { min-height: 100vh; }
+
+    .shell {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+    }
+
+    /* ---- Topbar ---- */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      min-height: 56px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      min-width: 0;
+      color: var(--fg-muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .mark {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-md);
+      color: var(--accent-text);
+      background: var(--accent-subtle);
+      font: 700 15px/1 var(--font-mono);
+    }
+
+    .nav {
+      display: flex;
+      gap: var(--space-1);
+      overflow-x: auto;
+      padding: var(--space-2) 0;
+      scrollbar-width: none;
+    }
+
+    .nav::-webkit-scrollbar { display: none; }
+
+    .nav a {
+      flex: none;
+      padding: 6px 10px;
+      border-radius: var(--radius-md);
+      color: var(--fg-muted);
+      font-size: 13px;
+      text-decoration: none;
+      transition: color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
+    }
+
+    .nav a:hover {
+      color: var(--fg);
+      background: var(--surface-2);
+    }
+
+    .theme-toggle {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      height: 32px;
+      padding: 0 var(--space-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--fg-muted);
+      background: var(--surface);
+      cursor: pointer;
+      transition: color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--border-strong);
+      color: var(--fg);
+      background: var(--surface-2);
+    }
+
+    /* ---- Hero ---- */
+    .hero {
+      padding: var(--space-8) 0 var(--space-7);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
+      gap: var(--space-7);
+      align-items: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 var(--space-4);
+      color: var(--accent-text);
+      font: 600 12px/1 var(--font-mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 720px;
+      font: 600 clamp(38px, 5vw, 62px)/1.15 var(--font-serif);
+      letter-spacing: -.02em;
+    }
+
+    .lead {
+      max-width: 720px;
+      margin-top: var(--space-5);
+      color: var(--fg-muted);
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .hero-points {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: var(--space-6);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .fact {
+      padding: var(--space-4);
+      border-left: 1px solid var(--border);
+    }
+
+    .fact:first-child { border-left: none; }
+
+    .fact b {
+      display: block;
+      margin-bottom: var(--space-1);
+      color: var(--fg);
+      font: 600 12px/1.4 var(--font-mono);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .fact span {
+      display: block;
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* ---- Hero visual: birth address ---- */
+    .hero-visual {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .hero-visual__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-visual__title {
+      color: var(--fg-muted);
+      font: 600 12px/1.4 var(--font-mono);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      color: var(--fg-muted);
+      font: 600 11px/1.3 var(--font-mono);
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+
+    .badge.accent {
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+      color: var(--accent-text);
+    }
+
+    .badge.warn {
+      border-color: var(--warning-border);
+      background: var(--warning-subtle);
+      color: var(--warning-text);
+    }
+
+    .bitfield {
+      display: grid;
+      gap: var(--space-3);
+      padding: var(--space-4);
+    }
+
+    .bitfield-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      font: 600 13px/1.2 var(--font-mono);
+    }
+
+    .bitfield-bar .hi {
+      padding: 12px;
+      text-align: center;
+      background: var(--accent-subtle);
+      color: var(--accent-text);
+      border-right: 1px solid var(--border-strong);
+    }
+
+    .bitfield-bar .lo {
+      padding: 12px;
+      text-align: center;
+      background: var(--surface-inset);
+      color: var(--fg);
+    }
+
+    .bitfield-caption {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      color: var(--fg-faint);
+      font: 500 11px/1.4 var(--font-mono);
+      text-align: center;
+    }
+
+    .stamp-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      padding: var(--space-2) 0 0;
+    }
+
+    .stamp-step {
+      padding: 7px 11px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-inset);
+      color: var(--fg-muted);
+      font: 500 12.5px/1.3 var(--font-mono);
+    }
+
+    .stamp-step.pulse {
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+      color: var(--accent-text);
+      animation: stamp 4.5s var(--ease-out) infinite;
+    }
+
+    .stamp-arrow {
+      color: var(--fg-faint);
+      font: 600 14px/1 var(--font-mono);
+    }
+
+    @keyframes stamp {
+      0% { transform: scale(.94); opacity: .4; }
+      10% { transform: scale(1.04); opacity: 1; }
+      16% { transform: scale(1); }
+      88% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(.94); opacity: .4; }
+    }
+
+    .hero-visual .plane-note {
+      padding: var(--space-3) var(--space-4);
+      border-top: 1px solid var(--border);
+      color: var(--fg-subtle);
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    /* ---- Sections ---- */
+    section { padding: var(--space-8) 0; }
+
+    section + section { border-top: 1px solid var(--border); }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+      gap: var(--space-5) var(--space-7);
+      align-items: end;
+      margin-bottom: var(--space-6);
+    }
+
+    .section-index {
+      display: inline-block;
+      margin-bottom: var(--space-3);
+      color: var(--accent-text);
+      font: 600 12px/1 var(--font-mono);
+      letter-spacing: .08em;
+    }
+
+    .section-head h2 {
+      font: 600 clamp(24px, 3vw, 34px)/1.25 var(--font-serif);
+      letter-spacing: -.01em;
+    }
+
+    .section-head > p {
+      color: var(--fg-muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ---- Problem section ---- */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+      gap: var(--space-5);
+      align-items: stretch;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-header h3 {
+      font: 600 14px/1.4 var(--font-mono);
+    }
+
+    .panel-body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      flex: 1;
+    }
+
+    .panel-body p {
+      color: var(--fg-muted);
+      font-size: 13.5px;
+      line-height: 1.65;
+    }
+
+    .frag-strip {
+      display: flex;
+      gap: 3px;
+      min-height: 30px;
+      padding: var(--space-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-inset);
+      overflow: hidden;
+    }
+
+    .frag-strip .seg {
+      flex: 1 1 auto;
+      border-radius: 3px;
+      background: var(--accent-subtle);
+      border: 1px solid var(--accent-border);
+      transition: flex-basis var(--duration-slow) var(--ease-out);
+    }
+
+    .frag-meter {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-3);
+      color: var(--fg-subtle);
+      font: 500 12px/1.4 var(--font-mono);
+    }
+
+    .frag-meter b { color: var(--fg); font-weight: 600; }
+
+    .stat-table {
+      width: 100%;
+      border-collapse: collapse;
+      font: 500 13px/1.5 var(--font-mono);
+    }
+
+    .stat-table th, .stat-table td {
+      padding: 8px 10px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      color: var(--fg-muted);
+    }
+
+    .stat-table th {
+      color: var(--fg-subtle);
+      font-size: 11px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .stat-table td:first-child, .stat-table th:first-child { text-align: left; }
+    .stat-table tr:last-child td { border-bottom: none; }
+    .stat-table .hot { color: var(--danger-text); font-weight: 600; }
+    .stat-table .dim { color: var(--fg-faint); }
+
+    .bar-cell {
+      position: relative;
+      min-width: 130px;
+    }
+
+    .bar-cell .bar {
+      position: absolute;
+      inset: 6px auto 6px 10px;
+      border-radius: 3px;
+      background: var(--danger-subtle);
+      border: 1px solid var(--danger-border);
+    }
+
+    .grid-note {
+      margin-top: var(--space-5);
+      max-width: 860px;
+      color: var(--fg-muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* ---- Identity section ---- */
+    .planes-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-5);
+      align-items: stretch;
+    }
+
+    .codebox {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .codebox-head {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+      color: var(--fg-muted);
+      font: 600 12px/1.4 var(--font-mono);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .codebox pre {
+      margin: 0;
+      padding: var(--space-4);
+      overflow-x: auto;
+      font: 12.5px/1.65 var(--font-mono);
+      color: var(--fg-muted);
+    }
+
+    .codebox .k { color: var(--accent-text); }
+    .codebox .m { color: var(--fg); font-weight: 600; }
+    .codebox .c { color: var(--fg-faint); }
+
+    .duty-stack {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .duty {
+      flex: 1;
+      padding: var(--space-4) var(--space-5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+
+    .duty h3 {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font: 600 15px/1.4 var(--font-sans);
+    }
+
+    .duty p {
+      margin-top: var(--space-2);
+      color: var(--fg-muted);
+      font-size: 13.5px;
+      line-height: 1.7;
+    }
+
+    .duty code { color: var(--fg); }
+
+    /* ---- Playground ---- */
+    .lab {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .lab-controls {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .lab-controls .hint {
+      margin-left: auto;
+      color: var(--fg-subtle);
+      font-size: 12.5px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      height: 32px;
+      padding: 0 var(--space-3);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--fg);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
+    }
+
+    .btn:hover:not(:disabled) { background: var(--surface-2); border-color: var(--fg-faint); }
+
+    .btn.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--accent-fg);
+    }
+
+    .btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+    .btn.danger { color: var(--danger-text); }
+
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    .lab-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+    }
+
+    .lab-left {
+      padding: var(--space-4);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      min-height: 340px;
+    }
+
+    .lab-right {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fragment {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-inset);
+      overflow: hidden;
+    }
+
+    .fragment.enter { animation: rise var(--duration-slow) var(--ease-out); }
+
+    .fragment-head {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 7px var(--space-3);
+      border-bottom: 1px solid var(--border);
+      color: var(--fg-muted);
+      font: 600 12px/1.4 var(--font-mono);
+    }
+
+    .fragment-head .spacer { margin-left: auto; }
+
+    .rows {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      padding: var(--space-3);
+    }
+
+    .row-cell {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-width: 62px;
+      padding: 7px 9px 6px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      font: 600 13px/1.2 var(--font-mono);
+      color: var(--fg);
+      cursor: pointer;
+      transition: border-color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
+    }
+
+    .row-cell small {
+      font: 500 10px/1.2 var(--font-mono);
+      color: var(--fg-faint);
+      letter-spacing: .02em;
+    }
+
+    .row-cell:hover:not(.dead) { border-color: var(--accent); }
+
+    .row-cell.moved {
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+      color: var(--accent-text);
+    }
+
+    .row-cell.dead {
+      border-style: dashed;
+      border-color: var(--border);
+      background: transparent;
+      color: var(--fg-faint);
+      cursor: default;
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+    }
+
+    .row-cell.selected {
+      box-shadow: 0 0 0 2px var(--accent);
+      border-color: var(--accent);
+    }
+
+    .row-cell.enter { animation: rise var(--duration-slow) var(--ease-out); }
+    .row-cell.flash-dead { animation: fadeDead .6s var(--ease-out); }
+    .row-cell.hit { animation: hitPulse 1.2s var(--ease-out); }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeDead {
+      0% { background: var(--danger-subtle); border-color: var(--danger-border); }
+      100% { background: transparent; border-color: var(--border); }
+    }
+
+    @keyframes hitPulse {
+      0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+      70% { box-shadow: 0 0 0 9px transparent; }
+      100% { box-shadow: 0 0 0 0 transparent; }
+    }
+
+    .reloc-block {
+      border-bottom: 1px solid var(--border);
+      padding: var(--space-3) var(--space-4);
+    }
+
+    .reloc-block:last-child { border-bottom: none; flex: 1; }
+
+    .reloc-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      margin-bottom: var(--space-2);
+      color: var(--fg-subtle);
+      font: 600 11px/1.4 var(--font-mono);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .reloc-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      min-height: 26px;
+    }
+
+    .reloc-entry {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface-inset);
+      color: var(--fg-muted);
+      font: 500 12px/1.4 var(--font-mono);
+    }
+
+    .reloc-entry .arrow { color: var(--fg-faint); }
+    .reloc-entry.enter { animation: rise var(--duration-slow) var(--ease-out), glowIn 1.1s var(--ease-out); }
+    .reloc-entry.hit { border-color: var(--accent); background: var(--accent-subtle); color: var(--accent-text); }
+
+    @keyframes glowIn {
+      0% { border-color: var(--accent); background: var(--accent-subtle); }
+      100% { border-color: var(--border); background: var(--surface-inset); }
+    }
+
+    .reloc-empty {
+      color: var(--fg-faint);
+      font: 500 12px/1.6 var(--font-mono);
+    }
+
+    .lab-log {
+      max-height: 132px;
+      overflow-y: auto;
+      padding: var(--space-2) var(--space-4);
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 3px;
+      background: var(--surface-inset);
+      border-top: 1px solid var(--border);
+    }
+
+    .lab-log div {
+      color: var(--fg-subtle);
+      font: 500 11.5px/1.55 var(--font-mono);
+    }
+
+    .lab-log div:first-child { color: var(--fg-muted); }
+
+    /* ---- Resolve panel ---- */
+    .resolve {
+      border-top: 1px solid var(--border);
+      padding: var(--space-4);
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: var(--space-4);
+      align-items: start;
+    }
+
+    .resolve-what {
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .resolve-what b {
+      display: block;
+      color: var(--fg);
+      font: 600 13px/1.4 var(--font-mono);
+      margin-bottom: var(--space-1);
+    }
+
+    .resolve-steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+
+    .rstep {
+      padding: var(--space-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-inset);
+      opacity: .55;
+      transition: opacity var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out), background-color var(--duration-base) var(--ease-out);
+    }
+
+    .rstep b {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-2);
+      color: var(--fg);
+      font: 600 12px/1.4 var(--font-mono);
+    }
+
+    .rstep span {
+      display: block;
+      margin-top: 3px;
+      color: var(--fg-subtle);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .rstep .verdict {
+      margin-top: var(--space-2);
+      font: 600 11.5px/1.3 var(--font-mono);
+      color: var(--fg-faint);
+      min-height: 15px;
+    }
+
+    .rstep.active { opacity: 1; border-color: var(--border-strong); }
+
+    .rstep.hit {
+      opacity: 1;
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+    }
+
+    .rstep.hit b, .rstep.hit .verdict { color: var(--accent-text); }
+
+    .rstep.dead-end {
+      opacity: 1;
+      border-color: var(--danger-border);
+      background: var(--danger-subtle);
+    }
+
+    .rstep.dead-end b, .rstep.dead-end .verdict { color: var(--danger-text); }
+
+    /* ---- Cost section ---- */
+    .cost-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+      gap: var(--space-5);
+      align-items: stretch;
+    }
+
+    .cmp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    .cmp-table th, .cmp-table td {
+      padding: 11px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .cmp-table tr:last-child td { border-bottom: none; }
+
+    .cmp-table th {
+      color: var(--fg-subtle);
+      font: 600 11px/1.4 var(--font-mono);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .cmp-table td:first-child {
+      color: var(--fg);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .cmp-table td { color: var(--fg-muted); }
+    .cmp-table .was { color: var(--danger-text); font-family: var(--font-mono); font-size: 12.5px; }
+    .cmp-table .now { color: var(--success-text); font-family: var(--font-mono); font-size: 12.5px; }
+
+    .merge-stage {
+      display: grid;
+      gap: var(--space-2);
+      padding: var(--space-4);
+      min-height: 210px;
+      align-content: start;
+    }
+
+    .merge-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 6px 9px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface-inset);
+      color: var(--fg-muted);
+      font: 500 12.5px/1.4 var(--font-mono);
+      transition: opacity var(--duration-slow) var(--ease-out), border-color var(--duration-slow) var(--ease-out), background-color var(--duration-slow) var(--ease-out);
+    }
+
+    .merge-row .arrow { color: var(--fg-faint); }
+
+    .merge-row.head {
+      background: transparent;
+      border-color: transparent;
+      padding: 4px 0 0;
+      color: var(--fg-subtle);
+      font-size: 10.5px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .merge-row.stale { opacity: .38; text-decoration: line-through; text-decoration-thickness: 1px; }
+    .merge-row.range {
+      border-color: var(--accent-border);
+      background: var(--accent-subtle);
+      color: var(--accent-text);
+      animation: rise var(--duration-slow) var(--ease-out);
+    }
+    .merge-row.gone { display: none; }
+
+    .merge-note {
+      padding: 0 var(--space-4) var(--space-4);
+      color: var(--fg-subtle);
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    .stepper {
+      display: flex;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .stepper .btn { height: 28px; font-size: 12.5px; }
+    .stepper .btn.on {
+      border-color: var(--accent);
+      color: var(--accent-text);
+      background: var(--accent-subtle);
+    }
+
+    /* ---- Migration ---- */
+    .migrate-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+
+    /* ---- Footer ---- */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: var(--space-6) 0 var(--space-8);
+      color: var(--fg-subtle);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    footer a { color: var(--accent-text); }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 960px) {
+      .hero-grid, .problem-grid, .planes-grid, .cost-grid, .lab-grid { grid-template-columns: 1fr; }
+      .lab-left { border-right: none; border-bottom: 1px solid var(--border); }
+      .section-head { grid-template-columns: 1fr; align-items: start; }
+      .migrate-grid { grid-template-columns: 1fr; }
+      .hero-points { grid-template-columns: 1fr; }
+      .fact { border-left: none; border-top: 1px solid var(--border); }
+      .fact:first-child { border-top: none; }
+      .resolve { grid-template-columns: 1fr; }
+      .resolve-steps { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <nav class="shell topbar-inner" aria-label="Page sections">
+        <div class="brand">
+          <span class="mark">X</span>
+          <span>Lance stable row ids · design sketch</span>
+        </div>
+        <div class="nav">
+          <a href="#problem">Problem</a>
+          <a href="#identity">Identity</a>
+          <a href="#playground">Playground</a>
+          <a href="#cost">Cost</a>
+          <a href="#migration">Migration</a>
+        </div>
+        <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Toggle theme">
+          <span aria-hidden="true">◐</span><span>Theme</span>
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="shell hero-grid">
+          <div>
+            <p class="eyebrow">Table format · Design sketch</p>
+            <h1>Row ids that are born, not assigned.</h1>
+            <p class="lead">Today a stable row id is a counter value with no structure, so finding a row means consulting a global index that is rebuilt in memory on every dataset version. This rework defines the id as the row's <em>birth address</em> — the fragment and offset where it was first written. A row that never moves resolves through pure identity; only moved rows appear in a small relocation view, transposed in memory from metadata the table already stores. Cost lands on movement, never on existence.</p>
+            <div class="hero-points" role="group" aria-label="Design goals">
+              <div class="fact"><b>Identity default</b><span>Unmoved rows — the vast majority — need zero metadata and zero translation.</span></div>
+              <div class="fact"><b>Derived, not stored</b><span>Compaction yields range entries, updates yield point entries — transposed from forward id sequences, nothing new persisted.</span></div>
+              <div class="fact"><b>Cheap cold start</b><span>Transpose costs O(moved rows), not O(table). A checkpoint — itself a standard Lance file — makes open a single GET.</span></div>
+            </div>
+          </div>
+          <div class="hero-visual" role="group" aria-label="Birth address overview">
+            <div class="hero-visual__head">
+              <span class="hero-visual__title">row id · 64 bits</span>
+              <span class="badge accent">birth address</span>
+            </div>
+            <div class="bitfield">
+              <div class="bitfield-bar">
+                <div class="hi">fragment id</div>
+                <div class="lo">offset</div>
+              </div>
+              <div class="bitfield-caption"><span>high 32 · never reused</span><span>low 32 · position at birth</span></div>
+              <div class="stamp-line">
+                <span class="stamp-step">row lands at F2 · offset 3</span>
+                <span class="stamp-arrow">→</span>
+                <span class="stamp-step pulse">id = 2·3, for life</span>
+              </div>
+            </div>
+            <div class="plane-note">The id is minted once, by position, and survives every later move. Resolution is <code>id → point entries → range entries → else id is the address</code>. The counter in the manifest disappears; id allocation conflicts collapse into fragment id rebase. One spec change makes this sound: overwrite must inherit the fragment-id high-water mark instead of resetting to zero.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="problem">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">01</span>
+              <h2>What a structureless id costs</h2>
+            </div>
+            <p>The current design persists only the forward map — each fragment stores the id sequence of its rows. The reverse map, id to address, is rebuilt in memory from every fragment and every deletion vector, on every version. And because a counter id says nothing about where a row lives, whole-table scans creep into paths that should be cheap.</p>
+          </div>
+          <div class="problem-grid">
+            <article class="panel">
+              <div class="panel-header"><h3>the interval map fragments</h3><span class="badge warn" id="frag-badge">updates: 0</span></div>
+              <div class="panel-body">
+                <div class="frag-strip" id="frag-strip" aria-hidden="true"><div class="seg"></div></div>
+                <div class="frag-meter"><span>id → addr interval map</span><span><b id="frag-count">1</b> segment<span id="frag-plural">s</span></span></div>
+                <p>Every update rewrites one row under its old id, somewhere new. Each rewrite punches a hole in one interval and opens another — the map only ever gets more fragmented, and the whole thing is rebuilt in memory each time the dataset version advances.</p>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><h3>measured growth · issue #6803</h3><span class="badge">rebuilt per version</span></div>
+              <div class="panel-body">
+                <table class="stat-table">
+                  <thead><tr><th>updates</th><th>index size</th><th aria-hidden="true"></th></tr></thead>
+                  <tbody>
+                    <tr><td>0</td><td>125 KB</td><td class="bar-cell"><span class="bar" style="width:2%"></span></td></tr>
+                    <tr><td>1 000</td><td>5 MB</td><td class="bar-cell"><span class="bar" style="width:8%"></span></td></tr>
+                    <tr><td>10 000</td><td>7.8 MB</td><td class="bar-cell"><span class="bar" style="width:12%"></span></td></tr>
+                    <tr><td class="dim">100 000 ²</td><td class="dim">75 MB</td><td class="bar-cell"><span class="bar" style="width:36%; opacity:.55"></span></td></tr>
+                    <tr><td class="dim">1 000 000 ²</td><td class="hot">750 MB</td><td class="bar-cell"><span class="bar" style="width:92%; opacity:.55"></span></td></tr>
+                  </tbody>
+                </table>
+                <p>² extrapolated in the issue. The same shapelessness leaks into query paths: prefilters must materialize an allow-list of <em>every live row</em>, where the address world gets away with a block-list of deletions. Deletion and movement are sparse events; the common case ends up paying for them.</p>
+              </div>
+            </article>
+          </div>
+          <p class="grid-note">There is also a standing tax not visible in any single number: stable and non-stable ids are two id semantics threaded through scanner, take, prefilter, every index type, compaction and conflict resolution — and each operation × index × mode combination is its own bug surface. The mode is chosen at table creation and cannot be changed later.</p>
+        </div>
+      </section>
+
+      <section id="identity">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">02</span>
+              <h2>id := birth address</h2>
+            </div>
+            <p>Stability never required shapelessness. The id only has to survive moves — it can still remember where the row was born. Three rules make that identity almost free.</p>
+          </div>
+          <div class="planes-grid">
+            <div class="codebox">
+              <div class="codebox-head">identity contract</div>
+              <pre><span class="c">// minted once, at first write</span>
+<span class="m">row_id</span> = <span class="k">birth_fragment</span> &lt;&lt; 32 | <span class="k">birth_offset</span>
+
+<span class="c">// invariants</span>
+<span class="m">I1</span>  id never changes while the row lives
+<span class="m">I2</span>  fragment ids are never reused
+    <span class="c">→ ids are globally unique, no counter</span>
+    <span class="c">→ requires: overwrite inherits max_fragment_id</span>
+<span class="m">I3</span>  a fresh fragment's id sequence is the
+    implicit range <span class="k">frag&lt;&lt;32 .. frag&lt;&lt;32+len</span>
+    <span class="c">→ zero metadata until something moves</span>
+
+<span class="c">// resolution, in order</span>
+<span class="m">resolve</span>(id):
+  point_entries[id]?          <span class="c">// moved by update</span>
+  range_entries[id]?          <span class="c">// moved by compaction</span>
+  <span class="k">else</span> id <span class="k">is</span> the address     <span class="c">// never moved</span></pre>
+            </div>
+            <div class="duty-stack">
+              <div class="duty">
+                <h3>Forward map — kept as is, and the only truth</h3>
+                <p>Fragments written by update or compaction carry a positional <code>RowIdSequence</code>, exactly like today, so scans can emit <code>_rowid</code> and index builds can read it. Fragments where nothing moved don't need one at all.</p>
+              </div>
+              <div class="duty">
+                <h3>Reverse map — derived, not stored</h3>
+                <p>The relocation view is the in-memory transpose of those forward sequences: range entries for whole compaction moves, point entries for updated rows. Dedup and run-collapsing happen during the transpose; an optional checkpoint snapshots the result as a standard Lance file.</p>
+              </div>
+              <div class="duty">
+                <h3>Single hop, always</h3>
+                <p>Any rewrite rewrites the sequences of the rows it moves, so the transpose always yields the current address: one lookup, one answer. When the same id appears twice (a row updated twice), the larger <code>(fragment, offset)</code> wins — writes only ever land at newer positions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="playground">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">03</span>
+              <h2>Watch the system run</h2>
+            </div>
+            <p>A miniature dataset: two native fragments, ids shown as <code>fragment·offset</code>. Select a row, then mutate the table and watch what each operation contributes to the relocation view — entries derived from fragment metadata, never a persisted log — and what a read of that id has to touch afterwards.</p>
+          </div>
+          <div class="lab">
+            <div class="lab-controls">
+              <button class="btn primary" type="button" id="op-update" disabled>Update row</button>
+              <button class="btn danger" type="button" id="op-delete" disabled>Delete row</button>
+              <button class="btn" type="button" id="op-append">Append row</button>
+              <button class="btn" type="button" id="op-compact">Compact all</button>
+              <button class="btn" type="button" id="op-reset">Reset</button>
+              <span class="hint" id="lab-hint">Click a row to select it.</span>
+            </div>
+            <div class="lab-grid">
+              <div class="lab-left" id="fragments-view" aria-live="polite"></div>
+              <div class="lab-right">
+                <div class="reloc-block">
+                  <div class="reloc-title"><span>point entries · updates</span><span class="badge" id="point-count">0</span></div>
+                  <div class="reloc-list" id="point-list"><span class="reloc-empty">empty — no row moved by update</span></div>
+                </div>
+                <div class="reloc-block">
+                  <div class="reloc-title"><span>range entries · compaction</span><span class="badge" id="range-count">0</span></div>
+                  <div class="reloc-list" id="range-list"><span class="reloc-empty">empty — no compaction yet</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="resolve" id="resolve-panel">
+              <div class="resolve-what" id="resolve-what">
+                <b>resolve(–)</b>
+                Select a live row above to trace how its id resolves to a physical address.
+              </div>
+              <div class="resolve-steps">
+                <div class="rstep" id="rs-point"><b><span>1 · point entries</span><span>in-memory search</span></b><span>Was this id moved by an update?</span><div class="verdict"></div></div>
+                <div class="rstep" id="rs-range"><b><span>2 · range entries</span><span>interval check</span></b><span>Did a compaction move its birth range?</span><div class="verdict"></div></div>
+                <div class="rstep" id="rs-ident"><b><span>3 · identity</span><span>no lookup</span></b><span>Otherwise the id is the address.</span><div class="verdict"></div></div>
+              </div>
+            </div>
+            <div class="lab-log" id="lab-log" aria-label="Operation log"></div>
+          </div>
+          <p class="grid-note">Three things to notice. Updating the same row twice replaces its point entry — the view tracks <em>current</em> positions, never chains. Compaction reissues entries for everything it moves: contiguous survivors become one range entry each, previously-updated strays get fresh point entries; reads stay single-hop no matter the history. And the whole right-hand panel is derived — it is the in-memory transpose of the fragments' forward id sequences, recomputable at any time.</p>
+        </div>
+      </section>
+
+      <section id="cost">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">04</span>
+              <h2>Cost lands on the exception</h2>
+            </div>
+            <p>The structural change is where cost attaches: to rows that moved, not rows that exist. Everything below follows from that one shift.</p>
+          </div>
+          <div class="cost-grid">
+            <div class="panel">
+              <div class="panel-header"><h3>counter id → birth address</h3></div>
+              <table class="cmp-table">
+                <thead><tr><th>path</th><th>today</th><th>reworked</th></tr></thead>
+                <tbody>
+                  <tr><td>Cold start</td><td class="was">rebuild O(table) in memory</td><td class="now">O(moved) transpose; ≤1 GET with checkpoint</td></tr>
+                  <tr><td>Commit overhead (S3)</td><td class="was">sequences ride the manifest</td><td class="now">same — zero extra requests</td></tr>
+                  <tr><td>Prefilter mask</td><td class="was">allow-list of all live rows</td><td class="now">per-fragment ranges − tombstones + moves</td></tr>
+                  <tr><td>Take by id</td><td class="was">global index lookup</td><td class="now">unmoved: none · moved: in-memory search</td></tr>
+                  <tr><td>1M-update footprint</td><td class="was">~750 MB, per version ²</td><td class="now">~16 MB resident, derived ³</td></tr>
+                </tbody>
+              </table>
+              <div class="merge-note" style="padding-top: var(--space-3)">² extrapolated in #6803 · ³ expected: ~16 B per <em>currently moved</em> row after transpose dedup. Index maintenance itself — stale entries masked by tombstones, fresh rows in the unindexed tail — is unchanged and orthogonal.</div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><h3>the transpose, step by step</h3><span class="badge accent">no id changes</span></div>
+              <div class="stepper" id="merge-stepper">
+                <button class="btn on" type="button" data-stage="0">1 · sequences</button>
+                <button class="btn" type="button" data-stage="1">2 · transpose</button>
+                <button class="btn" type="button" data-stage="2">3 · checkpoint</button>
+              </div>
+              <div class="merge-stage" id="merge-stage"></div>
+              <div class="merge-note" id="merge-note">The raw material: each rewritten fragment's forward id sequence, positional, already in the manifest.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="migration">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <span class="section-index">05</span>
+              <h2>One switch: storage version 2.3</h2>
+            </div>
+            <p>A Lance table's file storage version is a table-level property, fixed at creation, forever. That single value is the whole gate — no new feature flag, no per-table mode.</p>
+          </div>
+          <div class="migrate-grid">
+            <article class="panel">
+              <div class="panel-header"><h3>2.3 tables</h3><span class="badge accent">default and only</span></div>
+              <div class="panel-body">
+                <p>Every table created at 2.3 has birth-address ids — not opt-in, not opt-out. Format 2.3 does not contain the counter-id mechanism at all; scanner, take, prefilter and conflict resolution carry a single id model.</p>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><h3>≤2.2 tables</h3><span class="badge">semantics frozen</span></div>
+              <div class="panel-body">
+                <p>Address tables stay address; counter-id stable tables keep their legacy ids for life — rewriting them under new ids would break a user-visible promise. The only path into the new model is rebuilding into a 2.3 table, with the id change stated, never silent.</p>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><h3>the whole format delta</h3><span class="badge">two items</span></div>
+              <div class="panel-body">
+                <p>One behavior fix: overwrite inherits the fragment-id high-water mark (the manifest field already exists). One new field: an optional checkpoint reference — and the checkpoint itself is a standard Lance file, not a new format.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell">
+        <p>Design sketch for the Lance table format — stable row ids as birth addresses with a layered relocation table. Motivating data from <a href="https://github.com/lance-format/lance/issues/6803">lance-format/lance#6803</a>. Companion to the planar page layout and FTS block-row sketches.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // ---------- theme ----------
+    const root = document.documentElement;
+    let saved = null;
+    try { saved = localStorage.getItem("xuanwo-sketch-theme"); } catch (e) {}
+    if (saved) {
+      root.dataset.theme = saved;
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.dataset.theme = "dark";
+    }
+    const themeToggle = document.getElementById("theme-toggle");
+    themeToggle.setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
+    themeToggle.addEventListener("click", () => {
+      const next = root.dataset.theme === "dark" ? "light" : "dark";
+      root.dataset.theme = next;
+      themeToggle.setAttribute("aria-pressed", String(next === "dark"));
+      try { localStorage.setItem("xuanwo-sketch-theme", next); } catch (e) {}
+    });
+
+    // ---------- section 01: fragmentation strip ----------
+    (() => {
+      const strip = document.getElementById("frag-strip");
+      const badge = document.getElementById("frag-badge");
+      const count = document.getElementById("frag-count");
+      const plural = document.getElementById("frag-plural");
+      const MAX = 26;
+      let updates = 0;
+      function reset() {
+        updates = 0;
+        strip.innerHTML = '<div class="seg"></div>';
+        paint();
+      }
+      function paint() {
+        badge.textContent = "updates: " + updates;
+        const n = strip.children.length;
+        count.textContent = n;
+        plural.textContent = n === 1 ? "" : "s";
+      }
+      function tick() {
+        if (strip.children.length >= MAX) { setTimeout(reset, 1600); return; }
+        updates += 1;
+        const segs = strip.children;
+        const i = Math.floor(Math.random() * segs.length);
+        const twin = segs[i].cloneNode();
+        const basis = 30 + Math.random() * 60;
+        segs[i].style.flexBasis = basis + "px";
+        twin.style.flexBasis = (110 - basis) + "px";
+        strip.insertBefore(twin, segs[i].nextSibling);
+        paint();
+      }
+      paint();
+      setInterval(() => {
+        if (document.hidden) return;
+        tick();
+      }, 620);
+    })();
+
+    // ---------- section 03: playground ----------
+    (() => {
+      const K = (b) => b.frag + "·" + b.off;      // birth id label, e.g. 0·3
+      const A = (a) => "F" + a.frag + "·" + a.off; // physical address label
+
+      let fragments, pointEntries, rangeEntries, nextFragId, selected, epoch;
+      const fresh = () => ({
+        fragments: [
+          { id: 0, rows: Array.from({ length: 5 }, (_, i) => ({ birth: { frag: 0, off: i }, live: true })), open: false },
+          { id: 1, rows: Array.from({ length: 5 }, (_, i) => ({ birth: { frag: 1, off: i }, live: true })), open: false },
+        ],
+        nextFragId: 2,
+      });
+
+      const view = document.getElementById("fragments-view");
+      const pointList = document.getElementById("point-list");
+      const rangeList = document.getElementById("range-list");
+      const pointCount = document.getElementById("point-count");
+      const rangeCount = document.getElementById("range-count");
+      const logEl = document.getElementById("lab-log");
+      const hint = document.getElementById("lab-hint");
+      const btnUpdate = document.getElementById("op-update");
+      const btnDelete = document.getElementById("op-delete");
+      const btnAppend = document.getElementById("op-append");
+      const btnCompact = document.getElementById("op-compact");
+      const btnReset = document.getElementById("op-reset");
+      const resolveWhat = document.getElementById("resolve-what");
+      const steps = {
+        point: document.getElementById("rs-point"),
+        range: document.getElementById("rs-range"),
+        ident: document.getElementById("rs-ident"),
+      };
+      let resolveTimers = [];
+
+      function resolveId(id) {
+        const p = pointEntries.get(K(id));
+        if (p) return { addr: p, path: "point" };
+        for (const r of rangeEntries) {
+          if (id.frag === r.srcFrag && id.off >= r.start && id.off < r.end) {
+            return { addr: { frag: r.dstFrag, off: r.dstStart + (id.off - r.start) }, path: "range" };
+          }
+        }
+        return { addr: { ...id }, path: "ident" };
+      }
+
+      function rowAt(addr) {
+        const f = fragments.find((f) => f.id === addr.frag);
+        return f ? f.rows[addr.off] : null;
+      }
+
+      function log(msg) {
+        const div = document.createElement("div");
+        div.textContent = msg;
+        logEl.prepend(div);
+        while (logEl.children.length > 40) logEl.lastChild.remove();
+      }
+
+      function render(effects = {}) {
+        const enterRows = effects.enterRows || new Set();
+        const deadRows = effects.deadRows || new Set();
+        const enterFrags = effects.enterFrags || new Set();
+        const flashEntries = effects.flashEntries || new Set();
+
+        view.innerHTML = "";
+        for (const f of fragments) {
+          const el = document.createElement("div");
+          el.className = "fragment" + (enterFrags.has(f.id) ? " enter" : "");
+          const native = f.rows.length > 0 && f.rows.every((r, i) => r.birth.frag === f.id && r.birth.off === i);
+          el.innerHTML =
+            '<div class="fragment-head"><span>F' + f.id + "</span>" +
+            '<span class="badge' + (native ? " accent" : "") + '">' + (native ? "native · implicit range" : "rewrite · carries id sequence") + "</span>" +
+            '<span class="spacer"></span><span>' + f.rows.filter((r) => r.live).length + "/" + f.rows.length + " live</span></div>";
+          const rows = document.createElement("div");
+          rows.className = "rows";
+          f.rows.forEach((row, off) => {
+            const cell = document.createElement("button");
+            cell.type = "button";
+            const moved = row.birth.frag !== f.id || row.birth.off !== off;
+            const k = K(row.birth) + "@" + f.id + ":" + off;
+            cell.className = "row-cell" +
+              (row.live ? "" : " dead") +
+              (moved && row.live ? " moved" : "") +
+              (selected && row.live && K(selected) === K(row.birth) ? " selected" : "") +
+              (enterRows.has(k) ? " enter" : "") +
+              (deadRows.has(k) ? " flash-dead" : "");
+            cell.dataset.addr = f.id + ":" + off;
+            cell.innerHTML = "<span>" + K(row.birth) + "</span><small>" + (row.live ? (moved ? "id ≠ addr" : "id = addr") : "tombstone") + "</small>";
+            if (row.live) {
+              cell.addEventListener("click", () => { selected = { ...row.birth }; render(); runResolve(); });
+            } else {
+              cell.disabled = true;
+            }
+            rows.appendChild(cell);
+          });
+          el.appendChild(rows);
+          view.appendChild(el);
+        }
+
+        pointCount.textContent = pointEntries.size;
+        pointList.innerHTML = pointEntries.size ? "" : '<span class="reloc-empty">empty — no row moved by update</span>';
+        for (const [k, addr] of pointEntries) {
+          const e = document.createElement("div");
+          e.className = "reloc-entry" + (flashEntries.has("p:" + k) ? " enter" : "");
+          e.dataset.entry = "p:" + k;
+          e.innerHTML = "<span>" + k + '</span><span class="arrow">→</span><span>' + A(addr) + "</span>";
+          pointList.appendChild(e);
+        }
+
+        rangeCount.textContent = rangeEntries.length;
+        rangeList.innerHTML = rangeEntries.length ? "" : '<span class="reloc-empty">empty — no compaction yet</span>';
+        rangeEntries.forEach((r, i) => {
+          const e = document.createElement("div");
+          e.className = "reloc-entry" + (flashEntries.has("r:" + i) ? " enter" : "");
+          e.dataset.entry = "r:" + i;
+          e.innerHTML = "<span>F" + r.srcFrag + " · " + r.start + ".." + (r.end - 1) + '</span><span class="arrow">→</span><span>F' + r.dstFrag + " @ " + r.dstStart + "</span>";
+          rangeList.appendChild(e);
+        });
+
+        const hasSel = !!(selected && (() => { const { addr } = resolveId(selected); const row = rowAt(addr); return row && row.live && K(row.birth) === K(selected); })());
+        if (!hasSel) selected = null;
+        btnUpdate.disabled = !selected;
+        btnDelete.disabled = !selected;
+        hint.textContent = selected ? "selected id " + K(selected) : "Click a row to select it.";
+      }
+
+      function clearResolve() {
+        resolveTimers.forEach(clearTimeout);
+        resolveTimers = [];
+        for (const s of Object.values(steps)) {
+          s.className = "rstep";
+          s.querySelector(".verdict").textContent = "";
+        }
+      }
+
+      function runResolve() {
+        clearResolve();
+        if (!selected) {
+          resolveWhat.innerHTML = "<b>resolve(–)</b>Select a live row above to trace how its id resolves to a physical address.";
+          return;
+        }
+        const id = { ...selected };
+        const { addr, path } = resolveId(id);
+        const row = rowAt(addr);
+        const alive = row && row.live && K(row.birth) === K(id);
+        resolveWhat.innerHTML = "<b>resolve(" + K(id) + ")</b>" +
+          (alive ? "Watch the three layers answer in order — a hit stops the walk." : "This id is dead: its physical row is tombstoned.");
+        const order = ["point", "range", "ident"];
+        const hitIdx = order.indexOf(path);
+        order.forEach((name, i) => {
+          if (i > hitIdx) return;
+          resolveTimers.push(setTimeout(() => {
+            const s = steps[name];
+            const v = s.querySelector(".verdict");
+            if (i < hitIdx) {
+              s.classList.add("active");
+              v.textContent = "miss";
+            } else {
+              s.classList.add(alive ? "hit" : "dead-end");
+              v.textContent = (name === "point" ? "hit → " + A(addr) : name === "range" ? "hit → " + A(addr) : "id is the address → " + A(addr)) + (alive ? "" : " · tombstoned");
+              const cell = view.querySelector('[data-addr="' + addr.frag + ":" + addr.off + '"]');
+              if (cell) { cell.classList.remove("hit"); void cell.offsetWidth; cell.classList.add("hit"); }
+            }
+          }, 260 + i * 420));
+        });
+      }
+
+      function openFragment(effects) {
+        let open = fragments.find((f) => f.open);
+        if (!open) {
+          open = { id: nextFragId++, rows: [], open: true };
+          fragments.push(open);
+          effects.enterFrags.add(open.id);
+          log("open new rewrite fragment F" + open.id);
+        }
+        return open;
+      }
+
+      function doUpdate() {
+        if (!selected) return;
+        const id = { ...selected };
+        const effects = { enterRows: new Set(), deadRows: new Set(), enterFrags: new Set(), flashEntries: new Set() };
+        const { addr } = resolveId(id);
+        const row = rowAt(addr);
+        if (!row || !row.live) return;
+        row.live = false;
+        effects.deadRows.add(K(row.birth) + "@" + addr.frag + ":" + addr.off);
+        const open = openFragment(effects);
+        open.rows.push({ birth: id, live: true });
+        const newAddr = { frag: open.id, off: open.rows.length - 1 };
+        const had = pointEntries.has(K(id));
+        pointEntries.set(K(id), newAddr);
+        effects.enterRows.add(K(id) + "@" + newAddr.frag + ":" + newAddr.off);
+        effects.flashEntries.add("p:" + K(id));
+        log("update " + K(id) + ": tombstone @" + A(addr) + ", rewrite @" + A(newAddr) + ", point entry " + (had ? "replaced (single hop)" : "added"));
+        render(effects);
+        runResolve();
+      }
+
+      function doDelete() {
+        if (!selected) return;
+        const id = { ...selected };
+        const { addr } = resolveId(id);
+        const row = rowAt(addr);
+        if (!row || !row.live) return;
+        const effects = { deadRows: new Set([K(id) + "@" + addr.frag + ":" + addr.off]) };
+        row.live = false;
+        const had = pointEntries.delete(K(id));
+        log("delete " + K(id) + ": tombstone @" + A(addr) + (had ? ", drop its point entry — the id ends here" : " — the id ends here"));
+        selected = null;
+        render(effects);
+        clearResolve();
+        resolveWhat.innerHTML = "<b>resolve(" + K(id) + ")</b>Deleted. A dead id resolves to a tombstone and is never handed out again.";
+      }
+
+      function doAppend() {
+        const effects = { enterRows: new Set(), enterFrags: new Set() };
+        const open = openFragment(effects);
+        const off = open.rows.length;
+        open.rows.push({ birth: { frag: open.id, off }, live: true });
+        effects.enterRows.add(open.id + "·" + off + "@" + open.id + ":" + off);
+        log("append: new row born at F" + open.id + "·" + off + " — id " + open.id + "·" + off + ", native, no metadata");
+        render(effects);
+      }
+
+      function doCompact() {
+        const liveTotal = fragments.reduce((n, f) => n + f.rows.filter((r) => r.live).length, 0);
+        if (liveTotal === 0) { log("compact: nothing live to rewrite"); return; }
+        if (fragments.length === 1 && fragments[0].rows.every((r) => r.live)) { log("compact: single fully-live fragment, nothing to do"); return; }
+        const dst = { id: nextFragId++, rows: [], open: false };
+        for (const f of fragments) for (const r of f.rows) if (r.live) dst.rows.push({ birth: r.birth, live: true });
+        const retired = fragments.map((f) => "F" + f.id).join(", ");
+        fragments = [dst];
+        pointEntries = new Map();
+        rangeEntries = [];
+        const effects = { enterFrags: new Set([dst.id]), enterRows: new Set(), flashEntries: new Set() };
+        let run = null, nRange = 0, nPoint = 0;
+        const flush = (r) => {
+          if (!r) return;
+          if (r.end - r.start >= 2) { rangeEntries.push(r); effects.flashEntries.add("r:" + (rangeEntries.length - 1)); nRange++; }
+          else { pointEntries.set(r.srcFrag + "·" + r.start, { frag: r.dstFrag, off: r.dstStart }); effects.flashEntries.add("p:" + r.srcFrag + "·" + r.start); nPoint++; }
+        };
+        dst.rows.forEach((row, off) => {
+          effects.enterRows.add(K(row.birth) + "@" + dst.id + ":" + off);
+          if (run && row.birth.frag === run.srcFrag && row.birth.off === run.end && off === run.dstStart + (run.end - run.start)) {
+            run.end++;
+          } else {
+            flush(run);
+            run = { srcFrag: row.birth.frag, start: row.birth.off, end: row.birth.off + 1, dstFrag: dst.id, dstStart: off };
+          }
+        });
+        flush(run);
+        log("compact [" + retired + "] → F" + dst.id + ": " + liveTotal + " rows moved, entries reissued — " + nRange + " range + " + nPoint + " point, ids untouched");
+        render(effects);
+        runResolve();
+      }
+
+      function doReset() {
+        const s = fresh();
+        fragments = s.fragments;
+        nextFragId = s.nextFragId;
+        pointEntries = new Map();
+        rangeEntries = [];
+        selected = null;
+        logEl.innerHTML = "";
+        log("initial commit: F0 + F1, ten rows — every id equals its address, relocation empty");
+        render();
+        clearResolve();
+        resolveWhat.innerHTML = "<b>resolve(–)</b>Select a live row above to trace how its id resolves to a physical address.";
+      }
+
+      btnUpdate.addEventListener("click", doUpdate);
+      btnDelete.addEventListener("click", doDelete);
+      btnAppend.addEventListener("click", doAppend);
+      btnCompact.addEventListener("click", doCompact);
+      btnReset.addEventListener("click", doReset);
+      doReset();
+    })();
+
+    // ---------- section 04: transpose stepper ----------
+    (() => {
+      const stage = document.getElementById("merge-stage");
+      const note = document.getElementById("merge-note");
+      const stepper = document.getElementById("merge-stepper");
+      const notes = [
+        "The raw material: each rewritten fragment's forward id sequence, positional, already in the manifest.",
+        "The transpose flips direction and dedupes in one pass — for a twice-updated row the larger (fragment, offset) wins, and contiguous id → address runs collapse into range entries.",
+        "An optional checkpoint snapshots the view as a standard Lance file: three u64 columns plus a covered-fragments bitmap in its metadata. Pure cache — rebuild from sequences at any time.",
+      ];
+      function paint(stageIdx) {
+        stepper.querySelectorAll(".btn").forEach((b) => b.classList.toggle("on", +b.dataset.stage === stageIdx));
+        note.textContent = notes[stageIdx];
+        stage.innerHTML = "";
+        const add = (cls, html) => {
+          const e = document.createElement("div");
+          e.className = "merge-row" + (cls ? " " + cls : "");
+          e.innerHTML = html;
+          stage.appendChild(e);
+        };
+        const arrow = (s) => '<span class="arrow">' + s + "</span>";
+        if (stageIdx === 0) {
+          add("head", "F2 · rewrite — forward sequence");
+          add("", "<span>@0</span>" + arrow("←") + "<span>0·2</span>" + arrow("· tombstoned"));
+          add("", "<span>@1</span>" + arrow("←") + "<span>1·4</span>");
+          add("", "<span>@2</span>" + arrow("←") + "<span>0·2</span>");
+          add("head", "F4 · compaction — forward sequence");
+          add("", "<span>@0..@2</span>" + arrow("←") + "<span>3·0, 3·1, 3·2</span>");
+        } else if (stageIdx === 1) {
+          add("stale", "<span>0·2</span>" + arrow("→") + "<span>F2·0</span>" + arrow("· older offset loses"));
+          add("", "<span>0·2</span>" + arrow("→") + "<span>F2·2</span>");
+          add("", "<span>1·4</span>" + arrow("→") + "<span>F2·1</span>");
+          add("range", "<span>3·0..3·2</span>" + arrow("→") + "<span>F4 @ 0</span>" + arrow("· one range entry"));
+        } else {
+          add("head", "_rowid_checkpoints/v42.lance — standard Lance file");
+          add("", "<span>src_id_start</span>" + arrow("·") + "<span>len</span>" + arrow("·") + "<span>dst_addr_start</span>");
+          add("", "<span>0·2</span>" + arrow("·") + "<span>1</span>" + arrow("·") + "<span>F2·2</span>");
+          add("", "<span>1·4</span>" + arrow("·") + "<span>1</span>" + arrow("·") + "<span>F2·1</span>");
+          add("", "<span>3·0</span>" + arrow("·") + "<span>3</span>" + arrow("·") + "<span>F4·0</span>");
+          add("range", "<span>metadata</span>" + arrow("·") + "<span>covered_fragments = {2, 4}</span>");
+        }
+      }
+      stepper.addEventListener("click", (ev) => {
+        const b = ev.target.closest("[data-stage]");
+        if (b) paint(+b.dataset.stage);
+      });
+      paint(0);
+    })();
+  </script>
+</body>
+</html>
