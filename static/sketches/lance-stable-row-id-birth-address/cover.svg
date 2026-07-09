@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Lance Stable Row IDs as Birth Addresses</title>
+  <desc id="desc">Fragment rows whose ids equal their addresses, one moved row, and a small relocation table with a range entry and a point entry.</desc>
+  <style>
+    svg { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+    .bg { fill: #fbfbfc; }
+    .card { fill: #ffffff; stroke: #e6e8eb; }
+    .cell { fill: #f7f8f9; stroke: #d4d8dd; }
+    .cell-moved { fill: #e8f4fc; stroke: #9bd0f2; }
+    .cell-dead { fill: none; stroke: #d4d8dd; stroke-dasharray: 5 4; }
+    .cell-new { fill: #0f83cf; stroke: #0a6aa8; }
+    .head { fill: #767e87; font-size: 16px; font-weight: 600; letter-spacing: .05em; }
+    .idText { fill: #14171a; font-size: 19px; font-weight: 600; }
+    .idTextMoved { fill: #0a6aa8; font-size: 19px; font-weight: 600; }
+    .idTextDead { fill: #9aa1aa; font-size: 19px; font-weight: 600; text-decoration: line-through; }
+    .idTextOnAccent { fill: #ffffff; font-size: 17px; font-weight: 600; }
+    .eyebrow { fill: #0a6aa8; font-size: 20px; font-weight: 600; letter-spacing: .12em; }
+    .titleText { fill: #14171a; font-size: 60px; font-weight: 600; font-family: Georgia, "Songti SC", serif; letter-spacing: -1px; }
+    .sub { fill: #4d545c; font-size: 22px; font-family: -apple-system, "Segoe UI", system-ui, sans-serif; }
+    .arrow { stroke: #9aa1aa; stroke-width: 2.5; fill: none; }
+    .arrowHead { fill: #9aa1aa; }
+    .note { fill: #767e87; font-size: 17px; font-family: -apple-system, "Segoe UI", system-ui, sans-serif; }
+  </style>
+
+  <rect class="bg" x="0" y="0" width="1200" height="675"/>
+
+  <text class="eyebrow" x="84" y="112">TABLE FORMAT 2.3 · DESIGN SKETCH</text>
+  <text class="titleText" x="80" y="190">Row ids that are born, not assigned.</text>
+  <text class="sub" x="84" y="238">id := birth address — identity by default; moved rows resolve through a derived relocation view.</text>
+
+  <!-- fragments card -->
+  <rect class="card" x="84" y="296" width="560" height="304" rx="10"/>
+  <text class="head" x="116" y="348">F0 · NATIVE — IMPLICIT RANGE</text>
+  <rect class="cell" x="116" y="368" width="92" height="56" rx="8"/>
+  <text class="idText" x="162" y="403" text-anchor="middle">0·0</text>
+  <rect class="cell" x="220" y="368" width="92" height="56" rx="8"/>
+  <text class="idText" x="266" y="403" text-anchor="middle">0·1</text>
+  <rect class="cell-dead" x="324" y="368" width="92" height="56" rx="8"/>
+  <text class="idTextDead" x="370" y="403" text-anchor="middle">0·2</text>
+  <rect class="cell" x="428" y="368" width="92" height="56" rx="8"/>
+  <text class="idText" x="474" y="403" text-anchor="middle">0·3</text>
+
+  <text class="head" x="116" y="482">F2 · REWRITE — CARRIES ID SEQUENCE</text>
+  <rect class="cell-moved" x="116" y="502" width="92" height="56" rx="8"/>
+  <text class="idTextMoved" x="162" y="537" text-anchor="middle">0·2</text>
+  <rect class="cell" x="220" y="502" width="92" height="56" rx="8"/>
+  <text class="idText" x="266" y="537" text-anchor="middle">2·1</text>
+
+  <!-- arrow from tombstone to moved row -->
+  <path class="arrow" d="M 370 432 C 370 470, 240 462, 190 498"/>
+  <polygon class="arrowHead" points="186,502 200,494 192,488"/>
+
+  <!-- relocation card -->
+  <rect class="card" x="700" y="296" width="416" height="304" rx="10"/>
+  <text class="head" x="732" y="348">RELOCATION · DERIVED IN MEMORY</text>
+
+  <text class="head" x="732" y="396">POINT ENTRIES</text>
+  <rect class="cell-new" x="732" y="412" width="352" height="52" rx="8"/>
+  <text class="idTextOnAccent" x="908" y="445" text-anchor="middle">0·2  →  F2·0</text>
+
+  <text class="head" x="732" y="510">RANGE ENTRIES</text>
+  <rect class="cell-moved" x="732" y="526" width="352" height="52" rx="8"/>
+  <text class="idTextMoved" x="908" y="559" text-anchor="middle">F1 · 0..4  →  F3 @ 0</text>
+
+  <text class="note" x="84" y="646">resolve(id): point → range → else the id is the address. Unmoved rows pay nothing.</text>
+</svg>
