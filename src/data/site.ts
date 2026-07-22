@@ -52,7 +52,7 @@ export const siteConfig: SiteConfig = {
       { name: 'rss', url: '/index.xml', weight: 1 },
       { name: 'github', url: 'https://github.com/Xuanwo', weight: 2 },
       { name: 'send', url: 'https://t.me/xuanwo_tweets', weight: 3 },
-      { name: 'twitter', url: 'https://twitter.com/OnlyXuanwo', weight: 4 }
+      { name: 'twitter', url: 'https://x.com/xuanwo', weight: 4 }
     ]
   }
 }

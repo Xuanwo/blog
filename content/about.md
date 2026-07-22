@@ -9,7 +9,7 @@ My VISION is [`Data Freedom`](https://xuanwo.io/2024/04-xuanwo-vision/).
 I aim to create an ecosystem where users can access ANY data, across ANY service, using ANY method, in ANY language.
 
 - Find out what I'm doing at [Github](https://github.com/Xuanwo)
-- Follow me on [Twitter](https://twitter.com/OnlyXuanwo)
+- Follow me on [Twitter](https://x.com/xuanwo)
 - Find more links about me at [bento](https://bento.me/xuanwo)
 
 If our visions align in some part, feel free to get in touch so we can collaborate.
