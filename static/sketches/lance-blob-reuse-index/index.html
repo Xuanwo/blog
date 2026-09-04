@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Blob Reuse Index (BRI): Reorganize Rows, Keep the Bytes</title>
+  <meta name="description" content="A visual explanation of how Lance’s Blob Reuse Index separates row compaction from blob placement, and how retained manifests keep reused sidecars safe.">
+  <style>
+    /* Xuanwo blog tokens, inlined from assets/css/tokens for offline use. */
+/* ============================================================
+   Xuanwo Design System — Color
+   ------------------------------------------------------------
+   A calm, technical palette. Cool near-neutrals carry the page;
+   a single azure accent — the monitor-screen blue from the Xuanwo
+   logo — does all the highlighting. Full dual theme: light is the :root default,
+   dark applies via [data-theme="dark"] and also follows the OS
+   when no explicit theme is set.
+
+   Layers (low → high): --bg → --surface → --surface-2 → --surface-3
+   Text  (strong → faint): --fg → --fg-muted → --fg-subtle → --fg-faint
+   Lines (faint → strong) : --border → --border-strong
+   ============================================================ */
+
+:root {
+  /* ---- Base ramp (raw values) — Azure (the logo's screen-blue) ---- */
+  --azure-50:  #e8f4fc;
+  --azure-100: #cbe6f8;
+  --azure-200: #9bd0f2;
+  --azure-300: #5fb3e8;
+  --azure-400: #2b97db;
+  --azure-500: #0f83cf;   /* brand accent — light */
+  --azure-600: #0a6aa8;
+  --azure-700: #08547f;
+  --azure-800: #06425f;
+  --azure-900: #052f44;
+
+  /* ---- Surfaces ---- */
+  --bg:           #fbfbfc;   /* page */
+  --surface:      #ffffff;   /* cards, panels */
+  --surface-2:    #f4f5f7;   /* subtle fills, code, hover */
+  --surface-3:    #eceef1;   /* pressed / nested */
+  --surface-inset:#f7f8f9;   /* inputs */
+
+  /* ---- Text ---- */
+  --fg:        #14171a;   /* primary ink */
+  --fg-muted:  #4d545c;   /* secondary */
+  --fg-subtle: #767e87;   /* tertiary, captions */
+  --fg-faint:  #9aa1aa;   /* placeholders, disabled */
+  --fg-on-accent: #ffffff;
+
+  /* ---- Lines ---- */
+  --border:        #e6e8eb;
+  --border-strong: #d4d8dd;
+  --border-accent: var(--azure-500);
+
+  /* ---- Accent (semantic) ---- */
+  --accent:         var(--azure-500);
+  --accent-hover:   var(--azure-600);
+  --accent-active:  var(--azure-700);
+  --accent-fg:      #ffffff;          /* text/icon on a filled accent */
+  --accent-text:    var(--azure-600);  /* accent used AS text on light bg */
+  --accent-subtle:  var(--azure-50);   /* tinted background */
+  --accent-border:  var(--azure-200);
+
+  /* ---- Semantic status ---- */
+  --success:        #1f8a5b;
+  --success-text:   #157048;
+  --success-subtle: #e6f4ec;
+  --success-border: #b6e0c8;
+
+  --warning:        #b3791a;
+  --warning-text:   #8f5f12;
+  --warning-subtle: #fdf2dd;
+  --warning-border: #f0d9a3;
+
+  --danger:         #c5392f;
+  --danger-text:    #a72e26;
+  --danger-subtle:  #fcebe9;
+  --danger-border:  #f3c2bd;
+
+  --info:           #2563c9;
+  --info-text:      #1f54ab;
+  --info-subtle:    #e8f0fd;
+  --info-border:    #bcd3f5;
+
+  /* ---- Focus ring ---- */
+  --ring: color-mix(in srgb, var(--accent) 55%, transparent);
+
+  /* ---- Selection ---- */
+  --selection-bg: var(--azure-100);
+  --selection-fg: var(--azure-900);
+
+  --color-scheme: light;
+}
+
+/* Shared dark palette — applied to explicit [data-theme="dark"].
+   The page sets data-theme on load (following the OS when unset),
+   so this single scope registers every dark token. */
+[data-theme="dark"] {
+  --bg:           #0b0d0f;
+  --surface:      #131619;
+  --surface-2:    #1a1e22;
+  --surface-3:    #23282d;
+  --surface-inset:#15181c;
+
+  --fg:        #f4f6f7;
+  --fg-muted:  #a7afb8;
+  --fg-subtle: #7a838d;
+  --fg-faint:  #59616a;
+  --fg-on-accent: #04263b;
+
+  --border:        #23272c;
+  --border-strong: #323840;
+  --border-accent: var(--azure-400);
+
+  --accent:         #38a8ec;
+  --accent-hover:   #5fb3e8;
+  --accent-active:  #9bd0f2;
+  --accent-fg:      #04263b;
+  --accent-text:    #6fc1f0;
+  --accent-subtle:  #0c2f44;
+  --accent-border:  #134c6b;
+
+  --success:        #3fae7d;  --success-text: #5cc497;  --success-subtle:#10241b;  --success-border:#1d3f30;
+  --warning:        #d6a040;  --warning-text: #e6b765;  --warning-subtle:#2a2113;  --warning-border:#473717;
+  --danger:         #e0635a;  --danger-text:  #ef847c;  --danger-subtle: #2c1514;  --danger-border: #4a221f;
+  --info:           #5a93ef;  --info-text:    #82adf4;  --info-subtle:   #121f33;  --info-border:   #1f3656;
+
+  --ring: color-mix(in srgb, var(--accent) 60%, transparent);
+  --selection-bg: var(--azure-800);
+  --selection-fg: var(--azure-50);
+
+  --color-scheme: dark;
+}
+/* ============================================================
+   Xuanwo Design System — Typography
+   ------------------------------------------------------------
+   Humanist sans for UI & body, a serif for long-form and display,
+   monospace for everything technical. This blog intentionally ships
+   NO webfonts — the families below are system stacks, so the
+   serif/sans signature is carried by whatever the OS provides
+   (serif headings via Georgia / 宋体, sans UI via the system sans).
+
+   Scale is a ~1.2 minor-third, tightened at body sizes for dense
+   technical reading. Sizes are rem (root = 16px).
+   ============================================================ */
+
+:root {
+  /* ---- Families (system stacks — no webfonts) ---- */
+  --font-sans:  -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-serif: Georgia, "Songti SC", "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+  --font-mono:  ui-monospace, "SFMono-Regular", "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-cjk:   "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;  /* alias when targeting 中文 explicitly */
+
+  /* ---- Type scale (rem) ---- */
+  --text-xs:   0.75rem;    /* 12 — micro labels */
+  --text-sm:   0.8125rem;  /* 13 — captions, meta */
+  --text-base: 0.9375rem;  /* 15 — default UI text */
+  --text-md:   1rem;       /* 16 — comfortable body */
+  --text-lg:   1.125rem;   /* 18 — lead / long-form body */
+  --text-xl:   1.375rem;   /* 22 */
+  --text-2xl:  1.75rem;    /* 28 */
+  --text-3xl:  2.25rem;    /* 36 */
+  --text-4xl:  3rem;       /* 48 */
+  --text-5xl:  3.75rem;    /* 60 */
+  --text-display: 4.75rem; /* 76 — hero only */
+
+  /* ---- Weights ---- */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* ---- Line heights ---- */
+  --leading-none:    1;
+  --leading-tight:   1.15;   /* display & large headings */
+  --leading-snug:    1.3;    /* headings */
+  --leading-normal:  1.5;    /* UI text */
+  --leading-relaxed: 1.7;    /* long-form prose (esp. 中文) */
+
+  /* ---- Letter spacing ---- */
+  --tracking-tight:  -0.02em;  /* display / big headings */
+  --tracking-snug:   -0.01em;  /* headings */
+  --tracking-normal: 0;
+  --tracking-wide:   0.04em;   /* eyebrows, all-caps labels */
+  --tracking-wider:  0.08em;
+
+  /* ---- Semantic roles ---- */
+  --font-body:    var(--font-sans);
+  --font-heading: var(--font-sans);
+  --font-display: var(--font-serif);   /* serif lends a literary, considered tone to hero/section heads */
+  --font-reading: var(--font-serif);   /* long-form article body */
+  --font-code:    var(--font-mono);
+}
+/* ============================================================
+   Xuanwo Design System — Layout, Shape & Motion
+   ------------------------------------------------------------
+   8px grid. Small radii (crisp, not pill-y). Depth comes from
+   hairline borders and surface layering, NOT shadows — the only
+   sanctioned shadows are faint elevations for floating overlays
+   (menus, dialogs, tooltips). Motion is short and quiet.
+   ============================================================ */
+
+:root {
+  /* ---- Spacing scale (8px grid, 4px half-steps) ---- */
+  --space-0:  0;
+  --space-1:  0.25rem;   /* 4  */
+  --space-2:  0.5rem;    /* 8  */
+  --space-3:  0.75rem;   /* 12 */
+  --space-4:  1rem;      /* 16 */
+  --space-5:  1.5rem;    /* 24 */
+  --space-6:  2rem;      /* 32 */
+  --space-7:  3rem;      /* 48 */
+  --space-8:  4rem;      /* 64 */
+  --space-9:  6rem;      /* 96 */
+  --space-10: 8rem;      /* 128 */
+
+  /* ---- Radii (small — index-1 corner feel) ---- */
+  --radius-xs:   3px;
+  --radius-sm:   4px;
+  --radius-md:   6px;    /* default for buttons, inputs, cards */
+  --radius-lg:   8px;
+  --radius-xl:   12px;   /* large panels, modals */
+  --radius-2xl:  16px;
+  --radius-full: 999px;  /* avatars, dots, switch tracks */
+
+  /* ---- Borders ---- */
+  --border-width:    1px;
+  --border-width-2:  2px;
+  --border-hairline: 1px solid var(--border);
+
+  /* ---- Elevation (overlays only — surfaces use borders) ---- */
+  --shadow-none:    none;
+  --shadow-overlay: 0 1px 2px rgba(16,20,24,0.04), 0 8px 24px -8px rgba(16,20,24,0.14);
+  --shadow-popover: 0 1px 2px rgba(16,20,24,0.05), 0 12px 32px -10px rgba(16,20,24,0.18);
+  /* In dark mode overlays read against near-black; deepen the cast. */
+
+  /* ---- Layout ---- */
+  --container-prose:  680px;   /* long-form reading measure */
+  --container-narrow: 880px;
+  --container:        1080px;
+  --container-wide:   1280px;
+  --gutter:           var(--space-5);
+
+  /* ---- Z-index ---- */
+  --z-base:     0;
+  --z-sticky:   100;
+  --z-overlay:  200;
+  --z-dialog:   300;
+  --z-toast:    400;
+  --z-tooltip:  500;
+
+  /* ---- Motion ---- */
+  --ease-out:   cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out:cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast:   120ms;
+  --duration-base:   180ms;
+  --duration-slow:   280ms;
+  --transition-colors: color var(--duration-fast) var(--ease-out),
+                       background-color var(--duration-fast) var(--ease-out),
+                       border-color var(--duration-fast) var(--ease-out);
+}
+
+[data-theme="dark"] {
+  --shadow-overlay: 0 1px 2px rgba(0,0,0,0.4), 0 10px 28px -8px rgba(0,0,0,0.6);
+  --shadow-popover: 0 1px 2px rgba(0,0,0,0.45), 0 16px 40px -10px rgba(0,0,0,0.7);
+}
+
+    * { box-sizing: border-box; }
+    html { color-scheme: var(--color-scheme); scroll-padding-top: 80px; -webkit-text-size-adjust: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: var(--text-md)/var(--leading-relaxed) var(--font-body); -webkit-font-smoothing: antialiased; }
+    h1, h2, h3, p, figure { margin: 0; }
+    h1, h2 { font-family: var(--font-display); font-weight: 400; letter-spacing: var(--tracking-tight); line-height: 1.15; text-wrap: balance; }
+    h1 { font-size: clamp(36px, 5.5vw, 48px); margin-top: 16px; }
+    h1 span { color: var(--accent-text); white-space: nowrap; }
+    h2 { font-size: var(--text-2xl); margin: 12px 0 20px; }
+    h3 { font-size: var(--text-md); font-weight: 600; line-height: 1.4; }
+    a { color: var(--accent-text); text-underline-offset: 4px; }
+    code { font: 1em/var(--leading-relaxed) var(--font-code); overflow-wrap: anywhere; }
+    strong { font-weight: 600; color: var(--fg); }
+    ::selection { background: var(--selection-bg); color: var(--selection-fg); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .shell { width: min(var(--container), calc(100% - 48px)); margin-inline: auto; }
+    .topbar { border-bottom: 1px solid var(--border); background: var(--bg); }
+    .topbar .shell { display: flex; align-items: center; gap: 24px; min-height: 64px; }
+    .brand { font-size: var(--text-md); color: var(--fg); font-weight: 600; text-decoration: none; }
+    .brand span { color: var(--accent-text); }
+    nav { display: flex; gap: 24px; margin-left: auto; font-size: var(--text-md); overflow-x: auto; }
+    nav a { white-space: nowrap; color: var(--fg-muted); text-decoration: none; }
+    nav a:hover { color: var(--accent-text); }
+    button { background: var(--surface); color: var(--fg-muted); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 6px 12px; font: var(--text-md) var(--font-sans); cursor: pointer; }
+    button[hidden] { display: none; }
+    .skip { position: fixed; top: -100px; z-index: 10; padding: 12px; background: var(--surface); }
+    .skip:focus { top: 8px; }
+    header { padding: 56px 0 40px; }
+    .eyebrow { font: 600 var(--text-md)/var(--leading-normal) var(--font-sans); color: var(--accent-text); text-transform: uppercase; letter-spacing: var(--tracking-wider); }
+    .subtitle { margin-top: 12px; font-size: var(--text-md); color: var(--fg-muted); }
+    .lead { margin-top: 24px; max-width: 680px; font-size: var(--text-md); color: var(--fg-muted); }
+    .scope { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 24px; font-size: var(--text-md); color: var(--fg-muted); }
+    .scope span { padding-left: 12px; border-left: 2px solid var(--accent-border); }
+    main.shell { max-width: 880px; }
+    main > header, .chapter-copy, .repack > div, .reference > .eyebrow, .reference > h2 { max-width: 680px; margin-inline: auto; }
+    .chapter { padding: 48px 0; border-top: 1px solid var(--border); }
+    .chapter-copy p + p { margin-top: 16px; }
+    .chapter-copy p:not(.eyebrow) { color: var(--fg-muted); }
+    .chapter-copy .takeaway { color: var(--accent-text); font-weight: 500; padding-left: 16px; border-left: 2px solid var(--accent-border); }
+    .figure { min-width: 0; max-width: 480px; width: 100%; margin: 32px auto 0; }
+    .figure svg { display: block; width: 100%; height: auto; }
+    figcaption { font-size: var(--text-md); line-height: 1.6; margin-top: 16px; color: var(--fg-muted); }
+    .figure-note { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); font-size: var(--text-md); color: var(--fg-muted); }
+    svg text { font-family: var(--font-sans); fill: var(--fg); }
+    .diagram-kicker { font-size: var(--text-md); letter-spacing: 1px; fill: var(--accent-text); font-weight: 600; }
+    .node-name { font-size: var(--text-md); font-weight: 600; }
+    .node-code { font: var(--text-md) var(--font-mono); }
+    .diagram-note { font-size: var(--text-md); fill: var(--fg-muted); }
+    .edge-label { font-size: var(--text-md); font-weight: 600; letter-spacing: .5px; fill: var(--fg-muted); }
+    .file-node { fill: var(--surface); stroke: var(--border-strong); stroke-width: 1.5; }
+    .blob-node { fill: var(--accent-subtle); stroke: var(--accent-border); stroke-width: 1.5; }
+    .bri-node { fill: var(--warning-subtle); stroke: var(--warning-border); stroke-width: 1.5; }
+    .live-node { fill: var(--success-subtle); stroke: var(--success-border); stroke-width: 1.5; }
+    .removed-node { fill: var(--surface); stroke: var(--border-strong); stroke-dasharray: 4 4; }
+    .removed-name { fill: var(--fg-muted); text-decoration: line-through; }
+    .connector { fill: none; stroke: var(--fg-muted); stroke-width: 1.5; }
+    .copy-line { stroke: var(--danger-text); stroke-dasharray: 4 4; }
+    .copy-text { fill: var(--danger-text); }
+    .map-line { stroke: var(--warning-text); }
+    .map-text { fill: var(--warning-text); }
+    .live-line { stroke: var(--success-text); stroke-width: 2; }
+    .live-text { fill: var(--success-text); }
+    .mask { fill: var(--bg); }
+    .payload { fill: var(--accent-text); }
+    .range-track { fill: var(--surface); }
+    .range-label { fill: var(--accent-fg); font-size: var(--text-md); font-weight: 600; }
+    .contracts { max-width: 680px; margin: 28px auto 0; border-top: 1px solid var(--border); }
+    .contracts div { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 24px; }
+    .contracts dd { margin-top: 0; }
+    .contracts div { padding: 12px 0; border-bottom: 1px solid var(--border); }
+    dt { font-size: var(--text-md); font-weight: 600; }
+    dd { margin: 4px 0 0; font-size: var(--text-md); color: var(--fg-muted); }
+    .repack { border-top: 1px solid var(--border); padding: 40px 0; }
+    .repack h2 { font-size: var(--text-2xl); margin-bottom: 20px; }
+    .repack p { color: var(--fg-muted); }
+    .repack p + p { margin-top: 12px; }
+    .reference { padding: 48px 0; border-top: 1px solid var(--border); }
+    .reference h2 { margin-bottom: 24px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: var(--text-md); }
+    th { font-weight: 600; }
+    thead { background: var(--accent-subtle); color: var(--accent-text); }
+    th, td { padding: 16px 20px; vertical-align: top; border-bottom: 1px solid var(--border); }
+    tbody th { width: 25%; }
+    td { color: var(--fg-muted); }
+    .closing { margin-top: 32px; border-left: 3px solid var(--accent); padding: 4px 0 4px 20px; font: var(--text-md)/var(--leading-relaxed) var(--font-body); max-width: 700px; }
+    .sources { display: flex; gap: 12px 24px; flex-wrap: wrap; list-style: none; padding: 0; margin: 24px 0 0; font-size: var(--text-md); }
+    .evidence { color: var(--fg-muted); margin-top: 12px; font-size: var(--text-md); }
+    footer { border-top: 1px solid var(--border); padding: 24px 0 40px; font-size: var(--text-md); color: var(--fg-muted); }
+    footer .shell { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .storage-figure { max-width: none; }
+    .storage-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+    .storage-panel { border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); padding: 20px; min-width: 0; }
+    .storage-label { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px; color: var(--fg-muted); font-size: var(--text-md); }
+    .storage-label .status { color: var(--accent-text); font-weight: 600; white-space: nowrap; }
+    .storage-panel h3 { margin-top: 12px; font-size: var(--text-md); }
+    .storage-path { margin-top: 4px; color: var(--fg-muted); font-size: var(--text-md); }
+    .storage-location { margin-top: 20px; margin-bottom: 8px; font-size: var(--text-md); color: var(--fg-muted); }
+    .descriptor-table { font: var(--text-md)/var(--leading-relaxed) var(--font-mono); }
+    .descriptor-table thead { background: var(--surface-2); color: var(--fg-muted); }
+    .descriptor-table th, .descriptor-table td { padding: 8px; }
+    .descriptor-table th { font-weight: 500; width: auto; }
+    .descriptor-table .local-id th, .descriptor-table .local-id td { background: var(--warning-subtle); color: var(--warning-text); }
+    .storage-panel .storage-footnote { color: var(--fg-muted); font-size: var(--text-md); margin-top: 16px; }
+    .manifest-tree { font: var(--text-md)/var(--leading-relaxed) var(--font-mono); margin: 20px 0 0; white-space: pre; }
+    .manifest-tree code { font: inherit; }
+    .new-metadata { display: block; margin-top: 8px; padding: 12px; background: var(--warning-subtle); border-left: 2px solid var(--warning-border); color: var(--warning-text); }
+    .new-metadata .new-tag { font: 600 var(--text-md) var(--font-sans); letter-spacing: .04em; }
+    .source-sequences { margin-top: 16px; font-size: var(--text-md); color: var(--fg-muted); }
+    .sidecar-result { background: var(--accent-subtle); border: 1px solid var(--accent-border); border-radius: 6px; margin-top: 24px; padding: 20px 24px; }
+    .sidecar-result h3 { color: var(--accent-text); font-size: var(--text-md); }
+    .sidecar-result p { color: var(--fg-muted); font-size: var(--text-md); margin-top: 8px; }
+    .resolution { font: var(--text-md)/var(--leading-relaxed) var(--font-mono); overflow-wrap: anywhere; }
+    .byte-range { display: grid; grid-template-columns: 1fr 1fr; margin-top: 16px; border: 1px solid var(--accent-border); border-radius: 4px; overflow: hidden; font-size: var(--text-md); text-align: center; }
+    .byte-range span { padding: 10px 8px; background: var(--surface); color: var(--fg-muted); }
+    .byte-range .selected-range { background: var(--accent-text); color: var(--accent-fg); }
+    .storage-caption { max-width: 760px; }
+    .storage-figure .figure-note { max-width: 680px; margin: 24px auto 0; }
+    @media (max-width: 720px) {
+      .storage-grid { grid-template-columns: 1fr; gap: 16px; }
+    }
+    @media (max-width: 600px) {
+      .shell { width: calc(100% - 32px); }
+      .topbar .shell { flex-wrap: wrap; gap: 12px; padding-block: 12px; }
+      nav { order: 3; width: 100%; margin: 0; gap: 20px; }
+      #theme { margin-left: auto; }
+      header { padding-top: 32px; }
+      .subtitle { font-size: var(--text-md); }
+      .chapter, .reference { padding-block: 32px; }
+      .contracts div { display: block; }
+      .contracts dd { margin-top: 4px; }
+      .storage-panel { padding: 16px; }
+      .manifest-tree { font-size: var(--text-md); }
+      .sidecar-result { padding: 16px; }
+      .scope { flex-direction: column; }
+      .diagram-kicker, .edge-label { font-size: var(--text-md); letter-spacing: 0; }
+      th, td { padding: 12px 8px; }
+      tbody th { width: 28%; }
+      .closing { font-size: var(--text-md); }
+    }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+    @media print {
+      .topbar, .skip { display: none; }
+      .shell { width: 100%; }
+      .figure, .storage-panel { break-inside: avoid; }
+      .contracts { display: block; }
+      header, .chapter, .reference, .repack { padding-block: 20px; }
+      body { font-size: 10pt; }
+      h1 { font-size: 32pt; } h2 { font-size: 22pt; }
+      .figure { max-width: 440px; }
+      .storage-figure { max-width: none; }
+      .storage-grid { grid-template-columns: 1fr 1fr; }
+      tr { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="topbar"><div class="shell">
+    <a class="brand" href="https://xuanwo.io/sketches/">Xuanwo<span> / Sketches</span></a>
+    <nav aria-label="Page sections">
+      <a href="#why">Problem</a><a href="#mapping">Design</a><a href="#cleanup">Lifetime</a><a href="#repack">Trade-offs</a><a href="#reference">Compatibility</a>
+    </nav>
+    <button type="button" id="theme" hidden aria-pressed="false" aria-label="Use dark theme">Dark</button>
+  </div></div>
+  <main id="main" class="shell">
+    <header>
+      <p class="eyebrow">Lance · Blob v2 · Design proposal</p>
+      <h1>Blob Reuse Index <span>(BRI)</span></h1>
+      <p class="subtitle">Reorganize the rows. Keep the bytes.</p>
+      <p class="lead">Compaction should be able to move rows without copying their unchanged blob payloads. BRI gives new DataFiles a durable reference to existing sidecars.</p>
+      <div class="scope" aria-label="Scope">
+        <span><strong>Packed</strong> — a byte range in a shared sidecar</span>
+        <span><strong>Dedicated</strong> — a whole sidecar</span>
+        <span>Inline and External semantics unchanged</span>
+      </div>
+    </header>
+
+    <section id="why" class="chapter" aria-labelledby="why-title">
+      <div class="chapter-copy">
+        <p class="eyebrow">01 / The coupling</p>
+        <h2 id="why-title">New file. New blob address.</h2>
+        <p>A sidecar is a separate file holding blob bytes. A row stores a descriptor with a <strong>file-local ID</strong>; the containing DataFile’s stem supplies the directory.</p>
+        <p>Compaction writes surviving rows into new DataFiles. Under default addressing, those rows need new sidecars—even when the payloads are unchanged.</p>
+        <p class="takeaway">The row layout and payload placement are coupled by the address.</p>
+      </div>
+      <figure class="figure">
+        <svg viewBox="0 0 480 392" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bri-address-title bri-address-desc">
+<title id="bri-address-title">A new DataFile gives the payload a new address</title>
+<desc id="bri-address-desc">Compaction moves a row from F17 to F42; default sidecar addressing requires copying its unchanged payload from F17’s directory into F42’s directory.</desc>
+<defs>
+  <marker id="bri-address-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--fg-muted)"/></marker>
+  <marker id="bri-address-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--warning-text)"/></marker>
+  <marker id="bri-address-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--accent-text)"/></marker>
+  <marker id="bri-address-arrow-live" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--success-text)"/></marker>
+</defs>
+
+<text x="8" y="24" class="diagram-kicker">WITHOUT BRI</text>
+<path d="M 184 112 H 296" class="connector" marker-end="url(#bri-address-arrow)"/>
+<path d="M 96 160 V 264" class="connector" marker-end="url(#bri-address-arrow)"/>
+<path d="M 384 160 V 264" class="connector" marker-end="url(#bri-address-arrow)"/>
+<path d="M 184 312 H 296" class="connector copy-line" marker-end="url(#bri-address-arrow)"/>
+<rect x="192" y="76" width="96" height="24" class="mask"/>
+<text x="240" y="96" text-anchor="middle" class="edge-label">COMPACT</text>
+<rect x="204" y="276" width="72" height="24" class="mask"/>
+<text x="240" y="296" text-anchor="middle" class="edge-label copy-text">COPY</text>
+<rect x="8" y="64" width="176" height="96" rx="6" class="file-node"/>
+<text x="24" y="100" class="node-name">F17.lance</text>
+<text x="24" y="136" class="node-code">local #3</text>
+<rect x="296" y="64" width="176" height="96" rx="6" class="file-node"/>
+<text x="312" y="100" class="node-name">F42.lance</text>
+<text x="312" y="136" class="node-code">local #1</text>
+<rect x="8" y="264" width="176" height="112" rx="6" class="blob-node"/>
+<text x="24" y="296" class="node-code">F17 / blob #3</text>
+<text x="24" y="328" class="diagram-note">Payload</text>
+<rect x="24" y="344" width="144" height="12" rx="2" class="payload"/>
+<rect x="296" y="264" width="176" height="112" rx="6" class="blob-node"/>
+<text x="312" y="296" class="node-code">F42 / blob #1</text>
+<text x="312" y="328" class="diagram-note">Same payload</text>
+<rect x="312" y="344" width="144" height="12" rx="2" class="payload"/>
+</svg>
+        <figcaption>One surviving value, with illustrative file and blob IDs. Other compaction inputs are omitted.</figcaption>
+      </figure>
+    </section>
+
+    <section id="mapping" class="chapter" aria-labelledby="mapping-title">
+      <div class="chapter-copy">
+        <p class="eyebrow">02 / The storage contract</p>
+        <h2 id="mapping-title">New reference. Same bytes.</h2>
+        <p>Add <strong>BRI to the DataFile entry in the table manifest</strong>. The physical <code>.lance</code> file still stores Blob v2 descriptors in its encoded column data; the reused sidecar still holds the payload.</p>
+        <p>The example below shows one surviving Packed value after compaction: its local <code>blob_id</code> becomes <code>1</code>, while its original <code>position</code> and <code>size</code> are preserved.</p>
+      </div>
+      <figure class="figure storage-figure" aria-labelledby="storage-caption">
+        <div class="storage-grid">
+          <section class="storage-panel" aria-labelledby="descriptor-heading">
+            <div class="storage-label"><span>01 / Physical DataFile</span><span class="status">Layout unchanged</span></div>
+            <h3 id="descriptor-heading"><code>F42.lance</code></h3>
+            <p class="storage-path"><code>&lt;base&gt;/data/F42.lance</code></p>
+            <p class="storage-location">Blob column → packed-struct descriptor values</p>
+            <table class="descriptor-table" aria-label="One decoded Packed descriptor in F42.lance">
+              <thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Value</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">kind</th><td>u8</td><td>1 · Packed</td></tr>
+                <tr><th scope="row">position</th><td>u64</td><td>65536</td></tr>
+                <tr><th scope="row">size</th><td>u64</td><td>65536</td></tr>
+                <tr class="local-id"><th scope="row">blob_id</th><td>u32</td><td>1</td></tr>
+                <tr><th scope="row">blob_uri</th><td>utf8</td><td>""</td></tr>
+              </tbody>
+            </table>
+            <p class="storage-footnote">One descriptor per Blob value. These are decoded fields, not fixed byte offsets. BRI adds no field to the descriptor or the file footer.</p>
+          </section>
+          <section class="storage-panel" aria-labelledby="manifest-heading">
+            <div class="storage-label"><span>02 / Table manifest</span><span class="status">Metadata extended</span></div>
+            <h3 id="manifest-heading">DataFile metadata</h3>
+            <p class="storage-path"><code>&lt;table&gt;/_versions/*.manifest</code></p>
+            <pre class="manifest-tree"><code>Manifest
+└─ fragments[]
+   └─ files[]  : DataFile
+      ├─ path: "F42.lance"
+      ├─ base_id: absent
+      └─ <strong>blob_reuse_index</strong><span class="new-metadata"><span class="new-tag">NEW · DATAFILE FIELD 8</span>
+sources[]
+  base_id:      absent
+  blob_dir:     "F17"
+  local_ids:    [1]
+  physical_ids: [3]</span></code></pre>
+            <p class="storage-footnote"><code>sources</code> groups mappings by base and directory. Its absent <code>base_id</code> inherits F42’s base; both are absent here, so the primary root applies.</p>
+          </section>
+        </div>
+        <p class="source-sequences"><code>local_ids[i] → physical_ids[i]</code>: the sequences are positionally paired. Stored as <code>RowIdSequence</code> and <code>EncodedU64Array</code>, they are shown expanded here.</p>
+        <div class="sidecar-result">
+          <h3>03 / Existing sidecar · payload unchanged</h3>
+          <p class="resolution">F42: blob_id 1 → BRI → (F42’s base, F17, physical ID 3)</p>
+          <p>Open <code>&lt;base&gt;/data/F17/&lt;encoded(3)&gt;.blob</code>, then read <code>[65536, 131072)</code>. Here, <code>encoded(3)</code> stands for the existing blob-ID filename encoding.</p>
+          <div class="byte-range" aria-label="Illustrative 128 KiB sidecar, with the final 64 KiB selected">
+            <span>Other bytes · 0–64 KiB</span>
+            <span class="selected-range">Selected range · 64–128 KiB</span>
+          </div>
+        </div>
+        <figcaption id="storage-caption" class="storage-caption">One Packed value with illustrative IDs and byte counts; unrelated manifest fields are omitted. Compaction writes F42’s descriptor and its manifest mapping without reading or rewriting this sidecar. A Dedicated descriptor uses the same mapping and reads the whole object.</figcaption>
+        <p class="figure-note"><strong>No BRI entry?</strong> Resolve the ID under the containing DataFile’s own directory. New and repacked sidecars use this ordinary path.</p>
+      </figure>
+    </section>
+
+    <section id="cleanup" class="chapter" aria-labelledby="cleanup-title">
+      <div class="chapter-copy">
+        <p class="eyebrow">03 / The lifetime</p>
+        <h2 id="cleanup-title">Keep the reference. Keep the sidecar.</h2>
+        <p>Cleanup follows <strong>every retained manifest</strong>, including historical versions. Each DataFile keeps its own sidecar directory live; BRI additionally protects the exact objects it references.</p>
+
+      </div>
+      <figure class="figure">
+        <svg viewBox="0 0 480 408" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bri-lifetime-title bri-lifetime-desc">
+<title id="bri-lifetime-title">A retained reference keeps the sidecar alive</title>
+<desc id="bri-lifetime-desc">After the old version expires and cleanup can remove F17.lance, a BRI reference from retained F42 metadata still protects the original sidecar.</desc>
+<defs>
+  <marker id="bri-lifetime-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--fg-muted)"/></marker>
+  <marker id="bri-lifetime-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--warning-text)"/></marker>
+  <marker id="bri-lifetime-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--accent-text)"/></marker>
+  <marker id="bri-lifetime-arrow-live" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--success-text)"/></marker>
+</defs>
+
+<text x="8" y="24" class="diagram-kicker">AFTER OLD-VERSION CLEANUP</text>
+<path d="M 352 184 V 272" class="connector live-line" marker-end="url(#bri-lifetime-arrow-live)"/>
+<rect x="364" y="212" width="80" height="28" class="mask"/>
+<text x="372" y="232" class="edge-label live-text">KEEP</text>
+<rect x="8" y="80" width="184" height="72" rx="6" class="removed-node"/>
+<text x="24" y="124" class="node-name removed-name">F17.lance</text>
+<text x="24" y="180" class="diagram-note copy-text">Removed</text>
+<rect x="240" y="56" width="232" height="128" rx="6" class="bri-node"/>
+<text x="256" y="88" class="diagram-note map-text">Retained manifest</text>
+<text x="256" y="124" class="node-name map-text">F42 · BRI</text>
+<text x="256" y="156" class="node-code">#1 → F17 / #3</text>
+<rect x="120" y="272" width="352" height="112" rx="6" class="live-node"/>
+<text x="140" y="308" class="node-name live-text">F17 / blob #3</text>
+<text x="140" y="344" class="diagram-note live-text">Retained by the reference</text>
+<rect x="140" y="360" width="312" height="8" rx="2" fill="var(--success)"/>
+</svg>
+        <figcaption>F17.lance can be removed once no retained version needs it and cleanup’s safety rules permit deletion. Its reused sidecar stays live. Cleanup never deletes objects owned by another storage base.</figcaption>
+      </figure>
+      <dl class="contracts">
+      <div><dt>Immutable mapping</dt><dd>Changing BRI requires a new physical DataFile.</dd></div>
+      <div><dt>Direct targets</dt><dd>Recompaction resolves the physical object, never a chain of old manifests.</dd></div>
+      <div><dt>Safe rollback</dt><dd>An uncommitted output owns its new files, never its reused sources.</dd></div>
+      </dl>
+    </section>
+
+    <aside id="repack" class="repack" aria-labelledby="repack-title">
+      <div><p class="eyebrow">The trade-off</p><h2 id="repack-title">Copy less. Retain more.</h2></div>
+      <div>
+        <p>Reuse adds manifest metadata and a read-time lookup. It also keeps a whole Packed object alive, including dead bytes. <strong>Selective repacking</strong> copies surviving values into a new sidecar; cleanup reclaims the old object after its last retained reference disappears.</p>
+        <p>Dedicated sidecars are reused by default. Packed repacking uses a configurable fragment <code>active_rows / physical_rows</code> threshold—a row-count heuristic, not a live-byte measurement. Disabling reuse materializes both kinds through ordinary writes.</p>
+      </div>
+    </aside>
+
+    <section id="reference" class="reference" aria-labelledby="reference-title">
+      <p class="eyebrow">The integration contract</p>
+      <h2 id="reference-title">Every consumer must honor the reference.</h2>
+      <table>
+        <thead><tr><th scope="col">Boundary</th><th scope="col">Required behavior</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Manifest validation</th><td>Reject ambiguous IDs, invalid source bases, and misaligned mapping sequences when opening the manifest.</td></tr>
+          <tr><th scope="row">Readers &amp; writers</th><td>BRI requires both feature flags; unsupported clients reject it. Files without BRI retain default addressing.</td></tr>
+          <tr><th scope="row">Clones</th><td>Shallow clones preserve mappings and effective bases. Deep clones copy the dependencies and remap them into independent storage.</td></tr>
+          <tr><th scope="row">Full rewrite</th><td>Removing the last BRI clears its flags in that manifest. Older retained versions with BRI still require aware clients.</td></tr>
+        </tbody>
+      </table>
+      <p class="closing">Row layout and blob placement can evolve independently—connected by an explicit, durable reference.</p>
+      <ul class="sources" aria-label="Implementation sources">
+        <li><a href="https://github.com/lance-format/lance/blob/4a950fa02170fb254f846b8f2094f699c03a75af/docs/src/format/table/blob_reuse_index.md">Format &amp; configuration ↗</a></li>
+        <li><a href="https://github.com/lance-format/lance/blob/4a950fa02170fb254f846b8f2094f699c03a75af/protos/table.proto#L486">Manifest schema ↗</a></li>
+        <li><a href="https://github.com/lance-format/lance/blob/4a950fa02170fb254f846b8f2094f699c03a75af/rust/lance-encoding/src/encodings/logical/blob.rs#L236">Descriptor encoding ↗</a></li>
+        <li><a href="https://github.com/lance-format/lance/blob/4a950fa02170fb254f846b8f2094f699c03a75af/rust/lance/src/dataset/optimize.rs#L9273">Compaction tests ↗</a></li>
+        <li><a href="https://github.com/lance-format/lance/blob/4a950fa02170fb254f846b8f2094f699c03a75af/rust/lance/src/dataset/cleanup.rs#L639">Cleanup tracking ↗</a></li>
+      </ul>
+      <p class="evidence">Implementation contract, not a measured performance claim. Encoding details and policy defaults are in the linked source snapshot.</p>
+    </section>
+  </main>
+  <footer><div class="shell"><span>Xuanwo · Lance / BRI</span><span>September 2026 · Design sketch</span></div></footer>
+  <script>
+    "use strict";
+    const themeButton = document.getElementById("theme");
+    function setTheme(dark) {
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+      themeButton.textContent = dark ? "Light" : "Dark";
+      themeButton.setAttribute("aria-label", dark ? "Use light theme" : "Use dark theme");
+      themeButton.setAttribute("aria-pressed", String(dark));
+    }
+    let savedTheme = null;
+    try { savedTheme = localStorage.getItem("bri-theme"); }
+    catch { /* Theme persistence is optional in local previews. */ }
+    setTheme(savedTheme ? savedTheme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches);
+    themeButton.hidden = false;
+    themeButton.addEventListener("click", () => {
+      const dark = document.documentElement.dataset.theme !== "dark";
+      setTheme(dark);
+      try { localStorage.setItem("bri-theme", dark ? "dark" : "light"); }
+      catch { /* The selected theme still applies without persistence. */ }
+    });
+  </script>
+</body>
+</html>
