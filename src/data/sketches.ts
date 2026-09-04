@@ -9,6 +9,13 @@ export type Sketch = {
 // Each slug maps to static/sketches/<slug>/index.html.
 export const sketches: Sketch[] = [
   {
+    slug: 'lance-blob-reuse-index',
+    title: 'Lance Blob Reuse Index (BRI)',
+    date: '2026-09-04',
+    description: 'How a per-DataFile Blob Reuse Index lets Lance compaction preserve existing sidecars, and how retained manifests keep those references safe across reads, cleanup, and clones.',
+    cover: '/sketches/lance-blob-reuse-index/cover.svg'
+  },
+  {
     slug: 'lance-stable-row-id-birth-address',
     title: 'Lance Stable Row IDs as Birth Addresses',
     date: '2026-07-08',
